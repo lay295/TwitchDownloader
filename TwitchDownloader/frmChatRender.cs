@@ -25,8 +25,6 @@ namespace TwitchDownloader
 
         private void BntColor_Click(object sender, EventArgs e)
         {
-            colorDialog.Color = Color.Black;
-
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
                 textColor.Text = ToHexValue(colorDialog.Color);

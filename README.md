@@ -20,6 +20,6 @@ Because I made this in 2 days and I wanted to put it up before school starts :( 
 - Proper input validation
 - Have the text log actually log stuff
 - Better emoji support for chat rendering
-- ---Fix some GIFs that play at the wrong speed---
+- ~~Fix some GIFs that play at the wrong speed~~
 - More options for chat rendering
 - Make it look less ugly
