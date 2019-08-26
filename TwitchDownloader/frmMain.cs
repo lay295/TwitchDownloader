@@ -76,5 +76,11 @@ namespace TwitchDownloader
             HideForms();
             formChatRender.Show();
         }
+
+        private void BtnAbout_Click(object sender, EventArgs e)
+        {
+            frmAbout formAbout = new frmAbout();
+            formAbout.Show();
+        }
     }
 }

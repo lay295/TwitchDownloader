@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.mainSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.btnAbout = new System.Windows.Forms.Button();
             this.btnFrmChatRender = new System.Windows.Forms.Button();
             this.btnFrmChatDownload = new System.Windows.Forms.Button();
             this.btnFrmClipDownload = new System.Windows.Forms.Button();
@@ -48,6 +49,7 @@
             // 
             // mainSplitContainer.Panel1
             // 
+            this.mainSplitContainer.Panel1.Controls.Add(this.btnAbout);
             this.mainSplitContainer.Panel1.Controls.Add(this.btnFrmChatRender);
             this.mainSplitContainer.Panel1.Controls.Add(this.btnFrmChatDownload);
             this.mainSplitContainer.Panel1.Controls.Add(this.btnFrmClipDownload);
@@ -62,6 +64,16 @@
             this.mainSplitContainer.SplitterDistance = 67;
             this.mainSplitContainer.SplitterWidth = 1;
             this.mainSplitContainer.TabIndex = 1;
+            // 
+            // btnAbout
+            // 
+            this.btnAbout.Location = new System.Drawing.Point(734, 3);
+            this.btnAbout.Name = "btnAbout";
+            this.btnAbout.Size = new System.Drawing.Size(75, 23);
+            this.btnAbout.TabIndex = 8;
+            this.btnAbout.Text = "About";
+            this.btnAbout.UseVisualStyleBackColor = true;
+            this.btnAbout.Click += new System.EventHandler(this.BtnAbout_Click);
             // 
             // btnFrmChatRender
             // 
@@ -128,6 +140,7 @@
         private System.Windows.Forms.Button btnFrmChatDownload;
         private System.Windows.Forms.Button btnFrmClipDownload;
         private System.Windows.Forms.Button btnFrmVodDownload;
+        private System.Windows.Forms.Button btnAbout;
     }
 }
 

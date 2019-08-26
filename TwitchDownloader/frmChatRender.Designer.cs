@@ -60,11 +60,11 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(171, 122);
+            this.label2.Location = new System.Drawing.Point(110, 123);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(37, 13);
+            this.label2.Size = new System.Drawing.Size(98, 13);
             this.label2.TabIndex = 2;
-            this.label2.Text = "Color :";
+            this.label2.Text = "Background Color :";
             // 
             // label4
             // 
@@ -168,7 +168,7 @@
             // 
             // btnBrowse
             // 
-            this.btnBrowse.Location = new System.Drawing.Point(417, 45);
+            this.btnBrowse.Location = new System.Drawing.Point(417, 43);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(75, 23);
             this.btnBrowse.TabIndex = 10;
