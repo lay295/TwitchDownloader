@@ -113,7 +113,7 @@ namespace TwitchDownloader
             using (var vFWriter = new VideoFileWriter())
             {
                 // create new video file
-                vFWriter.Open(renderOptions.save_path, renderOptions.chat_width, renderOptions.chat_height, 60, VideoCodec.H264, 3000000);
+                vFWriter.Open(renderOptions.save_path, renderOptions.chat_width, renderOptions.chat_height, 60, VideoCodec.H264, 6000000);
                 gcan.FillRectangle(new SolidBrush(renderOptions.background_color), 0, 0, renderOptions.chat_width, renderOptions.chat_height);
                 gcan = Graphics.FromImage(canvas);
                 for (int i = videoStart; i < videoStart + duration; i++)
@@ -171,7 +171,18 @@ namespace TwitchDownloader
                             }
                             else
                             {
-                                int frame = (15 * globalTick / emote.fps) % emote.frames;
+                                int gifTime = (int)Math.Floor(1.5 * globalTick) % emote.total_duration;
+                                int frame = emote.frames - 1;
+                                int timeCount = 0;
+                                for (int k = 0; k < emote.durations.Count; k++)
+                                {
+                                    if (timeCount + emote.durations[k] > gifTime)
+                                    {
+                                        frame = k;
+                                        break;
+                                    }
+                                    timeCount += emote.durations[k];
+                                }
                                 FrameDimension dim = new FrameDimension(emote.image.FrameDimensionsList[0]);
                                 emote.image.SelectActiveFrame(dim, frame);
                                 gcan.DrawImage(emote.image, emote.offset);
@@ -641,20 +652,27 @@ public class GifEmote
     public string name;
     public Image image;
     public FrameDimension dim;
-    public int fps;
     public int frames;
+    public List<int> durations;
+    public int total_duration;
 
     public GifEmote(Point Offset, string Name, Image Image)
     {
         offset = Offset;
         name = Name;
         image = Image;
-        PropertyItem item = image.GetPropertyItem(0x5100);
-        fps = (item.Value[0] + item.Value[1] * 256) * 10;
-        if (fps == 0)
-            fps = 2;
         dim = new FrameDimension(image.FrameDimensionsList[0]);
         frames = image.GetFrameCount(dim);
+        var times = image.GetPropertyItem(0x5100).Value;
+
+        durations = new List<int>();
+        for (int i = 0; i < frames; i++)
+        {
+            var duration = BitConverter.ToInt32(times, 4 * i);
+            durations.Add(duration);
+            total_duration += duration;
+        }
+        
     }
 }
 

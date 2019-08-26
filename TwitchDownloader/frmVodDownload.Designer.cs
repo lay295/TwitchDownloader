@@ -92,7 +92,7 @@
             this.textUrl.Location = new System.Drawing.Point(301, 35);
             this.textUrl.Name = "textUrl";
             this.textUrl.Size = new System.Drawing.Size(203, 20);
-            this.textUrl.TabIndex = 1;
+            this.textUrl.TabIndex = 0;
             // 
             // label2
             // 
@@ -409,6 +409,7 @@
             // 
             // statusStrip
             // 
+            this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStatus,
             this.toolProgressBar});

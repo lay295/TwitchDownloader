@@ -37,6 +37,9 @@ namespace TwitchDownloader
             formChatRender.TopLevel = false;
             formChatRender.Dock = DockStyle.Fill;
             mainSplitContainer.Panel2.Controls.Add(formChatRender);
+
+            formVodDownload.Select();
+
             await FFmpeg.GetLatestVersion();
         }
 

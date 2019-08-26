@@ -164,7 +164,7 @@
             this.textJSON.Location = new System.Drawing.Point(190, 45);
             this.textJSON.Name = "textJSON";
             this.textJSON.Size = new System.Drawing.Size(221, 20);
-            this.textJSON.TabIndex = 9;
+            this.textJSON.TabIndex = 0;
             // 
             // btnBrowse
             // 
@@ -204,6 +204,7 @@
             // 
             // statusStrip
             // 
+            this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStatus,
             this.toolProgressBar});
