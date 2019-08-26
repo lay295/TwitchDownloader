@@ -1,7 +1,7 @@
 ### TwitchDownloader
 A Twitch VOD/Clip/Chat downloader I wrote, as well as a chat render feature
 
-![Screenshot](https://i.imgur.com/XXnLKyT.gifv)
+![](https://i.imgur.com/XXnLKyT.gif)
 
 ## What can this do?
 - Can download Twitch VODs
