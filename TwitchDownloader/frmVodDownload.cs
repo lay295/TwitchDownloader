@@ -164,7 +164,6 @@ namespace TwitchDownloader
                 Properties.Settings.Default.DOWNLOAD_FOLDER = dialog.FileName;
             }
         }
-
         private void BtnDownload_Click(object sender, EventArgs e)
         {
             SetEnabled(false);
@@ -314,8 +313,26 @@ namespace TwitchDownloader
             double seekDuration = info.Result.Duration.TotalSeconds - seekTime - options.crop_end;
             Task<IConversionResult> conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -t {2} -acodec copy -vcodec copy -copyts \"{3}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), seekDuration.ToString(), outputConvert));
             Task.WaitAll(conversionResult);
-            File.Delete(Path.Combine(downloadFolder, "output.ts"));
-            File.Delete(Path.Combine(downloadFolder,  options.id + ".txt"));
+            DeleteDirectory(downloadFolder);
+        }
+
+        public static void DeleteDirectory(string target_dir)
+        {
+            string[] files = Directory.GetFiles(target_dir);
+            string[] dirs = Directory.GetDirectories(target_dir);
+
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (string dir in dirs)
+            {
+                DeleteDirectory(dir);
+            }
+
+            Directory.Delete(target_dir, false);
         }
 
         private List<string> GenerateCroppedVideoList(List<KeyValuePair<string, double>> videoList, DownloadOptions options)
