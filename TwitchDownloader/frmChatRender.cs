@@ -1,5 +1,8 @@
 ﻿using Accord.Video.FFMPEG;
+using LayoutFarm;
 using Newtonsoft.Json.Linq;
+using PixelFarm.CpuBlit;
+using PixelFarm.Drawing.Fonts;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +16,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Typography.Contours;
+using Typography.OpenFont;
+using Typography.TextLayout;
 
 namespace TwitchDownloader
 {
@@ -113,7 +119,6 @@ namespace TwitchDownloader
                 // create new video file
                 vFWriter.Open(renderOptions.save_path, renderOptions.chat_width, renderOptions.chat_height, 60, VideoCodec.H264, 6000000);
                 gcan.FillRectangle(new SolidBrush(renderOptions.background_color), 0, 0, renderOptions.chat_width, renderOptions.chat_height);
-                gcan = Graphics.FromImage(canvas);
                 for (int i = videoStart; i < videoStart + duration; i++)
                 {
                     int height = 0;
@@ -260,13 +265,10 @@ namespace TwitchDownloader
 
                             if (Regex.Match(output, emojiRegex).Success)
                             {
-                                int inputWidth = (int)Math.Ceiling(g.MeasureString(output, emojiFont, 0, StringFormat.GenericTypographic).Width);
-
-                                if (drawPos.X + inputWidth + 3 > canvasSize.Width)
-                                    AddNewSection(ref messageSections, ref renderOptions, ref currentGifEmotes, ref currentSection, ref g, ref sectionImage, ref canvasSize, ref drawPos);
-                                g.DrawString(output, emojiFont, new SolidBrush(Color.White), drawPos.X, drawPos.Y + 2);
-                                drawPos.X += inputWidth + 5;
-                                
+                                Bitmap emojiBitmap = RenderEmoji(output, renderOptions);
+                                currentSection.hasEmote = true;
+                                g.DrawImage(emojiBitmap, drawPos.X + 2, drawPos.Y, emojiBitmap.Width, emojiBitmap.Height);
+                                drawPos.X += emojiBitmap.Width + 3;
                             }
                             else
                             {
@@ -340,6 +342,39 @@ namespace TwitchDownloader
             g.Dispose();
             currentSection.section.Dispose();
             finalComments.Add(new TwitchComment(final, Double.Parse(comment["content_offset_seconds"].ToString()), finalGifs));
+        }
+
+        private Bitmap RenderEmoji(string output, RenderOptions renderOptions)
+        {
+            MemBitmap emoji = new MemBitmap(40, 40);
+            AggPainter painter = AggPainter.Create(emoji);
+            Bitmap emojiBitmap = new Bitmap(emoji.Width, emoji.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            PixelFarm.Drawing.FontStyle fontstyle = PixelFarm.Drawing.FontStyle.Regular;
+
+            var reader = new OpenFontReader();
+            Typeface typeface;
+            using (var fs = new FileStream(@"FirefoxEmoji.ttf", FileMode.Open))
+                typeface = reader.Read(fs);
+
+            var reqFont = new PixelFarm.Drawing.RequestFont(typeface.Name, 30.0f, fontstyle);
+            painter.CurrentFont = reqFont;
+
+            OpenFontTextService textService = new LayoutFarm.OpenFontTextService();
+            textService.LoadFontsFromFolder("..");
+            painter.Clear(new PixelFarm.Drawing.Color(renderOptions.background_color.A, renderOptions.background_color.R, renderOptions.background_color.G, renderOptions.background_color.B));
+            VxsTextPrinter devVxsTextPrinter = new VxsTextPrinter(painter, textService);
+            TextPrinterBase _selectedTextPrinter = devVxsTextPrinter;
+            devVxsTextPrinter.ChangeFont(reqFont);
+            devVxsTextPrinter.PositionTechnique = Typography.TextLayout.PositionTechnique.OpenFont;
+            _selectedTextPrinter.Typeface = typeface;
+            _selectedTextPrinter.FontSizeInPoints = 30.0f;
+
+            char[] printTextBuffer = output.ToCharArray();
+            float x_pos = 0, y_pos = -9;
+            _selectedTextPrinter.DrawString(printTextBuffer, x_pos, y_pos);
+            PixelFarm.CpuBlit.Imaging.BitmapHelper.CopyToGdiPlusBitmapSameSize(emoji, emojiBitmap);
+            emojiBitmap = (Bitmap)ScaleImage(emojiBitmap, 20, 20);
+            return emojiBitmap;
         }
 
         private void AddNewSection(ref List<Section> messageSections, ref RenderOptions renderOptions, ref List<GifEmote> currentGifEmotes, ref Section currentSection, ref Graphics g, ref Bitmap bmp, ref Size canvasSize, ref Point drawPos)
