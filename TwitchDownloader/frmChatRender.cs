@@ -265,6 +265,9 @@ namespace TwitchDownloader
 
                             if (Regex.Match(output, emojiRegex).Success)
                             {
+                                if (drawPos.X + 20 + 3 > canvasSize.Width)
+                                    AddNewSection(ref messageSections, ref renderOptions, ref currentGifEmotes, ref currentSection, ref g, ref sectionImage, ref canvasSize, ref drawPos);
+
                                 Bitmap emojiBitmap = RenderEmoji(output, renderOptions);
                                 currentSection.hasEmote = true;
                                 g.DrawImage(emojiBitmap, drawPos.X + 2, drawPos.Y, emojiBitmap.Width, emojiBitmap.Height);
