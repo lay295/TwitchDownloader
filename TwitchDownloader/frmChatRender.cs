@@ -70,6 +70,11 @@ namespace TwitchDownloader
             List<KeyValuePair<int, Image>> chatEmotes = new List<KeyValuePair<int, Image>>();
             Random rand = new Random();
             string[] defaultColors = { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
+            string tempFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
+            string downloadFolder = Path.Combine(tempFolder, "Chat Render");
+
+            if (!Directory.Exists(downloadFolder))
+                Directory.CreateDirectory(downloadFolder);
 
             backgroundRenderManager.ReportProgress(0, "Fetching Chat Badges");
             GetChatBadges(chatBadges, chatJson["streamer"]);
@@ -99,7 +104,7 @@ namespace TwitchDownloader
 
                 DrawBadges(g, chatBadges, comment, ref canvasSize, ref drawPos);
                 DrawUsername(g, nameFont, userName, userColor, ref canvasSize, ref drawPos);
-                DrawMessage(g, renderOptions, sectionImage, messageSections, currentGifEmotes, currentSection, finalComments, messageFont, emojiFont, chatEmotes, thirdPartyEmotes, comment, userName, userColor, ref canvasSize, ref drawPos);
+                DrawMessage(g, renderOptions, downloadFolder, sectionImage, messageSections, currentGifEmotes, currentSection, finalComments, messageFont, emojiFont, chatEmotes, thirdPartyEmotes, comment, userName, userColor, ref canvasSize, ref drawPos);
             }
 
             backgroundRenderManager.ReportProgress(0, "Rendering Video 0%");
@@ -133,13 +138,14 @@ namespace TwitchDownloader
                             {
                                 if (Math.Floor(finalComments[j].secondsOffset) == i)
                                 {
+                                    Bitmap sectionImage = (Bitmap)Bitmap.FromFile(finalComments[j].section);
                                     foreach (var emote in finalComments[j].gifEmotes)
                                     {
                                         GifEmote newGif = new GifEmote(new Point(emote.offset.X, emote.offset.Y + height), emote.name, emote.image);
                                         displayedGifs.Add(newGif);
                                         newly_added.Add(newGif);
                                     }
-                                    height += finalComments[j].section.Height;
+                                    height += sectionImage.Height;
                                 }
                             }
                             foreach (var emote in old)
@@ -156,8 +162,9 @@ namespace TwitchDownloader
                                 {
                                     if (Math.Floor(finalComments[j].secondsOffset) == i)
                                     {
-                                        bg.DrawImage(finalComments[j].section, 0, y);
-                                        y += finalComments[j].section.Height;
+                                        Bitmap sectionImage = (Bitmap)Bitmap.FromFile(finalComments[j].section);
+                                        bg.DrawImage(sectionImage, 0, y);
+                                        y += sectionImage.Height;
                                     }
                                 }
                                 gcan = Graphics.FromImage(canvas);
@@ -211,7 +218,7 @@ namespace TwitchDownloader
             }
         }
 
-        private void DrawMessage(Graphics g, RenderOptions renderOptions, Bitmap sectionImage, List<Section> messageSections, List<GifEmote> currentGifEmotes, Section currentSection, List<TwitchComment> finalComments, Font messageFont, Font emojiFont, List<KeyValuePair<int, Image>> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, JToken comment, string userName, Color userColor, ref Size canvasSize, ref Point drawPos)
+        private void DrawMessage(Graphics g, RenderOptions renderOptions, string downloadFolder, Bitmap sectionImage, List<Section> messageSections, List<GifEmote> currentGifEmotes, Section currentSection, List<TwitchComment> finalComments, Font messageFont, Font emojiFont, List<KeyValuePair<int, Image>> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, JToken comment, string userName, Color userColor, ref Size canvasSize, ref Point drawPos)
         {
             if (comment["source"].ToString() != "chat")
                 return;
@@ -344,7 +351,9 @@ namespace TwitchDownloader
             }
             g.Dispose();
             currentSection.section.Dispose();
-            finalComments.Add(new TwitchComment(final, Double.Parse(comment["content_offset_seconds"].ToString()), finalGifs));
+            string imagePath = Path.Combine(downloadFolder, finalComments.Count + ".png");
+            finalComments.Add(new TwitchComment(imagePath, Double.Parse(comment["content_offset_seconds"].ToString()), finalGifs));
+            final.Save(imagePath);
         }
 
         private Bitmap RenderEmoji(string output, RenderOptions renderOptions)
@@ -670,11 +679,11 @@ public class ThirdPartyEmote
 
 public class TwitchComment
 {
-    public Bitmap section;
+    public string section;
     public double secondsOffset;
     public List<GifEmote> gifEmotes;
 
-    public TwitchComment(Bitmap Section, double SecondsOffset, List<GifEmote> GifEmotes)
+    public TwitchComment(string Section, double SecondsOffset, List<GifEmote> GifEmotes)
     {
         section = Section;
         secondsOffset = SecondsOffset;
