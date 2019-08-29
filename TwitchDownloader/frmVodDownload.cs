@@ -200,6 +200,7 @@ namespace TwitchDownloader
 
             if (Directory.Exists(downloadFolder))
                 DeleteDirectory(downloadFolder);
+            Directory.CreateDirectory(downloadFolder);
 
             string playlistUrl = "";
             foreach (var item in videoQualties)
@@ -395,9 +396,10 @@ namespace TwitchDownloader
                         isDone = true;
                     }
                 }
-                catch
+                catch (WebException)
                 {
                     errorCount++;
+                    Thread.Sleep(3000);
                 }
             }
 
