@@ -198,10 +198,8 @@ namespace TwitchDownloader
             string tempFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
             string downloadFolder = Path.Combine(tempFolder, options.id);
 
-            if (!Directory.Exists(tempFolder))
-                Directory.CreateDirectory(tempFolder);
-            if (!Directory.Exists(downloadFolder))
-                Directory.CreateDirectory(downloadFolder);
+            if (Directory.Exists(downloadFolder))
+                DeleteDirectory(downloadFolder);
 
             string playlistUrl = "";
             foreach (var item in videoQualties)
@@ -264,19 +262,12 @@ namespace TwitchDownloader
 
             backgroundDownloadManager.ReportProgress(0, "Combining Parts (2/3)");
 
-            if (File.Exists(Path.Combine(downloadFolder, "output.ts")))
-                File.Delete(Path.Combine(downloadFolder, "output.ts"));
-            if (File.Exists(Path.Combine(downloadFolder, options.id + ".txt")))
-                File.Delete(Path.Combine(downloadFolder, options.id + ".txt"));
-
             if (videoPartsList[0].Contains("muted"))
             {
                 string inputFileMuted = Path.Combine(downloadFolder, videoPartsList[0]);
                 string outputFileMuted = Path.Combine(downloadFolder, "new_" + videoPartsList[0]);
                 Task<IConversionResult> unmuteResult = new Conversion().Start(String.Format("-f lavfi -i anullsrc -i \"{0}\" -shortest -c:v copy -c:a aac -map 0:a -map 1:v \"{1}\"", inputFileMuted, outputFileMuted));
                 Task.WaitAll(unmuteResult);
-                if (File.Exists(Path.Combine(downloadFolder, videoPartsList[0])))
-                    File.Delete(Path.Combine(downloadFolder, videoPartsList[0]));
                 videoPartsList[0] = "new_" + videoPartsList[0];
             }
 
@@ -313,7 +304,8 @@ namespace TwitchDownloader
             double seekDuration = info.Result.Duration.TotalSeconds - seekTime - options.crop_end;
             Task<IConversionResult> conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -t {2} -acodec copy -vcodec copy -copyts \"{3}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), seekDuration.ToString(), outputConvert));
             Task.WaitAll(conversionResult);
-            DeleteDirectory(downloadFolder);
+            if (Directory.Exists(downloadFolder))
+                DeleteDirectory(downloadFolder);
         }
 
         public static void DeleteDirectory(string target_dir)
