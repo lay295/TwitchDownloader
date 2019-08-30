@@ -50,6 +50,8 @@
             this.toolProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.label6 = new System.Windows.Forms.Label();
             this.textLog = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.checkOutline = new System.Windows.Forms.CheckBox();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -114,7 +116,7 @@
             // 
             // textColor
             // 
-            this.textColor.Location = new System.Drawing.Point(249, 119);
+            this.textColor.Location = new System.Drawing.Point(249, 120);
             this.textColor.Name = "textColor";
             this.textColor.Size = new System.Drawing.Size(100, 20);
             this.textColor.TabIndex = 5;
@@ -246,12 +248,34 @@
             this.textLog.Size = new System.Drawing.Size(175, 264);
             this.textLog.TabIndex = 68;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(63, 177);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(145, 13);
+            this.label1.TabIndex = 70;
+            this.label1.Text = "Username/Message Outline :";
+            // 
+            // checkOutline
+            // 
+            this.checkOutline.AutoSize = true;
+            this.checkOutline.Location = new System.Drawing.Point(214, 177);
+            this.checkOutline.Margin = new System.Windows.Forms.Padding(2);
+            this.checkOutline.Name = "checkOutline";
+            this.checkOutline.Size = new System.Drawing.Size(15, 14);
+            this.checkOutline.TabIndex = 71;
+            this.checkOutline.UseVisualStyleBackColor = true;
+            // 
             // frmChatRender
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(812, 390);
             this.ControlBox = false;
+            this.Controls.Add(this.checkOutline);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.textLog);
             this.Controls.Add(this.statusStrip);
@@ -304,5 +328,7 @@
         private System.Windows.Forms.ToolStripProgressBar toolProgressBar;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox textLog;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox checkOutline;
     }
 }

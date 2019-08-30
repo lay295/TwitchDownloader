@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -53,7 +55,7 @@ namespace TwitchDownloader
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                RenderOptions info = new RenderOptions(textJSON.Text, saveFileDialog.FileName, colorDialog.Color, Int32.Parse(textHeight.Text), Int32.Parse(textWidth.Text), checkBTTV.Checked, checkFFZ.Checked);
+                RenderOptions info = new RenderOptions(textJSON.Text, saveFileDialog.FileName, colorDialog.Color, Int32.Parse(textHeight.Text), Int32.Parse(textWidth.Text), checkBTTV.Checked, checkFFZ.Checked, checkOutline.Checked);
 
                 backgroundRenderManager.RunWorkerAsync(info);
                 btnRender.Enabled = false;
@@ -84,9 +86,8 @@ namespace TwitchDownloader
             GetThirdPartyEmotes(thirdPartyEmotes, renderOptions, chatJson["streamer"]);
 
             Size canvasSize = new Size(renderOptions.chat_width, 32);
-            Font messageFont = new Font("Arial", 9.0F, FontStyle.Bold);
+            Font messageFont = new Font("Arial", 9.0F, FontStyle.Regular);
             Font nameFont = new Font("Arial", 9.0F, FontStyle.Bold);
-            Font emojiFont = new Font("Segoe UI Emoji", 9.0F);
 
             backgroundRenderManager.ReportProgress(0, "Rendering Comments");
             foreach (var comment in chatJson["comments"])
@@ -96,19 +97,29 @@ namespace TwitchDownloader
                 Color userColor = ColorTranslator.FromHtml(comment["message"]["user_color"] != null ? comment["message"]["user_color"].ToString() : defaultColors[rand.Next(0, defaultColors.Length)]);
                 Bitmap sectionImage = new Bitmap(canvasSize.Width, canvasSize.Height);
                 Graphics g = Graphics.FromImage(sectionImage);
+                SetAntiAlias(g);
                 List<Section> messageSections = new List<Section>();
                 List<GifEmote> currentGifEmotes = new List<GifEmote>();
                 Section currentSection = new Section(sectionImage, false, currentGifEmotes);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
                 g.FillRectangle(new SolidBrush(renderOptions.background_color), 0, 0, canvasSize.Width, canvasSize.Height);
 
                 DrawBadges(g, chatBadges, comment, ref canvasSize, ref drawPos);
-                DrawUsername(g, nameFont, userName, userColor, ref canvasSize, ref drawPos);
-                DrawMessage(g, renderOptions, downloadFolder, sectionImage, messageSections, currentGifEmotes, currentSection, finalComments, messageFont, emojiFont, chatEmotes, thirdPartyEmotes, comment, userName, userColor, ref canvasSize, ref drawPos);
+                DrawUsername(g, renderOptions, nameFont, userName, userColor, ref canvasSize, ref drawPos);
+                DrawMessage(g, renderOptions, downloadFolder, sectionImage, messageSections, currentGifEmotes, currentSection, finalComments, messageFont, chatEmotes, thirdPartyEmotes, comment, userName, userColor, ref canvasSize, ref drawPos);
             }
 
             backgroundRenderManager.ReportProgress(0, "Rendering Video 0%");
             RenderVideo(renderOptions, finalComments, chatJson["comments"]);
+
+            string[] files = Directory.GetFiles(downloadFolder);
+            for (int i = 0; i < files.Length; i++)
+            {
+                try
+                {
+                    File.Delete(files[i]);
+                }
+                catch { }
+            }
         }
 
         private void RenderVideo(RenderOptions renderOptions, List<TwitchComment> finalComments, JToken comments)
@@ -218,7 +229,7 @@ namespace TwitchDownloader
             }
         }
 
-        private void DrawMessage(Graphics g, RenderOptions renderOptions, string downloadFolder, Bitmap sectionImage, List<Section> messageSections, List<GifEmote> currentGifEmotes, Section currentSection, List<TwitchComment> finalComments, Font messageFont, Font emojiFont, List<KeyValuePair<int, Image>> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, JToken comment, string userName, Color userColor, ref Size canvasSize, ref Point drawPos)
+        private void DrawMessage(Graphics g, RenderOptions renderOptions, string downloadFolder, Bitmap sectionImage, List<Section> messageSections, List<GifEmote> currentGifEmotes, Section currentSection, List<TwitchComment> finalComments, Font messageFont, List<KeyValuePair<int, Image>> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, JToken comment, string userName, Color userColor, ref Size canvasSize, ref Point drawPos)
         {
             if (comment["source"].ToString() != "chat")
                 return;
@@ -255,7 +266,7 @@ namespace TwitchDownloader
                                 GifEmote emote = new GifEmote(new Point(drawPos.X + 2, 0), currentEmote.name, currentEmote.emote);
                                 currentGifEmotes.Add(emote);
                                 currentSection.hasEmote = true;
-                                drawPos.X += currentEmote.emote.Width + 2;
+                                drawPos.X += currentEmote.emote.Width + 3;
                             }
                             else
                             {
@@ -263,7 +274,7 @@ namespace TwitchDownloader
                                 if (currentEmote.emote.Height > 32)
                                     currentEmote.emote = ScaleImage(currentEmote.emote, 9999, 32);
                                 g.DrawImage(currentEmote.emote, drawPos.X + 2, drawPos.Y - 6, currentEmote.emote.Width, currentEmote.emote.Height);
-                                drawPos.X += currentEmote.emote.Width + 2;
+                                drawPos.X += currentEmote.emote.Width + 3;
                             }
                         }
                         else
@@ -286,8 +297,24 @@ namespace TwitchDownloader
 
                                 if (drawPos.X + inputWidth + 3 > canvasSize.Width)
                                     AddNewSection(ref messageSections, ref renderOptions, ref currentGifEmotes, ref currentSection, ref g, ref sectionImage, ref canvasSize, ref drawPos);
+                                if (renderOptions.outline)
+                                {
+                                    GraphicsPath p = new GraphicsPath();
+                                    p.AddString(
+                                        output,
+                                        messageFont.FontFamily,
+                                        (int)messageFont.Style,
+                                        g.DpiY * messageFont.Size / 72,       // em size
+                                        new Point(drawPos.X, drawPos.Y + 2),              // location where to draw text
+                                        new StringFormat()
+                                    );
+                                    Pen pen = new Pen(Color.Black, 6);
+                                    pen.LineJoin = LineJoin.Round;
+                                    g.DrawPath(pen, p);
+                                    //g.FillPath(new SolidBrush(Color.Black), p);
+                                }
                                 g.DrawString(output, messageFont, new SolidBrush(Color.White), drawPos.X, drawPos.Y + 2);
-                                drawPos.X += inputWidth + 5;
+                                drawPos.X += inputWidth + 4;
                             }
                             
                         }
@@ -350,6 +377,33 @@ namespace TwitchDownloader
                 }
             }
             g.Dispose();
+
+            //this is to remove the annoying bits on the bottom of the outlines https://i.imgur.com/AHs9nPn.png
+            if (renderOptions.background_color != Color.Black)
+            {
+                int blackCount = 0;
+                for (int i = final.Height / 2; i < final.Height; i++)
+                {
+                    for (int k = 0; k < final.Width; k++)
+                    {
+                        Color currentPixel = final.GetPixel(k, i);
+
+                        if (currentPixel == renderOptions.background_color)
+                        {
+                            if (blackCount == 1 || blackCount == 2)
+                            {
+                                for (int j = 1; j <= blackCount; j++)
+                                    final.SetPixel(k - j, i, renderOptions.background_color);
+                            }
+                            blackCount = 0;
+                        }
+                        else
+                            blackCount++;
+                    }
+                    blackCount = 0;
+                }
+            }
+
             currentSection.section.Dispose();
             string imagePath = Path.Combine(downloadFolder, finalComments.Count + ".png");
             finalComments.Add(new TwitchComment(imagePath, Double.Parse(comment["content_offset_seconds"].ToString()), finalGifs));
@@ -396,9 +450,16 @@ namespace TwitchDownloader
             bmp = new Bitmap(canvasSize.Width, canvasSize.Height);
             currentSection = new Section(bmp, false, currentGifEmotes);
             g = Graphics.FromImage(bmp);
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+            SetAntiAlias(g);
             g.FillRectangle(new SolidBrush(renderOptions.background_color), 0, 0, canvasSize.Width, canvasSize.Height + 32);
             drawPos.X = 2;
+        }
+
+        private void SetAntiAlias(Graphics g)
+        {
+            g.InterpolationMode = InterpolationMode.HighQualityBilinear;
+            g.TextRenderingHint = TextRenderingHint.AntiAlias;
+            g.CompositingQuality = CompositingQuality.HighQuality;
         }
 
         private void GetEmotes(List<KeyValuePair<int, Image>> chatEmotes, JToken comments)
@@ -427,8 +488,26 @@ namespace TwitchDownloader
             }
         }
 
-        private void DrawUsername(Graphics g, Font nameFont, string userName, Color userColor, ref Size canvasSize, ref Point drawPos)
+        private void DrawUsername(Graphics g, RenderOptions renderOptions, Font nameFont, string userName, Color userColor, ref Size canvasSize, ref Point drawPos)
         {
+            if (renderOptions.outline)
+            {
+                drawPos.X += 2;
+                GraphicsPath p = new GraphicsPath();
+                p.AddString(
+                    userName + ":",
+                    nameFont.FontFamily,
+                    (int)nameFont.Style,
+                    g.DpiY * nameFont.Size / 72,       // em size
+                    new Point(drawPos.X - 2, drawPos.Y + 2),              // location where to draw text
+                    new StringFormat()
+                );
+                Pen pen = new Pen(Color.Black, 6);
+                pen.LineJoin = LineJoin.Round;
+                g.DrawPath(pen, p);
+                g.FillPath(new SolidBrush(Color.Black), p);
+                //g.FillPath(new SolidBrush(Color.Black), p);
+            }
             g.DrawString(userName + ":", nameFont, new SolidBrush(userColor), drawPos.X - 2, drawPos.Y + 2);
             drawPos.X += (int)Math.Floor(g.MeasureString(userName + ":", nameFont, 0, StringFormat.GenericTypographic).Width) + 6;
         }
@@ -632,8 +711,9 @@ public class RenderOptions
     public int chat_width { get; set; }
     public bool bttv_emotes { get; set; }
     public bool ffz_emotes { get; set; }
+    public bool outline { get; set; }
 
-    public RenderOptions(string Json_path, string Save_path, Color Background_color, int Chat_height, int Chat_width, bool Bttv_emotes, bool Ffz_emotes)
+    public RenderOptions(string Json_path, string Save_path, Color Background_color, int Chat_height, int Chat_width, bool Bttv_emotes, bool Ffz_emotes, bool Outline)
     {
         json_path = Json_path;
         save_path = Save_path;
@@ -642,6 +722,7 @@ public class RenderOptions
         chat_width = Chat_width;
         bttv_emotes = Bttv_emotes;
         ffz_emotes = Ffz_emotes;
+        outline = Outline;
     }
 }
 
