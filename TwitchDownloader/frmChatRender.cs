@@ -111,15 +111,6 @@ namespace TwitchDownloader
             backgroundRenderManager.ReportProgress(0, "Rendering Video 0%");
             RenderVideo(renderOptions, finalComments, chatJson["comments"]);
 
-            string[] files = Directory.GetFiles(downloadFolder);
-            for (int i = 0; i < files.Length; i++)
-            {
-                try
-                {
-                    File.Delete(files[i]);
-                }
-                catch { }
-            }
         }
 
         private void RenderVideo(RenderOptions renderOptions, List<TwitchComment> finalComments, JToken comments)
@@ -379,7 +370,7 @@ namespace TwitchDownloader
             g.Dispose();
 
             //this is to remove the annoying bits on the bottom of the outlines https://i.imgur.com/AHs9nPn.png
-            if (renderOptions.background_color != Color.Black)
+            if (renderOptions.outline && renderOptions.background_color != Color.Black)
             {
                 int blackCount = 0;
                 for (int i = final.Height / 2; i < final.Height; i++)
