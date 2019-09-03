@@ -488,7 +488,7 @@
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmVodDownload";
-            this.Text = "frmVodDownload";
+            this.Text = "z";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             ((System.ComponentModel.ISupportInitialize)(this.numStartHour)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numStartMinute)).EndInit();

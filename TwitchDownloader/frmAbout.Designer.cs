@@ -41,8 +41,8 @@
             this.label1.Size = new System.Drawing.Size(466, 343);
             this.label1.TabIndex = 0;
             this.label1.Text = "Made by Lewis Pardo (@lay295)\r\n\r\nDownload Icon made by Freepik from www.flaticon." +
-    "com\r\n\r\nEmoji/Text Rendering Library\r\nhttps://github.com/LayoutFarm/Typography\r\nh" +
-    "ttps://github.com/PaintLab/PixelFarm";
+    "com\r\n\r\nEmoji Rendering Library\r\nhttps://github.com/LayoutFarm/Typography\r\nhttps:" +
+    "//github.com/PaintLab/PixelFarm";
             // 
             // pictureBox1
             // 

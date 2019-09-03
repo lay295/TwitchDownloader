@@ -52,6 +52,10 @@
             this.textLog = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.checkOutline = new System.Windows.Forms.CheckBox();
+            this.comboFonts = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.textFontSize = new System.Windows.Forms.TextBox();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -268,12 +272,51 @@
             this.checkOutline.TabIndex = 71;
             this.checkOutline.UseVisualStyleBackColor = true;
             // 
+            // comboFonts
+            // 
+            this.comboFonts.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboFonts.FormattingEnabled = true;
+            this.comboFonts.Location = new System.Drawing.Point(289, 173);
+            this.comboFonts.Name = "comboFonts";
+            this.comboFonts.Size = new System.Drawing.Size(187, 21);
+            this.comboFonts.TabIndex = 73;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(249, 176);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(34, 13);
+            this.label3.TabIndex = 72;
+            this.label3.Text = "Font :";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(249, 207);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(57, 13);
+            this.label10.TabIndex = 74;
+            this.label10.Text = "Font Size :";
+            // 
+            // textFontSize
+            // 
+            this.textFontSize.Location = new System.Drawing.Point(311, 204);
+            this.textFontSize.Name = "textFontSize";
+            this.textFontSize.Size = new System.Drawing.Size(38, 20);
+            this.textFontSize.TabIndex = 75;
+            this.textFontSize.Text = "9";
+            // 
             // frmChatRender
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(812, 390);
             this.ControlBox = false;
+            this.Controls.Add(this.textFontSize);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.comboFonts);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.checkOutline);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.label6);
@@ -298,6 +341,7 @@
             this.Name = "frmChatRender";
             this.Text = "frmChatRender";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Load += new System.EventHandler(this.FrmChatRender_Load);
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
@@ -330,5 +374,9 @@
         private System.Windows.Forms.TextBox textLog;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox checkOutline;
+        private System.Windows.Forms.ComboBox comboFonts;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox textFontSize;
     }
 }
