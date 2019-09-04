@@ -166,7 +166,7 @@ namespace TwitchDownloader
                     if (checkCropEnd.Checked)
                     {
                         TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                        duration = (int)Math.Ceiling(end.TotalSeconds - duration);
+                        duration = (int)Math.Ceiling(end.TotalSeconds - startTime);
                     }
                     else
                     {
@@ -196,7 +196,7 @@ namespace TwitchDownloader
 
                 bool isFirst = true;
                 string cursor = "";
-                double latestMessage = 0.0;
+                double latestMessage = clipInfo.offset - 1;
                 double videoStart = clipInfo.offset;
                 double videoDuration = clipInfo.duration;
                 JObject result = new JObject();
@@ -225,7 +225,7 @@ namespace TwitchDownloader
                     }
                     cursor = res["_next"].ToString();
 
-                    int percent = (int)Math.Floor(latestMessage / (videoStart + videoDuration) * 100);
+                    int percent = (int)Math.Floor((latestMessage - videoStart)/videoDuration * 100);
                     backgroundDownloadManager.ReportProgress(percent, String.Format("Downloading {0}%", percent));
 
                     if (isFirst)
