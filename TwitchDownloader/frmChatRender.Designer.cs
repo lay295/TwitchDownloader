@@ -56,6 +56,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.textFontSize = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.textUpdateTime = new System.Windows.Forms.TextBox();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -307,12 +309,31 @@
             this.textFontSize.TabIndex = 75;
             this.textFontSize.Text = "9";
             // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(361, 207);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(71, 13);
+            this.label11.TabIndex = 76;
+            this.label11.Text = "Update Time:";
+            // 
+            // textUpdateTime
+            // 
+            this.textUpdateTime.Location = new System.Drawing.Point(438, 204);
+            this.textUpdateTime.Name = "textUpdateTime";
+            this.textUpdateTime.Size = new System.Drawing.Size(38, 20);
+            this.textUpdateTime.TabIndex = 77;
+            this.textUpdateTime.Text = "1.0";
+            // 
             // frmChatRender
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(812, 390);
             this.ControlBox = false;
+            this.Controls.Add(this.textUpdateTime);
+            this.Controls.Add(this.label11);
             this.Controls.Add(this.textFontSize);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.comboFonts);
@@ -378,5 +399,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox textFontSize;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TextBox textUpdateTime;
     }
 }

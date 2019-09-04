@@ -56,7 +56,7 @@ namespace TwitchDownloader
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                RenderOptions info = new RenderOptions(textJSON.Text, saveFileDialog.FileName, colorDialog.Color, Int32.Parse(textHeight.Text), Int32.Parse(textWidth.Text), checkBTTV.Checked, checkFFZ.Checked, checkOutline.Checked, (string)comboFonts.SelectedItem, Double.Parse(textFontSize.Text));
+                RenderOptions info = new RenderOptions(textJSON.Text, saveFileDialog.FileName, colorDialog.Color, Int32.Parse(textHeight.Text), Int32.Parse(textWidth.Text), checkBTTV.Checked, checkFFZ.Checked, checkOutline.Checked, (string)comboFonts.SelectedItem, Double.Parse(textFontSize.Text), Double.Parse(textUpdateTime.Text));
 
                 backgroundRenderManager.RunWorkerAsync(info);
                 btnRender.Enabled = false;
@@ -132,7 +132,6 @@ namespace TwitchDownloader
             Graphics gcan = Graphics.FromImage(canvas);
             int videoStart = (int)Math.Floor(comments.First["content_offset_seconds"].ToObject<double>());
             int duration = (int)Math.Ceiling(comments.Last["content_offset_seconds"].ToObject<double>()) - videoStart;
-            int globalTick = 0;
             List<GifEmote> displayedGifs = new List<GifEmote>();
             Stopwatch stopwatch = new Stopwatch();
             using (var vFWriter = new VideoFileWriter())
@@ -141,93 +140,97 @@ namespace TwitchDownloader
                 stopwatch.Start();
                 vFWriter.Open(renderOptions.save_path, renderOptions.chat_width, renderOptions.chat_height, 60, VideoCodec.H264, 6000000);
                 gcan.FillRectangle(new SolidBrush(renderOptions.background_color), 0, 0, renderOptions.chat_width, renderOptions.chat_height);
-                for (int i = videoStart; i < videoStart + duration; i++)
+                int startTick = (int)Math.Floor(videoStart / (1.0 / 60.0));
+                int endTick = (int)Math.Floor((videoStart + duration) / (1.0 / 60.0));
+                int lastUpdateTick = startTick;
+                int globalTick = startTick;
+                for (int i = startTick; i < endTick; i++)
                 {
                     int height = 0;
-                    for (int w = 0; w < 60; w++)
+                    if (globalTick % renderOptions.update_frame == 0)
                     {
-                        if (w == 0)
+                        int y = 0;
+                        List<GifEmote> newly_added = new List<GifEmote>();
+                        List<GifEmote> old = new List<GifEmote>(displayedGifs);
+                        for (int j = 0; j < finalComments.Count; j++)
                         {
-                            int y = 0;
-                            List<GifEmote> newly_added = new List<GifEmote>();
-                            List<GifEmote> old = new List<GifEmote>(displayedGifs);
+                            int commentTick = (int)Math.Floor(finalComments[j].secondsOffset / (1.0 / 60.0));
+                            if (commentTick >= lastUpdateTick && commentTick < globalTick)
+                            {
+                                Bitmap sectionImage = (Bitmap)Bitmap.FromFile(finalComments[j].section);
+                                foreach (var emote in finalComments[j].gifEmotes)
+                                {
+                                    GifEmote newGif = new GifEmote(new Point(emote.offset.X, emote.offset.Y + height), emote.name, emote.image);
+                                    displayedGifs.Add(newGif);
+                                    newly_added.Add(newGif);
+                                }
+                                height += sectionImage.Height;
+                            }
+                        }
+                        foreach (var emote in old)
+                            emote.offset = new Point(emote.offset.X, emote.offset.Y - height);
+                        foreach (var emote in newly_added)
+                            emote.offset = new Point(emote.offset.X, (renderOptions.chat_height - height) + emote.offset.Y);
+
+                        if (height > 0)
+                        {
+                            Bitmap buffer = new Bitmap(renderOptions.chat_width, height);
+                            Graphics bg = Graphics.FromImage(buffer);
+
                             for (int j = 0; j < finalComments.Count; j++)
                             {
-                                if (Math.Floor(finalComments[j].secondsOffset) == i)
+                                int commentTick = (int)Math.Floor(finalComments[j].secondsOffset / (1.0 / 60.0));
+                                if (commentTick >= lastUpdateTick && commentTick < globalTick)
                                 {
                                     Bitmap sectionImage = (Bitmap)Bitmap.FromFile(finalComments[j].section);
-                                    foreach (var emote in finalComments[j].gifEmotes)
-                                    {
-                                        GifEmote newGif = new GifEmote(new Point(emote.offset.X, emote.offset.Y + height), emote.name, emote.image);
-                                        displayedGifs.Add(newGif);
-                                        newly_added.Add(newGif);
-                                    }
-                                    height += sectionImage.Height;
+                                    bg.DrawImage(sectionImage, 0, y);
+                                    y += sectionImage.Height;
                                 }
                             }
-                            foreach (var emote in old)
-                                emote.offset = new Point(emote.offset.X, emote.offset.Y - height);
-                            foreach (var emote in newly_added)
-                                emote.offset = new Point(emote.offset.X, (renderOptions.chat_height - height) + emote.offset.Y);
-
-                            if (height > 0)
-                            {
-                                Bitmap buffer = new Bitmap(renderOptions.chat_width, height);
-                                Graphics bg = Graphics.FromImage(buffer);
-
-                                for (int j = 0; j < finalComments.Count; j++)
-                                {
-                                    if (Math.Floor(finalComments[j].secondsOffset) == i)
-                                    {
-                                        Bitmap sectionImage = (Bitmap)Bitmap.FromFile(finalComments[j].section);
-                                        bg.DrawImage(sectionImage, 0, y);
-                                        y += sectionImage.Height;
-                                    }
-                                }
-                                gcan = Graphics.FromImage(canvas);
-                                gcan.DrawImage(canvas, 0, -height);
-                                gcan.DrawImage(buffer, 0, renderOptions.chat_height - height);
-                            }
+                            gcan = Graphics.FromImage(canvas);
+                            gcan.DrawImage(canvas, 0, -height);
+                            gcan.DrawImage(buffer, 0, renderOptions.chat_height - height);
                         }
-                        List<GifEmote> to_remove = new List<GifEmote>();
-                        foreach (var emote in displayedGifs)
-                        {
-                            if (emote.offset.Y < -emote.image.Width - renderOptions.chat_height)
-                            {
-                                to_remove.Add(emote);
-                            }
-                            else
-                            {
-                                int gifTime = (int)Math.Floor(1.5 * globalTick) % emote.total_duration;
-                                int frame = emote.frames - 1;
-                                int timeCount = 0;
-                                for (int k = 0; k < emote.durations.Count; k++)
-                                {
-                                    if (timeCount + emote.durations[k] > gifTime)
-                                    {
-                                        frame = k;
-                                        break;
-                                    }
-                                    timeCount += emote.durations[k];
-                                }
-                                FrameDimension dim = new FrameDimension(emote.image.FrameDimensionsList[0]);
-                                emote.image.SelectActiveFrame(dim, frame);
-                                gcan.DrawImage(emote.image, emote.offset.X, emote.offset.Y, (float)(emote.image.Width * renderOptions.image_scale), (float)(emote.image.Height * renderOptions.image_scale));
-                            }
-                        }
-
-                        foreach (var emote in to_remove)
-                        {
-                            displayedGifs.Remove(emote);
-                        }
-
-                        vFWriter.WriteVideoFrame(canvas);
-                        foreach (var emote in displayedGifs)
-                        {
-                            gcan.FillRectangle(new SolidBrush(renderOptions.background_color), emote.offset.X, emote.offset.Y, (float)(emote.image.Width * renderOptions.image_scale), (float)(emote.image.Height * renderOptions.image_scale));
-                        }
-                        globalTick += 1;
+                        lastUpdateTick = globalTick;
                     }
+                    List<GifEmote> to_remove = new List<GifEmote>();
+                    foreach (var emote in displayedGifs)
+                    {
+                        if (emote.offset.Y < -emote.image.Width - renderOptions.chat_height)
+                        {
+                            to_remove.Add(emote);
+                        }
+                        else
+                        {
+                            int gifTime = (int)Math.Floor(1.5 * globalTick) % emote.total_duration;
+                            int frame = emote.frames - 1;
+                            int timeCount = 0;
+                            for (int k = 0; k < emote.durations.Count; k++)
+                            {
+                                if (timeCount + emote.durations[k] > gifTime)
+                                {
+                                    frame = k;
+                                    break;
+                                }
+                                timeCount += emote.durations[k];
+                            }
+                            FrameDimension dim = new FrameDimension(emote.image.FrameDimensionsList[0]);
+                            emote.image.SelectActiveFrame(dim, frame);
+                            gcan.DrawImage(emote.image, emote.offset.X, emote.offset.Y, (float)(emote.image.Width * renderOptions.image_scale), (float)(emote.image.Height * renderOptions.image_scale));
+                        }
+                    }
+
+                    foreach (var emote in to_remove)
+                    {
+                        displayedGifs.Remove(emote);
+                    }
+
+                    vFWriter.WriteVideoFrame(canvas);
+                    foreach (var emote in displayedGifs)
+                    {
+                        gcan.FillRectangle(new SolidBrush(renderOptions.background_color), emote.offset.X, emote.offset.Y, (float)(emote.image.Width * renderOptions.image_scale), (float)(emote.image.Height * renderOptions.image_scale));
+                    }
+                    globalTick += 1;
                     double percentDouble = globalTick / (duration * 60.0) * 100.0;
                     int percentInt = (int)Math.Floor(percentDouble);
                     backgroundRenderManager.ReportProgress(percentInt, new Progress(String.Format("Rendering Video {0}%", percentInt), (int)Math.Floor(stopwatch.Elapsed.TotalSeconds), percentDouble));
@@ -290,6 +293,9 @@ namespace TwitchDownloader
                         else
                         {
                             string output = fragmentParts[i].Trim();
+
+                            if (output == "󠀀")
+                                continue;
 
                             if (Regex.Match(output, emojiRegex).Success)
                             {
@@ -779,8 +785,9 @@ public class RenderOptions
     public string font { get; set; }
     public double font_size { get; set; }
     public double image_scale { get; set; }
+    public int update_frame { get; set; }
 
-    public RenderOptions(string Json_path, string Save_path, Color Background_color, int Chat_height, int Chat_width, bool Bttv_emotes, bool Ffz_emotes, bool Outline, string Font, double Font_size)
+    public RenderOptions(string Json_path, string Save_path, Color Background_color, int Chat_height, int Chat_width, bool Bttv_emotes, bool Ffz_emotes, bool Outline, string Font, double Font_size, double Update_rate)
     {
         json_path = Json_path;
         save_path = Save_path;
@@ -793,6 +800,11 @@ public class RenderOptions
         font = Font;
         font_size = Font_size;
         image_scale = font_size / 9;
+
+        if (Update_rate == 0)
+            update_frame = 1;
+        else
+            update_frame = (int)Math.Floor(Update_rate / (1.0 / 60.0) );
     }
 }
 

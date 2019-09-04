@@ -192,6 +192,7 @@ namespace TwitchDownloader
             using (WebClient client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
+                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json; charset=UTF-8");
                 client.Headers.Add("Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
 
                 bool isFirst = true;
