@@ -99,13 +99,13 @@ namespace TwitchDownloader
                 Color userColor = ColorTranslator.FromHtml(comment["message"]["user_color"] != null ? comment["message"]["user_color"].ToString() : defaultColors[rand.Next(0, defaultColors.Length)]);
                 Bitmap sectionImage = new Bitmap(canvasSize.Width, canvasSize.Height);
                 Graphics g = Graphics.FromImage(sectionImage);
-                SetAntiAlias(g);
                 List<Section> messageSections = new List<Section>();
                 List<GifEmote> currentGifEmotes = new List<GifEmote>();
                 Section currentSection = new Section(sectionImage, false, currentGifEmotes);
-                g.FillRectangle(new SolidBrush(renderOptions.background_color), 0, 0, canvasSize.Width, canvasSize.Height);
+                g.FillRectangle(new SolidBrush(renderOptions.background_color), -10, -10, canvasSize.Width + 20, canvasSize.Height + 20);
 
                 DrawBadges(g, renderOptions, chatBadges, comment, ref canvasSize, ref drawPos);
+                SetAntiAlias(g);
                 DrawUsername(g, renderOptions, nameFont, userName, userColor, ref canvasSize, ref drawPos);
                 DrawMessage(g, renderOptions, downloadFolder, sectionImage, messageSections, currentGifEmotes, currentSection, finalComments, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, comment, userName, userColor, ref canvasSize, ref drawPos);
             }
@@ -404,32 +404,6 @@ namespace TwitchDownloader
             }
             g.Dispose();
 
-            //this is to remove the annoying bits on the bottom of the outlines https://i.imgur.com/AHs9nPn.png
-            if (renderOptions.outline && renderOptions.background_color != Color.Black)
-            {
-                int blackCount = 0;
-                for (int i = final.Height / 2; i < final.Height; i++)
-                {
-                    for (int k = 0; k < final.Width; k++)
-                    {
-                        Color currentPixel = final.GetPixel(k, i);
-
-                        if (currentPixel == renderOptions.background_color)
-                        {
-                            if (blackCount == 1 || blackCount == 2)
-                            {
-                                for (int j = 1; j <= blackCount; j++)
-                                    final.SetPixel(k - j, i, renderOptions.background_color);
-                            }
-                            blackCount = 0;
-                        }
-                        else
-                            blackCount++;
-                    }
-                    blackCount = 0;
-                }
-            }
-
             currentSection.section.Dispose();
             string imagePath = Path.Combine(downloadFolder, finalComments.Count + ".png");
             finalComments.Add(new TwitchComment(imagePath, Double.Parse(comment["content_offset_seconds"].ToString()), finalGifs));
@@ -477,12 +451,13 @@ namespace TwitchDownloader
             currentSection = new Section(bmp, false, currentGifEmotes);
             g = Graphics.FromImage(bmp);
             SetAntiAlias(g);
-            g.FillRectangle(new SolidBrush(renderOptions.background_color), 0, 0, canvasSize.Width, canvasSize.Height + (int)Math.Floor(32 * renderOptions.image_scale));
+            g.FillRectangle(new SolidBrush(renderOptions.background_color), -10, -10, canvasSize.Width + 20, canvasSize.Height + (int)Math.Floor(32 * renderOptions.image_scale) + 20);
             drawPos.X = 2;
         }
 
         private void SetAntiAlias(Graphics g)
         {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
             g.InterpolationMode = InterpolationMode.HighQualityBilinear;
             g.TextRenderingHint = TextRenderingHint.AntiAlias;
             g.CompositingQuality = CompositingQuality.HighQuality;
