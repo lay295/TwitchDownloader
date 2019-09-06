@@ -231,7 +231,7 @@ namespace TwitchDownloader
                         gcan.FillRectangle(new SolidBrush(renderOptions.background_color), emote.offset.X, emote.offset.Y, (float)(emote.image.Width * renderOptions.image_scale), (float)(emote.image.Height * renderOptions.image_scale));
                     }
                     globalTick += 1;
-                    double percentDouble = globalTick / (duration * 60.0) * 100.0;
+                    double percentDouble = (double)(globalTick - startTick) / (double)(endTick - startTick) * 100.0;
                     int percentInt = (int)Math.Floor(percentDouble);
                     backgroundRenderManager.ReportProgress(percentInt, new Progress(String.Format("Rendering Video {0}%", percentInt), (int)Math.Floor(stopwatch.Elapsed.TotalSeconds), percentDouble));
                 }
