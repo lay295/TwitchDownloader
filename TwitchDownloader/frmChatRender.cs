@@ -142,24 +142,22 @@ namespace TwitchDownloader
                                 if (output == "󠀀")
                                     continue;
 
-                                if (Regex.Match(output, emojiRegex).Success)
+                                Match m = Regex.Match(output, emojiRegex);
+                                if (m.Success)
                                 {
-                                    string codepoint = "";
-                                    if (char.IsSurrogatePair(output, 0))
+                                    for (var k = 0; k < m.Value.Length; k += char.IsSurrogatePair(m.Value, k) ? 2 : 1)
                                     {
-                                        codepoint = String.Format("{0:X4}", char.ConvertToUtf32(output, 0)).ToLower();
-                                    }
-                                    else
-                                    {
-                                        codepoint = string.Join("", output.Select(c => ((int)c).ToString("X2"))).ToLower();
-                                    }
+                                        string codepoint = String.Format("{0:X4}", char.ConvertToUtf32(m.Value, k)).ToLower();
+                                        codepoint = codepoint.Replace("fe0f", "");
+                                        Console.WriteLine("U+{0:X4}", codepoint);
+                                        if (codepoint != "" && !emojiCache.ContainsKey(codepoint))
+                                        {
+                                            byte[] bytes = client.DownloadData(String.Format("https://abs.twimg.com/emoji/v2/72x72/{0}.png", codepoint));
+                                            MemoryStream ms = new MemoryStream(bytes);
+                                            Image emojiImage = System.Drawing.Image.FromStream(ms);
+                                            emojiCache.Add(codepoint, (Bitmap)emojiImage);
+                                        }
 
-                                    if (!emojiCache.ContainsKey(codepoint))
-                                    {
-                                        byte[] bytes = client.DownloadData(String.Format("https://abs.twimg.com/emoji/v2/72x72/{0}.png", codepoint));
-                                        MemoryStream ms = new MemoryStream(bytes);
-                                        Image emojiImage = System.Drawing.Image.FromStream(ms);
-                                        emojiCache.Add(codepoint, (Bitmap)emojiImage);
                                     }
                                 }
                             }
@@ -344,22 +342,23 @@ namespace TwitchDownloader
                                 if (drawPos.X + (20 * renderOptions.image_scale) + 3 > canvasSize.Width)
                                     AddNewSection(ref messageSections, ref renderOptions, ref currentGifEmotes, ref currentSection, ref g, ref sectionImage, ref canvasSize, ref drawPos);
 
-                                string codepoint = "";
-                                if (char.IsSurrogatePair(output, 0))
+                                Match m = Regex.Match(output, emojiRegex);
+                                for (var k = 0; k < m.Value.Length; k += char.IsSurrogatePair(m.Value, k) ? 2 : 1)
                                 {
-                                    codepoint = String.Format("{0:X4}", char.ConvertToUtf32(output, 0)).ToLower();
-                                }
-                                else
-                                {
-                                    codepoint = string.Join("", output.Select(c => ((int)c).ToString("X2"))).ToLower();
-                                }
+                                    string codepoint = String.Format("{0:X4}", char.ConvertToUtf32(m.Value, k)).ToLower();
+                                    codepoint = codepoint.Replace("fe0f", "");
+                                    Console.WriteLine("U+{0:X4}", codepoint);
+                                    if (codepoint != "")
+                                    {
+                                        Bitmap emojiBitmap = emojiCache[codepoint];
+                                        currentSection.hasEmote = true;
+                                        float emoteHeight = (float)(20 * renderOptions.image_scale);
+                                        float emoteWidth = (float)(20 * renderOptions.image_scale);
+                                        g.DrawImage(emojiBitmap, drawPos.X + 2, (hasEmoteHeight - emoteHeight) / 2, emoteWidth, emoteHeight);
+                                        drawPos.X += (int)Math.Ceiling(emoteWidth * renderOptions.image_scale) + 3;
+                                    }
 
-                                Bitmap emojiBitmap = emojiCache[codepoint];
-                                currentSection.hasEmote = true;
-                                float emoteHeight = (float)(20 * renderOptions.image_scale);
-                                float emoteWidth = (float)(20 * renderOptions.image_scale);
-                                g.DrawImage(emojiBitmap, drawPos.X + 2, (hasEmoteHeight - emoteHeight) / 2, emoteWidth, emoteHeight);
-                                drawPos.X += (int)Math.Ceiling(emoteWidth * renderOptions.image_scale + 3);
+                                }
                             }
                             else
                             {
