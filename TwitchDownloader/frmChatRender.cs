@@ -867,6 +867,15 @@ public class GifEmote
             total_duration += duration;
         }
         
+        if (total_duration == 0)
+        {
+            for (int i = 0; i < durations.Count; i++)
+            {
+                durations.RemoveAt(i);
+                durations.Insert(i, 10);
+            }
+            total_duration = durations.Count * 10;
+        }
     }
 }
 
