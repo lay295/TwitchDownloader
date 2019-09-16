@@ -224,7 +224,10 @@ namespace TwitchDownloader
 
                         latestMessage = comment["content_offset_seconds"].ToObject<double>();
                     }
-                    cursor = res["_next"].ToString();
+                    if (res["_next"] == null)
+                        break;
+                    else
+                        cursor = res["_next"].ToString();
 
                     int percent = (int)Math.Floor((latestMessage - videoStart)/videoDuration * 100);
                     backgroundDownloadManager.ReportProgress(percent, String.Format("Downloading {0}%", percent));
