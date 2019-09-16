@@ -112,7 +112,7 @@ namespace TwitchDownloader
             RenderVideo(renderOptions, finalComments, chatJson["comments"]);
 
             string[] files = Directory.GetFiles(downloadFolder);
-            /*
+            
             for (int i = 0; i < files.Length; i++)
             {
                 try
@@ -121,7 +121,7 @@ namespace TwitchDownloader
                 }
                 catch { }
             }
-            */
+            
         }
 
         private void GetTwitterEmojis(Dictionary<string, Bitmap> emojiCache, JToken comments, RenderOptions renderOptions, string emojiRegex)
