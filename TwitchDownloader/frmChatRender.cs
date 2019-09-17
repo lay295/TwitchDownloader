@@ -54,6 +54,17 @@ namespace TwitchDownloader
 
                 backgroundRenderManager.RunWorkerAsync(info);
                 btnRender.Enabled = false;
+
+                Properties.Settings.Default.RENDER_FONT = (string)comboFonts.SelectedItem;
+                Properties.Settings.Default.RENDER_COLOR = textColor.Text;
+                Properties.Settings.Default.RENDER_HEIGHT = Int32.Parse(textHeight.Text);
+                Properties.Settings.Default.RENDER_WIDTH = Int32.Parse(textWidth.Text);
+                Properties.Settings.Default.RENDER_BTTV = checkBTTV.Checked;
+                Properties.Settings.Default.RENDER_FFZ = checkFFZ.Checked;
+                Properties.Settings.Default.RENDER_OUTLINE = checkOutline.Checked;
+                Properties.Settings.Default.RENDER_FONT_SIZE = Double.Parse(textFontSize.Text);
+                Properties.Settings.Default.RENDER_UPDATE_TIME = Double.Parse(textUpdateTime.Text);
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -103,9 +114,10 @@ namespace TwitchDownloader
 
                 SetAntiAlias(g);
                 DrawBadges(g, renderOptions, chatBadges, comment, ref canvasSize, ref drawPos);
-                
                 DrawUsername(g, renderOptions, nameFont, userName, userColor, ref canvasSize, ref drawPos);
                 DrawMessage(g, renderOptions, downloadFolder, sectionImage, messageSections, currentGifEmotes, currentSection, finalComments, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, comment, userName, userColor, ref canvasSize, ref drawPos, emojiRegex);
+                int percent = (int)Math.Floor(((double)finalComments.Count / (double)chatJson["comments"].Count()) * 100);
+                backgroundRenderManager.ReportProgress(percent, new Progress("Rendering Comments"));
             }
 
             backgroundRenderManager.ReportProgress(0, new Progress("Rendering Video 0%"));
@@ -121,7 +133,8 @@ namespace TwitchDownloader
                 }
                 catch { }
             }
-            
+
+            btnRender.Enabled = true;
         }
 
         private void GetTwitterEmojis(Dictionary<string, Bitmap> emojiCache, JToken comments, RenderOptions renderOptions, string emojiRegex)
@@ -704,7 +717,7 @@ namespace TwitchDownloader
             Progress update = (Progress)e.UserState;
             toolProgressBar.Value = e.ProgressPercentage >= 100 ? 100 : e.ProgressPercentage;
 
-            if (e.ProgressPercentage > 0)
+            if (e.ProgressPercentage > 0 && !update.justMessage)
             {
                 int timeLeftInt = (int)Math.Floor(100.0/ update.percent_double * update.time_passed) - update.time_passed;
                 TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
@@ -726,15 +739,23 @@ namespace TwitchDownloader
             InstalledFontCollection installedFontCollection = new InstalledFontCollection();
             FontFamily[] fontFamilies = installedFontCollection.Families;
             int fontIndex = 0;
+            string fontName = Properties.Settings.Default.RENDER_FONT == "" ? "Arial" : Properties.Settings.Default.RENDER_FONT;
             for (int i = 0; i < fontFamilies.Length; i++)
             {
                 comboFonts.Items.Add(fontFamilies[i].Name);
-                if (fontFamilies[i].Name == "Arial")
+                if (fontFamilies[i].Name == fontName)
                     fontIndex = i;
             }
             comboFonts.SelectedIndex = fontIndex;
 
-
+            textColor.Text = Properties.Settings.Default.RENDER_COLOR;
+            textHeight.Text = Properties.Settings.Default.RENDER_HEIGHT.ToString();
+            textWidth.Text = Properties.Settings.Default.RENDER_WIDTH.ToString();
+            checkBTTV.Checked = Properties.Settings.Default.RENDER_BTTV;
+            checkFFZ.Checked = Properties.Settings.Default.RENDER_FFZ;
+            checkOutline.Checked = Properties.Settings.Default.RENDER_OUTLINE;
+            textFontSize.Text = Properties.Settings.Default.RENDER_FONT_SIZE.ToString();
+            textUpdateTime.Text = Properties.Settings.Default.RENDER_UPDATE_TIME.ToString();
         }
     }
     
@@ -745,6 +766,7 @@ public class Progress
     public string message = "";
     public int time_passed = 0;
     public double percent_double = 0.0;
+    public bool justMessage = false;
     public Progress(string Message, int Time_passed, double Percent_double)
     {
         message = Message;
@@ -755,6 +777,7 @@ public class Progress
     public Progress(string Message)
     {
         message = Message;
+        justMessage = true;
     }
 }
 

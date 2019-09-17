@@ -43,7 +43,8 @@
             // mainSplitContainer
             // 
             this.mainSplitContainer.IsSplitterFixed = true;
-            this.mainSplitContainer.Location = new System.Drawing.Point(12, 12);
+            this.mainSplitContainer.Location = new System.Drawing.Point(16, 15);
+            this.mainSplitContainer.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.mainSplitContainer.Name = "mainSplitContainer";
             this.mainSplitContainer.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -60,16 +61,17 @@
             // 
             this.mainSplitContainer.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.mainSplitContainer.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.mainSplitContainer.Size = new System.Drawing.Size(812, 461);
-            this.mainSplitContainer.SplitterDistance = 67;
+            this.mainSplitContainer.Size = new System.Drawing.Size(1083, 567);
+            this.mainSplitContainer.SplitterDistance = 82;
             this.mainSplitContainer.SplitterWidth = 1;
             this.mainSplitContainer.TabIndex = 1;
             // 
             // btnAbout
             // 
-            this.btnAbout.Location = new System.Drawing.Point(734, 3);
+            this.btnAbout.Location = new System.Drawing.Point(979, 4);
+            this.btnAbout.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnAbout.Name = "btnAbout";
-            this.btnAbout.Size = new System.Drawing.Size(75, 23);
+            this.btnAbout.Size = new System.Drawing.Size(100, 28);
             this.btnAbout.TabIndex = 8;
             this.btnAbout.Text = "About";
             this.btnAbout.UseVisualStyleBackColor = true;
@@ -77,9 +79,10 @@
             // 
             // btnFrmChatRender
             // 
-            this.btnFrmChatRender.Location = new System.Drawing.Point(557, 9);
+            this.btnFrmChatRender.Location = new System.Drawing.Point(743, 11);
+            this.btnFrmChatRender.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnFrmChatRender.Name = "btnFrmChatRender";
-            this.btnFrmChatRender.Size = new System.Drawing.Size(142, 49);
+            this.btnFrmChatRender.Size = new System.Drawing.Size(189, 60);
             this.btnFrmChatRender.TabIndex = 7;
             this.btnFrmChatRender.Text = "Chat Render";
             this.btnFrmChatRender.UseVisualStyleBackColor = true;
@@ -87,9 +90,10 @@
             // 
             // btnFrmChatDownload
             // 
-            this.btnFrmChatDownload.Location = new System.Drawing.Point(409, 9);
+            this.btnFrmChatDownload.Location = new System.Drawing.Point(545, 11);
+            this.btnFrmChatDownload.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnFrmChatDownload.Name = "btnFrmChatDownload";
-            this.btnFrmChatDownload.Size = new System.Drawing.Size(142, 49);
+            this.btnFrmChatDownload.Size = new System.Drawing.Size(189, 60);
             this.btnFrmChatDownload.TabIndex = 6;
             this.btnFrmChatDownload.Text = "Chat Downloader";
             this.btnFrmChatDownload.UseVisualStyleBackColor = true;
@@ -97,9 +101,10 @@
             // 
             // btnFrmClipDownload
             // 
-            this.btnFrmClipDownload.Location = new System.Drawing.Point(261, 9);
+            this.btnFrmClipDownload.Location = new System.Drawing.Point(348, 11);
+            this.btnFrmClipDownload.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnFrmClipDownload.Name = "btnFrmClipDownload";
-            this.btnFrmClipDownload.Size = new System.Drawing.Size(142, 49);
+            this.btnFrmClipDownload.Size = new System.Drawing.Size(189, 60);
             this.btnFrmClipDownload.TabIndex = 5;
             this.btnFrmClipDownload.Text = "Clip Downloader";
             this.btnFrmClipDownload.UseVisualStyleBackColor = true;
@@ -107,22 +112,24 @@
             // 
             // btnFrmVodDownload
             // 
-            this.btnFrmVodDownload.Location = new System.Drawing.Point(113, 9);
+            this.btnFrmVodDownload.Location = new System.Drawing.Point(151, 11);
+            this.btnFrmVodDownload.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnFrmVodDownload.Name = "btnFrmVodDownload";
-            this.btnFrmVodDownload.Size = new System.Drawing.Size(142, 49);
+            this.btnFrmVodDownload.Size = new System.Drawing.Size(189, 60);
             this.btnFrmVodDownload.TabIndex = 4;
-            this.btnFrmVodDownload.Text = "VOD Downlaoder";
+            this.btnFrmVodDownload.Text = "VOD Downloader";
             this.btnFrmVodDownload.UseVisualStyleBackColor = true;
             this.btnFrmVodDownload.Click += new System.EventHandler(this.BtnFrmVodDownload_Click);
             // 
             // frmMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(836, 472);
+            this.ClientSize = new System.Drawing.Size(1115, 581);
             this.Controls.Add(this.mainSplitContainer);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "frmMain";
             this.Text = "Twitch Downloader";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_FormClosing);

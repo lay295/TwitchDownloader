@@ -34,5 +34,113 @@ namespace TwitchDownloader.Properties {
                 this["DOWNLOAD_FOLDER"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#111111")]
+        public string RENDER_COLOR {
+            get {
+                return ((string)(this["RENDER_COLOR"]));
+            }
+            set {
+                this["RENDER_COLOR"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public int RENDER_HEIGHT {
+            get {
+                return ((int)(this["RENDER_HEIGHT"]));
+            }
+            set {
+                this["RENDER_HEIGHT"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public int RENDER_WIDTH {
+            get {
+                return ((int)(this["RENDER_WIDTH"]));
+            }
+            set {
+                this["RENDER_WIDTH"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool RENDER_BTTV {
+            get {
+                return ((bool)(this["RENDER_BTTV"]));
+            }
+            set {
+                this["RENDER_BTTV"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool RENDER_FFZ {
+            get {
+                return ((bool)(this["RENDER_FFZ"]));
+            }
+            set {
+                this["RENDER_FFZ"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RENDER_OUTLINE {
+            get {
+                return ((bool)(this["RENDER_OUTLINE"]));
+            }
+            set {
+                this["RENDER_OUTLINE"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("9")]
+        public double RENDER_FONT_SIZE {
+            get {
+                return ((double)(this["RENDER_FONT_SIZE"]));
+            }
+            set {
+                this["RENDER_FONT_SIZE"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double RENDER_UPDATE_TIME {
+            get {
+                return ((double)(this["RENDER_UPDATE_TIME"]));
+            }
+            set {
+                this["RENDER_UPDATE_TIME"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string RENDER_FONT {
+            get {
+                return ((string)(this["RENDER_FONT"]));
+            }
+            set {
+                this["RENDER_FONT"] = value;
+            }
+        }
     }
 }
