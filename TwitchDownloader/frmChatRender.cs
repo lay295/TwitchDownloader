@@ -754,6 +754,11 @@ namespace TwitchDownloader
             checkOutline.Checked = Properties.Settings.Default.RENDER_OUTLINE;
             textFontSize.Text = Properties.Settings.Default.RENDER_FONT_SIZE.ToString();
             textUpdateTime.Text = Properties.Settings.Default.RENDER_UPDATE_TIME.ToString();
+
+            if (textFontSize.Text.IndexOf('.') == -1)
+                textFontSize.Text += ".0";
+            if (textUpdateTime.Text.IndexOf('.') == -1)
+                textUpdateTime.Text += ".0";
         }
     }
     
