@@ -133,8 +133,6 @@ namespace TwitchDownloader
                 }
                 catch { }
             }
-
-            btnRender.Enabled = true;
         }
 
         private void GetTwitterEmojis(Dictionary<string, Bitmap> emojiCache, JToken comments, RenderOptions renderOptions, string emojiRegex)
