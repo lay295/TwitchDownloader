@@ -256,7 +256,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(808, 76);
+            this.label6.Location = new System.Drawing.Point(745, 33);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(40, 17);
@@ -265,11 +265,11 @@
             // 
             // textLog
             // 
-            this.textLog.Location = new System.Drawing.Point(812, 96);
+            this.textLog.Location = new System.Drawing.Point(748, 59);
             this.textLog.Margin = new System.Windows.Forms.Padding(4);
             this.textLog.Multiline = true;
             this.textLog.Name = "textLog";
-            this.textLog.Size = new System.Drawing.Size(232, 324);
+            this.textLog.Size = new System.Drawing.Size(296, 361);
             this.textLog.TabIndex = 68;
             // 
             // label1

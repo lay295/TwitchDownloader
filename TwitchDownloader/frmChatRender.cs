@@ -489,6 +489,7 @@ namespace TwitchDownloader
         private void GetEmotes(List<KeyValuePair<int, Image>> chatEmotes, JToken comments, RenderOptions renderOptions)
         {
             List<int> alreadyAdded = new List<int>();
+            List<int> failedEmotes = new List<int>();
             using (WebClient client = new WebClient())
             {
                 foreach (var comment in comments)
@@ -498,18 +499,52 @@ namespace TwitchDownloader
                         if (fragment["emoticon"] != null)
                         {
                             int id = fragment["emoticon"]["emoticon_id"].ToObject<int>();
-                            if (!alreadyAdded.Contains(id))
+                            if (!alreadyAdded.Contains(id) && !failedEmotes.Contains(id))
                             {
-                                alreadyAdded.Add(id);
-                                byte[] bytes = client.DownloadData(String.Format("https://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0", id));
-                                MemoryStream ms = new MemoryStream(bytes);
-                                Image emoteImage = System.Drawing.Image.FromStream(ms);
-                                chatEmotes.Add(new KeyValuePair<int, Image>(id, emoteImage));
+                                try
+                                {
+                                    byte[] bytes = client.DownloadData(String.Format("https://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0", id));
+                                    alreadyAdded.Add(id);
+                                    MemoryStream ms = new MemoryStream(bytes);
+                                    Image emoteImage = System.Drawing.Image.FromStream(ms);
+                                    chatEmotes.Add(new KeyValuePair<int, Image>(id, emoteImage));
+                                }
+                                catch
+                                {
+                                    string emoteName = fragment["text"].ToString();
+                                    //sometimes emote still exists but id is different, I use twitch metrics because I can't find an api to find an emote by name
+                                    try
+                                    {
+                                        HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://www.twitchmetrics.net/e/" + emoteName);
+                                        request.AllowAutoRedirect = false;
+                                        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                                        string redirUrl = response.Headers["Location"];
+                                        response.Close();
+                                        string newId = redirUrl.Split('/').Last().Split('-').First();
+                                        byte[] bytes = client.DownloadData(String.Format("https://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0", newId));
+                                        alreadyAdded.Add(id);
+                                        MemoryStream ms = new MemoryStream(bytes);
+                                        Image emoteImage = System.Drawing.Image.FromStream(ms);
+                                        chatEmotes.Add(new KeyValuePair<int, Image>(id, emoteImage));
+                                    }
+                                    catch
+                                    {
+                                        AppendLog("Unable to fetch emote " + emoteName);
+                                        failedEmotes.Add(id);
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+
+        private void AppendLog(string message)
+        {
+            textLog.BeginInvoke((Action)(() =>
+                textLog.AppendText(message + Environment.NewLine)
+            ));
         }
 
         private void DrawUsername(Graphics g, RenderOptions renderOptions, Font nameFont, string userName, Color userColor, ref Size canvasSize, ref Point drawPos)
