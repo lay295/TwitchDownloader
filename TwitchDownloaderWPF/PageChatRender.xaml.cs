@@ -441,6 +441,11 @@ namespace TwitchDownloaderWPF
                         }
                         drawPos.X += emoteImage.Width;
                     }
+                    else
+                    {
+                        //Probably an old emote that was removed
+                        sectionImage = DrawText(sectionImage, fragment.text, messageFont, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
+                    }
                 }
             }
 
