@@ -2,10 +2,10 @@
 ### TwitchDownloader
 A Twitch VOD/Clip/Chat downloader I wrote, as well as a chat render feature
 
-![](https://i.imgur.com/8XyVD00.gifv)
+![](https://i.imgur.com/8XyVD00.gif)
 
 ## Chat render example
-![](https://i.imgur.com/rRw4bHq.gifv)
+![](https://i.imgur.com/rRw4bHq.gif)
 
 ## Video Demonstration (older version, same concept)
 https://www.youtube.com/watch?v=0W3MhfhnYjk
