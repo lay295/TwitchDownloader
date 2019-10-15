@@ -1,0 +1,99 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ig="http://schemas.infragistics.com/xaml"
+    xmlns:igPrim="http://schemas.infragistics.com/xaml/primitives"
+    xmlns:igPivot="http://schemas.infragistics.com/xaml"
+    xmlns:igPivotPrim="http://schemas.infragistics.com/xaml/primitives"
+    xmlns:System="clr-namespace:System;assembly=mscorlib"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+
+  <!-- ********************************** COLORS **********************************-->
+
+  <!--Color Tuner Theme Brushes-->
+  <SolidColorBrush x:Key="Brush01" Color="#FF2788B1"/>
+  <SolidColorBrush x:Key="Brush02" Color="#FF185170"/>
+  <SolidColorBrush x:Key="Brush03" Color="#FF7C7C7C"/>
+  <SolidColorBrush x:Key="Brush04" Color="#FF505050"/>
+  <SolidColorBrush x:Key="Brush05" Color="#FF333333"/>
+
+  <!--Ig Theme Base colors-->
+  <Color x:Key="Color_000">#FF000000</Color>
+  <Color x:Key="Color_001">#FF333333</Color>
+  <Color x:Key="Color_002">#FF3E3E3E</Color>
+  <Color x:Key="Color_003">#FF505050</Color>
+  <Color x:Key="Color_004">#FF696969</Color>
+  <Color x:Key="Color_005">#FF818181</Color>
+  <Color x:Key="Color_006">#FF9B9B9B</Color>
+  <Color x:Key="Color_007">#FFB1B1B1</Color>
+  <Color x:Key="Color_008">#FFD0D0D0</Color>
+  <Color x:Key="Color_009">#FFE0E0E0</Color>
+  <Color x:Key="Color_010">#FFF1F1F1</Color>
+  <Color x:Key="Color_011">#FFffffff</Color>
+  <Color x:Key="Color_012">#FFDCEDF3</Color>
+  <Color x:Key="Color_013">#FF94D7F3</Color>
+  <Color x:Key="Color_014">#FF3BB7EB</Color>
+  <Color x:Key="Color_015">#FF16A9E7</Color>
+  <Color x:Key="Color_016">#FF2788B1</Color>
+  <Color x:Key="Color_017">#FF19759B</Color>
+  <Color x:Key="Color_018">#FF1A5F7C</Color>
+
+  <!--Theme Error colors -->
+  <Color x:Key="Color_019">#FFd3404b</Color>
+  <Color x:Key="Color_020">#FFc62d36</Color>
+
+  <!--Whites with transparency-->
+  <Color x:Key="Color_021">#00FFFFFF</Color>  <!--0% White-->
+  <Color x:Key="Color_022">#33FFFFFF</Color>  <!--20% White-->
+  <Color x:Key="Color_023">#66FFFFFF</Color>  <!--40% White-->
+  <Color x:Key="Color_024">#99FFFFFF</Color>  <!--60% White-->
+  <Color x:Key="Color_025">#CCFFFFFF</Color>  <!--80% White-->
+
+  <!--Blacks with transparency-->
+  <Color x:Key="Color_026">#00000000</Color>  <!--0% Black-->
+  <Color x:Key="Color_027">#33000000</Color>  <!--20% Black-->
+  <Color x:Key="Color_028">#66000000</Color>  <!--40% Black-->
+  <Color x:Key="Color_029">#99000000</Color>  <!--60% Black-->
+  <Color x:Key="Color_030">#CC000000</Color>  <!--80% Black-->
+
+  <!--Colors for Chart Series-->
+  <Color x:Key="Color_031">#FF6E7E16</Color>
+  <Color x:Key="Color_032">#FFa4ba29</Color>
+  <Color x:Key="Color_033">#FFfdbd48</Color>
+  <Color x:Key="Color_034">#FFF7AA1B</Color>
+  <Color x:Key="Color_035">#FFff888b</Color>
+  <Color x:Key="Color_036">#FFff6a6f</Color>
+  <Color x:Key="Color_037">#FF9e73c1</Color>
+  <Color x:Key="Color_038">#FF714199</Color>
+  <Color x:Key="Color_039">#FFf79036</Color>
+  <Color x:Key="Color_040">#FFBC5900</Color>
+  <Color x:Key="Color_041">#FF69299D</Color>
+  <Color x:Key="Color_042">#FF371356</Color>
+  <Color x:Key="Color_043">#FF48892d</Color>
+  <Color x:Key="Color_044">#FF285017</Color>
+  <Color x:Key="Color_045">#FFDC8F00</Color>
+  <Color x:Key="Color_046">#FFCA4E52</Color>
+
+  <!--Specific ToolTip Color-->
+  <Color x:Key="Color_047">#E5E7E7E7</Color>
+
+  <!--Colors for gradient brushes-->
+  <Color x:Key="Color_048">#33818181</Color>
+
+    <!-- ********************************** BULLETGRAPH/LINEARGAUGE COLORS **********************************-->
+  
+  <Color x:Key="Color_049">#FF1487B8</Color>
+  <Color x:Key="Color_050">#FF106A92</Color>
+  <Color x:Key="Color_051">#FF1797CE</Color>
+  <Color x:Key="Color_052">#FF137BA8</Color>
+  <Color x:Key="Color_053">#FF3EA9D7</Color>
+  <Color x:Key="Color_054">#FF2894C1</Color>
+  <Color x:Key="Color_055">#FF65BBE0</Color>
+  <Color x:Key="Color_056">#FF42ABD9</Color>
+  <Color x:Key="Color_057">#FF8BCCE9</Color>
+  <Color x:Key="Color_058">#FF67BDE2</Color>
+
+
+
+</ResourceDictionary>

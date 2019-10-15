@@ -1,0 +1,30 @@
+﻿<Window x:Class="TwitchDownloaderWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TwitchDownloaderWPF"
+        mc:Ignorable="d"
+        Title="Twitch Downloader" Height="450" Width="800" Loaded="Window_Loaded" Closing="Window_Closing">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10" />
+            <RowDefinition Height="60" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="btnVodDownload" Margin="5" Grid.Row="1" Grid.Column="1" Content="VOD Downloader" Click="btnVodDownload_Click" />
+        <Button x:Name="btnClipDownload" Margin="5" Grid.Row="1" Grid.Column="2" Content="Clip Downloader" Click="btnClipDownload_Click" />
+        <Button x:Name="btnChatDownload" Margin="5" Grid.Row="1" Grid.Column="3" Content="Chat Downloader" Click="btnChatDownload_Click" />
+        <Button x:Name="btnChatRender" Margin="5" Grid.Row="1" Grid.Column="4" Content="Chat Render" Click="btnChatRender_Click" />
+        <Frame Focusable="False" x:Name="Main" Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="2" NavigationUIVisibility="Hidden"/>
+
+    </Grid>
+</Window>
