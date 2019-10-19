@@ -94,7 +94,7 @@ namespace TwitchDownloaderWPF
             BlockingCollection<TwitchComment> finalComments = new  BlockingCollection<TwitchComment>();
             List<ThirdPartyEmote> thirdPartyEmotes = new List<ThirdPartyEmote>();
             List<ChatBadge> chatBadges = new List<ChatBadge>();
-            Dictionary<int, SKBitmap> chatEmotes = new Dictionary<int, SKBitmap>();
+            Dictionary<string, SKBitmap> chatEmotes = new Dictionary<string, SKBitmap>();
             Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
             Random rand = new Random();
             string[] defaultColors = { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
@@ -298,7 +298,7 @@ namespace TwitchDownloaderWPF
             }
         }
         
-        private SKBitmap DrawMessage(SKBitmap sectionImage, List<SKBitmap> imageList, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, SKPaint messageFont, Dictionary<string, SKBitmap> emojiCache, Dictionary<int, SKBitmap> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, Comment comment, Size canvasSize, ref Point drawPos, string emojiRegex, ref int default_x)
+        private SKBitmap DrawMessage(SKBitmap sectionImage, List<SKBitmap> imageList, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, SKPaint messageFont, Dictionary<string, SKBitmap> emojiCache, Dictionary<string, SKBitmap> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, Comment comment, Size canvasSize, ref Point drawPos, string emojiRegex, ref int default_x)
         {
             bool hasEmote = false;
             foreach (var fragment in comment.message.fragments)
@@ -422,7 +422,7 @@ namespace TwitchDownloaderWPF
                 else
                 {
                     //Is a first party emote
-                    int emoteId = Int32.Parse(new String(fragment.emoticon.emoticon_id.Where(Char.IsDigit).ToArray()));
+                    string emoteId = fragment.emoticon.emoticon_id;
                     if (chatEmotes.ContainsKey(emoteId))
                     {
                         SKBitmap emoteImage = chatEmotes[emoteId];
@@ -828,10 +828,10 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void GetEmotes(Dictionary<int, SKBitmap> chatEmotes, List<Comment> comments, RenderOptions renderOptions)
+        private void GetEmotes(Dictionary<string, SKBitmap> chatEmotes, List<Comment> comments, RenderOptions renderOptions)
         {
-            List<int> alreadyAdded = new List<int>();
-            List<int> failedEmotes = new List<int>();
+            List<string> alreadyAdded = new List<string>();
+            List<string> failedEmotes = new List<string>();
             using (WebClient client = new WebClient())
             {
                 foreach (var comment in comments)
@@ -840,7 +840,7 @@ namespace TwitchDownloaderWPF
                     {
                         if (fragment.emoticon != null)
                         {
-                            int id = Int32.Parse(new String(fragment.emoticon.emoticon_id.Where(Char.IsDigit).ToArray()));
+                            string id = fragment.emoticon.emoticon_id;
                             if (!alreadyAdded.Contains(id) && !failedEmotes.Contains(id))
                             {
                                 try
