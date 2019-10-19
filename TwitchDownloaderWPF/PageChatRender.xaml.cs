@@ -422,7 +422,7 @@ namespace TwitchDownloaderWPF
                 else
                 {
                     //Is a first party emote
-                    int emoteId = Int32.Parse(fragment.emoticon.emoticon_id);
+                    int emoteId = Int32.Parse(new String(fragment.emoticon.emoticon_id.Where(Char.IsDigit).ToArray()));
                     if (chatEmotes.ContainsKey(emoteId))
                     {
                         SKBitmap emoteImage = chatEmotes[emoteId];
@@ -840,7 +840,7 @@ namespace TwitchDownloaderWPF
                     {
                         if (fragment.emoticon != null)
                         {
-                            int id = Int32.Parse(fragment.emoticon.emoticon_id);
+                            int id = Int32.Parse(new String(fragment.emoticon.emoticon_id.Where(Char.IsDigit).ToArray()));
                             if (!alreadyAdded.Contains(id) && !failedEmotes.Contains(id))
                             {
                                 try
