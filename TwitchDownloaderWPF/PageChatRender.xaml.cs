@@ -90,7 +90,19 @@ namespace TwitchDownloaderWPF
         private void BackgroundRenderManager_DoWork(object sender, DoWorkEventArgs e)
         {
             RenderOptions renderOptions = (RenderOptions)e.Argument;
-            ChatRoot chatJson = JsonConvert.DeserializeObject<ChatRoot>(File.ReadAllText(renderOptions.json_path));
+            ChatRoot chatJson;
+            try
+            {
+                chatJson = JsonConvert.DeserializeObject<ChatRoot>(File.ReadAllText(renderOptions.json_path));
+            }
+            catch (JsonSerializationException)
+            {
+                chatJson = new ChatRoot();
+                chatJson.comments = JsonConvert.DeserializeObject<List<Comment>>(File.ReadAllText(renderOptions.json_path));
+                chatJson.streamer = new Streamer();
+                chatJson.streamer.id = Int32.Parse(chatJson.comments.First().channel_id);
+                chatJson.streamer.name = "";
+            }
             BlockingCollection<TwitchComment> finalComments = new  BlockingCollection<TwitchComment>();
             List<ThirdPartyEmote> thirdPartyEmotes = new List<ThirdPartyEmote>();
             List<ChatBadge> chatBadges = new List<ChatBadge>();
@@ -123,7 +135,7 @@ namespace TwitchDownloaderWPF
             {
                 if (comment.source != "chat")
                     continue;
-                if (comment.message.user_notice_params.msg_id != null && comment.message.user_notice_params.msg_id != "")
+                if (comment.message.user_notice_params != null && (comment.message.user_notice_params.msg_id != null && comment.message.user_notice_params.msg_id != ""))
                     continue;
 
                 string userName = comment.commenter.display_name.ToString();
@@ -171,14 +183,21 @@ namespace TwitchDownloaderWPF
             RenderVideo(renderOptions, new List<TwitchComment>(finalComments.ToArray()), chatJson.comments, sender);
 
             (sender as BackgroundWorker).ReportProgress(0, new Progress("Cleaning up..."));
-            string[] files = Directory.GetFiles(downloadFolder);
-            for (int i = 0; i < files.Length; i++)
+            try
             {
-                try
+                Directory.Delete(downloadFolder, true);
+            }
+            catch
+            {
+                string[] files = Directory.GetFiles(downloadFolder);
+                for (int i = 0; i < files.Length; i++)
                 {
-                    File.Delete(files[i]);
+                    try
+                    {
+                        File.Delete(files[i]);
+                    }
+                    catch { }
                 }
-                catch { }
             }
         }
 
@@ -649,17 +668,24 @@ namespace TwitchDownloaderWPF
 
         private void BackgroundRenderManager_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            Progress update = (Progress)e.UserState;
-            statusProgressBar.Value = e.ProgressPercentage >= 100 ? 100 : e.ProgressPercentage;
-
-            if (e.ProgressPercentage > 0 && !update.justMessage)
+            try
             {
-                int timeLeftInt = (int)Math.Floor(100.0 / update.percent_double * update.time_passed) - update.time_passed;
-                TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
-                statusMessage.Text = String.Format("{0} ({1} left)", update.message, timeLeft.ToString(@"h\hm\ms\s"));
+                Progress update = (Progress)e.UserState;
+                statusProgressBar.Value = e.ProgressPercentage >= 100 ? 100 : e.ProgressPercentage;
+
+                if (e.ProgressPercentage > 0 && !update.justMessage)
+                {
+                    int timeLeftInt = (int)Math.Floor(100.0 / update.percent_double * update.time_passed) - update.time_passed;
+                    TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
+                    statusMessage.Text = String.Format("{0} ({1} left)", update.message, timeLeft.ToString(@"h\hm\ms\s"));
+                }
+                else
+                    statusMessage.Text = update.message;
             }
-            else
-                statusMessage.Text = update.message;
+            catch (Exception ex)
+            {
+                AppendLog("Error: " + ex.Message);
+            }
         }
 
         private void GetChatBadges(List<ChatBadge> chatBadges, Streamer streamerInfo, RenderOptions renderOptions)
