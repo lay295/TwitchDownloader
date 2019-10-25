@@ -880,24 +880,60 @@ namespace TwitchDownloaderWPF
                                 catch
                                 {
                                     string emoteName = fragment.text;
-                                    //sometimes emote still exists but id is different, I use twitch metrics because I can't find an api to find an emote by name
+                                    //lets try waybackmachine, very slow though :(
+                                    bool foundEmote = false;
+
                                     try
                                     {
-                                        HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://www.twitchmetrics.net/e/" + emoteName);
-                                        request.AllowAutoRedirect = false;
-                                        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                                        string redirUrl = response.Headers["Location"];
-                                        response.Close();
-                                        string newId = redirUrl.Split('/').Last().Split('-').First();
-                                        byte[] bytes = client.DownloadData(String.Format("https://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0", newId));
-                                        alreadyAdded.Add(id);
-                                        MemoryStream ms = new MemoryStream(bytes);
-                                        SKBitmap emoteImage = SKBitmap.Decode(ms);
-                                        chatEmotes.Add(id, emoteImage);
+                                        for (int i = 1; i <= 3; i++)
+                                        {
+                                            JObject response = JObject.Parse(client.DownloadString($"https://archive.org/wayback/available?url=https://static-cdn.jtvnw.net/emoticons/v1/{id}/{i}.0/"));
+                                            if (response["archived_snapshots"]["closest"] != null && response["archived_snapshots"]["closest"]["available"].ToObject<bool>() == true)
+                                            {
+                                                byte[] bytes = client.DownloadData(response["archived_snapshots"]["closest"]["url"].ToString().Replace("/https://static-cdn.jtvnw.net", "if_/https://static-cdn.jtvnw.net"));
+                                                MemoryStream ms = new MemoryStream(bytes);
+                                                SKBitmap emoteImage = SKBitmap.Decode(ms);
+                                                SKBitmap emoteImageScaled = new SKBitmap(28, 28);
+                                                emoteImage.ScalePixels(emoteImageScaled, SKFilterQuality.High);
+                                                alreadyAdded.Add(id);
+                                                chatEmotes.Add(id, emoteImageScaled);
+                                                emoteImage.Dispose();
+                                                foundEmote = true;
+                                                break;
+                                            }
+                                        }
                                     }
-                                    catch
+                                    catch { }
+                                    
+
+                                    if (foundEmote)
+                                        continue;
+                                    else
                                     {
-                                        AppendLog("Unable to fetch emote " + emoteName);
+                                        //sometimes emote still exists but id is different, I use twitch metrics because I can't find an api to find an emote by name
+                                        try
+                                        {
+                                            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://www.twitchmetrics.net/e/" + emoteName);
+                                            request.AllowAutoRedirect = false;
+                                            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                                            string redirUrl = response.Headers["Location"];
+                                            response.Close();
+                                            string newId = redirUrl.Split('/').Last().Split('-').First();
+                                            byte[] bytes = client.DownloadData(String.Format("https://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0", newId));
+                                            alreadyAdded.Add(id);
+                                            MemoryStream ms = new MemoryStream(bytes);
+                                            SKBitmap emoteImage = SKBitmap.Decode(ms);
+                                            chatEmotes.Add(id, emoteImage);
+                                            foundEmote = true;
+                                        }
+                                        catch
+                                        {
+
+                                        }
+                                    }
+                                    if (!foundEmote)
+                                    {
+                                        AppendLog($"Unable to fetch emote {emoteName}(ID:{id})");
                                         failedEmotes.Add(id);
                                     }
                                 }
