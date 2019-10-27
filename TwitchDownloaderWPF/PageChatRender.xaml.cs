@@ -143,6 +143,7 @@ namespace TwitchDownloaderWPF
                 Point drawPos = new Point(default_x, 0);
                 System.Drawing.Color userColorSystemDrawing = System.Drawing.ColorTranslator.FromHtml(comment.message.user_color != null ? comment.message.user_color : defaultColors[rand.Next(0, defaultColors.Length)]);
                 SKColor userColor = new SKColor(userColorSystemDrawing.R, userColorSystemDrawing.G, userColorSystemDrawing.B);
+                userColor = GenerateUserColor(userColor, renderOptions.background_color);
 
                 List<SKBitmap> imageList = new List<SKBitmap>();
                 SKBitmap sectionImage = new SKBitmap((int)canvasSize.Width, (int)canvasSize.Height);
@@ -199,6 +200,24 @@ namespace TwitchDownloaderWPF
                     catch { }
                 }
             }
+        }
+
+        private SKColor GenerateUserColor(SKColor userColor, SKColor background_color)
+        {
+            //I don't really know much about this, but i'll give it a shot
+            float[] userColorHsl = new float[3];
+            float[] backgroundColorHsl = new float[3];
+            userColor.ToHsl(out userColorHsl[0], out userColorHsl[1], out userColorHsl[2]);
+            background_color.ToHsl(out backgroundColorHsl[0], out backgroundColorHsl[1], out backgroundColorHsl[2]);
+
+            if (Math.Abs(userColorHsl[2] - backgroundColorHsl[2]) < 10)
+            {
+                userColorHsl[2] += 50;
+                SKColor newColor = SKColor.FromHsl(userColorHsl[0], userColorHsl[1], userColorHsl[2]);
+                return newColor;
+            }
+            else
+                return userColor;
         }
 
         private void RenderVideo(RenderOptions renderOptions, List<TwitchComment> finalComments, List<Comment> comments, object sender)
