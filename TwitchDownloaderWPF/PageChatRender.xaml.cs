@@ -94,6 +94,7 @@ namespace TwitchDownloaderWPF
             try
             {
                 chatJson = JsonConvert.DeserializeObject<ChatRoot>(File.ReadAllText(renderOptions.json_path));
+                chatJson.streamer.name = GetStreamerName(chatJson.streamer.id);
             }
             catch (JsonSerializationException)
             {
@@ -101,7 +102,7 @@ namespace TwitchDownloaderWPF
                 chatJson.comments = JsonConvert.DeserializeObject<List<Comment>>(File.ReadAllText(renderOptions.json_path));
                 chatJson.streamer = new Streamer();
                 chatJson.streamer.id = Int32.Parse(chatJson.comments.First().channel_id);
-                chatJson.streamer.name = "";
+                chatJson.streamer.name = GetStreamerName(chatJson.streamer.id);
             }
             BlockingCollection<TwitchComment> finalComments = new  BlockingCollection<TwitchComment>();
             List<ThirdPartyEmote> thirdPartyEmotes = new List<ThirdPartyEmote>();
@@ -202,6 +203,22 @@ namespace TwitchDownloaderWPF
             }
         }
 
+        private string GetStreamerName(int id)
+        {
+            try
+            {
+                using (WebClient client = new WebClient())
+                {
+                    client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json; charset=UTF-8");
+                    client.Headers.Add("Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+
+                    JObject response = JObject.Parse(client.DownloadString("https://api.twitch.tv/kraken/users/" + id));
+                    return response["name"].ToString();
+                }
+            }
+            catch { return ""; }
+        }
+
         private SKColor GenerateUserColor(SKColor userColor, SKColor background_color)
         {
             //I don't really know much about this, but i'll give it a shot
@@ -212,7 +229,10 @@ namespace TwitchDownloaderWPF
 
             if (Math.Abs(userColorHsl[2] - backgroundColorHsl[2]) < 10)
             {
-                userColorHsl[2] += 50;
+                if (backgroundColorHsl[2] < 50)
+                    userColorHsl[2] += 50;
+                else
+                    userColorHsl[2] -= 50;
                 SKColor newColor = SKColor.FromHsl(userColorHsl[0], userColorHsl[1], userColorHsl[2]);
                 return newColor;
             }
