@@ -190,5 +190,53 @@ namespace TwitchDownloader.Properties {
                 this["BackgroundColorB"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4000")]
+        public int Bitrate {
+            get {
+                return ((int)(this["Bitrate"]));
+            }
+            set {
+                this["Bitrate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("255")]
+        public int FontColorR {
+            get {
+                return ((int)(this["FontColorR"]));
+            }
+            set {
+                this["FontColorR"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("255")]
+        public int FontColorG {
+            get {
+                return ((int)(this["FontColorG"]));
+            }
+            set {
+                this["FontColorG"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("255")]
+        public int FontColorB {
+            get {
+                return ((int)(this["FontColorB"]));
+            }
+            set {
+                this["FontColorB"] = value;
+            }
+        }
     }
 }

@@ -44,5 +44,17 @@
     <Setting Name="BackgroundColorB" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">17</Value>
     </Setting>
+    <Setting Name="Bitrate" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4000</Value>
+    </Setting>
+    <Setting Name="FontColorR" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">255</Value>
+    </Setting>
+    <Setting Name="FontColorG" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">255</Value>
+    </Setting>
+    <Setting Name="FontColorB" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">255</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

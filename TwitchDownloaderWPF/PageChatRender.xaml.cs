@@ -67,8 +67,9 @@ namespace TwitchDownloaderWPF
                 if (saveFileDialog.ShowDialog() == true)
                 {
                     SKColor backgroundColor = new SKColor(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B);
+                    SKColor messageColor = new SKColor(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
                     System.Drawing.Color backgroundColorDrawing = System.Drawing.Color.FromArgb((int)colorBackground.SelectedColor.Value.R, (int)colorBackground.SelectedColor.Value.G, (int)colorBackground.SelectedColor.Value.B);
-                    RenderOptions info = new RenderOptions(textJson.Text, saveFileDialog.FileName, backgroundColor, Int32.Parse(textHeight.Text), Int32.Parse(textWidth.Text), (bool)checkBTTV.IsChecked, (bool)checkFFZ.IsChecked, (bool)checkOutline.IsChecked, (string)comboFont.SelectedItem, Double.Parse(textFontSize.Text), Double.Parse(textUpdateTime.Text), (bool)checkCompact.IsChecked, backgroundColorDrawing, (bool)checkTimestamp.IsChecked);
+                    RenderOptions info = new RenderOptions(textJson.Text, saveFileDialog.FileName, backgroundColor, Int32.Parse(textHeight.Text), Int32.Parse(textWidth.Text), (bool)checkBTTV.IsChecked, (bool)checkFFZ.IsChecked, (bool)checkOutline.IsChecked, (string)comboFont.SelectedItem, Double.Parse(textFontSize.Text), Double.Parse(textUpdateTime.Text), (bool)checkCompact.IsChecked, backgroundColorDrawing, (bool)checkTimestamp.IsChecked, messageColor, Int32.Parse(textBitrate.Text));
                     SaveSettings();
                     BackgroundWorker backgroundRenderManager = new BackgroundWorker();
                     backgroundRenderManager.WorkerReportsProgress = true;
@@ -129,7 +130,7 @@ namespace TwitchDownloaderWPF
 
             Size canvasSize = new Size(renderOptions.chat_width, renderOptions.has_emote_height);
             SKPaint nameFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.font, SKFontStyle.Bold), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.font_size, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-            SKPaint messageFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.font, SKFontStyle.Normal), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.font_size, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = SKColors.White };
+            SKPaint messageFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.font, SKFontStyle.Normal), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.font_size, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.message_color };
 
             (sender as BackgroundWorker).ReportProgress(0, new Progress("Rendering Comments"));
             foreach (Comment comment in chatJson.comments)
@@ -253,7 +254,7 @@ namespace TwitchDownloaderWPF
             {
                 // create new video file
                 stopwatch.Start();
-                vFWriter.Open(renderOptions.save_path, renderOptions.chat_width, renderOptions.chat_height, 60, VideoCodec.H264, 6000000);
+                vFWriter.Open(renderOptions.save_path, renderOptions.chat_width, renderOptions.chat_height, 60, VideoCodec.H264, renderOptions.bitrate * 1000);
                 gcan.FillRectangle(new System.Drawing.SolidBrush(backgroundColor), 0, 0, renderOptions.chat_width, renderOptions.chat_height);
                 int startTick = (int)Math.Floor(videoStart / (1.0 / 60.0));
                 int endTick = (int)Math.Floor((videoStart + duration) / (1.0 / 60.0));
@@ -460,7 +461,7 @@ namespace TwitchDownloaderWPF
                                         if (messageBuffer != "")
                                             sectionImage = DrawText(sectionImage, messageBuffer, messageFont, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
                                         SKPaint fallbackFont = GetFallbackFont(charList[j], renderOptions);
-                                        fallbackFont.Color = SKColors.White;
+                                        fallbackFont.Color = renderOptions.message_color;
                                         sectionImage = DrawText(sectionImage, charList[j].ToString(), fallbackFont, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, false, default_x);
                                         messageBuffer = "";
                                     }
@@ -997,6 +998,8 @@ namespace TwitchDownloaderWPF
                 textWidth.Text = Settings.Default.Width.ToString();
                 textFontSize.Text = Settings.Default.FontSize.ToString();
                 textUpdateTime.Text = Settings.Default.UpdateTime.ToString();
+                colorFont.SelectedColor = System.Windows.Media.Color.FromRgb((byte)Settings.Default.FontColorR, (byte)Settings.Default.FontColorG, (byte)Settings.Default.FontColorB);
+                textBitrate.Text = Settings.Default.Bitrate.ToString();
             }
             catch { }
         }
@@ -1011,8 +1014,13 @@ namespace TwitchDownloaderWPF
             Settings.Default.BackgroundColorB = colorBackground.SelectedColor.Value.B;
             Settings.Default.FFZEmotes = (bool)checkFFZ.IsChecked;
             Settings.Default.BTTVEmotes = (bool)checkBTTV.IsChecked;
+            Settings.Default.FontColorR = colorFont.SelectedColor.Value.R;
+            Settings.Default.FontColorG = colorFont.SelectedColor.Value.G;
+            Settings.Default.FontColorB = colorFont.SelectedColor.Value.B;
+            
             try
             {
+                Settings.Default.Bitrate = Int32.Parse(textBitrate.Text);
                 Settings.Default.Height = Int32.Parse(textHeight.Text);
                 Settings.Default.Width = Int32.Parse(textWidth.Text);
                 Settings.Default.FontSize = float.Parse(textFontSize.Text);
@@ -1036,6 +1044,7 @@ namespace TwitchDownloaderWPF
                 Int32.Parse(textHeight.Text);
                 Int32.Parse(textWidth.Text);
                 Double.Parse(textUpdateTime.Text);
+                Int32.Parse(textBitrate.Text);
             }
             catch (Exception ex)
             {
@@ -1140,8 +1149,10 @@ public class RenderOptions
     public string json_path { get; set; }
     public string save_path { get; set; }
     public SKColor background_color { get; set; }
+    public SKColor message_color { get; set; }
     public int chat_height { get; set; }
     public int chat_width { get; set; }
+    public int bitrate { get; set; }
     public bool bttv_emotes { get; set; }
     public bool ffz_emotes { get; set; }
     public bool outline { get; set; }
@@ -1157,7 +1168,7 @@ public class RenderOptions
     public bool chat_timestamp { get; set; }
     public int default_x { get; set; }
 
-    public RenderOptions(string Json_path, string Save_path, SKColor Background_color, int Chat_height, int Chat_width, bool Bttv_emotes, bool Ffz_emotes, bool Outline, string Font, double Font_size, double Update_rate, bool Compact_messages, System.Drawing.Color Background_color_drawing, bool Chat_timestamp)
+    public RenderOptions(string Json_path, string Save_path, SKColor Background_color, int Chat_height, int Chat_width, bool Bttv_emotes, bool Ffz_emotes, bool Outline, string Font, double Font_size, double Update_rate, bool Compact_messages, System.Drawing.Color Background_color_drawing, bool Chat_timestamp, SKColor Message_color, int Bitrate)
     {
         json_path = Json_path;
         save_path = Save_path;
@@ -1170,6 +1181,8 @@ public class RenderOptions
         font = Font;
         font_size = Font_size;
         image_scale = font_size / 12;
+        message_color = Message_color;
+        bitrate = Bitrate;
 
         if (Update_rate == 0)
             update_frame = 1;

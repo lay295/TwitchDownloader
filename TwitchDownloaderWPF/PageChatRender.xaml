@@ -31,13 +31,17 @@
             <StackPanel Orientation="Vertical" Margin="0,0,5,0">
                 <TextBlock Text="Font:" HorizontalAlignment="Right" Margin="0,2,0,0"/>
                 <TextBlock Text="Font Size:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
+                <TextBlock Text="Font Color:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
+                <TextBlock Text="Bitrate (kbps):" HorizontalAlignment="Right" Margin="0,12,0,0"/>
                 <TextBlock Text="Outline:" HorizontalAlignment="Right" Margin="0,8,0,0"/>
                 <TextBlock Text="Timestamp:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="Compact Messages:" HorizontalAlignment="Right" Margin="0,5,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
-                <ComboBox x:Name="comboFont" MinWidth="150"/>
-                <TextBox x:Name="textFontSize" Text="12" Width="40" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+                <ComboBox x:Name="comboFont" MinWidth="100"/>
+                <TextBox x:Name="textFontSize" Text="12" Width="40" HorizontalAlignment="Left" Margin="0,7,0,0"/>
+                <xctk:ColorPicker x:Name="colorFont" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left"/>
+                <TextBox x:Name="textBitrate" Text="4000" Width="50" Margin="0,5,0,0" HorizontalAlignment="Left"/>
                 <CheckBox x:Name="checkOutline" Margin="0,5,0,0"/>
                 <CheckBox x:Name="checkTimestamp" Margin="0,5,0,0"/>
                 <CheckBox x:Name="checkCompact" Margin="0,5,0,0"/>
@@ -57,7 +61,6 @@
                 <TextBox x:Name="textUpdateTime" Text="1.0" Margin="0,5,0,0"/>
                 <CheckBox x:Name="checkFFZ" IsChecked="True" Margin="0,5,0,0"/>
                 <CheckBox x:Name="checkBTTV" IsChecked="True" Margin="0,5,0,0"/>
-                
             </StackPanel>
         </StackPanel>
 
@@ -66,7 +69,7 @@
             <TextBox x:Name="textJson" Margin="3" MinWidth="200" MaxWidth="400"/>
             <Button x:Name="btnBrowse" Margin="3" MinWidth="50" Content="Browse" Click="btnBrowse_Click"/>
         </WrapPanel>
-        <Button x:Name="btnRender" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="Render Chat" Height="50" Width="100" VerticalAlignment="Bottom" Margin="0,0,0,20" Click="btnRender_Click"/>
+        <Button x:Name="btnRender" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="Render Chat" Height="50" Width="100" VerticalAlignment="Bottom" Margin="0,0,0,10" Click="btnRender_Click"/>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
             <TextBlock Text="Log:"/>
