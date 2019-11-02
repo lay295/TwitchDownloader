@@ -21,9 +21,12 @@ using Accord.Video.FFMPEG;
 using System.Drawing.Imaging;
 using System.Windows.Markup;
 using System.Collections.Concurrent;
+using System.Windows.Media;
 using Newtonsoft.Json;
 using SkiaSharp;
 using TwitchDownloader.Properties;
+using Xceed.Wpf.Toolkit;
+using MessageBox = System.Windows.MessageBox;
 
 namespace TwitchDownloaderWPF
 {
@@ -63,6 +66,7 @@ namespace TwitchDownloaderWPF
 
                 saveFileDialog.Filter = "MP4 Files | *.mp4";
                 saveFileDialog.RestoreDirectory = true;
+                saveFileDialog.FileName = Path.GetFileNameWithoutExtension(textJson.Text) + ".mp4";
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
@@ -1089,6 +1093,23 @@ namespace TwitchDownloaderWPF
             }
             if (comboFont.Items.Contains("Arial"))
                 comboFont.SelectedItem = "Arial";
+
+            for (int i = 0; i < colorBackground.StandardColors.Count; i++)
+            {
+                if (colorBackground.StandardColors[i].Color.Value.A < 255)
+                {
+                    colorBackground.StandardColors.RemoveAt(i);
+                    i--;
+                }
+            }
+            for (int i = 0; i < colorFont.StandardColors.Count; i++)
+            {
+                if (colorBackground.StandardColors[i].Color.Value.A < 255)
+                {
+                    colorBackground.StandardColors.RemoveAt(i);
+                    i--;
+                }
+            }
 
             LoadSettings();
         }
