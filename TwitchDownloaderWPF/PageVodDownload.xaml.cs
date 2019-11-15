@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -70,8 +71,16 @@ namespace TwitchDownloaderWPF
                     string thumbUrl = taskInfo.Result["data"][0]["thumbnail_url"].ToString().Replace("%{width}", 512.ToString()).Replace("%{height}", 290.ToString());
                     Task<BitmapImage> thumbImage = InfoHelper.GetThumb(thumbUrl);
                     Task<string[]> taskPlaylist = InfoHelper.GetVideoPlaylist(videoId, taskAccessToken.Result["token"].ToString(), taskAccessToken.Result["sig"].ToString());
-                    await Task.WhenAll(thumbImage, taskPlaylist);
-
+                    await taskPlaylist;
+                    try
+                    {
+                        await thumbImage;
+                    }
+                    catch
+                    {
+                        AppendLog("ERROR: Unable to find thumbnail");
+                    }
+                    
                     comboQuality.Items.Clear();
                     videoQualties.Clear();
                     string[] playlist = taskPlaylist.Result;
@@ -91,15 +100,16 @@ namespace TwitchDownloaderWPF
                     }
                     comboQuality.SelectedIndex = 0;
 
-                    imgThumbnail.Source = thumbImage.Result;
-                    TimeSpan vodLength = TimeSpan.Parse(Regex.Replace(taskInfo.Result["data"][0]["duration"].ToString(), @"[^\d]", ":").TrimEnd(':'));
+                    if (!thumbImage.IsFaulted)
+                        imgThumbnail.Source = thumbImage.Result;
+                    TimeSpan vodLength = GenerateTimespan(taskInfo.Result["data"][0]["duration"].ToString());
                     textStreamer.Text = taskInfo.Result["data"][0]["user_name"].ToString();
                     textTitle.Text = taskInfo.Result["data"][0]["title"].ToString();
                     textCreatedAt.Text = taskInfo.Result["data"][0]["created_at"].ToString();
                     numEndHour.Value = vodLength.Hours;
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
-                    labelLength.Text = String.Format("{0}:{1}:{2}", vodLength.Hours, vodLength.Minutes, vodLength.Seconds);
+                    labelLength.Text = String.Format("{0:00}:{1:00}:{2:00}", vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
 
                     SetEnabled(true);
                 }
@@ -114,6 +124,21 @@ namespace TwitchDownloaderWPF
             {
                 MessageBox.Show("Please enter a valid video ID/URL" + Environment.NewLine + "Examples:" + Environment.NewLine + "https://www.twitch.tv/videos/470741744" + Environment.NewLine + "470741744", "Invalid Video ID/URL", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private TimeSpan GenerateTimespan(string input)
+        {
+            //There might be a better way to do this, gets string 0h0m0s and returns timespan
+            TimeSpan returnSpan = new TimeSpan(0);
+            string[] inputArray = input.Remove(input.Length-1).Replace('h', ':').Replace('m', ':').Split(':');
+
+            returnSpan = returnSpan.Add(TimeSpan.FromSeconds(Int32.Parse(inputArray[inputArray.Length - 1])));
+            if (inputArray.Length > 1)
+                returnSpan = returnSpan.Add(TimeSpan.FromMinutes(Int32.Parse(inputArray[inputArray.Length - 2])));
+            if (inputArray.Length > 2)
+                returnSpan = returnSpan.Add(TimeSpan.FromHours(Int32.Parse(inputArray[inputArray.Length - 3])));
+
+            return returnSpan;
         }
 
         private void btnDownload_Click(object sender, RoutedEventArgs e)
@@ -197,7 +222,7 @@ namespace TwitchDownloaderWPF
                 for (int i = 0; i < videoChunks.Length; i++)
                 {
                     if (videoChunks[i].Contains("#EXTINF"))
-                        videoList.Add(new KeyValuePair<string, double>(videoChunks[i + 1], Double.Parse(videoChunks[i].Remove(0, 8).TrimEnd(','))));
+                        videoList.Add(new KeyValuePair<string, double>(videoChunks[i + 1], Double.Parse(videoChunks[i].Remove(0, 8).TrimEnd(','), CultureInfo.InvariantCulture)));
                 }
             }
             Queue<string> videoParts = new Queue<string>(GenerateCroppedVideoList(videoList, options));
@@ -426,7 +451,7 @@ namespace TwitchDownloaderWPF
             {
                 int number;
                 //Extract just the numbers from the URL, also remove query string
-                Uri url = new Uri(text);
+                Uri url = new UriBuilder(text).Uri;
                 string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
                 bool success = Int32.TryParse(Regex.Match(path, @"\d+").Value, out number);
                 if (success)

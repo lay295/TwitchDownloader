@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace TwitchDownloaderWPF
 {
@@ -13,5 +15,9 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class App : Application
     {
+        void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            File.AppendAllText("errors.txt", e.Exception.ToString());
+        }
     }
 }

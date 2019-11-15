@@ -8,7 +8,8 @@
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
       mc:Ignorable="d" 
       d:DesignHeight="350" d:DesignWidth="800"
-      Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded">
+      Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded"
+      >
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -40,7 +41,7 @@
             <StackPanel Orientation="Vertical">
                 <ComboBox x:Name="comboFont" MinWidth="100"/>
                 <TextBox x:Name="textFontSize" Text="12" Width="40" HorizontalAlignment="Left" Margin="0,7,0,0"/>
-                <xctk:ColorPicker x:Name="colorFont" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left"/>
+                <xctk:ColorPicker x:Name="colorFont" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
                 <TextBox x:Name="textBitrate" Text="4000" Width="50" Margin="0,5,0,0" HorizontalAlignment="Left"/>
                 <CheckBox x:Name="checkOutline" Margin="0,5,0,0"/>
                 <CheckBox x:Name="checkTimestamp" Margin="0,5,0,0"/>
@@ -55,7 +56,7 @@
                 <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,5,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
-                <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" UsingAlphaChannel="False"/>
+                <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
                 <TextBox x:Name="textHeight" Text="600" Margin="0,5,0,0"/>
                 <TextBox x:Name="textWidth" Text="350" Margin="0,5,0,0"/>
                 <TextBox x:Name="textUpdateTime" Text="1.0" Margin="0,5,0,0"/>

@@ -141,7 +141,7 @@ namespace TwitchDownloaderWPF
             else if (text.Contains("twitch.tv/videos/"))
             {
                 int number;
-                Uri url = new Uri(text);
+                Uri url = new UriBuilder(text).Uri;
                 string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
                 bool success = Int32.TryParse(Regex.Match(path, @"\d+").Value, out number);
                 if (success)
@@ -151,7 +151,7 @@ namespace TwitchDownloaderWPF
             }
             else if (text.Contains("clips.twitch.tv/") || clipRegex.IsMatch(text))
             {
-                Uri url = new Uri(text);
+                Uri url = new UriBuilder(text).Uri;
                 string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
                 return path.Split('/').Last();
             }

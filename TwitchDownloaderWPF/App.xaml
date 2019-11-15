@@ -9,6 +9,13 @@
                 <ResourceDictionary Source="Themes/IG/IG.MSControls.Core.Implicit.xaml" />
                 <ResourceDictionary Source="Themes/IG/IG.MSControls.Toolkit.Implicit.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <LinearGradientBrush x:Key="FixBrush" EndPoint="0.5,1"
+                                 StartPoint="0.5,0">
+                <GradientStop Color="#FFFAFBFB"
+                              Offset="0" />
+                <GradientStop Color="#FFF4F4F4"
+                              Offset="1" />
+            </LinearGradientBrush>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
