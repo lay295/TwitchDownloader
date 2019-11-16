@@ -1260,7 +1260,7 @@ public class GifEmote
             total_duration += duration;
         }
 
-        if (total_duration == 0)
+        if (total_duration == 0 || total_duration == frames)
         {
             for (int i = 0; i < durations.Count; i++)
             {

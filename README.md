@@ -1,6 +1,7 @@
 
 ### TwitchDownloader
 A Twitch VOD/Clip/Chat downloader I wrote, as well as a chat render feature.
+
 **THIS USES UNDOCUMENTED API ENDPOINTS, MAY BREAK EASILY. I'LL TRY AND UPDATE WHEN IT DOES. THIS PROGRAM REQUIRES [C++ 2015 Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=52685) TO RENDER CHAT.**
 ![](https://i.imgur.com/8XyVD00.gif)
 

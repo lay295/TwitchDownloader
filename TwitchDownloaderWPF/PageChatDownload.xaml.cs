@@ -217,7 +217,7 @@ namespace TwitchDownloaderWPF
                 {
                     if (clipInfo.is_json)
                     {
-                        sw.Write(result.ToString(Newtonsoft.Json.Formatting.Indented));
+                        sw.Write(result.ToString());
                     }
                     else
                     {
