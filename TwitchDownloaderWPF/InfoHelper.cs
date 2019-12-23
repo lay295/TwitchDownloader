@@ -84,15 +84,14 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        public static async Task<JObject> GetClipLinks(object clipId)
+        public static async Task<JArray> GetClipLinks(object clipId)
         {
             using (WebClient client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-                //API is deprecated - hopefully keeps working for a while. Can genereate full url from thumbnail but fails ocasionally https://discuss.dev.twitch.tv/t/clips-api-does-not-expose-video-url/15763/2
-                string response = await client.DownloadStringTaskAsync(String.Format("https://clips.twitch.tv/api/v2/clips/{0}/status", clipId));
-                JObject result = JObject.Parse(response);
+                string response = await client.UploadStringTaskAsync(new Uri("https://gql.twitch.tv/gql", UriKind.Absolute), "[{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"9bfcc0177bffc730bd5a5a89005869d2773480cf1738c592143b5173634b7d15\"}}}]");
+                JArray result = JArray.Parse(response);
                 return result;
             }
         }

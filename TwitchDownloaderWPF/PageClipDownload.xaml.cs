@@ -46,7 +46,7 @@ namespace TwitchDownloaderWPF
                     btnGetInfo.IsEnabled = false;
                     comboQuality.Items.Clear();
                     Task<JObject> taskInfo = InfoHelper.GetClipInfo(clipId);
-                    Task<JObject> taskLinks = InfoHelper.GetClipLinks(clipId);
+                    Task<JArray> taskLinks = InfoHelper.GetClipLinks(clipId);
                     await Task.WhenAll(taskInfo, taskLinks);
 
                     JToken clipData = taskInfo.Result["data"][0];
@@ -59,9 +59,9 @@ namespace TwitchDownloaderWPF
                     textCreatedAt.Text = clipData["created_at"].ToString();
                     textTitle.Text = clipData["title"].ToString();
 
-                    foreach (var quality in taskLinks.Result["quality_options"])
+                    foreach (var quality in taskLinks.Result[0]["data"]["clip"]["videoQualities"])
                     {
-                        comboQuality.Items.Add(new TwitchClip(quality["quality"].ToString(), quality["frame_rate"].ToString(), quality["source"].ToString()));
+                        comboQuality.Items.Add(new TwitchClip(quality["quality"].ToString(), quality["frameRate"].ToString(), quality["sourceURL"].ToString()));
                     }
 
                     comboQuality.SelectedIndex = 0;
@@ -72,7 +72,7 @@ namespace TwitchDownloaderWPF
                 catch (Exception ex)
                 {
                     MessageBox.Show("Unable to get Clip information. Please double check Clip Slug and try again", "Unable to get info", MessageBoxButton.OK, MessageBoxImage.Error);
-                    AppendLog("ERROR: " + ex.Message);
+                    AppendLog("ERROR: " + ex);
                     btnGetInfo.IsEnabled = true;
                 }
             }
