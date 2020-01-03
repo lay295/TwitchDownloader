@@ -502,7 +502,7 @@ namespace TwitchDownloaderWPF
                             SKRect emoteRect = new SKRect(imageLeft, imageTop, imageLeft + imageWidth, imageTop + imageHeight);
                             sectionImageCanvas.DrawBitmap(emoteImage, emoteRect, imagePaint);
                         }
-                        drawPos.X += emoteImage.Width;
+                        drawPos.X += (int)Math.Ceiling(imageWidth + (3 * renderOptions.image_scale));
                     }
                     else
                     {
@@ -777,8 +777,8 @@ namespace TwitchDownloaderWPF
                 if (renderOptions.bttv_emotes)
                 {
                     //Global BTTV emotes
-                    JObject BBTV = JObject.Parse(client.DownloadString("https://api.betterttv.net/2/emotes"));
-                    foreach (var emote in BBTV["emotes"])
+                    JArray BBTV = JArray.Parse(client.DownloadString("https://api.betterttv.net/3/cached/emotes/global"));
+                    foreach (var emote in BBTV)
                     {
                         string id = emote["id"].ToString();
                         byte[] bytes = client.DownloadData(String.Format("https://cdn.betterttv.net/emote/{0}/2x", id));
@@ -792,8 +792,8 @@ namespace TwitchDownloaderWPF
                     //Channel specific BTTV emotes
                     try
                     {
-                        JObject BBTV_channel = JObject.Parse(client.DownloadString("https://api.betterttv.net/2/channels/" + streamerInfo.name));
-                        foreach (var emote in BBTV_channel["emotes"])
+                        JObject BBTV_channel = JObject.Parse(client.DownloadString("https://api.betterttv.net/3/cached/users/twitch/" + streamerInfo.id));
+                        foreach (var emote in BBTV_channel["sharedEmotes"])
                         {
                             string id = emote["id"].ToString();
                             byte[] bytes = client.DownloadData(String.Format("https://cdn.betterttv.net/emote/{0}/2x", id));
@@ -810,8 +810,8 @@ namespace TwitchDownloaderWPF
                 if (renderOptions.ffz_emotes)
                 {
                     //Global FFZ emotes
-                    JObject FFZ = JObject.Parse(client.DownloadString("https://api.betterttv.net/2/frankerfacez_emotes/global"));
-                    foreach (var emote in FFZ["emotes"])
+                    JArray FFZ = JArray.Parse(client.DownloadString("https://api.betterttv.net/3/cached/frankerfacez/emotes/global"));
+                    foreach (var emote in FFZ)
                     {
                         string id = emote["id"].ToString();
                         byte[] bytes = client.DownloadData(String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/1", id));
@@ -825,8 +825,8 @@ namespace TwitchDownloaderWPF
                     //Channel specific FFZ emotes
                     try
                     {
-                        JObject FFZ_channel = JObject.Parse(client.DownloadString("https://api.betterttv.net/2/frankerfacez_emotes/channels/" + streamerInfo.id));
-                        foreach (var emote in FFZ_channel["emotes"])
+                        JArray FFZ_channel = JArray.Parse(client.DownloadString("https://api.betterttv.net/3/cached/frankerfacez/users/twitch/" + streamerInfo.id));
+                        foreach (var emote in FFZ_channel)
                         {
                             string id = emote["id"].ToString();
                             byte[] bytes;
