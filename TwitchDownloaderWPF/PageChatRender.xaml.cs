@@ -254,11 +254,29 @@ namespace TwitchDownloaderWPF
             List<GifEmote> displayedGifs = new List<GifEmote>();
             System.Drawing.Color backgroundColor = renderOptions.background_color_drawing;
             Stopwatch stopwatch = new Stopwatch();
-            using (var vFWriter = new VideoFileWriter())
+
+            if (File.Exists(renderOptions.save_path))
+                File.Delete(renderOptions.save_path);
+
+            var inputArgs = $"-framerate 60 -f image2pipe -pix_fmt rgb32 -video_size {renderOptions.chat_width}x{renderOptions.chat_height} -i -";
+            var outputArgs = $"-c:v h264_nvenc -pix_fmt yuv420p -preset fast \"{renderOptions.save_path}\"";
+            var process = new Process
+            {
+                StartInfo =
+                {
+                    FileName = "ffmpeg.exe",
+                    Arguments = $"{inputArgs} {outputArgs}",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardInput = true
+                }
+            };
+            process.Start();
+
+            using (var ffmpegStream = new BinaryWriter(process.StandardInput.BaseStream))
             {
                 // create new video file
                 stopwatch.Start();
-                vFWriter.Open(renderOptions.save_path, renderOptions.chat_width, renderOptions.chat_height, 60, VideoCodec.H264, renderOptions.bitrate * 1000);
                 gcan.FillRectangle(new System.Drawing.SolidBrush(backgroundColor), 0, 0, renderOptions.chat_width, renderOptions.chat_height);
                 int startTick = (int)Math.Floor(videoStart / (1.0 / 60.0));
                 int endTick = (int)Math.Floor((videoStart + duration) / (1.0 / 60.0));
@@ -346,7 +364,12 @@ namespace TwitchDownloaderWPF
                         displayedGifs.Remove(emote);
                     }
 
-                    vFWriter.WriteVideoFrame(canvas);
+                    using (var stream = new MemoryStream())
+                    {
+                        canvas.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                        ffmpegStream.Write(stream.ToArray());
+                    }
+
                     foreach (var emote in displayedGifs)
                     {
                         gcan.FillRectangle(new System.Drawing.SolidBrush(backgroundColor), (float)emote.offset.X, (float)emote.offset.Y + (int)Math.Floor((renderOptions.has_emote_height - ((emote.image.Height / emote.imageScale) * renderOptions.image_scale)) / 2.0), (float)((emote.image.Width / emote.imageScale) * renderOptions.image_scale), (float)((emote.image.Height / emote.imageScale) * renderOptions.image_scale));
@@ -356,9 +379,10 @@ namespace TwitchDownloaderWPF
                     int percentInt = (int)Math.Floor(percentDouble);
                     (sender as BackgroundWorker).ReportProgress(percentInt, new Progress(String.Format("Rendering Video {0}%", percentInt), (int)Math.Floor(stopwatch.Elapsed.TotalSeconds), percentDouble));
                 }
-                vFWriter.Close();
                 stopwatch.Stop();
+                AppendLog("TOTAL TIME: " + stopwatch.Elapsed.TotalSeconds);
             }
+            process.WaitForExit();
         }
         
         private SKBitmap DrawMessage(SKBitmap sectionImage, List<SKBitmap> imageList, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, SKPaint messageFont, Dictionary<string, SKBitmap> emojiCache, Dictionary<string, SKBitmap> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, Comment comment, Size canvasSize, ref Point drawPos, string emojiRegex, ref int default_x)

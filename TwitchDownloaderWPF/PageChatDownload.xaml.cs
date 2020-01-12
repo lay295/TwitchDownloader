@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Newtonsoft.Json;
 using TwitchDownloaderWPF;
 using WpfAnimatedGif;
 
@@ -217,7 +218,7 @@ namespace TwitchDownloaderWPF
                 {
                     if (clipInfo.is_json)
                     {
-                        sw.Write(result.ToString());
+                        sw.Write(result.ToString(Formatting.None));
                     }
                     else
                     {
