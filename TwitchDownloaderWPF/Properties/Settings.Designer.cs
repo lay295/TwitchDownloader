@@ -12,7 +12,7 @@ namespace TwitchDownloader.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.3.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.4.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -80,18 +80,6 @@ namespace TwitchDownloader.Properties {
             }
             set {
                 this["Timestamp"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool CompactMessages {
-            get {
-                return ((bool)(this["CompactMessages"]));
-            }
-            set {
-                this["CompactMessages"] = value;
             }
         }
         
@@ -193,18 +181,6 @@ namespace TwitchDownloader.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4000")]
-        public int Bitrate {
-            get {
-                return ((int)(this["Bitrate"]));
-            }
-            set {
-                this["Bitrate"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
         public int FontColorR {
             get {
@@ -236,6 +212,43 @@ namespace TwitchDownloader.Properties {
             }
             set {
                 this["FontColorB"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix" +
+            "_fmt bgra -video_size {width}x{height} -i -")]
+        public string FfmpegInputArgs {
+            get {
+                return ((string)(this["FfmpegInputArgs"]));
+            }
+            set {
+                this["FfmpegInputArgs"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-c:v libx264 -preset ultrafast \"{save_path}\"")]
+        public string FfmpegOutputArgs {
+            get {
+                return ((string)(this["FfmpegOutputArgs"]));
+            }
+            set {
+                this["FfmpegOutputArgs"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("60")]
+        public int Framerate {
+            get {
+                return ((int)(this["Framerate"]));
+            }
+            set {
+                this["Framerate"] = value;
             }
         }
     }

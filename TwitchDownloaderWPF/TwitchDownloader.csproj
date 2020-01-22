@@ -165,6 +165,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ChatRoot.cs" />
+    <Compile Include="FfmpegOptions.xaml.cs">
+      <DependentUpon>FfmpegOptions.xaml</DependentUpon>
+    </Compile>
     <Compile Include="InfoHelper.cs" />
     <Compile Include="PageChatDownload.xaml.cs">
       <DependentUpon>PageChatDownload.xaml</DependentUpon>
@@ -178,6 +181,10 @@
     <Compile Include="PageVodDownload.xaml.cs">
       <DependentUpon>PageVodDownload.xaml</DependentUpon>
     </Compile>
+    <Page Include="FfmpegOptions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -277,6 +284,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\HACKERMANS.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

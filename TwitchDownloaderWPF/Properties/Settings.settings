@@ -17,9 +17,6 @@
     <Setting Name="Timestamp" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="CompactMessages" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="Height" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">600</Value>
     </Setting>
@@ -44,9 +41,6 @@
     <Setting Name="BackgroundColorB" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">17</Value>
     </Setting>
-    <Setting Name="Bitrate" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">4000</Value>
-    </Setting>
     <Setting Name="FontColorR" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">255</Value>
     </Setting>
@@ -55,6 +49,15 @@
     </Setting>
     <Setting Name="FontColorB" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">255</Value>
+    </Setting>
+    <Setting Name="FfmpegInputArgs" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -</Value>
+    </Setting>
+    <Setting Name="FfmpegOutputArgs" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-c:v libx264 -preset ultrafast "{save_path}"</Value>
+    </Setting>
+    <Setting Name="Framerate" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">60</Value>
     </Setting>
   </Settings>
 </SettingsFile>

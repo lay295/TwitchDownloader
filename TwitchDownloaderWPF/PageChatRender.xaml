@@ -33,35 +33,36 @@
                 <TextBlock Text="Font:" HorizontalAlignment="Right" Margin="0,2,0,0"/>
                 <TextBlock Text="Font Size:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
                 <TextBlock Text="Font Color:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
-                <TextBlock Text="Bitrate (kbps):" HorizontalAlignment="Right" Margin="0,12,0,0"/>
                 <TextBlock Text="Outline:" HorizontalAlignment="Right" Margin="0,8,0,0"/>
                 <TextBlock Text="Timestamp:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
-                <TextBlock Text="Compact Messages:" HorizontalAlignment="Right" Margin="0,5,0,0"/>
+                <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <ComboBox x:Name="comboFont" MinWidth="100"/>
                 <TextBox x:Name="textFontSize" Text="12" Width="40" HorizontalAlignment="Left" Margin="0,7,0,0"/>
                 <xctk:ColorPicker x:Name="colorFont" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
-                <TextBox x:Name="textBitrate" Text="4000" Width="50" Margin="0,5,0,0" HorizontalAlignment="Left"/>
-                <CheckBox x:Name="checkOutline" Margin="0,5,0,0"/>
-                <CheckBox x:Name="checkTimestamp" Margin="0,5,0,0"/>
-                <CheckBox x:Name="checkCompact" Margin="0,5,0,0"/>
+                <CheckBox x:Name="checkOutline" Margin="0,6,0,0"/>
+                <CheckBox x:Name="checkTimestamp" Margin="0,6,0,0"/>
+                <CheckBox x:Name="checkFFZ" IsChecked="True" Margin="0,5,0,0"/>
+                <CheckBox x:Name="checkBTTV" IsChecked="True" Margin="0,5,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="20,0,5,0">
                 <TextBlock Text="Background Color:" HorizontalAlignment="Right"/>
                 <TextBlock Text="Height:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
                 <TextBlock Text="Width:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
-                <TextBlock Text="Update Time:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
-                <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
-                <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,5,0,0"/>
+                <TextBlock Text="Update Time:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
+                <TextBlock Text="Framerate:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
+                <TextBlock Text="FFmpeg Arguments:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
                 <TextBox x:Name="textHeight" Text="600" Margin="0,5,0,0"/>
                 <TextBox x:Name="textWidth" Text="350" Margin="0,5,0,0"/>
                 <TextBox x:Name="textUpdateTime" Text="1.0" Margin="0,5,0,0"/>
-                <CheckBox x:Name="checkFFZ" IsChecked="True" Margin="0,5,0,0"/>
-                <CheckBox x:Name="checkBTTV" IsChecked="True" Margin="0,5,0,0"/>
+                <TextBox x:Name="textFramerate" Text="60" Margin="0,5,0,0"/>
+                <Button x:Name="btnFfmpeg" Width="50" Content="Edit" HorizontalAlignment="Left" Margin="0,5,0,0" Click="btnFfmpeg_Click"/>
             </StackPanel>
         </StackPanel>
 
