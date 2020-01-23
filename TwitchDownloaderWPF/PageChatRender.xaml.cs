@@ -16,7 +16,6 @@ using WpfAnimatedGif;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-using Accord.Video.FFMPEG;
 using System.Windows.Markup;
 using System.Collections.Concurrent;
 using System.Windows.Media;

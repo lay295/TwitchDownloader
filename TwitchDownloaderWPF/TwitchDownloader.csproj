@@ -75,15 +75,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Accord, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Accord.3.8.0\lib\net462\Accord.dll</HintPath>
-    </Reference>
-    <Reference Include="Accord.Video, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Accord.Video.3.8.0\lib\net462\Accord.Video.dll</HintPath>
-    </Reference>
-    <Reference Include="Accord.Video.FFMPEG.x64, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=AMD64">
-      <HintPath>..\packages\Accord.Video.FFMPEG.x64.3.8.0\lib\net462\Accord.Video.FFMPEG.x64.dll</HintPath>
-    </Reference>
     <Reference Include="Emoji.Wpf, Version=0.0.0.19, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Emoji.Wpf.0.0.19-experimental\lib\net30\Emoji.Wpf.dll</HintPath>
     </Reference>
@@ -293,11 +284,8 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Accord.3.8.0\build\Accord.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Accord.3.8.0\build\Accord.targets'))" />
     <Error Condition="!Exists('..\packages\SkiaSharp.1.68.0\build\net45\SkiaSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SkiaSharp.1.68.0\build\net45\SkiaSharp.targets'))" />
-    <Error Condition="!Exists('..\packages\Accord.Video.FFMPEG.x64.3.8.0\build\Accord.Video.FFMPEG.x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Accord.Video.FFMPEG.x64.3.8.0\build\Accord.Video.FFMPEG.x64.targets'))" />
   </Target>
-  <Import Project="..\packages\Accord.3.8.0\build\Accord.targets" Condition="Exists('..\packages\Accord.3.8.0\build\Accord.targets')" />
   <Import Project="..\packages\SkiaSharp.1.68.0\build\net45\SkiaSharp.targets" Condition="Exists('..\packages\SkiaSharp.1.68.0\build\net45\SkiaSharp.targets')" />
   <PropertyGroup>
     <PostBuildEvent>RMDIR "$(TargetDir)de/" /S /Q
@@ -314,5 +302,4 @@ RMDIR "$(TargetDir)pt-BR/" /S /Q
 RMDIR "$(TargetDir)zh-Hans/" /S /Q
 RMDIR "$(TargetDir)zh-Hant/" /S /Q</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Accord.Video.FFMPEG.x64.3.8.0\build\Accord.Video.FFMPEG.x64.targets" Condition="Exists('..\packages\Accord.Video.FFMPEG.x64.3.8.0\build\Accord.Video.FFMPEG.x64.targets')" />
 </Project>
