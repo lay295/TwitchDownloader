@@ -61,7 +61,7 @@ namespace TwitchDownloader
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             textInputArgs.Text = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -";
-            textOutputArgs.Text = "-c:v libx264 -preset ultrafast \"{save_path}\"";
+            textOutputArgs.Text = "-c:v libx264 -preset fast \"{save_path}\"";
         }
     }
 }

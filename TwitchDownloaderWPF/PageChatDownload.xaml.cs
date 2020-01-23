@@ -87,9 +87,17 @@ namespace TwitchDownloaderWPF
                         videoData = taskInfo.Result;
                         string thumbUrl = videoData["data"][0]["thumbnail_url"].ToString().Replace("%{width}", 512.ToString()).Replace("%{height}", 290.ToString());
                         Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
-                        await Task.WhenAll(taskThumb);
 
-                        imgThumbnail.Source = taskThumb.Result;
+                        try
+                        {
+                            await taskThumb;
+                        }
+                        catch
+                        {
+                            AppendLog("ERROR: Unable to find thumbnail");
+                        }
+                        if (!taskThumb.IsFaulted)
+                            imgThumbnail.Source = taskThumb.Result;
                         textTitle.Text = taskInfo.Result["data"][0]["title"].ToString();
                         textStreamer.Text = taskInfo.Result["data"][0]["user_name"].ToString();
                         textCreatedAt.Text = taskInfo.Result["data"][0]["created_at"].ToString();

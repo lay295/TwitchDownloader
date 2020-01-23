@@ -34,7 +34,6 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageChatRender : System.Windows.Controls.Page
     {
-        public bool lastHasEmoteAtEnd = false;
         public SKPaint imagePaint = new SKPaint() { IsAntialias = true, FilterQuality = SKFilterQuality.High };
         public SKFontManager fontManager = SKFontManager.CreateDefault();
         public ConcurrentDictionary<char, SKPaint> fallbackCache = new ConcurrentDictionary<char, SKPaint>();
@@ -130,7 +129,7 @@ namespace TwitchDownloaderWPF
             (sender as BackgroundWorker).ReportProgress(0, new Progress("Fetching Twitter Emojis"));
             GetTwitterEmojis(emojiCache, chatJson.comments, renderOptions, emojiRegex);
 
-            Size canvasSize = new Size(renderOptions.chat_width, renderOptions.has_emote_height);
+            Size canvasSize = new Size(renderOptions.chat_width, renderOptions.text_height);
             SKPaint nameFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.font, SKFontStyle.Bold), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.font_size, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             SKPaint messageFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.font, SKFontStyle.Normal), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.font_size, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.message_color };
 
@@ -152,12 +151,14 @@ namespace TwitchDownloaderWPF
                 List<SKBitmap> imageList = new List<SKBitmap>();
                 SKBitmap sectionImage = new SKBitmap((int)canvasSize.Width, (int)canvasSize.Height);
                 List<GifEmote> currentGifEmotes = new List<GifEmote>();
+                List<SKBitmap> emoteList = new List<SKBitmap>();
+                List<SKRect> emotePositionList = new List<SKRect>();
                 new SKCanvas(sectionImage).Clear(renderOptions.background_color);
                 if (renderOptions.chat_timestamp)
                     sectionImage = DrawTimestamp(sectionImage, imageList, messageFont, renderOptions, comment, canvasSize, ref drawPos, ref default_x);
                 sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
                 sectionImage = DrawUsername(sectionImage, imageList, renderOptions, nameFont, userName, userColor, canvasSize, ref drawPos);
-                sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, comment, canvasSize, ref drawPos, emojiRegex, ref default_x);
+                sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, comment, canvasSize, ref drawPos, emojiRegex, ref default_x, emoteList, emotePositionList);
 
                 int finalHeight = 0;
                 foreach (var img in imageList)
@@ -172,8 +173,9 @@ namespace TwitchDownloaderWPF
                     img.Dispose();
                 }
 
+
                 string imagePath = Path.Combine(downloadFolder, Guid.NewGuid() + ".png");
-                finalComments.Add(new TwitchComment(imagePath, Double.Parse(comment.content_offset_seconds.ToString()), currentGifEmotes));
+                finalComments.Add(new TwitchComment(imagePath, Double.Parse(comment.content_offset_seconds.ToString()), currentGifEmotes, emoteList, emotePositionList));
                 using (Stream s = File.OpenWrite(imagePath))
                 {
                     SKImage.FromBitmap(finalImage).Encode(SKEncodedImageFormat.Png, 80).SaveTo(s);
@@ -311,8 +313,11 @@ namespace TwitchDownloaderWPF
                         foreach (var emote in newly_added)
                             emote.offset = new Point(emote.offset.X, (renderOptions.chat_height - height) + emote.offset.Y);
 
+                        
                         if (height > 0)
                         {
+                            List<SKBitmap> emoteList = new List<SKBitmap>();
+                            List<SKRect> emotePos = new List<SKRect>();
                             SKBitmap sectionBitmap = new SKBitmap(renderOptions.chat_width, height);
                             SKCanvas sectionCanvas = new SKCanvas(sectionBitmap);
 
@@ -323,11 +328,21 @@ namespace TwitchDownloaderWPF
                                 {
                                     SKBitmap sectionImage = SKBitmap.Decode(finalComments[j].section);
                                     sectionCanvas.DrawBitmap(sectionImage, 0, y);
+                                    for (int k = 0; k < finalComments[j].normalEmotes.Count; k++)
+                                    {
+                                        emoteList.Add(finalComments[j].normalEmotes[k]);
+                                        SKRect refrenceRect = finalComments[j].normalEmotesPositions[k];
+                                        float top = bufferBitmap.Height - sectionBitmap.Height + y + refrenceRect.Top;
+                                        emotePos.Add(new SKRect(refrenceRect.Left, top, refrenceRect.Right, top + (refrenceRect.Bottom - refrenceRect.Top)));
+                                    }
                                     y += sectionImage.Height;
                                 }
                             }
                             bufferCanvas.DrawBitmap(bufferBitmap, 0, -height);
                             bufferCanvas.DrawBitmap(sectionBitmap, 0, renderOptions.chat_height - height);
+
+                            for (int k = 0; k < emoteList.Count; k++)
+                                bufferCanvas.DrawBitmap(emoteList[k], emotePos[k], imagePaint);
                         }
                         lastUpdateTick = globalTick;
                     }
@@ -353,7 +368,7 @@ namespace TwitchDownloaderWPF
                                 timeCount += emote.durations[k];
                             }
                             float x = (float)emote.offset.X;
-                            float y = (float)emote.offset.Y + (int)Math.Floor((renderOptions.has_emote_height - ((emote.images[0].Height / emote.imageScale) * renderOptions.image_scale)) / 2.0);
+                            float y = (float)emote.offset.Y + (int)Math.Floor((renderOptions.text_height - ((emote.images[0].Height / emote.imageScale) * renderOptions.image_scale)) / 2.0);
                             bufferCanvas.DrawBitmap(emote.images[frame], new SKRect(x, y, x + (float)((emote.images[0].Width / emote.imageScale) * renderOptions.image_scale), y + (float)((emote.images[0].Height / emote.imageScale) * renderOptions.image_scale)));
                         }
                     }
@@ -370,7 +385,7 @@ namespace TwitchDownloaderWPF
 
                     foreach (var emote in displayedGifs)
                     {
-                        bufferCanvas.DrawRect((float)emote.offset.X, (float)emote.offset.Y + (int)Math.Floor((renderOptions.has_emote_height - ((emote.images[0].Height / emote.imageScale) * renderOptions.image_scale)) / 2.0), (float)((emote.images[0].Width / emote.imageScale) * renderOptions.image_scale), (float)((emote.images[0].Height / emote.imageScale) * renderOptions.image_scale), new SKPaint { Color = renderOptions.background_color });
+                        bufferCanvas.DrawRect((float)emote.offset.X, (float)emote.offset.Y + (int)Math.Floor((renderOptions.text_height - ((emote.images[0].Height / emote.imageScale) * renderOptions.image_scale)) / 2.0), (float)((emote.images[0].Width / emote.imageScale) * renderOptions.image_scale), (float)((emote.images[0].Height / emote.imageScale) * renderOptions.image_scale), new SKPaint { Color = renderOptions.background_color });
                     }
                     globalTick += 1;
                     double percentDouble = (double)(globalTick - startTick) / (double)(endTick - startTick) * 100.0;
@@ -381,9 +396,8 @@ namespace TwitchDownloaderWPF
             process.WaitForExit();
         }
         
-        private SKBitmap DrawMessage(SKBitmap sectionImage, List<SKBitmap> imageList, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, SKPaint messageFont, Dictionary<string, SKBitmap> emojiCache, Dictionary<string, SKBitmap> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, Comment comment, Size canvasSize, ref Point drawPos, string emojiRegex, ref int default_x)
+        private SKBitmap DrawMessage(SKBitmap sectionImage, List<SKBitmap> imageList, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, SKPaint messageFont, Dictionary<string, SKBitmap> emojiCache, Dictionary<string, SKBitmap> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, Comment comment, Size canvasSize, ref Point drawPos, string emojiRegex, ref int default_x, List<SKBitmap> emoteList, List<SKRect> emotePositionList)
         {
-            bool hasEmote = false;
             foreach (var fragment in comment.message.fragments)
             {
                 if (fragment.emoticon == null)
@@ -412,18 +426,16 @@ namespace TwitchDownloaderWPF
                             lock (currentEmote.codec)
                             {
                                 if (drawPos.X + (currentEmote.width / currentEmote.imageScale) * renderOptions.image_scale > canvasSize.Width)
-                                    sectionImage = AddImageSection(sectionImage, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
+                                    sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
 
                                 if (currentEmote.imageType == "gif")
                                 {
                                     GifEmote emote = new GifEmote(new Point(drawPos.X, drawPos.Y), currentEmote.name, currentEmote.codec, currentEmote.imageScale);
                                     currentGifEmotes.Add(emote);
-                                    hasEmote = true;
                                     drawPos.X += (currentEmote.width / currentEmote.imageScale) * renderOptions.image_scale + (3 * renderOptions.image_scale);
                                 }
                                 else
                                 {
-                                    hasEmote = true;
                                     using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImage))
                                     {
                                         float imageRatio = (float)renderOptions.image_scale / currentEmote.imageScale;
@@ -433,7 +445,9 @@ namespace TwitchDownloaderWPF
                                         float right = imageWidth + left;
                                         float top = (float)((sectionImage.Height - imageHeight) / 2);
                                         float bottom = imageHeight + top;
-                                        sectionImageCanvas.DrawBitmap(currentEmote.emote, new SKRect(left, top, right, bottom), imagePaint);
+                                        //sectionImageCanvas.DrawBitmap(currentEmote.emote, new SKRect(left, top, right, bottom), imagePaint);
+                                        emoteList.Add(currentEmote.emote);
+                                        emotePositionList.Add(new SKRect(left, top + (renderOptions.text_height*imageList.Count), right, bottom + (renderOptions.text_height * imageList.Count)));
                                         drawPos.X += (int)Math.Ceiling(imageWidth + (3 * renderOptions.image_scale));
                                     }
                                 }
@@ -453,13 +467,12 @@ namespace TwitchDownloaderWPF
                                         using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImage))
                                         {
                                             SKBitmap emojiBitmap = emojiCache[codepoint];
-                                            float emojiSize = (emojiBitmap.Width / 3) * (float)renderOptions.image_scale;
+                                            float emojiSize = (emojiBitmap.Width / 4) * (float)renderOptions.image_scale;
                                             if (drawPos.X + (20 * renderOptions.image_scale) + 3 > canvasSize.Width)
-                                                sectionImage = AddImageSection(sectionImage, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
+                                                sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
 
-                                            hasEmote = true;
                                             float emojiLeft = (float)Math.Floor(drawPos.X);
-                                            float emojiTop = (float)Math.Floor((renderOptions.has_emote_height - emojiSize) / 2.0);
+                                            float emojiTop = (float)Math.Floor((renderOptions.text_height - emojiSize) / 2.0);
                                             SKRect emojiRect = new SKRect(emojiLeft, emojiTop, emojiLeft+ emojiSize, emojiTop+ emojiSize);
                                             sectionImageCanvas.DrawBitmap(emojiBitmap, emojiRect, imagePaint);
                                             drawPos.X += emojiSize + (int)Math.Floor(3 * renderOptions.image_scale);
@@ -476,17 +489,17 @@ namespace TwitchDownloaderWPF
                                 //Very rough estimation of width of text, because we don't know the font yet. This is to show ASCII spam properly
                                 int textWidth = (int)Math.Floor(charList.Count * (9.0 * renderOptions.image_scale));
                                 if (drawPos.X + textWidth > canvasSize.Width)
-                                    sectionImage = AddImageSection(sectionImage, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
+                                    sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
 
                                 for (int j = 0; j < charList.Count; j++)
                                 {
                                     if (messageFont.Typeface.CountGlyphs(charList[j].ToString()) == 0)
                                     {
                                         if (messageBuffer != "")
-                                            sectionImage = DrawText(sectionImage, messageBuffer, messageFont, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
+                                            sectionImage = DrawText(sectionImage, messageBuffer, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
                                         SKPaint fallbackFont = GetFallbackFont(charList[j], renderOptions);
                                         fallbackFont.Color = renderOptions.message_color;
-                                        sectionImage = DrawText(sectionImage, charList[j].ToString(), fallbackFont, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, false, default_x);
+                                        sectionImage = DrawText(sectionImage, charList[j].ToString(), fallbackFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, false, default_x);
                                         messageBuffer = "";
                                     }
                                     else
@@ -497,7 +510,7 @@ namespace TwitchDownloaderWPF
                             }
                             else
                             {
-                                sectionImage = DrawText(sectionImage, output, messageFont, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
+                                sectionImage = DrawText(sectionImage, output, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
                             }
                         }
                     }
@@ -509,46 +522,40 @@ namespace TwitchDownloaderWPF
                     if (chatEmotes.ContainsKey(emoteId))
                     {
                         SKBitmap emoteImage = chatEmotes[emoteId];
-                        float imageWidth = (float)(emoteImage.Width * renderOptions.image_scale);
+                        float imageWidth = emoteImage.Width * (float)renderOptions.image_scale;
                         if (drawPos.X + imageWidth > canvasSize.Width)
-                            sectionImage = AddImageSection(sectionImage, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
-                        hasEmote = true;
+                            sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
                         using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImage))
                         {
-                            
-                            float imageHeight = (float)(emoteImage.Height * renderOptions.image_scale);
-                            float imageLeft = (float)Math.Floor(drawPos.X);
-                            float imageTop = (float)((renderOptions.has_emote_height - imageHeight) / 2.0);
-                            SKRect emoteRect = new SKRect(imageLeft, imageTop, imageLeft + imageWidth, imageTop + imageHeight);
-                            sectionImageCanvas.DrawBitmap(emoteImage, emoteRect, imagePaint);
+                            float imageHeight = emoteImage.Height * (float)renderOptions.image_scale;
+                            float left = (float)drawPos.X;
+                            float right = imageWidth + left;
+                            float top = (float)((sectionImage.Height - imageHeight) / 2);
+                            float bottom = imageHeight + top;
+                            //SKRect emoteRect = new SKRect(imageLeft, imageTop, imageLeft + imageWidth, imageTop + imageHeight);
+                            //sectionImageCanvas.DrawBitmap(emoteImage, emoteRect, imagePaint);
+                            emoteList.Add(emoteImage);
+                            emotePositionList.Add(new SKRect(left, top + (renderOptions.text_height * imageList.Count), right, bottom + (renderOptions.text_height * imageList.Count)));
                         }
                         drawPos.X += (int)Math.Ceiling(imageWidth + (3 * renderOptions.image_scale));
                     }
                     else
                     {
                         //Probably an old emote that was removed
-                        sectionImage = DrawText(sectionImage, fragment.text, messageFont, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
+                        sectionImage = DrawText(sectionImage, fragment.text, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
                     }
                 }
             }
-
-            sectionImage = CropImage(sectionImage, renderOptions, hasEmote);
             imageList.Add(sectionImage);
-            
-            /*
-            if (!renderOptions.compact_messages && !lastHasEmoteAtEnd && imageList.First().Height == renderOptions.has_no_emote_eight)
-            {
-                SKBitmap paddingImage = new SKBitmap((int)canvasSize.Width, (int)Math.Floor((renderOptions.has_emote_height - renderOptions.has_no_emote_eight) / 2.0));
-                using (SKCanvas paddingImageCanvas = new SKCanvas(paddingImage))
-                    paddingImageCanvas.Clear(renderOptions.background_color);
-                imageList.Insert(0, paddingImage);
-            }
-            */
-            lastHasEmoteAtEnd = hasEmote;
+
+            SKBitmap paddingImage = new SKBitmap((int)canvasSize.Width, (int)Math.Floor(.4 * renderOptions.text_height));
+            using (SKCanvas paddingImageCanvas = new SKCanvas(paddingImage))
+                paddingImageCanvas.Clear(renderOptions.background_color);
+            imageList.Add(paddingImage);
             return sectionImage;
         }
 
-        private SKBitmap DrawText(SKBitmap sectionImage, string message, SKPaint messageFont, List<SKBitmap> imageList, ref bool hasEmote, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, Size canvasSize, ref Point drawPos, bool padding, int default_x)
+        private SKBitmap DrawText(SKBitmap sectionImage, string message, SKPaint messageFont, List<SKBitmap> imageList, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, Size canvasSize, ref Point drawPos, bool padding, int default_x)
         {
             float textWidth;
             try
@@ -557,7 +564,7 @@ namespace TwitchDownloaderWPF
             }
             catch { return sectionImage; }
             if (drawPos.X + textWidth + 3 > canvasSize.Width)
-                sectionImage = AddImageSection(sectionImage, imageList, ref hasEmote, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
+                sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
 
             float xPos = (float)Math.Floor(drawPos.X);
             float yPos = (float)(((canvasSize.Height - renderOptions.font_size) / 2) + renderOptions.font_size) - (float)(renderOptions.image_scale * 2);
@@ -576,38 +583,17 @@ namespace TwitchDownloaderWPF
             return sectionImage;
         }
 
-        private SKBitmap AddImageSection(SKBitmap sectionImage, List<SKBitmap> imageList, ref bool hasEmote, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, Size canvasSize, ref Point drawPos, int default_x)
+        private SKBitmap AddImageSection(SKBitmap sectionImage, List<SKBitmap> imageList, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, Size canvasSize, ref Point drawPos, int default_x)
         {
-            sectionImage = CropImage(sectionImage, renderOptions, hasEmote);
             imageList.Add(sectionImage);
             SKBitmap newImage = new SKBitmap((int)canvasSize.Width, (int)canvasSize.Height);
             using (SKCanvas paddingImageCanvas = new SKCanvas(newImage))
                 paddingImageCanvas.Clear(renderOptions.background_color);
-            hasEmote = false;
             drawPos.X = default_x;
             drawPos.Y += sectionImage.Height;
             return newImage;
         }
 
-        private SKBitmap CropImage(SKBitmap sectionImage, RenderOptions renderOptions, bool hasEmote)
-        {
-            if (!hasEmote)
-            {
-                SKBitmap newBitmap = new SKBitmap(sectionImage.Width, renderOptions.has_no_emote_eight);
-
-                using (SKCanvas sectionImageCanvas = new SKCanvas(newBitmap))
-                {
-                    float sourceTop = (float)((renderOptions.has_emote_height - renderOptions.has_no_emote_eight) / 2);
-                    SKRect sourceRect = new SKRect(0, sourceTop, sectionImage.Width, sourceTop + renderOptions.has_no_emote_eight);
-                    SKRect destRect = new SKRect(0, 0, newBitmap.Width, newBitmap.Height);
-                    sectionImageCanvas.DrawBitmap(sectionImage, sourceRect, destRect);
-                }
-                sectionImage.Dispose();
-                return newBitmap;
-            }
-            return sectionImage;
-        }
-        
         private SKBitmap DrawTimestamp(SKBitmap sectionImage, List<SKBitmap> imageList, SKPaint messageFont, RenderOptions renderOptions, Comment comment, Size canvasSize, ref Point drawPos, ref int default_x)
         {
             SKCanvas sectionImageCanvas = new SKCanvas(sectionImage);
@@ -895,7 +881,6 @@ namespace TwitchDownloaderWPF
                                     {
                                         string codepoint = String.Format("{0:X4}", char.ConvertToUtf32(m.Value, k)).ToLower();
                                         codepoint = codepoint.Replace("fe0f", "");
-                                        Console.WriteLine("U+{0:X4}", codepoint);
                                         if (codepoint != "" && !emojiCache.ContainsKey(codepoint))
                                         {
                                             try
@@ -1202,8 +1187,7 @@ public class RenderOptions
     public double font_size { get; set; }
     public double image_scale { get; set; }
     public int update_frame { get; set; }
-    public int has_emote_height { get; set; }
-    public int has_no_emote_eight { get; set; }
+    public int text_height { get; set; }
     public int outline_size { get; set; }
     public bool chat_timestamp { get; set; }
     public int default_x { get; set; }
@@ -1234,8 +1218,7 @@ public class RenderOptions
         else
             update_frame = (int)Math.Floor(Update_rate / (1.0 / Framerate));
 
-        has_emote_height = (int)Math.Floor(36 * image_scale);
-        has_no_emote_eight = (int)Math.Floor(20 * image_scale);
+        text_height = (int)Math.Floor(22 * image_scale);
         outline_size = (int)Math.Round(3 * image_scale);
         chat_timestamp = Chat_timestamp;
         default_x = 2;
@@ -1306,11 +1289,15 @@ public class TwitchComment
     public string section;
     public double secondsOffset;
     public List<GifEmote> gifEmotes;
+    public List<SKBitmap> normalEmotes;
+    public List<SKRect> normalEmotesPositions;
 
-    public TwitchComment(string Section, double SecondsOffset, List<GifEmote> GifEmotes)
+    public TwitchComment(string Section, double SecondsOffset, List<GifEmote> GifEmotes, List<SKBitmap> NormalEmotes, List<SKRect> NormalEmotesPositions)
     {
         section = Section;
         secondsOffset = SecondsOffset;
         gifEmotes = GifEmotes;
+        normalEmotes = NormalEmotes;
+        normalEmotesPositions = NormalEmotesPositions;
     }
 }
