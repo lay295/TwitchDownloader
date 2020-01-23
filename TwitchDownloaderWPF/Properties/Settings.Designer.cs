@@ -230,7 +230,7 @@ namespace TwitchDownloader.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-c:v libx264 -preset fast \"{save_path}\"")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-c:v libx264 -preset medium -pix_fmt yuv420p \"{save_path}\"")]
         public string FfmpegOutputArgs {
             get {
                 return ((string)(this["FfmpegOutputArgs"]));

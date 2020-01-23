@@ -62,7 +62,7 @@ namespace TwitchDownloaderWPF
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            string tempFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "TwitchDownloader");
+            string tempFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "TwitchDownloader", "Chat Render");
             try
             {
                 DeleteDirectory(tempFolder);
