@@ -59,5 +59,11 @@
     <Setting Name="Framerate" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">60</Value>
     </Setting>
+    <Setting Name="VideoContainer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MP4</Value>
+    </Setting>
+    <Setting Name="VideoCodec" Type="System.String" Scope="User">
+      <Value Profile="(Default)">H264</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

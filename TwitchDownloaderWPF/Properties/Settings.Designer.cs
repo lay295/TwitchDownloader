@@ -251,5 +251,29 @@ namespace TwitchDownloader.Properties {
                 this["Framerate"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("MP4")]
+        public string VideoContainer {
+            get {
+                return ((string)(this["VideoContainer"]));
+            }
+            set {
+                this["VideoContainer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("H264")]
+        public string VideoCodec {
+            get {
+                return ((string)(this["VideoCodec"]));
+            }
+            set {
+                this["VideoCodec"] = value;
+            }
+        }
     }
 }

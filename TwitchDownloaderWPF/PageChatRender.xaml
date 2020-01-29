@@ -37,14 +37,13 @@
                 <TextBlock Text="Timestamp:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
-                
             </StackPanel>
             <StackPanel Orientation="Vertical">
-                <ComboBox x:Name="comboFont" MinWidth="100"/>
-                <TextBox x:Name="textFontSize" Text="12" Width="40" HorizontalAlignment="Left" Margin="0,7,0,0"/>
-                <xctk:ColorPicker x:Name="colorFont" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
-                <CheckBox x:Name="checkOutline" Margin="0,6,0,0"/>
-                <CheckBox x:Name="checkTimestamp" Margin="0,6,0,0"/>
+                <ComboBox x:Name="comboFont" MinWidth="100" SelectionChanged="UpdateFont"/>
+                <TextBox x:Name="textFontSize" Text="12" Width="40" HorizontalAlignment="Left" Margin="0,7,0,0" TextChanged="UpdatePreview"/>
+                <xctk:ColorPicker x:Name="colorFont" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}" SelectedColorChanged="UpdateColor"/>
+                <CheckBox x:Name="checkOutline" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
+                <CheckBox x:Name="checkTimestamp" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
                 <CheckBox x:Name="checkFFZ" IsChecked="True" Margin="0,5,0,0"/>
                 <CheckBox x:Name="checkBTTV" IsChecked="True" Margin="0,5,0,0"/>
             </StackPanel>
@@ -54,15 +53,25 @@
                 <TextBlock Text="Width:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
                 <TextBlock Text="Update Time:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
                 <TextBlock Text="Framerate:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
-                <TextBlock Text="FFmpeg Arguments:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
-                <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
-                <TextBox x:Name="textHeight" Text="600" Margin="0,5,0,0"/>
-                <TextBox x:Name="textWidth" Text="350" Margin="0,5,0,0"/>
+                <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" DropDownBackground="{StaticResource ResourceKey=FixBrush}" SelectedColorChanged="UpdateColor"/>
+                <TextBox x:Name="textHeight" Text="600" Margin="0,5,0,0" TextChanged="UpdatePreview"/>
+                <TextBox x:Name="textWidth" Text="350" Margin="0,5,0,0" TextChanged="UpdatePreview"/>
                 <TextBox x:Name="textUpdateTime" Text="1.0" Margin="0,5,0,0"/>
                 <TextBox x:Name="textFramerate" Text="60" Margin="0,5,0,0"/>
-                <Button x:Name="btnFfmpeg" Width="50" Content="Edit" HorizontalAlignment="Left" Margin="0,5,0,0" Click="btnFfmpeg_Click"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="20,0,5,0">
+                <TextBlock Text="Live Preview:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                <TextBlock Text="File Format:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
+                <TextBlock Text="Codec:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
+                <TextBlock Text="FFmpeg&#x0a;Arguments:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <Button x:Name="btnPreview" Width="50" Content="View" HorizontalAlignment="Left" Margin="0,5,0,0" Click="btnPreview_Click"/>
+                <ComboBox x:Name="comboFormat" MinWidth="70" Margin="0,5,0,0"/>
+                <ComboBox x:Name="comboCodec" MinWidth="70" Margin="0,5,0,0"/>
+                <Button x:Name="btnFfmpeg" Width="50" Content="Edit" HorizontalAlignment="Left" Margin="0,15,0,0" Click="btnFfmpeg_Click"/>
             </StackPanel>
         </StackPanel>
 
