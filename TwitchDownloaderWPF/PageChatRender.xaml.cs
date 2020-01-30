@@ -62,7 +62,7 @@ namespace TwitchDownloaderWPF
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
-                    SKColor backgroundColor = new SKColor(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B);
+                    SKColor backgroundColor = new SKColor(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
                     SKColor messageColor = new SKColor(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
                     RenderOptions info = new RenderOptions(textJson.Text, saveFileDialog.FileName, backgroundColor, Int32.Parse(textHeight.Text), Int32.Parse(textWidth.Text), (bool)checkBTTV.IsChecked, (bool)checkFFZ.IsChecked, (bool)checkOutline.IsChecked, (string)comboFont.SelectedItem, Double.Parse(textFontSize.Text), Double.Parse(textUpdateTime.Text), (bool)checkTimestamp.IsChecked, messageColor, Int32.Parse(textFramerate.Text), Settings.Default.FfmpegInputArgs, Settings.Default.FfmpegOutputArgs);
                     SaveSettings();
@@ -112,6 +112,8 @@ namespace TwitchDownloaderWPF
             string downloadFolder = Path.Combine(tempFolder, "Chat Render");
             string cacheFolder = Path.Combine(tempFolder, "cache");
 
+            if (renderOptions.background_color.Alpha < 255)
+                imagePaint.BlendMode = SKBlendMode.Src;
             if (!Directory.Exists(downloadFolder))
                 Directory.CreateDirectory(downloadFolder);
             if (!Directory.Exists(cacheFolder))
@@ -147,6 +149,7 @@ namespace TwitchDownloaderWPF
 
                 List<SKBitmap> imageList = new List<SKBitmap>();
                 SKBitmap sectionImage = new SKBitmap((int)canvasSize.Width, (int)canvasSize.Height);
+                
                 List<GifEmote> currentGifEmotes = new List<GifEmote>();
                 List<SKBitmap> emoteList = new List<SKBitmap>();
                 List<SKRect> emotePositionList = new List<SKRect>();
@@ -163,13 +166,13 @@ namespace TwitchDownloaderWPF
                 SKBitmap finalImage = new SKBitmap((int)canvasSize.Width, finalHeight);
                 SKCanvas finalImageCanvas = new SKCanvas(finalImage);
                 finalHeight = 0;
+                finalImageCanvas.Clear(renderOptions.background_color);
                 foreach (var img in imageList)
                 {
                     finalImageCanvas.DrawBitmap(img, 0, finalHeight);
                     finalHeight += img.Height;
                     img.Dispose();
                 }
-
 
                 string imagePath = Path.Combine(downloadFolder, Guid.NewGuid() + ".png");
                 finalComments.Add(new TwitchComment(imagePath, Double.Parse(comment.content_offset_seconds.ToString()), currentGifEmotes, emoteList, emotePositionList));
@@ -323,6 +326,7 @@ namespace TwitchDownloaderWPF
                             List<SKRect> emotePos = new List<SKRect>();
                             SKBitmap sectionBitmap = new SKBitmap(renderOptions.chat_width, height);
                             SKCanvas sectionCanvas = new SKCanvas(sectionBitmap);
+                            sectionCanvas.Clear(renderOptions.background_color);
 
                             for (int j = 0; j < finalComments.Count; j++)
                             {
@@ -341,7 +345,17 @@ namespace TwitchDownloaderWPF
                                     y += sectionImage.Height;
                                 }
                             }
-                            bufferCanvas.DrawBitmap(bufferBitmap, 0, -height);
+                            if (renderOptions.background_color.Alpha < 255)
+                            {
+                                SKBitmap bufferCopy = bufferBitmap.Copy();
+                                bufferCanvas.Clear();
+                                bufferCanvas.DrawBitmap(bufferCopy, 0, -height);
+                                bufferCopy.Dispose();
+                            }
+                            else
+                            {
+                                bufferCanvas.DrawBitmap(bufferBitmap, 0, -height);
+                            }
                             bufferCanvas.DrawBitmap(sectionBitmap, 0, renderOptions.chat_height - height);
 
                             for (int k = 0; k < emoteList.Count; k++)
@@ -374,7 +388,7 @@ namespace TwitchDownloaderWPF
                             SKBitmap gifBitmap = emote.GetFrame(frame);
                             float x = (float)emote.offset.X;
                             float y = (float)emote.offset.Y + (int)Math.Floor((renderOptions.text_height - ((gifBitmap.Height / emote.imageScale) * renderOptions.image_scale)) / 2.0);
-                            bufferCanvas.DrawBitmap(gifBitmap, new SKRect(x, y, x + (float)((gifBitmap.Width / emote.imageScale) * renderOptions.image_scale), y + (float)((gifBitmap.Height / emote.imageScale) * renderOptions.image_scale)));
+                            bufferCanvas.DrawBitmap(gifBitmap, new SKRect(x, y, x + (float)((gifBitmap.Width / emote.imageScale) * renderOptions.image_scale), y + (float)((gifBitmap.Height / emote.imageScale) * renderOptions.image_scale)), imagePaint);
                             gifBitmap.Dispose();
                         }
                     }
@@ -400,7 +414,7 @@ namespace TwitchDownloaderWPF
                 }
             }
             stopwatch.Stop();
-            AppendLog($"FINISHED. TOTAL TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {(duration / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x");
+            AppendLog($"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {(duration / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x");
             process.WaitForExit();
         }
 
@@ -1077,7 +1091,7 @@ namespace TwitchDownloaderWPF
                 comboFont.SelectedItem = Settings.Default.Font;
                 checkOutline.IsChecked = Settings.Default.Outline;
                 checkTimestamp.IsChecked = Settings.Default.Timestamp;
-                colorBackground.SelectedColor = System.Windows.Media.Color.FromRgb((byte)Settings.Default.BackgroundColorR, (byte)Settings.Default.BackgroundColorG, (byte)Settings.Default.BackgroundColorB);
+                colorBackground.SelectedColor = System.Windows.Media.Color.FromArgb((byte)Settings.Default.BackgroundColorA, (byte)Settings.Default.BackgroundColorR, (byte)Settings.Default.BackgroundColorG, (byte)Settings.Default.BackgroundColorB);
                 checkFFZ.IsChecked = Settings.Default.FFZEmotes;
                 checkBTTV.IsChecked = Settings.Default.BTTVEmotes;
                 textHeight.Text = Settings.Default.Height.ToString();
@@ -1103,8 +1117,19 @@ namespace TwitchDownloaderWPF
                 }
 
                 comboFormat.SelectionChanged += ComboFormatOnSelectionChanged;
+                comboCodec.SelectionChanged += ComboCodecOnSelectionChanged;
             }
             catch { }
+        }
+
+        private void ComboCodecOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (comboCodec.SelectedItem != null)
+            {
+                Settings.Default.FfmpegInputArgs = ((Codec)comboCodec.SelectedItem).InputArgs;
+                Settings.Default.FfmpegOutputArgs = ((Codec)comboCodec.SelectedItem).OutputArgs;
+                Settings.Default.Save();
+            }
         }
 
         private void ComboFormatOnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1114,13 +1139,12 @@ namespace TwitchDownloaderWPF
             foreach (Codec codec in currentContainer.SupportedCodecs)
             {
                 comboCodec.Items.Add(codec);
+                if (Settings.Default.VideoCodec == codec.Name)
+                    comboCodec.SelectedItem = Settings.Default.VideoCodec;
             }
 
-            comboCodec.SelectedIndex = 0;
-
-            Settings.Default.FfmpegInputArgs = ((Codec) comboCodec.SelectedItem).InputArgs;
-            Settings.Default.FfmpegOutputArgs = ((Codec) comboCodec.SelectedItem).OutputArgs;
-            Settings.Default.Save();
+            if (comboCodec.SelectedItem == null)
+                comboCodec.SelectedIndex = 0;
         }
 
         private void SaveSettings()
@@ -1131,12 +1155,16 @@ namespace TwitchDownloaderWPF
             Settings.Default.BackgroundColorR = colorBackground.SelectedColor.Value.R;
             Settings.Default.BackgroundColorG = colorBackground.SelectedColor.Value.G;
             Settings.Default.BackgroundColorB = colorBackground.SelectedColor.Value.B;
+            Settings.Default.BackgroundColorA = colorBackground.SelectedColor.Value.A;
             Settings.Default.FFZEmotes = (bool)checkFFZ.IsChecked;
             Settings.Default.BTTVEmotes = (bool)checkBTTV.IsChecked;
             Settings.Default.FontColorR = colorFont.SelectedColor.Value.R;
             Settings.Default.FontColorG = colorFont.SelectedColor.Value.G;
             Settings.Default.FontColorB = colorFont.SelectedColor.Value.B;
-            
+            if (comboFormat.SelectedItem != null)
+                Settings.Default.VideoContainer = ((VideoContainer) comboFormat.SelectedItem).Name;
+            if (comboCodec.SelectedItem != null)
+                Settings.Default.VideoCodec = ((Codec) comboCodec.SelectedItem).Name;
             try
             {
                 Settings.Default.Height = Int32.Parse(textHeight.Text);
@@ -1169,6 +1197,16 @@ namespace TwitchDownloaderWPF
             {
                 AppendLog("ERROR: " + ex.Message);
                 return false;
+            }
+
+            if (colorBackground.SelectedColor.Value.A < 255)
+            {
+                if ((((VideoContainer)comboFormat.SelectedItem).Name != "MOV" && ((Codec)comboCodec.SelectedItem).Name != "RLE") || ((VideoContainer) comboFormat.SelectedItem).Name == "WEBM")
+                {
+                    AppendLog("ERROR: You've selected an alpha channel (transparency) for a container/codec that does not support it.");
+                    AppendLog("Remove transparency or encode with MOV and RLE (file size will be large)");
+                    return false;
+                }
             }
 
             return true;
@@ -1209,24 +1247,19 @@ namespace TwitchDownloaderWPF
             if (comboFont.Items.Contains("Arial"))
                 comboFont.SelectedItem = "Arial";
 
-            for (int i = 0; i < colorFont.StandardColors.Count; i++)
-            {
-                if (colorFont.StandardColors[i].Color.Value.A < 255)
-                {
-                    colorFont.StandardColors.RemoveAt(i);
-                    i--;
-                }
-            }
-            Codec h264Codec = new Codec() {Name = "H264", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h264Codec = new Codec() { Name = "H264", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p \"{save_path}\"" };
             Codec h265Codec = new Codec() { Name = "H265", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx265 -preset veryfast -crf 20 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec vp8Codec = new Codec() { Name = "VP8", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx -crf 20 -b:v 2M -pix_fmt yuv420p \"{save_path}\"" };
-            Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 20 -b:v 2M -pix_fmt yuv420p \"{save_path}\"" };
+            Codec vp8Codec = new Codec() { Name = "VP8", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx -crf 20 -b:v 2M -pix_fmt yuva420p -auto-alt-ref 0 \"{save_path}\"" };
+            Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 20 -b:v 2M -pix_fmt yuva420p \"{save_path}\"" };
+            Codec rleCodec = new Codec() { Name = "RLE", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v qtrle -pix_fmt argb \"{save_path}\"" };
             VideoContainer mp4Container = new VideoContainer() {Name = "MP4", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec } };
-            VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, vp8Codec, vp9Codec } };
+            VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, rleCodec } };
             VideoContainer webmContainer = new VideoContainer() { Name = "WEBM", SupportedCodecs = new List<Codec>() { vp8Codec, vp9Codec } };
+            VideoContainer mkvContainer = new VideoContainer() { Name = "MKV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, vp8Codec, vp9Codec } };
             comboFormat.Items.Add(mp4Container);
             comboFormat.Items.Add(movContainer);
             comboFormat.Items.Add(webmContainer);
+            comboFormat.Items.Add(mkvContainer);
 
             LoadSettings();
         }
@@ -1234,6 +1267,11 @@ namespace TwitchDownloaderWPF
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             SaveSettings();
+
+            if (windowPreview != null && windowPreview.IsLoaded)
+            {
+                windowPreview.Close();
+            }
         }
 
         private void btnFfmpeg_Click(object sender, RoutedEventArgs e)

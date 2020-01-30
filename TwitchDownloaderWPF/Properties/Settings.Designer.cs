@@ -275,5 +275,17 @@ namespace TwitchDownloader.Properties {
                 this["VideoCodec"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("255")]
+        public int BackgroundColorA {
+            get {
+                return ((int)(this["BackgroundColorA"]));
+            }
+            set {
+                this["BackgroundColorA"] = value;
+            }
+        }
     }
 }
