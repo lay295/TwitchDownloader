@@ -66,7 +66,7 @@ namespace TwitchDownloader
                         using (MemoryStream ms = new MemoryStream(imageBytes))
                             emoteCodec = SKCodec.Create(ms);
 
-                        ThirdPartyEmote emote = new ThirdPartyEmote(emoteBitmap, emoteCodec, previewDataEmote.name, ".png", "0", 1);
+                        ThirdPartyEmote emote = new ThirdPartyEmote(new List<SKBitmap>() { emoteBitmap }, emoteCodec, previewDataEmote.name, ".png", "0", 1);
                         thirdPartyEmotes.Add(emote);
                     }
 

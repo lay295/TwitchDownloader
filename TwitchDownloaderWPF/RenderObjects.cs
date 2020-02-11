@@ -28,7 +28,7 @@ public class Progress
 
 public class ThirdPartyEmote
 {
-    public SKBitmap emote;
+    public List<SKBitmap> emote_frames = new List<SKBitmap>();
     public SKCodec codec;
     public string imageType;
     public string name;
@@ -37,16 +37,40 @@ public class ThirdPartyEmote
     public int height;
     public int imageScale;
 
-    public ThirdPartyEmote(SKBitmap Emote, SKCodec Codec, string Name, string ImageType, string Id, int ImageScale)
+    public ThirdPartyEmote(List<SKBitmap> Emote_frames, SKCodec Codec, string Name, string ImageType, string Id, int ImageScale)
     {
-        emote = Emote;
+        emote_frames = Emote_frames;
         codec = Codec;
         name = Name;
         imageType = ImageType;
         id = Id;
-        width = emote.Width;
-        height = emote.Height;
+        width = Emote_frames.First().Width;
+        height = Emote_frames.First().Height;
         imageScale = ImageScale;
+
+        if (imageType == "gif")
+        {
+            emote_frames.Clear();
+            for (int i = 0; i < Codec.FrameCount; i++)
+            {
+                SKImageInfo imageInfo = new SKImageInfo(codec.Info.Width, codec.Info.Height);
+                SKBitmap newBitmap = new SKBitmap(imageInfo);
+                IntPtr pointer = newBitmap.GetPixels();
+                SKCodecOptions codecOptions = new SKCodecOptions(i);
+                codec.GetPixels(imageInfo, pointer, codecOptions);
+                emote_frames.Add(newBitmap);
+            }
+        }
+    }
+
+    public SKBitmap GetFrame(int frameNum)
+    {
+        SKImageInfo imageInfo = new SKImageInfo(codec.Info.Width, codec.Info.Height);
+        SKBitmap newBitmap = new SKBitmap(imageInfo);
+        IntPtr pointer = newBitmap.GetPixels();
+        SKCodecOptions codecOptions = new SKCodecOptions(frameNum);
+        codec.GetPixels(imageInfo, pointer, codecOptions);
+        return newBitmap;
     }
 }
 
@@ -126,13 +150,16 @@ public class GifEmote
     public int imageScale;
     public int width;
     public int height;
+    public List<SKBitmap> image_frames;
+    public SKBitmap backgroundImage;
 
-    public GifEmote(Point Offset, string Name, SKCodec Codec, int ImageScale)
+    public GifEmote(Point Offset, string Name, SKCodec Codec, int ImageScale, List<SKBitmap> Image_frames)
     {
         offset = Offset;
         name = Name;
         frames = Codec.FrameCount;
         codec = Codec;
+        image_frames = Image_frames;
 
         durations = new List<int>();
         for (int i = 0; i < frames; i++)
@@ -152,22 +179,10 @@ public class GifEmote
             total_duration = durations.Count * 10;
         }
 
-        SKBitmap temp = GetFrame(0);
-        width = temp.Width;
-        height = temp.Height;
-        temp.Dispose();
+        width = image_frames.First().Width;
+        height = image_frames.First().Height;
 
         imageScale = ImageScale;
-    }
-
-    public SKBitmap GetFrame(int frameNum)
-    {
-        SKImageInfo imageInfo = new SKImageInfo(codec.Info.Width, codec.Info.Height);
-        SKBitmap newBitmap = new SKBitmap(imageInfo);
-        IntPtr pointer = newBitmap.GetPixels();
-        SKCodecOptions codecOptions = new SKCodecOptions(frameNum);
-        codec.GetPixels(imageInfo, pointer, codecOptions);
-        return newBitmap;
     }
 }
 

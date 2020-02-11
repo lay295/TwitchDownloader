@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using TwitchDownloader.Properties;
+using TwitchDownloaderWPF;
 
 namespace TwitchDownloader
 {
@@ -23,8 +24,10 @@ namespace TwitchDownloader
     /// </summary>
     public partial class FfmpegOptions : Window
     {
-        public FfmpegOptions()
+        private static PageChatRender parentWindow;
+        public FfmpegOptions(PageChatRender parent)
         {
+            parentWindow = parent;
             InitializeComponent();
         }
 
@@ -61,7 +64,10 @@ namespace TwitchDownloader
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             textInputArgs.Text = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -";
-            textOutputArgs.Text = "-c:v libx264 -preset medium -pix_fmt yuv420p \"{save_path}\"";
+            if (parentWindow.comboCodec.SelectedItem != null)
+            {
+                textOutputArgs.Text = ((Codec) parentWindow.comboCodec.SelectedItem).OutputArgs;
+            }
         }
     }
 }
