@@ -6,7 +6,7 @@ A Twitch VOD/Clip/Chat downloader I wrote, as well as a chat render feature.
 ![](https://i.imgur.com/BmGqYbm.gif)
 
 ## Chat render example
-![](https://i.imgur.com/huqkYcz.gif)
+![](https://i.imgur.com/I4Z2bWo.gif)
 
 ## Video Demonstration (older version, same concept)
 https://www.youtube.com/watch?v=0W3MhfhnYjk
