@@ -54,7 +54,7 @@
       <Value Profile="(Default)">-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -</Value>
     </Setting>
     <Setting Name="FfmpegOutputArgs" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-c:v libx264 -preset medium -pix_fmt yuv420p "{save_path}"</Value>
+      <Value Profile="(Default)">-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"</Value>
     </Setting>
     <Setting Name="Framerate" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">60</Value>
