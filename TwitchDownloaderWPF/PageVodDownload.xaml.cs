@@ -21,6 +21,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.IO;
+using TwitchDownloader;
 using TwitchDownloaderWPF;
 using Xabe.FFmpeg.Model;
 using Xabe.FFmpeg;
@@ -80,7 +81,7 @@ namespace TwitchDownloaderWPF
                     {
                         AppendLog("ERROR: Unable to find thumbnail");
                     }
-                    
+
                     comboQuality.Items.Clear();
                     videoQualties.Clear();
                     string[] playlist = taskPlaylist.Result;
@@ -130,7 +131,7 @@ namespace TwitchDownloaderWPF
         {
             //There might be a better way to do this, gets string 0h0m0s and returns timespan
             TimeSpan returnSpan = new TimeSpan(0);
-            string[] inputArray = input.Remove(input.Length-1).Replace('h', ':').Replace('m', ':').Split(':');
+            string[] inputArray = input.Remove(input.Length - 1).Replace('h', ':').Replace('m', ':').Split(':');
 
             returnSpan = returnSpan.Add(TimeSpan.FromSeconds(Int32.Parse(inputArray[inputArray.Length - 1])));
             if (inputArray.Length > 1)
@@ -169,6 +170,7 @@ namespace TwitchDownloaderWPF
 
                     SetImage("Images/ppOverheat.gif", true);
                     statusMessage.Text = "Downloading";
+
                     backgroundDownloadManager.RunWorkerAsync(options);
                 }
             }
@@ -200,6 +202,7 @@ namespace TwitchDownloaderWPF
             int downloadThreads = options.download_threads;
             string tempFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
             string downloadFolder = Path.Combine(tempFolder, options.id.ToString());
+            ServicePointManager.DefaultConnectionLimit = downloadThreads;
 
             if (Directory.Exists(downloadFolder))
                 DeleteDirectory(downloadFolder);
@@ -230,39 +233,14 @@ namespace TwitchDownloaderWPF
             int partCount = videoParts.Count;
             int doneCount = 0;
 
-            while (videoParts.Count > 0 || threads.Count > 0)
+            Parallel.ForEach(videoParts, new ParallelOptions { MaxDegreeOfParallelism = downloadThreads },
+            videoPart =>
             {
-                Thread.Sleep(1000);
-
-                List<Thread> toRemove = new List<Thread>();
-                foreach (var thread in threads)
-                {
-                    if (!thread.IsAlive)
-                        toRemove.Add(thread);
-                }
-                foreach (var thread in toRemove)
-                {
-                    threads.Remove(thread);
-                    doneCount++;
-
-                    int percent = (int)Math.Floor(((double)doneCount / (double)partCount) * 100);
-                    (sender as BackgroundWorker).ReportProgress(percent, String.Format("Downloading {0}% (1/3)", percent));
-                }
-
-                for (int i = threads.Count - 1; i < downloadThreads - 1; i++)
-                {
-                    if (videoParts.Count > 0)
-                    {
-                        string videoPart = videoParts.Dequeue();
-                        if (videoPart is string && videoPart != null)
-                        {
-                            Thread thread = new Thread(() => DownloadThread(videoPart, baseUrl, downloadFolder));
-                            thread.Start();
-                            threads.Add(thread);
-                        }
-                    }
-                }
-            }
+                DownloadThread(videoPart, baseUrl, downloadFolder);
+                doneCount++;
+                int percent = (int)Math.Floor(((double)doneCount / (double)partCount) * 100);
+                (sender as BackgroundWorker).ReportProgress(percent, String.Format("Downloading {0}% (1/3)", percent));
+            });
 
             (sender as BackgroundWorker).ReportProgress(0, "Combining Parts (2/3)");
 
@@ -400,7 +378,7 @@ namespace TwitchDownloaderWPF
             {
                 statusMessage.Text = "Done";
                 SetImage("Images/ppHop.gif", true);
-                
+
             }
             else
             {
@@ -487,7 +465,7 @@ namespace TwitchDownloaderWPF
             return true;
         }
 
-        private void AppendLog(string message)
+        public void AppendLog(string message)
         {
             textLog.Dispatcher.BeginInvoke((Action)(() =>
                 textLog.AppendText(message + Environment.NewLine)
@@ -497,7 +475,7 @@ namespace TwitchDownloaderWPF
         private void Page_Initialized(object sender, EventArgs e)
         {
             SetEnabled(false);
-
+            WebRequest.DefaultWebProxy = null;
             numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
         }
 
@@ -540,7 +518,7 @@ public class DownloadOptions
     public int download_threads { get; set; }
     public DownloadOptions()
     {
-        
+
     }
 
     public void UpdateValues(PageVodDownload currentPage)
