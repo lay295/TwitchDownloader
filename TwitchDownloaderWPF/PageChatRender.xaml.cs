@@ -240,7 +240,11 @@ namespace TwitchDownloaderWPF
             {
                 SKColor newColor = SKColor.Parse("#858585");
             }
+            
+            return userColor;
 
+            //Too scuffed, also can mess up if using a chroma key
+            /*
             //I don't really know much about this, but i'll give it a shot
             float[] userColorHsl = new float[3];
             float[] backgroundColorHsl = new float[3];
@@ -258,6 +262,7 @@ namespace TwitchDownloaderWPF
             }
             else
                 return userColor;
+            */
         }
 
         private void RenderVideo(RenderOptions renderOptions, Queue<TwitchComment> finalComments, List<Comment> comments, object sender)
