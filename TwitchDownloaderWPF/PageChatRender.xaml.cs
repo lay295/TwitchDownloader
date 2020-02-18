@@ -148,8 +148,8 @@ namespace TwitchDownloaderWPF
                 string userName = comment.commenter.display_name.ToString();
                 int default_x = 2;
                 Point drawPos = new Point(default_x, 0);
-                string colorHtml = (comment.message.user_color != null ? comment.message.user_color : defaultColors[rand.Next(0, defaultColors.Length)]).Substring(1);
-                SKColor userColor = new SKColor(Convert.ToByte(colorHtml.Substring(0, 2), 16), Convert.ToByte(colorHtml.Substring(2, 2), 16), Convert.ToByte(colorHtml.Substring(4, 2), 16));
+                string colorHtml = (comment.message.user_color != null ? comment.message.user_color : defaultColors[rand.Next(0, defaultColors.Length)]);
+                SKColor userColor = SKColor.Parse(colorHtml);
                 userColor = GenerateUserColor(userColor, renderOptions.background_color);
 
                 List<SKBitmap> imageList = new List<SKBitmap>();
@@ -239,6 +239,7 @@ namespace TwitchDownloaderWPF
             if (userColor.Red == 0 && userColor.Green == 0 && userColor.Blue == 0)
             {
                 SKColor newColor = SKColor.Parse("#858585");
+                return newColor;
             }
             
             return userColor;
