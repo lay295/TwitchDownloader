@@ -285,7 +285,7 @@ namespace TwitchDownloaderWPF
             Task.WaitAll(info);
             double seekTime = options.crop_begin;
             double seekDuration = info.Result.Duration.TotalSeconds - seekTime - options.crop_end;
-            Task<IConversionResult> conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -analyzeduration {2} -t {3} -acodec copy -vcodec copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), int.MaxValue, seekDuration.ToString(), outputConvert));
+            Task<IConversionResult> conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -analyzeduration {2} -t {3} -avoid_negative_ts make_zero -vcodec copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), int.MaxValue, seekDuration.ToString(), outputConvert));
             Task.WaitAll(conversionResult);
             if (Directory.Exists(downloadFolder))
                 DeleteDirectory(downloadFolder);

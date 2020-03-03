@@ -142,8 +142,11 @@ namespace TwitchDownloaderWPF
             {
                 if (comment.source != "chat")
                     continue;
-                if (comment.message.user_notice_params != null && (comment.message.user_notice_params.msg_id != null && comment.message.user_notice_params.msg_id != ""))
-                    continue;
+                if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
+                {
+                    if (comment.message.user_notice_params.msg_id != "highlighted-message" && comment.message.user_notice_params.msg_id != "")
+                        continue;
+                }
 
                 string userName = comment.commenter.display_name.ToString();
                 int default_x = 2;
