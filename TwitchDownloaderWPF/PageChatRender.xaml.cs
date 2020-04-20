@@ -104,6 +104,7 @@ namespace TwitchDownloaderWPF
             BlockingCollection<TwitchComment> finalComments = new BlockingCollection<TwitchComment>();
             List<ThirdPartyEmote> thirdPartyEmotes = new List<ThirdPartyEmote>();
             List<ChatBadge> chatBadges = new List<ChatBadge>();
+            List<CheerEmote> cheerEmotes = new List<CheerEmote>();
             Dictionary<string, SKBitmap> chatEmotes = new Dictionary<string, SKBitmap>();
             Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
             Random rand = new Random();
@@ -132,6 +133,8 @@ namespace TwitchDownloaderWPF
             GetThirdPartyEmotes(thirdPartyEmotes, chatJson.streamer, renderOptions, cacheFolder);
             (sender as BackgroundWorker).ReportProgress(0, new Progress("Fetching Twitter Emojis"));
             GetTwitterEmojis(emojiCache, chatJson.comments, renderOptions, cacheFolder, emojiRegex);
+            (sender as BackgroundWorker).ReportProgress(0, new Progress("Fetching Bit Emotes"));
+            GetBits(cheerEmotes, renderOptions, cacheFolder, emojiRegex);
 
             Size canvasSize = new Size(renderOptions.chat_width, renderOptions.text_height);
             SKPaint nameFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.font, SKFontStyle.Bold), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.font_size, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
@@ -151,7 +154,7 @@ namespace TwitchDownloaderWPF
                 string userName = comment.commenter.display_name.ToString();
                 int default_x = 2;
                 Point drawPos = new Point(default_x, 0);
-                string colorHtml = (comment.message.user_color != null ? comment.message.user_color : defaultColors[rand.Next(0, defaultColors.Length)]);
+                string colorHtml = (comment.message.user_color != null ? comment.message.user_color : defaultColors[Math.Abs(userName.GetHashCode()) % defaultColors.Length]);
                 SKColor userColor = SKColor.Parse(colorHtml);
                 userColor = GenerateUserColor(userColor, renderOptions.background_color);
 
@@ -166,7 +169,7 @@ namespace TwitchDownloaderWPF
                     sectionImage = DrawTimestamp(sectionImage, imageList, messageFont, renderOptions, comment, canvasSize, ref drawPos, ref default_x);
                 sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
                 sectionImage = DrawUsername(sectionImage, imageList, renderOptions, nameFont, userName, userColor, canvasSize, ref drawPos);
-                sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, comment, canvasSize, ref drawPos, emojiRegex, ref default_x, emoteList, emotePositionList);
+                sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, emojiRegex, ref default_x, emoteList, emotePositionList);
 
                 int finalHeight = 0;
                 foreach (var img in imageList)
@@ -239,34 +242,30 @@ namespace TwitchDownloaderWPF
 
         private SKColor GenerateUserColor(SKColor userColor, SKColor background_color)
         {
-            if (userColor.Red == 0 && userColor.Green == 0 && userColor.Blue == 0)
+            float backgroundHue, backgroundSaturation, backgroundBrightness;
+            background_color.ToHsl(out backgroundHue, out backgroundSaturation, out backgroundBrightness);
+            float userHue, userSaturation, userBrightness;
+            userColor.ToHsl(out userHue, out userSaturation, out userBrightness);
+
+            if (backgroundBrightness < 25)
             {
-                SKColor newColor = SKColor.Parse("#858585");
+                //Dark background
+                if (userBrightness < 45)
+                {
+                    userBrightness = 45;
+                    SKColor newColor = SKColor.FromHsl(userHue, userSaturation, userBrightness);
+                    return newColor;
+                }
+            }
+
+            if (Math.Abs(backgroundBrightness - userBrightness) < 10 && backgroundBrightness > 50)
+            {
+                userBrightness -= 20;
+                SKColor newColor = SKColor.FromHsl(userHue, userSaturation, userBrightness);
                 return newColor;
             }
-            
+
             return userColor;
-
-            //Too scuffed, also can mess up if using a chroma key
-            /*
-            //I don't really know much about this, but i'll give it a shot
-            float[] userColorHsl = new float[3];
-            float[] backgroundColorHsl = new float[3];
-            userColor.ToHsl(out userColorHsl[0], out userColorHsl[1], out userColorHsl[2]);
-            background_color.ToHsl(out backgroundColorHsl[0], out backgroundColorHsl[1], out backgroundColorHsl[2]);
-
-            if (Math.Abs(userColorHsl[2] - backgroundColorHsl[2]) < 10)
-            {
-                if (backgroundColorHsl[2] < 50)
-                    userColorHsl[2] += 50;
-                else
-                    userColorHsl[2] -= 50;
-                SKColor newColor = SKColor.FromHsl(userColorHsl[0], userColorHsl[1], userColorHsl[2]);
-                return newColor;
-            }
-            else
-                return userColor;
-            */
         }
 
         private void RenderVideo(RenderOptions renderOptions, Queue<TwitchComment> finalComments, List<Comment> comments, object sender)
@@ -305,10 +304,14 @@ namespace TwitchDownloaderWPF
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardInput = true,
-                    RedirectStandardOutput = true
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
                 }
             };
+            //process.ErrorDataReceived += ErrorDataHandler;
+
             process.Start();
+            process.BeginErrorReadLine();
             process.BeginOutputReadLine();
 
             stopwatch.Start();
@@ -471,8 +474,15 @@ namespace TwitchDownloaderWPF
             process.WaitForExit();
         }
 
-        public SKBitmap DrawMessage(SKBitmap sectionImage, List<SKBitmap> imageList, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, SKPaint messageFont, Dictionary<string, SKBitmap> emojiCache, Dictionary<string, SKBitmap> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, Comment comment, Size canvasSize, ref Point drawPos, string emojiRegex, ref int default_x, List<SKBitmap> emoteList, List<SKRect> emotePositionList)
+        private void ErrorDataHandler(object sender, DataReceivedEventArgs e)
         {
+            AppendLog(e.Data);
+        }
+
+        public SKBitmap DrawMessage(SKBitmap sectionImage, List<SKBitmap> imageList, RenderOptions renderOptions, List<GifEmote> currentGifEmotes, SKPaint messageFont, Dictionary<string, SKBitmap> emojiCache, Dictionary<string, SKBitmap> chatEmotes, List<ThirdPartyEmote> thirdPartyEmotes, List<CheerEmote> cheerEmotes, Comment comment, Size canvasSize, ref Point drawPos, string emojiRegex, ref int default_x, List<SKBitmap> emoteList, List<SKRect> emotePositionList)
+        {
+            int bitsCount = comment.message.bits_spent;
+
             foreach (var fragment in comment.message.fragments)
             {
                 if (fragment.emoticon == null)
@@ -581,7 +591,27 @@ namespace TwitchDownloaderWPF
                             }
                             else
                             {
-                                sectionImage = DrawText(sectionImage, output, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
+                                bool bitsPrinted = false;
+                                try
+                                {
+                                    if (bitsCount > 0 && output.Any(char.IsDigit) && cheerEmotes.Any(x => output.Contains(x.prefix)))
+                                    {
+                                        CheerEmote currentCheerEmote = cheerEmotes.Find(x => output.Contains(x.prefix));
+                                        int bitsIndex = output.IndexOfAny("0123456789".ToCharArray());
+                                        int bitsAmount = Int32.Parse(output.Substring(bitsIndex));
+                                        bitsCount -= bitsAmount;
+                                        KeyValuePair<int, ThirdPartyEmote> tierList = currentCheerEmote.getTier(bitsAmount);
+                                        GifEmote emote = new GifEmote(new Point(drawPos.X, drawPos.Y), tierList.Value.name, tierList.Value.codec, tierList.Value.imageScale, tierList.Value.emote_frames);
+                                        currentGifEmotes.Add(emote);
+                                        drawPos.X += (tierList.Value.width / tierList.Value.imageScale) * renderOptions.image_scale + (3 * renderOptions.image_scale);
+                                        sectionImage = DrawText(sectionImage, bitsAmount.ToString(), messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
+                                        bitsPrinted = true;
+                                    }
+                                }
+                                catch
+                                { }
+                                if (!bitsPrinted)
+                                    sectionImage = DrawText(sectionImage, output, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
                             }
                         }
                     }
@@ -904,6 +934,23 @@ namespace TwitchDownloaderWPF
                             SKBitmap temp_emote = SKBitmap.Decode(ms2);
                             thirdPartyEmotes.Add(new ThirdPartyEmote(new List<SKBitmap>() { temp_emote }, SKCodec.Create(ms), emote["code"].ToString(), emote["imageType"].ToString(), id, 2));
                         }
+                        foreach (var emote in BBTV_channel["channelEmotes"])
+                        {
+                            string id = emote["id"].ToString();
+                            byte[] bytes;
+                            string fileName = Path.Combine(bttvFolder, id + "_2x.png");
+                            if (File.Exists(fileName))
+                                bytes = File.ReadAllBytes(fileName);
+                            else
+                            {
+                                bytes = client.DownloadData(String.Format("https://cdn.betterttv.net/emote/{0}/2x", id));
+                                File.WriteAllBytes(fileName, bytes);
+                            }
+                            MemoryStream ms = new MemoryStream(bytes);
+                            MemoryStream ms2 = new MemoryStream(bytes);
+                            SKBitmap temp_emote = SKBitmap.Decode(ms2);
+                            thirdPartyEmotes.Add(new ThirdPartyEmote(new List<SKBitmap>() { temp_emote }, SKCodec.Create(ms), emote["code"].ToString(), emote["imageType"].ToString(), id, 2));
+                        }
                     }
                     catch { }
                 }
@@ -1138,6 +1185,60 @@ namespace TwitchDownloaderWPF
                 }
             }
         }
+        private void GetBits(List<CheerEmote> cheerEmotes, RenderOptions renderOptions, string cacheFolder, string emojiRegex)
+        {
+            string bitsFolder = Path.Combine(cacheFolder, "bits");
+            if (!Directory.Exists(bitsFolder))
+                Directory.CreateDirectory(bitsFolder);
+
+            using (WebClient client = new WebClient())
+            {
+                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json");
+                client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+
+                JObject globalCheer = JObject.Parse(client.DownloadString("https://api.twitch.tv/kraken/bits/actions"));
+
+                foreach (JToken emoteToken in globalCheer["actions"])
+                {
+                    string prefix = emoteToken["prefix"].ToString();
+                    List<KeyValuePair<int, ThirdPartyEmote>> tierList = new List<KeyValuePair<int, ThirdPartyEmote>>();
+                    CheerEmote newEmote = new CheerEmote() {prefix = prefix, tierList = tierList };
+                    byte[] finalBytes = null;
+                    foreach (JToken tierToken in emoteToken["tiers"])
+                    {
+                        try
+                        {
+                            int minBits = tierToken["min_bits"].ToObject<int>();
+                            string fileName = Path.Combine(bitsFolder, prefix + minBits + "_2x.gif");
+
+                            if (File.Exists(fileName))
+                            {
+                                finalBytes = File.ReadAllBytes(fileName);
+                            }
+                            else
+                            {
+                                byte[] bytes = client.DownloadData(tierToken["images"]["dark"]["animated"]["2"].ToString());
+                                File.WriteAllBytes(fileName, bytes);
+                                finalBytes = bytes;
+                            }
+
+                            if (finalBytes != null)
+                            {
+                                MemoryStream ms = new MemoryStream(finalBytes);
+                                MemoryStream ms2 = new MemoryStream(finalBytes);
+                                SKBitmap finalBitmap = SKBitmap.Decode(ms);
+                                ThirdPartyEmote emote = new ThirdPartyEmote(new List<SKBitmap>() { finalBitmap }, SKCodec.Create(ms2), prefix, "gif", "", 2);
+                                tierList.Add(new KeyValuePair<int, ThirdPartyEmote>(minBits, emote));
+                            }
+                        }
+                        catch
+                        { }
+                    }
+                    cheerEmotes.Add(newEmote);
+                }
+            }
+        }
+
         private void LoadSettings()
         {
             try
@@ -1310,8 +1411,9 @@ namespace TwitchDownloaderWPF
             Codec vp8Codec = new Codec() { Name = "VP8", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx -crf 18 -b:v 2M -pix_fmt yuva420p -auto-alt-ref 0 \"{save_path}\"" };
             Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 18 -b:v 2M -pix_fmt yuva420p \"{save_path}\"" };
             Codec rleCodec = new Codec() { Name = "RLE", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v qtrle -pix_fmt argb \"{save_path}\"" };
+            Codec proresCodec = new Codec() { Name = "ProRes", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v prores_ks -pix_fmt argb \"{save_path}\"" };
             VideoContainer mp4Container = new VideoContainer() { Name = "MP4", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec } };
-            VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, rleCodec } };
+            VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, rleCodec, proresCodec } };
             VideoContainer webmContainer = new VideoContainer() { Name = "WEBM", SupportedCodecs = new List<Codec>() { vp8Codec, vp9Codec } };
             VideoContainer mkvContainer = new VideoContainer() { Name = "MKV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, vp8Codec, vp9Codec } };
             comboFormat.Items.Add(mp4Container);
@@ -1395,6 +1497,25 @@ namespace TwitchDownloaderWPF
         public override string ToString()
         {
             return Name;
+        }
+    }
+
+    public class CheerEmote
+    {
+        public string prefix { get; set; }
+        public List<KeyValuePair<int, ThirdPartyEmote>> tierList = new List<KeyValuePair<int, ThirdPartyEmote>>();
+
+        public KeyValuePair<int, ThirdPartyEmote> getTier(int value)
+        {
+            KeyValuePair<int, ThirdPartyEmote> returnPair = tierList.First();
+            foreach (KeyValuePair<int, ThirdPartyEmote> tierPair in tierList)
+            {
+                if (tierPair.Key > value)
+                    break;
+                returnPair = tierPair;
+            }
+
+            return returnPair;
         }
     }
 }

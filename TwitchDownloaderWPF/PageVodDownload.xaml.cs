@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -27,6 +28,7 @@ using Xabe.FFmpeg.Model;
 using Xabe.FFmpeg;
 using WpfAnimatedGif;
 using TwitchDownloader.Properties;
+using Xabe.FFmpeg.Events;
 
 namespace TwitchDownloaderWPF
 {
@@ -55,7 +57,11 @@ namespace TwitchDownloaderWPF
             numEndMinute.IsEnabled = isEnabled;
             numEndSecond.IsEnabled = isEnabled;
             btnDownload.IsEnabled = isEnabled;
-            numDownloadThreads.IsEnabled = isEnabled;
+        }
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
 
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
@@ -67,7 +73,7 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     Task<JObject> taskInfo = InfoHelper.GetVideoInfo(videoId);
-                    Task<JObject> taskAccessToken = InfoHelper.GetVideoToken(videoId);
+                    Task<JObject> taskAccessToken = InfoHelper.GetVideoToken(videoId, textOauth.Text);
                     await Task.WhenAll(taskInfo, taskAccessToken);
                     string thumbUrl = taskInfo.Result["data"][0]["thumbnail_url"].ToString().Replace("%{width}", 512.ToString()).Replace("%{height}", 290.ToString());
                     Task<BitmapImage> thumbImage = InfoHelper.GetThumb(thumbUrl);
@@ -278,14 +284,67 @@ namespace TwitchDownloaderWPF
                     catch { }
                 }
             }
-
-            (sender as BackgroundWorker).ReportProgress(0, "Finalizing MP4 (3/3)");
+            
+            bool isVFR = false;
+            if (options.encode_cfr)
+            {
+                var process = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = "ffmpeg.exe",
+                        Arguments = $"-i \"" + Path.Combine(downloadFolder, "output.ts") + "\" -vf vfrdet -f null -",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardInput = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                string output = "";
+                process.ErrorDataReceived += delegate(object o, DataReceivedEventArgs args)
+                {
+                    if (args.Data != null && args.Data.Contains("Parsed_vfrdet"))
+                    {
+                        output += args.Data;
+                    }
+                };
+                process.Start();
+                process.BeginErrorReadLine();
+                process.BeginOutputReadLine();
+                process.WaitForExit();
+                double VFR = double.Parse(output.Substring(output.IndexOf("VFR:") + 4, 8));
+                if (VFR == 0.0)
+                {
+                    AppendLog("Constant framerate detected, no need to re-encode");
+                }
+                else
+                {
+                    isVFR = true;
+                    AppendLog("Detected variable framerate, re-encoding");
+                }
+            }
+            
+            if (isVFR)
+                (sender as BackgroundWorker).ReportProgress(0, "Re-encoding MP4 (3/3)");
+            else
+                (sender as BackgroundWorker).ReportProgress(0, "Finalizing MP4 (3/3)");
             string outputConvert = options.filename;
             Task<IMediaInfo> info = MediaInfo.Get(Path.Combine(downloadFolder, "output.ts"));
             Task.WaitAll(info);
             double seekTime = options.crop_begin;
-            double seekDuration = info.Result.Duration.TotalSeconds - seekTime - options.crop_end;
-            Task<IConversionResult> conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -analyzeduration {2} -t {3} -avoid_negative_ts make_zero -vcodec copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), int.MaxValue, seekDuration.ToString(), outputConvert));
+            double seekDuration = Math.Round(info.Result.Duration.TotalSeconds - seekTime - options.crop_end);
+            Task<IConversionResult> conversionResult = null;
+            if (isVFR)
+            {
+                int newFps = (int)Math.Ceiling(info.Result.VideoStreams.First().FrameRate);
+                conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -analyzeduration {2} -t {3} -crf 20 -filter:v fps=fps={4} \"{5}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), int.MaxValue, seekDuration.ToString(), newFps, outputConvert));
+            }
+            else
+            {
+                conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -analyzeduration {2} -t {3} -avoid_negative_ts make_zero -acodec copy -vcodec copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), int.MaxValue, seekDuration.ToString(), outputConvert));
+            }
+                
             Task.WaitAll(conversionResult);
             if (Directory.Exists(downloadFolder))
                 DeleteDirectory(downloadFolder);
@@ -477,6 +536,8 @@ namespace TwitchDownloaderWPF
             SetEnabled(false);
             WebRequest.DefaultWebProxy = null;
             numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
+            textOauth.Text = Settings.Default.OAuth;
+            checkCFR.IsChecked = Settings.Default.EncodeCFR;
         }
 
         private void numDownloadThreads_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -486,6 +547,18 @@ namespace TwitchDownloaderWPF
                 Settings.Default.VodDownloadThreads = (int)numDownloadThreads.Value;
                 Settings.Default.Save();
             }
+        }
+
+        private void textOauth_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Settings.Default.OAuth = textOauth.Text;
+            Settings.Default.Save();
+        }
+
+        private void checkCFR_Changed(object sender, RoutedEventArgs e)
+        {
+            Settings.Default.EncodeCFR = (bool)checkCFR.IsChecked;
+            Settings.Default.Save();
         }
     }
 }
@@ -516,6 +589,7 @@ public class DownloadOptions
     public TimeSpan cropped_end_time { get; set; }
     public double crop_end { get; set; }
     public int download_threads { get; set; }
+    public bool encode_cfr { get; set; }
     public DownloadOptions()
     {
 
@@ -535,5 +609,6 @@ public class DownloadOptions
         crop_begin = 0.0;
         crop_end = 0.0;
         download_threads = (int)currentPage.numDownloadThreads.Value;
+        encode_cfr = (bool)currentPage.checkCFR.IsChecked;
     }
 }

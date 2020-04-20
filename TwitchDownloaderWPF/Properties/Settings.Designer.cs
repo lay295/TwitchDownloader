@@ -287,5 +287,29 @@ namespace TwitchDownloader.Properties {
                 this["BackgroundColorA"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string OAuth {
+            get {
+                return ((string)(this["OAuth"]));
+            }
+            set {
+                this["OAuth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EncodeCFR {
+            get {
+                return ((bool)(this["EncodeCFR"]));
+            }
+            set {
+                this["EncodeCFR"] = value;
+            }
+        }
     }
 }

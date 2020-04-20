@@ -48,6 +48,7 @@ public class Emoticon2
 public class Message
 {
     public string body { get; set; }
+    public int bits_spent { get; set; }
     public List<Fragment> fragments { get; set; }
     public bool is_action { get; set; }
     public List<UserBadge> user_badges { get; set; }

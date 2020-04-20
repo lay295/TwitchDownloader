@@ -80,6 +80,7 @@ namespace TwitchDownloader
                         SKBitmap sectionImage = new SKBitmap((int)canvasSize.Width, (int)canvasSize.Height);
                         List<GifEmote> currentGifEmotes = new List<GifEmote>();
                         List<SKBitmap> emoteList = new List<SKBitmap>();
+                        List<CheerEmote> cheerEmotes = new List<CheerEmote>();
                         List<SKRect> emotePositionList = new List<SKRect>();
                         new SKCanvas(sectionImage).Clear(renderOptions.background_color);
                         Comment comment = new Comment();
@@ -93,7 +94,7 @@ namespace TwitchDownloader
                         if (previewComment.badges != null)
                             sectionImage = DrawBadges(sectionImage, imageList, renderOptions, canvasSize, ref drawPos, previewComment);
                         sectionImage = pageChatRender.DrawUsername(sectionImage, imageList, renderOptions, nameFont, userName, userColor, canvasSize, ref drawPos);
-                        sectionImage = pageChatRender.DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, comment, canvasSize, ref drawPos, emojiRegex, ref default_x, emoteList, emotePositionList);
+                        sectionImage = pageChatRender.DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, emojiRegex, ref default_x, emoteList, emotePositionList);
 
 
                         int finalHeight = 0;

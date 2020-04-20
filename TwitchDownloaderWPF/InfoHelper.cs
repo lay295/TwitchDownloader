@@ -37,13 +37,13 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        public static async Task<JObject> GetVideoToken(int videoId)
+        public static async Task<JObject> GetVideoToken(int videoId, string authToken)
         {
             using (WebClient client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-                string response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/api/vods/{0}/access_token", videoId));
+                string response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/api/vods/{0}/access_token{1}", videoId, (authToken == "" ? "" : "?oauth_token=" + authToken)));
                 JObject result = JObject.Parse(response);
                 return result;
             }
