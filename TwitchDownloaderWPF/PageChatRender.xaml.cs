@@ -1356,14 +1356,14 @@ namespace TwitchDownloaderWPF
 
             if (colorBackground.SelectedColor.Value.A < 255)
             {
-                if ((((VideoContainer)comboFormat.SelectedItem).Name == "MOV" && ((Codec)comboCodec.SelectedItem).Name == "RLE") || ((VideoContainer)comboFormat.SelectedItem).Name == "WEBM")
+                if ((((VideoContainer)comboFormat.SelectedItem).Name == "MOV" && ( ((Codec)comboCodec.SelectedItem).Name == "RLE") || ((Codec)comboCodec.SelectedItem).Name == "ProRes") || ((VideoContainer)comboFormat.SelectedItem).Name == "WEBM")
                 {
                     return true;
                 }
                 else
                 {
                     AppendLog("ERROR: You've selected an alpha channel (transparency) for a container/codec that does not support it.");
-                    AppendLog("Remove transparency or encode with MOV and RLE (file size will be large)");
+                    AppendLog("Remove transparency or encode with MOV and RLE/PRORES (file size will be large)");
                     return false;
                 }
             }

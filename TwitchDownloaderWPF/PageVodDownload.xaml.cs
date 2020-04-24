@@ -116,7 +116,7 @@ namespace TwitchDownloaderWPF
                     numEndHour.Value = vodLength.Hours;
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
-                    labelLength.Text = String.Format("{0:00}:{1:00}:{2:00}", vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
+                    labelLength.Text = String.Format("{0:00}:{1:00}:{2:00}", vodLength.Hours, vodLength.Minutes, vodLength.Seconds);
 
                     SetEnabled(true);
                 }
@@ -502,7 +502,7 @@ namespace TwitchDownloaderWPF
 
         private bool ValidateInput()
         {
-            TimeSpan videoLength = TimeSpan.Parse(labelLength.Text);
+            TimeSpan videoLength = TimeSpan.Parse(labelLength.Text.ToString(CultureInfo.InvariantCulture));
             TimeSpan beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
             TimeSpan endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
 
@@ -601,7 +601,7 @@ public class DownloadOptions
         title = currentPage.textTitle.Text;
         quality = (string)currentPage.comboQuality.SelectedItem;
         streamer = currentPage.textStreamer.Text;
-        length = TimeSpan.Parse(currentPage.labelLength.Text);
+        length = TimeSpan.Parse(currentPage.labelLength.Text.ToString(CultureInfo.InvariantCulture));
         cropped_begin = (bool)currentPage.checkStart.IsChecked;
         cropped_end = (bool)currentPage.checkEnd.IsChecked;
         cropped_begin_time = new TimeSpan((int)currentPage.numStartHour.Value, (int)currentPage.numStartMinute.Value, (int)currentPage.numStartSecond.Value);

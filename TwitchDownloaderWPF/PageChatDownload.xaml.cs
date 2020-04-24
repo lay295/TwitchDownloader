@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -312,7 +313,7 @@ namespace TwitchDownloaderWPF
                         }
                         else
                         {
-                            TimeSpan vodLength = TimeSpan.Parse(Regex.Replace(videoData["data"][0]["duration"].ToString(), @"[^\d]", ":").TrimEnd(':'));
+                            TimeSpan vodLength = GenerateTimespan(((JValue)videoData["data"][0]["duration"]).ToString(CultureInfo.InvariantCulture));
                             duration = (int)Math.Ceiling(vodLength.TotalSeconds);
                         }
                         info = new ChatDownloadInfo(downloadType, textUrl.Text, saveFileDialog.FileName, videoData["data"][0]["id"].ToString(), startTime, duration, (bool)radioJson.IsChecked, textStreamer.Text, streamerId);
@@ -338,6 +339,21 @@ namespace TwitchDownloaderWPF
                     AppendLog("ERROR: " + ex.Message);
                 }
             }
+        }
+
+        private TimeSpan GenerateTimespan(string input)
+        {
+            //There might be a better way to do this, gets string 0h0m0s and returns timespan
+            TimeSpan returnSpan = new TimeSpan(0);
+            string[] inputArray = input.Remove(input.Length - 1).Replace('h', ':').Replace('m', ':').Split(':');
+
+            returnSpan = returnSpan.Add(TimeSpan.FromSeconds(Int32.Parse(inputArray[inputArray.Length - 1])));
+            if (inputArray.Length > 1)
+                returnSpan = returnSpan.Add(TimeSpan.FromMinutes(Int32.Parse(inputArray[inputArray.Length - 2])));
+            if (inputArray.Length > 2)
+                returnSpan = returnSpan.Add(TimeSpan.FromHours(Int32.Parse(inputArray[inputArray.Length - 3])));
+
+            return returnSpan;
         }
 
         public void SetImage(string imageUri, bool isGif)
