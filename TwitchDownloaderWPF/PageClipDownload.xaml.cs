@@ -49,13 +49,13 @@ namespace TwitchDownloaderWPF
                     Task<JArray> taskLinks = InfoHelper.GetClipLinks(clipId);
                     await Task.WhenAll(taskInfo, taskLinks);
 
-                    JToken clipData = taskInfo.Result["data"][0];
-                    string thumbUrl = clipData["thumbnail_url"].ToString();
+                    JToken clipData = taskInfo.Result;
+                    string thumbUrl = clipData["thumbnails"]["medium"].ToString();
                     Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
                     await Task.WhenAll(taskThumb);
 
                     imgThumbnail.Source = taskThumb.Result;
-                    textStreamer.Text = clipData["broadcaster_name"].ToString();
+                    textStreamer.Text = clipData["broadcaster"]["display_name"].ToString();
                     textCreatedAt.Text = clipData["created_at"].ToString();
                     textTitle.Text = clipData["title"].ToString();
 

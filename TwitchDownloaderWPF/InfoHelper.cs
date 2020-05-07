@@ -30,8 +30,9 @@ namespace TwitchDownloaderWPF
             using (WebClient client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
+                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json");
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-                string response = await client.DownloadStringTaskAsync("https://api.twitch.tv/helix/videos?id=" + videoId);
+                string response = await client.DownloadStringTaskAsync("https://api.twitch.tv/kraken/videos/" + videoId);
                 JObject result = JObject.Parse(response);
                 return result;
             }
@@ -61,18 +62,6 @@ namespace TwitchDownloaderWPF
         }
 
         public static async Task<JObject> GetClipInfo(object clipId)
-        {
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-                string response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/helix/clips?id={0}", clipId));
-                JObject result = JObject.Parse(response);
-                return result;
-            }
-        }
-
-        public static async Task<JObject> GetClipInfoChat(object clipId)
         {
             using (WebClient client = new WebClient())
             {

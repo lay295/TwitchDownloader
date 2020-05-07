@@ -85,7 +85,8 @@
                 </StackPanel>
             </StackPanel>
         </StackPanel>
-        <Button x:Name="btnDownload" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="Download" Height="50" Width="100" Click="btnDownload_Click" Margin="0,0,0,10" VerticalAlignment="Bottom"/>
+        <Button x:Name="btnDownload" Content="Download" Height="50" Width="100" Click="btnDownload_Click" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom"/>
+        <!-- <Button x:Name="btnQueue" Content="Queue" Height="25" Width="60" Margin="5,4,0,10" Grid.Row="3" Grid.Column="3" HorizontalAlignment="Center"/> -->
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
             <TextBlock Text="Log:"/>

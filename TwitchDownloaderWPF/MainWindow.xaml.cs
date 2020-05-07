@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TwitchDownloader;
 using Xabe.FFmpeg;
 
 namespace TwitchDownloaderWPF
@@ -27,6 +28,7 @@ namespace TwitchDownloaderWPF
         PageClipDownload pageClipDownload = new PageClipDownload();
         PageChatDownload pageChatDownload = new PageChatDownload();
         PageChatRender pageChatRender = new PageChatRender();
+        PageQueue pageQueue = new PageQueue();
         public MainWindow()
         {
             InitializeComponent();
@@ -51,6 +53,11 @@ namespace TwitchDownloaderWPF
         private void btnChatRender_Click(object sender, RoutedEventArgs e)
         {
             Main.Content = pageChatRender;
+        }
+
+        private void btnQueue_Click(object sender, RoutedEventArgs e)
+        {
+            Main.Content = pageQueue;
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)

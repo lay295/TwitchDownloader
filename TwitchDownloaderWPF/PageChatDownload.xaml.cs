@@ -84,9 +84,8 @@ namespace TwitchDownloaderWPF
                         Task<JObject> taskInfo = InfoHelper.GetVideoInfo(Int32.Parse(downloadId));
                         await Task.WhenAll(taskInfo);
 
-                        JToken clipData = taskInfo.Result;
                         videoData = taskInfo.Result;
-                        string thumbUrl = videoData["data"][0]["thumbnail_url"].ToString().Replace("%{width}", 512.ToString()).Replace("%{height}", 290.ToString());
+                        string thumbUrl = taskInfo.Result["preview"]["medium"].ToString();
                         Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
 
                         try
@@ -99,16 +98,16 @@ namespace TwitchDownloaderWPF
                         }
                         if (!taskThumb.IsFaulted)
                             imgThumbnail.Source = taskThumb.Result;
-                        textTitle.Text = taskInfo.Result["data"][0]["title"].ToString();
-                        textStreamer.Text = taskInfo.Result["data"][0]["user_name"].ToString();
-                        textCreatedAt.Text = taskInfo.Result["data"][0]["created_at"].ToString();
-                        streamerId = taskInfo.Result["data"][0]["user_id"].ToObject<int>();
+                        textTitle.Text = taskInfo.Result["title"].ToString();
+                        textStreamer.Text = taskInfo.Result["channel"]["display_name"].ToString();
+                        textCreatedAt.Text = taskInfo.Result["created_at"].ToString();
+                        streamerId = taskInfo.Result["channel"]["_id"].ToObject<int>();
                         SetEnabled(true, false);
                     }
                     else if (downloadType == DownloadType.Clip)
                     {
                         string clipId = downloadId;
-                        Task<JObject> taskInfo = InfoHelper.GetClipInfoChat(clipId);
+                        Task<JObject> taskInfo = InfoHelper.GetClipInfo(clipId);
                         await Task.WhenAll(taskInfo);
 
                         JToken clipData = taskInfo.Result;
@@ -313,10 +312,10 @@ namespace TwitchDownloaderWPF
                         }
                         else
                         {
-                            TimeSpan vodLength = GenerateTimespan(((JValue)videoData["data"][0]["duration"]).ToString(CultureInfo.InvariantCulture));
+                            TimeSpan vodLength = TimeSpan.FromSeconds(videoData["length"].ToObject<int>());
                             duration = (int)Math.Ceiling(vodLength.TotalSeconds);
                         }
-                        info = new ChatDownloadInfo(downloadType, textUrl.Text, saveFileDialog.FileName, videoData["data"][0]["id"].ToString(), startTime, duration, (bool)radioJson.IsChecked, textStreamer.Text, streamerId);
+                        info = new ChatDownloadInfo(downloadType, textUrl.Text, saveFileDialog.FileName, videoData["_id"].ToString().Substring(1), startTime, duration, (bool)radioJson.IsChecked, textStreamer.Text, streamerId);
                     }
                     else
                         info = new ChatDownloadInfo(downloadType, textUrl.Text, saveFileDialog.FileName, videoData["vod"]["id"].ToString(), videoData["vod"]["offset"].ToObject<int>(), videoData["duration"].ToObject<double>(), (bool)radioJson.IsChecked, textStreamer.Text, streamerId);
