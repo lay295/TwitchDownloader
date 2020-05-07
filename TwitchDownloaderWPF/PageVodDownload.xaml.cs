@@ -59,7 +59,7 @@ namespace TwitchDownloaderWPF
             numEndMinute.IsEnabled = isEnabled;
             numEndSecond.IsEnabled = isEnabled;
             btnDownload.IsEnabled = isEnabled;
-            btnQueue.IsEnabled = isEnabled;
+            //btnQueue.IsEnabled = isEnabled;
         }
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
