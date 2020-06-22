@@ -79,8 +79,15 @@ public class Comment
     public bool more_replies { get; set; }
 }
 
+public class VideoTime
+{
+    public double start { get; set; }
+    public double end { get; set; }
+}
+
 public class ChatRoot
 {
     public Streamer streamer { get; set; }
     public List<Comment> comments { get; set; }
+    public VideoTime video { get; set; }
 }

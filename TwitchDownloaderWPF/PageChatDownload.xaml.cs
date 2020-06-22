@@ -183,11 +183,14 @@ namespace TwitchDownloaderWPF
                 double videoStart = clipInfo.offset;
                 double videoDuration = clipInfo.duration;
                 JObject result = new JObject();
+                JObject video = new JObject();
                 JArray comments = new JArray();
                 JObject streamer = new JObject();
 
                 streamer["name"] = clipInfo.streamer_name;
                 streamer["id"] = clipInfo.streamer_id;
+                video["start"] = videoStart;
+                video["end"] = videoStart + videoDuration;
 
                 while (latestMessage < (videoStart + videoDuration))
                 {
@@ -201,7 +204,7 @@ namespace TwitchDownloaderWPF
 
                     foreach (var comment in res["comments"])
                     {
-                        if (latestMessage < (videoStart + videoDuration))
+                        if (latestMessage < (videoStart + videoDuration) && comment["content_offset_seconds"].ToObject<double>() > videoStart)
                             comments.Add(comment);
 
                         latestMessage = comment["content_offset_seconds"].ToObject<double>();
@@ -221,6 +224,7 @@ namespace TwitchDownloaderWPF
 
                 result["streamer"] = streamer;
                 result["comments"] = comments;
+                result["video"] = video;
 
                 using (StreamWriter sw = new StreamWriter(clipInfo.path))
                 {

@@ -179,6 +179,15 @@ public class GifEmote
             total_duration = durations.Count * 10;
         }
 
+        for (int i = 0; i < durations.Count; i++)
+        {
+            if (durations[i] == 0)
+            {
+                total_duration += 10;
+                durations[i] = 10;
+            }
+        }
+
         width = image_frames.First().Width;
         height = image_frames.First().Height;
 

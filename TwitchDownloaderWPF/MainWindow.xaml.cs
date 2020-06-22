@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -29,10 +30,14 @@ namespace TwitchDownloaderWPF
         PageChatDownload pageChatDownload = new PageChatDownload();
         PageChatRender pageChatRender = new PageChatRender();
         PageQueue pageQueue = new PageQueue();
+        public ObservableCollection<ITwitchTask> taskList = new ObservableCollection<ITwitchTask>();
+
         public MainWindow()
         {
             InitializeComponent();
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            pageQueue.queueList.ItemsSource = taskList;
         }
 
         private void btnVodDownload_Click(object sender, RoutedEventArgs e)

@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Model;
 
@@ -21,22 +22,15 @@ namespace TwitchDownloader.Tasks
             get;
             set;
         }
+        public string Title { get; set; }
+        public string Information { get; set; }
+        public ImageSource Preview { get; set; }
 
         public DownloadOptions downloadOptions;
 
         public void cancelTask()
         {
             CancellationTokenSource.Cancel();
-        }
-
-        public string getInformation()
-        {
-            return downloadOptions.title;
-        }
-
-        public string getTitle()
-        {
-            return downloadOptions.title;
         }
 
         public Task runTask(IProgress<ProgressReport> progress)
@@ -92,6 +86,7 @@ namespace TwitchDownloader.Tasks
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Combining Parts (2/3)" });
             progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = 0 });
 
+            /*
             if (videoPartsList[0].Contains("muted"))
             {
                 string inputFileMuted = Path.Combine(downloadFolder, videoPartsList[0]);
@@ -110,20 +105,26 @@ namespace TwitchDownloader.Tasks
             }
 
             string inputFile = Path.Combine(downloadFolder, options.id + ".txt");
-            string outputFile = Path.Combine(downloadFolder, "output.ts");
             Task<IConversionResult> combineResult = new Conversion().Start(String.Format("-f concat -safe 0 -i \"{0}\" -c copy \"{1}\"", inputFile, outputFile));
-            Task.WaitAll(combineResult);
+            Task.WaitAll(combineResult);*/
 
-            foreach (var part in videoPartsList)
+            string outputFile = Path.Combine(downloadFolder, "output.mp4");
+            using (FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
             {
-                string file = Path.Combine(downloadFolder, part);
-                if (File.Exists(file))
+                foreach (var part in videoPartsList)
                 {
-                    try
+                    string file = Path.Combine(downloadFolder, part);
+                    if (File.Exists(file))
                     {
-                        File.Delete(file);
+                        byte[] writeBytes = File.ReadAllBytes(file);
+                        outputStream.Write(writeBytes, 0, writeBytes.Length);
+
+                        try
+                        {
+                            File.Delete(file);
+                        }
+                        catch { }
                     }
-                    catch { }
                 }
             }
 
@@ -135,7 +136,7 @@ namespace TwitchDownloader.Tasks
                     StartInfo =
                     {
                         FileName = "ffmpeg.exe",
-                        Arguments = $"-i \"" + Path.Combine(downloadFolder, "output.ts") + "\" -vf vfrdet -ss 0 -t 600 -f null -",
+                        Arguments = $"-i \"" + Path.Combine(downloadFolder, "output.mp4") + "\" -vf vfrdet -ss 0 -t 600 -f null -",
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         RedirectStandardInput = true,
@@ -172,7 +173,7 @@ namespace TwitchDownloader.Tasks
             else
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Finalizing MP4 (3/3)" });
             string outputConvert = options.filename;
-            Task<IMediaInfo> info = MediaInfo.Get(Path.Combine(downloadFolder, "output.ts"));
+            Task<IMediaInfo> info = MediaInfo.Get(Path.Combine(downloadFolder, "output.mp4"));
             Task.WaitAll(info);
             double seekTime = options.crop_begin;
             double seekDuration = Math.Round(info.Result.Duration.TotalSeconds - seekTime - options.crop_end);
@@ -180,18 +181,18 @@ namespace TwitchDownloader.Tasks
             if (isVFR)
             {
                 int newFps = (int)Math.Ceiling(info.Result.VideoStreams.First().FrameRate);
-                conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -analyzeduration {2} -t {3} -crf 20 -filter:v fps=fps={4} \"{5}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), Int32.MaxValue, seekDuration.ToString(), newFps, outputConvert));
+                conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -analyzeduration {2} -t {3} -crf 20 -filter:v fps=fps={4} \"{5}\"", Path.Combine(downloadFolder, "output.mp4"), seekTime.ToString(), Int32.MaxValue, seekDuration.ToString(), newFps, outputConvert));
             }
             else
             {
-                conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -analyzeduration {2} -t {3} -avoid_negative_ts make_zero -acodec copy -vcodec copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), Int32.MaxValue, seekDuration.ToString(), outputConvert));
+                conversionResult = Conversion.New().Start(String.Format("-y -i \"{0}\" -ss {1} -analyzeduration {2} -t {3} -avoid_negative_ts make_zero -c:v copy -f mp4 \"-bsf:a\" aac_adtstoasc \"{4}\"", Path.Combine(downloadFolder, "output.mp4"), seekTime.ToString(), Int32.MaxValue, seekDuration.ToString(), outputConvert));
             }
 
             Task.WaitAll(conversionResult);
             if (Directory.Exists(downloadFolder))
                 DeleteDirectory(downloadFolder);
 
-            return Task.CompletedTask; ;
+            return Task.CompletedTask;
         }
 
         private void Cleanup()
@@ -300,6 +301,8 @@ namespace TwitchDownloader.Tasks
         public TaskVodDownload(DownloadOptions DownloadOptions)
         {
             downloadOptions = DownloadOptions;
+            Title = downloadOptions.title;
+            Information = "This is a test description :)";
         }
     }
 }

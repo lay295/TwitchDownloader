@@ -30,6 +30,7 @@ using WpfAnimatedGif;
 using TwitchDownloader.Properties;
 using TwitchDownloader.Tasks;
 using Xabe.FFmpeg.Events;
+using System.Collections.ObjectModel;
 
 namespace TwitchDownloaderWPF
 {
@@ -59,7 +60,7 @@ namespace TwitchDownloaderWPF
             numEndMinute.IsEnabled = isEnabled;
             numEndSecond.IsEnabled = isEnabled;
             btnDownload.IsEnabled = isEnabled;
-            //btnQueue.IsEnabled = isEnabled;
+            btnQueue.IsEnabled = isEnabled;
         }
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
@@ -172,6 +173,7 @@ namespace TwitchDownloaderWPF
                     options.filename = saveFileDialog.FileName;
 
                     TaskVodDownload currentDownload = new TaskVodDownload(options);
+                    currentDownload.Preview = imgThumbnail.Source;
                     Progress<ProgressReport> uploadProgress = new Progress<ProgressReport>(OnProgressChanged);
 
                     SetImage("Images/ppOverheat.gif", true);
@@ -340,6 +342,36 @@ namespace TwitchDownloaderWPF
         {
             Settings.Default.EncodeCFR = (bool)checkCFR.IsChecked;
             Settings.Default.Save();
+        }
+
+        private void btnQueue_Click(object sender, RoutedEventArgs e)
+        {
+            bool isValid = ValidateInput();
+
+            if (isValid)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+                saveFileDialog.Filter = "MP4 Files | *.mp4";
+                saveFileDialog.RestoreDirectory = true;
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    SetEnabled(false);
+                    DownloadOptions options = new DownloadOptions();
+                    options.UpdateValues(this);
+                    options.filename = saveFileDialog.FileName;
+
+                    TaskVodDownload currentDownload = new TaskVodDownload(options);
+                    currentDownload.Preview = imgThumbnail.Source;
+                    ObservableCollection<ITwitchTask> taskList = ((MainWindow)Window.GetWindow(this)).taskList;
+                    taskList.Add(currentDownload);
+                }
+            }
+            else
+            {
+                AppendLog("ERROR: Invalid Crop Inputs");
+            }
         }
     }
 }

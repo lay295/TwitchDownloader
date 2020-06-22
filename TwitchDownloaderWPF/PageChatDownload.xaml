@@ -56,6 +56,7 @@
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock Text="Download Format:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
                 <TextBlock Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
+                <!-- <TextBlock HorizontalAlignment="Right" Margin="0,29,0,0">Embed Emotes <Hyperlink ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock> -->
             </StackPanel>
             <StackPanel>
                 <StackPanel Margin="5,12,0,0" Orientation="Horizontal">
@@ -78,6 +79,7 @@
                         <xctk:IntegerUpDown Margin="3,-1,0,0" Value="0" Name="numEndSecond" />
                     </StackPanel>
                 </StackPanel>
+                <!-- <CheckBox x:Name="checkEmbed" Margin="5,8,0,0"></CheckBox> -->
             </StackPanel>
         </StackPanel>
         <Button x:Name="btnDownload" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="Download" Height="50" Width="100" Margin="0,0,0,20" VerticalAlignment="Bottom" Click="btnDownload_Click"/>

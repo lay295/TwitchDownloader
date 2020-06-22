@@ -91,6 +91,13 @@ namespace TwitchDownloaderWPF
             try
             {
                 chatJson = JsonConvert.DeserializeObject<ChatRoot>(File.ReadAllText(renderOptions.json_path));
+                if (chatJson.streamer == null)
+                {
+                    JObject json = JObject.Parse(File.ReadAllText(renderOptions.json_path));
+                    chatJson.streamer = new Streamer();
+                    chatJson.streamer.name = json["video"]["user_name"].ToString();
+                    chatJson.streamer.id = json["video"]["user_id"].ToObject<int>();
+                }
                 chatJson.streamer.name = GetStreamerName(chatJson.streamer.id);
             }
             catch (JsonSerializationException)
@@ -203,7 +210,7 @@ namespace TwitchDownloaderWPF
             }
 
             (sender as BackgroundWorker).ReportProgress(0, new Progress("Rendering Video 0%"));
-            RenderVideo(renderOptions, new Queue<TwitchComment>(finalComments.ToArray()), chatJson.comments, sender);
+            RenderVideo(renderOptions, new Queue<TwitchComment>(finalComments.ToArray()), chatJson, sender);
 
             (sender as BackgroundWorker).ReportProgress(0, new Progress("Cleaning up..."));
             try
@@ -268,14 +275,24 @@ namespace TwitchDownloaderWPF
             return userColor;
         }
 
-        private void RenderVideo(RenderOptions renderOptions, Queue<TwitchComment> finalComments, List<Comment> comments, object sender)
+        private void RenderVideo(RenderOptions renderOptions, Queue<TwitchComment> finalComments, ChatRoot chatJson, object sender)
         {
             SKBitmap bufferBitmap = new SKBitmap(renderOptions.chat_width, renderOptions.chat_height);
             SKCanvas bufferCanvas = new SKCanvas(bufferBitmap);
             SKPaint gifBackgroundPaint = new SKPaint();
             SKPaint gifPaint = new SKPaint();
-            int videoStart = (int)Math.Floor(comments.First().content_offset_seconds);
-            int duration = (int)Math.Ceiling(comments.Last().content_offset_seconds) - videoStart;
+            int videoStart;
+            int duration;
+            if (chatJson.video != null)
+            {
+                videoStart = (int)Math.Floor(chatJson.video.start);
+                duration = (int)Math.Ceiling(chatJson.video.end) - videoStart;
+            }
+            else
+            {
+                videoStart = (int)Math.Floor(chatJson.comments.First().content_offset_seconds);
+                duration = (int)Math.Ceiling(chatJson.comments.Last().content_offset_seconds) - videoStart;
+            }
             List<GifEmote> displayedGifs = new List<GifEmote>();
             Stopwatch stopwatch = new Stopwatch();
 
@@ -1366,6 +1383,12 @@ namespace TwitchDownloaderWPF
                     AppendLog("Remove transparency or encode with MOV and RLE/PRORES (file size will be large)");
                     return false;
                 }
+            }
+
+            if (Int32.Parse(textHeight.Text) % 2 != 0 && Int32.Parse(textWidth.Text) % 2 != 0)
+            {
+                AppendLog("ERROR: Height and Width must be even");
+                return false;
             }
 
             return true;
