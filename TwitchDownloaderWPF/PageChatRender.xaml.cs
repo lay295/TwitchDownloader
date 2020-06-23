@@ -97,6 +97,7 @@ namespace TwitchDownloaderWPF
                     chatJson.streamer = new Streamer();
                     chatJson.streamer.name = json["video"]["user_name"].ToString();
                     chatJson.streamer.id = json["video"]["user_id"].ToObject<int>();
+                    chatJson.video.end = GenerateTimespan(json["video"]["duration"].ToString()).TotalSeconds;
                 }
                 chatJson.streamer.name = GetStreamerName(chatJson.streamer.id);
             }
@@ -275,6 +276,21 @@ namespace TwitchDownloaderWPF
             return userColor;
         }
 
+        private TimeSpan GenerateTimespan(string input)
+        {
+            //There might be a better way to do this, gets string 0h0m0s and returns timespan
+            TimeSpan returnSpan = new TimeSpan(0);
+            string[] inputArray = input.Remove(input.Length - 1).Replace('h', ':').Replace('m', ':').Split(':');
+
+            returnSpan = returnSpan.Add(TimeSpan.FromSeconds(Int32.Parse(inputArray[inputArray.Length - 1])));
+            if (inputArray.Length > 1)
+                returnSpan = returnSpan.Add(TimeSpan.FromMinutes(Int32.Parse(inputArray[inputArray.Length - 2])));
+            if (inputArray.Length > 2)
+                returnSpan = returnSpan.Add(TimeSpan.FromHours(Int32.Parse(inputArray[inputArray.Length - 3])));
+
+            return returnSpan;
+        }
+
         private void RenderVideo(RenderOptions renderOptions, Queue<TwitchComment> finalComments, ChatRoot chatJson, object sender)
         {
             SKBitmap bufferBitmap = new SKBitmap(renderOptions.chat_width, renderOptions.chat_height);
@@ -285,7 +301,9 @@ namespace TwitchDownloaderWPF
             int duration;
             if (chatJson.video != null)
             {
-                videoStart = (int)Math.Floor(chatJson.video.start);
+                int startSeconds = (int)Math.Floor(chatJson.video.start);
+                int firstCommentSeconds = (int)Math.Floor(chatJson.comments.First().content_offset_seconds);
+                videoStart = startSeconds < firstCommentSeconds ? startSeconds : firstCommentSeconds;
                 duration = (int)Math.Ceiling(chatJson.video.end) - videoStart;
             }
             else

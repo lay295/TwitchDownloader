@@ -137,21 +137,6 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private TimeSpan GenerateTimespan(string input)
-        {
-            //There might be a better way to do this, gets string 0h0m0s and returns timespan
-            TimeSpan returnSpan = new TimeSpan(0);
-            string[] inputArray = input.Remove(input.Length - 1).Replace('h', ':').Replace('m', ':').Split(':');
-
-            returnSpan = returnSpan.Add(TimeSpan.FromSeconds(Int32.Parse(inputArray[inputArray.Length - 1])));
-            if (inputArray.Length > 1)
-                returnSpan = returnSpan.Add(TimeSpan.FromMinutes(Int32.Parse(inputArray[inputArray.Length - 2])));
-            if (inputArray.Length > 2)
-                returnSpan = returnSpan.Add(TimeSpan.FromHours(Int32.Parse(inputArray[inputArray.Length - 3])));
-
-            return returnSpan;
-        }
-
         private async void btnDownload_Click(object sender, RoutedEventArgs e)
         {
             bool isValid = ValidateInput();
