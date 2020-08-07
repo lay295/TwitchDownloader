@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TwitchDownloader;
 using Xabe.FFmpeg;
+using Xabe.FFmpeg.Downloader;
 
 namespace TwitchDownloaderWPF
 {
@@ -30,14 +31,11 @@ namespace TwitchDownloaderWPF
         PageChatDownload pageChatDownload = new PageChatDownload();
         PageChatRender pageChatRender = new PageChatRender();
         PageQueue pageQueue = new PageQueue();
-        public ObservableCollection<ITwitchTask> taskList = new ObservableCollection<ITwitchTask>();
 
         public MainWindow()
         {
             InitializeComponent();
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-            pageQueue.queueList.ItemsSource = taskList;
         }
 
         private void btnVodDownload_Click(object sender, RoutedEventArgs e)
@@ -69,7 +67,7 @@ namespace TwitchDownloaderWPF
         {
             Main.Content = pageVodDownload;
             if (!File.Exists("ffmpeg.exe"))
-                await FFmpeg.GetLatestVersion();
+                await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

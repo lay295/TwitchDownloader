@@ -24,13 +24,13 @@ using System.Windows.Navigation;
 using System.IO;
 using TwitchDownloader;
 using TwitchDownloaderWPF;
-using Xabe.FFmpeg.Model;
 using Xabe.FFmpeg;
 using WpfAnimatedGif;
 using TwitchDownloader.Properties;
-using TwitchDownloader.Tasks;
 using Xabe.FFmpeg.Events;
 using System.Collections.ObjectModel;
+using TwitchDownloaderCore;
+using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderWPF
 {
@@ -41,7 +41,6 @@ namespace TwitchDownloaderWPF
     {
         public Dictionary<string, string> videoQualties = new Dictionary<string, string>();
         public int currentVideoId;
-        public TaskVodDownload currentDownload;
 
         public PageVodDownload()
         {
@@ -76,12 +75,12 @@ namespace TwitchDownloaderWPF
                 currentVideoId = videoId;
                 try
                 {
-                    Task<JObject> taskInfo = InfoHelper.GetVideoInfo(videoId);
-                    Task<JObject> taskAccessToken = InfoHelper.GetVideoToken(videoId, textOauth.Text);
+                    Task<JObject> taskInfo = TwitchHelper.GetVideoInfo(videoId);
+                    Task<JObject> taskAccessToken = TwitchHelper.GetVideoToken(videoId, textOauth.Text);
                     await Task.WhenAll(taskInfo, taskAccessToken);
                     string thumbUrl = taskInfo.Result["preview"]["medium"].ToString();
                     Task<BitmapImage> thumbImage = InfoHelper.GetThumb(thumbUrl);
-                    Task<string[]> taskPlaylist = InfoHelper.GetVideoPlaylist(videoId, taskAccessToken.Result["token"].ToString(), taskAccessToken.Result["sig"].ToString());
+                    Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result["token"].ToString(), taskAccessToken.Result["sig"].ToString());
                     await taskPlaylist;
                     try
                     {
@@ -153,20 +152,26 @@ namespace TwitchDownloaderWPF
                     SetEnabled(false);
                     btnGetInfo.IsEnabled = false;
 
-                    DownloadOptions options = new DownloadOptions();
-                    options.UpdateValues(this);
-                    options.filename = saveFileDialog.FileName;
+                    VideoDownloadOptions options = new VideoDownloadOptions();
+                    options.DownloadThreads = (int)numDownloadThreads.Value;
+                    options.Filename = saveFileDialog.FileName;
+                    options.Oauth = textOauth.Text;
+                    options.Quality = comboQuality.Text;
+                    options.Id = currentVideoId;
+                    options.CropBeginning = (bool)checkStart.IsChecked;
+                    options.CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds);
+                    options.CropEnding = (bool)checkEnd.IsChecked;
+                    options.CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds);
 
-                    TaskVodDownload currentDownload = new TaskVodDownload(options);
-                    currentDownload.Preview = imgThumbnail.Source;
-                    Progress<ProgressReport> uploadProgress = new Progress<ProgressReport>(OnProgressChanged);
+                    VideoDownloader currentDownload = new VideoDownloader(options);
+                    Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
 
                     SetImage("Images/ppOverheat.gif", true);
                     statusMessage.Text = "Downloading";
 
                     try
                     {
-                        await Task.Run(() =>currentDownload.runTask(uploadProgress));
+                        await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
                         statusMessage.Text = "Done";
                         SetImage("Images/ppHop.gif", true);
                     }
@@ -176,13 +181,7 @@ namespace TwitchDownloaderWPF
                         SetImage("Images/peepoSad.png", false);
                         AppendLog("ERROR: " + ex.Message);
                     }
-                    /*
-                    BackgroundWorker backgroundDownloadManager = new BackgroundWorker();
-                    backgroundDownloadManager.WorkerReportsProgress = true;
-                    backgroundDownloadManager.DoWork += BackgroundDownloadManager_DoWork;
-                    backgroundDownloadManager.ProgressChanged += BackgroundDownloadManager_ProgressChanged;
-                    backgroundDownloadManager.RunWorkerCompleted += BackgroundDownloadManager_RunWorkerCompleted;
-                    */
+                    btnGetInfo.IsEnabled = true;
                 }
             }
             else
@@ -214,31 +213,6 @@ namespace TwitchDownloaderWPF
                 ImageBehavior.SetAnimatedSource(statusImage, null);
                 statusImage.Source = image;
             }
-        }
-
-        private void BackgroundDownloadManager_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            btnGetInfo.IsEnabled = true;
-            statusProgressBar.Value = 0;
-            if (e.Error == null)
-            {
-                statusMessage.Text = "Done";
-                SetImage("Images/ppHop.gif", true);
-
-            }
-            else
-            {
-                statusMessage.Text = "ERROR";
-                SetImage("Images/peepoSad.png", false);
-                AppendLog("ERROR: " + e.Error.Message);
-            }
-        }
-
-        private void BackgroundDownloadManager_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            string message = (string)e.UserState;
-            statusMessage.Text = message;
-            statusProgressBar.Value = e.ProgressPercentage;
         }
 
         private int ValidateUrl(string text)
@@ -305,7 +279,6 @@ namespace TwitchDownloaderWPF
             WebRequest.DefaultWebProxy = null;
             numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
             textOauth.Text = Settings.Default.OAuth;
-            checkCFR.IsChecked = Settings.Default.EncodeCFR;
         }
 
         private void numDownloadThreads_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -323,81 +296,9 @@ namespace TwitchDownloaderWPF
             Settings.Default.Save();
         }
 
-        private void checkCFR_Changed(object sender, RoutedEventArgs e)
-        {
-            Settings.Default.EncodeCFR = (bool)checkCFR.IsChecked;
-            Settings.Default.Save();
-        }
-
         private void btnQueue_Click(object sender, RoutedEventArgs e)
         {
-            bool isValid = ValidateInput();
-
-            if (isValid)
-            {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-
-                saveFileDialog.Filter = "MP4 Files | *.mp4";
-                saveFileDialog.RestoreDirectory = true;
-
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    SetEnabled(false);
-                    DownloadOptions options = new DownloadOptions();
-                    options.UpdateValues(this);
-                    options.filename = saveFileDialog.FileName;
-
-                    TaskVodDownload currentDownload = new TaskVodDownload(options);
-                    currentDownload.Preview = imgThumbnail.Source;
-                    ObservableCollection<ITwitchTask> taskList = ((MainWindow)Window.GetWindow(this)).taskList;
-                    taskList.Add(currentDownload);
-                }
-            }
-            else
-            {
-                AppendLog("ERROR: Invalid Crop Inputs");
-            }
+            
         }
-    }
-}
-
-public class DownloadOptions
-{
-    public int id { get; set; }
-    public string title { get; set; }
-    public string quality { get; set; }
-    public string filename { get; set; }
-    public string streamer { get; set; }
-    public TimeSpan length { get; set; }
-    public bool cropped_begin { get; set; }
-    public TimeSpan cropped_begin_time { get; set; }
-    public double crop_begin { get; set; }
-    public bool cropped_end { get; set; }
-    public TimeSpan cropped_end_time { get; set; }
-    public double crop_end { get; set; }
-    public int download_threads { get; set; }
-    public bool encode_cfr { get; set; }
-    public Dictionary<string, string> video_qualities { get; set; }
-    public DownloadOptions()
-    {
-
-    }
-
-    public void UpdateValues(PageVodDownload currentPage)
-    {
-        id = currentPage.currentVideoId;
-        title = currentPage.textTitle.Text;
-        quality = (string)currentPage.comboQuality.SelectedItem;
-        streamer = currentPage.textStreamer.Text;
-        length = TimeSpan.Parse(currentPage.labelLength.Text.ToString(CultureInfo.InvariantCulture));
-        cropped_begin = (bool)currentPage.checkStart.IsChecked;
-        cropped_end = (bool)currentPage.checkEnd.IsChecked;
-        cropped_begin_time = new TimeSpan((int)currentPage.numStartHour.Value, (int)currentPage.numStartMinute.Value, (int)currentPage.numStartSecond.Value);
-        cropped_end_time = new TimeSpan((int)currentPage.numEndHour.Value, (int)currentPage.numEndMinute.Value, (int)currentPage.numEndSecond.Value);
-        crop_begin = 0.0;
-        crop_end = 0.0;
-        download_threads = (int)currentPage.numDownloadThreads.Value;
-        encode_cfr = (bool)currentPage.checkCFR.IsChecked;
-        video_qualities = currentPage.videoQualties.ToDictionary(entry => entry.Key, entry => entry.Value);
     }
 }

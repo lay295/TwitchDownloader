@@ -18,6 +18,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TwitchDownloader;
+using TwitchDownloaderCore;
+using TwitchDownloaderCore.Options;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -27,6 +30,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageClipDownload : Page
     {
+        static string clipId = "";
         public PageClipDownload()
         {
             InitializeComponent();
@@ -34,7 +38,7 @@ namespace TwitchDownloaderWPF
 
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
-            string clipId = ValidateUrl(textUrl.Text);
+            clipId = ValidateUrl(textUrl.Text);
             if (clipId == "")
             {
                 MessageBox.Show("Please enter a valid clip ID/URL" + Environment.NewLine + "Examples:" + Environment.NewLine + "https://clips.twitch.tv/ImportantPlausibleMetalOSsloth" + Environment.NewLine + "ImportantPlausibleMetalOSsloth", "Invalid Video ID/URL", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -45,8 +49,8 @@ namespace TwitchDownloaderWPF
                 {
                     btnGetInfo.IsEnabled = false;
                     comboQuality.Items.Clear();
-                    Task<JObject> taskInfo = InfoHelper.GetClipInfo(clipId);
-                    Task<JArray> taskLinks = InfoHelper.GetClipLinks(clipId);
+                    Task<JObject> taskInfo = TwitchHelper.GetClipInfo(clipId);
+                    Task<JArray> taskLinks = TwitchHelper.GetClipLinks(clipId);
                     await Task.WhenAll(taskInfo, taskLinks);
 
                     JToken clipData = taskInfo.Result;
@@ -123,16 +127,12 @@ namespace TwitchDownloaderWPF
                 statusMessage.Text = "Downloading";
                 try
                 {
-                    using (WebClient client = new WebClient())
-                    {
-                        client.DownloadProgressChanged += (sender2, e2) =>
-                        {
-                            statusMessage.Text = String.Format("Downloading {0}%", e2.ProgressPercentage);
-                            statusProgressBar.Value = e2.ProgressPercentage;
-                        };
+                    ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
+                    downloadOptions.Filename = saveFileDialog.FileName;
+                    downloadOptions.Id = clipId;
+                    downloadOptions.Quality = comboQuality.Text;
+                    await new ClipDownloader(downloadOptions).DownloadAsync();
 
-                        await client.DownloadFileTaskAsync(new Uri(((TwitchClip)comboQuality.SelectedItem).url), saveFileDialog.FileName);
-                    }
                     statusMessage.Text = "Done";
                     SetImage("Images/ppHop.gif", true);
                 }

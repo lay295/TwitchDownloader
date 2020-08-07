@@ -22,6 +22,10 @@ using System.Windows.Shapes;
 using Newtonsoft.Json;
 using TwitchDownloaderWPF;
 using WpfAnimatedGif;
+using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore;
+using System.Threading;
+using TwitchDownloader;
 
 namespace TwitchDownloaderWPF
 {
@@ -81,7 +85,7 @@ namespace TwitchDownloaderWPF
                 {
                     if (downloadType == DownloadType.Video)
                     {
-                        Task<JObject> taskInfo = InfoHelper.GetVideoInfo(Int32.Parse(downloadId));
+                        Task<JObject> taskInfo = TwitchHelper.GetVideoInfo(Int32.Parse(downloadId));
                         await Task.WhenAll(taskInfo);
 
                         videoData = taskInfo.Result;
@@ -107,7 +111,7 @@ namespace TwitchDownloaderWPF
                     else if (downloadType == DownloadType.Clip)
                     {
                         string clipId = downloadId;
-                        Task<JObject> taskInfo = InfoHelper.GetClipInfo(clipId);
+                        Task<JObject> taskInfo = TwitchHelper.GetClipInfo(clipId);
                         await Task.WhenAll(taskInfo);
 
                         JToken clipData = taskInfo.Result;
@@ -282,7 +286,7 @@ namespace TwitchDownloaderWPF
             ));
         }
 
-        private void btnDownload_Click(object sender, RoutedEventArgs e)
+        private async void btnDownload_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
 
@@ -297,51 +301,74 @@ namespace TwitchDownloaderWPF
             {
                 try
                 {
-                    ChatDownloadInfo info;
+                    ChatDownloadOptions downloadOptions = new ChatDownloadOptions() { IsJson = (bool)radioJson.IsChecked, Filename = saveFileDialog.FileName, Timestamp = true, EmbedEmotes = (bool)checkEmbed.IsChecked };
                     if (downloadType == DownloadType.Video)
                     {
                         int startTime = 0;
-                        int duration = 0;
+                        int endTime = 0;
 
                         if (checkStart.IsChecked == true)
                         {
+                            downloadOptions.CropBeginning = true;
                             TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
                             startTime = (int)Math.Round(start.TotalSeconds);
+                            downloadOptions.CropBeginningTime = startTime;
                         }
 
                         if (checkEnd.IsChecked == true)
                         {
+                            downloadOptions.CropEnding = true;
                             TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                            duration = (int)Math.Ceiling(end.TotalSeconds - startTime);
+                            endTime = (int)Math.Round(end.TotalSeconds);
+                            downloadOptions.CropEndingTime = endTime;
                         }
-                        else
-                        {
-                            TimeSpan vodLength = TimeSpan.FromSeconds(videoData["length"].ToObject<int>());
-                            duration = (int)Math.Ceiling(vodLength.TotalSeconds);
-                        }
-                        info = new ChatDownloadInfo(downloadType, textUrl.Text, saveFileDialog.FileName, videoData["_id"].ToString().Substring(1), startTime, duration, (bool)radioJson.IsChecked, textStreamer.Text, streamerId);
+
+                        downloadOptions.Id = videoData["_id"].ToString().Substring(1);
                     }
                     else
-                        info = new ChatDownloadInfo(downloadType, textUrl.Text, saveFileDialog.FileName, videoData["vod"]["id"].ToString(), videoData["vod"]["offset"].ToObject<int>(), videoData["duration"].ToObject<double>(), (bool)radioJson.IsChecked, textStreamer.Text, streamerId);
-                    statusMessage.Text = "Downloading";
+                    {
+                        downloadOptions.Id = videoData["vod"]["id"].ToString();
+                    }
+
+                    ChatDownloader currentDownload = new ChatDownloader(downloadOptions);
+
                     btnGetInfo.IsEnabled = false;
                     SetEnabled(false, false);
-
-                    BackgroundWorker backgroundDownloadManager = new BackgroundWorker();
-                    backgroundDownloadManager.WorkerReportsProgress = true;
-                    backgroundDownloadManager.DoWork += BackgroundDownloadManager_DoWork;
-                    backgroundDownloadManager.ProgressChanged += BackgroundDownloadManager_ProgressChanged;
-                    backgroundDownloadManager.RunWorkerCompleted += BackgroundDownloadManager_RunWorkerCompleted;
-
                     SetImage("Images/ppOverheat.gif", true);
                     statusMessage.Text = "Downloading";
-                    backgroundDownloadManager.RunWorkerAsync(info);
+
+                    Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
+
+                    try
+                    {
+                        await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
+                        statusMessage.Text = "Done";
+                        SetImage("Images/ppHop.gif", true);
+                    }
+                    catch (Exception ex)
+                    {
+                        statusMessage.Text = "ERROR";
+                        SetImage("Images/peepoSad.png", false);
+                        AppendLog("ERROR: " + ex.Message);
+                    }
+                    btnGetInfo.IsEnabled = true;
+                    statusProgressBar.Value = 0;
                 }
                 catch (Exception ex)
                 {
                     AppendLog("ERROR: " + ex.Message);
                 }
             }
+        }
+
+        private void OnProgressChanged(ProgressReport progress)
+        {
+            if (progress.reportType == ReportType.Percent)
+                statusProgressBar.Value = (int)progress.data;
+            if (progress.reportType == ReportType.Message)
+                statusMessage.Text = (string)progress.data;
+            if (progress.reportType == ReportType.Log)
+                AppendLog((string)progress.data);
         }
 
         private TimeSpan GenerateTimespan(string input)

@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.29324.140
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchDownloader", "TwitchDownloaderWPF\TwitchDownloader.csproj", "{A5940F4D-027D-4F9E-9F65-C0D842807BE1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchDownloaderCore", "TwitchDownloaderCore\TwitchDownloaderCore.csproj", "{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchDownloaderCLI", "TwitchDownloaderCLI\TwitchDownloaderCLI.csproj", "{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,22 @@ Global
 		{A5940F4D-027D-4F9E-9F65-C0D842807BE1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A5940F4D-027D-4F9E-9F65-C0D842807BE1}.Release|x64.ActiveCfg = Release|x64
 		{A5940F4D-027D-4F9E-9F65-C0D842807BE1}.Release|x64.Build.0 = Release|x64
+		{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}.Debug|x64.Build.0 = Debug|Any CPU
+		{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}.Release|x64.ActiveCfg = Release|Any CPU
+		{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}.Release|x64.Build.0 = Release|Any CPU
+		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Debug|x64.Build.0 = Debug|Any CPU
+		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Release|x64.ActiveCfg = Release|Any CPU
+		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
