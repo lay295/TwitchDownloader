@@ -61,7 +61,7 @@ namespace TwitchDownloaderCLI
         {
             VideoDownloadOptions downloadOptions = new VideoDownloadOptions();
 
-            if (inputOptions.Id == "" || inputOptions.Id.All(Char.IsDigit))
+            if (inputOptions.Id == "" || !inputOptions.Id.All(Char.IsDigit))
             {
                 Console.WriteLine("[ERROR] - Invalid VOD ID, unable to parse. Must be only numbers.");
                 Environment.Exit(1);
