@@ -116,10 +116,10 @@ namespace TwitchDownloaderWPF
                     textStreamer.Text = taskInfo.Result["channel"]["display_name"].ToString();
                     textTitle.Text = taskInfo.Result["title"].ToString();
                     textCreatedAt.Text = taskInfo.Result["created_at"].ToString();
-                    numEndHour.Value = vodLength.Hours;
+                    numEndHour.Value = (int)vodLength.TotalHours;
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
-                    labelLength.Text = String.Format("{0:00}:{1:00}:{2:00}", vodLength.Hours, vodLength.Minutes, vodLength.Seconds);
+                    labelLength.Text = String.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
 
                     SetEnabled(true);
                 }
@@ -162,6 +162,7 @@ namespace TwitchDownloaderWPF
                     options.CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds);
                     options.CropEnding = (bool)checkEnd.IsChecked;
                     options.CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds);
+                    options.FfmpegPath = "ffmpeg.exe";
 
                     VideoDownloader currentDownload = new VideoDownloader(options);
                     Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);

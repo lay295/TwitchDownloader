@@ -1,0 +1,4 @@
+Hello friend :) you've accidentally downloaded the program's source code, not a binary which you can run.
+
+You can go here and download the newest release to get something you can run.
+https://github.com/lay295/TwitchDownloader/releases

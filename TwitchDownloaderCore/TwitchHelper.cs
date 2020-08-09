@@ -239,6 +239,9 @@ namespace TwitchDownloaderCore
             {
                 foreach (var comment in comments)
                 {
+                    if (comment.message.fragments == null)
+                        continue;
+
                     foreach (var fragment in comment.message.fragments)
                     {
                         if (fragment.emoticon != null)
@@ -402,6 +405,9 @@ namespace TwitchDownloaderCore
             {
                 foreach (var comment in comments)
                 {
+                    if (comment.message.fragments == null)
+                        continue;
+
                     foreach (var fragment in comment.message.fragments)
                     {
                         if (fragment.emoticon == null)

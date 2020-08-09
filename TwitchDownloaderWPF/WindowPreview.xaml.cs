@@ -70,7 +70,7 @@ namespace TwitchDownloader
                     MessageFontStyle = SKFontStyle.Normal,
                     UsernameFontStyle = SKFontStyle.Bold
                 };
-                System.Drawing.Size canvasSize = new System.Drawing.Size(renderOptions.ChatWidth, renderOptions.ChatHeight);
+                System.Drawing.Size canvasSize = new System.Drawing.Size(renderOptions.ChatWidth, renderOptions.SectionHeight);
                 SKPaint nameFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.UsernameFontStyle), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
                 SKPaint messageFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.MessageFontStyle), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
                 List<ThirdPartyEmote> thirdPartyEmotes = new List<ThirdPartyEmote>();
@@ -100,7 +100,7 @@ namespace TwitchDownloader
                         string userName = previewComment.name;
                         SKColor userColor = new SKColor(Convert.ToByte(previewComment.color.Substring(0, 2), 16), Convert.ToByte(previewComment.color.Substring(2, 2), 16), Convert.ToByte(previewComment.color.Substring(4, 2), 16));
                         List<SKBitmap> imageList = new List<SKBitmap>();
-                        SKBitmap sectionImage = new SKBitmap((int)canvasSize.Width, (int)canvasSize.Height);
+                        SKBitmap sectionImage = new SKBitmap(canvasSize.Width, canvasSize.Height);
                         List<GifEmote> currentGifEmotes = new List<GifEmote>();
                         List<SKBitmap> emoteList = new List<SKBitmap>();
                         List<CheerEmote> cheerEmotes = new List<CheerEmote>();
@@ -119,11 +119,10 @@ namespace TwitchDownloader
                         sectionImage = ChatRenderer.DrawUsername(sectionImage, imageList, renderOptions, nameFont, userName, userColor, canvasSize, ref drawPos);
                         sectionImage = ChatRenderer.DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
 
-
                         int finalHeight = 0;
                         foreach (var img in imageList)
                             finalHeight += img.Height;
-                        SKBitmap finalImage = new SKBitmap((int)canvasSize.Width, finalHeight);
+                        SKBitmap finalImage = new SKBitmap(canvasSize.Width, finalHeight);
                         SKCanvas finalImageCanvas = new SKCanvas(finalImage);
                         finalHeight = 0;
                         foreach (var img in imageList)
@@ -134,8 +133,6 @@ namespace TwitchDownloader
                         }
 
                         finalComments.Add(new TwitchCommentPreview(finalImage, Double.Parse(comment.content_offset_seconds.ToString()), currentGifEmotes, emoteList, emotePositionList));
-                        //TODO: Debug why preview broke switching to TwitchDownloaderCore
-                        finalImage.Encode(SKEncodedImageFormat.Png, 100).SaveTo(new FileStream("test.png", FileMode.Create));
                     }
 
                     int y = 0;

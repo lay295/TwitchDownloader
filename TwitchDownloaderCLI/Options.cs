@@ -35,7 +35,7 @@ namespace TwitchDownloaderCLI
         public string Oauth { get; set; }
         [Option("timestamp", HelpText = "Enable timestamp for chat download in .txt format or chat render.")]
         public bool Timestamp { get; set; }
-        [Option('e', "embed-emotes", HelpText = "Embed emotes into chat download.")]
+        [Option("embed-emotes", HelpText = "Embed emotes into chat download.")]
         public bool EmbedEmotes { get; set; }
         [Option("backround-color", Default = "#111111", HelpText = "Color of background for chat render.")]
         public string BackgroundColor { get; set; }
@@ -57,11 +57,11 @@ namespace TwitchDownloaderCLI
         public string Font { get; set; }
         [Option("font-size", Default = 12, HelpText = "Size of font in chat render.")]
         public double FontSize { get; set; }
-        [Option("message-fontstyle", Default = "normal", HelpText = "Font style to use for message.")]
+        [Option("message-fontstyle", Default = "normal", HelpText = "Font style to use for message. Valid values are normal, bold, and italic.")]
         public string MessageFontStyle { get; set; }
         [Option("username-fontstyle", Default = "bold", HelpText = "Font style to use for username. Valid values are normal, bold, and italic.")]
         public string UsernameFontStyle { get; set; }
-        [Option("padding-left", Default = 2, HelpText = "Padding space to left of chat render. Valid values are normal, bold, and italic.")]
+        [Option("padding-left", Default = 2, HelpText = "Padding space to left of chat render.")]
         public int PaddingLeft { get; set; }
         [Option("framerate", Default = 30, HelpText = "Framerate of chat render output.")]
         public int Framerate { get; set; }

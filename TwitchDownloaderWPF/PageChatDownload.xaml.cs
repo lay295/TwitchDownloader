@@ -171,114 +171,6 @@ namespace TwitchDownloaderWPF
             return "";
         }
 
-        private void BackgroundDownloadManager_DoWork(object sender, DoWorkEventArgs e)
-        {
-            ChatDownloadInfo clipInfo = (ChatDownloadInfo)e.Argument;
-
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json; charset=UTF-8");
-                client.Headers.Add("Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-
-                bool isFirst = true;
-                string cursor = "";
-                double latestMessage = clipInfo.offset - 1;
-                double videoStart = clipInfo.offset;
-                double videoDuration = clipInfo.duration;
-                JObject result = new JObject();
-                JObject video = new JObject();
-                JArray comments = new JArray();
-                JObject streamer = new JObject();
-
-                streamer["name"] = clipInfo.streamer_name;
-                streamer["id"] = clipInfo.streamer_id;
-                video["start"] = videoStart;
-                video["end"] = videoStart + videoDuration;
-
-                while (latestMessage < (videoStart + videoDuration))
-                {
-                    string response;
-                    if (isFirst)
-                        response = client.DownloadString(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?content_offset_seconds={1}", clipInfo.vod_id, clipInfo.offset));
-                    else
-                        response = client.DownloadString(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?cursor={1}", clipInfo.vod_id, cursor));
-
-                    JObject res = JObject.Parse(response);
-
-                    foreach (var comment in res["comments"])
-                    {
-                        if (latestMessage < (videoStart + videoDuration) && comment["content_offset_seconds"].ToObject<double>() > videoStart)
-                            comments.Add(comment);
-
-                        latestMessage = comment["content_offset_seconds"].ToObject<double>();
-                    }
-                    if (res["_next"] == null)
-                        break;
-                    else
-                        cursor = res["_next"].ToString();
-
-                    int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                    (sender as BackgroundWorker).ReportProgress(percent, String.Format("Downloading {0}%", percent));
-
-                    if (isFirst)
-                        isFirst = false;
-
-                }
-
-                result["streamer"] = streamer;
-                result["comments"] = comments;
-                result["video"] = video;
-
-                using (StreamWriter sw = new StreamWriter(clipInfo.path))
-                {
-                    if (clipInfo.is_json)
-                    {
-                        sw.Write(result.ToString(Formatting.None));
-                    }
-                    else
-                    {
-                        foreach (var comment in result["comments"])
-                        {
-                            string username = comment["commenter"]["display_name"].ToString();
-                            string message = comment["message"]["body"].ToString();
-                            sw.WriteLine(String.Format("{0}: {1}", username, message));
-                        }
-                    }
-
-                    sw.Flush();
-                    sw.Close();
-                    clipInfo = null;
-                    result = null;
-                }
-            }
-        }
-
-        private void BackgroundDownloadManager_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            btnGetInfo.IsEnabled = true;
-            statusProgressBar.Value = 0;
-            if (e.Error == null)
-            {
-                statusMessage.Text = "Done";
-                SetImage("Images/ppHop.gif", true);
-
-            }
-            else
-            {
-                statusMessage.Text = "ERROR";
-                SetImage("Images/peepoSad.png", false);
-                AppendLog("ERROR: " + e.Error.Message);
-            }
-        }
-
-        private void BackgroundDownloadManager_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            string message = (string)e.UserState;
-            statusMessage.Text = message;
-            statusProgressBar.Value = e.ProgressPercentage >= 100 ? 100 : e.ProgressPercentage;
-        }
-
         private void AppendLog(string message)
         {
             textLog.Dispatcher.BeginInvoke((Action)(() =>
@@ -369,21 +261,6 @@ namespace TwitchDownloaderWPF
                 statusMessage.Text = (string)progress.data;
             if (progress.reportType == ReportType.Log)
                 AppendLog((string)progress.data);
-        }
-
-        private TimeSpan GenerateTimespan(string input)
-        {
-            //There might be a better way to do this, gets string 0h0m0s and returns timespan
-            TimeSpan returnSpan = new TimeSpan(0);
-            string[] inputArray = input.Remove(input.Length - 1).Replace('h', ':').Replace('m', ':').Split(':');
-
-            returnSpan = returnSpan.Add(TimeSpan.FromSeconds(Int32.Parse(inputArray[inputArray.Length - 1])));
-            if (inputArray.Length > 1)
-                returnSpan = returnSpan.Add(TimeSpan.FromMinutes(Int32.Parse(inputArray[inputArray.Length - 2])));
-            if (inputArray.Length > 2)
-                returnSpan = returnSpan.Add(TimeSpan.FromHours(Int32.Parse(inputArray[inputArray.Length - 3])));
-
-            return returnSpan;
         }
 
         public void SetImage(string imageUri, bool isGif)
