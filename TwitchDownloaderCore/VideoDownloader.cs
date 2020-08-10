@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -74,6 +75,7 @@ namespace TwitchDownloaderCore
 
                 string baseUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf("/") + 1);
                 List<KeyValuePair<string, double>> videoList = new List<KeyValuePair<string, double>>();
+                
                 using (WebClient client = new WebClient())
                 {
                     string[] videoChunks = (await client.DownloadStringTaskAsync(playlistUrl)).Split('\n');
@@ -85,7 +87,9 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                Queue<string> videoParts = new Queue<string>(GenerateCroppedVideoList(videoList, downloadOptions));
+                List<KeyValuePair<string, double>> videoListCropped = GenerateCroppedVideoList(videoList, downloadOptions);
+                Queue<string> videoParts = new Queue<string>();
+                videoListCropped.ForEach(x => videoParts.Enqueue(x.Key));
                 List<string> videoPartsList = new List<string>(videoParts);
                 int partCount = videoParts.Count;
                 int doneCount = 0;
@@ -105,13 +109,14 @@ namespace TwitchDownloaderCore
                                 {
                                     using (WebClient client = new WebClient())
                                     {
-                                        await client.DownloadFileTaskAsync(baseUrl + request, Path.Combine(downloadFolder, request));
+                                        await client.DownloadFileTaskAsync(baseUrl + request, Path.Combine(downloadFolder, RemoveQueryString(request)));
                                         isDone = true;
                                     }
                                 }
-                                catch (WebException)
+                                catch (WebException ex)
                                 {
                                     errorCount++;
+                                    Debug.WriteLine(ex);
                                     await Task.Delay(10000);
                                 }
                             }
@@ -125,6 +130,10 @@ namespace TwitchDownloaderCore
                             progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
 
                             return;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex);
                         }
                         finally
                         {
@@ -146,7 +155,7 @@ namespace TwitchDownloaderCore
                     {
                         foreach (var part in videoPartsList)
                         {
-                            string file = Path.Combine(downloadFolder, part);
+                            string file = Path.Combine(downloadFolder, RemoveQueryString(part));
                             if (File.Exists(file))
                             {
                                 byte[] writeBytes = File.ReadAllBytes(file);
@@ -166,6 +175,16 @@ namespace TwitchDownloaderCore
 
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Finalizing MP4 (3/3)" });
 
+                double startOffset = 0.0;
+
+                for (int i = 0; i < videoList.Count; i++)
+                {
+                    if (videoList[i].Key == videoPartsList[0])
+                        break;
+
+                    startOffset += videoList[i].Value;
+                }
+
                 double seekTime = downloadOptions.CropBeginningTime;
                 double seekDuration = Math.Round(downloadOptions.CropEndingTime - seekTime);
 
@@ -178,7 +197,7 @@ namespace TwitchDownloaderCore
                             StartInfo =
                         {
                         FileName = Path.GetFullPath(downloadOptions.FfmpegPath),
-                        Arguments = String.Format("-y -copyts -avoid_negative_ts make_zero -i \"{0}\" -ss {1} -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), seekTime.ToString(), Int32.MaxValue, seekDuration.ToString(), Path.GetFullPath(downloadOptions.Filename)),
+                        Arguments = String.Format("-y -avoid_negative_ts make_zero -ss {1} -i \"{0}\" -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(), Int32.MaxValue, seekDuration.ToString(), Path.GetFullPath(downloadOptions.Filename)),
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         RedirectStandardInput = false,
@@ -200,6 +219,19 @@ namespace TwitchDownloaderCore
             }
         }
 
+        //Some old twitch VODs have files with a query string at the end such as 1.ts?offset=blah which isn't a valid filename
+        private string RemoveQueryString(string inputString)
+        {
+            if (inputString.Contains('?'))
+            {
+                return inputString.Split('?')[0];
+            }
+            else
+            {
+                return inputString;
+            }
+        }
+
         private void Cleanup(string downloadFolder)
         {
             if (Directory.Exists(downloadFolder))
@@ -215,46 +247,50 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private List<string> GenerateCroppedVideoList(List<KeyValuePair<string, double>> videoList, VideoDownloadOptions downloadOptions)
+        private List<KeyValuePair<string, double>> GenerateCroppedVideoList(List<KeyValuePair<string, double>> videoList, VideoDownloadOptions downloadOptions)
         {
-            double beginTime = 0.0;
-            double endTime = 0.0;
-
+            List<KeyValuePair<string, double>> returnList = new List<KeyValuePair<string, double>>(videoList);
             TimeSpan startCrop = TimeSpan.FromSeconds(downloadOptions.CropBeginningTime);
             TimeSpan endCrop = TimeSpan.FromSeconds(downloadOptions.CropEndingTime);
 
-            foreach (var video in videoList)
-                endTime += video.Value;
-
             if (downloadOptions.CropBeginning)
             {
-                for (int i = 0; i < videoList.Count; i++)
+                double startTime = 0;
+                for (int i = 0; i < returnList.Count; i++)
                 {
-                    if (beginTime + videoList[i].Value <= startCrop.TotalSeconds)
+                    if (startTime + returnList[i].Value < startCrop.TotalSeconds)
                     {
-                        beginTime += videoList[i].Value;
-                        videoList.RemoveAt(i);
+                        startTime += returnList[i].Value;
+                        returnList.RemoveAt(i);
                         i--;
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
             }
 
             if (downloadOptions.CropEnding)
             {
-                for (int i = videoList.Count - 1; i >= 0; i--)
+                double endTime = 0.0;
+                videoList.ForEach(x => endTime += x.Value);
+
+                for (int i = returnList.Count - 1; i >= 0; i--)
                 {
-                    if (endTime - videoList[i].Value >= endCrop.TotalSeconds)
+                    if (endTime - returnList[i].Value > endCrop.TotalSeconds)
                     {
-                        endTime -= videoList[i].Value;
-                        videoList.RemoveAt(i);
+                        endTime -= returnList[i].Value;
+                        returnList.RemoveAt(i);
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
             }
-            List<string> result = new List<string>();
-            foreach (var video in videoList)
-                result.Add(video.Key);
 
-            return result;
+            return returnList;
         }
 
         private static void DownloadThread(string videoPart, string baseUrl, string downloadFolder)

@@ -245,7 +245,8 @@ namespace TwitchDownloaderWPF
 
         private bool ValidateInput()
         {
-            TimeSpan videoLength = TimeSpan.Parse(labelLength.Text.ToString(CultureInfo.InvariantCulture));
+            string fixedString = FormatString(labelLength.Text.ToString(CultureInfo.InvariantCulture));
+            TimeSpan videoLength = TimeSpan.Parse(fixedString);
             TimeSpan beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
             TimeSpan endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
 
@@ -265,6 +266,27 @@ namespace TwitchDownloaderWPF
             }
 
             return true;
+        }
+
+        private string FormatString(string oldString)
+        {
+            List<int> returnParts = new List<int>();
+            List<string> stringParts = new List<string>(oldString.Split(':'));
+
+            int hours = Int32.Parse(stringParts[0]);
+            if (hours > 23)
+            {
+                returnParts.Add(hours / 24);
+                returnParts.Add(hours % 24);
+                returnParts.Add(Int32.Parse(stringParts[1]));
+                returnParts.Add(Int32.Parse(stringParts[2]));
+
+                return String.Join(":", returnParts.ToArray());
+            }
+            else
+            {
+                return oldString;
+            }
         }
 
         public void AppendLog(string message)
