@@ -540,7 +540,7 @@ namespace TwitchDownloaderCore
                                                 sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
 
                                             float emojiLeft = (float)drawPos.X;
-                                            float emojiTop = (float)Math.Floor((renderOptions.EmoteScale - emojiSize) / 2.0);
+                                            float emojiTop = (float)Math.Floor((renderOptions.SectionHeight - emojiSize) / 2.0);
                                             SKRect emojiRect = new SKRect(emojiLeft, emojiTop, emojiLeft + emojiSize, emojiTop + emojiSize);
                                             sectionImageCanvas.DrawBitmap(emojiBitmap, emojiRect, imagePaint);
                                             drawPos.X += (int)Math.Floor(emojiSize + (int)Math.Floor(3 * renderOptions.EmoteScale));

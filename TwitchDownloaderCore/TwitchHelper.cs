@@ -286,7 +286,6 @@ namespace TwitchDownloaderCore
                                                 {
                                                     string filePath = Path.Combine(emoteFolder, id + "_1x.png");
                                                     byte[] bytes = client.DownloadData(response["archived_snapshots"]["closest"]["url"].ToString().Replace("/https://static-cdn.jtvnw.net", "if_/https://static-cdn.jtvnw.net"));
-                                                    File.WriteAllBytes(filePath, bytes);
                                                     MemoryStream ms = new MemoryStream(bytes);
                                                     SKBitmap emoteImage = SKBitmap.Decode(ms);
                                                     SKBitmap emoteImageScaled = new SKBitmap(28, 28);
@@ -294,6 +293,7 @@ namespace TwitchDownloaderCore
                                                     alreadyAdded.Add(id);
                                                     returnDictionary.Add(id, emoteImageScaled);
                                                     emoteImage.Dispose();
+                                                    emoteImageScaled.Encode(SKEncodedImageFormat.Png, 100).SaveTo(new FileStream(filePath, FileMode.Create));
                                                     foundEmote = true;
                                                     break;
                                                 }

@@ -126,12 +126,14 @@ namespace TwitchDownloaderCLI
                 downloadOptions.IsJson = true;
             }
 
+            downloadOptions.Id = inputOptions.Id;
             downloadOptions.CropBeginning = inputOptions.CropBeginningTime == 0.0 ? false : true;
             downloadOptions.CropBeginningTime = inputOptions.CropBeginningTime;
             downloadOptions.CropEnding = inputOptions.CropEndingTime == 0.0 ? false : true;
             downloadOptions.CropEndingTime = inputOptions.CropEndingTime;
             downloadOptions.Timestamp = inputOptions.Timestamp;
             downloadOptions.EmbedEmotes = inputOptions.EmbedEmotes;
+            downloadOptions.Filename = inputOptions.OutputFile;
 
             ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
