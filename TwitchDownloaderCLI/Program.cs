@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Mono.Unix;
 using SkiaSharp;
 using System;
 using System.IO;
@@ -13,6 +14,8 @@ namespace TwitchDownloaderCLI
 {
     class Program
     {
+        static string previousStatus = "";
+        static string ffmpegPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg";
         static void Main(string[] args)
         {
             if (args.Any(x => x.Equals("--download-ffmpeg")))
@@ -21,6 +24,13 @@ namespace TwitchDownloaderCLI
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official).Wait();
+                    try
+                    {
+                        var filePermissions = new Mono.Unix.UnixFileInfo("ffmpeg");
+                        filePermissions.FileAccessPermissions = FileAccessPermissions.UserRead | FileAccessPermissions.UserWrite| FileAccessPermissions.GroupRead| FileAccessPermissions.OtherRead | FileAccessPermissions.UserExecute | FileAccessPermissions.GroupExecute | FileAccessPermissions.OtherExecute;
+                        filePermissions.Refresh();
+                    }
+                    catch { }
                 }
                 else
                     FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full).Wait();
@@ -33,10 +43,10 @@ namespace TwitchDownloaderCLI
             if (optionsResult.Tag == ParserResultType.NotParsed)
                 Environment.Exit(1);
 
-            string ffmpegPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg";
+            
             if (!File.Exists(ffmpegPath))
             {
-                Console.WriteLine("[ERROR] - Unable to find ffmpeg, exiting");
+                Console.WriteLine("[ERROR] - Unable to find ffmpeg, exiting. You can download ffmpeg automatically with the argument --download-ffmpeg");
                 Environment.Exit(1);
             }
 
@@ -76,7 +86,7 @@ namespace TwitchDownloaderCLI
             downloadOptions.CropBeginningTime = inputOptions.CropBeginningTime;
             downloadOptions.CropEnding = inputOptions.CropEndingTime == 0.0 ? false : true;
             downloadOptions.CropEndingTime = inputOptions.CropEndingTime;
-            downloadOptions.FfmpegPath = inputOptions.FfmpegPath;
+            downloadOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : inputOptions.FfmpegPath;
 
             VideoDownloader videoDownloader = new VideoDownloader(downloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
@@ -88,7 +98,7 @@ namespace TwitchDownloaderCLI
         {
             ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
 
-            if (inputOptions.Id == "" || inputOptions.Id.All(Char.IsLetter))
+            if (inputOptions.Id == "" || inputOptions.Id.Any(x => !Char.IsLetter(x)))
             {
                 Console.WriteLine("[ERROR] - Invalid Clip ID, unable to parse. Must be only letters.");
                 Environment.Exit(1);
@@ -189,6 +199,7 @@ namespace TwitchDownloaderCLI
             renderOptions.Framerate = inputOptions.Framerate;
             renderOptions.InputArgs = inputOptions.InputArgs;
             renderOptions.OutputArgs = inputOptions.OutputArgs;
+            renderOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : inputOptions.FfmpegPath;
 
             ChatRenderer chatDownloader = new ChatRenderer(renderOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
@@ -198,9 +209,18 @@ namespace TwitchDownloaderCLI
 
         private static void Progress_ProgressChanged(object sender, ProgressReport e)
         {
-            if (e.reportType == ReportType.Percent)
+            if (e.reportType == ReportType.Message)
             {
-                Console.WriteLine(e.data);
+                string currentStatus = "[STATUS] - " + e.data;
+                if (currentStatus != previousStatus)
+                {
+                    previousStatus = currentStatus;
+                    Console.WriteLine(currentStatus);
+                }
+            }
+            else if (e.reportType == ReportType.Log)
+            {
+                Console.WriteLine("[LOG] - " + e.data);
             }
         }
     }

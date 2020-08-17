@@ -218,6 +218,9 @@ namespace TwitchDownloaderCore
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
 
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             using (var ffmpegStream = new BinaryWriter(process.StandardInput.BaseStream))
             {
                 bufferCanvas.Clear(renderOptions.BackgroundColor);
@@ -372,10 +375,14 @@ namespace TwitchDownloaderCore
                     if (progress != null)
                     {
                         progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percentInt });
-                        progress.Report(new ProgressReport() { reportType = ReportType.Message, data = $"Rendering Video {percentInt}%" });
+                        int timeLeftInt = (int)Math.Floor(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
+                        TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
+                        progress.Report(new ProgressReport() { reportType = ReportType.Message, data = $"Rendering Video {percentInt}% ({timeLeft.ToString(@"h\hm\ms\s")} left)" });
                     } 
                 }
             }
+            stopwatch.Stop();
+            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {(duration / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });
             process.WaitForExit();
         }
         public static SKBitmap DrawTimestamp(SKBitmap sectionImage, List<SKBitmap> imageList, SKPaint messageFont, ChatRenderOptions renderOptions, Comment comment, Size canvasSize, ref Point drawPos, ref int default_x)
@@ -532,13 +539,13 @@ namespace TwitchDownloaderCore
                                     codepoint = codepoint.Replace("fe0f", "");
                                     if (codepoint != "" && emojiCache.ContainsKey(codepoint))
                                     {
+                                        SKBitmap emojiBitmap = emojiCache[codepoint];
+                                        float emojiSize = (emojiBitmap.Width / 4) * (float)renderOptions.EmoteScale;
+                                        if (drawPos.X + (20 * renderOptions.EmoteScale) + 3 > canvasSize.Width)
+                                            sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
+
                                         using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImage))
                                         {
-                                            SKBitmap emojiBitmap = emojiCache[codepoint];
-                                            float emojiSize = (emojiBitmap.Width / 4) * (float)renderOptions.EmoteScale;
-                                            if (drawPos.X + (20 * renderOptions.EmoteScale) + 3 > canvasSize.Width)
-                                                sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
-
                                             float emojiLeft = (float)drawPos.X;
                                             float emojiTop = (float)Math.Floor((renderOptions.SectionHeight - emojiSize) / 2.0);
                                             SKRect emojiRect = new SKRect(emojiLeft, emojiTop, emojiLeft + emojiSize, emojiTop + emojiSize);
