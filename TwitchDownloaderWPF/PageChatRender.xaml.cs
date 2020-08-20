@@ -23,6 +23,7 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore;
 using System.Threading;
 using TwitchDownloaderCore.TwitchObjects;
+using System.Windows.Navigation;
 
 namespace TwitchDownloaderWPF
 {
@@ -89,7 +90,8 @@ namespace TwitchDownloaderWPF
                         InputArgs = Settings.Default.FfmpegInputArgs,
                         OutputArgs = Settings.Default.FfmpegOutputArgs,
                         MessageFontStyle = SKFontStyle.Normal,
-                        UsernameFontStyle = SKFontStyle.Bold
+                        UsernameFontStyle = SKFontStyle.Bold,
+                        GenerateMask = (bool)checkMask.IsChecked
                     };
                     options.PaddingLeft = (int)Math.Floor(2 * options.EmoteScale);
 
@@ -147,6 +149,7 @@ namespace TwitchDownloaderWPF
                 textUpdateTime.Text = Settings.Default.UpdateTime.ToString("0.##");
                 colorFont.SelectedColor = System.Windows.Media.Color.FromRgb((byte)Settings.Default.FontColorR, (byte)Settings.Default.FontColorG, (byte)Settings.Default.FontColorB);
                 textFramerate.Text = Settings.Default.Framerate.ToString();
+                checkMask.IsChecked = Settings.Default.GenerateMask;
 
                 foreach (VideoContainer container in comboFormat.Items)
                 {
@@ -167,6 +170,12 @@ namespace TwitchDownloaderWPF
                 comboCodec.SelectionChanged += ComboCodecOnSelectionChanged;
             }
             catch { }
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
 
         private void ComboCodecOnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -208,6 +217,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.FontColorR = colorFont.SelectedColor.Value.R;
             Settings.Default.FontColorG = colorFont.SelectedColor.Value.G;
             Settings.Default.FontColorB = colorFont.SelectedColor.Value.B;
+            Settings.Default.GenerateMask = (bool)checkMask.IsChecked;
             if (comboFormat.SelectedItem != null)
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
             if (comboCodec.SelectedItem != null)
@@ -248,7 +258,7 @@ namespace TwitchDownloaderWPF
 
             if (colorBackground.SelectedColor.Value.A < 255)
             {
-                if ((((VideoContainer)comboFormat.SelectedItem).Name == "MOV" && ( ((Codec)comboCodec.SelectedItem).Name == "RLE") || ((Codec)comboCodec.SelectedItem).Name == "ProRes") || ((VideoContainer)comboFormat.SelectedItem).Name == "WEBM")
+                if ((((VideoContainer)comboFormat.SelectedItem).Name == "MOV" && ( ((Codec)comboCodec.SelectedItem).Name == "RLE") || ((Codec)comboCodec.SelectedItem).Name == "ProRes") || ((VideoContainer)comboFormat.SelectedItem).Name == "WEBM" || (bool)checkMask.IsChecked)
                 {
                     return true;
                 }

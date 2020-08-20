@@ -1,6 +1,7 @@
 ﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace TwitchDownloaderCore.Options
@@ -48,6 +49,19 @@ namespace TwitchDownloaderCore.Options
                 else
                     return (int)Math.Floor(UpdateRate / (1.0 / Framerate));
             }  
+        }
+        public bool GenerateMask { get; set; }
+        public string OutputFileMask
+        {
+            get
+            {
+                if (OutputFile == "" || GenerateMask == false)
+                    return OutputFile;
+
+                string extension = Path.GetExtension(OutputFile);
+                int lastIndex = OutputFile.LastIndexOf(extension);
+                return OutputFile.Substring(0, lastIndex) + "_mask" + extension;
+            }
         }
         public string InputArgs { get; set; }
         public string OutputArgs { get; set; }

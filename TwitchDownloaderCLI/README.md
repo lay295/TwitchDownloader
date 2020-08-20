@@ -38,7 +38,7 @@ Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do -b 
 **-t/-\-threads**
 (Default: 10) Number of download threads.
 
-**-o/-\-oauth**
+**-\-oauth**
 OAuth to be passed when downloading a VOD. Used when downloading sub only VODs.
 ## Arguments for mode ClipDownload
 **-u/-\-id**
@@ -108,6 +108,9 @@ Path to JSON chat file input.
 
 **-\-timestamp**
 Enables timestamps to left of messages, similar to VOD chat on Twitch.
+
+**-\-generate-mask**
+Generates a mask file in addition to the regular chat file.
 
 **-\-framerate**
 (Default: 30) Framerate of chat render output.

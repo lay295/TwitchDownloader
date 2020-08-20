@@ -65,12 +65,14 @@
                 <TextBlock Text="Live Preview:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="File Format:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
                 <TextBlock Text="Codec:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
+                <TextBlock HorizontalAlignment="Right" Margin="0,12,0,0">Generate Mask: <Hyperlink NavigateUri="https://www.youtube.com/watch?v=D-_TD1-w3fY" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Generates a seperate video file as a mask for transparency. Click for a tutorial on how to use in Premiere and Vegas.</Hyperlink.ToolTip>(?)</Hyperlink></TextBlock>
                 <TextBlock Text="FFmpeg&#x0a;Arguments:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <Button x:Name="btnPreview" Width="50" Content="View" HorizontalAlignment="Left" Margin="0,5,0,0" Click="btnPreview_Click"/>
                 <ComboBox x:Name="comboFormat" MinWidth="70" Margin="0,5,0,0"/>
                 <ComboBox x:Name="comboCodec" MinWidth="70" Margin="0,5,0,0"/>
+                <CheckBox x:Name="checkMask" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
                 <Button x:Name="btnFfmpeg" Width="50" Content="Edit" HorizontalAlignment="Left" Margin="0,15,0,0" Click="btnFfmpeg_Click"/>
             </StackPanel>
         </StackPanel>

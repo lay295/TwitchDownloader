@@ -197,6 +197,7 @@ namespace TwitchDownloaderCLI
             renderOptions.UpdateRate = inputOptions.UpdateRate;
             renderOptions.PaddingLeft = inputOptions.PaddingLeft;
             renderOptions.Framerate = inputOptions.Framerate;
+            renderOptions.GenerateMask = inputOptions.GenerateMask;
             renderOptions.InputArgs = inputOptions.InputArgs;
             renderOptions.OutputArgs = inputOptions.OutputArgs;
             renderOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : inputOptions.FfmpegPath;

@@ -221,6 +221,36 @@ namespace TwitchDownloaderCore
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
+            Process maskProcess = null;
+            BinaryWriter maskStream = null;
+            if (renderOptions.GenerateMask)
+            {
+                string outputArgsMask = renderOptions.OutputArgs.Replace("{fps}", renderOptions.Framerate.ToString())
+                .Replace("{height}", renderOptions.ChatHeight.ToString()).Replace("{width}", renderOptions.ChatWidth.ToString())
+                .Replace("{save_path}", renderOptions.OutputFileMask).Replace("{max_int}", int.MaxValue.ToString());
+                maskProcess = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = ffmpegFile,
+                        Arguments = $"{inputArgs} {outputArgsMask}",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardInput = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+
+                if (File.Exists(renderOptions.OutputFileMask))
+                    File.Delete(renderOptions.OutputFileMask);
+
+                maskProcess.Start();
+                maskProcess.BeginErrorReadLine();
+                maskProcess.BeginOutputReadLine();
+                maskStream = new BinaryWriter(maskProcess.StandardInput.BaseStream);
+            }
+
             using (var ffmpegStream = new BinaryWriter(process.StandardInput.BaseStream))
             {
                 bufferCanvas.Clear(renderOptions.BackgroundColor);
@@ -363,6 +393,19 @@ namespace TwitchDownloaderCore
                     var data = SKData.Create(pix.GetPixels(), pix.Info.BytesSize);
                     var bytes = data.ToArray();
                     ffmpegStream.Write(bytes);
+                    if (renderOptions.GenerateMask)
+                    {
+                        SKBitmap maskBitmap = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
+                        using (SKCanvas maskCanvas = new SKCanvas(maskBitmap))
+                        {
+                            maskCanvas.Clear(SKColors.White);
+                            maskCanvas.DrawBitmap(bufferBitmap, 0, 0, new SKPaint() { BlendMode = SKBlendMode.DstIn });
+                        }
+                        var pixMask = maskBitmap.PeekPixels();
+                        var dataMask = SKData.Create(pixMask.GetPixels(), pixMask.Info.BytesSize);
+                        var bytesMask = dataMask.ToArray();
+                        maskStream.Write(bytesMask);
+                    }
 
                     foreach (var emote in displayedGifs)
                     {
@@ -380,6 +423,11 @@ namespace TwitchDownloaderCore
                         progress.Report(new ProgressReport() { reportType = ReportType.Message, data = $"Rendering Video {percentInt}% ({timeLeft.ToString(@"h\hm\ms\s")} left)" });
                     } 
                 }
+            }
+            if (renderOptions.GenerateMask)
+            {
+                maskStream.Dispose();
+                maskProcess.WaitForExit();
             }
             stopwatch.Stop();
             progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {(duration / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });

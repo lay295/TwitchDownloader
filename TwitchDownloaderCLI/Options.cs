@@ -51,6 +51,8 @@ namespace TwitchDownloaderCLI
         public bool FfzEmotes { get; set; }
         [Option("outline", Default = false, HelpText = "Enable outline in chat render.")]
         public bool Outline { get; set; }
+        [Option("generate-mask", Default = false, HelpText = "Generates a mask file in addition to the regular chat file.")]
+        public bool GenerateMask { get; set; }
         [Option("outline-size", Default = 4, HelpText = "Size of outline in chat render.")]
         public double OutlineSize { get; set; }
         [Option('f', "font", Default = "ariel", HelpText = "Font to use in chat render.")]
