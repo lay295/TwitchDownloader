@@ -15,9 +15,6 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class App : Application
     {
-        void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-        {
-            File.AppendAllText("errors.txt", e.Exception.ToString());
-        }
+        
     }
 }

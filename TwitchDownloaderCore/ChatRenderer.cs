@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -395,15 +396,7 @@ namespace TwitchDownloaderCore
                     ffmpegStream.Write(bytes);
                     if (renderOptions.GenerateMask)
                     {
-                        SKBitmap maskBitmap = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
-                        using (SKCanvas maskCanvas = new SKCanvas(maskBitmap))
-                        {
-                            maskCanvas.Clear(SKColors.White);
-                            maskCanvas.DrawBitmap(bufferBitmap, 0, 0, new SKPaint() { BlendMode = SKBlendMode.DstIn });
-                        }
-                        var pixMask = maskBitmap.PeekPixels();
-                        var dataMask = SKData.Create(pixMask.GetPixels(), pixMask.Info.BytesSize);
-                        var bytesMask = dataMask.ToArray();
+                        byte[] bytesMask = GetMaskBytes(bufferBitmap, renderOptions);
                         maskStream.Write(bytesMask);
                     }
 
@@ -433,6 +426,21 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {(duration / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });
             process.WaitForExit();
         }
+
+        private byte[] GetMaskBytes(SKBitmap bufferBitmap, ChatRenderOptions renderOptions)
+        {
+            SKBitmap maskBitmap = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
+            using (SKCanvas maskCanvas = new SKCanvas(maskBitmap))
+            {
+                maskCanvas.Clear(SKColors.White);
+                maskCanvas.DrawBitmap(bufferBitmap, 0, 0, new SKPaint() { BlendMode = SKBlendMode.DstIn });
+            }
+            var pixMask = maskBitmap.PeekPixels();
+            var dataMask = SKData.Create(pixMask.GetPixels(), pixMask.Info.BytesSize);
+            var bytesMask = dataMask.ToArray();
+            return bytesMask;
+        }
+
         public static SKBitmap DrawTimestamp(SKBitmap sectionImage, List<SKBitmap> imageList, SKPaint messageFont, ChatRenderOptions renderOptions, Comment comment, Size canvasSize, ref Point drawPos, ref int default_x)
         {
             SKCanvas sectionImageCanvas = new SKCanvas(sectionImage);
