@@ -426,7 +426,7 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {(duration / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });
             process.WaitForExit();
         }
-
+        [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
         private byte[] GetMaskBytes(SKBitmap bufferBitmap, ChatRenderOptions renderOptions)
         {
             SKBitmap maskBitmap = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
