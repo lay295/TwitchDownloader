@@ -111,9 +111,9 @@ namespace TwitchDownloaderCore
                 result["comments"] = comments;
                 result["video"] = video;
 
-                if (downloadOptions.EmbedEmotes && !downloadOptions.IsJson)
+                if (downloadOptions.EmbedEmotes && downloadOptions.IsJson)
                 {
-                    progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Downloading + Embedding Emojis" });
+                    progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Downloading + Embedding Emotes" });
                     result["emotes"] = new JObject();
                     JArray firstParty = new JArray();
                     JArray thirdParty = new JArray();

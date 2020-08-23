@@ -91,7 +91,8 @@ namespace TwitchDownloaderWPF
                         OutputArgs = Settings.Default.FfmpegOutputArgs,
                         MessageFontStyle = SKFontStyle.Normal,
                         UsernameFontStyle = SKFontStyle.Bold,
-                        GenerateMask = (bool)checkMask.IsChecked
+                        GenerateMask = (bool)checkMask.IsChecked,
+                        OutlineSize = 4
                     };
                     options.PaddingLeft = (int)Math.Floor(2 * options.EmoteScale);
 

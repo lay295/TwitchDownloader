@@ -49,18 +49,16 @@ namespace TwitchDownloaderCore
                     Directory.CreateDirectory(cacheFolder);
 
 
+                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Chat Badges" });
+                List<ChatBadge> chatBadges = await Task.Run(() => TwitchHelper.GetChatBadges(chatJson.streamer.id));
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Emotes" });
-                Task<List<ChatBadge>> chatBadgesTask = Task.Run(() => TwitchHelper.GetChatBadges(chatJson.streamer.id));
-                Task<Dictionary<string, SKBitmap>> chatEmotesTask = Task.Run(() => TwitchHelper.GetEmotes(chatJson.comments, cacheFolder, chatJson.emotes, true));
-                Task<List<ThirdPartyEmote>> thirdPartyEmotesTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatJson.streamer.id, cacheFolder, chatJson.emotes));
-                Task<List<CheerEmote>> cheerEmotesTask = Task.Run(() => TwitchHelper.GetBits(cacheFolder));
-                Task<Dictionary<string, SKBitmap>> emojiCacheTask = Task.Run(() => TwitchHelper.GetTwitterEmojis(chatJson.comments, cacheFolder));
-
-                List<ChatBadge> chatBadges = await chatBadgesTask;
-                List<ThirdPartyEmote> thirdPartyEmotes = await thirdPartyEmotesTask;
-                List<CheerEmote> cheerEmotes = await cheerEmotesTask;
-                Dictionary<string, SKBitmap> chatEmotes = await chatEmotesTask;
-                Dictionary<string, SKBitmap> emojiCache = await emojiCacheTask;
+                Dictionary<string, SKBitmap> chatEmotes = await Task.Run(() => TwitchHelper.GetEmotes(chatJson.comments, cacheFolder, chatJson.emotes, true));
+                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching 3rd Party Emotes" });
+                List<ThirdPartyEmote> thirdPartyEmotes = await Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatJson.streamer.id, cacheFolder, chatJson.emotes));
+                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Cheer Emotes" });
+                List<CheerEmote> cheerEmotes = await Task.Run(() => TwitchHelper.GetBits(cacheFolder));
+                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Emojis" });
+                Dictionary<string, SKBitmap> emojiCache = await Task.Run(() => TwitchHelper.GetTwitterEmojis(chatJson.comments, cacheFolder));
 
                 CheckCancelation(cancellationToken, downloadFolder);
 
@@ -69,68 +67,71 @@ namespace TwitchDownloaderCore
                 SKPaint messageFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.MessageFontStyle), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
 
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Rendering Comments" });
-
-                foreach (Comment comment in chatJson.comments)
+                await Task.Run(() =>
                 {
-                    if (comment.source != "chat")
-                        continue;
-                    if (comment.message.fragments == null)
-                        continue;
-                    if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
+                    foreach (Comment comment in chatJson.comments)
                     {
-                        if (comment.message.user_notice_params.msg_id != "highlighted-message" && comment.message.user_notice_params.msg_id != "")
+                        if (comment.source != "chat")
                             continue;
-                    }
-
-                    Point drawPos = new Point(renderOptions.PaddingLeft, 0);
-                    SKColor userColor = SKColor.Parse(comment.message.user_color != null ? comment.message.user_color : defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Count]);
-                    userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor);
-
-                    List<SKBitmap> imageList = new List<SKBitmap>();
-                    SKBitmap sectionImage = new SKBitmap(canvasSize.Width, canvasSize.Height);
-                    int default_x = renderOptions.PaddingLeft;
-
-                    List<GifEmote> currentGifEmotes = new List<GifEmote>();
-                    List<SKBitmap> emoteList = new List<SKBitmap>();
-                    List<SKRect> emotePositionList = new List<SKRect>();
-                    new SKCanvas(sectionImage).Clear(renderOptions.BackgroundColor);
-
-                    if (renderOptions.Timestamp)
-                        sectionImage = DrawTimestamp(sectionImage, imageList, messageFont, renderOptions, comment, canvasSize, ref drawPos, ref default_x);
-                    sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
-                    sectionImage = DrawUsername(sectionImage, imageList, renderOptions, nameFont, comment.commenter.display_name, userColor, canvasSize, ref drawPos);
-                    sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
-
-                    int finalHeight = 0;
-                    foreach (var img in imageList)
-                        finalHeight += img.Height;
-                    SKBitmap finalImage = new SKBitmap(canvasSize.Width, finalHeight);
-                    SKCanvas finalImageCanvas = new SKCanvas(finalImage);
-                    finalHeight = 0;
-                    finalImageCanvas.Clear(renderOptions.BackgroundColor);
-                    foreach (var img in imageList)
-                    {
-                        finalImageCanvas.DrawBitmap(img, 0, finalHeight);
-                        finalHeight += img.Height;
-                        img.Dispose();
-                    }
-
-                    string imagePath = Path.Combine(downloadFolder, Guid.NewGuid() + ".png");
-                    finalComments.Add(new TwitchComment() { Section = imagePath, SecondsOffset = Double.Parse(comment.content_offset_seconds.ToString()), GifEmotes = currentGifEmotes, NormalEmotes = emoteList, NormalEmotesPositions = emotePositionList });
-                    using (Stream s = File.OpenWrite(imagePath))
-                    {
-                        SKImage saveImage = SKImage.FromBitmap(finalImage);
-                        if (saveImage != null)
+                        if (comment.message.fragments == null)
+                            continue;
+                        if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
                         {
-                            saveImage.Encode(SKEncodedImageFormat.Png, 100).SaveTo(s);
-                            saveImage.Dispose();
+                            if (comment.message.user_notice_params.msg_id != "highlighted-message" && comment.message.user_notice_params.msg_id != "")
+                                continue;
                         }
+
+                        Point drawPos = new Point(renderOptions.PaddingLeft, 0);
+                        SKColor userColor = SKColor.Parse(comment.message.user_color != null ? comment.message.user_color : defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Count]);
+                        userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor);
+
+                        List<SKBitmap> imageList = new List<SKBitmap>();
+                        SKBitmap sectionImage = new SKBitmap(canvasSize.Width, canvasSize.Height);
+                        int default_x = renderOptions.PaddingLeft;
+
+                        List<GifEmote> currentGifEmotes = new List<GifEmote>();
+                        List<SKBitmap> emoteList = new List<SKBitmap>();
+                        List<SKRect> emotePositionList = new List<SKRect>();
+                        new SKCanvas(sectionImage).Clear(renderOptions.BackgroundColor);
+
+                        if (renderOptions.Timestamp)
+                            sectionImage = DrawTimestamp(sectionImage, imageList, messageFont, renderOptions, comment, canvasSize, ref drawPos, ref default_x);
+                        sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
+                        sectionImage = DrawUsername(sectionImage, imageList, renderOptions, nameFont, comment.commenter.display_name, userColor, canvasSize, ref drawPos);
+                        sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
+
+                        int finalHeight = 0;
+                        foreach (var img in imageList)
+                            finalHeight += img.Height;
+                        SKBitmap finalImage = new SKBitmap(canvasSize.Width, finalHeight);
+                        SKCanvas finalImageCanvas = new SKCanvas(finalImage);
+                        finalHeight = 0;
+                        finalImageCanvas.Clear(renderOptions.BackgroundColor);
+                        foreach (var img in imageList)
+                        {
+                            finalImageCanvas.DrawBitmap(img, 0, finalHeight);
+                            finalHeight += img.Height;
+                            img.Dispose();
+                        }
+
+                        string imagePath = Path.Combine(downloadFolder, Guid.NewGuid() + ".png");
+                        finalComments.Add(new TwitchComment() { Section = imagePath, SecondsOffset = Double.Parse(comment.content_offset_seconds.ToString()), GifEmotes = currentGifEmotes, NormalEmotes = emoteList, NormalEmotesPositions = emotePositionList });
+                        using (Stream s = File.OpenWrite(imagePath))
+                        {
+                            SKImage saveImage = SKImage.FromBitmap(finalImage);
+                            if (saveImage != null)
+                            {
+                                saveImage.Encode(SKEncodedImageFormat.Png, 100).SaveTo(s);
+                                saveImage.Dispose();
+                            }
+                        }
+                        finalImage.Dispose();
+                        finalImageCanvas.Dispose();
+                        int percent = (int)Math.Floor(((double)finalComments.Count / (double)chatJson.comments.Count) * 100);
+                        CheckCancelation(cancellationToken, downloadFolder);
                     }
-                    finalImage.Dispose();
-                    finalImageCanvas.Dispose();
-                    int percent = (int)Math.Floor(((double)finalComments.Count / (double)chatJson.comments.Count) * 100);
-                    CheckCancelation(cancellationToken, downloadFolder);
-                }
+                });
+
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Rendering Video 0%" });
                 await Task.Run(() => RenderVideo(renderOptions, new Queue<TwitchComment>(finalComments.ToArray()), chatJson, progress), cancellationToken);
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Cleaning up..." });
@@ -723,7 +724,7 @@ namespace TwitchDownloaderCore
                 if (renderOptions.Outline)
                 {
                     SKPath outlinePath = messageFont.GetTextPath(message, xPos, yPos);
-                    SKPaint outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(4 * renderOptions.EmoteScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
+                    SKPaint outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.EmoteScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
                     sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
                 }
 
