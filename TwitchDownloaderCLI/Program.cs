@@ -98,9 +98,9 @@ namespace TwitchDownloaderCLI
         {
             ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
 
-            if (inputOptions.Id == "" || inputOptions.Id.Any(x => !Char.IsLetter(x)))
+            if (inputOptions.Id == "" || inputOptions.Id.All(Char.IsDigit))
             {
-                Console.WriteLine("[ERROR] - Invalid Clip ID, unable to parse. Must be only letters.");
+                Console.WriteLine("[ERROR] - Invalid Clip ID, unable to parse.");
                 Environment.Exit(1);
             }
 
@@ -116,7 +116,7 @@ namespace TwitchDownloaderCLI
         {
             ChatDownloadOptions downloadOptions = new ChatDownloadOptions();
 
-            if (inputOptions.Id == "" || (!inputOptions.Id.All(Char.IsLetter) && !inputOptions.Id.All(Char.IsDigit)))
+            if (inputOptions.Id == "")
             {
                 Console.WriteLine("[ERROR] - Invalid ID, unable to parse.");
                 Environment.Exit(1);

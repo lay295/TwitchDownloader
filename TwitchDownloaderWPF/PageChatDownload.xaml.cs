@@ -219,7 +219,7 @@ namespace TwitchDownloaderWPF
                     }
                     else
                     {
-                        downloadOptions.Id = videoData["vod"]["id"].ToString();
+                        downloadOptions.Id = downloadId;
                     }
 
                     ChatDownloader currentDownload = new ChatDownloader(downloadOptions);
