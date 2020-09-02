@@ -83,7 +83,24 @@ namespace TwitchDownloaderCore
                     for (int i = 0; i < videoChunks.Length; i++)
                     {
                         if (videoChunks[i].Contains("#EXTINF"))
-                            videoList.Add(new KeyValuePair<string, double>(videoChunks[i + 1], Double.Parse(videoChunks[i].Remove(0, 8).TrimEnd(','), CultureInfo.InvariantCulture)));
+                        {
+                            if (videoChunks[i + 1].Contains("#EXT-X-BYTERANGE"))
+                            {
+                                if (videoList.Any(x => x.Key == videoChunks[i + 2]))
+                                {
+                                    KeyValuePair<string, double> pair = videoList.Where(x => x.Key == videoChunks[i + 2]).First();
+                                    pair = new KeyValuePair<string, double>(pair.Key, pair.Value + Double.Parse(videoChunks[i].Remove(0, 8).TrimEnd(','), CultureInfo.InvariantCulture));
+                                }
+                                else
+                                {
+                                    videoList.Add(new KeyValuePair<string, double>(videoChunks[i + 2], Double.Parse(videoChunks[i].Remove(0, 8).TrimEnd(','), CultureInfo.InvariantCulture)));
+                                }
+                            }
+                            else
+                            {
+                                videoList.Add(new KeyValuePair<string, double>(videoChunks[i + 1], Double.Parse(videoChunks[i].Remove(0, 8).TrimEnd(','), CultureInfo.InvariantCulture)));
+                            }
+                        }
                     }
                 }
 
@@ -195,15 +212,15 @@ namespace TwitchDownloaderCore
                         var process = new Process
                         {
                             StartInfo =
-                        {
-                        FileName = Path.GetFullPath(downloadOptions.FfmpegPath),
-                        Arguments = String.Format("-y -avoid_negative_ts make_zero -ss {1} -i \"{0}\" -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(), Int32.MaxValue, seekDuration.ToString(), Path.GetFullPath(downloadOptions.Filename)),
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardInput = false,
-                        RedirectStandardOutput = false,
-                        RedirectStandardError = false
-                        }
+                            {
+                                FileName = Path.GetFullPath(downloadOptions.FfmpegPath),
+                                Arguments = String.Format("-y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {1} " : "") + "-i \"{0}\" -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(), Int32.MaxValue, seekDuration.ToString(), Path.GetFullPath(downloadOptions.Filename)),
+                                UseShellExecute = false,
+                                CreateNoWindow = true,
+                                RedirectStandardInput = false,
+                                RedirectStandardOutput = false,
+                                RedirectStandardError = false
+                            }
                         };
                         process.Start();
                         process.WaitForExit();

@@ -81,6 +81,21 @@ namespace TwitchDownloaderCore
             string bttvFolder = Path.Combine(cacheFolder, "bttv");
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
 
+            if (embededEmotes != null)
+            {
+                foreach (ThirdPartyEmoteData emoteData in embededEmotes.thirdParty)
+                {
+                    try
+                    {
+                        MemoryStream ms = new MemoryStream(emoteData.data);
+                        SKCodec codec = SKCodec.Create(ms);
+                        ThirdPartyEmote newEmote = new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(emoteData.data) }, codec, emoteData.name, codec.FrameCount == 1 ? "png" : "gif", "", emoteData.imageScale, emoteData.data);
+                        returnList.Add(newEmote);
+                    }
+                    catch { }
+                }
+            }
+
             using (WebClient client = new WebClient())
             {
                 if (bttv)
@@ -206,20 +221,6 @@ namespace TwitchDownloaderCore
                     }
                     catch { }
                 }
-
-                if (embededEmotes != null)
-                {
-                    foreach (ThirdPartyEmoteData emoteData in embededEmotes.thirdParty)
-                    {
-                        if (returnList.Any(x => x.name == emoteData.name))
-                            continue;
-
-                        MemoryStream ms = new MemoryStream(emoteData.data);
-                        SKCodec codec = SKCodec.Create(ms);
-                        ThirdPartyEmote newEmote = new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(emoteData.data) }, codec, emoteData.name, codec.FrameCount == 1 ? "png" : "gif", "", emoteData.imageScale, emoteData.data);
-                        returnList.Add(newEmote);
-                    }
-                }
             }
 
             return returnList;
@@ -234,6 +235,19 @@ namespace TwitchDownloaderCore
             string emoteFolder = Path.Combine(cacheFolder, "emotes");
             if (!Directory.Exists(emoteFolder))
                 Directory.CreateDirectory(emoteFolder);
+
+            if (embededEmotes != null)
+            {
+                foreach (FirstPartyEmoteData emoteData in embededEmotes.firstParty)
+                {
+                    try
+                    {
+                        if (!returnDictionary.ContainsKey(emoteData.id))
+                            returnDictionary.Add(emoteData.id, SKBitmap.Decode(emoteData.data));
+                    }
+                    catch { }
+                }
+            }
 
             using (WebClient client = new WebClient())
             {
@@ -337,15 +351,6 @@ namespace TwitchDownloaderCore
                                 }
                             }
                         }
-                    }
-                }
-
-                if (embededEmotes != null)
-                {
-                    foreach (FirstPartyEmoteData emoteData in embededEmotes.firstParty)
-                    {
-                        if (!returnDictionary.ContainsKey(emoteData.id))
-                            returnDictionary.Add(emoteData.id, SKBitmap.Decode(emoteData.data));
                     }
                 }
             }
