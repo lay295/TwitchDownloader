@@ -44,7 +44,7 @@ namespace TwitchDownloaderCLI
                 Environment.Exit(1);
 
             
-            if (!File.Exists(ffmpegPath))
+            if (!File.Exists(ffmpegPath) && (inputOptions.FfmpegPath == null || !File.Exists(inputOptions.FfmpegPath)) && !ExistsOnPath(ffmpegPath))
             {
                 Console.WriteLine("[ERROR] - Unable to find ffmpeg, exiting. You can download ffmpeg automatically with the argument --download-ffmpeg");
                 Environment.Exit(1);
@@ -92,6 +92,27 @@ namespace TwitchDownloaderCLI
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
             videoDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
+        }
+
+        //https://stackoverflow.com/a/3856090/12204538
+        public static bool ExistsOnPath(string fileName)
+        {
+            return GetFullPath(fileName) != null;
+        }
+
+        public static string GetFullPath(string fileName)
+        {
+            if (File.Exists(fileName))
+                return Path.GetFullPath(fileName);
+
+            var values = Environment.GetEnvironmentVariable("PATH");
+            foreach (var path in values.Split(Path.PathSeparator))
+            {
+                var fullPath = Path.Combine(path, fileName);
+                if (File.Exists(fullPath))
+                    return fullPath;
+            }
+            return null;
         }
 
         private static void DownloadClip(Options inputOptions)
