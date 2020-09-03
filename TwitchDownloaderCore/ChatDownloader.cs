@@ -99,6 +99,7 @@ namespace TwitchDownloaderCore
 
                     int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
                     progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
+                    progress.Report(new ProgressReport() { reportType = ReportType.Message, data = $"Downloading {percent}%" });
 
                     cancellationToken.ThrowIfCancellationRequested();
 
