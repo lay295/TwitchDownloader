@@ -243,7 +243,10 @@ namespace TwitchDownloaderCore
                     try
                     {
                         if (!returnDictionary.ContainsKey(emoteData.id))
+                        {
                             returnDictionary.Add(emoteData.id, SKBitmap.Decode(emoteData.data));
+                            alreadyAdded.Add(emoteData.id);
+                        }
                     }
                     catch { }
                 }
