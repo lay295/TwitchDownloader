@@ -89,7 +89,7 @@ namespace TwitchDownloaderCore
                     {
                         MemoryStream ms = new MemoryStream(emoteData.data);
                         SKCodec codec = SKCodec.Create(ms);
-                        ThirdPartyEmote newEmote = new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(emoteData.data) }, codec, emoteData.name, codec.FrameCount == 1 ? "png" : "gif", "", emoteData.imageScale, emoteData.data);
+                        ThirdPartyEmote newEmote = new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(emoteData.data) }, codec, emoteData.name, codec.FrameCount == 0 ? "png" : "gif", "", emoteData.imageScale, emoteData.data);
                         returnList.Add(newEmote);
                     }
                     catch { }
