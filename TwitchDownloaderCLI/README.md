@@ -67,7 +67,7 @@ Embeds emotes into the JSON file so in the future when an emote is removed from 
 **-i/-\-input**
 Path to JSON chat file input.
 
-**-\-backround-color**
+**-\-background-color**
 (Default: #111111) Color of background in HEX string format.
 
 **-\-message-color**

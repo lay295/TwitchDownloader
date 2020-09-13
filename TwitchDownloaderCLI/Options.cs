@@ -37,7 +37,7 @@ namespace TwitchDownloaderCLI
         public bool Timestamp { get; set; }
         [Option("embed-emotes", HelpText = "Embed emotes into chat download.")]
         public bool EmbedEmotes { get; set; }
-        [Option("backround-color", Default = "#111111", HelpText = "Color of background for chat render.")]
+        [Option("background-color", Default = "#111111", HelpText = "Color of background for chat render.")]
         public string BackgroundColor { get; set; }
         [Option("message-color", Default = "#ffffff", HelpText = "Color of messages for chat render.")]
         public string MessageColor { get; set; }
@@ -55,7 +55,7 @@ namespace TwitchDownloaderCLI
         public bool GenerateMask { get; set; }
         [Option("outline-size", Default = 4, HelpText = "Size of outline in chat render.")]
         public double OutlineSize { get; set; }
-        [Option('f', "font", Default = "ariel", HelpText = "Font to use in chat render.")]
+        [Option('f', "font", Default = "arial", HelpText = "Font to use in chat render.")]
         public string Font { get; set; }
         [Option("font-size", Default = 12, HelpText = "Size of font in chat render.")]
         public double FontSize { get; set; }
