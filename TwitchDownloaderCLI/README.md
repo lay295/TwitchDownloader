@@ -92,7 +92,7 @@ Path to JSON chat file input.
 (Default: 4) Size of outline if outline is enabled.
 
 **-f/-\-font**
-(Default: Ariel) Font to use.
+(Default: Arial) Font to use.
 
 **-\-font-size**
 (Default: 12) Size of font.

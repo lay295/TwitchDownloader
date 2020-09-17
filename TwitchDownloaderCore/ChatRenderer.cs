@@ -463,6 +463,24 @@ namespace TwitchDownloaderCore
         }
         public SKBitmap DrawBadges(SKBitmap sectionImage, List<SKBitmap> imageList, ChatRenderOptions renderOptions, List<ChatBadge> chatBadges, Comment comment, Size canvasSize, ref Point drawPos)
         {
+            //A little easter egg for my Twitch username won't hurt :)
+            if (comment.commenter.name == "ilovekeepo69" && chatBadges.Any(x => x.Name == "ilovekeepo69"))
+            {
+                SKBitmap badgeImage = chatBadges.Where(x => x.Name == "ilovekeepo69").First().Versions["1"];
+                using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImage))
+                {
+                    float imageRatio = (float)(renderOptions.EmoteScale * 0.5);
+                    float imageSize = badgeImage.Width * imageRatio;
+                    float left = (float)drawPos.X;
+                    float right = imageSize + left;
+                    float top = (float)((sectionImage.Height - imageSize) / 2);
+                    float bottom = imageSize + top;
+                    SKRect drawBox = new SKRect(left, top, right, bottom);
+                    sectionImageCanvas.DrawBitmap(badgeImage, drawBox, imagePaint);
+                    drawPos.X += (int)Math.Floor(20 * renderOptions.EmoteScale);
+                }
+            }
+
             if (comment.message.user_badges != null)
             {
                 foreach (var badge in comment.message.user_badges)
@@ -502,7 +520,6 @@ namespace TwitchDownloaderCore
                     }
                 }
             }
-
             return sectionImage;
         }
         public static SKBitmap DrawUsername(SKBitmap sectionImage, List<SKBitmap> imageList, ChatRenderOptions renderOptions, SKPaint nameFont, string userName, SKColor userColor, Size canvasSize, ref Point drawPos)

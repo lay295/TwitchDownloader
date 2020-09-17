@@ -397,6 +397,20 @@ namespace TwitchDownloaderCore
 
                     chatBadges.Add(new ChatBadge() { Name = name, Versions = versions });
                 }
+
+                try
+                {
+                    byte[] bytes = client.DownloadData("https://cdn.betterttv.net/emote/58493695987aab42df852e0f/2x");
+                    MemoryStream ms = new MemoryStream(bytes);
+                    SKBitmap badgeImage = SKBitmap.Decode(ms);
+                    SKBitmap scaledBitmap = new SKBitmap(36, 36);
+                    using (SKCanvas canvas = new SKCanvas(scaledBitmap))
+                    {
+                        canvas.DrawBitmap(badgeImage, new SKRect(0, 0, 36, 36), new SKPaint());
+                    }
+                    chatBadges.Add(new ChatBadge() { Name = "ilovekeepo69", Versions = new Dictionary<string, SKBitmap>() { { "1", scaledBitmap } } });
+                }
+                catch { }
             }
 
             return chatBadges;
