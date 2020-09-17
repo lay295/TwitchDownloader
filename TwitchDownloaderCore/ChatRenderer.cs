@@ -612,7 +612,7 @@ namespace TwitchDownloaderCore
                                     }
                                 }
                             }
-                            else if (new StringInfo(output).LengthInTextElements < output.Length)
+                            else if (new StringInfo(output).LengthInTextElements < output.Length || !messageFont.ContainsGlyphs(output))
                             {
                                 SKPaint renderFont = messageFont;
                                 List<char> charList = new List<char>(output.ToArray());
@@ -624,7 +624,7 @@ namespace TwitchDownloaderCore
 
                                 for (int j = 0; j < charList.Count; j++)
                                 {
-                                    if (new StringInfo(charList[j].ToString()).LengthInTextElements == 0)
+                                    if (new StringInfo(charList[j].ToString()).LengthInTextElements == 0 || !renderFont.ContainsGlyphs(charList[j].ToString()))
                                     {
                                         if (messageBuffer != "")
                                             sectionImage = DrawText(sectionImage, messageBuffer, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
