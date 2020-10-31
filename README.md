@@ -24,6 +24,9 @@ https://www.youtube.com/watch?v=0W3MhfhnYjk
 ## Linux? MacOS?
 Sorry the GUI version is only avaliable for Windows :( but there is a command line version avaliable.
 This is a cross platform client that can do the main functions of the program without a GUI. It works on Windows and Linux, haven't tested it on MacOS though. 
+
+For Arch Linux, there's an [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/)
+
 [Some documentation here](https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderCLI/README.md), for example, you could copy/paste this into a .bat file on Windows and you can download a VOD, download chat, then render it in a single go. I've never really made a command line utility before, so things may change in the future. If you're on Linux, make sure fontconfig and libfontconfig1 are installed. (apt-get install fontconfig libfontconfig1)
 ```
 @echo off
