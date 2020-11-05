@@ -32,3 +32,17 @@ TwitchDownloaderCLI -m VideoDownload --id %vodid% --ffmpeg-path "ffmpeg.exe" -o 
 TwitchDownloaderCLI -m ChatDownload --id %vodid% -o %vodid%_chat.json
 TwitchDownloaderCLI -m ChatRender -i %vodid%_chat.json -h 1080 -w 422 --framerate 30 --update-rate 0 --font-size 18 -o %vodid%_chat.mp4
 ```
+
+### Linux - Getting started
+
+1. Go to realeases and download the latest version for Linux
+2. Extract the `TwitchDownloaderCLI`
+3. Browse to where you extracted the file and give it executable rights by opening a terminal and executing the following:
+```
+sudo chmod +x TwitchDownloaderCLI
+```
+4. You can now start using the donwloader, for example:
+```
+TwitchDownloaderCLI -m VideoDownload --id <vod-id-here> -o out.mp4
+```
+  
