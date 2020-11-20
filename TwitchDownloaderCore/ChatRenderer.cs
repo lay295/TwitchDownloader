@@ -197,15 +197,11 @@ namespace TwitchDownloaderCore
                 .Replace("{height}", renderOptions.ChatHeight.ToString()).Replace("{width}", renderOptions.ChatWidth.ToString())
                 .Replace("{save_path}", renderOptions.OutputFile).Replace("{max_int}", int.MaxValue.ToString());
 
-            string ffmpegFile = "";
-            if (renderOptions.FfmpegPath != "")
-                ffmpegFile = "ffmpeg";
-
             var process = new Process
             {
                 StartInfo =
                 {
-                    FileName = ffmpegFile,
+                    FileName = renderOptions.FfmpegPath,
                     Arguments = $"{inputArgs} {outputArgs}",
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -214,6 +210,7 @@ namespace TwitchDownloaderCore
                     RedirectStandardError = true
                 }
             };
+
             //process.ErrorDataReceived += ErrorDataHandler;
 
             process.Start();
@@ -234,7 +231,7 @@ namespace TwitchDownloaderCore
                 {
                     StartInfo =
                     {
-                        FileName = ffmpegFile,
+                        FileName = renderOptions.FfmpegPath,
                         Arguments = $"{inputArgs} {outputArgsMask}",
                         UseShellExecute = false,
                         CreateNoWindow = true,
@@ -427,6 +424,12 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {(duration / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });
             process.WaitForExit();
         }
+
+        private void ErrorDataHandler(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
+        }
+
         [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
         private byte[] GetMaskBytes(SKBitmap bufferBitmap, ChatRenderOptions renderOptions)
         {

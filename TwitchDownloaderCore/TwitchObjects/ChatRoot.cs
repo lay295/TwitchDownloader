@@ -106,6 +106,12 @@ public class Emotes
     public List<FirstPartyEmoteData> firstParty { get; set; }
 }
 
+public class CommentResponse
+{
+    public List<Comment> comments { get; set; }
+    public string _next { get; set; }
+}
+
 public class ChatRoot
 {
     public Streamer streamer { get; set; }

@@ -20,7 +20,7 @@ namespace TwitchDownloaderCore
             {
                 client.Encoding = Encoding.UTF8;
                 client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json");
-                client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                client.Headers.Add("Client-ID", "v8kfhyc2980it9e7t5hhc7baukzuj2");
                 string response = await client.DownloadStringTaskAsync("https://api.twitch.tv/kraken/videos/" + videoId);
                 JObject result = JObject.Parse(response);
                 return result;
@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore
             using (WebClient client = new WebClient())
             {
                 client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json");
-                client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                client.Headers.Add("Client-ID", "v8kfhyc2980it9e7t5hhc7baukzuj2");
                 string response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/kraken/clips/{0}", clipId));
                 JObject result = JObject.Parse(response);
                 return result;
@@ -556,7 +556,7 @@ namespace TwitchDownloaderCore
                 using (WebClient client = new WebClient())
                 {
                     client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json; charset=UTF-8");
-                    client.Headers.Add("Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                    client.Headers.Add("Client-Id", "v8kfhyc2980it9e7t5hhc7baukzuj2");
 
                     JObject response = JObject.Parse(client.DownloadString("https://api.twitch.tv/kraken/users/" + id));
                     return response["name"].ToString();
