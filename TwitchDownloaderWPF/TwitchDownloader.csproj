@@ -144,11 +144,11 @@
     <Reference Include="WPFToolkit, Version=3.5.40128.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Infragistics.Themes.IG.Wpf.1.0.0\lib\net40\WPFToolkit.dll</HintPath>
     </Reference>
-    <Reference Include="Xabe.FFmpeg, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xabe.FFmpeg.4.1.1\lib\netstandard2.0\Xabe.FFmpeg.dll</HintPath>
+    <Reference Include="Xabe.FFmpeg, Version=4.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xabe.FFmpeg.4.3.1\lib\netstandard2.0\Xabe.FFmpeg.dll</HintPath>
     </Reference>
-    <Reference Include="Xabe.FFmpeg.Downloader, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xabe.FFmpeg.Downloader.4.1.1\lib\netstandard2.0\Xabe.FFmpeg.Downloader.dll</HintPath>
+    <Reference Include="Xabe.FFmpeg.Downloader, Version=4.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xabe.FFmpeg.Downloader.4.3.1\lib\netstandard2.0\Xabe.FFmpeg.Downloader.dll</HintPath>
     </Reference>
     <Reference Include="Xceed.Wpf.AvalonDock, Version=3.6.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
       <HintPath>..\packages\Extended.Wpf.Toolkit.3.6.0\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
