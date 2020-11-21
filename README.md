@@ -35,7 +35,7 @@ TwitchDownloaderCLI -m ChatRender -i %vodid%_chat.json -h 1080 -w 422 --framerat
 
 ### Linux - Getting started
 
-1. Go to realeases and download the latest version for Linux
+1. Go to releases and download the latest version for Linux
 2. Extract the `TwitchDownloaderCLI`
 3. Browse to where you extracted the file and give it executable rights by opening a terminal and executing the following:
 ```
