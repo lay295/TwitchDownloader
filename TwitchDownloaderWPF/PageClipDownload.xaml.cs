@@ -117,7 +117,14 @@ namespace TwitchDownloaderWPF
 
             saveFileDialog.Filter = "MP4 Files | *.mp4";
             saveFileDialog.RestoreDirectory = true;
-            saveFileDialog.FileName = textStreamer.Text + " - " + textTitle.Text;
+            if ((bool)checkSaveID.IsChecked)
+            {
+                saveFileDialog.FileName = ValidateUrl(textUrl.Text);
+            }
+            else
+            {
+                saveFileDialog.FileName = textStreamer.Text + " - " + textTitle.Text;
+            }
 
             if (saveFileDialog.ShowDialog() == true)
             {

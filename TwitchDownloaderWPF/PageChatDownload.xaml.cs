@@ -182,12 +182,26 @@ namespace TwitchDownloaderWPF
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
 
+            string file_ending = "";
             if (radioJson.IsChecked == true)
+            {
                 saveFileDialog.Filter = "JSON Files | *.json";
+                file_ending = "_chat.json";
+            }
             else
+            {
                 saveFileDialog.Filter = "TXT Files | *.txt";
+                file_ending = "_chat.txt";
+            }
 
-            saveFileDialog.RestoreDirectory = true;
+            if ((bool)checkSaveID.IsChecked)
+            {
+                saveFileDialog.FileName = ValidateUrl(textUrl.Text) + file_ending;
+            }
+            else
+            {
+                saveFileDialog.FileName = textTitle.Text + file_ending;
+            }
 
             if (saveFileDialog.ShowDialog() == true)
             {

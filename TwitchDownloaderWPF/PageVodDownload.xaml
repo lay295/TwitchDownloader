@@ -52,13 +52,14 @@
             <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400"/>
             <Button x:Name="btnGetInfo"  Margin="3" MinWidth="50" Content="Get Info" Click="btnGetInfo_Click"/>
         </WrapPanel>
-        <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,15,20,0" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,2,20,0" Orientation="Horizontal" HorizontalAlignment="Center">
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock Text="Length:" HorizontalAlignment="Right"/>
                 <TextBlock Text="Quality:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
                 <TextBlock Text="Crop Video:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
                 <TextBlock Text="Download Threads:" HorizontalAlignment="Right" Margin="0,30,0,0"/>
                 <TextBlock HorizontalAlignment="Right" Margin="0,12,0,0">OAuth (optional) <Hyperlink NavigateUri="https://www.youtube.com/watch?v=1MBsUoFGuls" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Only required for sub only VODs. All 3rd party OAuth tokens will not work. Click to see YouTube video on how to get OAuth token.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock Text="Use ID as Filename:" HorizontalAlignment="Right" Margin="0,9,0,0"/>
             </StackPanel>
             <StackPanel>
                 <TextBlock x:Name="labelLength" Text="0:0:0" Margin="5,0,0,0"/>
@@ -80,6 +81,7 @@
                     </StackPanel>
                     <xctk:IntegerUpDown Margin="2,5,0,0" Value="10" Width="40" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" />
                     <TextBox x:Name="textOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" TextChanged="textOauth_TextChanged"/>
+                    <CheckBox x:Name="checkSaveID" Margin="0,0,0,0"></CheckBox>
                 </StackPanel>
             </StackPanel>
         </StackPanel>
