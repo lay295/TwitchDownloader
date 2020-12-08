@@ -4,7 +4,8 @@
     {
         Log,
         Percent,
-        Message
+        Message,
+        MessageInfo
     }
 
     public class ProgressReport
