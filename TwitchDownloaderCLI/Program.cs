@@ -242,6 +242,7 @@ namespace TwitchDownloaderCLI
                 string currentStatus = "[STATUS] - " + e.data;
                 if (currentStatus != previousStatus)
                 {
+                    previousStatus = currentStatus;
                     Console.WriteLine(currentStatus);
                 }
             }
