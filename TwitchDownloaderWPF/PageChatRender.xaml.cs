@@ -129,7 +129,7 @@ namespace TwitchDownloaderWPF
         {
             if (progress.reportType == ReportType.Percent)
                 statusProgressBar.Value = (int)progress.data;
-            if (progress.reportType == ReportType.Message)
+            if (progress.reportType == ReportType.Message || progress.reportType == ReportType.MessageInfo)
                 statusMessage.Text = (string)progress.data;
             if (progress.reportType == ReportType.Log)
                 AppendLog((string)progress.data);
