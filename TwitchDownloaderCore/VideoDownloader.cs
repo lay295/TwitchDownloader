@@ -213,8 +213,8 @@ namespace TwitchDownloaderCore
                         {
                             StartInfo =
                             {
-                                FileName = Path.GetFullPath(downloadOptions.FfmpegPath),
-                                Arguments = String.Format("-y -avoid_negative_ts make_zero -i \"{0}\" -analyzeduration {2} -probesize {2} -c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(), Int32.MaxValue, seekDuration.ToString(), Path.GetFullPath(downloadOptions.Filename)),
+                                FileName = downloadOptions.FfmpegPath,
+                                Arguments = String.Format("-y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {1} " : "") + "-i \"{0}\" -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(), Int32.MaxValue, seekDuration.ToString(), Path.GetFullPath(downloadOptions.Filename)),
                                 UseShellExecute = false,
                                 CreateNoWindow = true,
                                 RedirectStandardInput = false,

@@ -86,7 +86,7 @@ namespace TwitchDownloaderCLI
             downloadOptions.CropBeginningTime = inputOptions.CropBeginningTime;
             downloadOptions.CropEnding = inputOptions.CropEndingTime == 0.0 ? false : true;
             downloadOptions.CropEndingTime = inputOptions.CropEndingTime;
-            downloadOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : inputOptions.FfmpegPath;
+            downloadOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : Path.GetFullPath(inputOptions.FfmpegPath);
 
             VideoDownloader videoDownloader = new VideoDownloader(downloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
@@ -221,7 +221,7 @@ namespace TwitchDownloaderCLI
             renderOptions.GenerateMask = inputOptions.GenerateMask;
             renderOptions.InputArgs = inputOptions.InputArgs;
             renderOptions.OutputArgs = inputOptions.OutputArgs;
-            renderOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : inputOptions.FfmpegPath;
+            renderOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : Path.GetFullPath(inputOptions.FfmpegPath);
 
             ChatRenderer chatDownloader = new ChatRenderer(renderOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();

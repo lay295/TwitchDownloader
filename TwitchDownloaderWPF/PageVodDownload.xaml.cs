@@ -163,7 +163,7 @@ namespace TwitchDownloaderWPF
                     options.CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds);
                     options.CropEnding = (bool)checkEnd.IsChecked;
                     options.CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds);
-                    options.FfmpegPath = "ffmpeg.exe";
+                    options.FfmpegPath = "ffmpeg";
 
                     VideoDownloader currentDownload = new VideoDownloader(options);
                     Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
