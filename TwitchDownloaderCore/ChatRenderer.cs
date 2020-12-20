@@ -25,7 +25,7 @@ namespace TwitchDownloaderCore
         static SKPaint imagePaint = new SKPaint() { IsAntialias = true, FilterQuality = SKFilterQuality.High };
         static SKPaint emotePaint = new SKPaint() { IsAntialias = true, FilterQuality = SKFilterQuality.High };
         static SKFontManager fontManager = SKFontManager.CreateDefault();
-        static ConcurrentDictionary<char, SKPaint> fallbackCache = new ConcurrentDictionary<char, SKPaint>();
+        static ConcurrentDictionary<int, SKPaint> fallbackCache = new ConcurrentDictionary<int, SKPaint>();
 
         public ChatRenderer(ChatRenderOptions RenderOptions)
         {
@@ -532,7 +532,7 @@ namespace TwitchDownloaderCore
                 SKPaint userPaint = nameFont;
                 if (userName.Any(isNotAscii))
                 {
-                    userPaint = GetFallbackFont(userName.First(), renderOptions);
+                    userPaint = GetFallbackFont((int)userName.First(), renderOptions);
                     userPaint.Color = userColor;
                 }
                 float textWidth = userPaint.MeasureText(userName + ":");
@@ -647,7 +647,17 @@ namespace TwitchDownloaderCore
 
                                 for (int j = 0; j < charList.Count; j++)
                                 {
-                                    if (new StringInfo(charList[j].ToString()).LengthInTextElements == 0 || !renderFont.ContainsGlyphs(charList[j].ToString()))
+                                    if (char.IsHighSurrogate(charList[j]) && j+1 < charList.Count && char.IsLowSurrogate(charList[j+1]))
+                                    {
+                                        if (messageBuffer != "")
+                                            sectionImage = DrawText(sectionImage, messageBuffer, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
+                                        SKPaint fallbackFont = GetFallbackFont(char.ConvertToUtf32(charList[j], charList[j+1]), renderOptions);
+                                        fallbackFont.Color = renderOptions.MessageColor;
+                                        sectionImage = DrawText(sectionImage, charList[j].ToString() + charList[j+1].ToString(), fallbackFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, false, default_x);
+                                        messageBuffer = "";
+                                        j++;
+                                    }
+                                    else if (new StringInfo(charList[j].ToString()).LengthInTextElements == 0 || !renderFont.ContainsGlyphs(charList[j].ToString()))
                                     {
                                         if (messageBuffer != "")
                                             sectionImage = DrawText(sectionImage, messageBuffer, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
@@ -793,7 +803,7 @@ namespace TwitchDownloaderCore
 
             return userColor;
         }
-        public static SKPaint GetFallbackFont(char input, ChatRenderOptions renderOptions)
+        public static SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions)
         {
             if (fallbackCache.ContainsKey(input))
                 return fallbackCache[input];
