@@ -442,31 +442,34 @@ namespace TwitchDownloaderCore
                                 if (output == "󠀀")
                                     continue;
 
-                                Match m = Regex.Match(output, emojiRegex);
-                                if (m.Success)
+                                MatchCollection matches = Regex.Matches(output, emojiRegex);
+                                foreach (Match m in matches)
                                 {
-                                    for (var k = 0; k < m.Value.Length; k += char.IsSurrogatePair(m.Value, k) ? 2 : 1)
+                                    if (m.Success)
                                     {
-                                        string codepoint = String.Format("{0:X4}", char.ConvertToUtf32(m.Value, k)).ToLower();
-                                        codepoint = codepoint.Replace("fe0f", "");
-                                        if (codepoint != "" && !emojiCache.ContainsKey(codepoint))
+                                        for (var k = 0; k < m.Value.Length; k += char.IsSurrogatePair(m.Value, k) ? 2 : 1)
                                         {
-                                            try
+                                            string codepoint = String.Format("{0:X4}", char.ConvertToUtf32(m.Value, k)).ToLower();
+                                            codepoint = codepoint.Replace("fe0f", "");
+                                            if (codepoint != "" && !emojiCache.ContainsKey(codepoint))
                                             {
-                                                byte[] bytes;
-                                                string fileName = Path.Combine(emojiFolder, codepoint + ".png");
-                                                if (File.Exists(fileName))
-                                                    bytes = File.ReadAllBytes(fileName);
-                                                else
+                                                try
                                                 {
-                                                    bytes = client.DownloadData(String.Format("https://abs.twimg.com/emoji/v2/72x72/{0}.png", codepoint));
-                                                    File.WriteAllBytes(fileName, bytes);
-                                                }
+                                                    byte[] bytes;
+                                                    string fileName = Path.Combine(emojiFolder, codepoint + ".png");
+                                                    if (File.Exists(fileName))
+                                                        bytes = File.ReadAllBytes(fileName);
+                                                    else
+                                                    {
+                                                        bytes = client.DownloadData(String.Format("https://abs.twimg.com/emoji/v2/72x72/{0}.png", codepoint));
+                                                        File.WriteAllBytes(fileName, bytes);
+                                                    }
 
-                                                SKBitmap emojiImage = SKBitmap.Decode(bytes);
-                                                emojiCache.Add(codepoint, emojiImage);
+                                                    SKBitmap emojiImage = SKBitmap.Decode(bytes);
+                                                    emojiCache.Add(codepoint, emojiImage);
+                                                }
+                                                catch { }
                                             }
-                                            catch { }
                                         }
                                     }
                                 }
