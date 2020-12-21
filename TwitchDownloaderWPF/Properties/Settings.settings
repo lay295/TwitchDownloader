@@ -77,5 +77,20 @@
     <Setting Name="GenerateMask" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="TempPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="HideDonation" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="TemplateVod" Type="System.String" Scope="User">
+      <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title}</Value>
+    </Setting>
+    <Setting Name="TemplateClip" Type="System.String" Scope="User">
+      <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title}</Value>
+    </Setting>
+    <Setting Name="TemplateChat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title}</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

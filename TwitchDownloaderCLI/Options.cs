@@ -77,5 +77,7 @@ namespace TwitchDownloaderCLI
         public bool DownloadFfmpeg { get; set; }
         [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]
         public string FfmpegPath { get; set; }
+        [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
+        public string TempFolder { get; set; }
     }
 }

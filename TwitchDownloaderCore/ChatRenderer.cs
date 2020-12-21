@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            string tempFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
+            string tempFolder = renderOptions.TempFolder == "" ? Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(renderOptions.TempFolder, "TwitchDownloader");
             string downloadFolder = Path.Combine(tempFolder, "Chat Render", Guid.NewGuid().ToString());
             string cacheFolder = Path.Combine(tempFolder, "cache");
             try

@@ -93,7 +93,8 @@ namespace TwitchDownloaderWPF
                         UsernameFontStyle = SKFontStyle.Bold,
                         GenerateMask = (bool)checkMask.IsChecked,
                         OutlineSize = 4,
-                        FfmpegPath = "ffmpeg"
+                        FfmpegPath = "ffmpeg",
+                        TempFolder = Settings.Default.TempPath
                     };
                     options.PaddingLeft = (int)Math.Floor(2 * options.EmoteScale);
 
@@ -384,6 +385,23 @@ namespace TwitchDownloaderWPF
         private void UpdateCheckbox(object sender, RoutedEventArgs e)
         {
             Update();
+        }
+
+        private void btnDonate_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.buymeacoffee.com/lay295");
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsPage settings = new SettingsPage();
+            settings.ShowDialog();
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 

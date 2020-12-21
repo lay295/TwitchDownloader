@@ -41,6 +41,7 @@ namespace TwitchDownloaderWPF
     {
         public Dictionary<string, string> videoQualties = new Dictionary<string, string>();
         public int currentVideoId;
+        public DateTime currentVideoTime;
 
         public PageVodDownload()
         {
@@ -116,6 +117,7 @@ namespace TwitchDownloaderWPF
                     textStreamer.Text = taskInfo.Result["channel"]["display_name"].ToString();
                     textTitle.Text = taskInfo.Result["title"].ToString();
                     textCreatedAt.Text = taskInfo.Result["created_at"].ToString();
+                    currentVideoTime = taskInfo.Result["created_at"].ToObject<DateTime>().ToLocalTime();
                     numEndHour.Value = (int)vodLength.TotalHours;
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
@@ -146,7 +148,7 @@ namespace TwitchDownloaderWPF
 
                 saveFileDialog.Filter = "MP4 Files | *.mp4";
                 saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.FileName = textStreamer.Text + " - " + textTitle.Text;
+                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text);
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
@@ -164,6 +166,7 @@ namespace TwitchDownloaderWPF
                     options.CropEnding = (bool)checkEnd.IsChecked;
                     options.CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds);
                     options.FfmpegPath = "ffmpeg";
+                    options.TempFolder = Settings.Default.TempPath;
 
                     VideoDownloader currentDownload = new VideoDownloader(options);
                     Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
@@ -323,6 +326,23 @@ namespace TwitchDownloaderWPF
         private void btnQueue_Click(object sender, RoutedEventArgs e)
         {
             
+        }
+
+        private void btnDonate_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.buymeacoffee.com/lay295");
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsPage settings = new SettingsPage();
+            settings.ShowDialog();
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 }

@@ -26,6 +26,7 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore;
 using System.Threading;
 using TwitchDownloader;
+using TwitchDownloader.Properties;
 
 namespace TwitchDownloaderWPF
 {
@@ -39,6 +40,7 @@ namespace TwitchDownloaderWPF
         public DownloadType downloadType;
         public string downloadId;
         public int streamerId;
+        public DateTime currentVideoTime;
         JObject videoData = new JObject();
         public PageChatDownload()
         {
@@ -105,6 +107,7 @@ namespace TwitchDownloaderWPF
                         textTitle.Text = taskInfo.Result["title"].ToString();
                         textStreamer.Text = taskInfo.Result["channel"]["display_name"].ToString();
                         textCreatedAt.Text = taskInfo.Result["created_at"].ToString();
+                        currentVideoTime = taskInfo.Result["created_at"].ToObject<DateTime>().ToLocalTime();
                         streamerId = taskInfo.Result["channel"]["_id"].ToObject<int>();
                         SetEnabled(true, false);
                     }
@@ -123,6 +126,7 @@ namespace TwitchDownloaderWPF
                         imgThumbnail.Source = taskThumb.Result;
                         textStreamer.Text = clipData["broadcaster"]["display_name"].ToString();
                         textCreatedAt.Text = clipData["created_at"].ToString();
+                        currentVideoTime = clipData["created_at"].ToObject<DateTime>().ToLocalTime();
                         textTitle.Text = clipData["title"].ToString();
                         streamerId = clipData["broadcaster"]["id"].ToObject<int>();
                         SetEnabled(true, false);
@@ -188,6 +192,7 @@ namespace TwitchDownloaderWPF
                 saveFileDialog.Filter = "TXT Files | *.txt";
 
             saveFileDialog.RestoreDirectory = true;
+            saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text);
 
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -276,6 +281,23 @@ namespace TwitchDownloaderWPF
                 ImageBehavior.SetAnimatedSource(statusImage, null);
                 statusImage.Source = image;
             }
+        }
+
+        private void btnDonate_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.buymeacoffee.com/lay295");
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsPage settings = new SettingsPage();
+            settings.ShowDialog();
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void btnSettings_Loaded(object sender, RoutedEventArgs e)
+        {
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 }

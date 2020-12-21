@@ -12,7 +12,7 @@ namespace TwitchDownloader.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.7.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.8.1.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -321,6 +321,66 @@ namespace TwitchDownloader.Properties {
             }
             set {
                 this["GenerateMask"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string TempPath {
+            get {
+                return ((string)(this["TempPath"]));
+            }
+            set {
+                this["TempPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HideDonation {
+            get {
+                return ((bool)(this["HideDonation"]));
+            }
+            set {
+                this["HideDonation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("[{date_custom=\"M-d-yy\"}] {channel} - {title}")]
+        public string TemplateVod {
+            get {
+                return ((string)(this["TemplateVod"]));
+            }
+            set {
+                this["TemplateVod"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("[{date_custom=\"M-d-yy\"}] {channel} - {title}")]
+        public string TemplateClip {
+            get {
+                return ((string)(this["TemplateClip"]));
+            }
+            set {
+                this["TemplateClip"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("[{date_custom=\"M-d-yy\"}] {channel} - {title}")]
+        public string TemplateChat {
+            get {
+                return ((string)(this["TemplateChat"]));
+            }
+            set {
+                this["TemplateChat"] = value;
             }
         }
     }

@@ -19,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TwitchDownloader;
+using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using WpfAnimatedGif;
@@ -30,7 +31,8 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageClipDownload : Page
     {
-        static string clipId = "";
+        public string clipId = "";
+        public DateTime currentVideoTime;
         public PageClipDownload()
         {
             InitializeComponent();
@@ -61,6 +63,7 @@ namespace TwitchDownloaderWPF
                     imgThumbnail.Source = taskThumb.Result;
                     textStreamer.Text = clipData["broadcaster"]["display_name"].ToString();
                     textCreatedAt.Text = clipData["created_at"].ToString();
+                    currentVideoTime = clipData["created_at"].ToObject<DateTime>().ToLocalTime();
                     textTitle.Text = clipData["title"].ToString();
 
                     foreach (var quality in taskLinks.Result[0]["data"]["clip"]["videoQualities"])
@@ -117,7 +120,7 @@ namespace TwitchDownloaderWPF
 
             saveFileDialog.Filter = "MP4 Files | *.mp4";
             saveFileDialog.RestoreDirectory = true;
-            saveFileDialog.FileName = textStreamer.Text + " - " + textTitle.Text;
+            saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text);
 
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -162,6 +165,23 @@ namespace TwitchDownloaderWPF
                 ImageBehavior.SetAnimatedSource(statusImage, null);
                 statusImage.Source = image;
             }
+        }
+
+        private void btnDonate_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.buymeacoffee.com/lay295");
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsPage settings = new SettingsPage();
+            settings.ShowDialog();
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void btnSettings_Loaded(object sender, RoutedEventArgs e)
+        {
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 }
