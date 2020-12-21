@@ -133,7 +133,7 @@ namespace TwitchDownloaderCore
                 });
 
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Rendering Video 0%" });
-                await Task.Run(() => RenderVideo(renderOptions, new Queue<TwitchComment>(finalComments.ToArray()), chatJson, progress), cancellationToken);
+                await Task.Run(() => RenderVideo(renderOptions, new Queue<TwitchComment>(finalComments.OrderBy(x => x.SecondsOffset)), chatJson, progress), cancellationToken);
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Cleaning up..." });
                 Cleanup(downloadFolder);
             }
