@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TwitchDownloader;
+using TwitchDownloader.Properties;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
 
@@ -66,6 +68,8 @@ namespace TwitchDownloaderWPF
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Main.Content = pageVodDownload;
+            Settings.Default.Upgrade();
+            Settings.Default.Save();
             if (!File.Exists("ffmpeg.exe"))
                 await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
         }
@@ -97,6 +101,34 @@ namespace TwitchDownloaderWPF
             }
 
             Directory.Delete(target_dir, false);
+        }
+
+        internal static string GetFilename(string template, string title, string id, DateTime date, string channel)
+        {
+            StringBuilder returnString = new StringBuilder(template.Replace("{title}", title).Replace("{id}", id).Replace("{channel}", channel).Replace("{date}", date.ToString("Mdyy")));
+            Regex regex = new Regex("{date_custom=\"(.*)\"}");
+            bool done = false;
+            while (!done)
+            {
+                Match match = regex.Match(returnString.ToString());
+                if (match.Success)
+                {
+                    string formatString = match.Groups[1].ToString();
+                    returnString.Remove(match.Groups[0].Index, match.Groups[0].Length);
+                    returnString.Insert(match.Groups[0].Index, date.ToString(formatString));
+                }
+                else
+                {
+                    done = true;
+                }
+            }
+
+            return RemoveInvalidChars(returnString.ToString());
+        }
+
+        public static string RemoveInvalidChars(string filename)
+        {
+            return string.Concat(filename.Split(System.IO.Path.GetInvalidFileNameChars()));
         }
     }
 }

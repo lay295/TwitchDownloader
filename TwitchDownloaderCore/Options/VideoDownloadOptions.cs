@@ -17,5 +17,6 @@ namespace TwitchDownloaderCore.Options
         public int DownloadThreads { get; set; }
         public string Oauth { get; set; }
         public string FfmpegPath { get; set; }
+        public string TempFolder { get; set; }
     }
 }

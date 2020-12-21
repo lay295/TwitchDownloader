@@ -21,11 +21,11 @@ namespace TwitchDownloaderCore
 {
     public class ChatRenderer
     {
-        static ChatRenderOptions renderOptions;
+        ChatRenderOptions renderOptions;
         static SKPaint imagePaint = new SKPaint() { IsAntialias = true, FilterQuality = SKFilterQuality.High };
         static SKPaint emotePaint = new SKPaint() { IsAntialias = true, FilterQuality = SKFilterQuality.High };
         static SKFontManager fontManager = SKFontManager.CreateDefault();
-        static ConcurrentDictionary<char, SKPaint> fallbackCache = new ConcurrentDictionary<char, SKPaint>();
+        static ConcurrentDictionary<int, SKPaint> fallbackCache = new ConcurrentDictionary<int, SKPaint>();
 
         public ChatRenderer(ChatRenderOptions RenderOptions)
         {
@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            string tempFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
+            string tempFolder = renderOptions.TempFolder == "" ? Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(renderOptions.TempFolder, "TwitchDownloader");
             string downloadFolder = Path.Combine(tempFolder, "Chat Render", Guid.NewGuid().ToString());
             string cacheFolder = Path.Combine(tempFolder, "cache");
             try
@@ -77,7 +77,9 @@ namespace TwitchDownloaderCore
                             continue;
                         if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
                         {
-                            if (comment.message.user_notice_params.msg_id != "highlighted-message" && comment.message.user_notice_params.msg_id != "")
+                            if (comment.message.user_notice_params.msg_id != "highlighted-message" && comment.message.user_notice_params.msg_id != "sub" && comment.message.user_notice_params.msg_id != "resub" && comment.message.user_notice_params.msg_id != "subgift" && comment.message.user_notice_params.msg_id != "")
+                                continue;
+                            if (!renderOptions.SubMessages && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
                                 continue;
                         }
 
@@ -88,17 +90,28 @@ namespace TwitchDownloaderCore
                         List<SKBitmap> imageList = new List<SKBitmap>();
                         SKBitmap sectionImage = new SKBitmap(canvasSize.Width, canvasSize.Height);
                         int default_x = renderOptions.PaddingLeft;
+                        bool accentMessage = false;
 
                         List<GifEmote> currentGifEmotes = new List<GifEmote>();
                         List<SKBitmap> emoteList = new List<SKBitmap>();
                         List<SKRect> emotePositionList = new List<SKRect>();
                         new SKCanvas(sectionImage).Clear(renderOptions.BackgroundColor);
 
-                        if (renderOptions.Timestamp)
-                            sectionImage = DrawTimestamp(sectionImage, imageList, messageFont, renderOptions, comment, canvasSize, ref drawPos, ref default_x);
-                        sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
-                        sectionImage = DrawUsername(sectionImage, imageList, renderOptions, nameFont, comment.commenter.display_name, userColor, canvasSize, ref drawPos);
-                        sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
+                        if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
+                        {
+                            accentMessage = true;
+                            drawPos.X += (int)(8 * renderOptions.EmoteScale);
+                            default_x += (int)(8 * renderOptions.EmoteScale); 
+                            sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
+                        }
+                        else
+                        {
+                            if (renderOptions.Timestamp)
+                                sectionImage = DrawTimestamp(sectionImage, imageList, messageFont, renderOptions, comment, canvasSize, ref drawPos, ref default_x);
+                            sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
+                            sectionImage = DrawUsername(sectionImage, imageList, renderOptions, nameFont, comment.commenter.display_name, userColor, canvasSize, ref drawPos);
+                            sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
+                        }
 
                         int finalHeight = 0;
                         foreach (var img in imageList)
@@ -114,6 +127,9 @@ namespace TwitchDownloaderCore
                             img.Dispose();
                         }
 
+                        if (accentMessage)
+                            finalImageCanvas.DrawRect(renderOptions.PaddingLeft, 0, (int)(4 * renderOptions.EmoteScale), finalHeight - (int)Math.Floor(.4 * renderOptions.SectionHeight), new SKPaint() { Color = SKColor.Parse("#7b2cf2") });
+
                         string imagePath = Path.Combine(downloadFolder, Guid.NewGuid() + ".png");
                         finalComments.Add(new TwitchComment() { Section = imagePath, SecondsOffset = Double.Parse(comment.content_offset_seconds.ToString()), GifEmotes = currentGifEmotes, NormalEmotes = emoteList, NormalEmotesPositions = emotePositionList });
                         using (Stream s = File.OpenWrite(imagePath))
@@ -127,13 +143,14 @@ namespace TwitchDownloaderCore
                         }
                         finalImage.Dispose();
                         finalImageCanvas.Dispose();
+
                         int percent = (int)Math.Floor(((double)finalComments.Count / (double)chatJson.comments.Count) * 100);
                         CheckCancelation(cancellationToken, downloadFolder);
                     }
                 });
-
+                
                 progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = "Rendering Video 0%" });
-                await Task.Run(() => RenderVideo(renderOptions, new Queue<TwitchComment>(finalComments.ToArray()), chatJson, progress), cancellationToken);
+                await Task.Run(() => RenderVideo(renderOptions, new Queue<TwitchComment>(finalComments.OrderBy(x => x.SecondsOffset)), chatJson, progress), cancellationToken);
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Cleaning up..." });
                 Cleanup(downloadFolder);
             }
@@ -532,7 +549,7 @@ namespace TwitchDownloaderCore
                 SKPaint userPaint = nameFont;
                 if (userName.Any(isNotAscii))
                 {
-                    userPaint = GetFallbackFont(userName.First(), renderOptions);
+                    userPaint = GetFallbackFont((int)userName.First(), renderOptions);
                     userPaint.Color = userColor;
                 }
                 float textWidth = userPaint.MeasureText(userName + ":");
@@ -609,25 +626,28 @@ namespace TwitchDownloaderCore
                         {
                             if (Regex.Match(output, emojiRegex).Success)
                             {
-                                Match m = Regex.Match(output, emojiRegex);
-                                for (var k = 0; k < m.Value.Length; k += char.IsSurrogatePair(m.Value, k) ? 2 : 1)
+                                MatchCollection matches = Regex.Matches(output, emojiRegex);
+                                foreach (Match m in matches)
                                 {
-                                    string codepoint = String.Format("{0:X4}", char.ConvertToUtf32(m.Value, k)).ToLower();
-                                    codepoint = codepoint.Replace("fe0f", "");
-                                    if (codepoint != "" && emojiCache.ContainsKey(codepoint))
+                                    for (var k = 0; k < m.Value.Length; k += char.IsSurrogatePair(m.Value, k) ? 2 : 1)
                                     {
-                                        SKBitmap emojiBitmap = emojiCache[codepoint];
-                                        float emojiSize = (emojiBitmap.Width / 4) * (float)renderOptions.EmoteScale;
-                                        if (drawPos.X + (20 * renderOptions.EmoteScale) + 3 > canvasSize.Width)
-                                            sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
-
-                                        using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImage))
+                                        string codepoint = String.Format("{0:X4}", char.ConvertToUtf32(m.Value, k)).ToLower();
+                                        codepoint = codepoint.Replace("fe0f", "");
+                                        if (codepoint != "" && emojiCache.ContainsKey(codepoint))
                                         {
-                                            float emojiLeft = (float)drawPos.X;
-                                            float emojiTop = (float)Math.Floor((renderOptions.SectionHeight - emojiSize) / 2.0);
-                                            SKRect emojiRect = new SKRect(emojiLeft, emojiTop, emojiLeft + emojiSize, emojiTop + emojiSize);
-                                            sectionImageCanvas.DrawBitmap(emojiBitmap, emojiRect, imagePaint);
-                                            drawPos.X += (int)Math.Floor(emojiSize + (int)Math.Floor(3 * renderOptions.EmoteScale));
+                                            SKBitmap emojiBitmap = emojiCache[codepoint];
+                                            float emojiSize = (emojiBitmap.Width / 4) * (float)renderOptions.EmoteScale;
+                                            if (drawPos.X + (20 * renderOptions.EmoteScale) + 3 > canvasSize.Width)
+                                                sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
+
+                                            using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImage))
+                                            {
+                                                float emojiLeft = (float)drawPos.X;
+                                                float emojiTop = (float)Math.Floor((renderOptions.SectionHeight - emojiSize) / 2.0);
+                                                SKRect emojiRect = new SKRect(emojiLeft, emojiTop, emojiLeft + emojiSize, emojiTop + emojiSize);
+                                                sectionImageCanvas.DrawBitmap(emojiBitmap, emojiRect, imagePaint);
+                                                drawPos.X += (int)Math.Floor(emojiSize + (int)Math.Floor(3 * renderOptions.EmoteScale));
+                                            }
                                         }
                                     }
                                 }
@@ -644,7 +664,17 @@ namespace TwitchDownloaderCore
 
                                 for (int j = 0; j < charList.Count; j++)
                                 {
-                                    if (new StringInfo(charList[j].ToString()).LengthInTextElements == 0 || !renderFont.ContainsGlyphs(charList[j].ToString()))
+                                    if (char.IsHighSurrogate(charList[j]) && j+1 < charList.Count && char.IsLowSurrogate(charList[j+1]))
+                                    {
+                                        if (messageBuffer != "")
+                                            sectionImage = DrawText(sectionImage, messageBuffer, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
+                                        SKPaint fallbackFont = GetFallbackFont(char.ConvertToUtf32(charList[j], charList[j+1]), renderOptions);
+                                        fallbackFont.Color = renderOptions.MessageColor;
+                                        sectionImage = DrawText(sectionImage, charList[j].ToString() + charList[j+1].ToString(), fallbackFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, false, default_x);
+                                        messageBuffer = "";
+                                        j++;
+                                    }
+                                    else if (new StringInfo(charList[j].ToString()).LengthInTextElements == 0 || !renderFont.ContainsGlyphs(charList[j].ToString()))
                                     {
                                         if (messageBuffer != "")
                                             sectionImage = DrawText(sectionImage, messageBuffer, messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
@@ -790,7 +820,7 @@ namespace TwitchDownloaderCore
 
             return userColor;
         }
-        public static SKPaint GetFallbackFont(char input, ChatRenderOptions renderOptions)
+        public static SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions)
         {
             if (fallbackCache.ContainsKey(input))
                 return fallbackCache[input];

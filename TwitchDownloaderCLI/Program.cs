@@ -88,6 +88,7 @@ namespace TwitchDownloaderCLI
             downloadOptions.CropEnding = inputOptions.CropEndingTime == 0.0 ? false : true;
             downloadOptions.CropEndingTime = inputOptions.CropEndingTime;
             downloadOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : Path.GetFullPath(inputOptions.FfmpegPath);
+            downloadOptions.TempFolder = inputOptions.TempFolder;
 
             VideoDownloader videoDownloader = new VideoDownloader(downloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
@@ -223,6 +224,12 @@ namespace TwitchDownloaderCLI
             renderOptions.InputArgs = inputOptions.InputArgs;
             renderOptions.OutputArgs = inputOptions.OutputArgs;
             renderOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : Path.GetFullPath(inputOptions.FfmpegPath);
+            renderOptions.TempFolder = inputOptions.TempFolder;
+
+            if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
+            {
+                Console.WriteLine("[WARNING] - Generate mask option has been selected with an opaque background. You most likely want to set a transparent background with --background-color \"#00000000\"");
+            }
 
             ChatRenderer chatDownloader = new ChatRenderer(renderOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();

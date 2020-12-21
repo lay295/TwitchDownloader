@@ -77,6 +77,7 @@ namespace TwitchDownloaderCore
         public static List<ThirdPartyEmote> GetThirdPartyEmotes(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool bttv = true, bool ffz = true)
         {
             List<ThirdPartyEmote> returnList = new List<ThirdPartyEmote>();
+            List<string> alreadyAdded = new List<string>();
 
             string bttvFolder = Path.Combine(cacheFolder, "bttv");
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
@@ -91,6 +92,7 @@ namespace TwitchDownloaderCore
                         SKCodec codec = SKCodec.Create(ms);
                         ThirdPartyEmote newEmote = new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(emoteData.data) }, codec, emoteData.name, codec.FrameCount == 0 ? "png" : "gif", "", emoteData.imageScale, emoteData.data);
                         returnList.Add(newEmote);
+                        alreadyAdded.Add(emoteData.name);
                     }
                     catch { }
                 }
@@ -108,6 +110,9 @@ namespace TwitchDownloaderCore
                     foreach (var emote in BBTV)
                     {
                         string id = emote["id"].ToString();
+                        string name = emote["code"].ToString();
+                        if (alreadyAdded.Contains(name))
+                            continue;
                         byte[] bytes;
                         string fileName = Path.Combine(bttvFolder, id + "_2x.png");
                         if (File.Exists(fileName))
@@ -119,7 +124,8 @@ namespace TwitchDownloaderCore
                         }
 
                         MemoryStream ms = new MemoryStream(bytes);
-                        returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), emote["code"].ToString(), emote["imageType"].ToString(), id, 2, bytes));
+                        returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 2, bytes));
+                        alreadyAdded.Add(name);
                     }
 
                     //Channel specific BTTV emotes
@@ -129,6 +135,9 @@ namespace TwitchDownloaderCore
                         foreach (var emote in BBTV_channel["sharedEmotes"])
                         {
                             string id = emote["id"].ToString();
+                            string name = emote["code"].ToString();
+                            if (alreadyAdded.Contains(name))
+                                continue;
                             byte[] bytes;
                             string fileName = Path.Combine(bttvFolder, id + "_2x.png");
                             if (File.Exists(fileName))
@@ -139,11 +148,15 @@ namespace TwitchDownloaderCore
                                 File.WriteAllBytes(fileName, bytes);
                             }
                             MemoryStream ms = new MemoryStream(bytes);
-                            returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), emote["code"].ToString(), emote["imageType"].ToString(), id, 2, bytes));
+                            returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 2, bytes));
+                            alreadyAdded.Add(name);
                         }
                         foreach (var emote in BBTV_channel["channelEmotes"])
                         {
                             string id = emote["id"].ToString();
+                            string name = emote["code"].ToString();
+                            if (alreadyAdded.Contains(name))
+                                continue;
                             byte[] bytes;
                             string fileName = Path.Combine(bttvFolder, id + "_2x.png");
                             if (File.Exists(fileName))
@@ -154,7 +167,8 @@ namespace TwitchDownloaderCore
                                 File.WriteAllBytes(fileName, bytes);
                             }
                             MemoryStream ms = new MemoryStream(bytes);
-                            returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), emote["code"].ToString(), emote["imageType"].ToString(), id, 2, bytes));
+                            returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 2, bytes));
+                            alreadyAdded.Add(name);
                         }
                     }
                     catch { }
@@ -170,6 +184,9 @@ namespace TwitchDownloaderCore
                     foreach (var emote in FFZ)
                     {
                         string id = emote["id"].ToString();
+                        string name = emote["code"].ToString();
+                        if (alreadyAdded.Contains(name))
+                            continue;
                         byte[] bytes;
                         string fileName = Path.Combine(ffzFolder, id + "_1x.png");
                         if (File.Exists(fileName))
@@ -180,7 +197,8 @@ namespace TwitchDownloaderCore
                             File.WriteAllBytes(fileName, bytes);
                         }
                         MemoryStream ms = new MemoryStream(bytes);
-                        returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), emote["code"].ToString(), emote["imageType"].ToString(), id, 1, bytes));
+                        returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 1, bytes));
+                        alreadyAdded.Add(name);
                     }
 
                     //Channel specific FFZ emotes
@@ -190,6 +208,9 @@ namespace TwitchDownloaderCore
                         foreach (var emote in FFZ_channel)
                         {
                             string id = emote["id"].ToString();
+                            string name = emote["code"].ToString();
+                            if (alreadyAdded.Contains(name))
+                                continue;
                             byte[] bytes;
                             int scale = 2;
                             string fileName = Path.Combine(ffzFolder, id + "_2x.png");
@@ -216,7 +237,8 @@ namespace TwitchDownloaderCore
                                 scale = 1;
                             }
                             MemoryStream ms = new MemoryStream(bytes);
-                            returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), emote["code"].ToString(), emote["imageType"].ToString(), id, scale, bytes));
+                            returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, scale, bytes));
+                            alreadyAdded.Add(name);
                         }
                     }
                     catch { }
@@ -442,31 +464,34 @@ namespace TwitchDownloaderCore
                                 if (output == "󠀀")
                                     continue;
 
-                                Match m = Regex.Match(output, emojiRegex);
-                                if (m.Success)
+                                MatchCollection matches = Regex.Matches(output, emojiRegex);
+                                foreach (Match m in matches)
                                 {
-                                    for (var k = 0; k < m.Value.Length; k += char.IsSurrogatePair(m.Value, k) ? 2 : 1)
+                                    if (m.Success)
                                     {
-                                        string codepoint = String.Format("{0:X4}", char.ConvertToUtf32(m.Value, k)).ToLower();
-                                        codepoint = codepoint.Replace("fe0f", "");
-                                        if (codepoint != "" && !emojiCache.ContainsKey(codepoint))
+                                        for (var k = 0; k < m.Value.Length; k += char.IsSurrogatePair(m.Value, k) ? 2 : 1)
                                         {
-                                            try
+                                            string codepoint = String.Format("{0:X4}", char.ConvertToUtf32(m.Value, k)).ToLower();
+                                            codepoint = codepoint.Replace("fe0f", "");
+                                            if (codepoint != "" && !emojiCache.ContainsKey(codepoint))
                                             {
-                                                byte[] bytes;
-                                                string fileName = Path.Combine(emojiFolder, codepoint + ".png");
-                                                if (File.Exists(fileName))
-                                                    bytes = File.ReadAllBytes(fileName);
-                                                else
+                                                try
                                                 {
-                                                    bytes = client.DownloadData(String.Format("https://abs.twimg.com/emoji/v2/72x72/{0}.png", codepoint));
-                                                    File.WriteAllBytes(fileName, bytes);
-                                                }
+                                                    byte[] bytes;
+                                                    string fileName = Path.Combine(emojiFolder, codepoint + ".png");
+                                                    if (File.Exists(fileName))
+                                                        bytes = File.ReadAllBytes(fileName);
+                                                    else
+                                                    {
+                                                        bytes = client.DownloadData(String.Format("https://abs.twimg.com/emoji/v2/72x72/{0}.png", codepoint));
+                                                        File.WriteAllBytes(fileName, bytes);
+                                                    }
 
-                                                SKBitmap emojiImage = SKBitmap.Decode(bytes);
-                                                emojiCache.Add(codepoint, emojiImage);
+                                                    SKBitmap emojiImage = SKBitmap.Decode(bytes);
+                                                    emojiCache.Add(codepoint, emojiImage);
+                                                }
+                                                catch { }
                                             }
-                                            catch { }
                                         }
                                     }
                                 }

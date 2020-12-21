@@ -61,6 +61,16 @@
         </StackPanel>
         <Button x:Name="btnDownload" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="Download" Height="50" Width="100" Click="btnDownload_Click" VerticalAlignment="Bottom" Margin="0,0,0,20"/>
         <!-- RIGHT -->
+        <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="btnDonate" ToolTip="Use the program often and want to support me? Buy me a coffee :)" Height="26" Width="40" Click="btnDonate_Click">
+                    <Image Source="Images\donate.png" Height="22" Width="36" Margin="0,2,0,0" ></Image>
+                </Button>
+                <Button x:Name="btnSettings" Height="26" Width="40" Click="btnSettings_Click" Margin="4,0,0,0" Loaded="btnSettings_Loaded">
+                    <Image Source="Images\settings.png" Height="22" Width="36" Margin="0,2,0,0" ></Image>
+                </Button>
+            </StackPanel>
+        </StackPanel>
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
             <TextBlock Text="Log:"/>
             <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" BorderBrush="Black">

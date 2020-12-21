@@ -72,7 +72,7 @@ namespace TwitchDownloaderWPF
                     SKColor messageColor = new SKColor(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
                     SaveSettings();
 
-                    ChatRenderOptions options = new ChatRenderOptions() { 
+                    ChatRenderOptions options = new ChatRenderOptions() {
                         InputFile = textJson.Text,
                         OutputFile = saveFileDialog.FileName,
                         BackgroundColor = backgroundColor,
@@ -93,7 +93,9 @@ namespace TwitchDownloaderWPF
                         UsernameFontStyle = SKFontStyle.Bold,
                         GenerateMask = (bool)checkMask.IsChecked,
                         OutlineSize = 4,
-                        FfmpegPath = "ffmpeg"
+                        FfmpegPath = "ffmpeg",
+                        TempFolder = Settings.Default.TempPath,
+                        SubMessages = (bool)checkSub.IsChecked
                     };
                     options.PaddingLeft = (int)Math.Floor(2 * options.EmoteScale);
 
@@ -152,6 +154,7 @@ namespace TwitchDownloaderWPF
                 colorFont.SelectedColor = System.Windows.Media.Color.FromRgb((byte)Settings.Default.FontColorR, (byte)Settings.Default.FontColorG, (byte)Settings.Default.FontColorB);
                 textFramerate.Text = Settings.Default.Framerate.ToString();
                 checkMask.IsChecked = Settings.Default.GenerateMask;
+                checkSub.IsChecked = Settings.Default.SubMessages;
 
                 foreach (VideoContainer container in comboFormat.Items)
                 {
@@ -220,6 +223,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.FontColorG = colorFont.SelectedColor.Value.G;
             Settings.Default.FontColorB = colorFont.SelectedColor.Value.B;
             Settings.Default.GenerateMask = (bool)checkMask.IsChecked;
+            Settings.Default.SubMessages = (bool)checkSub.IsChecked;
             if (comboFormat.SelectedItem != null)
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
             if (comboCodec.SelectedItem != null)
@@ -384,6 +388,23 @@ namespace TwitchDownloaderWPF
         private void UpdateCheckbox(object sender, RoutedEventArgs e)
         {
             Update();
+        }
+
+        private void btnDonate_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.buymeacoffee.com/lay295");
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsPage settings = new SettingsPage();
+            settings.ShowDialog();
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 

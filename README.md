@@ -24,6 +24,7 @@ https://www.youtube.com/watch?v=0W3MhfhnYjk
 ## Linux? MacOS?
 Sorry the GUI version is only avaliable for Windows :( but there is a command line version avaliable.
 This is a cross platform client that can do the main functions of the program without a GUI. It works on Windows and Linux, haven't tested it on MacOS though. 
+
 [Some documentation here](https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderCLI/README.md), for example, you could copy/paste this into a .bat file on Windows and you can download a VOD, download chat, then render it in a single go. I've never really made a command line utility before, so things may change in the future. If you're on Linux, make sure fontconfig and libfontconfig1 are installed. (apt-get install fontconfig libfontconfig1)
 ```
 @echo off
@@ -32,3 +33,18 @@ TwitchDownloaderCLI -m VideoDownload --id %vodid% --ffmpeg-path "ffmpeg.exe" -o 
 TwitchDownloaderCLI -m ChatDownload --id %vodid% -o %vodid%_chat.json
 TwitchDownloaderCLI -m ChatRender -i %vodid%_chat.json -h 1080 -w 422 --framerate 30 --update-rate 0 --font-size 18 -o %vodid%_chat.mp4
 ```
+=======
+
+### Linux - Getting started
+
+1. Go to releases and download the latest version for Linux
+2. Extract the `TwitchDownloaderCLI`
+3. Browse to where you extracted the file and give it executable rights by opening a terminal and executing the following:
+```
+sudo chmod +x TwitchDownloaderCLI
+```
+4. You can now start using the donwloader, for example:
+```
+TwitchDownloaderCLI -m VideoDownload --id <vod-id-here> -o out.mp4
+```
+For Arch Linux, there's an [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/)

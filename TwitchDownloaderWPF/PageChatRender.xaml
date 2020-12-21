@@ -8,7 +8,7 @@
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
       mc:Ignorable="d" 
       d:DesignHeight="350" d:DesignWidth="800"
-      Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded"
+      Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded" Loaded="Page_Loaded"
       >
 
     <Grid>
@@ -33,7 +33,7 @@
                 <TextBlock Text="Font:" HorizontalAlignment="Right" Margin="0,2,0,0"/>
                 <TextBlock Text="Font Size:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
                 <TextBlock Text="Font Color:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
-                <TextBlock Text="Outline:" HorizontalAlignment="Right" Margin="0,8,0,0"/>
+                <TextBlock Text="Outline:" HorizontalAlignment="Right" Margin="0,9,0,0"/>
                 <TextBlock Text="Timestamp:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
@@ -44,8 +44,8 @@
                 <xctk:ColorPicker x:Name="colorFont" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}" SelectedColorChanged="UpdateColor"/>
                 <CheckBox x:Name="checkOutline" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
                 <CheckBox x:Name="checkTimestamp" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
-                <CheckBox x:Name="checkFFZ" IsChecked="True" Margin="0,5,0,0"/>
-                <CheckBox x:Name="checkBTTV" IsChecked="True" Margin="0,5,0,0"/>
+                <CheckBox x:Name="checkFFZ" IsChecked="True" Margin="0,6,0,0"/>
+                <CheckBox x:Name="checkBTTV" IsChecked="True" Margin="0,6,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="20,0,5,0">
                 <TextBlock Text="Background Color:" HorizontalAlignment="Right"/>
@@ -53,6 +53,7 @@
                 <TextBlock Text="Width:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
                 <TextBlock Text="Update Time:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
                 <TextBlock Text="Framerate:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
+                <TextBlock Text="Sub Messages:" HorizontalAlignment="Right" Margin="0,11,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" DropDownBackground="{StaticResource ResourceKey=FixBrush}" SelectedColorChanged="UpdateColor"/>
@@ -60,6 +61,7 @@
                 <TextBox x:Name="textWidth" Text="350" Margin="0,5,0,0" TextChanged="UpdatePreview"/>
                 <TextBox x:Name="textUpdateTime" Text="1.0" Margin="0,5,0,0"/>
                 <TextBox x:Name="textFramerate" Text="60" Margin="0,5,0,0"/>
+                <CheckBox x:Name="checkSub" IsChecked="True" Margin="0,6,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="20,0,5,0">
                 <TextBlock Text="Live Preview:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
@@ -84,6 +86,16 @@
         </WrapPanel>
         <Button x:Name="btnRender" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="Render Chat" Height="50" Width="100" VerticalAlignment="Bottom" Margin="0,0,0,10" Click="btnRender_Click"/>
         <!-- RIGHT -->
+        <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="btnDonate" ToolTip="Use the program often and want to support me? Buy me a coffee :)" Height="26" Width="40" Click="btnDonate_Click">
+                    <Image Source="Images\donate.png" Height="22" Width="36" Margin="0,2,0,0" ></Image>
+                </Button>
+                <Button x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click">
+                    <Image Source="Images\settings.png" Height="22" Width="36" Margin="0,2,0,0" ></Image>
+                </Button>
+            </StackPanel>
+        </StackPanel>
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
             <TextBlock Text="Log:"/>
             <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" BorderBrush="Black">
