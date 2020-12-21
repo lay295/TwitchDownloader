@@ -67,5 +67,6 @@ namespace TwitchDownloaderCore.Options
         public string OutputArgs { get; set; }
         public string FfmpegPath { get; set; }
         public string TempFolder { get; set; }
+        public bool SubMessages { get; set; }
     }
 }

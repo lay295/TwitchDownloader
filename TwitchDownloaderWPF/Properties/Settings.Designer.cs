@@ -383,5 +383,17 @@ namespace TwitchDownloader.Properties {
                 this["TemplateChat"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool SubMessages {
+            get {
+                return ((bool)(this["SubMessages"]));
+            }
+            set {
+                this["SubMessages"] = value;
+            }
+        }
     }
 }

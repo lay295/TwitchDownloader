@@ -92,5 +92,8 @@
     <Setting Name="TemplateChat" Type="System.String" Scope="User">
       <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title}</Value>
     </Setting>
+    <Setting Name="SubMessages" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

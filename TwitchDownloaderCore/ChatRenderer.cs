@@ -77,7 +77,9 @@ namespace TwitchDownloaderCore
                             continue;
                         if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
                         {
-                            if (comment.message.user_notice_params.msg_id != "highlighted-message" && comment.message.user_notice_params.msg_id != "")
+                            if (comment.message.user_notice_params.msg_id != "highlighted-message" && comment.message.user_notice_params.msg_id != "sub" && comment.message.user_notice_params.msg_id != "resub" && comment.message.user_notice_params.msg_id != "subgift" && comment.message.user_notice_params.msg_id != "")
+                                continue;
+                            if (!renderOptions.SubMessages && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
                                 continue;
                         }
 
@@ -88,17 +90,28 @@ namespace TwitchDownloaderCore
                         List<SKBitmap> imageList = new List<SKBitmap>();
                         SKBitmap sectionImage = new SKBitmap(canvasSize.Width, canvasSize.Height);
                         int default_x = renderOptions.PaddingLeft;
+                        bool accentMessage = false;
 
                         List<GifEmote> currentGifEmotes = new List<GifEmote>();
                         List<SKBitmap> emoteList = new List<SKBitmap>();
                         List<SKRect> emotePositionList = new List<SKRect>();
                         new SKCanvas(sectionImage).Clear(renderOptions.BackgroundColor);
 
-                        if (renderOptions.Timestamp)
-                            sectionImage = DrawTimestamp(sectionImage, imageList, messageFont, renderOptions, comment, canvasSize, ref drawPos, ref default_x);
-                        sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
-                        sectionImage = DrawUsername(sectionImage, imageList, renderOptions, nameFont, comment.commenter.display_name, userColor, canvasSize, ref drawPos);
-                        sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
+                        if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
+                        {
+                            accentMessage = true;
+                            drawPos.X += (int)(8 * renderOptions.EmoteScale);
+                            default_x += (int)(8 * renderOptions.EmoteScale); 
+                            sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
+                        }
+                        else
+                        {
+                            if (renderOptions.Timestamp)
+                                sectionImage = DrawTimestamp(sectionImage, imageList, messageFont, renderOptions, comment, canvasSize, ref drawPos, ref default_x);
+                            sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
+                            sectionImage = DrawUsername(sectionImage, imageList, renderOptions, nameFont, comment.commenter.display_name, userColor, canvasSize, ref drawPos);
+                            sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
+                        }
 
                         int finalHeight = 0;
                         foreach (var img in imageList)
@@ -114,6 +127,9 @@ namespace TwitchDownloaderCore
                             img.Dispose();
                         }
 
+                        if (accentMessage)
+                            finalImageCanvas.DrawRect(renderOptions.PaddingLeft, 0, (int)(4 * renderOptions.EmoteScale), finalHeight - (int)Math.Floor(.4 * renderOptions.SectionHeight), new SKPaint() { Color = SKColor.Parse("#7b2cf2") });
+
                         string imagePath = Path.Combine(downloadFolder, Guid.NewGuid() + ".png");
                         finalComments.Add(new TwitchComment() { Section = imagePath, SecondsOffset = Double.Parse(comment.content_offset_seconds.ToString()), GifEmotes = currentGifEmotes, NormalEmotes = emoteList, NormalEmotesPositions = emotePositionList });
                         using (Stream s = File.OpenWrite(imagePath))
@@ -127,6 +143,7 @@ namespace TwitchDownloaderCore
                         }
                         finalImage.Dispose();
                         finalImageCanvas.Dispose();
+
                         int percent = (int)Math.Floor(((double)finalComments.Count / (double)chatJson.comments.Count) * 100);
                         CheckCancelation(cancellationToken, downloadFolder);
                     }

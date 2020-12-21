@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -86,6 +87,12 @@ namespace TwitchDownloader
             Settings.Default.TempPath = textTempPath.Text;
             Settings.Default.HideDonation = (bool)checkDonation.IsChecked;
             Settings.Default.Save();
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
     }
 }

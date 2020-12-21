@@ -48,6 +48,8 @@
             </StackPanel>
             <TextBlock Margin="3,5,3,3">
                 Avaliable paramaters are: <Bold>{title} {id} {date} {channel} {date_custom=""}</Bold>
+                <LineBreak/>
+                Date custom formatting is based on the C# <Hyperlink NavigateUri="https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings" RequestNavigate="Hyperlink_RequestNavigate">standard date and time format strings</Hyperlink>
             </TextBlock>
         </StackPanel>
         
