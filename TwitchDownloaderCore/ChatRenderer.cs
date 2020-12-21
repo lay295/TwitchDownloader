@@ -148,8 +148,8 @@ namespace TwitchDownloaderCore
                         CheckCancelation(cancellationToken, downloadFolder);
                     }
                 });
-
-                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Rendering Video 0%" });
+                
+                progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = "Rendering Video 0%" });
                 await Task.Run(() => RenderVideo(renderOptions, new Queue<TwitchComment>(finalComments.OrderBy(x => x.SecondsOffset)), chatJson, progress), cancellationToken);
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Cleaning up..." });
                 Cleanup(downloadFolder);
@@ -428,7 +428,7 @@ namespace TwitchDownloaderCore
                         progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percentInt });
                         int timeLeftInt = (int)Math.Floor(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
                         TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
-                        progress.Report(new ProgressReport() { reportType = ReportType.Message, data = $"Rendering Video {percentInt}% ({timeLeft.ToString(@"h\hm\ms\s")} left)" });
+                        progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = $"Rendering Video {percentInt}% ({timeLeft.ToString(@"h\hm\ms\s")} left)" });
                     } 
                 }
             }

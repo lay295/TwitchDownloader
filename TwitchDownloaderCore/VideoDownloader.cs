@@ -143,7 +143,7 @@ namespace TwitchDownloaderCore
 
                             doneCount++;
                             int percent = (int)Math.Floor(((double)doneCount / (double)partCount) * 100);
-                            progress.Report(new ProgressReport() { reportType = ReportType.Message, data = String.Format("Downloading {0}% (1/3)", percent) });
+                            progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = String.Format("Downloading {0}% (1/3)", percent) });
                             progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
 
                             return;
