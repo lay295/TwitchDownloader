@@ -88,6 +88,9 @@ Path to JSON chat file input.
 **-\-ffz**
 (Default: true) Enable FFZ emotes.
 
+**-\-sub-messages**
+(Default: true) Enable sub/re-sub messages.
+
 **-\-outline**
 (Default: false) Enable outline around chat messages.
 
