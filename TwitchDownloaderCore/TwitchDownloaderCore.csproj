@@ -6,7 +6,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Lewis Pardo</Authors>
-    <Version>1.0.1</Version>
+    <Version>1.0.7</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +14,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="SkiaSharp" Version="1.68.3" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="1.68.3" />
+    <PackageReference Include="StoneCold.SkiaSharp.NativeAssets.AlpineLinux" Version="1.68.3" />
   </ItemGroup>
 
 </Project>

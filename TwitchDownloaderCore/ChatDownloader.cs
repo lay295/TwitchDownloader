@@ -35,10 +35,8 @@ namespace TwitchDownloaderCore
                 DownloadType downloadType = downloadOptions.Id.All(x => Char.IsDigit(x)) ? DownloadType.Video : DownloadType.Clip;
                 string videoId = "";
 
-                JObject result = new JObject();
-                JObject video = new JObject();
-                JObject streamer = new JObject();
-                JArray comments = new JArray();
+                List<Comment> comments = new List<Comment>();
+                ChatRoot chatRoot = new ChatRoot() { streamer = new Streamer(), video = new VideoTime(), comments = comments };
 
                 double videoStart = 0.0;
                 double videoEnd = 0.0;
@@ -48,8 +46,8 @@ namespace TwitchDownloaderCore
                 {
                     videoId = downloadOptions.Id;
                     JObject taskInfo = await TwitchHelper.GetVideoInfo(Int32.Parse(videoId));
-                    streamer["name"] = taskInfo["channel"]["display_name"];
-                    streamer["id"] = taskInfo["channel"]["_id"];
+                    chatRoot.streamer.name = taskInfo["channel"]["display_name"].ToString();
+                    chatRoot.streamer.id = taskInfo["channel"]["_id"].ToObject<int>();
                     videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
                     videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : taskInfo["length"].ToObject<double>();
                 }
@@ -61,14 +59,14 @@ namespace TwitchDownloaderCore
                     downloadOptions.CropBeginningTime = taskInfo["vod"]["offset"].ToObject<int>();
                     downloadOptions.CropEnding = true;
                     downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + taskInfo["duration"].ToObject<double>();
-                    streamer["name"] = taskInfo["broadcaster"]["display_name"];
-                    streamer["id"] = taskInfo["broadcaster"]["id"];
+                    chatRoot.streamer.name = taskInfo["broadcaster"]["display_name"].ToString();
+                    chatRoot.streamer.id = taskInfo["broadcaster"]["id"].ToObject<int>();
                     videoStart = taskInfo["vod"]["offset"].ToObject<double>();
                     videoEnd = taskInfo["vod"]["offset"].ToObject<double>() + taskInfo["duration"].ToObject<double>();
                 }
 
-                video["start"] = videoStart;
-                video["end"] = videoEnd;
+                chatRoot.video.start = videoStart;
+                chatRoot.video.end = videoEnd;
                 videoDuration = videoEnd - videoStart;
 
                 double latestMessage = videoStart - 1;
@@ -83,19 +81,19 @@ namespace TwitchDownloaderCore
                     else
                         response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?cursor={1}", videoId, cursor));
 
-                    JObject res = JObject.Parse(response);
+                    CommentResponse commentResponse = JsonConvert.DeserializeObject<CommentResponse>(response);
 
-                    foreach (var comment in res["comments"])
+                    foreach (var comment in commentResponse.comments)
                     {
-                        if (latestMessage < videoEnd && comment["content_offset_seconds"].ToObject<double>() > videoStart)
+                        if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
                             comments.Add(comment);
 
-                        latestMessage = comment["content_offset_seconds"].ToObject<double>();
+                        latestMessage = comment.content_offset_seconds;
                     }
-                    if (res["_next"] == null)
+                    if (commentResponse._next == null)
                         break;
                     else
-                        cursor = res["_next"].ToString();
+                        cursor = commentResponse._next;
 
                     int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
                     progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
@@ -108,63 +106,63 @@ namespace TwitchDownloaderCore
 
                 }
 
-                result["streamer"] = streamer;
-                result["comments"] = comments;
-                result["video"] = video;
-
                 if (downloadOptions.EmbedEmotes && downloadOptions.IsJson)
                 {
                     progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Downloading + Embedding Emotes" });
-                    result["emotes"] = new JObject();
-                    JArray firstParty = new JArray();
-                    JArray thirdParty = new JArray();
+                    chatRoot.emotes = new Emotes();
+                    List<FirstPartyEmoteData> firstParty = new List<FirstPartyEmoteData>();
+                    List<ThirdPartyEmoteData> thirdParty = new List<ThirdPartyEmoteData>();
 
                     string cacheFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader", "cache");
                     List<ThirdPartyEmote> thirdPartyEmotes = new List<ThirdPartyEmote>();
                     List<KeyValuePair<string, SKBitmap>> firstPartyEmotes = new List<KeyValuePair<string, SKBitmap>>();
 
                     await Task.Run(() => {
-                        thirdPartyEmotes = TwitchHelper.GetThirdPartyEmotes(streamer["id"].ToObject<int>(), cacheFolder);
-                        firstPartyEmotes = TwitchHelper.GetEmotes(result["comments"].ToObject<List<Comment>>(), cacheFolder).ToList();
+                        thirdPartyEmotes = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder);
+                        firstPartyEmotes = TwitchHelper.GetEmotes(comments, cacheFolder).ToList();
                     });
 
                     foreach (ThirdPartyEmote emote in thirdPartyEmotes)
                     {
-                        JObject newEmote = new JObject();
-                        newEmote["id"] = emote.id;
-                        newEmote["imageScale"] = emote.imageScale;
-                        newEmote["data"] = emote.imageData;
-                        newEmote["name"] = emote.name;
+                        ThirdPartyEmoteData newEmote = new ThirdPartyEmoteData();
+                        newEmote.id = emote.id;
+                        newEmote.imageScale = emote.imageScale;
+                        newEmote.data = emote.imageData;
+                        newEmote.name = emote.name;
                         thirdParty.Add(newEmote);
                     }
                     foreach (KeyValuePair<string, SKBitmap> emote in firstPartyEmotes)
                     {
-                        JObject newEmote = new JObject();
-                        newEmote["id"] = emote.Key;
-                        newEmote["imageScale"] = 1;
-                        newEmote["data"] = SKImage.FromBitmap(emote.Value).Encode(SKEncodedImageFormat.Png, 100).ToArray();
+                        FirstPartyEmoteData newEmote = new FirstPartyEmoteData();
+                        newEmote.id = emote.Key;
+                        newEmote.imageScale = 1;
+                        newEmote.data = SKImage.FromBitmap(emote.Value).Encode(SKEncodedImageFormat.Png, 100).ToArray();
                         firstParty.Add(newEmote);
                     }
 
-                    result["emotes"]["thirdParty"] = thirdParty;
-                    result["emotes"]["firstParty"] = firstParty;
+                    chatRoot.emotes.thirdParty = thirdParty;
+                    chatRoot.emotes.firstParty = firstParty;
                 }
 
-                using (StreamWriter sw = new StreamWriter(downloadOptions.Filename))
+                if (downloadOptions.IsJson)
                 {
-                    if (downloadOptions.IsJson)
+                    using (TextWriter writer = File.CreateText(downloadOptions.Filename))
                     {
-                        sw.Write(result.ToString(Formatting.None));
+                        var serializer = new JsonSerializer();
+                        serializer.Serialize(writer, chatRoot);
                     }
-                    else
+                }
+                else
+                {
+                    using (StreamWriter sw = new StreamWriter(downloadOptions.Filename))
                     {
-                        foreach (var comment in result["comments"])
+                        foreach (var comment in chatRoot.comments)
                         {
-                            string username = comment["commenter"]["display_name"].ToString();
-                            string message = comment["message"]["body"].ToString();
+                            string username = comment.commenter.display_name;
+                            string message = comment.message.body;
                             if (downloadOptions.Timestamp)
                             {
-                                string timestamp = comment["created_at"].ToObject<DateTime>().ToString("u").Replace("Z", " UTC");
+                                string timestamp = comment.created_at.ToString("u").Replace("Z", " UTC");
                                 sw.WriteLine(String.Format("[{0}] {1}: {2}", timestamp, username, message));
                             }
                             else
@@ -172,12 +170,14 @@ namespace TwitchDownloaderCore
                                 sw.WriteLine(String.Format("{0}: {1}", username, message));
                             }
                         }
-                    }
 
-                    sw.Flush();
-                    sw.Close();
-                    result = null;
+                        sw.Flush();
+                        sw.Close();
+                    }
                 }
+                
+                chatRoot = null;
+                GC.Collect();
             }
         }
     }

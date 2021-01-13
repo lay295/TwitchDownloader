@@ -25,7 +25,7 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            string tempFolder = downloadOptions.TempFolder == "" ?  Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(downloadOptions.TempFolder, "TwitchDownloader");
+            string tempFolder = downloadOptions.TempFolder == null || downloadOptions.TempFolder == "" ?  Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(downloadOptions.TempFolder, "TwitchDownloader");
             string downloadFolder = Path.Combine(tempFolder, downloadOptions.Id.ToString() == "0" ? Guid.NewGuid().ToString() : downloadOptions.Id.ToString());
             try
             {
@@ -43,7 +43,7 @@ namespace TwitchDownloaderCore
                     Task<JObject> taskAccessToken = TwitchHelper.GetVideoToken(downloadOptions.Id, downloadOptions.Oauth);
                     await Task.WhenAll(taskInfo, taskAccessToken);
 
-                    string[] videoPlaylist = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, taskAccessToken.Result["token"].ToString(), taskAccessToken.Result["sig"].ToString());
+                    string[] videoPlaylist = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["value"].ToString(), taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["signature"].ToString());
                     List<KeyValuePair<string, string>> videoQualities = new List<KeyValuePair<string, string>>();
 
                     for (int i = 0; i < videoPlaylist.Length; i++)

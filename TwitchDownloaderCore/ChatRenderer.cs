@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            string tempFolder = renderOptions.TempFolder == "" ? Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(renderOptions.TempFolder, "TwitchDownloader");
+            string tempFolder = renderOptions.TempFolder == null || renderOptions.TempFolder == "" ? Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(renderOptions.TempFolder, "TwitchDownloader");
             string downloadFolder = Path.Combine(tempFolder, "Chat Render", Guid.NewGuid().ToString());
             string cacheFolder = Path.Combine(tempFolder, "cache");
             try
@@ -549,7 +549,7 @@ namespace TwitchDownloaderCore
                 SKPaint userPaint = nameFont;
                 if (userName.Any(isNotAscii))
                 {
-                    userPaint = GetFallbackFont((int)userName.First(), renderOptions);
+                    userPaint = GetFallbackFont((int)userName.Where(x => isNotAscii(x)).First(), renderOptions);
                     userPaint.Color = userColor;
                 }
                 float textWidth = userPaint.MeasureText(userName + ":");
@@ -804,11 +804,11 @@ namespace TwitchDownloaderCore
             {
                 //Dark background
                 if (userBrightness < 45)
-                {
                     userBrightness = 45;
-                    SKColor newColor = SKColor.FromHsl(userHue, userSaturation, userBrightness);
-                    return newColor;
-                }
+                if (userSaturation > 80)
+                    userSaturation = 80;
+                SKColor newColor = SKColor.FromHsl(userHue, userSaturation, userBrightness);
+                return newColor;
             }
 
             if (Math.Abs(backgroundBrightness - userBrightness) < 10 && backgroundBrightness > 50)
@@ -838,7 +838,14 @@ namespace TwitchDownloaderCore
             ChatRoot chatJson;
             try
             {
-                chatJson = JsonConvert.DeserializeObject<ChatRoot>(File.ReadAllText(renderOptions.InputFile));
+                using (StreamReader r = new StreamReader(renderOptions.InputFile))
+                {
+                    using (JsonReader reader = new JsonTextReader(r))
+                    {
+                        JsonSerializer serializer = new JsonSerializer();
+                        chatJson = serializer.Deserialize<ChatRoot>(reader);
+                    }
+                }
                 if (chatJson.streamer == null)
                 {
                     JObject json = JObject.Parse(File.ReadAllText(renderOptions.InputFile));

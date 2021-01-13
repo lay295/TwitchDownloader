@@ -22,7 +22,7 @@ namespace TwitchDownloaderCLI
             if (args.Any(x => x.Equals("--download-ffmpeg")))
             {
                 Console.WriteLine("[INFO] - Downloading ffmpeg and exiting");
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official).Wait();
                     try

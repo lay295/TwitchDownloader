@@ -33,7 +33,7 @@ namespace TwitchDownloaderCore
             {
                 client.Encoding = Encoding.UTF8;
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-                string response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/api/vods/{0}/access_token{1}", videoId, (authToken == "" ? "" : "?oauth_token=" + authToken)));
+                string response = await client.UploadStringTaskAsync("https://gql.twitch.tv/gql", "{\"operationName\":\"PlaybackAccessToken_Template\",\"query\":\"query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: \\\"web\\\", playerBackend: \\\"mediaplayer\\\", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: \\\"web\\\", playerBackend: \\\"mediaplayer\\\", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}\",\"variables\":{\"isLive\":false,\"login\":\"\",\"isVod\":true,\"vodID\":\"" + videoId + "\",\"playerType\":\"embed\"}}");
                 JObject result = JObject.Parse(response);
                 return result;
             }
@@ -295,10 +295,22 @@ namespace TwitchDownloaderCore
                                     if (File.Exists(filePath))
                                     {
                                         SKBitmap emoteImage = SKBitmap.Decode(filePath);
-                                        returnDictionary.Add(id, emoteImage);
-                                        alreadyAdded.Add(id);
+                                        if (emoteImage == null)
+                                        {
+                                            try
+                                            {
+                                                File.Delete(filePath);
+                                            }
+                                            catch { }
+                                        }
+                                        else
+                                        {
+                                            returnDictionary.Add(id, emoteImage);
+                                            alreadyAdded.Add(id);
+                                        }
                                     }
-                                    else
+
+                                    if (!alreadyAdded.Contains(id))
                                     {
                                         byte[] bytes = client.DownloadData(String.Format("https://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0", id));
                                         alreadyAdded.Add(id);
@@ -380,7 +392,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            return returnDictionary;
+            return returnDictionary.Where(x => x.Value != null).ToDictionary(z => z.Key, z => z.Value);
         }
 
         public static List<ChatBadge> GetChatBadges(int streamerId)
