@@ -73,7 +73,7 @@ namespace TwitchDownloaderCore
                     {
                         if (comment.source != "chat")
                             continue;
-                        if (comment.message.fragments == null)
+                        if (comment.message.fragments == null || comment.commenter == null)
                             continue;
                         if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
                         {
@@ -484,22 +484,26 @@ namespace TwitchDownloaderCore
         public SKBitmap DrawBadges(SKBitmap sectionImage, List<SKBitmap> imageList, ChatRenderOptions renderOptions, List<ChatBadge> chatBadges, Comment comment, Size canvasSize, ref Point drawPos)
         {
             //A little easter egg for my Twitch username won't hurt :)
-            if (comment.commenter.name == "ilovekeepo69" && chatBadges.Any(x => x.Name == "ilovekeepo69"))
+            try
             {
-                SKBitmap badgeImage = chatBadges.Where(x => x.Name == "ilovekeepo69").First().Versions["1"];
-                using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImage))
+                if (comment.commenter.name == "ilovekeepo69" && chatBadges.Any(x => x.Name == "ilovekeepo69"))
                 {
-                    float imageRatio = (float)(renderOptions.EmoteScale * 0.5);
-                    float imageSize = badgeImage.Width * imageRatio;
-                    float left = (float)drawPos.X;
-                    float right = imageSize + left;
-                    float top = (float)((sectionImage.Height - imageSize) / 2);
-                    float bottom = imageSize + top;
-                    SKRect drawBox = new SKRect(left, top, right, bottom);
-                    sectionImageCanvas.DrawBitmap(badgeImage, drawBox, imagePaint);
-                    drawPos.X += (int)Math.Floor(20 * renderOptions.EmoteScale);
+                    SKBitmap badgeImage = chatBadges.Where(x => x.Name == "ilovekeepo69").First().Versions["1"];
+                    using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImage))
+                    {
+                        float imageRatio = (float)(renderOptions.EmoteScale * 0.5);
+                        float imageSize = badgeImage.Width * imageRatio;
+                        float left = (float)drawPos.X;
+                        float right = imageSize + left;
+                        float top = (float)((sectionImage.Height - imageSize) / 2);
+                        float bottom = imageSize + top;
+                        SKRect drawBox = new SKRect(left, top, right, bottom);
+                        sectionImageCanvas.DrawBitmap(badgeImage, drawBox, imagePaint);
+                        drawPos.X += (int)Math.Floor(20 * renderOptions.EmoteScale);
+                    }
                 }
             }
+            catch { }
 
             if (comment.message.user_badges != null)
             {
