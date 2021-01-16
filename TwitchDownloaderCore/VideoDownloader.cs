@@ -207,28 +207,26 @@ namespace TwitchDownloaderCore
 
                 await Task.Run(() =>
                 {
-                    progress.Report(new ProgressReport() { reportType = ReportType.Log, data = "Ffmpeg Path: " + downloadOptions.FfmpegPath });
-                    progress.Report(new ProgressReport() { reportType = ReportType.Log, data = "Input File: " + Path.Combine(downloadFolder, "output.ts") });
-                    progress.Report(new ProgressReport() { reportType = ReportType.Log, data = "Output File: " + Path.GetFullPath(downloadOptions.Filename) });
-                    var process = new Process
+                    try
                     {
-                        StartInfo =
+                        var process = new Process
+                        {
+                            StartInfo =
                             {
                                 FileName = downloadOptions.FfmpegPath,
-                                Arguments = String.Format("-y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {1} " : "") + "-i \"{0}\" -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), Int32.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
+                                Arguments = String.Format("-y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {1} " : "") + "-i \"{0}\" -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(), Int32.MaxValue, seekDuration.ToString(), Path.GetFullPath(downloadOptions.Filename)),
                                 UseShellExecute = false,
                                 CreateNoWindow = true,
-                                RedirectStandardInput = true,
-                                RedirectStandardOutput = true,
-                                RedirectStandardError = true
+                                RedirectStandardInput = false,
+                                RedirectStandardOutput = false,
+                                RedirectStandardError = false
                             }
-                    };
-                    process.ErrorDataReceived += ((object sender, DataReceivedEventArgs e) => { progress.Report(new ProgressReport() { reportType = ReportType.Log, data = e.Data }); });
-
-                    process.Start();
-                    process.BeginErrorReadLine();
-                    process.BeginOutputReadLine();
-                    process.WaitForExit();
+                        };
+                        process.Start();
+                        process.WaitForExit();
+                    }
+                    catch (TaskCanceledException) { }
+                    Cleanup(downloadFolder);
                 });
             }
             catch
