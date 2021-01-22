@@ -223,6 +223,7 @@ namespace TwitchDownloaderCore
                     process.Start();
                     process.WaitForExit();
                 });
+                Cleanup(downloadFolder);
             }
             catch
             {
