@@ -1,0 +1,205 @@
+name: Build and Upload Release
+ 
+on: 
+ workflow_dispatch:
+   inputs:
+     release_tag:
+        description: 'Release Tag'     
+        required: true
+        default: '1.0.0'
+
+jobs:
+  create-release:
+   runs-on: ubuntu-20.04
+   
+   steps:
+    - name: Create a Release
+      id: create_release
+      uses: actions/create-release@v1.1.4
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # The name of the tag. This should come from the webhook payload, `github.GITHUB_REF` when a user pushes a new tag
+        tag_name: ${{ github.event.inputs.release_tag }}
+        # The name of the release. For example, `Release v1.0.1`
+        release_name: ${{ github.event.inputs.release_tag }}
+    - shell: bash
+      run: |
+        expr "${{ steps.create_release.outputs.upload_url }}" > upload_url.txt
+    - name: Upload URL
+      uses: actions/upload-artifact@v2
+      with:
+        name: upload_url
+        path: upload_url.txt
+  
+  build:
+    runs-on: windows-latest
+    needs: [create-release]
+    env:
+     ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+ 
+    steps:
+    - uses: actions/checkout@v1
+      name: Checkout Code
+     
+    - name: Setup MSBuild Path
+      uses: warrenbuckley/Setup-MSBuild@v1
+       
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.2
+     
+    - name: Restore NuGet Packages
+      run: nuget restore TwitchDownloaderWPF.sln
+ 
+    - name: Build
+      run: msbuild TwitchDownloaderWPF.sln /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:AllowedReferenceRelatedFileExtensions=none /p:DeployOnBuild=true
+    
+    - name: Download File To Workspace
+      # You may pin to the exact commit or the version.
+      # uses: carlosperate/download-file-action@e85e0aa6262f13571d17a4a39687b26981c583dc
+      uses: carlosperate/download-file-action@v1.0.3
+      with:
+        # URL of the file to download
+        file-url: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+        # New filename to rename the downloaded file
+        file-name: ffmpeg.zip
+        
+    - name: Bundle ffmpeg
+      run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/Release/ffmpeg.exe
+        
+    - name: Rename/Zip Release
+      run: cd TwitchDownloaderWPF/bin;ren Release "Twitch Downloader";cd ../../;tar -C "TwitchDownloaderWPF/bin" -a -c -f release.zip "Twitch Downloader"
+    
+    - name: Download URL
+      uses: actions/download-artifact@v2
+      with:
+        name: upload_url
+        
+    - name: Read URL
+      id: url
+      uses: juliangruber/read-file-action@v1
+      with:
+        path: upload_url.txt
+        
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: release.zip
+        asset_name: release.zip
+        asset_content_type: application/zip
+
+  build-cli:
+    runs-on: ubuntu-20.04
+    needs: [create-release, build]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows /p:DebugType=None /p:DebugSymbols=false
+    - name: Build
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Linux /p:DebugType=None /p:DebugSymbols=false
+    - name: Build
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine /p:DebugType=None /p:DebugSymbols=false
+    - name: Build
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm /p:DebugType=None /p:DebugSymbols=false
+    
+    - name: Create ZIP Files
+      run: tar -C TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/Windows -a -c -f TwitchDownloaderCLI-Windows-x64.zip TwitchDownloaderCLI.exe; tar -C TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/Linux -a -c -f TwitchDownloaderCLI-Linux-x64.zip TwitchDownloaderCLI; tar -C TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/LinuxAlpine -a -c -f TwitchDownloaderCLI-LinuxAlpine-x64.zip TwitchDownloaderCLI; tar -C TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/LinuxArm -a -c -f TwitchDownloaderCLI-LinuxArm.zip TwitchDownloaderCLI
+        
+    - name: Download URL
+      uses: actions/download-artifact@v2
+      with:
+        name: upload_url
+        
+    - name: Read URL
+      id: url
+      uses: juliangruber/read-file-action@v1
+      with:
+        path: upload_url.txt
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: TwitchDownloaderCLI-Windows-x64.zip
+        asset_name: TwitchDownloaderCLI-Windows-x64.zip
+        asset_content_type: application/zip
+      
+    - name: Upload Release Asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: TwitchDownloaderCLI-Linux-x64.zip
+        asset_name: TwitchDownloaderCLI-Linux-x64.zip
+        asset_content_type: application/zip
+        
+    - name: Upload Release Asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: TwitchDownloaderCLI-LinuxAlpine-x64.zip
+        asset_name: TwitchDownloaderCLI-LinuxAlpine-x64.zip
+        asset_content_type: application/zip
+        
+    - name: Upload Release Asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: TwitchDownloaderCLI-LinuxArm.zip
+        asset_name: TwitchDownloaderCLI-LinuxArm.zip
+        asset_content_type: application/zip
+  
+  build-cli-mac:
+    runs-on: macos-10.15
+    needs: [create-release, build-cli]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS /p:DebugType=None /p:DebugSymbols=false
+        
+    - name: Create ZIP Files
+      run: tar -C TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/MacOS -a -c -f TwitchDownloaderCLI-MacOS-x64.zip TwitchDownloaderCLI
+    
+    - name: Download URL
+      uses: actions/download-artifact@v2
+      with:
+        name: upload_url
+        
+    - name: Read URL
+      id: url
+      uses: juliangruber/read-file-action@v1
+      with:
+        path: upload_url.txt
+    
+    - name: Upload Release Asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: TwitchDownloaderCLI-MacOS-x64.zip
+        asset_name: TwitchDownloaderCLI-MacOS-x64.zip
+        asset_content_type: application/zip
