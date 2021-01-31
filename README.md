@@ -3,14 +3,9 @@
 Twitch VOD/Clip/Chat downloader and chat renderer I wrote.
 
 **THIS USES UNDOCUMENTED API ENDPOINTS, MAY BREAK EASILY. I'LL TRY AND UPDATE WHEN IT DOES.**
-![](https://i.imgur.com/BmGqYbm.gif)
 
 ## Chat Render Example
 ![](https://i.imgur.com/I4Z2bWo.gif)
-
-## Video Demonstration
-https://www.youtube.com/watch?v=0W3MhfhnYjk
-(older version, same concept)
 
 ## What can it do?
 - Download Twitch VODs
@@ -21,6 +16,14 @@ https://www.youtube.com/watch?v=0W3MhfhnYjk
 ## Things still to be done
 - Fix bugs that slipped by
 - More options for chat rendering
+
+# GUI
+
+![](https://i.imgur.com/BmGqYbm.gif)
+
+## Video Demonstration
+https://www.youtube.com/watch?v=0W3MhfhnYjk
+(older version, same concept)
 
 ## Linux? MacOS?
 Sorry, the GUI version is only avaliable for Windows :(  
