@@ -1,18 +1,18 @@
 
 # TwitchDownloader
-A Twitch VOD/Clip/Chat downloader and chat renderer I wrote.
+Twitch VOD/Clip/Chat downloader and chat renderer I wrote.
 
 **THIS USES UNDOCUMENTED API ENDPOINTS, MAY BREAK EASILY. I'LL TRY AND UPDATE WHEN IT DOES.**
 ![](https://i.imgur.com/BmGqYbm.gif)
 
-## Chat render example
+## Chat Render Example
 ![](https://i.imgur.com/I4Z2bWo.gif)
 
 ## Video Demonstration
 https://www.youtube.com/watch?v=0W3MhfhnYjk
 (older version, same concept)
 
-## What can this do?
+## What can it do?
 - Download Twitch VODs
 - Download Twitch Clips
 - Download chat for VODS and Clips, in either a [JSON with all the information](https://pastebin.com/raw/YDgRe6X4) or a [simple text file](https://pastebin.com/raw/016azeQX)
@@ -31,7 +31,7 @@ The CLI is cross platform and performs the main functions of the program. It wor
 
 [Documentation here](https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderCLI/README.md). 
 
-I've never really made a command line utility before so things may change in the future. If you're on Linux, make sure fontconfig and libfontconfig1 are installed `(apt-get install fontconfig libfontconfig1)`.
+I've never really made a command line utility before so things may change in the future. If you're on Linux, make sure `fontconfig` and `libfontconfig1` are installed `(apt-get install fontconfig libfontconfig1)`.
 
 For example, you could copy/paste this into a `.bat` file on Windows, to download a VOD, chat, and then render in a single go.  
 ```
