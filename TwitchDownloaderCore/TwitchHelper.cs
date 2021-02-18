@@ -418,16 +418,18 @@ namespace TwitchDownloaderCore
                         JProperty jVersionProperty = version.ToObject<JProperty>();
                         string versionString = jVersionProperty.Name;
                         string downloadUrl = version.First["image_url_2x"].ToString();
-                        byte[] bytes = client.DownloadData(downloadUrl);
-                        MemoryStream ms = new MemoryStream(bytes);
                         try
                         {
+                            byte[] bytes = client.DownloadData(downloadUrl);
+                            MemoryStream ms = new MemoryStream(bytes);
                             //For some reason, twitch has corrupted images sometimes :) for example
                             //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                             SKBitmap badgeImage = SKBitmap.Decode(ms);
                             versions.Add(versionString, badgeImage);
                         }
                         catch (ArgumentException)
+                        { }
+                        catch (WebException)
                         { }
                     }
 
