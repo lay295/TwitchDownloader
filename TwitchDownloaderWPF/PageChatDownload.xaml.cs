@@ -62,6 +62,10 @@ namespace TwitchDownloaderWPF
             numEndHour.IsEnabled = isEnabled;
             numEndMinute.IsEnabled = isEnabled;
             numEndSecond.IsEnabled = isEnabled;
+            checkEmbed.IsEnabled = isEnabled;
+            radioRelative.IsEnabled = isEnabled;
+            radioUTC.IsEnabled = isEnabled;
+            radioNone.IsEnabled = isEnabled;
 
             if (!onlyCrop)
             {
@@ -227,6 +231,13 @@ namespace TwitchDownloaderWPF
                         downloadOptions.Id = downloadId;
                     }
 
+                    if ((bool)radioUTC.IsChecked)
+                        downloadOptions.TimeFormat = TimestampFormat.Utc;
+                    if ((bool)radioRelative.IsChecked)
+                        downloadOptions.TimeFormat = TimestampFormat.Relative;
+                    if ((bool)radioNone.IsChecked)
+                        downloadOptions.TimeFormat = TimestampFormat.None;
+
                     ChatDownloader currentDownload = new ChatDownloader(downloadOptions);
 
                     btnGetInfo.IsEnabled = false;
@@ -298,6 +309,20 @@ namespace TwitchDownloaderWPF
         private void btnSettings_Loaded(object sender, RoutedEventArgs e)
         {
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void radioText_Checked(object sender, RoutedEventArgs e)
+        {
+            timeText.Visibility = Visibility.Visible;
+            timeOptions.Visibility = Visibility.Visible;
+            checkEmbed.IsEnabled = false;
+        }
+
+        private void radioText_Unchecked(object sender, RoutedEventArgs e)
+        {
+            timeText.Visibility = Visibility.Collapsed;
+            timeOptions.Visibility = Visibility.Collapsed;
+            checkEmbed.IsEnabled = true;
         }
     }
 }

@@ -167,6 +167,7 @@ namespace TwitchDownloaderCLI
             downloadOptions.Timestamp = inputOptions.Timestamp;
             downloadOptions.EmbedEmotes = inputOptions.EmbedEmotes;
             downloadOptions.Filename = inputOptions.OutputFile;
+            downloadOptions.TimeFormat = inputOptions.TimeFormat;
 
             ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();

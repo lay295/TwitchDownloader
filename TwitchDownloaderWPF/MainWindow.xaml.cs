@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoUpdaterDotNET;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -72,6 +73,8 @@ namespace TwitchDownloaderWPF
             Settings.Default.Save();
             if (!File.Exists("ffmpeg.exe"))
                 await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
+
+            AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

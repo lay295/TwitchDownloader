@@ -4,6 +4,7 @@ using System.Text;
 
 namespace TwitchDownloaderCore.Options
 {
+    public enum TimestampFormat { Utc, Relative, None }
     public class ChatDownloadOptions
     {
         public bool IsJson { get; set; } = true;
@@ -15,5 +16,6 @@ namespace TwitchDownloaderCore.Options
         public double CropEndingTime { get; set; }
         public bool Timestamp { get; set; }
         public bool EmbedEmotes { get; set; }
+        public TimestampFormat TimeFormat { get; set; }
     }
 }

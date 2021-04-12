@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI
 {
@@ -35,6 +36,8 @@ namespace TwitchDownloaderCLI
         public string Oauth { get; set; }
         [Option("timestamp", HelpText = "Enable timestamp for chat download in .txt format or chat render.")]
         public bool Timestamp { get; set; }
+        [Option("timestamp-format", HelpText = "Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None")]
+        public TimestampFormat TimeFormat { get; set; }
         [Option("embed-emotes", HelpText = "Embed emotes into chat download.")]
         public bool EmbedEmotes { get; set; }
         [Option("background-color", Default = "#111111", HelpText = "Color of background for chat render.")]

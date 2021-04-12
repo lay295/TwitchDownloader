@@ -64,6 +64,9 @@ Time in seconds to crop ending. For example if I wanted a 10 second stream but o
 **-\-timestamp**
 If downloading to a text file, will add timestamps before each message.
 
+**-\-timestamp-format**
+Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None.
+
 **-\-embed-emotes**
 Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.
 ## Arguments for mode ChatRender

@@ -55,13 +55,19 @@
         <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock Text="Download Format:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
+                <TextBlock Visibility="Collapsed" x:Name="timeText" Text="Timestamp Format:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
                 <TextBlock Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
                 <TextBlock HorizontalAlignment="Right" Margin="0,29,0,0">Embed Emotes <Hyperlink ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
             </StackPanel>
             <StackPanel>
                 <StackPanel Margin="5,12,0,0" Orientation="Horizontal">
                     <RadioButton x:Name="radioJson" IsChecked="True" Content="Advanced JSON"/>
-                    <RadioButton x:Name="radioText" Content="Simple Text" Margin="3,0,0,0"/>
+                    <RadioButton x:Name="radioText" Content="Simple Text" Margin="3,0,0,0" Checked="radioText_Checked" Unchecked="radioText_Unchecked"/>
+                </StackPanel>
+                <StackPanel Visibility="Collapsed" x:Name="timeOptions" Margin="5,8,0,0" Orientation="Horizontal">
+                    <RadioButton x:Name="radioUTC" IsChecked="True" Content="UTC"/>
+                    <RadioButton x:Name="radioRelative" Content="Relative" Margin="3,0,0,0"/>
+                    <RadioButton x:Name="radioNone" Content="None" Margin="3,0,0,0"/>
                 </StackPanel>
                 <StackPanel Margin="5,5,0,0">
                     <StackPanel Orientation="Horizontal">
