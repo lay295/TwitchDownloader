@@ -32,6 +32,8 @@ namespace TwitchDownloaderCore
             if (downloadUrl == "")
                 downloadUrl = taskLinks[0]["data"]["clip"]["videoQualities"].First["sourceURL"].ToString();
 
+            downloadUrl += "?sig=" + taskLinks[0]["data"]["clip"]["playbackAccessToken"]["signature"] + "&token=" + taskLinks[0]["data"]["clip"]["playbackAccessToken"]["value"];
+
             using (WebClient client = new WebClient())
                 await client.DownloadFileTaskAsync(downloadUrl, downloadOptions.Filename);
         }

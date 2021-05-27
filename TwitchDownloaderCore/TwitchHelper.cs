@@ -70,7 +70,7 @@ namespace TwitchDownloaderCore
             {
                 client.Encoding = Encoding.UTF8;
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-                string response = await client.UploadStringTaskAsync(new Uri("https://gql.twitch.tv/gql", UriKind.Absolute), "[{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"9bfcc0177bffc730bd5a5a89005869d2773480cf1738c592143b5173634b7d15\"}}}]");
+                string response = await client.UploadStringTaskAsync(new Uri("https://gql.twitch.tv/gql", UriKind.Absolute), "[{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}]");
                 JArray result = JArray.Parse(response);
                 return result;
             }
