@@ -61,9 +61,6 @@ Time in seconds to crop beginning. For example if I wanted a 10 second stream bu
 **-e/-\-ending**
 Time in seconds to crop ending. For example if I wanted a 10 second stream but only wanted the first 4 seconds of it I would use -e 4 remove the last 6 seconds of it.
 
-**-\-timestamp**
-If downloading to a text file, will add timestamps before each message.
-
 **-\-timestamp-format**
 Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None.
 
@@ -141,7 +138,7 @@ Download a Clip
     TwitchDownloaderCLI -m ClipDownload --id NurturingCalmHamburgerVoHiYo -o clip.mp4
 Download a Chat (plain text with timestamps)
 
-    TwitchDownloaderCLI -m ChatDownload --id 612942303 --timestamp -o chat.txt
+    TwitchDownloaderCLI -m ChatDownload --id 612942303 --timestamp-format Relative -o chat.txt
 Download a Chat (JSON with embeded emotes)
 
     TwitchDownloaderCLI -m ChatDownload --id 612942303 --embed-emotes -o chat.json

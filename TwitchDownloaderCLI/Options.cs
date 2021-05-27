@@ -34,9 +34,9 @@ namespace TwitchDownloaderCLI
         public int DownloadThreads { get; set; }
         [Option("oauth", HelpText = "OAuth to be passed when downloading a VOD.")]
         public string Oauth { get; set; }
-        [Option("timestamp", HelpText = "Enable timestamp for chat download in .txt format or chat render.")]
+        [Option("timestamp", HelpText = "Enable timestamp in chat render.")]
         public bool Timestamp { get; set; }
-        [Option("timestamp-format", HelpText = "Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None")]
+        [Option("timestamp-format", HelpText = "Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None", Default = TimestampFormat.None)]
         public TimestampFormat TimeFormat { get; set; }
         [Option("embed-emotes", HelpText = "Embed emotes into chat download.")]
         public bool EmbedEmotes { get; set; }

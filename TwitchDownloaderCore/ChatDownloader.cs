@@ -160,25 +160,18 @@ namespace TwitchDownloaderCore
                         {
                             string username = comment.commenter.display_name;
                             string message = comment.message.body;
-                            if (downloadOptions.Timestamp)
+                            if (downloadOptions.TimeFormat == TimestampFormat.Utc)
                             {
-                                if (downloadOptions.TimeFormat == TimestampFormat.Utc)
-                                {
-                                    string timestamp = comment.created_at.ToString("u").Replace("Z", " UTC");
-                                    sw.WriteLine(String.Format("[{0}] {1}: {2}", timestamp, username, message));
-                                }
-                                else if (downloadOptions.TimeFormat == TimestampFormat.Relative)
-                                {
-                                    TimeSpan time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
-                                    string timestamp = time.ToString(@"h\:mm\:ss");
-                                    sw.WriteLine(String.Format("[{0}] {1}: {2}", timestamp, username, message));
-                                }
-                                else if (downloadOptions.TimeFormat == TimestampFormat.None)
-                                {
-                                    sw.WriteLine(String.Format("{0}: {1}", username, message));
-                                }
+                                string timestamp = comment.created_at.ToString("u").Replace("Z", " UTC");
+                                sw.WriteLine(String.Format("[{0}] {1}: {2}", timestamp, username, message));
                             }
-                            else
+                            else if (downloadOptions.TimeFormat == TimestampFormat.Relative)
+                            {
+                                TimeSpan time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
+                                string timestamp = time.ToString(@"h\:mm\:ss");
+                                sw.WriteLine(String.Format("[{0}] {1}: {2}", timestamp, username, message));
+                            }
+                            else if (downloadOptions.TimeFormat == TimestampFormat.None)
                             {
                                 sw.WriteLine(String.Format("{0}: {1}", username, message));
                             }
