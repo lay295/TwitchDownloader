@@ -80,9 +80,9 @@ jobs:
         
     - name: Read URL
       id: url
-      uses: juliangruber/read-file-action@v1
+      uses: komorebitech/read-files-action@v1.5
       with:
-        path: upload_url.txt
+        files: '["upload_url.txt"]'
         
     - name: Upload Release Asset
       id: upload-release-asset 
