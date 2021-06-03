@@ -80,9 +80,9 @@ jobs:
         
     - name: Read URL
       id: url
-      uses: komorebitech/read-files-action@v1.5
+      uses: juliangruber/read-file-action@74dc4b4435b60f96f84bcba916659c779f46ba0a
       with:
-        files: '["upload_url.txt"]'
+        path: upload_url.txt
         
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -146,7 +146,7 @@ jobs:
         
     - name: Read URL
       id: url
-      uses: juliangruber/read-file-action@v1
+      uses: juliangruber/read-file-action@74dc4b4435b60f96f84bcba916659c779f46ba0a
       with:
         path: upload_url.txt
     
@@ -217,7 +217,7 @@ jobs:
         
     - name: Read URL
       id: url
-      uses: juliangruber/read-file-action@v1
+      uses: juliangruber/read-file-action@74dc4b4435b60f96f84bcba916659c779f46ba0a
       with:
         path: upload_url.txt
     
