@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCore
@@ -32,7 +33,7 @@ namespace TwitchDownloaderCore
             if (downloadUrl == "")
                 downloadUrl = taskLinks[0]["data"]["clip"]["videoQualities"].First["sourceURL"].ToString();
 
-            downloadUrl += "?sig=" + taskLinks[0]["data"]["clip"]["playbackAccessToken"]["signature"] + "&token=" + taskLinks[0]["data"]["clip"]["playbackAccessToken"]["value"];
+            downloadUrl += "?sig=" + taskLinks[0]["data"]["clip"]["playbackAccessToken"]["signature"] + "&token=" + HttpUtility.UrlEncode(taskLinks[0]["data"]["clip"]["playbackAccessToken"]["value"].ToString());
 
             using (WebClient client = new WebClient())
                 await client.DownloadFileTaskAsync(downloadUrl, downloadOptions.Filename);
