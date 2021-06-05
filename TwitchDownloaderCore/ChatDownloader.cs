@@ -41,6 +41,7 @@ namespace TwitchDownloaderCore
                 double videoStart = 0.0;
                 double videoEnd = 0.0;
                 double videoDuration = 0.0;
+                int errorCount = 0;
 
                 if (downloadType == DownloadType.Video)
                 {
@@ -76,10 +77,25 @@ namespace TwitchDownloaderCore
                 while (latestMessage < videoEnd)
                 {
                     string response;
-                    if (isFirst)
-                        response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?content_offset_seconds={1}", videoId, videoStart));
-                    else
-                        response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?cursor={1}", videoId, cursor));
+
+                    try
+                    {
+                        if (isFirst)
+                            response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?content_offset_seconds={1}", videoId, videoStart));
+                        else
+                            response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?cursor={1}", videoId, cursor));
+                        errorCount = 0;
+                    }
+                    catch (WebException ex)
+                    {
+                        await Task.Delay(1000 * errorCount);
+                        errorCount++;
+
+                        if (errorCount >= 10)
+                            throw ex;
+
+                        continue;
+                    }
 
                     CommentResponse commentResponse = JsonConvert.DeserializeObject<CommentResponse>(response);
 
