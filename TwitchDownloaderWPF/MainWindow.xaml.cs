@@ -69,8 +69,13 @@ namespace TwitchDownloaderWPF
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Main.Content = pageVodDownload;
-            Settings.Default.Upgrade();
-            Settings.Default.Save();
+            if (Settings.Default.UpgradeRequired)
+            {
+                Settings.Default.Upgrade();
+                Settings.Default.UpgradeRequired = false;
+                Settings.Default.Save();
+            }
+            
             if (!File.Exists("ffmpeg.exe"))
                 await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
 
