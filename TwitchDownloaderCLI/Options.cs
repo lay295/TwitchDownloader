@@ -36,7 +36,7 @@ namespace TwitchDownloaderCLI
         public string Oauth { get; set; }
         [Option("timestamp", HelpText = "Enable timestamp in chat render.")]
         public bool Timestamp { get; set; }
-        [Option("timestamp-format", HelpText = "Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None", Default = TimestampFormat.None)]
+        [Option("timestamp-format", HelpText = "Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None", Default = TimestampFormat.Relative)]
         public TimestampFormat TimeFormat { get; set; }
         [Option("embed-emotes", HelpText = "Embed emotes into chat download.")]
         public bool EmbedEmotes { get; set; }
