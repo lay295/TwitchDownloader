@@ -276,7 +276,7 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            if (Int32.Parse(textHeight.Text) % 2 != 0 && Int32.Parse(textWidth.Text) % 2 != 0)
+            if (Int32.Parse(textHeight.Text) % 2 != 0 || Int32.Parse(textWidth.Text) % 2 != 0)
             {
                 AppendLog("ERROR: Height and Width must be even");
                 return false;
