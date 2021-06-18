@@ -130,15 +130,15 @@ namespace TwitchDownloaderCore
                     List<ThirdPartyEmoteData> thirdParty = new List<ThirdPartyEmoteData>();
 
                     string cacheFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader", "cache");
-                    List<ThirdPartyEmote> thirdPartyEmotes = new List<ThirdPartyEmote>();
-                    List<KeyValuePair<string, SKBitmap>> firstPartyEmotes = new List<KeyValuePair<string, SKBitmap>>();
+                    List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();
+                    List<TwitchEmote> firstPartyEmotes = new List<TwitchEmote>();
 
                     await Task.Run(() => {
                         thirdPartyEmotes = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder);
                         firstPartyEmotes = TwitchHelper.GetEmotes(comments, cacheFolder).ToList();
                     });
 
-                    foreach (ThirdPartyEmote emote in thirdPartyEmotes)
+                    foreach (TwitchEmote emote in thirdPartyEmotes)
                     {
                         ThirdPartyEmoteData newEmote = new ThirdPartyEmoteData();
                         newEmote.id = emote.id;
@@ -147,12 +147,12 @@ namespace TwitchDownloaderCore
                         newEmote.name = emote.name;
                         thirdParty.Add(newEmote);
                     }
-                    foreach (KeyValuePair<string, SKBitmap> emote in firstPartyEmotes)
+                    foreach (TwitchEmote emote in firstPartyEmotes)
                     {
                         FirstPartyEmoteData newEmote = new FirstPartyEmoteData();
-                        newEmote.id = emote.Key;
+                        newEmote.id = emote.id;
                         newEmote.imageScale = 1;
-                        newEmote.data = SKImage.FromBitmap(emote.Value).Encode(SKEncodedImageFormat.Png, 100).ToArray();
+                        newEmote.data = emote.imageData;
                         firstParty.Add(newEmote);
                     }
 

@@ -8,12 +8,12 @@ namespace TwitchDownloaderCore.TwitchObjects
     public class CheerEmote
     {
         public string prefix { get; set; }
-        public List<KeyValuePair<int, ThirdPartyEmote>> tierList { get; set; } = new List<KeyValuePair<int, ThirdPartyEmote>>();
+        public List<KeyValuePair<int, TwitchEmote>> tierList { get; set; } = new List<KeyValuePair<int, TwitchEmote>>();
 
-        public KeyValuePair<int, ThirdPartyEmote> getTier(int value)
+        public KeyValuePair<int, TwitchEmote> getTier(int value)
         {
-            KeyValuePair<int, ThirdPartyEmote> returnPair = tierList.First();
-            foreach (KeyValuePair<int, ThirdPartyEmote> tierPair in tierList)
+            KeyValuePair<int, TwitchEmote> returnPair = tierList.First();
+            foreach (KeyValuePair<int, TwitchEmote> tierPair in tierList)
             {
                 if (tierPair.Key > value)
                     break;

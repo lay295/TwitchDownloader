@@ -76,9 +76,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public static List<ThirdPartyEmote> GetThirdPartyEmotes(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool bttv = true, bool ffz = true)
+        public static List<TwitchEmote> GetThirdPartyEmotes(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool bttv = true, bool ffz = true)
         {
-            List<ThirdPartyEmote> returnList = new List<ThirdPartyEmote>();
+            List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
 
             string bttvFolder = Path.Combine(cacheFolder, "bttv");
@@ -92,7 +92,7 @@ namespace TwitchDownloaderCore
                     {
                         MemoryStream ms = new MemoryStream(emoteData.data);
                         SKCodec codec = SKCodec.Create(ms);
-                        ThirdPartyEmote newEmote = new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(emoteData.data) }, codec, emoteData.name, codec.FrameCount == 0 ? "png" : "gif", "", emoteData.imageScale, emoteData.data);
+                        TwitchEmote newEmote = new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(emoteData.data) }, codec, emoteData.name, codec.FrameCount == 0 ? "png" : "gif", "", emoteData.imageScale, emoteData.data);
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emoteData.name);
                     }
@@ -126,7 +126,7 @@ namespace TwitchDownloaderCore
                         }
 
                         MemoryStream ms = new MemoryStream(bytes);
-                        returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 2, bytes));
+                        returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 2, bytes));
                         alreadyAdded.Add(name);
                     }
 
@@ -150,7 +150,7 @@ namespace TwitchDownloaderCore
                                 File.WriteAllBytes(fileName, bytes);
                             }
                             MemoryStream ms = new MemoryStream(bytes);
-                            returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 2, bytes));
+                            returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 2, bytes));
                             alreadyAdded.Add(name);
                         }
                         foreach (var emote in BBTV_channel["channelEmotes"])
@@ -169,7 +169,7 @@ namespace TwitchDownloaderCore
                                 File.WriteAllBytes(fileName, bytes);
                             }
                             MemoryStream ms = new MemoryStream(bytes);
-                            returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 2, bytes));
+                            returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 2, bytes));
                             alreadyAdded.Add(name);
                         }
                     }
@@ -199,7 +199,7 @@ namespace TwitchDownloaderCore
                             File.WriteAllBytes(fileName, bytes);
                         }
                         MemoryStream ms = new MemoryStream(bytes);
-                        returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 1, bytes));
+                        returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, 1, bytes));
                         alreadyAdded.Add(name);
                     }
 
@@ -239,7 +239,7 @@ namespace TwitchDownloaderCore
                                 scale = 1;
                             }
                             MemoryStream ms = new MemoryStream(bytes);
-                            returnList.Add(new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, scale, bytes));
+                            returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, scale, bytes));
                             alreadyAdded.Add(name);
                         }
                     }
@@ -250,9 +250,9 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static Dictionary<string, SKBitmap> GetEmotes(List<Comment> comments, string cacheFolder, Emotes embededEmotes = null, bool deepSearch = false)
+        public static List<TwitchEmote> GetEmotes(List<Comment> comments, string cacheFolder, Emotes embededEmotes = null, bool deepSearch = false)
         {
-            Dictionary<string, SKBitmap> returnDictionary = new Dictionary<string, SKBitmap>();
+            List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
             List<string> failedEmotes = new List<string>();
 
@@ -266,11 +266,11 @@ namespace TwitchDownloaderCore
                 {
                     try
                     {
-                        if (!returnDictionary.ContainsKey(emoteData.id))
-                        {
-                            returnDictionary.Add(emoteData.id, SKBitmap.Decode(emoteData.data));
-                            alreadyAdded.Add(emoteData.id);
-                        }
+                        MemoryStream ms = new MemoryStream(emoteData.data);
+                        SKCodec codec = SKCodec.Create(ms);
+                        TwitchEmote newEmote = new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(emoteData.data) }, codec, emoteData.id, codec.FrameCount == 0 ? "png" : "gif", emoteData.id, emoteData.imageScale, emoteData.data);
+                        returnList.Add(newEmote);
+                        alreadyAdded.Add(emoteData.id);
                     }
                     catch { }
                 }
@@ -292,7 +292,11 @@ namespace TwitchDownloaderCore
                             {
                                 try
                                 {
-                                    string filePath = Path.Combine(emoteFolder, id + "_1x.png");
+                                    string filePath = "";
+                                    if (File.Exists(Path.Combine(emoteFolder, id + "_1x.gif")))
+                                        filePath = Path.Combine(emoteFolder, id + "_1x.gif");
+                                    else if (File.Exists(Path.Combine(emoteFolder, id + "_1x.png")))
+                                        filePath = Path.Combine(emoteFolder, id + "_1x.png");
 
                                     if (File.Exists(filePath))
                                     {
@@ -307,86 +311,28 @@ namespace TwitchDownloaderCore
                                         }
                                         else
                                         {
-                                            returnDictionary.Add(id, emoteImage);
+                                            byte[] bytes = File.ReadAllBytes(filePath);
+                                            MemoryStream ms = new MemoryStream(bytes);
+                                            SKCodec codec = SKCodec.Create(ms);
+                                            returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, codec, id, codec.FrameCount == 0 ? "png" : "gif", id, 1, bytes));
                                             alreadyAdded.Add(id);
                                         }
                                     }
 
                                     if (!alreadyAdded.Contains(id))
                                     {
-                                        byte[] bytes = client.DownloadData(String.Format("https://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0", id));
+                                        byte[] bytes = client.DownloadData(String.Format("https://static-cdn.jtvnw.net/emoticons/v2/{0}/default/dark/1.0", id));
                                         alreadyAdded.Add(id);
                                         MemoryStream ms = new MemoryStream(bytes);
-                                        SKBitmap emoteImage = SKBitmap.Decode(ms);
-                                        returnDictionary.Add(id, emoteImage);
-                                        File.WriteAllBytes(filePath, bytes);
+                                        SKCodec codec = SKCodec.Create(ms);
+                                        TwitchEmote newEmote = new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, codec, id, codec.FrameCount == 0 ? "png" : "gif", id, 1, bytes);
+                                        returnList.Add(newEmote);
+                                        File.WriteAllBytes(Path.Combine(emoteFolder, newEmote.id + "." + newEmote.imageType), bytes);
                                     }
                                 }
                                 catch (WebException)
                                 {
-                                    string emoteName = fragment.text;
-                                    bool foundEmote = false;
-
-                                    if (deepSearch)
-                                    {
-                                        //lets try waybackmachine, very slow though :(
-                                        try
-                                        {
-                                            for (int i = 1; i <= 3; i++)
-                                            {
-                                                JObject response = JObject.Parse(client.DownloadString($"https://archive.org/wayback/available?url=https://static-cdn.jtvnw.net/emoticons/v1/{id}/{i}.0/"));
-                                                if (response["archived_snapshots"]["closest"] != null && response["archived_snapshots"]["closest"]["available"].ToObject<bool>() == true)
-                                                {
-                                                    string filePath = Path.Combine(emoteFolder, id + "_1x.png");
-                                                    byte[] bytes = client.DownloadData(response["archived_snapshots"]["closest"]["url"].ToString().Replace("/https://static-cdn.jtvnw.net", "if_/https://static-cdn.jtvnw.net"));
-                                                    MemoryStream ms = new MemoryStream(bytes);
-                                                    SKBitmap emoteImage = SKBitmap.Decode(ms);
-                                                    SKBitmap emoteImageScaled = new SKBitmap(28, 28);
-                                                    emoteImage.ScalePixels(emoteImageScaled, SKFilterQuality.High);
-                                                    alreadyAdded.Add(id);
-                                                    returnDictionary.Add(id, emoteImageScaled);
-                                                    emoteImage.Dispose();
-                                                    emoteImageScaled.Encode(SKEncodedImageFormat.Png, 100).SaveTo(new FileStream(filePath, FileMode.Create));
-                                                    foundEmote = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        catch { }
-
-
-                                        if (foundEmote)
-                                            continue;
-                                        else
-                                        {
-                                            //sometimes emote still exists but id is different, I use twitch metrics because I can't find an api to find an emote by name
-                                            try
-                                            {
-                                                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://www.twitchmetrics.net/e/" + emoteName);
-                                                request.AllowAutoRedirect = false;
-                                                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                                                string redirUrl = response.Headers["Location"];
-                                                response.Close();
-                                                string newId = redirUrl.Split('/').Last().Split('-').First();
-                                                byte[] bytes = client.DownloadData(String.Format("https://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0", newId));
-                                                string filePath = Path.Combine(emoteFolder, id + "_1x.png");
-                                                File.WriteAllBytes(filePath, bytes);
-                                                alreadyAdded.Add(id);
-                                                MemoryStream ms = new MemoryStream(bytes);
-                                                SKBitmap emoteImage = SKBitmap.Decode(ms);
-                                                returnDictionary.Add(id, emoteImage);
-                                                foundEmote = true;
-                                            }
-                                            catch
-                                            {
-
-                                            }
-                                        }
-                                    }
-                                    if (!foundEmote)
-                                    {
-                                        failedEmotes.Add(id);
-                                    }
+                                    failedEmotes.Add(id);
                                 }
                             }
                         }
@@ -394,7 +340,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            return returnDictionary.Where(x => x.Value != null).ToDictionary(z => z.Key, z => z.Value);
+            return returnList;
         }
 
         public static List<ChatBadge> GetChatBadges(int streamerId)
@@ -537,7 +483,7 @@ namespace TwitchDownloaderCore
                 foreach (JToken emoteToken in globalCheer["actions"])
                 {
                     string prefix = emoteToken["prefix"].ToString();
-                    List<KeyValuePair<int, ThirdPartyEmote>> tierList = new List<KeyValuePair<int, ThirdPartyEmote>>();
+                    List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
                     CheerEmote newEmote = new CheerEmote() { prefix = prefix, tierList = tierList };
                     byte[] finalBytes = null;
                     foreach (JToken tierToken in emoteToken["tiers"])
@@ -561,8 +507,8 @@ namespace TwitchDownloaderCore
                             if (finalBytes != null)
                             {
                                 MemoryStream ms = new MemoryStream(finalBytes);
-                                ThirdPartyEmote emote = new ThirdPartyEmote(new List<SKBitmap>() { SKBitmap.Decode(finalBytes) }, SKCodec.Create(ms), prefix, "gif", "", 2, finalBytes);
-                                tierList.Add(new KeyValuePair<int, ThirdPartyEmote>(minBits, emote));
+                                TwitchEmote emote = new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(finalBytes) }, SKCodec.Create(ms), prefix, "gif", "", 2, finalBytes);
+                                tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
                             }
                         }
                         catch

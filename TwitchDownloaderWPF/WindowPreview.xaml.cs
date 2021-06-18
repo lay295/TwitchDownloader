@@ -73,8 +73,8 @@ namespace TwitchDownloader
                 System.Drawing.Size canvasSize = new System.Drawing.Size(renderOptions.ChatWidth, renderOptions.SectionHeight);
                 SKPaint nameFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.UsernameFontStyle), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
                 SKPaint messageFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.MessageFontStyle), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
-                List<ThirdPartyEmote> thirdPartyEmotes = new List<ThirdPartyEmote>();
-                Dictionary<string, SKBitmap> chatEmotes = new Dictionary<string, SKBitmap>();
+                List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();
+                List<TwitchEmote> chatEmotes = new List<TwitchEmote>();
                 Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
 
                 using (SKCanvas previewCanvas = new SKCanvas(previewBitmap))
@@ -89,7 +89,7 @@ namespace TwitchDownloader
                         using (MemoryStream ms = new MemoryStream(imageBytes))
                             emoteCodec = SKCodec.Create(ms);
 
-                        ThirdPartyEmote emote = new ThirdPartyEmote(new List<SKBitmap>() { emoteBitmap }, emoteCodec, previewDataEmote.name, ".png", "0", 1, imageBytes);
+                        TwitchEmote emote = new TwitchEmote(new List<SKBitmap>() { emoteBitmap }, emoteCodec, previewDataEmote.name, ".png", "0", 1, imageBytes);
                         thirdPartyEmotes.Add(emote);
                     }
 

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
-    public class ThirdPartyEmote
+    public class TwitchEmote
     {
         public List<SKBitmap> emote_frames = new List<SKBitmap>();
         public SKCodec codec;
@@ -18,7 +18,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int height;
         public int imageScale;
 
-        public ThirdPartyEmote(List<SKBitmap> Emote_frames, SKCodec Codec, string Name, string ImageType, string Id, int ImageScale, byte[] ImageData)
+        public TwitchEmote(List<SKBitmap> Emote_frames, SKCodec Codec, string Name, string ImageType, string Id, int ImageScale, byte[] ImageData)
         {
             emote_frames = Emote_frames;
             codec = Codec;
