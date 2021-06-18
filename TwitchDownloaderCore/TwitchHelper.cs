@@ -295,7 +295,7 @@ namespace TwitchDownloaderCore
                                     string filePath = "";
                                     if (File.Exists(Path.Combine(emoteFolder, id + "_1x.gif")))
                                         filePath = Path.Combine(emoteFolder, id + "_1x.gif");
-                                    else if (File.Exists(Path.Combine(emoteFolder, id + "_1x.png")))
+                                    else if (File.Exists(Path.Combine(emoteFolder, id + "_1x.png")) && !id.Contains("emotesv2_"))
                                         filePath = Path.Combine(emoteFolder, id + "_1x.png");
 
                                     if (File.Exists(filePath))
