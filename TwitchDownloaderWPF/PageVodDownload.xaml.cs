@@ -254,7 +254,7 @@ namespace TwitchDownloaderWPF
             TimeSpan beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
             TimeSpan endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
 
-            if ((int)numDownloadThreads.Value < 1)
+            if (numDownloadThreads.Value == null || (int)numDownloadThreads.Value < 1)
                 numDownloadThreads.Value = 1;
 
             if ((bool)checkStart.IsChecked)
@@ -310,7 +310,7 @@ namespace TwitchDownloaderWPF
 
         private void numDownloadThreads_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (numDownloadThreads.IsEnabled)
+            if (numDownloadThreads.IsEnabled && numDownloadThreads.Value != null)
             {
                 Settings.Default.VodDownloadThreads = (int)numDownloadThreads.Value;
                 Settings.Default.Save();
