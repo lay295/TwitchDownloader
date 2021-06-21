@@ -327,7 +327,7 @@ namespace TwitchDownloaderCore
                                         SKCodec codec = SKCodec.Create(ms);
                                         TwitchEmote newEmote = new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, codec, id, codec.FrameCount == 0 ? "png" : "gif", id, 1, bytes);
                                         returnList.Add(newEmote);
-                                        File.WriteAllBytes(Path.Combine(emoteFolder, newEmote.id + "." + newEmote.imageType), bytes);
+                                        File.WriteAllBytes(Path.Combine(emoteFolder, newEmote.id + "_1x." + newEmote.imageType), bytes);
                                     }
                                 }
                                 catch (WebException)
