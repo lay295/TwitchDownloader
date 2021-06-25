@@ -148,3 +148,6 @@ Render a chat with defaults
 Render a chat with different heights and values
 
     TwitchDownloaderCLI -m ChatRender -i chat.json -h 1440 -w 720 --framerate 60 --outline -o chat.mp4
+Render a chat with custom ffmpeg arguments
+
+    TwitchDownloaderCLI -m ChatRender -i chat.json --output-args='-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"' -o chat.mp4
