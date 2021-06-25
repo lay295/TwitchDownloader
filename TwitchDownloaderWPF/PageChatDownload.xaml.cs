@@ -62,13 +62,13 @@ namespace TwitchDownloaderWPF
             numEndHour.IsEnabled = isEnabled;
             numEndMinute.IsEnabled = isEnabled;
             numEndSecond.IsEnabled = isEnabled;
-            checkEmbed.IsEnabled = isEnabled;
-            radioRelative.IsEnabled = isEnabled;
-            radioUTC.IsEnabled = isEnabled;
-            radioNone.IsEnabled = isEnabled;
-
+            
             if (!onlyCrop)
             {
+                radioRelative.IsEnabled = isEnabled;
+                radioUTC.IsEnabled = isEnabled;
+                radioNone.IsEnabled = isEnabled;
+                checkEmbed.IsEnabled = isEnabled;
                 btnDownload.IsEnabled = isEnabled;
                 radioJson.IsEnabled = isEnabled;
                 radioText.IsEnabled = isEnabled;

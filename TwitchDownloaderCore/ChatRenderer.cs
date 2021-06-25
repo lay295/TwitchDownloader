@@ -187,7 +187,7 @@ namespace TwitchDownloaderCore
             {
                 int startSeconds = (int)Math.Floor(chatJson.video.start);
                 int firstCommentSeconds = (int)Math.Floor(chatJson.comments.First().content_offset_seconds);
-                videoStart = startSeconds < firstCommentSeconds ? startSeconds : firstCommentSeconds;
+                videoStart = startSeconds;
                 duration = (int)Math.Ceiling(chatJson.video.end) - videoStart;
             }
             else
