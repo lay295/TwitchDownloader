@@ -11,7 +11,7 @@ Twitch VOD/Clip/Chat downloader and chat renderer I wrote.
 - Download Twitch VODs
 - Download Twitch Clips
 - Download chat for VODS and Clips, in either a [JSON with all the information](https://pastebin.com/raw/YDgRe6X4) or a [simple text file](https://pastebin.com/raw/016azeQX)
-- Use a previously generated JSON chat file to render the chat with FFZ and BTTV support (including GIFS)
+- Use a previously generated JSON chat file to render the chat with FFZ, BTTV and 7TV support (including GIFS)
 
 ## Things still to be done
 - Fix bugs that slipped by
@@ -32,7 +32,7 @@ Sorry, the GUI version is only avaliable for Windows :(
 
 The CLI is cross platform and performs the main functions of the program. It works on Windows and Linux, but has not been tested on MacOS. 
 
-[Documentation here](https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderCLI/README.md). 
+[Documentation here](TwitchDownloaderCLI/README.md). 
 
 I've never really made a command line utility before so things may change in the future. If you're on Linux, make sure `fontconfig` and `libfontconfig1` are installed `(apt-get install fontconfig libfontconfig1)`.
 
