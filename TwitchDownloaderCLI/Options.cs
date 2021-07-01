@@ -52,6 +52,8 @@ namespace TwitchDownloaderCLI
         public bool BttvEmotes { get; set; }
         [Option("ffz", Default = true, HelpText = "Enable FFZ emotes in chat render.")]
         public bool FfzEmotes { get; set; }
+        [Option("stv", Default = true, HelpText = "Enable 7tv emotes in chat render.")]
+        public bool StvEmotes { get; set; }
         [Option("outline", Default = false, HelpText = "Enable outline in chat render.")]
         public bool Outline { get; set; }
         [Option("sub-messages", Default = true, HelpText = "Enable sub messages.")]

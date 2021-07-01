@@ -46,6 +46,7 @@
                 <CheckBox x:Name="checkTimestamp" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
                 <CheckBox x:Name="checkFFZ" IsChecked="True" Margin="0,6,0,0"/>
                 <CheckBox x:Name="checkBTTV" IsChecked="True" Margin="0,6,0,0"/>
+                <CheckBox x:Name="checkSTV" IsChecked="True" Margin="0,6,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="20,0,5,0">
                 <TextBlock Text="Background Color:" HorizontalAlignment="Right"/>

@@ -16,6 +16,7 @@ namespace TwitchDownloaderCore.Options
         public int ChatWidth { get; set; }
         public bool BttvEmotes { get; set; }
         public bool FfzEmotes { get; set; }
+        public bool StvEmotes { get; set; }
         public bool Outline { get; set; }
         public double OutlineSize { get; set; }
         public string Font { get; set; }
