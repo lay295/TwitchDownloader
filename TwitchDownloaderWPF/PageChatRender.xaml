@@ -37,6 +37,7 @@
                 <TextBlock Text="Timestamp:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                <TextBlock Text="7TV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <ComboBox x:Name="comboFont" MinWidth="100" SelectionChanged="UpdateFont"/>

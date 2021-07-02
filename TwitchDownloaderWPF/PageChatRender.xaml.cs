@@ -80,6 +80,7 @@ namespace TwitchDownloaderWPF
                         ChatWidth = Int32.Parse(textWidth.Text),
                         BttvEmotes = (bool)checkBTTV.IsChecked,
                         FfzEmotes = (bool)checkFFZ.IsChecked,
+                        StvEmotes = (bool)checkSTV.IsChecked,
                         Outline = (bool)checkOutline.IsChecked,
                         Font = (string)comboFont.SelectedItem,
                         FontSize = Double.Parse(textFontSize.Text),
@@ -219,6 +220,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.BackgroundColorA = colorBackground.SelectedColor.Value.A;
             Settings.Default.FFZEmotes = (bool)checkFFZ.IsChecked;
             Settings.Default.BTTVEmotes = (bool)checkBTTV.IsChecked;
+            Settings.Default.STVEmotes = (bool)checkSTV.IsChecked;
             Settings.Default.FontColorR = colorFont.SelectedColor.Value.R;
             Settings.Default.FontColorG = colorFont.SelectedColor.Value.G;
             Settings.Default.FontColorB = colorFont.SelectedColor.Value.B;
