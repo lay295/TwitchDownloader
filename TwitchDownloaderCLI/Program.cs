@@ -187,6 +187,7 @@ namespace TwitchDownloaderCLI
             renderOptions.ChatWidth = inputOptions.ChatWidth;
             renderOptions.BttvEmotes = inputOptions.BttvEmotes;
             renderOptions.FfzEmotes = inputOptions.FfzEmotes;
+            renderOptions.StvEmotes = inputOptions.StvEmotes;
             renderOptions.Outline = inputOptions.Outline;
             renderOptions.OutlineSize = inputOptions.OutlineSize;
             renderOptions.Font = inputOptions.Font;

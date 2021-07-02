@@ -76,13 +76,14 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public static List<TwitchEmote> GetThirdPartyEmotes(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool bttv = true, bool ffz = true)
+        public static List<TwitchEmote> GetThirdPartyEmotes(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool bttv = true, bool ffz = true, bool stv = true)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
 
             string bttvFolder = Path.Combine(cacheFolder, "bttv");
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
+            string stvFolder = Path.Combine(cacheFolder, "stv");
 
             if (embededEmotes != null)
             {
@@ -240,6 +241,63 @@ namespace TwitchDownloaderCore
                             }
                             MemoryStream ms = new MemoryStream(bytes);
                             returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["imageType"].ToString(), id, scale, bytes));
+                            alreadyAdded.Add(name);
+                        }
+                    }
+                    catch { }
+                }
+                
+                if (stv)
+                {
+                    if (!Directory.Exists(stvFolder))
+                        Directory.CreateDirectory(stvFolder);
+
+                    //Global 7tv Emotes
+                    JArray STV = JArray.Parse(client.DownloadString("https://api.7tv.app/v2/emotes/global"));
+                    foreach (var emote in STV)
+                    {
+                        string id = emote["id"].ToString();
+                        string name = emote["name"].ToString();
+                        string url2x = emote["urls"][1][1].ToString(); // 2x
+                        if (alreadyAdded.Contains(name))
+                            continue;
+                        byte[] bytes;
+                        string fileName = Path.Combine(stvFolder, id + "_2x.png");
+                        if (File.Exists(fileName))
+                            bytes = File.ReadAllBytes(fileName);
+                        else
+                        {
+                            bytes = client.DownloadData(url2x);
+                            File.WriteAllBytes(fileName, bytes);
+                        }
+
+                        MemoryStream ms = new MemoryStream(bytes);
+                        returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["mime"].ToString().Split('/')[1], id, 2, bytes));
+                        alreadyAdded.Add(name);
+                    }
+
+                    //Channel specific 7tv emotes
+                    try
+                    {
+                        JArray STV_channel = JArray.Parse(client.DownloadString(String.Format("https://api.7tv.app/v2/users/{0}/emotes", streamerId)));
+                        foreach (var emote in STV_channel)
+                        {
+                            string id = emote["id"].ToString();
+                            string name = emote["name"].ToString();
+                            string url2x = emote["urls"][1][1].ToString(); // 2x
+                            if (alreadyAdded.Contains(name))
+                                continue;
+                            byte[] bytes;
+                            string fileName = Path.Combine(stvFolder, id + "_2x.png");
+                            if (File.Exists(fileName))
+                                bytes = File.ReadAllBytes(fileName);
+                            else
+                            {
+                                bytes = client.DownloadData(url2x);
+                                File.WriteAllBytes(fileName, bytes);
+                            }
+                            MemoryStream ms = new MemoryStream(bytes);
+                            returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["mime"].ToString().Split('/')[1], id, 2, bytes));
                             alreadyAdded.Add(name);
                         }
                     }

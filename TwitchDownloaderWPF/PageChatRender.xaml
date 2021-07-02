@@ -37,6 +37,7 @@
                 <TextBlock Text="Timestamp:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
                 <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                <TextBlock Text="7TV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <ComboBox x:Name="comboFont" MinWidth="100" SelectionChanged="UpdateFont"/>
@@ -46,6 +47,7 @@
                 <CheckBox x:Name="checkTimestamp" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
                 <CheckBox x:Name="checkFFZ" IsChecked="True" Margin="0,6,0,0"/>
                 <CheckBox x:Name="checkBTTV" IsChecked="True" Margin="0,6,0,0"/>
+                <CheckBox x:Name="checkSTV" IsChecked="True" Margin="0,6,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="20,0,5,0">
                 <TextBlock Text="Background Color:" HorizontalAlignment="Right"/>

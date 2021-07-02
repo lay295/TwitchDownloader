@@ -88,6 +88,9 @@ Path to JSON chat file input.
 **-\-ffz**
 (Default: true) Enable FFZ emotes.
 
+**-\-stv**
+(Default: true) Enable 7TV emotes.
+
 **-\-sub-messages**
 (Default: true) Enable sub/re-sub messages.
 

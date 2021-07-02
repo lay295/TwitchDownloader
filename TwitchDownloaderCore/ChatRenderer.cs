@@ -53,7 +53,7 @@ namespace TwitchDownloaderCore
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Emotes" });
                 List<TwitchEmote> chatEmotes = await Task.Run(() => TwitchHelper.GetEmotes(chatJson.comments, cacheFolder, chatJson.emotes, true));
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching 3rd Party Emotes" });
-                List<TwitchEmote> thirdPartyEmotes = await Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatJson.streamer.id, cacheFolder, chatJson.emotes, renderOptions.BttvEmotes, renderOptions.FfzEmotes));
+                List<TwitchEmote> thirdPartyEmotes = await Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatJson.streamer.id, cacheFolder, chatJson.emotes, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes));
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Cheer Emotes" });
                 List<CheerEmote> cheerEmotes = await Task.Run(() => TwitchHelper.GetBits(cacheFolder));
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Emojis" });

@@ -32,6 +32,9 @@
     <Setting Name="BTTVEmotes" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="STVEmotes" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
     <Setting Name="BackgroundColorR" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">17</Value>
     </Setting>
