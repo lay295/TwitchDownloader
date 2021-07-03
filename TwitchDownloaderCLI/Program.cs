@@ -45,7 +45,7 @@ namespace TwitchDownloaderCLI
                 Environment.Exit(1);
 
             
-            if (!File.Exists(ffmpegPath) && (inputOptions.FfmpegPath == null || !File.Exists(inputOptions.FfmpegPath)) && !ExistsOnPath(ffmpegPath))
+            if (!File.Exists(ffmpegPath) && (inputOptions.FfmpegPath == null || !File.Exists(inputOptions.FfmpegPath)) && !ExistsOnPath(ffmpegPath) && inputOptions.RunMode != RunMode.ChatDownload)
             {
                 Console.WriteLine("[ERROR] - Unable to find ffmpeg, exiting. You can download ffmpeg automatically with the argument --download-ffmpeg");
                 Environment.Exit(1);
