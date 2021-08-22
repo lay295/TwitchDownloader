@@ -208,7 +208,8 @@ namespace TwitchDownloaderCore
 
             string inputArgs = renderOptions.InputArgs.Replace("{fps}", renderOptions.Framerate.ToString())
                 .Replace("{height}", renderOptions.ChatHeight.ToString()).Replace("{width}", renderOptions.ChatWidth.ToString())
-                .Replace("{save_path}", renderOptions.OutputFile).Replace("{max_int}", int.MaxValue.ToString());
+                .Replace("{save_path}", renderOptions.OutputFile).Replace("{max_int}", int.MaxValue.ToString())
+                .Replace("{pix_fmt}", bufferBitmap.ColorType == SKColorType.Rgba8888 ? "rgba" : "bgra");
             string outputArgs = renderOptions.OutputArgs.Replace("{fps}", renderOptions.Framerate.ToString())
                 .Replace("{height}", renderOptions.ChatHeight.ToString()).Replace("{width}", renderOptions.ChatWidth.ToString())
                 .Replace("{save_path}", renderOptions.OutputFile).Replace("{max_int}", int.MaxValue.ToString());

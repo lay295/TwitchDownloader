@@ -76,7 +76,7 @@ namespace TwitchDownloaderCLI
         public int Framerate { get; set; }
         [Option("update-rate", Default = 0.2, HelpText = "Time in seconds to update chat render output.")]
         public double UpdateRate { get; set; }
-        [Option("input-args", Default = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", HelpText = "Input arguments for ffmpeg chat render.")]
+        [Option("input-args", Default = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", HelpText = "Input arguments for ffmpeg chat render.")]
         public string InputArgs { get; set; }
         [Option("output-args", Default = "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"", HelpText = "Output arguments for ffmpeg chat render.")]
         public string OutputArgs { get; set; }
