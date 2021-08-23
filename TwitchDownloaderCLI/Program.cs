@@ -234,6 +234,15 @@ namespace TwitchDownloaderCLI
                 Console.WriteLine("[WARNING] - Generate mask option has been selected with an opaque background. You most likely want to set a transparent background with --background-color \"#00000000\"");
             }
 
+            if (renderOptions.ChatHeight % 2 != 0 || renderOptions.ChatWidth % 2 != 0)
+            {
+                Console.WriteLine("[WARNING] - Height and Width MUST be even, rounding up to the nearest even number to prevent errors");
+                if (renderOptions.ChatHeight % 2 != 0)
+                    renderOptions.ChatHeight++;
+                if (renderOptions.ChatWidth % 2 != 0)
+                    renderOptions.ChatWidth++;
+            }
+
             ChatRenderer chatDownloader = new ChatRenderer(renderOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
