@@ -287,6 +287,13 @@ namespace TwitchDownloaderCore
                         while (finalComments.Count > 0 && !isDone)
                         {
                             int commentTick = (int)Math.Floor(finalComments.Peek().SecondsOffset / (1.0 / renderOptions.Framerate));
+
+                            if (commentTick < startTick)
+                            {
+                                finalComments.Dequeue();
+                                continue;
+                            }
+
                             if (commentTick >= lastUpdateTick && commentTick < globalTick)
                             {
                                 TwitchComment currentComment = finalComments.Dequeue();
