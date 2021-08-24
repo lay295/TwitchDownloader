@@ -75,10 +75,19 @@ namespace TwitchDownloaderCore
 
                 string baseUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf("/") + 1);
                 List<KeyValuePair<string, double>> videoList = new List<KeyValuePair<string, double>>();
+
+                double vodAge = 25;
+                
                 
                 using (WebClient client = new WebClient())
                 {
                     string[] videoChunks = (await client.DownloadStringTaskAsync(playlistUrl)).Split('\n');
+
+                    try
+                    {
+                        vodAge = (DateTimeOffset.UtcNow - DateTimeOffset.Parse(videoChunks.First(x => x.Contains("#ID3-EQUIV-TDTG:")).Replace("#ID3-EQUIV-TDTG:", ""))).TotalHours;
+                    }
+                    catch { }
 
                     for (int i = 0; i < videoChunks.Length; i++)
                     {
@@ -119,6 +128,7 @@ namespace TwitchDownloaderCore
                         try
                         {
                             bool isDone = false;
+                            bool tryUnmute = vodAge < 24;
                             int errorCount = 0;
                             while (!isDone && errorCount < 10)
                             {
@@ -126,7 +136,15 @@ namespace TwitchDownloaderCore
                                 {
                                     using (WebClient client = new WebClient())
                                     {
-                                        await client.DownloadFileTaskAsync(baseUrl + request, Path.Combine(downloadFolder, RemoveQueryString(request)));
+                                        if (tryUnmute && request.Contains("-muted"))
+                                        {
+                                            await client.DownloadFileTaskAsync(baseUrl + request.Replace("-muted", ""), Path.Combine(downloadFolder, RemoveQueryString(request)));
+                                        }
+                                        else
+                                        {
+                                            await client.DownloadFileTaskAsync(baseUrl + request, Path.Combine(downloadFolder, RemoveQueryString(request)));
+                                        }
+                                        
                                         isDone = true;
                                     }
                                 }
@@ -134,7 +152,16 @@ namespace TwitchDownloaderCore
                                 {
                                     errorCount++;
                                     Debug.WriteLine(ex);
-                                    await Task.Delay(10000);
+
+                                    HttpStatusCode? status = (ex.Response as HttpWebResponse)?.StatusCode;
+                                    if (status != null && status == HttpStatusCode.Forbidden)
+                                    {
+                                        tryUnmute = false;
+                                    }
+                                    else
+                                    {
+                                        await Task.Delay(10000);
+                                    }
                                 }
                             }
 
