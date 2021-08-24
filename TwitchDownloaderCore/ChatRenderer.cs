@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SkiaSharp;
+using SkiaSharp.HarfBuzz;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -586,7 +587,7 @@ namespace TwitchDownloaderCore
             {
                 if (fragment.emoticon == null)
                 {
-                    string[] fragmentParts = fragment.text.Split(' ');
+                    string[] fragmentParts = SwapRTL(fragment.text.Split(' '));
                     for (int i = 0; i < fragmentParts.Length; i++)
                     {
                         string output = fragmentParts[i].Trim();
@@ -780,9 +781,19 @@ namespace TwitchDownloaderCore
         public static SKBitmap DrawText(SKBitmap sectionImage, string message, SKPaint messageFont, List<SKBitmap> imageList, ChatRenderOptions renderOptions, List<GifEmote> currentGifEmotes, Size canvasSize, ref Point drawPos, bool padding, int default_x)
         {
             float textWidth;
+            bool isRtl = isRTL(message);
             try
             {
-                textWidth = messageFont.MeasureText(message);
+                if (isRtl)
+                {
+                    SKShaper messageShape = new SKShaper(messageFont.Typeface);
+                    SKShaper.Result measure = messageShape.Shape(message, messageFont);
+                    textWidth = measure.Points[measure.Points.Length - 1].X;
+                }
+                else
+                {
+                    textWidth = messageFont.MeasureText(message);
+                }
             }
             catch { return sectionImage; }
             if (drawPos.X + textWidth + 3 > canvasSize.Width)
@@ -799,9 +810,17 @@ namespace TwitchDownloaderCore
                     sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
                 }
 
-                sectionImageCanvas.DrawText(message, xPos, yPos, messageFont);
+                sectionImageCanvas.DrawShapedText(message, xPos, yPos, messageFont);
             }
-            drawPos.X += (int)Math.Floor(textWidth + (padding ? (int)Math.Floor(4 * renderOptions.EmoteScale) : 0));
+            if (!isRtl)
+            {
+                drawPos.X += (int)Math.Floor(textWidth + (padding ? (int)Math.Floor(4 * renderOptions.EmoteScale) : 0));
+            }
+            else
+            {
+                drawPos.X += (int)Math.Floor(textWidth + (padding ? (int)Math.Floor(8 * renderOptions.EmoteScale) : 0));
+            }
+            
             return sectionImage;
         }
         private static SKBitmap AddImageSection(SKBitmap sectionImage, List<SKBitmap> imageList, ChatRenderOptions renderOptions, List<GifEmote> currentGifEmotes, Size canvasSize, ref Point drawPos, int default_x)
@@ -853,6 +872,46 @@ namespace TwitchDownloaderCore
         private static bool isNotAscii(char input)
         {
             return input > 127;
+        }
+        /*
+         *  Swaps the order of groups of RTL words, preserves order of LTR words
+         *  ex:
+         *  Arabic1 Arabic2 Engligh1 English2 Ararbic3 Arabic4 -> Arabic2 Arabic1 English1 English2 Arabic4 Arabic3
+         */
+        static string[] SwapRTL(string[] words)
+        {
+            List<string> finalWords = new List<string>();
+            Stack<string> rtlStack = new Stack<string>();
+            foreach (var word in words)
+            {
+                if (isRTL(word))
+                {
+                    rtlStack.Push(word);
+                }
+                else
+                {
+                    while (rtlStack.Count > 0)
+                        finalWords.Add(rtlStack.Pop());
+                    finalWords.Add(word);
+                }
+            }
+            while (rtlStack.Count > 0)
+                finalWords.Add(rtlStack.Pop());
+            return finalWords.ToArray();
+        }
+        static bool isRTL(string message)
+        {
+            if (message.Length > 0)
+            {
+                if (message[0] >= '\u0591' && message[0] <= '\u07FF')
+                    return true;
+                else
+                    return false;
+            }
+            else
+            {
+                return false;
+            }
         }
         public ChatRoot ParseJson()
         {
