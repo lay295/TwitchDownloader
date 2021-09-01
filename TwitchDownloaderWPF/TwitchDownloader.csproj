@@ -82,6 +82,9 @@
     <Reference Include="Emoji.Wpf, Version=0.0.0.19, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Emoji.Wpf.0.0.19-experimental\lib\net30\Emoji.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="HarfBuzzSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\HarfBuzzSharp.2.6.1.7\lib\net462\HarfBuzzSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -96,6 +99,9 @@
     </Reference>
     <Reference Include="SkiaSharp, Version=2.80.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\SkiaSharp.2.80.2\lib\net462\SkiaSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="SkiaSharp.HarfBuzz, Version=2.80.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\SkiaSharp.HarfBuzz.2.80.2\lib\net462\SkiaSharp.HarfBuzz.dll</HintPath>
     </Reference>
     <Reference Include="SkiaSharp.Views.Desktop, Version=2.80.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\SkiaSharp.Views.2.80.2\lib\net462\SkiaSharp.Views.Desktop.dll</HintPath>
@@ -374,5 +380,7 @@ RMDIR "$(TargetDir)zh-Hant/" /S /Q</PostBuildEvent>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\SkiaSharp.2.80.2\build\net462\SkiaSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SkiaSharp.2.80.2\build\net462\SkiaSharp.targets'))" />
+    <Error Condition="!Exists('..\packages\HarfBuzzSharp.2.6.1.7\build\net462\HarfBuzzSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\HarfBuzzSharp.2.6.1.7\build\net462\HarfBuzzSharp.targets'))" />
   </Target>
+  <Import Project="..\packages\HarfBuzzSharp.2.6.1.7\build\net462\HarfBuzzSharp.targets" Condition="Exists('..\packages\HarfBuzzSharp.2.6.1.7\build\net462\HarfBuzzSharp.targets')" />
 </Project>
