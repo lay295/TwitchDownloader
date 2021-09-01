@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -107,7 +108,7 @@ namespace TwitchDownloaderCore
                 if (bttv)
                 {
                     if (!Directory.Exists(bttvFolder))
-                        Directory.CreateDirectory(bttvFolder);
+                        TwitchHelper.CreateDirectory(bttvFolder);
 
                     //Global BTTV Emotes
                     JArray BBTV = JArray.Parse(client.DownloadString("https://api.betterttv.net/3/cached/emotes/global"));
@@ -181,7 +182,7 @@ namespace TwitchDownloaderCore
                 if (ffz)
                 {
                     if (!Directory.Exists(ffzFolder))
-                        Directory.CreateDirectory(ffzFolder);
+                        TwitchHelper.CreateDirectory(ffzFolder);
 
                     //Global FFZ emotes
                     JArray FFZ = JArray.Parse(client.DownloadString("https://api.betterttv.net/3/cached/frankerfacez/emotes/global"));
@@ -251,7 +252,7 @@ namespace TwitchDownloaderCore
                 if (stv)
                 {
                     if (!Directory.Exists(stvFolder))
-                        Directory.CreateDirectory(stvFolder);
+                        TwitchHelper.CreateDirectory(stvFolder);
 
                     //Global 7tv Emotes
                     JArray STV = JArray.Parse(client.DownloadString("https://api.7tv.app/v2/emotes/global"));
@@ -317,7 +318,7 @@ namespace TwitchDownloaderCore
 
             string emoteFolder = Path.Combine(cacheFolder, "emotes");
             if (!Directory.Exists(emoteFolder))
-                Directory.CreateDirectory(emoteFolder);
+                TwitchHelper.CreateDirectory(emoteFolder);
 
             if (embededEmotes != null)
             {
@@ -466,7 +467,7 @@ namespace TwitchDownloaderCore
             string emojiFolder = Path.Combine(cacheFolder, "emojis");
             if (!Directory.Exists(emojiFolder))
             {
-                Directory.CreateDirectory(emojiFolder);
+                TwitchHelper.CreateDirectory(emojiFolder);
             }
 
             int emojiCount = Directory.GetFiles(emojiFolder, "*.png").Length;
@@ -500,7 +501,7 @@ namespace TwitchDownloaderCore
             List<CheerEmote> cheerEmotes = new List<CheerEmote>();
             string bitsFolder = Path.Combine(cacheFolder, "bits");
             if (!Directory.Exists(bitsFolder))
-                Directory.CreateDirectory(bitsFolder);
+                TwitchHelper.CreateDirectory(bitsFolder);
 
             using (WebClient client = new WebClient())
             {
@@ -548,6 +549,32 @@ namespace TwitchDownloaderCore
             }
 
             return cheerEmotes;
+        }
+
+        public static DirectoryInfo CreateDirectory(string path)
+        {
+            DirectoryInfo directoryInfo = null;
+            try
+            {
+                directoryInfo = Directory.CreateDirectory(path);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    var folderInfo = new Mono.Unix.UnixFileInfo(path);
+                    folderInfo.FileAccessPermissions = Mono.Unix.FileAccessPermissions.AllPermissions;
+                    folderInfo.Refresh();
+                }
+            }
+            catch { }
+
+            return directoryInfo;
         }
 
         public static int TimestampToSeconds(string input)

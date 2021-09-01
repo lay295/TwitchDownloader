@@ -45,9 +45,9 @@ namespace TwitchDownloaderCore
                 List<string> defaultColors = new List<string>() { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
 
                 if (!Directory.Exists(downloadFolder))
-                    Directory.CreateDirectory(downloadFolder);
+                    TwitchHelper.CreateDirectory(downloadFolder);
                 if (!Directory.Exists(cacheFolder))
-                    Directory.CreateDirectory(cacheFolder);
+                    TwitchHelper.CreateDirectory(cacheFolder);
 
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Chat Badges" });
                 List<ChatBadge> chatBadges = await Task.Run(() => TwitchHelper.GetChatBadges(chatJson.streamer.id));

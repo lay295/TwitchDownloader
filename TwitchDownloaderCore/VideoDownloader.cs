@@ -33,7 +33,7 @@ namespace TwitchDownloaderCore
 
                 if (Directory.Exists(downloadFolder))
                     Directory.Delete(downloadFolder, true);
-                Directory.CreateDirectory(downloadFolder);
+                TwitchHelper.CreateDirectory(downloadFolder);
 
                 string playlistUrl;
 
