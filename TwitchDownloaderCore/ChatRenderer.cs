@@ -85,7 +85,7 @@ namespace TwitchDownloaderCore
 
                         Point drawPos = new Point(renderOptions.PaddingLeft, 0);
                         SKColor userColor = SKColor.Parse(comment.message.user_color != null ? comment.message.user_color : defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Count]);
-                        userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor);
+                        userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor, renderOptions);
 
                         List<SKBitmap> imageList = new List<SKBitmap>();
                         SKBitmap sectionImage = new SKBitmap(canvasSize.Width, canvasSize.Height);
@@ -925,16 +925,16 @@ namespace TwitchDownloaderCore
             drawPos.Y += sectionImage.Height;
             return newImage;
         }
-        private SKColor GenerateUserColor(SKColor userColor, SKColor background_color)
+        private SKColor GenerateUserColor(SKColor userColor, SKColor background_color, ChatRenderOptions renderOptions)
         {
             float backgroundHue, backgroundSaturation, backgroundBrightness;
             background_color.ToHsl(out backgroundHue, out backgroundSaturation, out backgroundBrightness);
             float userHue, userSaturation, userBrightness;
             userColor.ToHsl(out userHue, out userSaturation, out userBrightness);
 
-            if (backgroundBrightness < 25)
+            if (backgroundBrightness < 25 || renderOptions.Outline)
             {
-                //Dark background
+                //Dark background or black outline
                 if (userBrightness < 45)
                     userBrightness = 45;
                 if (userSaturation > 80)
