@@ -73,8 +73,6 @@ namespace TwitchDownloaderCore
                     {
                         if (comment.source != "chat")
                             continue;
-                        if (comment.message.fragments == null || comment.commenter == null)
-                            continue;
                         if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
                         {
                             if (comment.message.user_notice_params.msg_id != "highlighted-message" && comment.message.user_notice_params.msg_id != "sub" && comment.message.user_notice_params.msg_id != "resub" && comment.message.user_notice_params.msg_id != "subgift" && comment.message.user_notice_params.msg_id != "")
@@ -82,6 +80,13 @@ namespace TwitchDownloaderCore
                             if (!renderOptions.SubMessages && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
                                 continue;
                         }
+                        if (comment.message.user_notice_params.msg_id == "highlighted-message" && comment.message.fragments == null && comment.message.body != null)
+                        {
+                            comment.message.fragments = new List<Fragment>();
+                            comment.message.fragments[0].text = comment.message.body;
+                        }
+                        if (comment.message.fragments == null || comment.commenter == null)
+                            continue;
 
                         Point drawPos = new Point(renderOptions.PaddingLeft, 0);
                         SKColor userColor = SKColor.Parse(comment.message.user_color != null ? comment.message.user_color : defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Count]);

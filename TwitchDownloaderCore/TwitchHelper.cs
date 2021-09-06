@@ -563,18 +563,24 @@ namespace TwitchDownloaderCore
                 throw ex;
             }
 
+            
             try
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    var folderInfo = new Mono.Unix.UnixFileInfo(path);
-                    folderInfo.FileAccessPermissions = Mono.Unix.FileAccessPermissions.AllPermissions;
-                    folderInfo.Refresh();
+                    SetDirectoryPermissions(path);
                 }
             }
             catch { }
 
             return directoryInfo;
+        }
+
+        public static void SetDirectoryPermissions(string path)
+        {
+            var folderInfo = new Mono.Unix.UnixFileInfo(path);
+            folderInfo.FileAccessPermissions = Mono.Unix.FileAccessPermissions.AllPermissions;
+            folderInfo.Refresh();
         }
 
         public static int TimestampToSeconds(string input)
