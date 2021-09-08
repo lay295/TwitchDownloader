@@ -94,6 +94,9 @@ Path to JSON chat file input.
 **-\-sub-messages**
 (Default: true) Enable sub/re-sub messages.
 
+**-\-badges**
+(Default: true) Enable chat badges.
+
 **-\-outline**
 (Default: false) Enable outline around chat messages.
 

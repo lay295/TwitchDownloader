@@ -57,6 +57,8 @@ namespace TwitchDownloaderCLI
         [Option("outline", Default = false, HelpText = "Enable outline in chat render.")]
         public bool Outline { get; set; }
         [Option("sub-messages", Default = true, HelpText = "Enable sub messages.")]
+        public bool ChatBadges { get; set; }
+        [Option("badges", Default = true, HelpText = "Enable chat badges.")]
         public bool SubMessages { get; set; }
         [Option("generate-mask", Default = false, HelpText = "Generates a mask file in addition to the regular chat file.")]
         public bool GenerateMask { get; set; }

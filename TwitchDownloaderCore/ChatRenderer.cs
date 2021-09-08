@@ -113,7 +113,8 @@ namespace TwitchDownloaderCore
                         {
                             if (renderOptions.Timestamp)
                                 sectionImage = DrawTimestamp(sectionImage, imageList, messageFont, renderOptions, comment, canvasSize, ref drawPos, ref default_x);
-                            sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
+                            if (renderOptions.ChatBadges)
+                                sectionImage = DrawBadges(sectionImage, imageList, renderOptions, chatBadges, comment, canvasSize, ref drawPos);
                             sectionImage = DrawUsername(sectionImage, imageList, renderOptions, nameFont, comment.commenter.display_name, userColor, canvasSize, ref drawPos);
                             sectionImage = DrawMessage(sectionImage, imageList, renderOptions, currentGifEmotes, messageFont, emojiCache, chatEmotes, thirdPartyEmotes, cheerEmotes, comment, canvasSize, ref drawPos, ref default_x, emoteList, emotePositionList);
                         }

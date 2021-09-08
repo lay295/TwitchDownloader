@@ -96,7 +96,8 @@ namespace TwitchDownloaderWPF
                         OutlineSize = 4,
                         FfmpegPath = "ffmpeg",
                         TempFolder = Settings.Default.TempPath,
-                        SubMessages = (bool)checkSub.IsChecked
+                        SubMessages = (bool)checkSub.IsChecked,
+                        ChatBadges = (bool)checkBadge.IsChecked
                     };
                     options.PaddingLeft = (int)Math.Floor(2 * options.EmoteScale);
 
@@ -156,6 +157,7 @@ namespace TwitchDownloaderWPF
                 textFramerate.Text = Settings.Default.Framerate.ToString();
                 checkMask.IsChecked = Settings.Default.GenerateMask;
                 checkSub.IsChecked = Settings.Default.SubMessages;
+                checkBadge.IsChecked = Settings.Default.ChatBadges;
 
                 foreach (VideoContainer container in comboFormat.Items)
                 {
@@ -226,6 +228,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.FontColorB = colorFont.SelectedColor.Value.B;
             Settings.Default.GenerateMask = (bool)checkMask.IsChecked;
             Settings.Default.SubMessages = (bool)checkSub.IsChecked;
+            Settings.Default.ChatBadges = (bool)checkBadge.IsChecked;
             if (comboFormat.SelectedItem != null)
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
             if (comboCodec.SelectedItem != null)

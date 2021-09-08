@@ -228,6 +228,7 @@ namespace TwitchDownloaderCLI
             renderOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : Path.GetFullPath(inputOptions.FfmpegPath);
             renderOptions.TempFolder = inputOptions.TempFolder;
             renderOptions.SubMessages = inputOptions.SubMessages;
+            renderOptions.ChatBadges = inputOptions.ChatBadges;
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
             {

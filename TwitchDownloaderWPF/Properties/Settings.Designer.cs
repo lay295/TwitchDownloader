@@ -419,5 +419,17 @@ namespace TwitchDownloader.Properties {
                 this["UpgradeRequired"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ChatBadges {
+            get {
+                return ((bool)(this["ChatBadges"]));
+            }
+            set {
+                this["ChatBadges"] = value;
+            }
+        }
     }
 }
