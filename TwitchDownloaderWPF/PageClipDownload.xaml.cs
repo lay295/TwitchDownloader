@@ -74,6 +74,7 @@ namespace TwitchDownloaderWPF
                     comboQuality.SelectedIndex = 0;
                     comboQuality.IsEnabled = true;
                     btnDownload.IsEnabled = true;
+                    btnQueue.IsEnabled = true;
                     btnGetInfo.IsEnabled = true;
                 }
                 catch (Exception ex)
@@ -112,6 +113,7 @@ namespace TwitchDownloaderWPF
         {
             comboQuality.IsEnabled = false;
             btnDownload.IsEnabled = false;
+            btnQueue.IsEnabled = false;
         }
 
         private async void btnDownload_Click(object sender, RoutedEventArgs e)
@@ -127,6 +129,7 @@ namespace TwitchDownloaderWPF
                 comboQuality.IsEnabled = false;
                 btnGetInfo.IsEnabled = false;
                 btnDownload.IsEnabled = false;
+                btnQueue.IsEnabled = false;
                 SetImage("Images/ppOverheat.gif", true);
                 statusMessage.Text = "Downloading";
                 try
@@ -148,6 +151,7 @@ namespace TwitchDownloaderWPF
                 }
                 btnGetInfo.IsEnabled = true;
                 btnDownload.IsEnabled = true;
+                btnQueue.IsEnabled = true;
                 statusProgressBar.Value = 0;
             }
         }
@@ -182,6 +186,12 @@ namespace TwitchDownloaderWPF
         private void btnSettings_Loaded(object sender, RoutedEventArgs e)
         {
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void btnQueue_Click(object sender, RoutedEventArgs e)
+        {
+            QueueOptions queueOptions = new QueueOptions(this);
+            queueOptions.ShowDialog();
         }
     }
 }

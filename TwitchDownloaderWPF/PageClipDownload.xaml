@@ -59,7 +59,10 @@
                 <ComboBox x:Name="comboQuality" Margin="5,5,0,0" MinWidth="150"/>
             </StackPanel>
         </StackPanel>
-        <Button x:Name="btnDownload" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="Download" Height="50" Width="100" Click="btnDownload_Click" VerticalAlignment="Bottom" Margin="0,0,0,20"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="80,0,20,10" VerticalAlignment="Bottom">
+            <Button x:Name="btnDownload" Content="Download" Height="50" Width="100" Click="btnDownload_Click"/>
+            <Button x:Name="btnQueue" Content="Queue" Height="25" Width="60" Click="btnQueue_Click" Margin="5,14,0,10" Grid.Row="3" Grid.Column="3" HorizontalAlignment="Center"/>
+        </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal">

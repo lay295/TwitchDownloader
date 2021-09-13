@@ -386,7 +386,7 @@ namespace TwitchDownloader.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("[{date_custom=\"M-d-yy\"}] {channel} - {title}")]
+        [global::System.Configuration.DefaultSettingValueAttribute("[{date_custom=\"M-d-yy\"}] {channel} - {title} - Chat")]
         public string TemplateChat {
             get {
                 return ((string)(this["TemplateChat"]));
@@ -429,6 +429,66 @@ namespace TwitchDownloader.Properties {
             }
             set {
                 this["ChatBadges"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("6")]
+        public int LimitVod {
+            get {
+                return ((int)(this["LimitVod"]));
+            }
+            set {
+                this["LimitVod"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int LimitClip {
+            get {
+                return ((int)(this["LimitClip"]));
+            }
+            set {
+                this["LimitClip"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int LimitChat {
+            get {
+                return ((int)(this["LimitChat"]));
+            }
+            set {
+                this["LimitChat"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int LimitRender {
+            get {
+                return ((int)(this["LimitRender"]));
+            }
+            set {
+                this["LimitRender"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string QueueFolder {
+            get {
+                return ((string)(this["QueueFolder"]));
+            }
+            set {
+                this["QueueFolder"] = value;
             }
         }
     }

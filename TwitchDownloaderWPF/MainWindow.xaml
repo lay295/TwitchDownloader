@@ -17,7 +17,7 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
-            <!-- <ColumnDefinition Width="*"/> -->
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
@@ -25,7 +25,7 @@
         <Button x:Name="btnClipDownload" Margin="5" Grid.Row="1" Grid.Column="2" Content="Clip Downloader" Click="btnClipDownload_Click" />
         <Button x:Name="btnChatDownload" Margin="5" Grid.Row="1" Grid.Column="3" Content="Chat Downloader" Click="btnChatDownload_Click" />
         <Button x:Name="btnChatRender" Margin="5" Grid.Row="1" Grid.Column="4" Content="Chat Render" Click="btnChatRender_Click" />
-        <!-- <Button x:Name="btnQueue" Margin="5" Grid.Row="1" Grid.Column="5" Content="Task Queue" Click="btnQueue_Click" /> -->
+        <Button x:Name="btnQueue" Margin="5" Grid.Row="1" Grid.Column="5" Content="Task Queue" Click="btnQueue_Click" />
         <Frame Focusable="False" x:Name="Main" Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="2" NavigationUIVisibility="Hidden"/>
 
     </Grid>

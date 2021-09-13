@@ -29,11 +29,11 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        PageVodDownload pageVodDownload = new PageVodDownload();
-        PageClipDownload pageClipDownload = new PageClipDownload();
-        PageChatDownload pageChatDownload = new PageChatDownload();
-        PageChatRender pageChatRender = new PageChatRender();
-        PageQueue pageQueue = new PageQueue();
+        static public PageVodDownload pageVodDownload = new PageVodDownload();
+        static public PageClipDownload pageClipDownload = new PageClipDownload();
+        static public PageChatDownload pageChatDownload = new PageChatDownload();
+        static public PageChatRender pageChatRender = new PageChatRender();
+        static public PageQueue pageQueue = new PageQueue();
 
         public MainWindow()
         {

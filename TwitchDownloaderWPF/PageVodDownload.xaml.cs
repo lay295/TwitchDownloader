@@ -46,6 +46,7 @@ namespace TwitchDownloaderWPF
         public PageVodDownload()
         {
             InitializeComponent();
+            
         }
 
         private void SetEnabled(bool isEnabled)
@@ -155,18 +156,7 @@ namespace TwitchDownloaderWPF
                     SetEnabled(false);
                     btnGetInfo.IsEnabled = false;
 
-                    VideoDownloadOptions options = new VideoDownloadOptions();
-                    options.DownloadThreads = (int)numDownloadThreads.Value;
-                    options.Filename = saveFileDialog.FileName;
-                    options.Oauth = textOauth.Text;
-                    options.Quality = comboQuality.Text;
-                    options.Id = currentVideoId;
-                    options.CropBeginning = (bool)checkStart.IsChecked;
-                    options.CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds);
-                    options.CropEnding = (bool)checkEnd.IsChecked;
-                    options.CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds);
-                    options.FfmpegPath = "ffmpeg";
-                    options.TempFolder = Settings.Default.TempPath;
+                    VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
 
                     VideoDownloader currentDownload = new VideoDownloader(options);
                     Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
@@ -193,6 +183,31 @@ namespace TwitchDownloaderWPF
             {
                 AppendLog("ERROR: Invalid Crop Inputs");
             }
+        }
+
+        public VideoDownloadOptions GetOptions(string filename, string folder)
+        {
+            VideoDownloadOptions options = new VideoDownloadOptions();
+            options.DownloadThreads = (int)numDownloadThreads.Value;
+            //If filename is provided, use that if not use template for queue system
+            if (filename != null)
+            {
+                options.Filename = filename;
+            }
+            else
+            {
+                options.Filename = Path.Combine(folder, MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text) + ".mp4");
+            }
+            options.Oauth = textOauth.Text;
+            options.Quality = comboQuality.Text;
+            options.Id = currentVideoId;
+            options.CropBeginning = (bool)checkStart.IsChecked;
+            options.CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds);
+            options.CropEnding = (bool)checkEnd.IsChecked;
+            options.CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds);
+            options.FfmpegPath = "ffmpeg";
+            options.TempFolder = Settings.Default.TempPath;
+            return options;
         }
 
         private void OnProgressChanged(ProgressReport progress)
@@ -247,7 +262,7 @@ namespace TwitchDownloaderWPF
                 return -1;
         }
 
-        private bool ValidateInput()
+        public bool ValidateInput()
         {
             string fixedString = FormatString(labelLength.Text.ToString(CultureInfo.InvariantCulture));
             TimeSpan videoLength = TimeSpan.Parse(fixedString);
@@ -310,7 +325,7 @@ namespace TwitchDownloaderWPF
 
         private void numDownloadThreads_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (numDownloadThreads.IsEnabled && numDownloadThreads.Value != null)
+            if (this.IsInitialized && numDownloadThreads.IsEnabled && numDownloadThreads.Value != null)
             {
                 Settings.Default.VodDownloadThreads = (int)numDownloadThreads.Value;
                 Settings.Default.Save();
@@ -319,13 +334,26 @@ namespace TwitchDownloaderWPF
 
         private void textOauth_TextChanged(object sender, TextChangedEventArgs e)
         {
-            Settings.Default.OAuth = textOauth.Text;
-            Settings.Default.Save();
+            if (this.IsInitialized)
+            {
+                Settings.Default.OAuth = textOauth.Text;
+                Settings.Default.Save();
+            }
         }
 
         private void btnQueue_Click(object sender, RoutedEventArgs e)
         {
-            
+            bool isValid = ValidateInput();
+
+            if (isValid)
+            {
+                QueueOptions queueOptions = new QueueOptions(this);
+                queueOptions.ShowDialog();
+            }
+            else
+            {
+                AppendLog("ERROR: Invalid Crop Inputs");
+            }
         }
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)

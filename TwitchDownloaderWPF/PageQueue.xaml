@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:TwitchDownloader"
+      xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="PageQueue">
@@ -18,20 +19,35 @@
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
 
-        <ItemsControl x:Name="queueList" Grid.Column="1" Grid.ColumnSpan="3">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Source="{Binding Preview}"></Image>
-                        <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Title}"></TextBlock>
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <Border Grid.Column="1" Grid.ColumnSpan="3" BorderThickness="1" BorderBrush="Black" Margin="0,0,0,10">
+            <ScrollViewer  VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="queueList" ItemsSource="{Binding taskList}" Margin="0,10">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderThickness="1" BorderBrush="Black" CornerRadius="8" Margin="0,0,8,8" Padding="4">
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <Image Source="{Binding Thumbnail}" MaxHeight="60"></Image>
+                                    <StackPanel Orientation="Vertical" Margin="20,0,0,0" >
+                                        <TextBlock Text="{Binding Title, StringFormat=Title: {0}}"></TextBlock>
+                                        <TextBlock Text="{Binding TaskType, StringFormat=Task Type: {0}}"></TextBlock>
+                                        <TextBlock Text="{Binding Status, StringFormat=Status: {0}, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"></TextBlock>
+                                        <ProgressBar Height="16" Width="200" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+        <Label Content="Parallel Task Limits" Grid.Column="4" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Label Content="VOD Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top"/>
+        <Label Content="Clip Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top"/>
+        <Label Content="Chat Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,87,0,0" VerticalAlignment="Top"/>
+        <Label Content="Chat Renders" Grid.Column="4" HorizontalAlignment="Left" Margin="10,113,0,0" VerticalAlignment="Top"/>
+        <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,38,0,0" Value="0" Minimum="1" Name="numVod" Width="52" ValueChanged="numVod_ValueChanged" />
+        <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,64,0,0" Value="0" Minimum="1" x:Name="numClip" Width="52" ValueChanged="numClip_ValueChanged" />
+        <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,89,0,0" Value="0" Minimum="1" x:Name="numChat" Width="52" ValueChanged="numChat_ValueChanged" />
+        <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,116,0,0" Value="0" Minimum="1" x:Name="numRender" Width="52" ValueChanged="numRender_ValueChanged" />
     </Grid>
 </Page>

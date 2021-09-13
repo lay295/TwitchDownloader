@@ -1,0 +1,23 @@
+﻿<Window x:Class="TwitchDownloader.QueueOptions"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TwitchDownloader"
+        mc:Ignorable="d"
+        Title="Queue Options" Height="200" Width="500">
+    <Grid>
+        <TextBox x:Name="textFolder" HorizontalAlignment="Left" Height="23" Margin="106,10,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="279"/>
+        <Button x:Name="btnFolder" Content="Select Folder" HorizontalAlignment="Left" Margin="390,12,0,0" VerticalAlignment="Top" Width="89" Click="btnFolder_Click"/>
+        <Label Content="Download Folder" HorizontalAlignment="Left" Margin="5,10,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="checkChat" Content="Download Chat" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Checked="checkChat_Checked" Unchecked="checkChat_Unchecked"/>
+        <CheckBox x:Name="checkRender" IsEnabled="False" Content="Render Chat" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top"/>
+        <Label Content="Download Folder" HorizontalAlignment="Left" Margin="5,10,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnQueue" Content="Add To Queue" HorizontalAlignment="Left" Margin="199,105,0,0" VerticalAlignment="Top" Width="93" Height="45" Click="btnQueue_Click"/>
+        <RadioButton x:Name="radioJson" IsEnabled="False" IsChecked="True" Content="JSON" HorizontalAlignment="Left" Margin="27,87,0,0" VerticalAlignment="Top"/>
+        <RadioButton x:Name="radioTxt" IsEnabled="False" Content="TXT" HorizontalAlignment="Left" Margin="82,87,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="checkEmbed" IsEnabled="False" Content="Embed Emotes" HorizontalAlignment="Left" Margin="27,105,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="checkVideo" Content="Download Video" HorizontalAlignment="Left" Margin="10,43,0,0" VerticalAlignment="Top"/>
+
+    </Grid>
+</Window>

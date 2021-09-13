@@ -72,34 +72,7 @@ namespace TwitchDownloaderWPF
                     SKColor messageColor = new SKColor(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
                     SaveSettings();
 
-                    ChatRenderOptions options = new ChatRenderOptions() {
-                        InputFile = textJson.Text,
-                        OutputFile = saveFileDialog.FileName,
-                        BackgroundColor = backgroundColor,
-                        ChatHeight = Int32.Parse(textHeight.Text),
-                        ChatWidth = Int32.Parse(textWidth.Text),
-                        BttvEmotes = (bool)checkBTTV.IsChecked,
-                        FfzEmotes = (bool)checkFFZ.IsChecked,
-                        StvEmotes = (bool)checkSTV.IsChecked,
-                        Outline = (bool)checkOutline.IsChecked,
-                        Font = (string)comboFont.SelectedItem,
-                        FontSize = Double.Parse(textFontSize.Text),
-                        UpdateRate = Double.Parse(textUpdateTime.Text),
-                        Timestamp = (bool)checkTimestamp.IsChecked,
-                        MessageColor = messageColor,
-                        Framerate = Int32.Parse(textFramerate.Text),
-                        InputArgs = Settings.Default.FfmpegInputArgs,
-                        OutputArgs = Settings.Default.FfmpegOutputArgs,
-                        MessageFontStyle = SKFontStyle.Normal,
-                        UsernameFontStyle = SKFontStyle.Bold,
-                        GenerateMask = (bool)checkMask.IsChecked,
-                        OutlineSize = 4,
-                        FfmpegPath = "ffmpeg",
-                        TempFolder = Settings.Default.TempPath,
-                        SubMessages = (bool)checkSub.IsChecked,
-                        ChatBadges = (bool)checkBadge.IsChecked
-                    };
-                    options.PaddingLeft = (int)Math.Floor(2 * options.EmoteScale);
+                    ChatRenderOptions options = GetOptions(saveFileDialog.FileName);
 
                     SetImage("Images/ppOverheat.gif", true);
                     btnRender.IsEnabled = false;
@@ -127,6 +100,40 @@ namespace TwitchDownloaderWPF
             {
                 MessageBox.Show("Please double check your inputs are valid", "Unable to parse inputs", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        public ChatRenderOptions GetOptions(string filename)
+        {
+            ChatRenderOptions options = new ChatRenderOptions();
+            SKColor backgroundColor = new SKColor(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
+            SKColor messageColor = new SKColor(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
+            options.OutputFile = filename;
+            options.InputFile = textJson.Text;
+            options.BackgroundColor = backgroundColor;
+            options.ChatHeight = Int32.Parse(textHeight.Text);
+            options.ChatWidth = Int32.Parse(textWidth.Text);
+            options.BttvEmotes = (bool)checkBTTV.IsChecked;
+            options.FfzEmotes = (bool)checkFFZ.IsChecked;
+            options.StvEmotes = (bool)checkSTV.IsChecked;
+            options.Outline = (bool)checkOutline.IsChecked;
+            options.Font = (string)comboFont.SelectedItem;
+            options.FontSize = Double.Parse(textFontSize.Text);
+            options.UpdateRate = Double.Parse(textUpdateTime.Text);
+            options.Timestamp = (bool)checkTimestamp.IsChecked;
+            options.MessageColor = messageColor;
+            options.Framerate = Int32.Parse(textFramerate.Text);
+            options.InputArgs = Settings.Default.FfmpegInputArgs;
+            options.OutputArgs = Settings.Default.FfmpegOutputArgs;
+            options.MessageFontStyle = SKFontStyle.Normal;
+            options.UsernameFontStyle = SKFontStyle.Bold;
+            options.GenerateMask = (bool)checkMask.IsChecked;
+            options.OutlineSize = 4;
+            options.FfmpegPath = "ffmpeg";
+            options.TempFolder = Settings.Default.TempPath;
+            options.SubMessages = (bool)checkSub.IsChecked;
+            options.ChatBadges = (bool)checkBadge.IsChecked;
+            options.PaddingLeft = (int)Math.Floor(2 * options.EmoteScale);
+            return options;
         }
 
         private void OnProgressChanged(ProgressReport progress)
@@ -410,6 +417,15 @@ namespace TwitchDownloaderWPF
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void btnQueue_Click(object sender, RoutedEventArgs e)
+        {
+            if (ValidateInputs())
+            {
+                QueueOptions queueOptions = new QueueOptions(this);
+                queueOptions.ShowDialog();
+            }
         }
     }
 

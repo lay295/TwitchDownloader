@@ -93,7 +93,7 @@
       <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title}</Value>
     </Setting>
     <Setting Name="TemplateChat" Type="System.String" Scope="User">
-      <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title}</Value>
+      <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title} - Chat</Value>
     </Setting>
     <Setting Name="SubMessages" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -103,6 +103,21 @@
     </Setting>
     <Setting Name="ChatBadges" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="LimitVod" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">6</Value>
+    </Setting>
+    <Setting Name="LimitClip" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="LimitChat" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="LimitRender" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="QueueFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

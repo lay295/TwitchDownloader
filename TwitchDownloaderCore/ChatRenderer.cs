@@ -908,7 +908,14 @@ namespace TwitchDownloaderCore
                     sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
                 }
 
-                sectionImageCanvas.DrawShapedText(message, xPos, yPos, messageFont);
+                try
+                {
+                    sectionImageCanvas.DrawShapedText(message, xPos, yPos, messageFont);
+                }
+                catch
+                {
+                    sectionImageCanvas.DrawText(message, xPos, yPos, messageFont);
+                }
             }
             if (!isRtl)
             {

@@ -88,7 +88,10 @@
             <TextBox x:Name="textJson" Margin="3" MinWidth="200" MaxWidth="400"/>
             <Button x:Name="btnBrowse" Margin="3" MinWidth="50" Content="Browse" Click="btnBrowse_Click"/>
         </WrapPanel>
-        <Button x:Name="btnRender" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="Render Chat" Height="50" Width="100" VerticalAlignment="Bottom" Margin="0,0,0,10" Click="btnRender_Click"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="80,0,20,10" VerticalAlignment="Bottom">
+            <Button x:Name="btnRender" Content="Render Chat" Height="50" Width="100" Click="btnRender_Click"/>
+            <Button x:Name="btnQueue" Content="Queue" Height="25" Width="60" Click="btnQueue_Click" Margin="5,14,0,10" Grid.Row="3" Grid.Column="3" HorizontalAlignment="Center"/>
+        </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal">

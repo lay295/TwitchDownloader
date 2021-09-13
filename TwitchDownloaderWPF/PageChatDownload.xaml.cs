@@ -18,7 +18,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Newtonsoft.Json;
 using TwitchDownloaderWPF;
 using WpfAnimatedGif;
@@ -70,6 +69,7 @@ namespace TwitchDownloaderWPF
                 radioNone.IsEnabled = isEnabled;
                 checkEmbed.IsEnabled = isEnabled;
                 btnDownload.IsEnabled = isEnabled;
+                btnQueue.IsEnabled = isEnabled;
                 radioJson.IsEnabled = isEnabled;
                 radioText.IsEnabled = isEnabled;
             }
@@ -202,7 +202,7 @@ namespace TwitchDownloaderWPF
             {
                 try
                 {
-                    ChatDownloadOptions downloadOptions = new ChatDownloadOptions() { IsJson = (bool)radioJson.IsChecked, Filename = saveFileDialog.FileName, Timestamp = true, EmbedEmotes = (bool)checkEmbed.IsChecked };
+                    ChatDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
                     if (downloadType == DownloadType.Video)
                     {
                         int startTime = 0;
@@ -269,6 +269,16 @@ namespace TwitchDownloaderWPF
             }
         }
 
+        public ChatDownloadOptions GetOptions(string filename)
+        {
+            ChatDownloadOptions options = new ChatDownloadOptions();
+            options.IsJson = (bool)radioJson.IsChecked;
+            options.Timestamp = true;
+            options.EmbedEmotes = (bool)checkEmbed.IsChecked;
+            options.Filename = filename;
+            return options;
+        }
+
         private void OnProgressChanged(ProgressReport progress)
         {
             if (progress.reportType == ReportType.Percent)
@@ -323,6 +333,12 @@ namespace TwitchDownloaderWPF
             timeText.Visibility = Visibility.Collapsed;
             timeOptions.Visibility = Visibility.Collapsed;
             checkEmbed.IsEnabled = true;
+        }
+
+        private void btnQueue_Click(object sender, RoutedEventArgs e)
+        {
+            QueueOptions queueOptions = new QueueOptions(this);
+            queueOptions.ShowDialog();
         }
     }
 }
