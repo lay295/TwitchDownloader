@@ -53,13 +53,12 @@ namespace TwitchDownloader
 
         private void TaskManager_DoWork(object sender, DoWorkEventArgs e)
         {
-            int maxVod = Settings.Default.LimitVod;
-            int maxClip = Settings.Default.LimitClip;
-            int maxChat = Settings.Default.LimitChat;
-            int maxRender = Settings.Default.LimitRender;
-
             while (true)
             {
+                int maxVod = Settings.Default.LimitVod;
+                int maxClip = Settings.Default.LimitClip;
+                int maxChat = Settings.Default.LimitChat;
+                int maxRender = Settings.Default.LimitRender;
                 int currentVod = 0;
                 int currentClip = 0;
                 int currentChat = 0;
