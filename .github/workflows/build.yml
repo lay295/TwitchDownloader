@@ -52,7 +52,7 @@ jobs:
       run: nuget restore TwitchDownloaderWPF.sln
  
     - name: Build
-      run: msbuild TwitchDownloaderWPF.sln /p:Configuration=Debug /p:DebugType=None /p:DebugSymbols=false /p:AllowedReferenceRelatedFileExtensions=none /p:DeployOnBuild=true
+      run: msbuild TwitchDownloaderWPF.sln /p:Configuration=Debug /p:Platform=x64 /p:DebugType=None /p:DebugSymbols=false /p:AllowedReferenceRelatedFileExtensions=none /p:DeployOnBuild=true
     
     - name: Download File To Workspace
       # You may pin to the exact commit or the version.
