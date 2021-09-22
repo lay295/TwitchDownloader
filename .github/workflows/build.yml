@@ -65,12 +65,12 @@ jobs:
         file-name: ffmpeg.zip
         
     - name: Bundle ffmpeg
-      run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/Debug/ffmpeg.exe
+      run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/x64/Debug/ffmpeg.exe
       
     - name: Zip Release
       uses: papeloto/action-zip@v1
       with:
-        files: "TwitchDownloaderWPF/bin/Debug"
+        files: "TwitchDownloaderWPF/bin/x64/Debug"
         dest: release.zip
     
     - name: Download URL
