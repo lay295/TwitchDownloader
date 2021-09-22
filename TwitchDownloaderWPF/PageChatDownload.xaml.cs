@@ -152,7 +152,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private string ValidateUrl(string text)
+        static public string ValidateUrl(string text)
         {
             Regex clipRegex = new Regex(@"twitch.tv\/(\S+)\/clip\/");
             if (text.All(Char.IsLetter) || text.All(Char.IsDigit))
@@ -337,7 +337,7 @@ namespace TwitchDownloaderWPF
 
         private void btnQueue_Click(object sender, RoutedEventArgs e)
         {
-            QueueOptions queueOptions = new QueueOptions(this);
+            WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();
         }
     }

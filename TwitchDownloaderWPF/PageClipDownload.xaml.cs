@@ -190,7 +190,7 @@ namespace TwitchDownloaderWPF
 
         private void btnQueue_Click(object sender, RoutedEventArgs e)
         {
-            QueueOptions queueOptions = new QueueOptions(this);
+            WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();
         }
     }

@@ -26,9 +26,9 @@
                         <DataTemplate>
                             <Border BorderThickness="1" BorderBrush="Black" CornerRadius="8" Margin="0,0,8,8" Padding="4">
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <Image Source="{Binding Thumbnail}" MaxHeight="60"></Image>
+                                    <Image Source="{Binding Info.Thumbnail}" MaxHeight="60"></Image>
                                     <StackPanel Orientation="Vertical" Margin="20,0,0,0" >
-                                        <TextBlock Text="{Binding Title, StringFormat=Title: {0}}"></TextBlock>
+                                        <TextBlock Text="{Binding Info.Title, StringFormat=Title: {0}}"></TextBlock>
                                         <TextBlock Text="{Binding TaskType, StringFormat=Task Type: {0}}"></TextBlock>
                                         <TextBlock Text="{Binding Status, StringFormat=Status: {0}, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"></TextBlock>
                                         <ProgressBar Height="16" Width="200" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" />
@@ -49,5 +49,9 @@
         <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,64,0,0" Value="0" Minimum="1" x:Name="numClip" Width="52" ValueChanged="numClip_ValueChanged" />
         <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,89,0,0" Value="0" Minimum="1" x:Name="numChat" Width="52" ValueChanged="numChat_ValueChanged" />
         <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,116,0,0" Value="0" Minimum="1" x:Name="numRender" Width="52" ValueChanged="numRender_ValueChanged" />
+        <Label Content="Mass Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,144,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Button x:Name="btnList" Content="URL List" Grid.Column="4" HorizontalAlignment="Left" Margin="15,170,0,0" VerticalAlignment="Top" Width="158" Click="btnList_Click"/>
+        <Button x:Name="btnVods" Content="Search VODs" Grid.Column="4" HorizontalAlignment="Left" Margin="15,197,0,0" VerticalAlignment="Top" Width="158" Click="btnVods_Click"/>
+        <Button x:Name="btnClips" Content="Search Clips" Grid.Column="4" HorizontalAlignment="Left" Margin="15,224,0,0" VerticalAlignment="Top" Width="158" Click="btnClips_Click"/>
     </Grid>
 </Page>

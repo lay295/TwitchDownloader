@@ -13,8 +13,7 @@ namespace TwitchDownloader.TwitchTasks
 {
     class ChatDownloadTask : ITwitchTask
     {
-        public string Title { get; set; }
-        public ImageSource Thumbnail { get; set; }
+        public TaskData Info { get; set; } = new TaskData();
         public int Progress { get; set; }
         public TwitchTaskStatus Status { get; set; } = TwitchTaskStatus.Ready;
         public ChatDownloadOptions DownloadOptions { get; set; }
@@ -53,6 +52,8 @@ namespace TwitchDownloader.TwitchTasks
                 }
                 else
                 {
+                    Progress = 100;
+                    OnPropertyChanged("Progress");
                     Status = TwitchTaskStatus.Finished;
                     OnPropertyChanged("Status");
                 }

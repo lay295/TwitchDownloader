@@ -228,8 +228,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="QueueOptions.xaml.cs">
-      <DependentUpon>QueueOptions.xaml</DependentUpon>
+    <Compile Include="WindowMassDownload.xaml.cs">
+      <DependentUpon>WindowMassDownload.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WindowQueueOptions.xaml.cs">
+      <DependentUpon>WindowQueueOptions.xaml</DependentUpon>
     </Compile>
     <Compile Include="SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
@@ -238,9 +241,13 @@
     <Compile Include="TwitchTasks\ChatRenderTask.cs" />
     <Compile Include="TwitchTasks\ClipDownloadTask.cs" />
     <Compile Include="TwitchTasks\ITwitchTask.cs" />
+    <Compile Include="TwitchTasks\TaskData.cs" />
     <Compile Include="TwitchTasks\VodDownloadTask.cs" />
     <Compile Include="WindowPreview.xaml.cs">
       <DependentUpon>WindowPreview.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WindowUrlList.xaml.cs">
+      <DependentUpon>WindowUrlList.xaml</DependentUpon>
     </Compile>
     <Page Include="FfmpegOptions.xaml">
       <SubType>Designer</SubType>
@@ -278,7 +285,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="QueueOptions.xaml">
+    <Page Include="WindowMassDownload.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WindowQueueOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -307,6 +318,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="WindowPreview.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WindowUrlList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

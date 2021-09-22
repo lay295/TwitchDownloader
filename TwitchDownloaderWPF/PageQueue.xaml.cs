@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TwitchDownloader.Properties;
 using TwitchDownloader.TwitchTasks;
+using TwitchDownloaderWPF;
 
 namespace TwitchDownloader
 {
@@ -54,7 +55,7 @@ namespace TwitchDownloader
         {
             int maxVod = Settings.Default.LimitVod;
             int maxClip = Settings.Default.LimitClip;
-            int maxChat = Settings.Default.LimitClip;
+            int maxChat = Settings.Default.LimitChat;
             int maxRender = Settings.Default.LimitRender;
 
             while (true)
@@ -91,17 +92,17 @@ namespace TwitchDownloader
                         }
                         if (task is ClipDownloadTask && (currentClip + 1) <= maxClip)
                         {
-                            currentVod++;
+                            currentClip++;
                             task.RunAsync();
                         }
                         if (task is ChatDownloadTask && (currentChat + 1) <= maxChat)
                         {
-                            currentVod++;
+                            currentChat++;
                             task.RunAsync();
                         }
                         if (task is ChatRenderTask && (currentRender + 1) <= maxRender)
                         {
-                            currentVod++;
+                            currentRender++;
                             task.RunAsync();
                         }
                     }
@@ -145,6 +146,24 @@ namespace TwitchDownloader
                 Settings.Default.LimitRender = (int)numRender.Value;
                 Settings.Default.Save();
             }
+        }
+
+        private void btnList_Click(object sender, RoutedEventArgs e)
+        {
+            WindowUrlList window = new WindowUrlList();
+            window.ShowDialog();
+        }
+
+        private void btnVods_Click(object sender, RoutedEventArgs e)
+        {
+            WindowMassDownload window = new WindowMassDownload(DownloadType.Video);
+            window.ShowDialog();
+        }
+
+        private void btnClips_Click(object sender, RoutedEventArgs e)
+        {
+            WindowMassDownload window = new WindowMassDownload(DownloadType.Clip);
+            window.ShowDialog();
         }
     }
 }

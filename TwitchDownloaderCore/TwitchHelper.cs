@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -74,6 +75,32 @@ namespace TwitchDownloaderCore
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
                 string response = await client.UploadStringTaskAsync(new Uri("https://gql.twitch.tv/gql", UriKind.Absolute), "[{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}]");
                 JArray result = JArray.Parse(response);
+                return result;
+            }
+        }
+
+        public static async Task<GqlVideoResponse> GetGqlVideos(string channelName, string cursor = "", int limit = 50)
+        {
+            using (WebClient client = new WebClient())
+            {
+
+                client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                string response = await client.UploadStringTaskAsync("https://gql.twitch.tv/gql", "{\"query\":\"query{user(login:\\\"" + channelName + "\\\"){videos(first: " + limit + "" + (cursor == "" ? "" : ",after:\\\"" + cursor + "\\\"") + ") { edges { node { title, id, lengthSeconds, previewThumbnailURL(height: 180, width: 320), createdAt, viewCount }, cursor }, pageInfo { hasNextPage, hasPreviousPage }, totalCount }}}\",\"variables\":{}}");
+                GqlVideoResponse result = JsonConvert.DeserializeObject<GqlVideoResponse>(response);
+                return result;
+            }
+        }
+
+        public static async Task<GqlClipResponse> GetGqlClips(string channelName, string period = "LAST_WEEK", string cursor = "", int limit = 50)
+        {
+            using (WebClient client = new WebClient())
+            {
+
+                client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                string response = await client.UploadStringTaskAsync("https://gql.twitch.tv/gql", "{\"query\":\"query{user(login:\\\"" + channelName + "\\\"){clips(first: " + limit + ", after: \\\"" + cursor + "\\\", criteria: { period: " + period + " }) {  edges { cursor, node { id, slug, title, createdAt, durationSeconds, thumbnailURL, viewCount } }, pageInfo { hasNextPage, hasPreviousPage } }}}\",\"variables\":{}}");
+                GqlClipResponse result = JsonConvert.DeserializeObject<GqlClipResponse>(response);
                 return result;
             }
         }

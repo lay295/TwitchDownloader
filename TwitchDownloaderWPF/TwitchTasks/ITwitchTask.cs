@@ -23,8 +23,7 @@ namespace TwitchDownloader.TwitchTasks
 
     public interface ITwitchTask : INotifyPropertyChanged
     {
-        string Title { get; set; }
-        ImageSource Thumbnail { get; set; }
+        TaskData Info { get; set; }
         int Progress { get; set; }
         TwitchTaskStatus Status { get; set; }
         CancellationTokenSource TokenSource { get; set; }

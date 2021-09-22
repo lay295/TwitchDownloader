@@ -347,7 +347,7 @@ namespace TwitchDownloaderWPF
 
             if (isValid)
             {
-                QueueOptions queueOptions = new QueueOptions(this);
+                WindowQueueOptions queueOptions = new WindowQueueOptions(this);
                 queueOptions.ShowDialog();
             }
             else

@@ -1,0 +1,15 @@
+﻿<Window x:Class="TwitchDownloader.WindowUrlList"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TwitchDownloader"
+        mc:Ignorable="d"
+        Title="Mass Download URL List" Height="600" Width="500">
+    <Grid>
+        <Button x:Name="btnQueue" Content="Add To Queue" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="110" Height="45" Margin="0,0,0,10" Click="btnQueue_Click"/>
+        <Label Content="List of VODs/Clips (One per line)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="textList" HorizontalAlignment="Left" AcceptsReturn="True" Height="454" Margin="10,41,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="466"/>
+
+    </Grid>
+</Window>

@@ -14,13 +14,12 @@ namespace TwitchDownloader.TwitchTasks
 {
     class VodDownloadTask : ITwitchTask
     {
-        public string Title { get; set; }
+        public TaskData Info { get; set; } = new TaskData();
         public int Progress { get; set; }
         public TwitchTaskStatus Status { get; set; } = TwitchTaskStatus.Ready;
         public VideoDownloadOptions DownloadOptions { get; set; }
         public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
         public ITwitchTask DependantTask { get; set; }
-        public ImageSource Thumbnail { get; set; }
         public string TaskType { get; set; } = "VOD Download";
         public event PropertyChangedEventHandler PropertyChanged;
 
