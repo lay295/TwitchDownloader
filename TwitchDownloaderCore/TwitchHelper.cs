@@ -164,11 +164,12 @@ namespace TwitchDownloaderCore
                         {
                             string id = emote["id"].ToString();
                             string name = emote["code"].ToString();
+                            string mime = emote["imageType"].ToString();
                             if (alreadyAdded.Contains(name))
                                 continue;
-                            string fileName = Path.Combine(bttvFolder, id + "_2x.png");
+                            string fileName = Path.Combine(bttvFolder, id + "_2x." + mime);
                             string url = String.Format("https://cdn.betterttv.net/emote/{0}/2x", id);
-                            TwitchEmote newEmote = GetTwitchEmote(fileName, url, name, emote["imageType"].ToString(), id, 2);
+                            TwitchEmote newEmote = GetTwitchEmote(fileName, url, name, mime, id, 2);
                             if (newEmote != null)
                             {
                                 returnList.Add(newEmote);
@@ -179,11 +180,12 @@ namespace TwitchDownloaderCore
                         {
                             string id = emote["id"].ToString();
                             string name = emote["code"].ToString();
+                            string mime = emote["imageType"].ToString();
                             if (alreadyAdded.Contains(name))
                                 continue;
-                            string fileName = Path.Combine(bttvFolder, id + "_2x.png");
+                            string fileName = Path.Combine(bttvFolder, id + "_2x." + mime);
                             string url = String.Format("https://cdn.betterttv.net/emote/{0}/2x", id);
-                            TwitchEmote newEmote = GetTwitchEmote(fileName, url, name, emote["imageType"].ToString(), id, 2);
+                            TwitchEmote newEmote = GetTwitchEmote(fileName, url, name, mime, id, 2);
                             if (newEmote != null)
                             {
                                 returnList.Add(newEmote);
@@ -205,11 +207,12 @@ namespace TwitchDownloaderCore
                     {
                         string id = emote["id"].ToString();
                         string name = emote["code"].ToString();
+                        string mime = emote["imageType"].ToString();
                         if (alreadyAdded.Contains(name))
                             continue;
-                        string fileName = Path.Combine(ffzFolder, id + "_1x.png");
+                        string fileName = Path.Combine(ffzFolder, id + "_1x." + mime);
                         string url = String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/1", id);
-                        TwitchEmote newEmote = GetTwitchEmote(fileName, url, name, emote["imageType"].ToString(), id, 2);
+                        TwitchEmote newEmote = GetTwitchEmote(fileName, url, name, mime, id, 2);
                         if (newEmote != null)
                         {
                             returnList.Add(newEmote);
@@ -225,20 +228,21 @@ namespace TwitchDownloaderCore
                         {
                             string id = emote["id"].ToString();
                             string name = emote["code"].ToString();
+                            string mime = emote["imageType"].ToString();
                             if (alreadyAdded.Contains(name))
                                 continue;
-                            string fileName = Path.Combine(ffzFolder, id + "_2x.png");
-                            string fileNameLow = Path.Combine(ffzFolder, id + "_1x.png");
+                            string fileName = Path.Combine(ffzFolder, id + "_2x." + mime);
+                            string fileNameLow = Path.Combine(ffzFolder, id + "_1x" + mime);
                             TwitchEmote newEmote = null;
                             if (File.Exists(fileNameLow))
                             {
-                                newEmote = GetTwitchEmote(fileName, String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/1", id), name, emote["imageType"].ToString(), id, 1);
+                                newEmote = GetTwitchEmote(fileName, String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/1", id), name, mime, id, 1);
                             }
                             if (newEmote == null)
                             {
-                                newEmote = GetTwitchEmote(fileName, String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/2", id), name, emote["imageType"].ToString(), id, 2);
+                                newEmote = GetTwitchEmote(fileName, String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/2", id), name, mime, id, 2);
                                 if (newEmote == null)
-                                    newEmote = GetTwitchEmote(fileName, String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/1", id), name, emote["imageType"].ToString(), id, 1);
+                                    newEmote = GetTwitchEmote(fileName, String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/1", id), name, mime, id, 1);
                             }
                             if (newEmote != null)
                             {
@@ -261,11 +265,12 @@ namespace TwitchDownloaderCore
                     {
                         string id = emote["id"].ToString();
                         string name = emote["name"].ToString();
+                        string mime = emote["mime"].ToString().Split('/')[1];
                         string url2x = emote["urls"][1][1].ToString(); // 2x
                         if (alreadyAdded.Contains(name))
                             continue;
                         byte[] bytes;
-                        string fileName = Path.Combine(stvFolder, id + "_2x.png");
+                        string fileName = Path.Combine(stvFolder, id + "_2x." + mime);
                         if (File.Exists(fileName))
                             bytes = File.ReadAllBytes(fileName);
                         else
@@ -273,9 +278,8 @@ namespace TwitchDownloaderCore
                             bytes = client.DownloadData(url2x);
                             File.WriteAllBytes(fileName, bytes);
                         }
-
                         MemoryStream ms = new MemoryStream(bytes);
-                        returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["mime"].ToString().Split('/')[1], id, 2, bytes));
+                        returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, mime, id, 2, bytes));
                         alreadyAdded.Add(name);
                     }
 
@@ -287,11 +291,12 @@ namespace TwitchDownloaderCore
                         {
                             string id = emote["id"].ToString();
                             string name = emote["name"].ToString();
+                            string mime = emote["mime"].ToString().Split('/')[1];
                             string url2x = emote["urls"][1][1].ToString(); // 2x
                             if (alreadyAdded.Contains(name))
                                 continue;
                             byte[] bytes;
-                            string fileName = Path.Combine(stvFolder, id + "_2x.png");
+                            string fileName = Path.Combine(stvFolder, id + "_2x." + mime);
                             if (File.Exists(fileName))
                                 bytes = File.ReadAllBytes(fileName);
                             else
@@ -300,7 +305,7 @@ namespace TwitchDownloaderCore
                                 File.WriteAllBytes(fileName, bytes);
                             }
                             MemoryStream ms = new MemoryStream(bytes);
-                            returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, emote["mime"].ToString().Split('/')[1], id, 2, bytes));
+                            returnList.Add(new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(bytes) }, SKCodec.Create(ms), name, mime, id, 2, bytes));
                             alreadyAdded.Add(name);
                         }
                     }
@@ -532,7 +537,11 @@ namespace TwitchDownloaderCore
                     var emojis = archive.Entries.Where(x => Path.GetDirectoryName(x.FullName) == @"twemoji-13.1.0\assets\72x72" && !String.IsNullOrWhiteSpace(x.Name));
                     foreach (var emoji in emojis)
                     {
-                        emoji.ExtractToFile(Path.Combine(emojiFolder, emoji.Name));
+                        try
+                        {
+                            emoji.ExtractToFile(Path.Combine(emojiFolder, emoji.Name));
+                        }
+                        catch { }
                     }
                 }
             }

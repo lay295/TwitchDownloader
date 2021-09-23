@@ -23,14 +23,20 @@ namespace TwitchDownloaderCore.TwitchObjects
             emote_frames = Emote_frames;
             codec = Codec;
             name = Name;
-            imageType = ImageType;
             id = Id;
             width = Emote_frames.First().Width;
             height = Emote_frames.First().Height;
             imageScale = ImageScale;
             imageData = ImageData;
 
-            if (imageType == "gif")
+            // If we are webp, with zero frame count then we are a static image
+            // Thus we should just treat it as a differnt imageType so we don't animate it
+            imageType = ImageType;
+            if (imageType == "webp" && Codec.FrameCount == 0)
+                imageType = "webp_static";
+
+            // Split animated image into a list of images
+            if (imageType == "gif" || imageType == "webp")
             {
                 emote_frames.Clear();
                 for (int i = 0; i < Codec.FrameCount; i++)
