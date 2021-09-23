@@ -532,7 +532,11 @@ namespace TwitchDownloaderCore
                     var emojis = archive.Entries.Where(x => Path.GetDirectoryName(x.FullName) == @"twemoji-13.1.0\assets\72x72" && !String.IsNullOrWhiteSpace(x.Name));
                     foreach (var emoji in emojis)
                     {
-                        emoji.ExtractToFile(Path.Combine(emojiFolder, emoji.Name));
+                        try
+                        {
+                            emoji.ExtractToFile(Path.Combine(emojiFolder, emoji.Name));
+                        }
+                        catch { }
                     }
                 }
             }
