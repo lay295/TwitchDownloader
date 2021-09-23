@@ -617,7 +617,7 @@ namespace TwitchDownloaderCore
                             if (drawPos.X + (currentEmote.width / currentEmote.imageScale) * renderOptions.EmoteScale > canvasSize.Width)
                                 sectionImage = AddImageSection(sectionImage, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, default_x);
 
-                            if (currentEmote.imageType == "gif")
+                            if (currentEmote.imageType == "gif" || currentEmote.imageType == "webp")
                             {
                                 GifEmote emote = new GifEmote(new Point(drawPos.X, drawPos.Y), currentEmote.name, currentEmote.codec, currentEmote.imageScale, currentEmote.emote_frames);
                                 currentGifEmotes.Add(emote);
