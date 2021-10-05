@@ -556,7 +556,7 @@ namespace TwitchDownloaderCore
             return emojiCache;
         }
 
-        public static List<CheerEmote> GetBits(string cacheFolder)
+        public static List<CheerEmote> GetBits(string cacheFolder, string channel_id = "")
         {
             List<CheerEmote> cheerEmotes = new List<CheerEmote>();
             string bitsFolder = Path.Combine(cacheFolder, "bits");
@@ -568,20 +568,20 @@ namespace TwitchDownloaderCore
                 client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json");
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
 
-                JObject globalCheer = JObject.Parse(client.DownloadString("https://api.twitch.tv/kraken/bits/actions"));
+                JObject globalCheer = JObject.Parse(client.DownloadString("https://api.twitch.tv/kraken/bits/actions?channel_id=" + channel_id));
 
                 foreach (JToken emoteToken in globalCheer["actions"])
                 {
                     string prefix = emoteToken["prefix"].ToString();
                     List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
                     CheerEmote newEmote = new CheerEmote() { prefix = prefix, tierList = tierList };
-                    byte[] finalBytes = null;
                     foreach (JToken tierToken in emoteToken["tiers"])
                     {
                         try
                         {
                             int minBits = tierToken["min_bits"].ToObject<int>();
                             string fileName = Path.Combine(bitsFolder, prefix + minBits + "_2x.gif");
+                            byte[] finalBytes = null;
 
                             if (File.Exists(fileName))
                             {

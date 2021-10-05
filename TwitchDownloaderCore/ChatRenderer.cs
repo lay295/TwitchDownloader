@@ -56,7 +56,7 @@ namespace TwitchDownloaderCore
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching 3rd Party Emotes" });
                 List<TwitchEmote> thirdPartyEmotes = await Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatJson.streamer.id, cacheFolder, chatJson.emotes, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes));
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Cheer Emotes" });
-                List<CheerEmote> cheerEmotes = await Task.Run(() => TwitchHelper.GetBits(cacheFolder));
+                List<CheerEmote> cheerEmotes = await Task.Run(() => TwitchHelper.GetBits(cacheFolder, chatJson.streamer.id.ToString()));
                 progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Emojis" });
                 Dictionary<string, SKBitmap> emojiCache = await Task.Run(() => TwitchHelper.GetTwitterEmojis(chatJson.comments, cacheFolder));
 
@@ -805,18 +805,22 @@ namespace TwitchDownloaderCore
                                 bool bitsPrinted = false;
                                 try
                                 {
-                                    if (bitsCount > 0 && output.Any(char.IsDigit) && cheerEmotes.Any(x => output.Contains(x.prefix)))
+                                    if (bitsCount > 0 && output.Any(char.IsDigit) && output.Any(char.IsLetter))
                                     {
-                                        CheerEmote currentCheerEmote = cheerEmotes.Find(x => output.Contains(x.prefix));
                                         int bitsIndex = output.IndexOfAny("0123456789".ToCharArray());
-                                        int bitsAmount = Int32.Parse(output.Substring(bitsIndex));
-                                        bitsCount -= bitsAmount;
-                                        KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
-                                        GifEmote emote = new GifEmote(new Point(drawPos.X, drawPos.Y), tierList.Value.name, tierList.Value.codec, tierList.Value.imageScale, tierList.Value.emote_frames);
-                                        currentGifEmotes.Add(emote);
-                                        drawPos.X += (int)((tierList.Value.width / tierList.Value.imageScale) * renderOptions.EmoteScale + (3 * renderOptions.EmoteScale));
-                                        sectionImage = DrawText(sectionImage, bitsAmount.ToString(), messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
-                                        bitsPrinted = true;
+                                        string outputPrefix = output.Substring(0, bitsIndex).ToLower();
+                                        if (cheerEmotes.Any(x => x.prefix.ToLower() == outputPrefix))
+                                        {
+                                            CheerEmote currentCheerEmote = cheerEmotes.Find(x => x.prefix.ToLower() == outputPrefix);
+                                            int bitsAmount = Int32.Parse(output.Substring(bitsIndex));
+                                            bitsCount -= bitsAmount;
+                                            KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
+                                            GifEmote emote = new GifEmote(new Point(drawPos.X, drawPos.Y), tierList.Value.name, tierList.Value.codec, tierList.Value.imageScale, tierList.Value.emote_frames);
+                                            currentGifEmotes.Add(emote);
+                                            drawPos.X += (int)((tierList.Value.width / tierList.Value.imageScale) * renderOptions.EmoteScale + (3 * renderOptions.EmoteScale));
+                                            sectionImage = DrawText(sectionImage, bitsAmount.ToString(), messageFont, imageList, renderOptions, currentGifEmotes, canvasSize, ref drawPos, true, default_x);
+                                            bitsPrinted = true;
+                                        }
                                     }
                                 }
                                 catch
