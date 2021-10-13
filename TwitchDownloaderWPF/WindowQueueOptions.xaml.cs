@@ -300,28 +300,68 @@ namespace TwitchDownloader
                     }
                 }
             }
-
-            if (dataList.Count > 0)
+            else
             {
-                string folderPath = textFolder.Text;
-                if (!String.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
+                if (dataList.Count > 0)
                 {
-                    for (int i = 0; i < dataList.Count; i++)
+                    string folderPath = textFolder.Text;
+                    if (!String.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
                     {
-                        if ((bool)checkVideo.IsChecked)
+                        for (int i = 0; i < dataList.Count; i++)
                         {
-                            if (dataList[i].Id.All(Char.IsDigit))
+                            if ((bool)checkVideo.IsChecked)
                             {
-                                VodDownloadTask downloadTask = new VodDownloadTask();
-                                VideoDownloadOptions downloadOptions = new VideoDownloadOptions();
-                                downloadOptions.Oauth = Settings.Default.OAuth;
-                                downloadOptions.TempFolder = Settings.Default.TempPath;
-                                downloadOptions.Id = int.Parse(dataList[i].Id);
-                                downloadOptions.FfmpegPath = "ffmpeg";
+                                if (dataList[i].Id.All(Char.IsDigit))
+                                {
+                                    VodDownloadTask downloadTask = new VodDownloadTask();
+                                    VideoDownloadOptions downloadOptions = new VideoDownloadOptions();
+                                    downloadOptions.Oauth = Settings.Default.OAuth;
+                                    downloadOptions.TempFolder = Settings.Default.TempPath;
+                                    downloadOptions.Id = int.Parse(dataList[i].Id);
+                                    downloadOptions.FfmpegPath = "ffmpeg";
+                                    downloadOptions.CropBeginning = false;
+                                    downloadOptions.CropEnding = false;
+                                    downloadOptions.DownloadThreads = Settings.Default.VodDownloadThreads;
+                                    downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateVod, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + ".mp4");
+                                    downloadTask.DownloadOptions = downloadOptions;
+                                    downloadTask.Info.Title = dataList[i].Title;
+                                    downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
+                                    downloadTask.Status = TwitchTaskStatus.Ready;
+
+                                    lock (PageQueue.taskLock)
+                                    {
+                                        PageQueue.taskList.Add(downloadTask);
+                                    }
+                                }
+                                else
+                                {
+                                    ClipDownloadTask downloadTask = new ClipDownloadTask();
+                                    ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
+                                    downloadOptions.Id = dataList[i].Id;
+                                    downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateClip, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + ".mp4");
+                                    downloadTask.DownloadOptions = downloadOptions;
+                                    downloadTask.Info.Title = dataList[i].Title;
+                                    downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
+                                    downloadTask.Status = TwitchTaskStatus.Ready;
+
+                                    lock (PageQueue.taskLock)
+                                    {
+                                        PageQueue.taskList.Add(downloadTask);
+                                    }
+                                }
+                            }
+
+                            if ((bool)checkChat.IsChecked)
+                            {
+                                ChatDownloadTask downloadTask = new ChatDownloadTask();
+                                ChatDownloadOptions downloadOptions = new ChatDownloadOptions();
+                                downloadOptions.IsJson = (bool)radioJson.IsChecked;
+                                downloadOptions.EmbedEmotes = (bool)checkEmbed.IsChecked;
+                                downloadOptions.TimeFormat = TimestampFormat.Relative;
+                                downloadOptions.Id = dataList[i].Id;
                                 downloadOptions.CropBeginning = false;
                                 downloadOptions.CropEnding = false;
-                                downloadOptions.DownloadThreads = Settings.Default.VodDownloadThreads;
-                                downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateVod, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + ".mp4");
+                                downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + (downloadOptions.IsJson ? ".json" : ".txt"));
                                 downloadTask.DownloadOptions = downloadOptions;
                                 downloadTask.Info.Title = dataList[i].Title;
                                 downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
@@ -331,76 +371,38 @@ namespace TwitchDownloader
                                 {
                                     PageQueue.taskList.Add(downloadTask);
                                 }
-                            }
-                            else
-                            {
-                                ClipDownloadTask downloadTask = new ClipDownloadTask();
-                                ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
-                                downloadOptions.Id = dataList[i].Id;
-                                downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateClip, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + ".mp4");
-                                downloadTask.DownloadOptions = downloadOptions;
-                                downloadTask.Info.Title = dataList[i].Title;
-                                downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
-                                downloadTask.Status = TwitchTaskStatus.Ready;
 
-                                lock (PageQueue.taskLock)
+                                if ((bool)checkRender.IsChecked && downloadOptions.IsJson)
                                 {
-                                    PageQueue.taskList.Add(downloadTask);
+                                    ChatRenderTask renderTask = new ChatRenderTask();
+                                    ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(downloadOptions.Filename, ".mp4"));
+                                    if (renderOptions.OutputFile.Trim() == downloadOptions.Filename.Trim())
+                                    {
+                                        //Just in case VOD and chat paths are the same. Like the previous defaults
+                                        renderOptions.OutputFile = Path.ChangeExtension(downloadOptions.Filename, " - CHAT.mp4");
+                                    }
+                                    renderOptions.InputFile = downloadOptions.Filename;
+                                    renderTask.DownloadOptions = renderOptions;
+                                    renderTask.Info.Title = dataList[i].Title;
+                                    renderTask.Info.Thumbnail = dataList[i].Thumbnail;
+                                    renderTask.Status = TwitchTasks.TwitchTaskStatus.Waiting;
+                                    renderTask.DependantTask = downloadTask;
+
+                                    lock (PageQueue.taskLock)
+                                    {
+                                        PageQueue.taskList.Add(renderTask);
+                                    }
                                 }
                             }
                         }
 
-                        if ((bool)checkChat.IsChecked)
-                        {
-                            ChatDownloadTask downloadTask = new ChatDownloadTask();
-                            ChatDownloadOptions downloadOptions = new ChatDownloadOptions();
-                            downloadOptions.IsJson = (bool)radioJson.IsChecked;
-                            downloadOptions.EmbedEmotes = (bool)checkEmbed.IsChecked;
-                            downloadOptions.TimeFormat = TimestampFormat.Relative;
-                            downloadOptions.Id = dataList[i].Id;
-                            downloadOptions.CropBeginning = false;
-                            downloadOptions.CropEnding = false;
-                            downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + (downloadOptions.IsJson ? ".json" : ".txt"));
-                            downloadTask.DownloadOptions = downloadOptions;
-                            downloadTask.Info.Title = dataList[i].Title;
-                            downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
-                            downloadTask.Status = TwitchTaskStatus.Ready;
-
-                            lock (PageQueue.taskLock)
-                            {
-                                PageQueue.taskList.Add(downloadTask);
-                            }
-
-                            if ((bool)checkRender.IsChecked && downloadOptions.IsJson)
-                            {
-                                ChatRenderTask renderTask = new ChatRenderTask();
-                                ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(downloadOptions.Filename, ".mp4"));
-                                if (renderOptions.OutputFile.Trim() == downloadOptions.Filename.Trim())
-                                {
-                                    //Just in case VOD and chat paths are the same. Like the previous defaults
-                                    renderOptions.OutputFile = Path.ChangeExtension(downloadOptions.Filename, " - CHAT.mp4");
-                                }
-                                renderOptions.InputFile = downloadOptions.Filename;
-                                renderTask.DownloadOptions = renderOptions;
-                                renderTask.Info.Title = dataList[i].Title;
-                                renderTask.Info.Thumbnail = dataList[i].Thumbnail;
-                                renderTask.Status = TwitchTasks.TwitchTaskStatus.Waiting;
-                                renderTask.DependantTask = downloadTask;
-
-                                lock (PageQueue.taskLock)
-                                {
-                                    PageQueue.taskList.Add(renderTask);
-                                }
-                            }
-                        }
+                        this.DialogResult = true;
+                        this.Close();
                     }
-
-                    this.DialogResult = true;
-                    this.Close();
-                }
-                else
-                {
-                    MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                    else
+                    {
+                        MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
