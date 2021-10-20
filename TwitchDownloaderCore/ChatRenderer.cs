@@ -79,12 +79,12 @@ namespace TwitchDownloaderCore
                                 continue;
                             if (!renderOptions.SubMessages && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
                                 continue;
-                        }
-                        if (comment.message.user_notice_params.msg_id == "highlighted-message" && comment.message.fragments == null && comment.message.body != null)
-                        {
-                            comment.message.fragments = new List<Fragment>();
-                            comment.message.fragments.Add(new Fragment());
-                            comment.message.fragments[0].text = comment.message.body;
+                            if (comment.message.user_notice_params.msg_id == "highlighted-message" && comment.message.fragments == null && comment.message.body != null)
+                            {
+                                comment.message.fragments = new List<Fragment>();
+                                comment.message.fragments.Add(new Fragment());
+                                comment.message.fragments[0].text = comment.message.body;
+                            }
                         }
                         if (comment.message.fragments == null || comment.commenter == null)
                             continue;
