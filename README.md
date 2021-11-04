@@ -55,6 +55,6 @@ sudo chmod +x TwitchDownloaderCLI
 ```
 4. You can now start using the donwloader, for example:
 ```
-TwitchDownloaderCLI -m VideoDownload --id <vod-id-here> -o out.mp4
+./TwitchDownloaderCLI -m VideoDownload --id <vod-id-here> -o out.mp4
 ```
 For Arch Linux, there's an [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/)
