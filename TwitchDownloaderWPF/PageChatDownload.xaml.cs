@@ -26,6 +26,7 @@ using TwitchDownloaderCore;
 using System.Threading;
 using TwitchDownloader;
 using TwitchDownloader.Properties;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderWPF
 {
@@ -40,7 +41,7 @@ namespace TwitchDownloaderWPF
         public string downloadId;
         public int streamerId;
         public DateTime currentVideoTime;
-        JObject videoData = new JObject();
+
         public PageChatDownload()
         {
             InitializeComponent();
@@ -91,11 +92,9 @@ namespace TwitchDownloaderWPF
                 {
                     if (downloadType == DownloadType.Video)
                     {
-                        Task<JObject> taskInfo = TwitchHelper.GetVideoInfo(Int32.Parse(downloadId));
-                        await Task.WhenAll(taskInfo);
+                        GqlVideoResponse taskInfo = await TwitchHelper.GetVideoInfo(Int32.Parse(downloadId));
 
-                        videoData = taskInfo.Result;
-                        string thumbUrl = taskInfo.Result["preview"]["medium"].ToString();
+                        string thumbUrl = taskInfo.data.video.thumbnailURLs.FirstOrDefault();
                         Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
 
                         try
@@ -108,31 +107,28 @@ namespace TwitchDownloaderWPF
                         }
                         if (!taskThumb.IsFaulted)
                             imgThumbnail.Source = taskThumb.Result;
-                        textTitle.Text = taskInfo.Result["title"].ToString();
-                        textStreamer.Text = taskInfo.Result["channel"]["display_name"].ToString();
-                        textCreatedAt.Text = taskInfo.Result["created_at"].ToString();
-                        currentVideoTime = taskInfo.Result["created_at"].ToObject<DateTime>().ToLocalTime();
-                        streamerId = taskInfo.Result["channel"]["_id"].ToObject<int>();
+                        textTitle.Text = taskInfo.data.video.title;
+                        textStreamer.Text = taskInfo.data.video.owner.displayName;
+                        textCreatedAt.Text = taskInfo.data.video.createdAt.ToString();
+                        currentVideoTime = taskInfo.data.video.createdAt.ToLocalTime();
+                        streamerId = int.Parse(taskInfo.data.video.owner.id);
                         SetEnabled(true, false);
                     }
                     else if (downloadType == DownloadType.Clip)
                     {
                         string clipId = downloadId;
-                        Task<JObject> taskInfo = TwitchHelper.GetClipInfo(clipId);
-                        await Task.WhenAll(taskInfo);
+                        GqlClipResponse taskInfo = await TwitchHelper.GetClipInfo(clipId);
 
-                        JToken clipData = taskInfo.Result;
-                        videoData = taskInfo.Result;
-                        string thumbUrl = clipData["thumbnails"]["medium"].ToString();
+                        string thumbUrl = taskInfo.data.clip.thumbnailURL;
                         Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
                         await Task.WhenAll(taskThumb);
 
                         imgThumbnail.Source = taskThumb.Result;
-                        textStreamer.Text = clipData["broadcaster"]["display_name"].ToString();
-                        textCreatedAt.Text = clipData["created_at"].ToString();
-                        currentVideoTime = clipData["created_at"].ToObject<DateTime>().ToLocalTime();
-                        textTitle.Text = clipData["title"].ToString();
-                        streamerId = clipData["broadcaster"]["id"].ToObject<int>();
+                        textStreamer.Text = taskInfo.data.clip.broadcaster.displayName;
+                        textCreatedAt.Text = taskInfo.data.clip.createdAt.ToString();
+                        currentVideoTime = taskInfo.data.clip.createdAt.ToLocalTime();
+                        textTitle.Text = taskInfo.data.clip.title;
+                        streamerId = int.Parse(taskInfo.data.clip.broadcaster.id);
                         SetEnabled(true, false);
                         SetEnabled(false, true);
                     }
@@ -224,7 +220,7 @@ namespace TwitchDownloaderWPF
                             downloadOptions.CropEndingTime = endTime;
                         }
 
-                        downloadOptions.Id = videoData["_id"].ToString().Substring(1);
+                        downloadOptions.Id = downloadId;
                     }
                     else
                     {

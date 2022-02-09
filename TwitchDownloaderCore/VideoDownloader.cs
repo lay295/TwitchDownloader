@@ -39,9 +39,8 @@ namespace TwitchDownloaderCore
 
                 if (downloadOptions.PlaylistUrl == null)
                 {
-                    Task<JObject> taskInfo = TwitchHelper.GetVideoInfo(downloadOptions.Id);
                     Task<JObject> taskAccessToken = TwitchHelper.GetVideoToken(downloadOptions.Id, downloadOptions.Oauth);
-                    await Task.WhenAll(taskInfo, taskAccessToken);
+                    await taskAccessToken;
 
                     string[] videoPlaylist = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["value"].ToString(), taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["signature"].ToString());
                     List<KeyValuePair<string, string>> videoQualities = new List<KeyValuePair<string, string>>();

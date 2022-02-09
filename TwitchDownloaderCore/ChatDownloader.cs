@@ -46,24 +46,24 @@ namespace TwitchDownloaderCore
                 if (downloadType == DownloadType.Video)
                 {
                     videoId = downloadOptions.Id;
-                    JObject taskInfo = await TwitchHelper.GetVideoInfo(Int32.Parse(videoId));
-                    chatRoot.streamer.name = taskInfo["channel"]["display_name"].ToString();
-                    chatRoot.streamer.id = taskInfo["channel"]["_id"].ToObject<int>();
+                    GqlVideoResponse taskInfo = await TwitchHelper.GetVideoInfo(Int32.Parse(videoId));
+                    chatRoot.streamer.name = taskInfo.data.video.owner.displayName;
+                    chatRoot.streamer.id = int.Parse(taskInfo.data.video.owner.id);
                     videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
-                    videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : taskInfo["length"].ToObject<double>();
+                    videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : taskInfo.data.video.lengthSeconds;
                 }
                 else
                 {
-                    JObject taskInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
-                    videoId = taskInfo["vod"]["id"].ToString();
+                    GqlClipResponse taskInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
+                    videoId = taskInfo.data.clip.video.id;
                     downloadOptions.CropBeginning = true;
-                    downloadOptions.CropBeginningTime = taskInfo["vod"]["offset"].ToObject<int>();
+                    downloadOptions.CropBeginningTime = taskInfo.data.clip.videoOffsetSeconds;
                     downloadOptions.CropEnding = true;
-                    downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + taskInfo["duration"].ToObject<double>();
-                    chatRoot.streamer.name = taskInfo["broadcaster"]["display_name"].ToString();
-                    chatRoot.streamer.id = taskInfo["broadcaster"]["id"].ToObject<int>();
-                    videoStart = taskInfo["vod"]["offset"].ToObject<double>();
-                    videoEnd = taskInfo["vod"]["offset"].ToObject<double>() + taskInfo["duration"].ToObject<double>();
+                    downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + taskInfo.data.clip.durationSeconds;
+                    chatRoot.streamer.name = taskInfo.data.clip.broadcaster.displayName;
+                    chatRoot.streamer.id = int.Parse(taskInfo.data.clip.broadcaster.id);
+                    videoStart = taskInfo.data.clip.videoOffsetSeconds;
+                    videoEnd = taskInfo.data.clip.videoOffsetSeconds + taskInfo.data.clip.durationSeconds;
                 }
 
                 chatRoot.video.start = videoStart;

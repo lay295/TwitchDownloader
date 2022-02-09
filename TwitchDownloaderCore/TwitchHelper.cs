@@ -17,16 +17,14 @@ namespace TwitchDownloaderCore
 {
     public static class TwitchHelper
     {
-        public static async Task<JObject> GetVideoInfo(int videoId)
+        public static async Task<GqlVideoResponse> GetVideoInfo(int videoId)
         {
             using (WebClient client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
-                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json");
-                client.Headers.Add("Client-ID", "v8kfhyc2980it9e7t5hhc7baukzuj2");
-                string response = await client.DownloadStringTaskAsync("https://api.twitch.tv/kraken/videos/" + videoId);
-                JObject result = JObject.Parse(response);
-                return result;
+                client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                string response = await client.UploadStringTaskAsync(new Uri("https://gql.twitch.tv/gql", UriKind.Absolute), "{\"query\":\"query{video(id:\\\"" + videoId + "\\\"){title,thumbnailURLs(height:180,width:320),createdAt,lengthSeconds,owner{id,displayName}}}\",\"variables\":{}}");
+                return JsonConvert.DeserializeObject<GqlVideoResponse>(response);
             }
         }
 
@@ -55,15 +53,14 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public static async Task<JObject> GetClipInfo(object clipId)
+        public static async Task<GqlClipResponse> GetClipInfo(object clipId)
         {
             using (WebClient client = new WebClient())
             {
-                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json");
-                client.Headers.Add("Client-ID", "v8kfhyc2980it9e7t5hhc7baukzuj2");
-                string response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/kraken/clips/{0}", clipId));
-                JObject result = JObject.Parse(response);
-                return result;
+                client.Encoding = Encoding.UTF8;
+                client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                string response = await client.UploadStringTaskAsync(new Uri("https://gql.twitch.tv/gql", UriKind.Absolute), "{\"query\":\"query{clip(slug:\\\"" + clipId + "\\\"){title,thumbnailURL,createdAt,durationSeconds,broadcaster{id,displayName},videoOffsetSeconds,video{id}}}\",\"variables\":{}}");
+                return JsonConvert.DeserializeObject<GqlClipResponse>(response);
             }
         }
 
@@ -79,7 +76,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public static async Task<GqlVideoResponse> GetGqlVideos(string channelName, string cursor = "", int limit = 50)
+        public static async Task<GqlVideoSearchResponse> GetGqlVideos(string channelName, string cursor = "", int limit = 50)
         {
             using (WebClient client = new WebClient())
             {
@@ -87,12 +84,12 @@ namespace TwitchDownloaderCore
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
                 client.Headers[HttpRequestHeader.ContentType] = "application/json";
                 string response = await client.UploadStringTaskAsync("https://gql.twitch.tv/gql", "{\"query\":\"query{user(login:\\\"" + channelName + "\\\"){videos(first: " + limit + "" + (cursor == "" ? "" : ",after:\\\"" + cursor + "\\\"") + ") { edges { node { title, id, lengthSeconds, previewThumbnailURL(height: 180, width: 320), createdAt, viewCount }, cursor }, pageInfo { hasNextPage, hasPreviousPage }, totalCount }}}\",\"variables\":{}}");
-                GqlVideoResponse result = JsonConvert.DeserializeObject<GqlVideoResponse>(response);
+                GqlVideoSearchResponse result = JsonConvert.DeserializeObject<GqlVideoSearchResponse>(response);
                 return result;
             }
         }
 
-        public static async Task<GqlClipResponse> GetGqlClips(string channelName, string period = "LAST_WEEK", string cursor = "", int limit = 50)
+        public static async Task<GqlClipSearchResponse> GetGqlClips(string channelName, string period = "LAST_WEEK", string cursor = "", int limit = 50)
         {
             using (WebClient client = new WebClient())
             {
@@ -100,7 +97,7 @@ namespace TwitchDownloaderCore
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
                 client.Headers[HttpRequestHeader.ContentType] = "application/json";
                 string response = await client.UploadStringTaskAsync("https://gql.twitch.tv/gql", "{\"query\":\"query{user(login:\\\"" + channelName + "\\\"){clips(first: " + limit + ", after: \\\"" + cursor + "\\\", criteria: { period: " + period + " }) {  edges { cursor, node { id, slug, title, createdAt, durationSeconds, thumbnailURL, viewCount } }, pageInfo { hasNextPage, hasPreviousPage } }}}\",\"variables\":{}}");
-                GqlClipResponse result = JsonConvert.DeserializeObject<GqlClipResponse>(response);
+                GqlClipSearchResponse result = JsonConvert.DeserializeObject<GqlClipSearchResponse>(response);
                 return result;
             }
         }

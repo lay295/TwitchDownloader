@@ -22,6 +22,7 @@ using TwitchDownloader;
 using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.TwitchObjects;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -51,20 +52,20 @@ namespace TwitchDownloaderWPF
                 {
                     btnGetInfo.IsEnabled = false;
                     comboQuality.Items.Clear();
-                    Task<JObject> taskInfo = TwitchHelper.GetClipInfo(clipId);
+                    Task<GqlClipResponse> taskInfo = TwitchHelper.GetClipInfo(clipId);
                     Task<JArray> taskLinks = TwitchHelper.GetClipLinks(clipId);
                     await Task.WhenAll(taskInfo, taskLinks);
 
-                    JToken clipData = taskInfo.Result;
-                    string thumbUrl = clipData["thumbnails"]["medium"].ToString();
+                    GqlClipResponse clipData = taskInfo.Result;
+                    string thumbUrl = clipData.data.clip.thumbnailURL;
                     Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
                     await Task.WhenAll(taskThumb);
 
                     imgThumbnail.Source = taskThumb.Result;
-                    textStreamer.Text = clipData["broadcaster"]["display_name"].ToString();
-                    textCreatedAt.Text = clipData["created_at"].ToString();
-                    currentVideoTime = clipData["created_at"].ToObject<DateTime>().ToLocalTime();
-                    textTitle.Text = clipData["title"].ToString();
+                    textStreamer.Text = clipData.data.clip.broadcaster.displayName;
+                    textCreatedAt.Text = clipData.data.clip.createdAt.ToString();
+                    currentVideoTime = clipData.data.clip.createdAt.ToLocalTime();
+                    textTitle.Text = clipData.data.clip.title;
 
                     foreach (var quality in taskLinks.Result[0]["data"]["clip"]["videoQualities"])
                     {

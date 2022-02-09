@@ -31,6 +31,7 @@ using Xabe.FFmpeg.Events;
 using System.Collections.ObjectModel;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderWPF
 {
@@ -84,10 +85,10 @@ namespace TwitchDownloaderWPF
                 currentVideoId = videoId;
                 try
                 {
-                    Task<JObject> taskInfo = TwitchHelper.GetVideoInfo(videoId);
+                    Task<GqlVideoResponse> taskInfo = TwitchHelper.GetVideoInfo(videoId);
                     Task<JObject> taskAccessToken = TwitchHelper.GetVideoToken(videoId, textOauth.Text);
                     await Task.WhenAll(taskInfo, taskAccessToken);
-                    string thumbUrl = taskInfo.Result["preview"]["medium"].ToString();
+                    string thumbUrl = taskInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
                     Task<BitmapImage> thumbImage = InfoHelper.GetThumb(thumbUrl);
                     Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["value"].ToString(), taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["signature"].ToString());
                     await taskPlaylist;
@@ -121,11 +122,11 @@ namespace TwitchDownloaderWPF
 
                     if (!thumbImage.IsFaulted)
                         imgThumbnail.Source = thumbImage.Result;
-                    TimeSpan vodLength = TimeSpan.FromSeconds(taskInfo.Result["length"].ToObject<int>());
-                    textStreamer.Text = taskInfo.Result["channel"]["display_name"].ToString();
-                    textTitle.Text = taskInfo.Result["title"].ToString();
-                    textCreatedAt.Text = taskInfo.Result["created_at"].ToString();
-                    currentVideoTime = taskInfo.Result["created_at"].ToObject<DateTime>().ToLocalTime();
+                    TimeSpan vodLength = TimeSpan.FromSeconds(taskInfo.Result.data.video.lengthSeconds);
+                    textStreamer.Text = taskInfo.Result.data.video.owner.displayName;
+                    textTitle.Text = taskInfo.Result.data.video.title;
+                    textCreatedAt.Text = taskInfo.Result.data.video.createdAt.ToString();
+                    currentVideoTime = taskInfo.Result.data.video.createdAt.ToLocalTime();
                     numEndHour.Value = (int)vodLength.TotalHours;
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;

@@ -4,37 +4,31 @@ using System.Text;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
-    public class ClipNode
+    public class ClipBroadcaster
     {
         public string id { get; set; }
-        public string slug { get; set; }
+        public string displayName { get; set; }
+    }
+
+    public class ClipVideo
+    {
+        public string id { get; set; }
+    }
+
+    public class Clip
+    {
         public string title { get; set; }
+        public string thumbnailURL { get; set; }
         public DateTime createdAt { get; set; }
         public int durationSeconds { get; set; }
-        public string thumbnailURL { get; set; }
-        public int viewCount { get; set; }
-    }
-
-    public class Edge
-    {
-        public string cursor { get; set; }
-        public ClipNode node { get; set; }
-    }
-
-    public class Clips
-    {
-        public List<Edge> edges { get; set; }
-        public PageInfo pageInfo { get; set; }
-    }
-
-    public class ClipUser
-    {
-        public Clips clips { get; set; }
+        public ClipBroadcaster broadcaster { get; set; }
+        public int videoOffsetSeconds { get; set; }
+        public ClipVideo video { get; set; }
     }
 
     public class ClipData
     {
-        public ClipUser user { get; set; }
+        public Clip clip { get; set; }
     }
 
     public class GqlClipResponse
@@ -42,6 +36,4 @@ namespace TwitchDownloaderCore.TwitchObjects
         public ClipData data { get; set; }
         public Extensions extensions { get; set; }
     }
-
-
 }

@@ -64,7 +64,7 @@ namespace TwitchDownloader
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlVideoResponse res = await TwitchHelper.GetGqlVideos(currnetChannel, currentCursor, 100);
+                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currnetChannel, currentCursor, 100);
                 videoList.Clear();
                 if (res.data.user != null)
                 {
@@ -111,7 +111,7 @@ namespace TwitchDownloader
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlClipResponse res = await TwitchHelper.GetGqlClips(currnetChannel, period, currentCursor, 50);
+                GqlClipSearchResponse res = await TwitchHelper.GetGqlClips(currnetChannel, period, currentCursor, 50);
                 videoList.Clear();
                 if (res.data.user != null)
                 {

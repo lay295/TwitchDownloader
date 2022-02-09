@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using TwitchDownloader.TwitchTasks;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderWPF;
 
 namespace TwitchDownloader
@@ -60,75 +61,92 @@ namespace TwitchDownloader
             }
 
             Dictionary<int, string> taskDict = new Dictionary<int, string>();
-            List<Task<JObject>> taskList = new List<Task<JObject>>();
+            List<Task<GqlVideoResponse>> taskVideoList = new List<Task<GqlVideoResponse>>();
+            List<Task<GqlClipResponse>> taskClipList = new List<Task<GqlClipResponse>>();
 
             foreach (var id in idList)
             {
                 if (id.All(Char.IsDigit))
                 {
-                    Task<JObject> task = TwitchHelper.GetVideoInfo(int.Parse(id));
-                    taskList.Add(task);
+                    Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(int.Parse(id));
+                    taskVideoList.Add(task);
                     taskDict[task.Id] = id;
                 }
                 else
                 {
-                    Task<JObject> task = TwitchHelper.GetClipInfo(id);
-                    taskList.Add(task);
+                    Task<GqlClipResponse> task = TwitchHelper.GetClipInfo(id);
+                    taskClipList.Add(task);
                     taskDict[task.Id] = id;
                 }
             }
 
             try
             {
-                await Task.WhenAll(taskList.ToArray());
+                await Task.WhenAll(taskVideoList.ToArray());
+            }
+            catch { }
+            try
+            {
+                await Task.WhenAll(taskClipList.ToArray());
             }
             catch { }
 
-            for (int i = 0; i < taskList.Count; i++)
+            for (int i = 0; i < taskVideoList.Count; i++)
             {
-                if (taskList[i].IsCompleted)
+                if (taskVideoList[i].IsCompleted)
                 {
-                    string id = taskDict[taskList[i].Id];
-                    if (!taskList[i].IsFaulted)
+                    string id = taskDict[taskVideoList[i].Id];
+                    if (!taskVideoList[i].IsFaulted)
                     {
-                        JObject data = taskList[i].Result;
+                        GqlVideoResponse data = taskVideoList[i].Result;
                         TaskData newData = new TaskData();
                         newData.Id = id;
-                        if (id.All(Char.IsDigit))
+                        try
                         {
-                            
-                            try
-                            {
-                                string thumbUrl = data["preview"]["medium"].ToString();
-                                var bitmapImage = new BitmapImage();
-                                bitmapImage.BeginInit();
-                                bitmapImage.UriSource = new Uri(thumbUrl);
-                                bitmapImage.EndInit();
-                                newData.Thumbnail = bitmapImage;
-                            }
-                            catch { }
-                            newData.Title = data["title"].ToString();
-                            newData.Streamer = data["channel"]["display_name"].ToString();
-                            newData.Time = data["created_at"].ToObject<DateTime>().ToLocalTime();
-                            dataList.Add(newData);
+                            string thumbUrl = data.data.video.thumbnailURLs.FirstOrDefault();
+                            var bitmapImage = new BitmapImage();
+                            bitmapImage.BeginInit();
+                            bitmapImage.UriSource = new Uri(thumbUrl);
+                            bitmapImage.EndInit();
+                            newData.Thumbnail = bitmapImage;
                         }
-                        else
+                        catch { }
+                        newData.Title = data.data.video.title;
+                        newData.Streamer = data.data.video.owner.displayName;
+                        newData.Time = data.data.video.createdAt.ToLocalTime();
+                        dataList.Add(newData);
+                    }
+                    else
+                    {
+                        errorList.Add(idDict[id]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < taskClipList.Count; i++)
+            {
+                if (taskClipList[i].IsCompleted)
+                {
+                    string id = taskDict[taskClipList[i].Id];
+                    if (!taskClipList[i].IsFaulted)
+                    {
+                        GqlClipResponse data = taskClipList[i].Result;
+                        TaskData newData = new TaskData();
+                        newData.Id = id;
+                        try
                         {
-                            try
-                            {
-                                string thumbUrl = data["thumbnails"]["medium"].ToString();
-                                var bitmapImage = new BitmapImage();
-                                bitmapImage.BeginInit();
-                                bitmapImage.UriSource = new Uri(thumbUrl);
-                                bitmapImage.EndInit();
-                                newData.Thumbnail = bitmapImage;
-                            }
-                            catch { }
-                            newData.Title = data["title"].ToString();
-                            newData.Streamer = data["broadcaster"]["display_name"].ToString();
-                            newData.Time = data["created_at"].ToObject<DateTime>().ToLocalTime();
-                            dataList.Add(newData);
+                            string thumbUrl = data.data.clip.thumbnailURL;
+                            var bitmapImage = new BitmapImage();
+                            bitmapImage.BeginInit();
+                            bitmapImage.UriSource = new Uri(thumbUrl);
+                            bitmapImage.EndInit();
+                            newData.Thumbnail = bitmapImage;
                         }
+                        catch { }
+                        newData.Title = data.data.clip.title;
+                        newData.Streamer = data.data.clip.broadcaster.displayName;
+                        newData.Time = data.data.clip.createdAt.ToLocalTime();
+                        dataList.Add(newData);
                     }
                     else
                     {
