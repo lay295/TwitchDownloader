@@ -46,7 +46,7 @@ namespace TwitchDownloaderWPF
         public PageVodDownload()
         {
             InitializeComponent();
-            
+
         }
 
         private void SetEnabled(bool isEnabled)
@@ -54,14 +54,21 @@ namespace TwitchDownloaderWPF
             comboQuality.IsEnabled = isEnabled;
             checkStart.IsEnabled = isEnabled;
             checkEnd.IsEnabled = isEnabled;
+            btnDownload.IsEnabled = isEnabled;
+            btnQueue.IsEnabled = isEnabled;
+        }
+
+        private void SetEnabledCropStart(bool isEnabled)
+        {
             numStartHour.IsEnabled = isEnabled;
             numStartMinute.IsEnabled = isEnabled;
             numStartSecond.IsEnabled = isEnabled;
+        }
+        private void SetEnabledCropEnd(bool isEnabled)
+        {
             numEndHour.IsEnabled = isEnabled;
             numEndMinute.IsEnabled = isEnabled;
             numEndSecond.IsEnabled = isEnabled;
-            btnDownload.IsEnabled = isEnabled;
-            btnQueue.IsEnabled = isEnabled;
         }
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
@@ -318,6 +325,8 @@ namespace TwitchDownloaderWPF
         private void Page_Initialized(object sender, EventArgs e)
         {
             SetEnabled(false);
+            SetEnabledCropStart(false);
+            SetEnabledCropEnd(false);
             WebRequest.DefaultWebProxy = null;
             numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
             textOauth.Text = Settings.Default.OAuth;
@@ -371,6 +380,34 @@ namespace TwitchDownloaderWPF
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void checkStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
+        {
+            bool isStart = (bool)checkStart.IsChecked;
+
+            if (isStart)
+            {
+                SetEnabledCropStart(true);
+            }
+            else
+            {
+                SetEnabledCropStart(false);
+            }
+        }
+
+        private void checkEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
+        {
+            bool isEnd = (bool)checkEnd.IsChecked;
+
+            if (isEnd)
+            {
+                SetEnabledCropEnd(true);
+            }
+            else
+            {
+                SetEnabledCropEnd(false);
+            }
         }
     }
 }

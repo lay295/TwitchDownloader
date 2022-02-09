@@ -65,14 +65,14 @@
                 <ComboBox Name="comboQuality" Margin="5,10,0,0"/>
                 <StackPanel Margin="5,5,0,0">
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkStart_OnCheckStateChanged" Unchecked="checkStart_OnCheckStateChanged"/>
                         <TextBlock Text="Start" VerticalAlignment="Center" />
                         <xctk:IntegerUpDown Margin="3,-1,0,0" Value="0" Name="numStartHour" />
                         <xctk:IntegerUpDown Margin="3,-1,0,0" Value="0" Name="numStartMinute" />
                         <xctk:IntegerUpDown Margin="3,-1,0,0" Value="0" Name="numStartSecond" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                        <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkEnd_OnCheckStateChanged" Unchecked="checkEnd_OnCheckStateChanged"/>
                         <TextBlock Text="End" VerticalAlignment="Center" Margin="0,0,5,0" />
                         <xctk:IntegerUpDown Margin="3,-1,0,0" Value="0" Name="numEndHour" />
                         <xctk:IntegerUpDown Margin="3,-1,0,0" Value="0" Name="numEndMinute" />
