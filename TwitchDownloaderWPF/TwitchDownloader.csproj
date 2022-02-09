@@ -101,5 +101,7 @@ RMDIR "$(TargetDir)hu/" /S /Q
 RMDIR "$(TargetDir)pt-BR/" /S /Q
 RMDIR "$(TargetDir)zh-Hans/" /S /Q
 RMDIR "$(TargetDir)zh-Hant/" /S /Q</PostBuildEvent>
+    <AssemblyVersion>1.40.5.0</AssemblyVersion>
+    <FileVersion>1.40.5.0</FileVersion>
   </PropertyGroup>
 </Project>

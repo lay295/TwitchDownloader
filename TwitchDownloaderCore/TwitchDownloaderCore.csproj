@@ -6,7 +6,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Lewis Pardo</Authors>
-    <Version>1.1.3</Version>
+    <Version>1.1.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
