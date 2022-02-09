@@ -22,6 +22,7 @@
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 	<EnableNETAnalyzers>false</EnableNETAnalyzers>
+	<Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>icon_zps_icon.ico</ApplicationIcon>
