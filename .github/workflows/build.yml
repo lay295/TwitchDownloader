@@ -39,20 +39,15 @@ jobs:
      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
  
     steps:
-    - uses: actions/checkout@v1
-      name: Checkout Code
-     
-    - name: Setup MSBuild Path
-      uses: warrenbuckley/Setup-MSBuild@v1
-       
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.2
-     
-    - name: Restore NuGet Packages
-      run: nuget restore TwitchDownloaderWPF.sln
- 
-    - name: Build
-      run: msbuild TwitchDownloaderWPF.sln /p:Configuration=Debug /p:Platform=x64 /p:DebugType=None /p:DebugSymbols=false /p:AllowedReferenceRelatedFileExtensions=none /p:DeployOnBuild=true
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build Windows GUI
+      run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
     
     - name: Download File To Workspace
       # You may pin to the exact commit or the version.
@@ -65,12 +60,12 @@ jobs:
         file-name: ffmpeg.zip
         
     - name: Bundle ffmpeg
-      run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/x64/Debug/ffmpeg.exe
+      run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64/ffmpeg.exe
       
     - name: Zip Release
-      uses: papeloto/action-zip@v1
+      uses: vimtor/action-zip@v1
       with:
-        files: "TwitchDownloaderWPF/bin/x64/Debug"
+        files: "TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64"
         dest: release.zip
     
     - name: Download URL
@@ -103,9 +98,9 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore TwitchDownloaderCLI
     - name: Build
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows /p:DebugType=None /p:DebugSymbols=false
     - name: Build
@@ -116,25 +111,25 @@ jobs:
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm /p:DebugType=None /p:DebugSymbols=false
         
     - name: Zip Windows CLI
-      uses: papeloto/action-zip@v1
+      uses: vimtor/action-zip@v1
       with:
         files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/Windows/TwitchDownloaderCLI.exe
         dest: TwitchDownloaderCLI-Windows-x64.zip
         
     - name: Zip Linux CLI
-      uses: papeloto/action-zip@v1
+      uses: vimtor/action-zip@v1
       with:
         files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/Linux/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-Linux-x64.zip
         
     - name: Zip LinuxAlpine CLI
-      uses: papeloto/action-zip@v1
+      uses: vimtor/action-zip@v1
       with:
         files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/LinuxAlpine/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-LinuxAlpine-x64.zip
     
     - name: Zip LinuxArm CLI
-      uses: papeloto/action-zip@v1
+      uses: vimtor/action-zip@v1
       with:
         files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/LinuxArm/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-LinuxArm.zip
@@ -198,14 +193,14 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore TwitchDownloaderCLI
     - name: Build
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS /p:DebugType=None /p:DebugSymbols=false
       
     - name: Zip Release
-      uses: papeloto/action-zip@v1
+      uses: vimtor/action-zip@v1
       with:
         files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/MacOS/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-MacOS-x64.zip
