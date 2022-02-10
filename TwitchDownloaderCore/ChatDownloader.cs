@@ -55,15 +55,19 @@ namespace TwitchDownloaderCore
                 else
                 {
                     GqlClipResponse taskInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
+
+                    if (taskInfo.data.clip.video == null || taskInfo.data.clip.videoOffsetSeconds == null)
+                        throw new Exception("Invalid VOD for clip, deleted/expired VOD possibly?");
+
                     videoId = taskInfo.data.clip.video.id;
                     downloadOptions.CropBeginning = true;
-                    downloadOptions.CropBeginningTime = taskInfo.data.clip.videoOffsetSeconds;
+                    downloadOptions.CropBeginningTime = (int)taskInfo.data.clip.videoOffsetSeconds;
                     downloadOptions.CropEnding = true;
                     downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + taskInfo.data.clip.durationSeconds;
                     chatRoot.streamer.name = taskInfo.data.clip.broadcaster.displayName;
                     chatRoot.streamer.id = int.Parse(taskInfo.data.clip.broadcaster.id);
-                    videoStart = taskInfo.data.clip.videoOffsetSeconds;
-                    videoEnd = taskInfo.data.clip.videoOffsetSeconds + taskInfo.data.clip.durationSeconds;
+                    videoStart = (int)taskInfo.data.clip.videoOffsetSeconds;
+                    videoEnd = (int)taskInfo.data.clip.videoOffsetSeconds + taskInfo.data.clip.durationSeconds;
                 }
 
                 chatRoot.video.start = videoStart;

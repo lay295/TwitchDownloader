@@ -22,7 +22,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public DateTime createdAt { get; set; }
         public int durationSeconds { get; set; }
         public ClipBroadcaster broadcaster { get; set; }
-        public int videoOffsetSeconds { get; set; }
+        public int? videoOffsetSeconds { get; set; }
         public ClipVideo video { get; set; }
     }
 
