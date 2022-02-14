@@ -562,54 +562,78 @@ namespace TwitchDownloaderCore
 
             using (WebClient client = new WebClient())
             {
-                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json");
+                client.Encoding = Encoding.UTF8;
                 client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
 
-                JObject globalCheer = JObject.Parse(client.DownloadString("https://api.twitch.tv/kraken/bits/actions?channel_id=" + channel_id));
+                GqlCheerResponse cheerResponse = JsonConvert.DeserializeObject<GqlCheerResponse>(client.UploadString("https://gql.twitch.tv/gql", "{\"query\":\"query{cheerConfig{groups{nodes{id, prefix, tiers{bits}}, templateURL}},user(id:\\\"" + channel_id + "\\\"){cheer{cheerGroups{nodes{id,prefix,tiers{bits}},templateURL}}}}\",\"variables\":{}}"));
 
-                foreach (JToken emoteToken in globalCheer["actions"])
+                if (cheerResponse != null && cheerResponse.data != null)
                 {
-                    string prefix = emoteToken["prefix"].ToString();
-                    List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
-                    CheerEmote newEmote = new CheerEmote() { prefix = prefix, tierList = tierList };
-                    foreach (JToken tierToken in emoteToken["tiers"])
+                    List<CheerGroup> groupList = new List<CheerGroup>();
+
+                    foreach (CheerGroup group in cheerResponse.data.cheerConfig.groups)
                     {
-                        try
-                        {
-                            int minBits = tierToken["min_bits"].ToObject<int>();
-                            string fileName = Path.Combine(bitsFolder, prefix + minBits + "_2x.gif");
-                            byte[] finalBytes = null;
-
-                            if (File.Exists(fileName))
-                            {
-                                try
-                                {
-                                    finalBytes = File.ReadAllBytes(fileName);
-                                }
-                                catch { }
-                            }
-                            if (finalBytes == null)
-                            {
-                                byte[] bytes = client.DownloadData(tierToken["images"]["dark"]["animated"]["2"].ToString());
-                                try
-                                {
-                                    File.WriteAllBytes(fileName, bytes);
-                                }
-                                catch { }
-                                finalBytes = bytes;
-                            }
-
-                            if (finalBytes != null)
-                            {
-                                MemoryStream ms = new MemoryStream(finalBytes);
-                                TwitchEmote emote = new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(finalBytes) }, SKCodec.Create(ms), prefix, "gif", "", 2, finalBytes);
-                                tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
-                            }
-                        }
-                        catch
-                        { }
+                        groupList.Add(group);
                     }
-                    cheerEmotes.Add(newEmote);
+
+                    if (cheerResponse.data.user != null && cheerResponse.data.user.cheer != null && cheerResponse.data.user.cheer.cheerGroups != null)
+                    {
+                        foreach (var group in cheerResponse.data.user.cheer.cheerGroups)
+                        {
+                            groupList.Add(group);
+                        }
+                    }
+
+                    foreach (CheerGroup group in groupList)
+                    {
+                        string templateURL = group.templateURL;
+
+                        foreach (CheerNode node in group.nodes)
+                        {
+                            string prefix = node.prefix;
+                            List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
+                            CheerEmote newEmote = new CheerEmote() { prefix = prefix, tierList = tierList };
+                            foreach (Tier tier in node.tiers)
+                            {
+                                try
+                                {
+                                    int minBits = tier.bits;
+                                    string fileName = Path.Combine(bitsFolder, prefix + minBits + "_2x.gif");
+                                    byte[] finalBytes = null;
+
+                                    if (File.Exists(fileName))
+                                    {
+                                        try
+                                        {
+                                            finalBytes = File.ReadAllBytes(fileName);
+                                        }
+                                        catch { }
+                                    }
+                                    if (finalBytes == null)
+                                    {
+                                        string url = templateURL.Replace("PREFIX", node.prefix.ToLower()).Replace("BACKGROUND", "dark").Replace("ANIMATION", "animated").Replace("TIER", tier.bits.ToString()).Replace("SCALE.EXTENSION", "2.gif");
+                                        byte[] bytes = client.DownloadData(url);
+                                        try
+                                        {
+                                            File.WriteAllBytes(fileName, bytes);
+                                        }
+                                        catch { }
+                                        finalBytes = bytes;
+                                    }
+
+                                    if (finalBytes != null)
+                                    {
+                                        MemoryStream ms = new MemoryStream(finalBytes);
+                                        TwitchEmote emote = new TwitchEmote(new List<SKBitmap>() { SKBitmap.Decode(finalBytes) }, SKCodec.Create(ms), prefix, "gif", "", 2, finalBytes);
+                                        tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
+                                    }
+                                }
+                                catch
+                                { }
+                            }
+                            cheerEmotes.Add(newEmote);
+                        }
+                    }
                 }
             }
 
@@ -669,11 +693,12 @@ namespace TwitchDownloaderCore
             {
                 using (WebClient client = new WebClient())
                 {
-                    client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json; charset=UTF-8");
-                    client.Headers.Add("Client-Id", "v8kfhyc2980it9e7t5hhc7baukzuj2");
+                    client.Encoding = Encoding.UTF8;
+                    client.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
 
-                    JObject response = JObject.Parse(client.DownloadString("https://api.twitch.tv/kraken/users/" + id));
-                    return response["name"].ToString();
+                    JObject response = JObject.Parse(client.UploadString("https://gql.twitch.tv/gql", "{\"query\":\"query{user(id:\\\"" + id.ToString() + "\\\"){login}}\",\"variables\":{}}"));
+
+                    return response["data"]["user"]["login"].ToString();
                 }
             }
             catch { return ""; }
