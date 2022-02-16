@@ -1,0 +1,25 @@
+name: Feature Request
+description: Suggest a new feature
+labels: ["enhancement"]
+body:
+- type: markdown
+  attributes:
+    value: |
+           This is for suggesting new features.
+           [File a bug report here](https://github.com/lay295/TwitchDownloader/issues/new?labels=bug&template=bug_report.yaml)
+- type: checkboxes
+  id: checklist
+  attributes:
+    label: Checklist
+    options:
+      - label: I have checked the [issue page](https://github.com/lay295/TwitchDownloader/issues) for duplicates
+        required: true
+      - label: I am running the latest version ([download here](https://github.com/lay295/TwitchDownloader/releases/latest))
+        required: true
+- type: textarea
+  id: request_text
+  attributes:
+    label: Write your feature request here
+    placeholder: Please add support for downloading streams while they are live
+  validations:
+      required: true
