@@ -6,7 +6,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Lewis Pardo</Authors>
-    <Version>1.1.4</Version>
+    <Version>1.1.6</Version>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
@@ -18,6 +18,7 @@
     <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.80.2" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.80.2" />
     <PackageReference Include="StoneCold.SkiaSharp.NativeAssets.AlpineLinux" Version="2.80.2" />
+    <PackageReference Include="System.Text.Json" Version="6.0.2" />
   </ItemGroup>
 
 </Project>

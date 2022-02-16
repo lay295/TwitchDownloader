@@ -76,6 +76,7 @@ namespace TwitchDownloader
                         data.Id = video.node.id;
                         data.Time = video.node.createdAt;
                         data.Views = video.node.viewCount;
+                        data.Streamer = currnetChannel;
                         try
                         {
                             var bitmapImage = new BitmapImage();
@@ -123,6 +124,7 @@ namespace TwitchDownloader
                         data.Id = clip.node.slug;
                         data.Time = clip.node.createdAt;
                         data.Views = clip.node.viewCount;
+                        data.Streamer = currnetChannel;
                         try
                         {
                             var bitmapImage = new BitmapImage();

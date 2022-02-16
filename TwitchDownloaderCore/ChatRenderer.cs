@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1025,37 +1026,42 @@ namespace TwitchDownloaderCore
         }
         public ChatRoot ParseJson()
         {
-            ChatRoot chatJson;
-            try
+            ChatRoot chat = new ChatRoot();
+
+            using (FileStream fs = new FileStream(renderOptions.InputFile, FileMode.Open, FileAccess.Read))
             {
-                using (StreamReader r = new StreamReader(renderOptions.InputFile))
+                using (JsonDocument jsonDocument = JsonDocument.Parse(fs))
                 {
-                    using (JsonReader reader = new JsonTextReader(r))
+                    if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
                     {
-                        JsonSerializer serializer = new JsonSerializer();
-                        chatJson = serializer.Deserialize<ChatRoot>(reader);
+                        chat.streamer = streamerJson.Deserialize<Streamer>();
+                    }
+                    if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
+                    {
+                        if (videoJson.TryGetProperty("start", out JsonElement videoStartJson) && videoJson.TryGetProperty("end", out JsonElement videoEndJson))
+                        {
+                            chat.video = videoJson.Deserialize<VideoTime>();
+                        }
+                    }
+                    if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
+                    {
+                        chat.emotes = emotesJson.Deserialize<Emotes>();
+                    }
+                    if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
+                    {
+                        chat.comments = commentsJson.Deserialize<List<Comment>>();
                     }
                 }
-                if (chatJson.streamer == null)
-                {
-                    JObject json = JObject.Parse(File.ReadAllText(renderOptions.InputFile));
-                    chatJson.streamer = new Streamer();
-                    chatJson.streamer.name = json["video"]["user_name"].ToString();
-                    chatJson.streamer.id = json["video"]["user_id"].ToObject<int>();
-                    chatJson.video.end = TwitchHelper.TimestampToSeconds(json["video"]["duration"].ToString());
-                }
-                chatJson.streamer.name = TwitchHelper.GetStreamerName(chatJson.streamer.id);
-            }
-            catch (JsonSerializationException)
-            {
-                chatJson = new ChatRoot();
-                chatJson.comments = JsonConvert.DeserializeObject<List<Comment>>(File.ReadAllText(renderOptions.InputFile));
-                chatJson.streamer = new Streamer();
-                chatJson.streamer.id = Int32.Parse(chatJson.comments.First().channel_id);
-                chatJson.streamer.name = TwitchHelper.GetStreamerName(chatJson.streamer.id);
             }
 
-            return chatJson;
+            if (chat.streamer == null)
+            {
+                chat.streamer = new Streamer();
+                chat.streamer.id = int.Parse(chat.comments.First().channel_id);
+                chat.streamer.name = TwitchHelper.GetStreamerName(chat.streamer.id);
+            }
+
+            return chat;
         }
     }
 }
