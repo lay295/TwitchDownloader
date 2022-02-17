@@ -26,7 +26,7 @@ namespace TwitchDownloaderCore
 
             foreach (var quality in taskLinks[0]["data"]["clip"]["videoQualities"])
             {
-                if (quality["quality"].ToString() == downloadOptions.Quality)
+                if (quality["quality"].ToString() + "p" + (quality["frameRate"].ToString() == "30" ? "" : quality["frameRate"].ToString()) == downloadOptions.Quality)
                     downloadUrl = quality["sourceURL"].ToString();
             }
 
