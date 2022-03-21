@@ -531,7 +531,8 @@ namespace TwitchDownloaderCore
                 new WebClient().DownloadFile("https://github.com/twitter/twemoji/archive/refs/tags/v13.1.0.zip", emojiZip);
                 using (ZipArchive archive = ZipFile.OpenRead(emojiZip))
                 {
-                    var emojis = archive.Entries.Where(x => Path.GetDirectoryName(x.FullName) == @"twemoji-13.1.0\assets\72x72" && !String.IsNullOrWhiteSpace(x.Name));
+                    var emojiAssetsPath = Path.Combine("twemoji-13.1.0", "assets", "72x72");
+                    var emojis = archive.Entries.Where(x => Path.GetDirectoryName(x.FullName) == emojiAssetsPath && !String.IsNullOrWhiteSpace(x.Name));
                     foreach (var emoji in emojis)
                     {
                         try
