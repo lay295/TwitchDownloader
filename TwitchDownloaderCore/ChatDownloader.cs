@@ -97,6 +97,7 @@ namespace TwitchDownloaderCore
             double videoStart = 0.0;
             double videoEnd = 0.0;
             double videoDuration = 0.0;
+            int threadCount = downloadOptions.ThreadCount;
 
             if (downloadType == DownloadType.Video)
             {
@@ -123,13 +124,12 @@ namespace TwitchDownloaderCore
                 chatRoot.streamer.id = int.Parse(taskInfo.data.clip.broadcaster.id);
                 videoStart = (int)taskInfo.data.clip.videoOffsetSeconds;
                 videoEnd = (int)taskInfo.data.clip.videoOffsetSeconds + taskInfo.data.clip.durationSeconds;
+                threadCount = 1;
             }
 
             chatRoot.video.start = videoStart;
             chatRoot.video.end = videoEnd;
             videoDuration = videoEnd - videoStart;
-
-            int threadCount = downloadOptions.ThreadCount;
 
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
             List<Task> tasks = new List<Task>();
@@ -163,9 +163,10 @@ namespace TwitchDownloaderCore
                         progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
                     }
                 });
-                double start = chunk * i;
+                double start = videoStart + chunk * i;
                 tasks.Add(DownloadSection(threadProgress, cancellationToken, start, start + chunk, videoId, commentsSet));
             }
+
             await Task.WhenAll(tasks);
 
             comments = commentsSet.ToList();
