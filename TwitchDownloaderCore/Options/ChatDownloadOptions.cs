@@ -16,6 +16,8 @@ namespace TwitchDownloaderCore.Options
         public double CropEndingTime { get; set; }
         public bool Timestamp { get; set; }
         public bool EmbedEmotes { get; set; }
+
+        public int ThreadCount { get; set; }
         public TimestampFormat TimeFormat { get; set; }
     }
 }

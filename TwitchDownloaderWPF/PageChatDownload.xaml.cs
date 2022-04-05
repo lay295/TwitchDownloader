@@ -272,6 +272,7 @@ namespace TwitchDownloaderWPF
             options.Timestamp = true;
             options.EmbedEmotes = (bool)checkEmbed.IsChecked;
             options.Filename = filename;
+            options.ThreadCount = (int)numChatDownloadThreads.Value;
             return options;
         }
 
@@ -335,6 +336,10 @@ namespace TwitchDownloaderWPF
         {
             WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();
+        }
+        private void numChatDownloadThreads_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            numChatDownloadThreads.Value = Math.Clamp((int)numChatDownloadThreads.Value, 1, 50);
         }
     }
 }
