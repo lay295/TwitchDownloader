@@ -67,7 +67,7 @@ Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, an
 **-\-embed-emotes**
 Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.
 
-**-\-chat-threads**
+**-\-chat-connections**
 The number of parallel downloads for chat. Default 10.
 ## Arguments for mode ChatRender
 **-i/-\-input**

@@ -17,7 +17,7 @@ namespace TwitchDownloaderCore.Options
         public bool Timestamp { get; set; }
         public bool EmbedEmotes { get; set; }
 
-        public int ThreadCount { get; set; }
+        public int ConnectionCount { get; set; }
         public TimestampFormat TimeFormat { get; set; }
     }
 }

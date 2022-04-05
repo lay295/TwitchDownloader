@@ -97,7 +97,7 @@ namespace TwitchDownloaderCore
             double videoStart = 0.0;
             double videoEnd = 0.0;
             double videoDuration = 0.0;
-            int threadCount = downloadOptions.ThreadCount;
+            int connectionCount = downloadOptions.ConnectionCount;
 
             if (downloadType == DownloadType.Video)
             {
@@ -124,7 +124,7 @@ namespace TwitchDownloaderCore
                 chatRoot.streamer.id = int.Parse(taskInfo.data.clip.broadcaster.id);
                 videoStart = (int)taskInfo.data.clip.videoOffsetSeconds;
                 videoEnd = (int)taskInfo.data.clip.videoOffsetSeconds + taskInfo.data.clip.durationSeconds;
-                threadCount = 1;
+                connectionCount = 1;
             }
 
             chatRoot.video.start = videoStart;
@@ -133,14 +133,14 @@ namespace TwitchDownloaderCore
 
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
             List<Task> tasks = new List<Task>();
-            List<int> percentages = new List<int>(threadCount);
+            List<int> percentages = new List<int>(connectionCount);
 
-            double chunk = videoDuration / threadCount;
-            for (int i=0;i<threadCount;i++)
+            double chunk = videoDuration / connectionCount;
+            for (int i=0;i<connectionCount;i++)
             {
                 int tc = i;
                 percentages.Add(0);
-                var threadProgress = new Progress<ProgressReport>(progressReport => {
+                var taskProgress = new Progress<ProgressReport>(progressReport => {
                     if (progressReport.reportType != ReportType.Percent)
                     {
                         progress.Report(progressReport);
@@ -157,14 +157,14 @@ namespace TwitchDownloaderCore
 
                         percent = 0;
                         percentages.ForEach(p => percent += p);
-                        percent = percent / threadCount;
+                        percent = percent / connectionCount;
 
                         progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = $"Downloading {percent}%" });
                         progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
                     }
                 });
                 double start = videoStart + chunk * i;
-                tasks.Add(DownloadSection(threadProgress, cancellationToken, start, start + chunk, videoId, commentsSet));
+                tasks.Add(DownloadSection(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet));
             }
 
             await Task.WhenAll(tasks);
