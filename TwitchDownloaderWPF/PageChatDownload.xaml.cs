@@ -337,6 +337,7 @@ namespace TwitchDownloaderWPF
             WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();
         }
+
         private void numChatDownloadConnections_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             numChatDownloadConnections.Value = Math.Clamp((int)numChatDownloadConnections.Value, 1, 50);
