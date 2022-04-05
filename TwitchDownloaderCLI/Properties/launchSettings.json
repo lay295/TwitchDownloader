@@ -1,8 +1,7 @@
 {
   "profiles": {
     "TwitchDownloaderCLI": {
-      "commandName": "Project",
-      "commandLineArgs": "-m ChatDownload -o data.json -u 1446299181"
+      "commandName": "Project"
     }
   }
 }
