@@ -58,6 +58,7 @@
                 <TextBlock Visibility="Collapsed" x:Name="timeText" Text="Timestamp Format:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
                 <TextBlock Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
                 <TextBlock HorizontalAlignment="Right" Margin="0,29,0,0">Embed Emotes <Hyperlink ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock Text="Connections:" Margin="0,6,0,0"/>
             </StackPanel>
             <StackPanel>
                 <StackPanel Margin="5,12,0,0" Orientation="Horizontal">
@@ -86,6 +87,7 @@
                     </StackPanel>
                 </StackPanel>
                 <CheckBox x:Name="checkEmbed" Margin="5,8,0,0"></CheckBox>
+                <xctk:IntegerUpDown Margin="2,5,0,0" Value="10" Width="40" x:Name="numChatDownloadConnections" HorizontalAlignment="Left" ValueChanged="numChatDownloadConnections_ValueChanged" />
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="80,0,20,10" VerticalAlignment="Bottom">

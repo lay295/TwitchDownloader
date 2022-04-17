@@ -168,6 +168,7 @@ namespace TwitchDownloaderCLI
             downloadOptions.EmbedEmotes = inputOptions.EmbedEmotes;
             downloadOptions.Filename = inputOptions.OutputFile;
             downloadOptions.TimeFormat = inputOptions.TimeFormat;
+            downloadOptions.ConnectionCount = inputOptions.ChatConnections;
 
             ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
