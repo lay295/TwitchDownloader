@@ -113,25 +113,25 @@ jobs:
     - name: Zip Windows CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/Windows/TwitchDownloaderCLI.exe
+        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/Windows/TwitchDownloaderCLI.exe
         dest: TwitchDownloaderCLI-Windows-x64.zip
         
     - name: Zip Linux CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/Linux/TwitchDownloaderCLI
+        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/Linux/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-Linux-x64.zip
         
     - name: Zip LinuxAlpine CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/LinuxAlpine/TwitchDownloaderCLI
+        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxAlpine/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-LinuxAlpine-x64.zip
     
     - name: Zip LinuxArm CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/LinuxArm/TwitchDownloaderCLI
+        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-LinuxArm.zip
     
     - name: Download URL
@@ -202,7 +202,7 @@ jobs:
     - name: Zip Release
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/netcoreapp3.1/publish/MacOS/TwitchDownloaderCLI
+        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOS/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-MacOS-x64.zip
     
     - name: Download URL
