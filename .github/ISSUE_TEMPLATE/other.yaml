@@ -1,0 +1,23 @@
+name: Other
+description: Anything else you may have to say
+body:
+- type: markdown
+  attributes:
+    value: |
+           This is a generic issue.
+           If you are experiencing a problem or have an idea that could improve the program, [file the accurate issue](https://github.com/lay295/TwitchDownloader/issues/new/choose)
+- type: checkboxes
+  id: checklist
+  attributes:
+    label: Checklist
+    options:
+      - label: I have checked the [issue page](https://github.com/lay295/TwitchDownloader/issues) for duplicates
+        required: true
+- type: textarea
+  id: request_text
+  attributes:
+    label: Write stuff here
+    description: This could be a question, or a poem about this program, it's up to you.
+    placeholder: Woah this program is amazing and fixed my life thank you!!
+  validations:
+      required: true

@@ -1,0 +1,25 @@
+name: Bug Report
+description: File a bug report
+labels: ["bug"]
+body:
+- type: markdown
+  attributes:
+    value: |
+           This is for reporting bugs.
+           [Suggest a new feature here](https://github.com/lay295/TwitchDownloader/issues/new?labels=enhancement&template=feature_request.yaml)
+- type: checkboxes
+  id: checklist
+  attributes:
+    label: Checklist
+    options:
+      - label: I have checked the [issue page](https://github.com/lay295/TwitchDownloader/issues) for duplicates
+        required: true
+      - label: I am running the latest version ([download here](https://github.com/lay295/TwitchDownloader/releases/latest))
+        required: true
+- type: textarea
+  id: issue_text
+  attributes:
+    label: Describe your issue here
+    placeholder: When i try to download a VOD it gives me a 403 error
+  validations:
+      required: true
