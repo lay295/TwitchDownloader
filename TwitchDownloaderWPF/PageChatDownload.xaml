@@ -87,7 +87,7 @@
                     </StackPanel>
                 </StackPanel>
                 <CheckBox x:Name="checkEmbed" Margin="5,8,0,0"></CheckBox>
-                <xctk:IntegerUpDown Margin="2,5,0,0" Value="10" Width="40" x:Name="numChatDownloadConnections" HorizontalAlignment="Left" ValueChanged="numChatDownloadConnections_ValueChanged" />
+                <xctk:IntegerUpDown Margin="4,5,0,0" Value="10" Width="40" x:Name="numChatDownloadConnections" HorizontalAlignment="Left" ValueChanged="numChatDownloadConnections_ValueChanged" />
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="80,0,20,10" VerticalAlignment="Bottom">
