@@ -5,7 +5,6 @@
     <Version>1.40.8</Version>
     <Platforms>AnyCPU;x64</Platforms>
     <TargetFramework>net6.0</TargetFramework>
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 

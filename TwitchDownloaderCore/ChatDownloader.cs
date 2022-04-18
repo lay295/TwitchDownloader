@@ -24,7 +24,7 @@ namespace TwitchDownloaderCore
             downloadOptions = DownloadOptions;
         }
 
-        public async Task DownloadSection(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments)
+        public async Task DownloadSection(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
         {
             using (WebClient client = new WebClient())
             {
@@ -63,12 +63,15 @@ namespace TwitchDownloaderCore
 
                     CommentResponse commentResponse = JsonConvert.DeserializeObject<CommentResponse>(response);
 
-                    foreach (var comment in commentResponse.comments)
+                    lock (commentLock)
                     {
-                        if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
-                            comments.Add(comment);
+                        foreach (var comment in commentResponse.comments)
+                        {
+                            if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
+                                comments.Add(comment);
 
-                        latestMessage = comment.content_offset_seconds;
+                            latestMessage = comment.content_offset_seconds;
+                        }
                     }
                     if (commentResponse._next == null)
                         break;
@@ -132,6 +135,7 @@ namespace TwitchDownloaderCore
             videoDuration = videoEnd - videoStart;
 
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
+            object commentLock = new object();
             List<Task> tasks = new List<Task>();
             List<int> percentages = new List<int>(connectionCount);
 
@@ -156,7 +160,8 @@ namespace TwitchDownloaderCore
                         percentages[tc] = percent;
 
                         percent = 0;
-                        percentages.ForEach(p => percent += p);
+                        for (int j = 0; j < connectionCount; j++)
+                            percent += percentages[j];
                         percent = percent / connectionCount;
 
                         progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = $"Downloading {percent}%" });
@@ -164,7 +169,7 @@ namespace TwitchDownloaderCore
                     }
                 });
                 double start = videoStart + chunk * i;
-                tasks.Add(DownloadSection(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet));
+                tasks.Add(DownloadSection(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet, commentLock));
             }
 
             await Task.WhenAll(tasks);
