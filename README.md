@@ -53,7 +53,7 @@ TwitchDownloaderCLI -m ChatRender -i %vodid%_chat.json -h 1080 -w 422 --framerat
 ```
 sudo chmod +x TwitchDownloaderCLI
 ```
-4. You can now start using the donwloader, for example:
+4. You can now start using the downloader, for example:
 ```
 ./TwitchDownloaderCLI -m VideoDownload --id <vod-id-here> -o out.mp4
 ```
