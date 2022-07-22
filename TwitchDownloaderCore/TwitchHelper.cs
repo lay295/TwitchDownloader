@@ -257,7 +257,7 @@ namespace TwitchDownloaderCore
                         TwitchHelper.CreateDirectory(stvFolder);
 
                     //Global 7tv Emotes
-                    JArray STV = JArray.Parse(client.DownloadString("https://api.7tv.app/v2/emotes/global"));
+                    JArray STV = JArray.Parse(client.DownloadString("https://7tv.io/v2/emotes/global"));
                     foreach (var emote in STV)
                     {
                         string id = emote["id"].ToString();
@@ -283,7 +283,7 @@ namespace TwitchDownloaderCore
                     //Channel specific 7tv emotes
                     try
                     {
-                        JArray STV_channel = JArray.Parse(client.DownloadString(String.Format("https://api.7tv.app/v2/users/{0}/emotes", streamerId)));
+                        JArray STV_channel = JArray.Parse(client.DownloadString(String.Format("https://7tv.io/v2/users/{0}/emotes", streamerId)));
                         foreach (var emote in STV_channel)
                         {
                             string id = emote["id"].ToString();
