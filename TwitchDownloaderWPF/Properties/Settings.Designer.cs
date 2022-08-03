@@ -12,7 +12,7 @@ namespace TwitchDownloader.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -49,7 +49,7 @@ namespace TwitchDownloader.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("12")]
+        [global::System.Configuration.DefaultSettingValueAttribute("24")]
         public float FontSize {
             get {
                 return ((float)(this["FontSize"]));
@@ -85,7 +85,7 @@ namespace TwitchDownloader.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("600")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1200")]
         public int Height {
             get {
                 return ((int)(this["Height"]));
@@ -97,7 +97,7 @@ namespace TwitchDownloader.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("350")]
+        [global::System.Configuration.DefaultSettingValueAttribute("700")]
         public int Width {
             get {
                 return ((int)(this["Width"]));
@@ -224,31 +224,6 @@ namespace TwitchDownloader.Properties {
             }
             set {
                 this["FontColorB"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix" +
-            "_fmt bgra -video_size {width}x{height} -i -")]
-        public string FfmpegInputArgs {
-            get {
-                return ((string)(this["FfmpegInputArgs"]));
-            }
-            set {
-                this["FfmpegInputArgs"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"")]
-        public string FfmpegOutputArgs {
-            get {
-                return ((string)(this["FfmpegOutputArgs"]));
-            }
-            set {
-                this["FfmpegOutputArgs"] = value;
             }
         }
         
@@ -489,6 +464,66 @@ namespace TwitchDownloader.Properties {
             }
             set {
                 this["QueueFolder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int ChatDownloadThreads {
+            get {
+                return ((int)(this["ChatDownloadThreads"]));
+            }
+            set {
+                this["ChatDownloadThreads"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ChatDownloadType {
+            get {
+                return ((int)(this["ChatDownloadType"]));
+            }
+            set {
+                this["ChatDownloadType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ChatEmbedEmotes {
+            get {
+                return ((bool)(this["ChatEmbedEmotes"]));
+            }
+            set {
+                this["ChatEmbedEmotes"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("[]")]
+        public string FfmpegArguments {
+            get {
+                return ((string)(this["FfmpegArguments"]));
+            }
+            set {
+                this["FfmpegArguments"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double EmoteScale {
+            get {
+                return ((double)(this["EmoteScale"]));
+            }
+            set {
+                this["EmoteScale"] = value;
             }
         }
     }
