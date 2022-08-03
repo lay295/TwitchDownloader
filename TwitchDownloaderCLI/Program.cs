@@ -243,6 +243,13 @@ namespace TwitchDownloaderCLI
                 if (renderOptions.ChatWidth % 2 != 0)
                     renderOptions.ChatWidth++;
             }
+            
+            if (inputOptions.IgnoreUsersList != "")
+            {
+                renderOptions.IgnoreUsersList = inputOptions.IgnoreUsersList.ToLower().Split(',',
+                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            }
+
 
             ChatRenderer chatDownloader = new ChatRenderer(renderOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();

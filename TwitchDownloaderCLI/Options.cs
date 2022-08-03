@@ -90,5 +90,7 @@ namespace TwitchDownloaderCLI
         public int ChatConnections { get; set; }
         [Option("badge-filter", Default = 0, HelpText = "Chat Badge filter mask")]
         public int BadgeFilterMask { get; set; }
+        [Option("ignore-users", Default = "", HelpText = "List of usernames to ignore when rendering, separated by commas.")]
+        public string IgnoreUsersList { get; set; }
     }
 }

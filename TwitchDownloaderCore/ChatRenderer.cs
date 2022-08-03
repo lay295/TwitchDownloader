@@ -266,6 +266,13 @@ namespace TwitchDownloaderCore
                 frameCanvas.Clear(renderOptions.BackgroundColor);
                 while (commentIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
                 {
+                    // Skip comments from ignored users
+                    if (renderOptions.IgnoreUsersList.Contains(chatRoot.comments[commentIndex].commenter.name))
+                    {
+                        commentIndex--;
+                        continue;
+                    }
+
                     CommentSection comment = GenerateCommentSection(commentIndex);
                     commentList.Add(comment);
 
