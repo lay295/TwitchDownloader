@@ -85,25 +85,21 @@ public class VideoTime
     public double end { get; set; }
 }
 
-public class ThirdPartyEmoteData
+public class EmbedEmoteData
 {
     public string id { get; set; }
     public int imageScale { get; set; }
     public byte[] data { get; set; }
     public string name { get; set; }
-}
-
-public class FirstPartyEmoteData
-{
-    public string id { get; set; }
-    public int imageScale { get; set; }
-    public byte[] data { get; set; }
+    public string url { get; set; }
+    public int width { get; set; }
+    public int height { get; set; }
 }
 
 public class Emotes
 {
-    public List<ThirdPartyEmoteData> thirdParty { get; set; }
-    public List<FirstPartyEmoteData> firstParty { get; set; }
+    public List<EmbedEmoteData> thirdParty { get; set; }
+    public List<EmbedEmoteData> firstParty { get; set; }
 }
 
 public class CommentResponse

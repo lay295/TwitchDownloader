@@ -50,6 +50,22 @@ namespace TwitchDownloaderWPF
         private void Page_Initialized(object sender, EventArgs e)
         {
             SetEnabled(false, false);
+            checkEmbed.IsChecked = Settings.Default.ChatEmbedEmotes;
+            numChatDownloadConnections.Value = Settings.Default.ChatDownloadThreads;
+            switch (Settings.Default.ChatDownloadType)
+            {
+                case (int)DownloadFormat.Text:
+                    radioText.IsChecked = true;
+                    break;
+                case (int)DownloadFormat.Html:
+                    radioHTML.IsChecked = true;
+                    break;
+                case (int)DownloadFormat.Json:
+                    radioJson.IsChecked = true;
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void SetEnabled(bool isEnabled, bool onlyCrop)
@@ -73,6 +89,7 @@ namespace TwitchDownloaderWPF
                 btnQueue.IsEnabled = isEnabled;
                 radioJson.IsEnabled = isEnabled;
                 radioText.IsEnabled = isEnabled;
+                radioHTML.IsEnabled = isEnabled;
             }
         }
 
@@ -182,93 +199,17 @@ namespace TwitchDownloaderWPF
             ));
         }
 
-        private async void btnDownload_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-
-            if (radioJson.IsChecked == true)
-                saveFileDialog.Filter = "JSON Files | *.json";
-            else
-                saveFileDialog.Filter = "TXT Files | *.txt";
-
-            saveFileDialog.RestoreDirectory = true;
-            saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text);
-
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                try
-                {
-                    ChatDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
-                    if (downloadType == DownloadType.Video)
-                    {
-                        int startTime = 0;
-                        int endTime = 0;
-
-                        if (checkStart.IsChecked == true)
-                        {
-                            downloadOptions.CropBeginning = true;
-                            TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                            startTime = (int)Math.Round(start.TotalSeconds);
-                            downloadOptions.CropBeginningTime = startTime;
-                        }
-
-                        if (checkEnd.IsChecked == true)
-                        {
-                            downloadOptions.CropEnding = true;
-                            TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                            endTime = (int)Math.Round(end.TotalSeconds);
-                            downloadOptions.CropEndingTime = endTime;
-                        }
-
-                        downloadOptions.Id = downloadId;
-                    }
-                    else
-                    {
-                        downloadOptions.Id = downloadId;
-                    }
-
-                    if ((bool)radioUTC.IsChecked)
-                        downloadOptions.TimeFormat = TimestampFormat.Utc;
-                    if ((bool)radioRelative.IsChecked)
-                        downloadOptions.TimeFormat = TimestampFormat.Relative;
-                    if ((bool)radioNone.IsChecked)
-                        downloadOptions.TimeFormat = TimestampFormat.None;
-
-                    ChatDownloader currentDownload = new ChatDownloader(downloadOptions);
-
-                    btnGetInfo.IsEnabled = false;
-                    SetEnabled(false, false);
-                    SetImage("Images/ppOverheat.gif", true);
-                    statusMessage.Text = "Downloading";
-
-                    Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-
-                    try
-                    {
-                        await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
-                        statusMessage.Text = "Done";
-                        SetImage("Images/ppHop.gif", true);
-                    }
-                    catch (Exception ex)
-                    {
-                        statusMessage.Text = "ERROR";
-                        SetImage("Images/peepoSad.png", false);
-                        AppendLog("ERROR: " + ex.Message);
-                    }
-                    btnGetInfo.IsEnabled = true;
-                    statusProgressBar.Value = 0;
-                }
-                catch (Exception ex)
-                {
-                    AppendLog("ERROR: " + ex.Message);
-                }
-            }
-        }
-
         public ChatDownloadOptions GetOptions(string filename)
         {
             ChatDownloadOptions options = new ChatDownloadOptions();
-            options.IsJson = (bool)radioJson.IsChecked;
+
+            if (radioJson.IsChecked == true)
+                options.DownloadFormat = DownloadFormat.Json;
+            else if (radioHTML.IsChecked == true)
+                options.DownloadFormat = DownloadFormat.Html;
+            else if (radioText.IsChecked == true)
+                options.DownloadFormat = DownloadFormat.Text;
+
             options.Timestamp = true;
             options.EmbedEmotes = (bool)checkEmbed.IsChecked;
             options.Filename = filename;
@@ -313,60 +254,173 @@ namespace TwitchDownloaderWPF
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void btnSettings_Loaded(object sender, RoutedEventArgs e)
+        private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void radioText_Checked(object sender, RoutedEventArgs e)
         {
-            timeText.Visibility = Visibility.Visible;
-            timeOptions.Visibility = Visibility.Visible;
-            checkEmbed.IsEnabled = false;
+            if (this.IsInitialized)
+            {
+                timeText.Visibility = Visibility.Visible;
+                timeOptions.Visibility = Visibility.Visible;
+                checkEmbed.IsEnabled = false;
+                textCrop.Margin = new Thickness(0, 14, 0, 0);
+
+                Settings.Default.ChatDownloadType = (int)DownloadFormat.Text;
+                Settings.Default.Save();
+            }
         }
 
-        private void radioText_Unchecked(object sender, RoutedEventArgs e)
+        private void numChatDownloadConnections_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            timeText.Visibility = Visibility.Collapsed;
-            timeOptions.Visibility = Visibility.Collapsed;
-            checkEmbed.IsEnabled = true;
+            numChatDownloadConnections.Value = Math.Clamp((int)numChatDownloadConnections.Value, 1, 50);
+            if (this.IsInitialized)
+            {
+                Settings.Default.ChatDownloadThreads = (int)numChatDownloadConnections.Value;
+                Settings.Default.Save();
+            }
         }
 
-        private void btnQueue_Click(object sender, RoutedEventArgs e)
+        private void checkEmbed_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.ChatEmbedEmotes = true;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkEmbed_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.ChatEmbedEmotes = true;
+                Settings.Default.Save();
+            }
+        }
+
+        private void radioJson_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                timeText.Visibility = Visibility.Collapsed;
+                timeOptions.Visibility = Visibility.Collapsed;
+                checkEmbed.IsEnabled = true;
+                textCrop.Margin = new Thickness(0, 20, 0, 0);
+
+                Settings.Default.ChatDownloadType = (int)DownloadFormat.Json;
+                Settings.Default.Save();
+            }
+        }
+
+        private void radioHTML_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                timeText.Visibility = Visibility.Collapsed;
+                timeOptions.Visibility = Visibility.Collapsed;
+                checkEmbed.IsEnabled = true;
+                textCrop.Margin = new Thickness(0, 20, 0, 0);
+
+                Settings.Default.ChatDownloadType = (int)DownloadFormat.Html;
+                Settings.Default.Save();
+            }
+        }
+
+        private async void SplitButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+                if (radioJson.IsChecked == true)
+                    saveFileDialog.Filter = "JSON Files | *.json";
+                else if (radioHTML.IsChecked == true)
+                    saveFileDialog.Filter = "HTML Files | *.html";
+                else
+                    saveFileDialog.Filter = "TXT Files | *.txt";
+
+                saveFileDialog.RestoreDirectory = true;
+                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text);
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    try
+                    {
+                        ChatDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
+                        if (downloadType == DownloadType.Video)
+                        {
+                            int startTime = 0;
+                            int endTime = 0;
+
+                            if (checkStart.IsChecked == true)
+                            {
+                                downloadOptions.CropBeginning = true;
+                                TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
+                                startTime = (int)Math.Round(start.TotalSeconds);
+                                downloadOptions.CropBeginningTime = startTime;
+                            }
+
+                            if (checkEnd.IsChecked == true)
+                            {
+                                downloadOptions.CropEnding = true;
+                                TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
+                                endTime = (int)Math.Round(end.TotalSeconds);
+                                downloadOptions.CropEndingTime = endTime;
+                            }
+
+                            downloadOptions.Id = downloadId;
+                        }
+                        else
+                        {
+                            downloadOptions.Id = downloadId;
+                        }
+
+                        if ((bool)radioUTC.IsChecked)
+                            downloadOptions.TimeFormat = TimestampFormat.Utc;
+                        if ((bool)radioRelative.IsChecked)
+                            downloadOptions.TimeFormat = TimestampFormat.Relative;
+                        if ((bool)radioNone.IsChecked)
+                            downloadOptions.TimeFormat = TimestampFormat.None;
+
+                        ChatDownloader currentDownload = new ChatDownloader(downloadOptions);
+
+                        btnGetInfo.IsEnabled = false;
+                        SetEnabled(false, false);
+                        SetImage("Images/ppOverheat.gif", true);
+                        statusMessage.Text = "Downloading";
+
+                        Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
+
+                        try
+                        {
+                            await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
+                            statusMessage.Text = "Done";
+                            SetImage("Images/ppHop.gif", true);
+                        }
+                        catch (Exception ex)
+                        {
+                            statusMessage.Text = "ERROR";
+                            SetImage("Images/peepoSad.png", false);
+                            AppendLog("ERROR: " + ex.Message);
+                        }
+                        btnGetInfo.IsEnabled = true;
+                        statusProgressBar.Value = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendLog("ERROR: " + ex.Message);
+                    }
+                }
+            }
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();
         }
-
-        private void numChatDownloadConnections_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            numChatDownloadConnections.Value = Math.Clamp((int)numChatDownloadConnections.Value, 1, 50);
-        }
-    }
-}
-
-public class ChatDownloadInfo
-{
-    public DownloadType is_vod { get; set; }
-    public string id { get; set; }
-    public string path { get; set; }
-    public string vod_id { get; set; }
-    public int offset { get; set; }
-    public double duration { get; set; }
-    public bool is_json { get; set; }
-    public string streamer_name { get; set; }
-    public int streamer_id { get; set; }
-
-    public ChatDownloadInfo(DownloadType Is_vod, string Id, string Path, string Vod_id, int Offset, double Duration, bool Is_json, string Streamer_name, int Streamer_id)
-    {
-        is_vod = Is_vod;
-        id = Id;
-        path = Path;
-        vod_id = Vod_id;
-        offset = Offset;
-        duration = Duration;
-        is_json = Is_json;
-        streamer_name = Streamer_name;
-        streamer_id = Streamer_id;
     }
 }

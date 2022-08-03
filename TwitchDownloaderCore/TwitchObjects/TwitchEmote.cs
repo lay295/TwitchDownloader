@@ -1,64 +1,110 @@
 ﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
+    
+    public enum EmoteProvider
+    {
+        FirstParty,
+        ThirdParty
+    }
     public class TwitchEmote
     {
-        public List<SKBitmap> emote_frames = new List<SKBitmap>();
-        public SKCodec codec;
-        public byte[] imageData;
-        public string imageType;
-        public string name;
-        public string id;
-        public int width;
-        public int height;
-        public int imageScale;
-
-        public TwitchEmote(List<SKBitmap> Emote_frames, SKCodec Codec, string Name, string ImageType, string Id, int ImageScale, byte[] ImageData)
+        public SKCodec Codec { get; set; }
+        public byte[] ImageData { get; set; }
+        public EmoteProvider EmoteProvider { get; set; }
+        public List<SKBitmap> EmoteFrames { get; set; } = new List<SKBitmap>();
+        public List<int> EmoteFrameDurations { get; set; } = new List<int>();
+        public int TotalDuration { get; set; }
+        public string Name { get; set; }
+        public string Id { get; set; }
+        public int ImageScale { get; set; }
+        public bool IsZeroWidth { get; set; } = false;
+        public int FrameCount
         {
-            emote_frames = Emote_frames;
-            codec = Codec;
-            name = Name;
-            id = Id;
-            width = Emote_frames.First().Width;
-            height = Emote_frames.First().Height;
-            imageScale = ImageScale;
-            imageData = ImageData;
-
-            // If we are webp, with zero frame count then we are a static image
-            // Thus we should just treat it as a differnt imageType so we don't animate it
-            imageType = ImageType;
-            if (imageType == "webp" && Codec.FrameCount == 0)
-                imageType = "webp_static";
-
-            // Split animated image into a list of images
-            if (imageType == "gif" || imageType == "webp")
+            get
             {
-                emote_frames.Clear();
-                for (int i = 0; i < Codec.FrameCount; i++)
+                if (Codec.FrameCount == 0)
+                    return 1;
+                else
+                    return Codec.FrameCount;
+            }
+        }
+        public int Height { get { return EmoteFrames[0].Height; } }
+        public int Width { get { return EmoteFrames[0].Width; } }
+
+        public TwitchEmote(byte[] imageData, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName)
+        {
+            using MemoryStream ms = new MemoryStream(imageData);
+            Codec = SKCodec.Create(ms);
+            EmoteProvider = emoteProvider;
+            Id = imageId;
+            Name = imageName;
+            ImageScale = imageScale;
+            ImageData = imageData;
+
+            ExtractFrames();
+            CalculateDurations();
+        }
+
+        private void CalculateDurations()
+        {
+            EmoteFrameDurations = new List<int>();
+            for (int i = 0; i < Codec.FrameCount; i++)
+            {
+                var duration = Codec.FrameInfo[i].Duration / 10;
+                EmoteFrameDurations.Add(duration);
+                TotalDuration += duration;
+            }
+
+            if (TotalDuration == 0 || TotalDuration == Codec.FrameCount)
+            {
+                for (int i = 0; i < EmoteFrameDurations.Count; i++)
                 {
-                    SKImageInfo imageInfo = new SKImageInfo(codec.Info.Width, codec.Info.Height);
-                    SKBitmap newBitmap = new SKBitmap(imageInfo);
-                    IntPtr pointer = newBitmap.GetPixels();
-                    SKCodecOptions codecOptions = new SKCodecOptions(i);
-                    codec.GetPixels(imageInfo, pointer, codecOptions);
-                    emote_frames.Add(newBitmap);
+                    EmoteFrameDurations.RemoveAt(i);
+                    EmoteFrameDurations.Insert(i, 10);
+                }
+                TotalDuration = EmoteFrameDurations.Count * 10;
+            }
+
+            for (int i = 0; i < EmoteFrameDurations.Count; i++)
+            {
+                if (EmoteFrameDurations[i] == 0)
+                {
+                    TotalDuration += 10;
+                    EmoteFrameDurations[i] = 10;
                 }
             }
         }
 
-        public SKBitmap GetFrame(int frameNum)
+        private void ExtractFrames()
         {
-            SKImageInfo imageInfo = new SKImageInfo(codec.Info.Width, codec.Info.Height);
-            SKBitmap newBitmap = new SKBitmap(imageInfo);
-            IntPtr pointer = newBitmap.GetPixels();
-            SKCodecOptions codecOptions = new SKCodecOptions(frameNum);
-            codec.GetPixels(imageInfo, pointer, codecOptions);
-            return newBitmap;
+            for (int i = 0; i < FrameCount; i++)
+            {
+                SKImageInfo imageInfo = new SKImageInfo(Codec.Info.Width, Codec.Info.Height);
+                SKBitmap newBitmap = new SKBitmap(imageInfo);
+                IntPtr pointer = newBitmap.GetPixels();
+                SKCodecOptions codecOptions = new SKCodecOptions(i);
+                Codec.GetPixels(imageInfo, pointer, codecOptions);
+                EmoteFrames.Add(newBitmap);
+            }
+        }
+
+        public void Resize(double newScale)
+        {
+            for (int i = 0; i < FrameCount; i++)
+            {
+                SKImageInfo imageInfo = new SKImageInfo((int)(Codec.Info.Width * newScale), (int)(Codec.Info.Height * newScale));
+                SKBitmap newBitmap = new SKBitmap(imageInfo);
+                EmoteFrames[i].ScalePixels(newBitmap, SKFilterQuality.High);
+                EmoteFrames[i].Dispose();
+                EmoteFrames[i] = newBitmap;
+            }
         }
     }
 }

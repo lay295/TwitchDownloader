@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:TwitchDownloader"
       xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+      xmlns:hc="https://handyorg.github.io/handycontrol"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="PageQueue">
@@ -40,18 +41,18 @@
                 </ItemsControl>
             </ScrollViewer>
         </Border>
-        <Label Content="Parallel Task Limits" Grid.Column="4" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-        <Label Content="VOD Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top"/>
-        <Label Content="Clip Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top"/>
-        <Label Content="Chat Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,87,0,0" VerticalAlignment="Top"/>
-        <Label Content="Chat Renders" Grid.Column="4" HorizontalAlignment="Left" Margin="10,113,0,0" VerticalAlignment="Top"/>
-        <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,38,0,0" Value="0" Minimum="1" Name="numVod" Width="52" ValueChanged="numVod_ValueChanged" />
-        <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,64,0,0" Value="0" Minimum="1" x:Name="numClip" Width="52" ValueChanged="numClip_ValueChanged" />
-        <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,89,0,0" Value="0" Minimum="1" x:Name="numChat" Width="52" ValueChanged="numChat_ValueChanged" />
-        <xctk:IntegerUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,116,0,0" Value="0" Minimum="1" x:Name="numRender" Width="52" ValueChanged="numRender_ValueChanged" />
-        <Label Content="Mass Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,144,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-        <Button x:Name="btnList" Content="URL List" Grid.Column="4" HorizontalAlignment="Left" Margin="15,170,0,0" VerticalAlignment="Top" Width="158" Click="btnList_Click"/>
-        <Button x:Name="btnVods" Content="Search VODs" Grid.Column="4" HorizontalAlignment="Left" Margin="15,197,0,0" VerticalAlignment="Top" Width="158" Click="btnVods_Click"/>
-        <Button x:Name="btnClips" Content="Search Clips" Grid.Column="4" HorizontalAlignment="Left" Margin="15,224,0,0" VerticalAlignment="Top" Width="158" Click="btnClips_Click"/>
+        <hc:Divider Content="Parallel Task Limits" Grid.Column="4" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="170"/>
+        <TextBlock Text="VOD Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top"/>
+        <TextBlock Text="Clip Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top"/>
+        <TextBlock Text="Chat Downloads" Grid.Column="4" HorizontalAlignment="Left" Margin="10,99,0,0" VerticalAlignment="Top"/>
+        <TextBlock Text="Chat Renders" Grid.Column="4" HorizontalAlignment="Left" Margin="10,131,0,0" VerticalAlignment="Top"/>
+        <hc:NumericUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,30,0,0" Value="0" Minimum="1" Name="numVod" Width="70" ValueChanged="numVod_ValueChanged" />
+        <hc:NumericUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,62,0,0" Value="0" Minimum="1" x:Name="numClip" Width="70" ValueChanged="numClip_ValueChanged" />
+        <hc:NumericUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,94,0,0" Value="0" Minimum="1" x:Name="numChat" Width="70" ValueChanged="numChat_ValueChanged" />
+        <hc:NumericUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,126,0,0" Value="0" Minimum="1" x:Name="numRender" Width="70" ValueChanged="numRender_ValueChanged" />
+        <hc:Divider Content="Mass Downloads" Grid.Column="4" HorizontalAlignment="Center" Margin="10,160,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="180"/>
+        <Button x:Name="btnList" Content="URL List" Grid.Column="4" HorizontalAlignment="Left" Margin="15,187,0,0" VerticalAlignment="Top" Width="158" Click="btnList_Click"/>
+        <Button x:Name="btnVods" Content="Search VODs" Grid.Column="4" HorizontalAlignment="Left" Margin="15,227,0,0" VerticalAlignment="Top" Width="158" Click="btnVods_Click"/>
+        <Button x:Name="btnClips" Content="Search Clips" Grid.Column="4" HorizontalAlignment="Left" Margin="15,267,0,0" VerticalAlignment="Top" Width="158" Click="btnClips_Click"/>
     </Grid>
 </Page>

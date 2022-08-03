@@ -21,24 +21,24 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical">
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,5,3,3" Text="Temp Folder:"/>
+                <TextBlock Margin="3,9,3,3" Text="Temp Folder:"/>
                 <TextBox x:Name="textTempPath" Margin="3" MinWidth="300" MaxWidth="400"/>
-                <Button x:Name="btnTempBrowse"  Margin="3" MinWidth="50" Content="Browse" Click="btnTempBrowse_Click"/>
+                <Button x:Name="btnTempBrowse" Style="{StaticResource ButtonInfo}" Margin="3" MinWidth="50" Content="Browse" Click="btnTempBrowse_Click"/>
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,5,3,3" Text="Clear Cache Folder:"/>
-                <Button x:Name="btnClearCache"  Margin="3" MinWidth="50" Content="Clear Cache" Click="btnClearCache_Click"/>
+                <TextBlock Margin="3,8,3,3" Text="Clear Cache Folder:"/>
+                <Button x:Name="btnClearCache" Style="{StaticResource ButtonInfo}" Margin="3" MinWidth="50" Content="Clear Cache" Click="btnClearCache_Click"/>
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,5,3,3" Text="Hide Donation Button:"/>
+                <TextBlock Margin="3,4,3,3" Text="Hide Donation Button:"/>
                 <CheckBox x:Name="checkDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0"/>
             </StackPanel>
             <TextBlock Margin="3,5,3,3" Text="Download Filename Templates:" />
             <StackPanel Margin="0" Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Margin="3,8,3,3" Text="VODs:"/>
-                    <TextBlock Margin="3,10,3,3" Text="Clips:"/>
-                    <TextBlock Margin="3,10,3,3" Text="Chat:"/>
+                    <TextBlock Margin="3,10,3,3" Text="VODs:"/>
+                    <TextBlock Margin="3,18,3,3" Text="Clips:"/>
+                    <TextBlock Margin="3,18,3,3" Text="Chat:"/>
                 </StackPanel>
                 <StackPanel Orientation="Vertical">
                     <TextBox x:Name="textVodTemplate" Margin="3,5,3,3" MinWidth="300" MaxWidth="400"/>

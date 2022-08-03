@@ -22,5 +22,13 @@ namespace TwitchDownloaderCore.TwitchObjects
 
             return returnPair;
         }
+
+        public void Resize(double newScale)
+        {
+            for (int i = 0; i < tierList.Count; i++)
+            {
+                tierList[i].Value.Resize(newScale);
+            }
+        }
     }
 }

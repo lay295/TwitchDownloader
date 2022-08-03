@@ -79,12 +79,13 @@ namespace TwitchDownloaderWPF
             if (!File.Exists("ffmpeg.exe"))
                 await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
 
-            AutoUpdater.InstalledVersion = new Version("1.40.9.0");
+            AutoUpdater.InstalledVersion = new Version("1.50.0.0");
             AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            pageChatRender.SaveSettings();
             string tempFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "TwitchDownloader", "Chat Render");
             try
             {

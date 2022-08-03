@@ -47,7 +47,6 @@ namespace TwitchDownloaderWPF
         public PageVodDownload()
         {
             InitializeComponent();
-
         }
 
         private void SetEnabled(bool isEnabled)
@@ -147,52 +146,6 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private async void btnDownload_Click(object sender, RoutedEventArgs e)
-        {
-            bool isValid = ValidateInput();
-
-            if (isValid)
-            {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-
-                saveFileDialog.Filter = "MP4 Files | *.mp4";
-                saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text);
-
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    SetEnabled(false);
-                    btnGetInfo.IsEnabled = false;
-
-                    VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
-
-                    VideoDownloader currentDownload = new VideoDownloader(options);
-                    Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-
-                    SetImage("Images/ppOverheat.gif", true);
-                    statusMessage.Text = "Downloading";
-
-                    try
-                    {
-                        await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
-                        statusMessage.Text = "Done";
-                        SetImage("Images/ppHop.gif", true);
-                    }
-                    catch (Exception ex)
-                    {
-                        statusMessage.Text = "ERROR";
-                        SetImage("Images/peepoSad.png", false);
-                        AppendLog("ERROR: " + ex.Message);
-                    }
-                    btnGetInfo.IsEnabled = true;
-                }
-            }
-            else
-            {
-                AppendLog("ERROR: Invalid Crop Inputs");
-            }
-        }
-
         public VideoDownloadOptions GetOptions(string filename, string folder)
         {
             VideoDownloadOptions options = new VideoDownloadOptions();
@@ -277,7 +230,7 @@ namespace TwitchDownloaderWPF
             TimeSpan beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
             TimeSpan endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
 
-            if (numDownloadThreads.Value == null || (int)numDownloadThreads.Value < 1)
+            if ((int)numDownloadThreads.Value < 1)
                 numDownloadThreads.Value = 1;
 
             if ((bool)checkStart.IsChecked)
@@ -333,9 +286,9 @@ namespace TwitchDownloaderWPF
             textOauth.Text = Settings.Default.OAuth;
         }
 
-        private void numDownloadThreads_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void numDownloadThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized && numDownloadThreads.IsEnabled && numDownloadThreads.Value != null)
+            if (this.IsInitialized && numDownloadThreads.IsEnabled)
             {
                 Settings.Default.VodDownloadThreads = (int)numDownloadThreads.Value;
                 Settings.Default.Save();
@@ -348,21 +301,6 @@ namespace TwitchDownloaderWPF
             {
                 Settings.Default.OAuth = textOauth.Text;
                 Settings.Default.Save();
-            }
-        }
-
-        private void btnQueue_Click(object sender, RoutedEventArgs e)
-        {
-            bool isValid = ValidateInput();
-
-            if (isValid)
-            {
-                WindowQueueOptions queueOptions = new WindowQueueOptions(this);
-                queueOptions.ShowDialog();
-            }
-            else
-            {
-                AppendLog("ERROR: Invalid Crop Inputs");
             }
         }
 
@@ -408,6 +346,70 @@ namespace TwitchDownloaderWPF
             else
             {
                 SetEnabledCropEnd(false);
+            }
+        }
+
+        private async void SplitButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
+            {
+                bool isValid = ValidateInput();
+
+                if (isValid)
+                {
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+                    saveFileDialog.Filter = "MP4 Files | *.mp4";
+                    saveFileDialog.RestoreDirectory = true;
+                    saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text);
+
+                    if (saveFileDialog.ShowDialog() == true)
+                    {
+                        SetEnabled(false);
+                        btnGetInfo.IsEnabled = false;
+
+                        VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
+
+                        VideoDownloader currentDownload = new VideoDownloader(options);
+                        Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
+
+                        SetImage("Images/ppOverheat.gif", true);
+                        statusMessage.Text = "Downloading";
+
+                        try
+                        {
+                            await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
+                            statusMessage.Text = "Done";
+                            SetImage("Images/ppHop.gif", true);
+                        }
+                        catch (Exception ex)
+                        {
+                            statusMessage.Text = "ERROR";
+                            SetImage("Images/peepoSad.png", false);
+                            AppendLog("ERROR: " + ex.Message);
+                        }
+                        btnGetInfo.IsEnabled = true;
+                    }
+                }
+                else
+                {
+                    AppendLog("ERROR: Invalid Crop Inputs");
+                }
+            }
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            bool isValid = ValidateInput();
+
+            if (isValid)
+            {
+                WindowQueueOptions queueOptions = new WindowQueueOptions(this);
+                queueOptions.ShowDialog();
+            }
+            else
+            {
+                AppendLog("ERROR: Invalid Crop Inputs");
             }
         }
     }

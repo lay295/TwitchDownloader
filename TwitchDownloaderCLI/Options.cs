@@ -72,8 +72,6 @@ namespace TwitchDownloaderCLI
         public string MessageFontStyle { get; set; }
         [Option("username-fontstyle", Default = "bold", HelpText = "Font style to use for username. Valid values are normal, bold, and italic.")]
         public string UsernameFontStyle { get; set; }
-        [Option("padding-left", Default = 2, HelpText = "Padding space to left of chat render.")]
-        public int PaddingLeft { get; set; }
         [Option("framerate", Default = 30, HelpText = "Framerate of chat render output.")]
         public int Framerate { get; set; }
         [Option("update-rate", Default = 0.2, HelpText = "Time in seconds to update chat render output.")]
@@ -88,7 +86,9 @@ namespace TwitchDownloaderCLI
         public string FfmpegPath { get; set; }
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
-        [Option("chat-connections", Default = 10, HelpText = "Number of downloading connections for chat")]
+        [Option("chat-connections", Default = 4, HelpText = "Number of downloading connections for chat")]
         public int ChatConnections { get; set; }
+        [Option("badge-filter", Default = 0, HelpText = "Chat Badge filter mask")]
+        public int BadgeFilterMask { get; set; }
     }
 }

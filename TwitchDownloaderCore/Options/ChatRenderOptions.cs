@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Options
 {
@@ -20,22 +21,21 @@ namespace TwitchDownloaderCore.Options
         public bool Outline { get; set; }
         public double OutlineSize { get; set; }
         public string Font { get; set; }
-        public double FontSize { get; set; }
+        public double FontSize { get; set; } = 24.0;
         public SKFontStyle MessageFontStyle { get; set; }
         public SKFontStyle UsernameFontStyle { get; set; }
-        public double EmoteScale
+        public double ReferenceScale
         {
             get
             {
-                return FontSize / 12;
+                return FontSize / 24;
             }
         }
-        public int PaddingLeft { get; set; }
         public int SectionHeight
         {
             get
             {
-                return (int)Math.Floor(22 * EmoteScale);
+                return (int)Math.Floor(40 * ReferenceScale);
             }
         }
         public bool Timestamp { get; set; }
@@ -43,13 +43,13 @@ namespace TwitchDownloaderCore.Options
         public double UpdateRate { get; set; }
         public int UpdateFrame
         {
-            get 
+            get
             {
                 if (UpdateRate == 0)
                     return 1;
                 else
                     return (int)Math.Floor(UpdateRate / (1.0 / Framerate));
-            }  
+            }
         }
         public bool GenerateMask { get; set; }
         public string OutputFileMask
@@ -70,5 +70,38 @@ namespace TwitchDownloaderCore.Options
         public string TempFolder { get; set; }
         public bool SubMessages { get; set; }
         public bool ChatBadges { get; set; }
+        public double EmoteScale { get; set; } = 1.0;
+        public int RenderThreads { get; set; } = 1;
+        public int ChatBadgeMask { get; set; } = 0;
+        public int StartOverride { get; set; } = -1;
+        public int EndOverride { get; set; } = -1;
+        public int SidePadding
+        {
+            get
+            {
+                return (int)(6 * EmoteScale);
+            }
+        }
+        public int VerticalPadding
+        {
+            get
+            {
+                return (int)(14 * EmoteScale);
+            }
+        }
+        public int WordSpacing
+        {
+            get
+            {
+                return (int)(8 * EmoteScale);
+            }
+        }
+        public int EmoteSpacing
+        {
+            get
+            {
+                return (int)(6 * EmoteScale);
+            }
+        }
     }
 }

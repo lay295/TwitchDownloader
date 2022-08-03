@@ -41,6 +41,8 @@ namespace TwitchDownloader.TwitchTasks
                 else
                 {
                     Status = TwitchTaskStatus.Finished;
+                    Progress = 100;
+                    OnPropertyChanged("Progress");
                     OnPropertyChanged("Status");
                 }
             }
