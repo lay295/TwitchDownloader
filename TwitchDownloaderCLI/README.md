@@ -50,7 +50,7 @@ The ID of the Clip to download, currently only accepts the string identifier and
 **-q/-\-quality**
 The quality the program will attempt to download, for example "1080p60", if not found will download highest quality video.
 ## Arguments for mode ChatDownload
-**IMPORTANT NOTE**: If output file argument does not end in .json it will download it as a plain text file
+**IMPORTANT NOTE**: If output file argument does not end in .json or .html it will download it as a plain text file
 
 **-u/-\-id**
 The ID of the VOD or clip to download. Does not currently accept URLs.
@@ -68,7 +68,7 @@ Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, an
 Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.
 
 **-\-chat-connections**
-The number of parallel downloads for chat. Default 10.
+The number of parallel downloads for chat. Default 4.
 ## Arguments for mode ChatRender
 **-i/-\-input**
 Path to JSON chat file input.
@@ -117,9 +117,6 @@ Path to JSON chat file input.
 
 **-\-username-fontstyle**
 (Default: bold) Font style to use for username. Valid values are **normal**, **bold**, and **italic**.
-
-**-\-padding-left**
-(Default: 2) Padding space to left of chat render.
 
 **-\-timestamp**
 Enables timestamps to left of messages, similar to VOD chat on Twitch.

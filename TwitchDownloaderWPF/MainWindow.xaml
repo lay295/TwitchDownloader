@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchDownloaderWPF"
         mc:Ignorable="d"
-        Title="Twitch Downloader" Height="480" Width="850" Loaded="Window_Loaded" Closing="Window_Closing">
+        Title="Twitch Downloader" Height="500" Width="850" Loaded="Window_Loaded" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="10" />
+            <RowDefinition Height="0" />
             <RowDefinition Height="60" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -21,12 +21,11 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="btnVodDownload" Margin="5" Grid.Row="1" Grid.Column="1" Content="VOD Downloader" Click="btnVodDownload_Click" />
-        <Button x:Name="btnClipDownload" Margin="5" Grid.Row="1" Grid.Column="2" Content="Clip Downloader" Click="btnClipDownload_Click" />
-        <Button x:Name="btnChatDownload" Margin="5" Grid.Row="1" Grid.Column="3" Content="Chat Downloader" Click="btnChatDownload_Click" />
-        <Button x:Name="btnChatRender" Margin="5" Grid.Row="1" Grid.Column="4" Content="Chat Render" Click="btnChatRender_Click" />
-        <Button x:Name="btnQueue" Margin="5" Grid.Row="1" Grid.Column="5" Content="Task Queue" Click="btnQueue_Click" />
-        <Frame Focusable="False" x:Name="Main" Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="2" NavigationUIVisibility="Hidden"/>
-
+        <Button Style="{StaticResource ButtonPrimary}" x:Name="btnVodDownload" Grid.Row="1" Grid.Column="1" Content="VOD Downloader" Click="btnVodDownload_Click" Width="146" Height="50" FontWeight="Bold" />
+        <Button Style="{StaticResource ButtonPrimary}" x:Name="btnClipDownload" Margin="5" Grid.Row="1" Grid.Column="2" Content="Clip Downloader" Width="146" Height="50" Click="btnClipDownload_Click" FontWeight="Bold" />
+        <Button Style="{StaticResource ButtonPrimary}" x:Name="btnChatDownload" Margin="5" Grid.Row="1" Grid.Column="3" Content="Chat Downloader" Width="146" Height="50" Click="btnChatDownload_Click" FontWeight="Bold" />
+        <Button Style="{StaticResource ButtonPrimary}" x:Name="btnChatRender" Margin="5" Grid.Row="1" Grid.Column="4" Content="Chat Render" Width="146" Height="50" Click="btnChatRender_Click" FontWeight="Bold" />
+        <Button Style="{StaticResource ButtonPrimary}" x:Name="btnQueue" Margin="5" Grid.Row="1" Grid.Column="5" Content="Task Queue" Width="146" Height="50" Click="btnQueue_Click" FontWeight="Bold" />
+        <Frame Focusable="False" x:Name="Main" Grid.Column="0" Grid.ColumnSpan="7" Grid.Row="2" NavigationUIVisibility="Hidden" BorderBrush="{x:Null}"/>
     </Grid>
 </Window>

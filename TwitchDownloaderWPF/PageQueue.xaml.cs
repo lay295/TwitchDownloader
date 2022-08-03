@@ -111,36 +111,36 @@ namespace TwitchDownloader
             }
         }
 
-        private void numVod_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void numVod_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized && numVod.Value != null)
+            if (this.IsInitialized)
             {
                 Settings.Default.LimitVod = (int)numVod.Value;
                 Settings.Default.Save();
             }
         }
 
-        private void numClip_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void numClip_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized && numClip.Value != null)
+            if (this.IsInitialized)
             {
                 Settings.Default.LimitClip = (int)numClip.Value;
                 Settings.Default.Save();
             }
         }
 
-        private void numChat_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void numChat_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized && numChat.Value != null)
+            if (this.IsInitialized)
             {
                 Settings.Default.LimitChat = (int)numChat.Value;
                 Settings.Default.Save();
             }
         }
 
-        private void numRender_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void numRender_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized && numRender.Value != null)
+            if (this.IsInitialized)
             {
                 Settings.Default.LimitRender = (int)numRender.Value;
                 Settings.Default.Save();

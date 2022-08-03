@@ -117,46 +117,6 @@ namespace TwitchDownloaderWPF
             btnQueue.IsEnabled = false;
         }
 
-        private async void btnDownload_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-
-            saveFileDialog.Filter = "MP4 Files | *.mp4";
-            saveFileDialog.RestoreDirectory = true;
-            saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text);
-
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                comboQuality.IsEnabled = false;
-                btnGetInfo.IsEnabled = false;
-                btnDownload.IsEnabled = false;
-                btnQueue.IsEnabled = false;
-                SetImage("Images/ppOverheat.gif", true);
-                statusMessage.Text = "Downloading";
-                try
-                {
-                    ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
-                    downloadOptions.Filename = saveFileDialog.FileName;
-                    downloadOptions.Id = clipId;
-                    downloadOptions.Quality = comboQuality.Text;
-                    await new ClipDownloader(downloadOptions).DownloadAsync();
-
-                    statusMessage.Text = "Done";
-                    SetImage("Images/ppHop.gif", true);
-                }
-                catch (Exception ex)
-                {
-                    statusMessage.Text = "ERROR";
-                    SetImage("Images/peepoSad.png", false);
-                    AppendLog("ERROR: " + ex.Message);
-                }
-                btnGetInfo.IsEnabled = true;
-                btnDownload.IsEnabled = true;
-                btnQueue.IsEnabled = true;
-                statusProgressBar.Value = 0;
-            }
-        }
-
         public void SetImage(string imageUri, bool isGif)
         {
             var image = new BitmapImage();
@@ -184,12 +144,55 @@ namespace TwitchDownloaderWPF
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void btnSettings_Loaded(object sender, RoutedEventArgs e)
+        private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void btnQueue_Click(object sender, RoutedEventArgs e)
+        private async void SplitButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+                saveFileDialog.Filter = "MP4 Files | *.mp4";
+                saveFileDialog.RestoreDirectory = true;
+                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text);
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    comboQuality.IsEnabled = false;
+                    btnGetInfo.IsEnabled = false;
+                    btnDownload.IsEnabled = false;
+                    btnQueue.IsEnabled = false;
+                    SetImage("Images/ppOverheat.gif", true);
+                    statusMessage.Text = "Downloading";
+                    try
+                    {
+                        ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
+                        downloadOptions.Filename = saveFileDialog.FileName;
+                        downloadOptions.Id = clipId;
+                        downloadOptions.Quality = comboQuality.Text;
+                        await new ClipDownloader(downloadOptions).DownloadAsync();
+
+                        statusMessage.Text = "Done";
+                        SetImage("Images/ppHop.gif", true);
+                    }
+                    catch (Exception ex)
+                    {
+                        statusMessage.Text = "ERROR";
+                        SetImage("Images/peepoSad.png", false);
+                        AppendLog("ERROR: " + ex.Message);
+                    }
+                    btnGetInfo.IsEnabled = true;
+                    btnDownload.IsEnabled = true;
+                    btnQueue.IsEnabled = true;
+                    statusProgressBar.Value = 0;
+                }
+            }
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();

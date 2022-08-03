@@ -45,9 +45,20 @@ namespace TwitchDownloader
                 checkVideo.Visibility = Visibility.Collapsed;
                 checkChat.IsChecked = true;
                 checkChat.IsEnabled = false;
-                radioJson.IsEnabled = false;
-                radioTxt.IsEnabled = false;
-                checkEmbed.IsEnabled = false;
+                radioJson.Visibility = Visibility.Collapsed;
+                radioTxt.Visibility = Visibility.Collapsed;
+                radioHTML.Visibility = Visibility.Collapsed;
+                checkEmbed.Visibility = Visibility.Collapsed;
+                var chatPage = page as PageChatDownload;
+                if (chatPage.radioJson.IsChecked != true)
+                {
+                    checkRender.IsChecked = false;
+                    checkRender.IsEnabled = false;
+                }
+                else
+                {
+                    checkRender.Margin = new Thickness(10, 85, 0, 0);
+                }
             }
             if (page is PageChatRender)
             {
@@ -55,9 +66,11 @@ namespace TwitchDownloader
                 checkChat.Visibility = Visibility.Collapsed;
                 radioJson.Visibility = Visibility.Collapsed;
                 radioTxt.Visibility = Visibility.Collapsed;
+                radioHTML.Visibility = Visibility.Collapsed;
                 checkEmbed.Visibility = Visibility.Collapsed;
                 checkRender.IsChecked = true;
                 checkRender.IsEnabled = false;
+                checkRender.Margin = new Thickness(10, 65, 0, 0);
             }
         }
 
@@ -98,9 +111,14 @@ namespace TwitchDownloader
                             ChatDownloadTask chatTask = new ChatDownloadTask();
                             ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
                             chatOptions.Id = downloadOptions.Id.ToString();
-                            chatOptions.IsJson = (bool)radioJson.IsChecked;
+                            if (radioJson.IsChecked == true)
+                                chatOptions.DownloadFormat = DownloadFormat.Json;
+                            else if (radioHTML.IsChecked == true)
+                                chatOptions.DownloadFormat = DownloadFormat.Html;
+                            else
+                                chatOptions.DownloadFormat = DownloadFormat.Text;
                             chatOptions.EmbedEmotes = (bool)checkEmbed.IsChecked;
-                            chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, vodPage.currentVideoTime, vodPage.textStreamer.Text) + (chatOptions.IsJson ? ".json" : ".txt"));
+                            chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, vodPage.currentVideoTime, vodPage.textStreamer.Text) + "." + chatOptions.DownloadFormat);
 
                             if (downloadOptions.CropBeginning)
                             {
@@ -124,7 +142,7 @@ namespace TwitchDownloader
                                 PageQueue.taskList.Add(chatTask);
                             }
 
-                            if ((bool)checkRender.IsChecked && chatOptions.IsJson)
+                            if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == DownloadFormat.Json)
                             {
                                 ChatRenderTask renderTask = new ChatRenderTask();
                                 ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename, ".mp4"));
@@ -181,10 +199,15 @@ namespace TwitchDownloader
                             ChatDownloadTask chatTask = new ChatDownloadTask();
                             ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
                             chatOptions.Id = downloadOptions.Id.ToString();
-                            chatOptions.IsJson = (bool)radioJson.IsChecked;
+                            if (radioJson.IsChecked == true)
+                                chatOptions.DownloadFormat = DownloadFormat.Json;
+                            else if (radioHTML.IsChecked == true)
+                                chatOptions.DownloadFormat = DownloadFormat.Html;
+                            else
+                                chatOptions.DownloadFormat = DownloadFormat.Text;
                             chatOptions.TimeFormat = TimestampFormat.Relative;
                             chatOptions.EmbedEmotes = (bool)checkEmbed.IsChecked;
-                            chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text) + (chatOptions.IsJson ? ".json" : ".txt"));
+                            chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text) + "." + chatOptions.FileExtension);
 
                             chatTask.DownloadOptions = chatOptions;
                             chatTask.Info.Title = clipPage.textTitle.Text;
@@ -196,7 +219,7 @@ namespace TwitchDownloader
                                 PageQueue.taskList.Add(chatTask);
                             }
 
-                            if ((bool)checkRender.IsChecked && chatOptions.IsJson)
+                            if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == DownloadFormat.Json)
                             {
                                 ChatRenderTask renderTask = new ChatRenderTask();
                                 ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename, ".mp4"));
@@ -236,7 +259,7 @@ namespace TwitchDownloader
                         ChatDownloadTask chatTask = new ChatDownloadTask();
                         ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
                         chatOptions.Id = chatPage.downloadId;
-                        chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatOptions.Id, chatPage.currentVideoTime, chatPage.textStreamer.Text) + (chatOptions.IsJson ? ".json" : ".txt"));
+                        chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatOptions.Id, chatPage.currentVideoTime, chatPage.textStreamer.Text) + "." + chatOptions.FileExtension);
 
                         chatTask.DownloadOptions = chatOptions;
                         chatTask.Info.Title = chatPage.textTitle.Text;
@@ -248,7 +271,7 @@ namespace TwitchDownloader
                             PageQueue.taskList.Add(chatTask);
                         }
 
-                        if ((bool)checkRender.IsChecked && chatOptions.IsJson)
+                        if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == DownloadFormat.Json)
                         {
                             ChatRenderTask renderTask = new ChatRenderTask();
                             ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename, ".mp4"));
@@ -355,13 +378,18 @@ namespace TwitchDownloader
                             {
                                 ChatDownloadTask downloadTask = new ChatDownloadTask();
                                 ChatDownloadOptions downloadOptions = new ChatDownloadOptions();
-                                downloadOptions.IsJson = (bool)radioJson.IsChecked;
+                                if (radioJson.IsChecked == true)
+                                    downloadOptions.DownloadFormat = DownloadFormat.Json;
+                                else if (radioHTML.IsChecked == true)
+                                    downloadOptions.DownloadFormat = DownloadFormat.Html;
+                                else
+                                    downloadOptions.DownloadFormat = DownloadFormat.Text;
                                 downloadOptions.EmbedEmotes = (bool)checkEmbed.IsChecked;
                                 downloadOptions.TimeFormat = TimestampFormat.Relative;
                                 downloadOptions.Id = dataList[i].Id;
                                 downloadOptions.CropBeginning = false;
                                 downloadOptions.CropEnding = false;
-                                downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + (downloadOptions.IsJson ? ".json" : ".txt"));
+                                downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + "." + downloadOptions.FileExtension);
                                 downloadTask.DownloadOptions = downloadOptions;
                                 downloadTask.Info.Title = dataList[i].Title;
                                 downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
@@ -372,7 +400,7 @@ namespace TwitchDownloader
                                     PageQueue.taskList.Add(downloadTask);
                                 }
 
-                                if ((bool)checkRender.IsChecked && downloadOptions.IsJson)
+                                if ((bool)checkRender.IsChecked && downloadOptions.DownloadFormat == DownloadFormat.Json)
                                 {
                                     ChatRenderTask renderTask = new ChatRenderTask();
                                     ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(downloadOptions.Filename, ".mp4"));
@@ -425,6 +453,7 @@ namespace TwitchDownloader
             checkRender.IsEnabled = true;
             radioJson.IsEnabled = true;
             radioTxt.IsEnabled = true;
+            radioHTML.IsEnabled = true;
             checkEmbed.IsEnabled = true;
         }
 
@@ -434,6 +463,7 @@ namespace TwitchDownloader
             checkRender.IsChecked = false;
             radioJson.IsEnabled = false;
             radioTxt.IsEnabled = false;
+            radioHTML.IsEnabled = false;
             checkEmbed.IsEnabled = false;
         }
 
@@ -452,6 +482,15 @@ namespace TwitchDownloader
             if (this.IsInitialized)
             {
                 checkEmbed.IsEnabled = false;
+                checkRender.IsEnabled = false;
+            }
+        }
+
+        private void radioHTML_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                checkEmbed.IsEnabled = true;
                 checkRender.IsEnabled = false;
             }
         }

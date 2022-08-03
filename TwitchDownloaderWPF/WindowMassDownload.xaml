@@ -7,19 +7,19 @@
         mc:Ignorable="d"
         Title="Mass Downloader" Height="700" Width="1100">
     <Grid>
-        <Label x:Name="labelSort" Content="Sort:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <ComboBox SelectedIndex="2" x:Name="comboSort" HorizontalAlignment="Left" Margin="49,12,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboSort_SelectionChanged">
+        <Label x:Name="labelSort" Content="Sort:" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top"/>
+        <ComboBox SelectedIndex="2" x:Name="comboSort" HorizontalAlignment="Left" Margin="61,6,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboSort_SelectionChanged">
             <ComboBoxItem Content="Top 24 Hours" Tag="LAST_DAY"/>
             <ComboBoxItem Content="Top 7 Days" Tag="LAST_WEEK"/>
             <ComboBoxItem Content="Top 30 Days" Tag="LAST_MONTH"/>
             <ComboBoxItem Content="Top All Time" Tag="ALL_TIME"/>
         </ComboBox>
 
-        <TextBox x:Name="textChannel" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="194" Margin="0,12,0,0"/>
-        <Button x:Name="btnChannel" Content="Set Channel" HorizontalAlignment="Center" Margin="290,12,0,0" VerticalAlignment="Top" Width="84" Height="24" Click="btnChannel_Click"/>
+        <TextBox x:Name="textChannel" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="194" Margin="0,6,0,0"/>
+        <Button x:Name="btnChannel" Style="{StaticResource ButtonInfo}" Content="Set Channel" HorizontalAlignment="Left" Margin="653,6,0,0" VerticalAlignment="Top" Width="84" Height="30" Click="btnChannel_Click"/>
         <WrapPanel HorizontalAlignment="Left" Height="329" Margin="10,54,0,0" VerticalAlignment="Top" Width="772"/>
-        <Button x:Name="btnPrev" Content="&lt;-" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="0,0,80,4" Click="btnPrev_Click"/>
-        <Button x:Name="btnNext" Content="->" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="80,0,0,4" Click="btnNext_Click"/>
+        <Button x:Name="btnPrev" Content="&lt;-" Style="{StaticResource ButtonInfo}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="0,0,80,4" Click="btnPrev_Click"/>
+        <Button x:Name="btnNext" Content="->" Style="{StaticResource ButtonInfo}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="80,0,0,4" Click="btnNext_Click"/>
         <ScrollViewer x:Name="scrollDownload" VerticalScrollBarVisibility="Auto" Margin="10,41,10,45">
             <ItemsControl x:Name="itemList" ItemsSource="{Binding videoList}">
                 <ItemsControl.ItemsPanel>
@@ -50,8 +50,8 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        <Button x:Name="btnQueue" Content="Add To Queue" HorizontalAlignment="Left" Margin="956,0,0,4" VerticalAlignment="Bottom" Width="102" Height="36" Click="btnQueue_Click"/>
+        <Button x:Name="btnQueue" Content="Add To Queue" Style="{StaticResource ButtonInfo}" HorizontalAlignment="Left" Margin="956,0,0,4" VerticalAlignment="Bottom" Width="102" Height="36" Click="btnQueue_Click"/>
         <Label x:Name="textCount" Content="Selected Items: 0" HorizontalAlignment="Left" Margin="10,0,0,3" VerticalAlignment="Bottom"/>
-        <Button x:Name="btnSelectAll" Content="Select All" HorizontalAlignment="Left" Margin="131,0,0,4" VerticalAlignment="Bottom" Width="88" Height="36" Click="btnSelectAll_Click"/>
+        <Button x:Name="btnSelectAll" Content="Select All" Style="{StaticResource ButtonInfo}" HorizontalAlignment="Left" Margin="132,0,0,3" VerticalAlignment="Bottom" Width="88" Height="30" Click="btnSelectAll_Click"/>
     </Grid>
 </Window>

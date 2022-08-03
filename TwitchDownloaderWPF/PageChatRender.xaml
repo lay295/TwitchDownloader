@@ -5,9 +5,11 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       xmlns:gif="http://wpfanimatedgif.codeplex.com"
+      xmlns:hc="https://handyorg.github.io/handycontrol"
+      xmlns:fa="http://schemas.fontawesome.com/icons/"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
       mc:Ignorable="d" 
-      d:DesignHeight="350" d:DesignWidth="800"
+      d:DesignHeight="370" d:DesignWidth="800"
       Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded" Loaded="Page_Loaded"
       >
 
@@ -25,87 +27,134 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="25"/>
+            <RowDefinition Height="28"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,20,0,0">
-            <StackPanel Orientation="Vertical" Margin="0,0,5,0">
-                <TextBlock Text="Font:" HorizontalAlignment="Right" Margin="0,2,0,0"/>
-                <TextBlock Text="Font Size:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
-                <TextBlock Text="Font Color:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
-                <TextBlock Text="Outline:" HorizontalAlignment="Right" Margin="0,9,0,0"/>
-                <TextBlock Text="Timestamp:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
-                <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
-                <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
-                <TextBlock Text="7TV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Vertical">
-                <ComboBox x:Name="comboFont" MinWidth="100" SelectionChanged="UpdateFont"/>
-                <TextBox x:Name="textFontSize" Text="12" Width="40" HorizontalAlignment="Left" Margin="0,7,0,0" TextChanged="UpdatePreview"/>
-                <xctk:ColorPicker x:Name="colorFont" SelectedColor="#111111" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}" SelectedColorChanged="UpdateColor"/>
-                <CheckBox x:Name="checkOutline" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
-                <CheckBox x:Name="checkTimestamp" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
-                <CheckBox x:Name="checkFFZ" IsChecked="True" Margin="0,6,0,0"/>
-                <CheckBox x:Name="checkBTTV" IsChecked="True" Margin="0,6,0,0"/>
-                <CheckBox x:Name="checkSTV" IsChecked="True" Margin="0,6,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Vertical" Margin="20,0,5,0">
-                <TextBlock Text="Background Color:" HorizontalAlignment="Right"/>
-                <TextBlock Text="Height:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
-                <TextBlock Text="Width:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
-                <TextBlock Text="Update Time:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
-                <TextBlock Text="Framerate:" HorizontalAlignment="Right" Margin="0,13,0,0"/>
-                <TextBlock Text="Sub Messages:" HorizontalAlignment="Right" Margin="0,11,0,0"/>
-                <TextBlock Text="Chat Badges:" HorizontalAlignment="Right" Margin="0,11,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Vertical">
-                <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" DropDownBackground="{StaticResource ResourceKey=FixBrush}" SelectedColorChanged="UpdateColor"/>
-                <TextBox x:Name="textHeight" Text="600" Margin="0,5,0,0" TextChanged="UpdatePreview"/>
-                <TextBox x:Name="textWidth" Text="350" Margin="0,5,0,0" TextChanged="UpdatePreview"/>
-                <TextBox x:Name="textUpdateTime" Text="1.0" Margin="0,5,0,0"/>
-                <TextBox x:Name="textFramerate" Text="60" Margin="0,5,0,0"/>
-                <CheckBox x:Name="checkSub" IsChecked="True" Margin="0,6,0,0"/>
-                <CheckBox x:Name="checkBadge" IsChecked="True" Margin="0,10,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Vertical" Margin="20,0,5,0">
-                <TextBlock Text="Live Preview:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
-                <TextBlock Text="File Format:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
-                <TextBlock Text="Codec:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
-                <TextBlock HorizontalAlignment="Right" Margin="0,12,0,0">Generate Mask: <Hyperlink NavigateUri="https://www.youtube.com/watch?v=D-_TD1-w3fY" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Generates a seperate video file as a mask for transparency. Click for a tutorial on how to use in Premiere and Vegas.</Hyperlink.ToolTip>(?)</Hyperlink></TextBlock>
-                <TextBlock Text="FFmpeg&#x0a;Arguments:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Vertical">
-                <Button x:Name="btnPreview" Width="50" Content="View" HorizontalAlignment="Left" Margin="0,5,0,0" Click="btnPreview_Click"/>
-                <ComboBox x:Name="comboFormat" MinWidth="70" Margin="0,5,0,0"/>
-                <ComboBox x:Name="comboCodec" MinWidth="70" Margin="0,5,0,0"/>
-                <CheckBox x:Name="checkMask" Margin="0,6,0,0" Checked="UpdateCheckbox" Unchecked="UpdateCheckbox"/>
-                <Button x:Name="btnFfmpeg" Width="50" Content="Edit" HorizontalAlignment="Left" Margin="0,15,0,0" Click="btnFfmpeg_Click"/>
-            </StackPanel>
-        </StackPanel>
+        <TabControl Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,0,20,0">
+            <TabItem Header="General">
+                <DockPanel Margin="0,6,0,0" >
+                    <StackPanel Orientation="Vertical" Margin="0,0,5,0">
+                        <TextBlock Text="Font:" HorizontalAlignment="Right" Margin="0,4,0,0"/>
+                        <TextBlock Text="Font Size:" HorizontalAlignment="Right" Margin="0,22,0,0"/>
+                        <TextBlock Text="Font Color:" HorizontalAlignment="Right" Margin="0,16,0,0"/>
+                        <TextBlock Text="Background Color:" HorizontalAlignment="Right" Margin="0,12,0,0"/>
+                        <TextBlock Text="Width:" HorizontalAlignment="Right" Margin="0,15,0,0"/>
+                        <TextBlock Text="Height:" HorizontalAlignment="Right" Margin="0,20,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <ComboBox x:Name="comboFont" MinWidth="180" MaxWidth="300" HorizontalAlignment="Left"/>
+                        <hc:NumericUpDown x:Name="numFontSize" Value="12" Width="75" HorizontalAlignment="Left" Margin="0,7,0,0"/>
+                        <xctk:ColorPicker x:Name="colorFont" SelectedColor="#FFFFFF" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
+                        <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" UsingAlphaChannel="True" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
+                        <TextBox x:Name="textWidth" Text="12" Width="60" HorizontalAlignment="Left" Margin="0,7,0,0"/>
+                        <TextBox x:Name="textHeight" Text="12" Width="60" HorizontalAlignment="Left" Margin="0,7,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Rendering">
+                <DockPanel Margin="0,6,0,0" >
+                    <StackPanel Orientation="Vertical" Margin="0,0,5,0">
+                        <TextBlock Text="Outline:" HorizontalAlignment="Right" Margin="0,0,0,0"/>
+                        <TextBlock Text="Timestamps:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                        <TextBlock Text="Sub Messages:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                        <TextBlock Text="Chat Badges:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                        <TextBlock Text="Update Time:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
+                        <TextBlock Text="Emote Scale:" HorizontalAlignment="Right" Margin="0,22,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <CheckBox x:Name="checkOutline" HorizontalAlignment="Left" Margin="0,2,0,0"/>
+                        <CheckBox x:Name="checkTimestamp" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                        <CheckBox x:Name="checkSub" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                        <CheckBox x:Name="checkBadge" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                        <TextBox x:Name="textUpdateTime" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0"/>
+                        <TextBox x:Name="textEmoteScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="20,0,5,0">
+                        <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,0,0,0"/>
+                        <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                        <TextBlock Text="7TV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <CheckBox x:Name="checkBTTV" HorizontalAlignment="Left" Margin="0,2,0,0"/>
+                        <CheckBox x:Name="checkFFZ" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                        <CheckBox x:Name="checkSTV" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="20,0,0,0">
+                        <TextBlock Text="Chat Badge Filter:"></TextBlock>
+                        <hc:CheckComboBox x:Name="comboBadges" Width="200" HorizontalAlignment="Left" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Encoding">
+                <DockPanel Margin="0,6,0,0" >
+                    <StackPanel Orientation="Vertical" Margin="0,0,5,0">
+                        <TextBlock Text="File Format:" HorizontalAlignment="Right" Margin="0,4,0,0"/>
+                        <TextBlock Text="Codec:" HorizontalAlignment="Right" Margin="0,22,0,0"/>
+                        <TextBlock Text="Framerate:" HorizontalAlignment="Right" Margin="0,20,0,0"/>
+                        <TextBlock Text="Generate Mask:" HorizontalAlignment="Right" Margin="0,14,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <ComboBox x:Name="comboFormat" MinWidth="150" MaxWidth="300" HorizontalAlignment="Left"/>
+                        <ComboBox x:Name="comboCodec" MinWidth="150" MaxWidth="300" HorizontalAlignment="Left" Margin="0,7,0,0"/>
+                        <TextBox x:Name="textFramerate" Text="30.0" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0"/>
+                        <CheckBox x:Name="checkMask" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Ffmpeg">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Image x:Name="imageWarning" Height="16" Width="16" Margin="0,0,3,0" />
+                        <TextBlock>
+                    <Bold>
+                        This is for advanced users only, if you get a pipe ended error this is probably why
+                    </Bold>
+                        </TextBlock>
+                    </StackPanel>
+                    <TextBlock Text="Input Arguments" Margin="0,6,0,0"></TextBlock>
+                    <TextBox x:Name="textFfmpegInput" LostFocus="textFfmpegInput_LostFocus"></TextBox>
+                    <TextBlock Text="Output Arguments" Margin="0,10,0,0"></TextBlock>
+                    <TextBox x:Name="textFfmpegOutput" LostFocus="textFfmpegOutput_LostFocus"></TextBox>
+                    <Button HorizontalAlignment="Left" Content="Reset To Defaults" Margin="0,6,0,0" Click="Button_Click"></Button>
+                    <TextBlock Margin="0,8,0,0">
+                Avaliable paramaters are: <Bold>{fps} {height} {width} {max_int} {save_path}</Bold>
+                    </TextBlock>
+                    <TextBlock>
+                <Hyperlink NavigateUri="https://ffmpeg.org/ffmpeg.html" RequestNavigate="Hyperlink_RequestNavigate">
+                Click here to learn about FFmpeg options
+                    </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </TabItem>
+            <TabItem Visibility="Hidden" Header="Preview">
+            </TabItem>
+        </TabControl>
 
         <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Margin="3,5,3,3" Text="JSON File:"/>
+            <TextBlock Margin="3,8,3,3" Text="JSON File:"/>
             <TextBox x:Name="textJson" Margin="3" MinWidth="200" MaxWidth="400"/>
-            <Button x:Name="btnBrowse" Margin="3" MinWidth="50" Content="Browse" Click="btnBrowse_Click"/>
+            <Button x:Name="btnBrowse" Style="{StaticResource ButtonInfo}" Margin="3" MinWidth="50" Content="Browse" Click="btnBrowse_Click"/>
         </WrapPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="80,0,20,10" VerticalAlignment="Bottom">
-            <Button x:Name="btnRender" Content="Render Chat" Height="50" Width="100" Click="btnRender_Click"/>
-            <Button x:Name="btnQueue" Content="Queue" Height="25" Width="60" Click="btnQueue_Click" Margin="5,14,0,10" Grid.Row="3" Grid.Column="3" HorizontalAlignment="Center"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
+            <hc:SplitButton x:Name="btnRender" Style="{StaticResource SplitButtonInfo}" Height="40" Width="120" Content="Render Chat" Click="SplitButton_Click" >
+                <hc:SplitButton.DropDownContent>
+                    <StackPanel>
+                        <MenuItem Header="Partial Render" Click="MenuItem_Click_1"/>
+                        <MenuItem Header="Enqueue Render" Click="MenuItem_Click"/>
+                    </StackPanel>
+                </hc:SplitButton.DropDownContent>
+            </hc:SplitButton>
         </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="btnDonate" ToolTip="Use the program often and want to support me? Buy me a coffee :)" Height="26" Width="40" Click="btnDonate_Click">
-                    <Image Source="Images\donate.png" Height="22" Width="36" Margin="0,2,0,0" ></Image>
-                </Button>
-                <Button x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click">
-                    <Image Source="Images\settings.png" Height="22" Width="36" Margin="0,2,0,0" ></Image>
-                </Button>
+                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="Use the program often and want to support me? Buy me a coffee :)" Height="26" Width="40" Click="btnDonate_Click"/>
+                <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click"/>
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
             <TextBlock Text="Log:"/>
-            <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" BorderBrush="Black">
+            <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
                         <Setter Property="Margin" Value="0" />
@@ -123,7 +172,7 @@
                 <TextBlock Text="Idle" x:Name="statusMessage" FontWeight="Bold"/>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <ProgressBar Width="200" Height="18" x:Name="statusProgressBar"/>
+                <ProgressBar Width="200" Height="14" x:Name="statusProgressBar"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>

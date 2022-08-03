@@ -150,13 +150,13 @@ namespace TwitchDownloaderCLI
             {
                 string extension = Path.GetFileName(inputOptions.OutputFile).Split('.').Last();
                 if (extension.ToLower() == "json")
-                    downloadOptions.IsJson = true;
-                else
-                    downloadOptions.IsJson = false;
+                    downloadOptions.DownloadFormat = DownloadFormat.Json;
+                else if (extension.ToLower() == "html")
+                    downloadOptions.DownloadFormat = DownloadFormat.Html;
             }
             else
             {
-                downloadOptions.IsJson = true;
+                downloadOptions.DownloadFormat = DownloadFormat.Text;
             }
 
             downloadOptions.Id = inputOptions.Id;
@@ -176,7 +176,7 @@ namespace TwitchDownloaderCLI
             chatDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
         }
 
-        private static void RenderChat(Options inputOptions)
+        private static async void RenderChat(Options inputOptions)
         {
             ChatRenderOptions renderOptions = new ChatRenderOptions();
 
@@ -221,7 +221,6 @@ namespace TwitchDownloaderCLI
             }
 
             renderOptions.UpdateRate = inputOptions.UpdateRate;
-            renderOptions.PaddingLeft = inputOptions.PaddingLeft;
             renderOptions.Framerate = inputOptions.Framerate;
             renderOptions.GenerateMask = inputOptions.GenerateMask;
             renderOptions.InputArgs = inputOptions.InputArgs;
@@ -248,6 +247,7 @@ namespace TwitchDownloaderCLI
             ChatRenderer chatDownloader = new ChatRenderer(renderOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
+            await chatDownloader.ParseJson();
             chatDownloader.RenderVideoAsync(progress, new CancellationToken()).Wait();
         }
 

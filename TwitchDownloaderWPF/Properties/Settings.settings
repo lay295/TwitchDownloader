@@ -9,7 +9,7 @@
       <Value Profile="(Default)">Arial</Value>
     </Setting>
     <Setting Name="FontSize" Type="System.Single" Scope="User">
-      <Value Profile="(Default)">12</Value>
+      <Value Profile="(Default)">24</Value>
     </Setting>
     <Setting Name="Outline" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -18,10 +18,10 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Height" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">600</Value>
+      <Value Profile="(Default)">1200</Value>
     </Setting>
     <Setting Name="Width" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">350</Value>
+      <Value Profile="(Default)">700</Value>
     </Setting>
     <Setting Name="UpdateTime" Type="System.Double" Scope="User">
       <Value Profile="(Default)">1</Value>
@@ -52,12 +52,6 @@
     </Setting>
     <Setting Name="FontColorB" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">255</Value>
-    </Setting>
-    <Setting Name="FfmpegInputArgs" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -</Value>
-    </Setting>
-    <Setting Name="FfmpegOutputArgs" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"</Value>
     </Setting>
     <Setting Name="Framerate" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">60</Value>
@@ -118,6 +112,21 @@
     </Setting>
     <Setting Name="QueueFolder" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ChatDownloadThreads" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="ChatDownloadType" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="ChatEmbedEmotes" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="FfmpegArguments" Type="System.String" Scope="User">
+      <Value Profile="(Default)">[]</Value>
+    </Setting>
+    <Setting Name="EmoteScale" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1</Value>
     </Setting>
   </Settings>
 </SettingsFile>
