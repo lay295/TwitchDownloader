@@ -247,7 +247,7 @@ namespace TwitchDownloaderCLI
             if (inputOptions.IgnoreUsersList != "")
             {
                 renderOptions.IgnoreUsersList = inputOptions.IgnoreUsersList.ToLower().Split(',',
-                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
             }
 
 
