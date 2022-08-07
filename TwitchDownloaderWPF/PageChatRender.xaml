@@ -43,7 +43,7 @@
                     </StackPanel>
                     <StackPanel Orientation="Vertical">
                         <ComboBox x:Name="comboFont" MinWidth="180" MaxWidth="300" HorizontalAlignment="Left"/>
-                        <hc:NumericUpDown x:Name="numFontSize" Value="12" Width="75" HorizontalAlignment="Left" Margin="0,7,0,0"/>
+                        <hc:NumericUpDown x:Name="numFontSize" Minimum="0" Value="12" Width="75" HorizontalAlignment="Left" Margin="0,7,0,0"/>
                         <xctk:ColorPicker x:Name="colorFont" SelectedColor="#FFFFFF" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
                         <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" UsingAlphaChannel="True" Margin="0,5,0,0" HorizontalAlignment="Left" DropDownBackground="{StaticResource ResourceKey=FixBrush}"/>
                         <TextBox x:Name="textWidth" Text="12" Width="60" HorizontalAlignment="Left" Margin="0,7,0,0"/>
