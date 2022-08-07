@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
@@ -356,11 +357,11 @@ namespace TwitchDownloaderCore
 
             int emojiCount = Directory.GetFiles(emojiFolder, "*.png").Length;
 
-            //Twemoji 14 has 3677 emojis
-            if (emojiCount < 3677)
+            //Twemoji 14 has 3689 emoji images
+            if (emojiCount < 3689)
             {
                 string emojiZipPath = Path.GetTempFileName();
-                byte[] emojiZipData = await httpClient.GetByteArrayAsync("https://github.com/twitter/twemoji/archive/refs/tags/v14.0.0.zip");
+                byte[] emojiZipData = Resources.twemoji_14_0_0;
                 await File.WriteAllBytesAsync(emojiZipPath, emojiZipData);
                 using (ZipArchive archive = ZipFile.OpenRead(emojiZipPath))
                 {
@@ -368,7 +369,15 @@ namespace TwitchDownloaderCore
                     var emojis = archive.Entries.Where(x => Path.GetDirectoryName(x.FullName) == emojiAssetsPath && !String.IsNullOrWhiteSpace(x.Name));
                     foreach (var emoji in emojis)
                     {
-                        emoji.ExtractToFile(Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace("-", " ")));
+                        string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace("-", " "));
+                        if (!File.Exists(filePath))
+                        {
+                            try
+                            {
+                                emoji.ExtractToFile(filePath);
+                            }
+                            catch { }
+                        }
                     }
                 }
             }
