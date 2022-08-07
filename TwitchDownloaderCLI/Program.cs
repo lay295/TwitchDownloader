@@ -176,7 +176,7 @@ namespace TwitchDownloaderCLI
             chatDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
         }
 
-        private static async void RenderChat(Options inputOptions)
+        private static void RenderChat(Options inputOptions)
         {
             ChatRenderOptions renderOptions = new ChatRenderOptions();
 
@@ -247,7 +247,7 @@ namespace TwitchDownloaderCLI
             ChatRenderer chatDownloader = new ChatRenderer(renderOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
-            await chatDownloader.ParseJson();
+            chatDownloader.ParseJson().Wait();
             chatDownloader.RenderVideoAsync(progress, new CancellationToken()).Wait();
         }
 
