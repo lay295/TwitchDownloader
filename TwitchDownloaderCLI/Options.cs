@@ -34,11 +34,11 @@ namespace TwitchDownloaderCLI
         public int DownloadThreads { get; set; }
         [Option("oauth", HelpText = "OAuth to be passed when downloading a VOD.")]
         public string Oauth { get; set; }
-        [Option("timestamp", HelpText = "Enable timestamp in chat render.")]
+        [Option("timestamp", Default = false, HelpText = "Enable timestamp in chat render.")]
         public bool Timestamp { get; set; }
         [Option("timestamp-format", HelpText = "Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None", Default = TimestampFormat.Relative)]
         public TimestampFormat TimeFormat { get; set; }
-        [Option("embed-emotes", HelpText = "Embed emotes into chat download.")]
+        [Option("embed-emotes", Default = false, HelpText = "Embed 1st and 3rd party emotes into chat download.")]
         public bool EmbedEmotes { get; set; }
         [Option("background-color", Default = "#111111", HelpText = "Color of background for chat render.")]
         public string BackgroundColor { get; set; }
@@ -48,17 +48,17 @@ namespace TwitchDownloaderCLI
         public int ChatHeight { get; set; }
         [Option('w', "chat-width", Default = 350, HelpText = "Width of chat render.")]
         public int ChatWidth { get; set; }
-        [Option("bttv", Default = true, HelpText = "Enable BTTV emotes in chat render.")]
+        [Option("no-bttv", Default = false, HelpText = "Disable BTTV emotes in chat render.")]
         public bool BttvEmotes { get; set; }
-        [Option("ffz", Default = true, HelpText = "Enable FFZ emotes in chat render.")]
+        [Option("no-ffz", Default = false, HelpText = "Disable FFZ emotes in chat render.")]
         public bool FfzEmotes { get; set; }
-        [Option("stv", Default = true, HelpText = "Enable 7tv emotes in chat render.")]
+        [Option("no-stv", Default = false, HelpText = "Disable 7tv emotes in chat render.")]
         public bool StvEmotes { get; set; }
         [Option("outline", Default = false, HelpText = "Enable outline in chat render.")]
         public bool Outline { get; set; }
-        [Option("sub-messages", Default = true, HelpText = "Enable sub messages.")]
+        [Option("no-badges", Default = false, HelpText = "Disable chat badges.")]
         public bool ChatBadges { get; set; }
-        [Option("badges", Default = true, HelpText = "Enable chat badges.")]
+        [Option("no-sub-messages", Default = false, HelpText = "Disable sub messages.")]
         public bool SubMessages { get; set; }
         [Option("generate-mask", Default = false, HelpText = "Generates a mask file in addition to the regular chat file.")]
         public bool GenerateMask { get; set; }

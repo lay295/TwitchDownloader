@@ -85,20 +85,20 @@ Path to JSON chat file input.
 **-w/-\-chat-width**
 (Default: 350) Width of chat render.
 
-**-\-bttv**
-(Default: true) Enable BTTV emotes.
+**-\-no-bttv**
+(Default: false) Disable BTTV emotes.
 
-**-\-ffz**
-(Default: true) Enable FFZ emotes.
+**-\-no-ffz**
+(Default: false) Disable FFZ emotes.
 
-**-\-stv**
-(Default: true) Enable 7TV emotes.
+**-\-no-stv**
+(Default: false) Disable 7TV emotes.
 
-**-\-sub-messages**
-(Default: true) Enable sub/re-sub messages.
+**-\-no-sub-messages**
+(Default: false) Disable sub/re-sub messages.
 
-**-\-badges**
-(Default: true) Enable chat badges.
+**-\-no-badges**
+(Default: false) Disable chat badges.
 
 **-\-outline**
 (Default: false) Enable outline around chat messages.

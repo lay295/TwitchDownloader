@@ -186,9 +186,9 @@ namespace TwitchDownloaderCLI
             renderOptions.MessageColor = SKColor.Parse(inputOptions.MessageColor);
             renderOptions.ChatHeight = inputOptions.ChatHeight;
             renderOptions.ChatWidth = inputOptions.ChatWidth;
-            renderOptions.BttvEmotes = inputOptions.BttvEmotes;
-            renderOptions.FfzEmotes = inputOptions.FfzEmotes;
-            renderOptions.StvEmotes = inputOptions.StvEmotes;
+            renderOptions.BttvEmotes = !inputOptions.BttvEmotes; // Inverted to fix boolean argument
+            renderOptions.FfzEmotes = !inputOptions.FfzEmotes; // Inverted to fix boolean argument
+            renderOptions.StvEmotes = !inputOptions.StvEmotes; // Inverted to fix boolean argument
             renderOptions.Outline = inputOptions.Outline;
             renderOptions.OutlineSize = inputOptions.OutlineSize;
             renderOptions.Font = inputOptions.Font;
@@ -227,8 +227,8 @@ namespace TwitchDownloaderCLI
             renderOptions.OutputArgs = inputOptions.OutputArgs;
             renderOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : Path.GetFullPath(inputOptions.FfmpegPath);
             renderOptions.TempFolder = inputOptions.TempFolder;
-            renderOptions.SubMessages = inputOptions.SubMessages;
-            renderOptions.ChatBadges = inputOptions.ChatBadges;
+            renderOptions.SubMessages = !inputOptions.SubMessages; // Inverted to fix boolean argument
+            renderOptions.ChatBadges = !inputOptions.ChatBadges; // Inverted to fix boolean argument
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
             {
