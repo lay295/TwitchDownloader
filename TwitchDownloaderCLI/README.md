@@ -135,6 +135,9 @@ Generates a mask file in addition to the regular chat file.
 
 **-\-output-args**
 (Default: -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}") Output arguments for ffmpeg chat render.
+
+**-\-ignore-users**
+(Default: ) List of usernames to ignore when rendering, separated by commas.
 ## Example Commands
 Download a VOD
 

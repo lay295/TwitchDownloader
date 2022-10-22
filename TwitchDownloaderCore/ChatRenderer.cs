@@ -266,6 +266,13 @@ namespace TwitchDownloaderCore
                 frameCanvas.Clear(renderOptions.BackgroundColor);
                 while (commentIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
                 {
+                    // Skip comments from ignored users
+                    if (renderOptions.IgnoreUsersList.Contains(chatRoot.comments[commentIndex].commenter.name))
+                    {
+                        commentIndex--;
+                        continue;
+                    }
+
                     CommentSection comment = GenerateCommentSection(commentIndex);
                     if (comment != null)
                     {
@@ -862,7 +869,7 @@ namespace TwitchDownloaderCore
         {
             using (FileStream fs = new FileStream(renderOptions.InputFile, FileMode.Open, FileAccess.Read))
             {
-                using (JsonDocument jsonDocument = await JsonDocument.ParseAsync(fs))
+                using (var jsonDocument = JsonDocument.Parse(fs))
                 {
                     if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
                     {

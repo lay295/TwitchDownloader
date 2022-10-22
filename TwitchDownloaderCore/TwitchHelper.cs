@@ -158,7 +158,7 @@ namespace TwitchDownloaderCore
 
             if (getStv)
             {
-                JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://api.7tv.app/v2/emotes/global"));
+                JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://7tv.io/v2/emotes/global"));
 
                 if (streamerId != null)
                 {
