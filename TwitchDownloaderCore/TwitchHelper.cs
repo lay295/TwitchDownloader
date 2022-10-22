@@ -157,10 +157,10 @@ namespace TwitchDownloaderCore
 
             if (getStv)
             {
-                JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://api.7tv.app/v2/emotes/global"));
+                JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://7tv.io/v2/emotes/global"));
 
                 if (streamerId != null)
-                    STV.Merge(JArray.Parse(await httpClient.GetStringAsync(String.Format("https://api.7tv.app/v2/users/{0}/emotes", streamerId))));
+                    STV.Merge(JArray.Parse(await httpClient.GetStringAsync(String.Format("https://7tv.io/v2/users/{0}/emotes", streamerId))));
 
                 foreach (var emote in STV)
                 {
