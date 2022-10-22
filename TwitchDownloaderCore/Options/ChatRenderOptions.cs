@@ -93,7 +93,7 @@ namespace TwitchDownloaderCore.Options
         {
             get
             {
-                return (int)(8 * EmoteScale);
+                return (int)(6 * EmoteScale);
             }
         }
         public int EmoteSpacing

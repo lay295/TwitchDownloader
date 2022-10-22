@@ -161,7 +161,15 @@ namespace TwitchDownloaderCore
                 JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://api.7tv.app/v2/emotes/global"));
 
                 if (streamerId != null)
-                    STV.Merge(JArray.Parse(await httpClient.GetStringAsync(String.Format("https://api.7tv.app/v2/users/{0}/emotes", streamerId))));
+                {
+                    //Channel might not have 7TV emotes
+                    try
+                    {
+                        STV.Merge(JArray.Parse(await httpClient.GetStringAsync(String.Format("https://api.7tv.app/v2/users/{0}/emotes", streamerId))));
+                    }
+                    catch { }
+                }
+                    
 
                 foreach (var emote in STV)
                 {
@@ -331,7 +339,7 @@ namespace TwitchDownloaderCore
                         string[] id_parts = downloadUrl.Split('/');
                         string id = id_parts[id_parts.Length - 2];
                         byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
-                        MemoryStream ms = new MemoryStream(bytes);
+                        using MemoryStream ms = new MemoryStream(bytes);
                         //For some reason, twitch has corrupted images sometimes :) for example
                         //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                         SKBitmap badgeImage = SKBitmap.Decode(ms);
