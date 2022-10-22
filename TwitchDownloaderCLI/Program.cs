@@ -169,6 +169,9 @@ namespace TwitchDownloaderCLI
             downloadOptions.Filename = inputOptions.OutputFile;
             downloadOptions.TimeFormat = inputOptions.TimeFormat;
             downloadOptions.ConnectionCount = inputOptions.ChatConnections;
+            downloadOptions.BttvEmotes = inputOptions.BttvEmotes;
+            downloadOptions.FfzEmotes = inputOptions.FfzEmotes;
+            downloadOptions.StvEmotes = inputOptions.StvEmotes;
 
             ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
