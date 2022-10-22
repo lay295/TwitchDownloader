@@ -59,7 +59,8 @@
                 <TextBlock Text="Download Format:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
                 <TextBlock Visibility="Collapsed" x:Name="timeText" Text="Timestamp Format:" HorizontalAlignment="Right" Margin="0,16,0,0"/>
                 <TextBlock x:Name="textCrop" Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,20,0,0"/>
-                <TextBlock HorizontalAlignment="Right" Margin="0,45,0,0">Embed Emotes <Hyperlink ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Embeds emotes into the JSON/HTML file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock HorizontalAlignment="Right" Margin="0,46,0,0">Embed Emotes <Hyperlink ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Embeds emotes into the JSON/HTML file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock Visibility="Collapsed" x:Name="thirdPartyEmoteText" HorizontalAlignment="Right" Margin="0,9,0,0">Embed 3rd Party Emotes <Hyperlink ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Also embed third party emotes into the file. File size will be much larger. 7TV will return 404 if the streamer does not use it.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 <TextBlock HorizontalAlignment="Right" Text="Connections:" Margin="0,14,0,0"/>
             </StackPanel>
             <StackPanel>
@@ -91,6 +92,11 @@
                     </StackPanel>
                 </StackPanel>
                 <CheckBox x:Name="checkEmbed" Margin="5,8,0,0" Checked="checkEmbed_Checked" Unchecked="checkEmbed_Unchecked"></CheckBox>
+                <StackPanel Visibility="Collapsed" x:Name="thirdPartyEmbedOptions" Orientation="Horizontal">
+                    <CheckBox x:Name="checkBttvEmbed" Margin="5,8,0,0" Checked="checkBttvEmbed_Checked" Unchecked="checkBttvEmbed_Unchecked" Content="BTTV"></CheckBox>
+                    <CheckBox x:Name="checkFfzEmbed" Margin="5,8,0,0" Checked="checkFfzEmbed_Checked" Unchecked="checkFfzEmbed_Unchecked" Content="FFZ"></CheckBox>
+                    <CheckBox x:Name="checkStvEmbed" Margin="5,8,0,0" Checked="checkStvEmbed_Checked" Unchecked="checkStvEmbed_Unchecked" Content="7TV"></CheckBox>
+                </StackPanel>
                 <hc:NumericUpDown Margin="4,5,0,0" Value="10" Width="60" x:Name="numChatDownloadConnections" HorizontalAlignment="Left" ValueChanged="numChatDownloadConnections_ValueChanged" />
             </StackPanel>
         </StackPanel>
