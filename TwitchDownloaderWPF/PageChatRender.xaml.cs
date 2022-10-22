@@ -75,6 +75,10 @@ namespace TwitchDownloaderWPF
             options.FontSize = numFontSize.Value;
             options.UpdateRate = Double.Parse(textUpdateTime.Text);
             options.EmoteScale = Double.Parse(textEmoteScale.Text);
+            options.IgnoreUsersList = textIgnoreUsersList.Text
+                .ToLower()
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
             options.Timestamp = (bool)checkTimestamp.IsChecked;
             options.MessageColor = messageColor;
             options.Framerate = Int32.Parse(textFramerate.Text);
