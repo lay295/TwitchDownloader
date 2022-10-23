@@ -189,7 +189,7 @@ namespace TwitchDownloaderCore
                 List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();
                 List<TwitchEmote> firstPartyEmotes = new List<TwitchEmote>();
 
-                thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder);
+                thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes);
                 firstPartyEmotes = await TwitchHelper.GetEmotes(comments, cacheFolder);
 
                 foreach (TwitchEmote emote in thirdPartyEmotes)

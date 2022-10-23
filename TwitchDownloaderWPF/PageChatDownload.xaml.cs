@@ -27,6 +27,8 @@ using System.Threading;
 using TwitchDownloader;
 using TwitchDownloader.Properties;
 using TwitchDownloaderCore.TwitchObjects;
+using System.Security.Policy;
+using System.Reflection;
 
 namespace TwitchDownloaderWPF
 {
@@ -51,6 +53,9 @@ namespace TwitchDownloaderWPF
         {
             SetEnabled(false, false);
             checkEmbed.IsChecked = Settings.Default.ChatEmbedEmotes;
+            checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
+            checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
+            checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
             numChatDownloadConnections.Value = Settings.Default.ChatDownloadThreads;
             switch (Settings.Default.ChatDownloadType)
             {
@@ -85,6 +90,9 @@ namespace TwitchDownloaderWPF
                 radioUTC.IsEnabled = isEnabled;
                 radioNone.IsEnabled = isEnabled;
                 checkEmbed.IsEnabled = isEnabled;
+                checkBttvEmbed.IsEnabled = isEnabled;
+                checkFfzEmbed.IsEnabled = isEnabled;
+                checkStvEmbed.IsEnabled = isEnabled;
                 btnDownload.IsEnabled = isEnabled;
                 btnQueue.IsEnabled = isEnabled;
                 radioJson.IsEnabled = isEnabled;
@@ -212,6 +220,9 @@ namespace TwitchDownloaderWPF
 
             options.Timestamp = true;
             options.EmbedEmotes = (bool)checkEmbed.IsChecked;
+            options.BttvEmotes = (bool)checkBttvEmbed.IsChecked;
+            options.FfzEmotes = (bool)checkFfzEmbed.IsChecked;
+            options.StvEmotes = (bool)checkStvEmbed.IsChecked;
             options.Filename = filename;
             options.ConnectionCount = (int)numChatDownloadConnections.Value;
             return options;
@@ -266,6 +277,9 @@ namespace TwitchDownloaderWPF
                 timeText.Visibility = Visibility.Visible;
                 timeOptions.Visibility = Visibility.Visible;
                 checkEmbed.IsEnabled = false;
+                checkBttvEmbed.IsEnabled = false;
+                checkFfzEmbed.IsEnabled = false;
+                checkStvEmbed.IsEnabled = false;
                 textCrop.Margin = new Thickness(0, 14, 0, 0);
 
                 Settings.Default.ChatDownloadType = (int)DownloadFormat.Text;
@@ -289,6 +303,8 @@ namespace TwitchDownloaderWPF
             {
                 Settings.Default.ChatEmbedEmotes = true;
                 Settings.Default.Save();
+                thirdPartyEmoteText.Visibility = Visibility.Visible;
+                thirdPartyEmbedOptions.Visibility = Visibility.Visible;
             }
         }
 
@@ -297,6 +313,62 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.ChatEmbedEmotes = true;
+                Settings.Default.Save();
+                thirdPartyEmoteText.Visibility = Visibility.Collapsed;
+                thirdPartyEmbedOptions.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void checkBttvEmbed_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.BTTVEmotes = true;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkBttvEmbed_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.BTTVEmotes = false;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkFfzEmbed_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.FFZEmotes = true;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkFfzEmbed_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.FFZEmotes = false;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkStvEmbed_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.STVEmotes = true;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkStvEmbed_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.STVEmotes = false;
                 Settings.Default.Save();
             }
         }
@@ -308,6 +380,9 @@ namespace TwitchDownloaderWPF
                 timeText.Visibility = Visibility.Collapsed;
                 timeOptions.Visibility = Visibility.Collapsed;
                 checkEmbed.IsEnabled = true;
+                checkBttvEmbed.IsEnabled = true;
+                checkFfzEmbed.IsEnabled = true;
+                checkStvEmbed.IsEnabled = true;
                 textCrop.Margin = new Thickness(0, 20, 0, 0);
 
                 Settings.Default.ChatDownloadType = (int)DownloadFormat.Json;
@@ -322,6 +397,9 @@ namespace TwitchDownloaderWPF
                 timeText.Visibility = Visibility.Collapsed;
                 timeOptions.Visibility = Visibility.Collapsed;
                 checkEmbed.IsEnabled = true;
+                checkBttvEmbed.IsEnabled = true;
+                checkFfzEmbed.IsEnabled = true;
+                checkStvEmbed.IsEnabled = true;
                 textCrop.Margin = new Thickness(0, 20, 0, 0);
 
                 Settings.Default.ChatDownloadType = (int)DownloadFormat.Html;

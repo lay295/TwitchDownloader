@@ -48,11 +48,11 @@ namespace TwitchDownloaderCLI
         public int ChatHeight { get; set; }
         [Option('w', "chat-width", Default = 350, HelpText = "Width of chat render.")]
         public int ChatWidth { get; set; }
-        [Option("bttv", Default = true, HelpText = "Enable BTTV emotes in chat render.")]
+        [Option("bttv", Default = true, HelpText = "Enable BTTV emotes in chat download/render.")]
         public bool? BttvEmotes { get; set; }
-        [Option("ffz", Default = true, HelpText = "Enable FFZ emotes in chat render.")]
+        [Option("ffz", Default = true, HelpText = "Enable FFZ emotes in chat download/render.")]
         public bool? FfzEmotes { get; set; }
-        [Option("stv", Default = true, HelpText = "Enable 7tv emotes in chat render.")]
+        [Option("stv", Default = true, HelpText = "Enable 7tv emotes in chat download/render.")]
         public bool? StvEmotes { get; set; }
         [Option("outline", Default = false, HelpText = "Enable outline in chat render.")]
         public bool? Outline { get; set; }
