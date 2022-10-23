@@ -164,8 +164,8 @@ namespace TwitchDownloaderCLI
             downloadOptions.CropBeginningTime = inputOptions.CropBeginningTime;
             downloadOptions.CropEnding = inputOptions.CropEndingTime == 0.0 ? false : true;
             downloadOptions.CropEndingTime = inputOptions.CropEndingTime;
-            downloadOptions.Timestamp = inputOptions.Timestamp;
-            downloadOptions.EmbedEmotes = inputOptions.EmbedEmotes;
+            downloadOptions.Timestamp = (bool)inputOptions.Timestamp;
+            downloadOptions.EmbedEmotes = (bool)inputOptions.EmbedEmotes;
             downloadOptions.Filename = inputOptions.OutputFile;
             downloadOptions.TimeFormat = inputOptions.TimeFormat;
             downloadOptions.ConnectionCount = inputOptions.ChatConnections;
@@ -176,7 +176,7 @@ namespace TwitchDownloaderCLI
             chatDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
         }
 
-        private static async void RenderChat(Options inputOptions)
+        private static void RenderChat(Options inputOptions)
         {
             ChatRenderOptions renderOptions = new ChatRenderOptions();
 
@@ -186,10 +186,10 @@ namespace TwitchDownloaderCLI
             renderOptions.MessageColor = SKColor.Parse(inputOptions.MessageColor);
             renderOptions.ChatHeight = inputOptions.ChatHeight;
             renderOptions.ChatWidth = inputOptions.ChatWidth;
-            renderOptions.BttvEmotes = inputOptions.BttvEmotes;
-            renderOptions.FfzEmotes = inputOptions.FfzEmotes;
-            renderOptions.StvEmotes = inputOptions.StvEmotes;
-            renderOptions.Outline = inputOptions.Outline;
+            renderOptions.BttvEmotes = (bool)inputOptions.BttvEmotes;
+            renderOptions.FfzEmotes = (bool)inputOptions.FfzEmotes;
+            renderOptions.StvEmotes = (bool)inputOptions.StvEmotes;
+            renderOptions.Outline = (bool)inputOptions.Outline;
             renderOptions.OutlineSize = inputOptions.OutlineSize;
             renderOptions.Font = inputOptions.Font;
             renderOptions.FontSize = inputOptions.FontSize;
@@ -222,13 +222,13 @@ namespace TwitchDownloaderCLI
 
             renderOptions.UpdateRate = inputOptions.UpdateRate;
             renderOptions.Framerate = inputOptions.Framerate;
-            renderOptions.GenerateMask = inputOptions.GenerateMask;
+            renderOptions.GenerateMask = (bool)inputOptions.GenerateMask;
             renderOptions.InputArgs = inputOptions.InputArgs;
             renderOptions.OutputArgs = inputOptions.OutputArgs;
             renderOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : Path.GetFullPath(inputOptions.FfmpegPath);
             renderOptions.TempFolder = inputOptions.TempFolder;
-            renderOptions.SubMessages = inputOptions.SubMessages;
-            renderOptions.ChatBadges = inputOptions.ChatBadges;
+            renderOptions.SubMessages = (bool)inputOptions.SubMessages;
+            renderOptions.ChatBadges = (bool)inputOptions.ChatBadges;
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
             {
@@ -243,11 +243,18 @@ namespace TwitchDownloaderCLI
                 if (renderOptions.ChatWidth % 2 != 0)
                     renderOptions.ChatWidth++;
             }
+            
+            if (inputOptions.IgnoreUsersList != "")
+            {
+                renderOptions.IgnoreUsersList = inputOptions.IgnoreUsersList.ToLower().Split(',',
+                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
+            }
+
 
             ChatRenderer chatDownloader = new ChatRenderer(renderOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
-            await chatDownloader.ParseJson();
+            chatDownloader.ParseJson().Wait();
             chatDownloader.RenderVideoAsync(progress, new CancellationToken()).Wait();
         }
 

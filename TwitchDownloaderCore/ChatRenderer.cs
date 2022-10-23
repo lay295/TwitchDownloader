@@ -266,18 +266,28 @@ namespace TwitchDownloaderCore
                 frameCanvas.Clear(renderOptions.BackgroundColor);
                 while (commentIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
                 {
-                    CommentSection comment = GenerateCommentSection(commentIndex);
-                    commentList.Add(comment);
-
-                    frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
-                    frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
-
-                    foreach (var emote in comment.Emotes)
+                    // Skip comments from ignored users
+                    if (renderOptions.IgnoreUsersList.Contains(chatRoot.comments[commentIndex].commenter.name))
                     {
-                        //Only draw static emotes
-                        if (emote.Item2.FrameCount == 1)
+                        commentIndex--;
+                        continue;
+                    }
+
+                    CommentSection comment = GenerateCommentSection(commentIndex);
+                    if (comment != null)
+                    {
+                        commentList.Add(comment);
+
+                        frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
+                        frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
+
+                        foreach (var emote in comment.Emotes)
                         {
-                            frameCanvas.DrawBitmap(emote.Item2.EmoteFrames[0], emote.Item1.X, emote.Item1.Y + frameHeight);
+                            //Only draw static emotes
+                            if (emote.Item2.FrameCount == 1)
+                            {
+                                frameCanvas.DrawBitmap(emote.Item2.EmoteFrames[0], emote.Item1.X, emote.Item1.Y + frameHeight);
+                            }
                         }
                     }
                     commentIndex--;
@@ -295,30 +305,58 @@ namespace TwitchDownloaderCore
             List<SKBitmap> sectionImages = new List<SKBitmap>();
             Point drawPos = new Point();
             Point defaultPos = new Point();
+            bool ascentMessage = false;
             defaultPos.X = renderOptions.SidePadding;
-            AddImageSection(sectionImages, ref drawPos, ref defaultPos);
 
+            if (comment.source != "chat")
+                return null;
+            if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
+            {
+                if (comment.message.user_notice_params.msg_id != "highlighted-message" && comment.message.user_notice_params.msg_id != "sub" && comment.message.user_notice_params.msg_id != "resub" && comment.message.user_notice_params.msg_id != "subgift" && comment.message.user_notice_params.msg_id != "")
+                    return null;
+                if (!renderOptions.SubMessages && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
+                    return null;
+                if (comment.message.user_notice_params.msg_id == "highlighted-message" && comment.message.fragments == null && comment.message.body != null)
+                {
+                    comment.message.fragments = new List<Fragment>();
+                    comment.message.fragments.Add(new Fragment());
+                    comment.message.fragments[0].text = comment.message.body;
+                }
+            }
+            if (comment.message.fragments == null || comment.commenter == null)
+                return null;
+
+            AddImageSection(sectionImages, ref drawPos, ref defaultPos);
             //Measure some sample text to determine position to draw text in, cannot assume height is font size
             SKRect textBounds = new SKRect();
             messageFont.MeasureText("abc123", ref textBounds);
             defaultPos.Y = (int)(((renderOptions.SectionHeight - textBounds.Height) / 2.0) + textBounds.Height);
             drawPos.Y = defaultPos.Y;
 
-            if (renderOptions.Timestamp)
-                DrawTimestamp(comment, sectionImages, ref drawPos, ref defaultPos);
-            if (renderOptions.ChatBadges)
-                DrawBadges(comment, sectionImages, ref drawPos, ref defaultPos);
-            DrawUsername(comment, sectionImages, ref drawPos, ref defaultPos);
-            DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, ref defaultPos);
+            if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
+            {
+                ascentMessage = true;
+                drawPos.X += (int)(24 * renderOptions.EmoteScale);
+                DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, ref defaultPos);
+            }
+            else
+            {
+                if (renderOptions.Timestamp)
+                    DrawTimestamp(comment, sectionImages, ref drawPos, ref defaultPos);
+                if (renderOptions.ChatBadges)
+                    DrawBadges(comment, sectionImages, ref drawPos, ref defaultPos);
+                DrawUsername(comment, sectionImages, ref drawPos, ref defaultPos);
+                DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, ref defaultPos);
+            }
 
-            SKBitmap finalBitmap = CombineImages(sectionImages);
+            SKBitmap finalBitmap = CombineImages(sectionImages, ascentMessage);
             newSection.Image = finalBitmap;
             newSection.Emotes = emoteSectionList;
 
             return newSection;
         }
 
-        private SKBitmap CombineImages(List<SKBitmap> sectionImages)
+        private SKBitmap CombineImages(List<SKBitmap> sectionImages, bool ascent)
         {
             SKBitmap finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.Height));
             using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
@@ -328,6 +366,9 @@ namespace TwitchDownloaderCore
                     finalCanvas.DrawBitmap(sectionImages[i], 0, i * renderOptions.SectionHeight);
                     sectionImages[i].Dispose();
                 }
+
+                if (ascent)
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, (float)(12 * renderOptions.EmoteScale), finalBitmap.Height, new SKPaint() { Color = SKColor.Parse("#7b2cf2") });
             }
             sectionImages.Clear();
             return finalBitmap;
@@ -387,7 +428,7 @@ namespace TwitchDownloaderCore
                         {
                             while (!String.IsNullOrWhiteSpace(fragmentString))
                             {
-                                List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString())).ToList();
+                                List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
 
                                 //Make sure the found emojis actually exist in our cache
                                 for (int j = 0; j < emojiMatches.Count; j++)
@@ -412,7 +453,9 @@ namespace TwitchDownloaderCore
                                     using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
                                         canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
 
-                                    fragmentString = fragmentString.Substring(selectedEmoji.ToString().Length);
+                                    drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
+
+                                    fragmentString = fragmentString.Substring(selectedEmoji.Sequence.AsString.Trim('\uFE0F').Length);
                                 }
                                 else
                                 {
@@ -509,7 +552,7 @@ namespace TwitchDownloaderCore
                     }
                     else
                     {
-                        //Probably an old remote that was removed
+                        //Probably an old emote that was removed
                         DrawText(fragment.text, messageFont, true, sectionImages, ref drawPos, ref defaultPos);
                     }
                 }
@@ -828,7 +871,7 @@ namespace TwitchDownloaderCore
         {
             using (FileStream fs = new FileStream(renderOptions.InputFile, FileMode.Open, FileAccess.Read))
             {
-                using (JsonDocument jsonDocument = await JsonDocument.ParseAsync(fs))
+                using (var jsonDocument = JsonDocument.Parse(fs))
                 {
                     if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
                     {
