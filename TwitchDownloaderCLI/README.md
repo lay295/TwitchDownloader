@@ -24,6 +24,9 @@ Path to ffmpeg executable.
 **-\-temp-path**
 Path to temporary folder for cache.
 
+**-\-clear-cache**
+Clears the default cache folder.
+
 ## Arguments for mode VideoDownload
 **-u/-\-id**
 The ID of the VOD to download, currently only accepts Integer IDs and will accept URLs in the future.
