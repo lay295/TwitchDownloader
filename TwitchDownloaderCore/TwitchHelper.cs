@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
@@ -157,10 +158,18 @@ namespace TwitchDownloaderCore
 
             if (getStv)
             {
-                JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://api.7tv.app/v2/emotes/global"));
+                JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://7tv.io/v2/emotes/global"));
 
                 if (streamerId != null)
-                    STV.Merge(JArray.Parse(await httpClient.GetStringAsync(String.Format("https://api.7tv.app/v2/users/{0}/emotes", streamerId))));
+                {
+                    //Channel might not have 7TV emotes
+                    try
+                    {
+                        STV.Merge(JArray.Parse(await httpClient.GetStringAsync(String.Format("https://api.7tv.app/v2/users/{0}/emotes", streamerId))));
+                    }
+                    catch { }
+                }
+                    
 
                 foreach (var emote in STV)
                 {
@@ -330,7 +339,7 @@ namespace TwitchDownloaderCore
                         string[] id_parts = downloadUrl.Split('/');
                         string id = id_parts[id_parts.Length - 2];
                         byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
-                        MemoryStream ms = new MemoryStream(bytes);
+                        using MemoryStream ms = new MemoryStream(bytes);
                         //For some reason, twitch has corrupted images sometimes :) for example
                         //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                         SKBitmap badgeImage = SKBitmap.Decode(ms);
@@ -356,11 +365,11 @@ namespace TwitchDownloaderCore
 
             int emojiCount = Directory.GetFiles(emojiFolder, "*.png").Length;
 
-            //Twemoji 14 has 3677 emojis
-            if (emojiCount < 3677)
+            //Twemoji 14 has 3689 emoji images
+            if (emojiCount < 3689)
             {
                 string emojiZipPath = Path.GetTempFileName();
-                byte[] emojiZipData = await httpClient.GetByteArrayAsync("https://github.com/twitter/twemoji/archive/refs/tags/v14.0.0.zip");
+                byte[] emojiZipData = Resources.twemoji_14_0_0;
                 await File.WriteAllBytesAsync(emojiZipPath, emojiZipData);
                 using (ZipArchive archive = ZipFile.OpenRead(emojiZipPath))
                 {
@@ -368,7 +377,15 @@ namespace TwitchDownloaderCore
                     var emojis = archive.Entries.Where(x => Path.GetDirectoryName(x.FullName) == emojiAssetsPath && !String.IsNullOrWhiteSpace(x.Name));
                     foreach (var emoji in emojis)
                     {
-                        emoji.ExtractToFile(Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace("-", " ")));
+                        string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace("-", " "));
+                        if (!File.Exists(filePath))
+                        {
+                            try
+                            {
+                                emoji.ExtractToFile(filePath);
+                            }
+                            catch { }
+                        }
                     }
                 }
             }

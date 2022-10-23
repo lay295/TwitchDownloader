@@ -68,37 +68,26 @@ namespace TwitchDownloaderCore.Properties {
         ///&lt;!-- TITLE --&gt;
         ///&lt;/title&gt;
         ///&lt;style&gt;
-        ///body {
-        ///    font-family: &apos;Inter&apos;;font-size: 14px;
-        ///}
-        ///
-        ///.comment-root {
-        ///    margin: 0.9em 0px;
-        ///}
-        ///
-        ///.comment-author {
-        ///    font-weight: bold;
-        ///}
-        ///
-        ///.emote-image {
-        ///    vertical-align: middle;
-        ///}
-        ///
-        ////* Invisible text for emotes so they&apos;re still searchable with text even though they&apos;re images */
-        ///.invis-text {
-        ///    display: none
-        ///}
-        ///
-        ///#pagingControls {
-        ///    padding: 6px;
-        ///}
-        ///
-        ///#content {
-        ///    padding: 10 [rest of string was truncated]&quot;;.
+        ////*!
+        /// * Bootstrap v4.0.0 (https://getbootstrap.com)
+        /// * Copyright 2011-2018 The Bootstrap Authors
+        /// * Copyright 2011-2018 Twitter, Inc.
+        /// * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+        /// */:root{--blue:#007bff;--indigo:#6610f2;--purple:#6f42c1;--pink:#e83e8c;--red:#dc3545;--orange:#fd7e14;--yellow:#ffc107;--green:#28a745;--teal:#20c997;--cyan [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string template {
             get {
                 return ResourceManager.GetString("template", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] twemoji_14_0_0 {
+            get {
+                object obj = ResourceManager.GetObject("twemoji_14_0_0", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }

@@ -70,18 +70,18 @@
                     <StackPanel Orientation="Horizontal">
                         <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkStart_OnCheckStateChanged" Unchecked="checkStart_OnCheckStateChanged"/>
                         <TextBlock Margin="2,0,0,0" Text="Start" VerticalAlignment="Center" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Value="0" x:Name="numStartHour" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Value="0" x:Name="numStartMinute" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Value="0" x:Name="numStartSecond" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartHour" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartMinute" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartSecond" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                         <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkEnd_OnCheckStateChanged" Unchecked="checkEnd_OnCheckStateChanged"/>
                         <TextBlock Text="End" VerticalAlignment="Center" Margin="2,0,5,0" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Value="0" x:Name="numEndHour" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Value="0" x:Name="numEndMinute" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Value="0" x:Name="numEndSecond" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndHour" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndMinute" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndSecond" />
                     </StackPanel>
-                    <hc:NumericUpDown Margin="2,5,0,0" Value="10" Width="60" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" />
+                    <hc:NumericUpDown Margin="2,5,0,0" Minimum="1" Value="10" Width="60" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" />
                     <TextBox x:Name="textOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" TextChanged="textOauth_TextChanged"/>
                 </StackPanel>
             </StackPanel>

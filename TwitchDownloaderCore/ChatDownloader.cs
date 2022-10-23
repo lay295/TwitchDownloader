@@ -207,7 +207,7 @@ namespace TwitchDownloaderCore
                 {
                     EmbedEmoteData newEmote = new EmbedEmoteData();
                     newEmote.id = emote.Id;
-                    newEmote.imageScale = 1;
+                    newEmote.imageScale = emote.ImageScale;
                     newEmote.data = emote.ImageData;
                     newEmote.width = emote.Width / emote.ImageScale;
                     newEmote.height = emote.Height / emote.ImageScale;
