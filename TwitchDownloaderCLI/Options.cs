@@ -86,7 +86,7 @@ namespace TwitchDownloaderCLI
         public string FfmpegPath { get; set; }
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
-        [Option("chat-connections", Default = 1, HelpText = "Number of downloading connections for chat")]
+        [Option("chat-connections", Default = 4, HelpText = "Number of downloading connections for chat")]
         public int ChatConnections { get; set; }
         [Option("badge-filter", Default = 0, HelpText = "Chat Badge filter mask")]
         public int BadgeFilterMask { get; set; }

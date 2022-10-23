@@ -81,7 +81,7 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 (Default: true) 7TV emote embedding. Requires `-\-embed-emotes`.
 
 **-\-chat-connections**
-The number of parallel downloads for chat. Default 4.
+(Default: 4) The number of parallel downloads for chat.
 ## Arguments for mode ChatRender
 **-i/-\-input**
 Path to JSON chat file input.
