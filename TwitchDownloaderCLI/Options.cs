@@ -35,11 +35,11 @@ namespace TwitchDownloaderCLI
         [Option("oauth", HelpText = "OAuth to be passed when downloading a VOD.")]
         public string Oauth { get; set; }
         [Option("timestamp", HelpText = "Enable timestamp in chat render.", Default = false)]
-        public bool? Timestamp { get; set; }
+        public bool Timestamp { get; set; }
         [Option("timestamp-format", HelpText = "Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None", Default = TimestampFormat.Relative)]
         public TimestampFormat TimeFormat { get; set; }
         [Option("embed-emotes", HelpText = "Embed emotes into chat download.", Default = false)]
-        public bool? EmbedEmotes { get; set; }
+        public bool EmbedEmotes { get; set; }
         [Option("background-color", Default = "#111111", HelpText = "Color of background for chat render.")]
         public string BackgroundColor { get; set; }
         [Option("message-color", Default = "#ffffff", HelpText = "Color of messages for chat render.")]
@@ -55,13 +55,13 @@ namespace TwitchDownloaderCLI
         [Option("stv", Default = true, HelpText = "Enable 7tv emotes in chat download/render.")]
         public bool? StvEmotes { get; set; }
         [Option("outline", Default = false, HelpText = "Enable outline in chat render.")]
-        public bool? Outline { get; set; }
+        public bool Outline { get; set; }
         [Option("badges", Default = true, HelpText = "Enable chat badges.")]
         public bool? ChatBadges { get; set; }
         [Option("sub-messages", Default = true, HelpText = "Enable sub messages.")]
         public bool? SubMessages { get; set; }
         [Option("generate-mask", Default = false, HelpText = "Generates a mask file in addition to the regular chat file.")]
-        public bool? GenerateMask { get; set; }
+        public bool GenerateMask { get; set; }
         [Option("outline-size", Default = 4, HelpText = "Size of outline in chat render.")]
         public double OutlineSize { get; set; }
         [Option('f', "font", Default = "Inter", HelpText = "Font to use in chat render.")]
@@ -81,7 +81,7 @@ namespace TwitchDownloaderCLI
         [Option("output-args", Default = "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"", HelpText = "Output arguments for ffmpeg chat render.")]
         public string OutputArgs { get; set; }
         [Option("download-ffmpeg", Required = false, HelpText = "Downloads ffmpeg and exits.", Default = false)]
-        public bool? DownloadFfmpeg { get; set; }
+        public bool DownloadFfmpeg { get; set; }
         [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]
         public string FfmpegPath { get; set; }
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
@@ -92,5 +92,7 @@ namespace TwitchDownloaderCLI
         public int BadgeFilterMask { get; set; }
         [Option("ignore-users", Default = "", HelpText = "List of usernames to ignore when rendering, separated by commas.")]
         public string IgnoreUsersList { get; set; }
+        [Option("clear-cache", Default = false, HelpText = "Clears the default cache folder.")]
+        public bool? ClearCache { get; set; }
     }
 }

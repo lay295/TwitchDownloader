@@ -51,6 +51,14 @@ namespace TwitchDownloaderCLI
                 Environment.Exit(1);
             }
 
+            if ((bool)inputOptions.ClearCache)
+            {
+                Console.Write("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly\nYes/No: ");
+                string userInput = Console.ReadLine().Trim().ToLower();
+                if (userInput.Equals("y") || userInput.Equals("yes"))
+                    ClearTempCache();
+            }
+
             switch (inputOptions.RunMode)
             {
                 case RunMode.VideoDownload:
@@ -290,6 +298,29 @@ namespace TwitchDownloaderCLI
             {
                 Console.Write("\r[STATUS] - " + e.data);
                 was_last_message_percent = true;
+            }
+        }
+
+        private static void ClearTempCache()
+        {
+            Console.WriteLine("Clearing cache...");
+            string defaultDir = Path.Combine(System.IO.Path.GetTempPath(), "TwitchDownloader");
+            if (Directory.Exists(defaultDir))
+            {
+                try
+                {
+                    Directory.Delete(defaultDir, true);
+                    Console.WriteLine("Cache cleared successfully");
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    Console.WriteLine("Cache cleared successfully");
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    Console.WriteLine("Insufficient access to clear cache folder");
+                }
+                catch { }
             }
         }
     }
