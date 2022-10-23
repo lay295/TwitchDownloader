@@ -172,8 +172,8 @@ namespace TwitchDownloaderCLI
             downloadOptions.CropBeginningTime = inputOptions.CropBeginningTime;
             downloadOptions.CropEnding = inputOptions.CropEndingTime == 0.0 ? false : true;
             downloadOptions.CropEndingTime = inputOptions.CropEndingTime;
-            downloadOptions.Timestamp = (bool)inputOptions.Timestamp;
-            downloadOptions.EmbedEmotes = (bool)inputOptions.EmbedEmotes;
+            downloadOptions.Timestamp = inputOptions.Timestamp;
+            downloadOptions.EmbedEmotes = inputOptions.EmbedEmotes;
             downloadOptions.Filename = inputOptions.OutputFile;
             downloadOptions.TimeFormat = inputOptions.TimeFormat;
             downloadOptions.ConnectionCount = inputOptions.ChatConnections;
@@ -200,7 +200,7 @@ namespace TwitchDownloaderCLI
             renderOptions.BttvEmotes = (bool)inputOptions.BttvEmotes;
             renderOptions.FfzEmotes = (bool)inputOptions.FfzEmotes;
             renderOptions.StvEmotes = (bool)inputOptions.StvEmotes;
-            renderOptions.Outline = (bool)inputOptions.Outline;
+            renderOptions.Outline = inputOptions.Outline;
             renderOptions.OutlineSize = inputOptions.OutlineSize;
             renderOptions.Font = inputOptions.Font;
             renderOptions.FontSize = inputOptions.FontSize;
@@ -233,13 +233,14 @@ namespace TwitchDownloaderCLI
 
             renderOptions.UpdateRate = inputOptions.UpdateRate;
             renderOptions.Framerate = inputOptions.Framerate;
-            renderOptions.GenerateMask = (bool)inputOptions.GenerateMask;
+            renderOptions.GenerateMask = inputOptions.GenerateMask;
             renderOptions.InputArgs = inputOptions.InputArgs;
             renderOptions.OutputArgs = inputOptions.OutputArgs;
             renderOptions.FfmpegPath = inputOptions.FfmpegPath == null || inputOptions.FfmpegPath == "" ? ffmpegPath : Path.GetFullPath(inputOptions.FfmpegPath);
             renderOptions.TempFolder = inputOptions.TempFolder;
             renderOptions.SubMessages = (bool)inputOptions.SubMessages;
             renderOptions.ChatBadges = (bool)inputOptions.ChatBadges;
+            renderOptions.Timestamp = inputOptions.Timestamp;
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
             {
