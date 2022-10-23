@@ -92,5 +92,7 @@ namespace TwitchDownloaderCLI
         public int BadgeFilterMask { get; set; }
         [Option("ignore-users", Default = "", HelpText = "List of usernames to ignore when rendering, separated by commas.")]
         public string IgnoreUsersList { get; set; }
+        [Option("clear-cache", Default = false, HelpText = "Clears the default cache folder.")]
+        public bool? ClearCache { get; set; }
     }
 }
