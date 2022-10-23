@@ -61,6 +61,26 @@ namespace TwitchDownloaderCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Inter {
+            get {
+                object obj = ResourceManager.GetObject("Inter", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] InterBold {
+            get {
+                object obj = ResourceManager.GetObject("InterBold", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;html&gt;
         ///&lt;head&gt;
         ///&lt;link href=&apos;https://fonts.googleapis.com/css?family=Inter&apos; rel=&apos;stylesheet&apos;&gt;

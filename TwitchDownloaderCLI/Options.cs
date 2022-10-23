@@ -64,7 +64,7 @@ namespace TwitchDownloaderCLI
         public bool? GenerateMask { get; set; }
         [Option("outline-size", Default = 4, HelpText = "Size of outline in chat render.")]
         public double OutlineSize { get; set; }
-        [Option('f', "font", Default = "arial", HelpText = "Font to use in chat render.")]
+        [Option('f', "font", Default = "Inter", HelpText = "Font to use in chat render.")]
         public string Font { get; set; }
         [Option("font-size", Default = 12, HelpText = "Size of font in chat render.")]
         public double FontSize { get; set; }
