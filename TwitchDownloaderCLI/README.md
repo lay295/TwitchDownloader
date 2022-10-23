@@ -7,6 +7,7 @@ A cross platform command line tool that can do the main functions of the GUI pro
  - [Arguments for mode ChatDownload](#arguments-for-mode-chatdownload)
  - [Arguments for mode ChatRender](#arguments-for-mode-chatrender)
  - [Example Commands](#example-commands)
+ - [Notes](#notes)
 
 ## Global Arguments
 **-m/-\-mode (REQUIRED)**
@@ -35,11 +36,11 @@ The ID of the VOD to download, currently only accepts Integer IDs and will accep
 The quality the program will attempt to download, for example "1080p60", if not found will download highest quality stream.
 
 **-b/-\-beginning**
-Time in seconds to crop beginning. For example if I wanted a 10 second stream but only wanted the last 7 seconds of it I would use -b 3 to skip the first 3 seconds of it.
+Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e/-\-ending**
-Time in seconds to crop ending. For example if I wanted a 10 second stream but only wanted the first 4 seconds of it I would use -e 4 remove the last 6 seconds of it.
-Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do -b 3 -e 6
+Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
 
 **-t/-\-threads**
 (Default: 10) Number of download threads.
@@ -59,28 +60,28 @@ The quality the program will attempt to download, for example "1080p60", if not 
 The ID of the VOD or clip to download. Does not currently accept URLs.
 
 **-b/-\-beginning**
-Time in seconds to crop beginning. For example if I wanted a 10 second stream but only wanted the last 7 seconds of it I would use -b 3 to skip the first 3 seconds of it.
+Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e/-\-ending**
-Time in seconds to crop ending. For example if I wanted a 10 second stream but only wanted the first 4 seconds of it I would use -e 4 remove the last 6 seconds of it.
+Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 **-\-timestamp-format**
-Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None.
+(Default: Relative) Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None.
 
 **-\-embed-emotes**
-Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.
+(Default: false) Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.
 
 **-\-bttv**
-BTTV emote embedding. Requires `-\-embed-emotes`.
+(Default: true) BTTV emote embedding. Requires `-\-embed-emotes`.
 
 **-\-ffz**
-FFZ emote embedding. Requires `-\-embed-emotes`.
+(Default: true) FFZ emote embedding. Requires `-\-embed-emotes`.
 
 **-\-stv**
-7TV emote embedding. Requires `-\-embed-emotes`.
+(Default: true) 7TV emote embedding. Requires `-\-embed-emotes`.
 
 **-\-chat-connections**
-The number of parallel downloads for chat. Default 4.
+(Default: 4) The number of parallel downloads for chat.
 ## Arguments for mode ChatRender
 **-i/-\-input**
 Path to JSON chat file input.
@@ -119,7 +120,7 @@ Path to JSON chat file input.
 (Default: 4) Size of outline if outline is enabled.
 
 **-f/-\-font**
-(Default: Arial) Font to use.
+(Default: Inter) Font to use.
 
 **-\-font-size**
 (Default: 12) Size of font.
@@ -131,10 +132,10 @@ Path to JSON chat file input.
 (Default: bold) Font style to use for username. Valid values are **normal**, **bold**, and **italic**.
 
 **-\-timestamp**
-Enables timestamps to left of messages, similar to VOD chat on Twitch.
+(Default: false) Enables timestamps to left of messages, similar to VOD chat on Twitch.
 
 **-\-generate-mask**
-Generates a mask file in addition to the regular chat file.
+(Default: false) Generates a mask file in addition to the regular chat file.
 
 **-\-framerate**
 (Default: 30) Framerate of chat render output.
@@ -160,9 +161,9 @@ Download a Clip
 Download a Chat (plain text with timestamps)
 
     TwitchDownloaderCLI -m ChatDownload --id 612942303 --timestamp-format Relative -o chat.txt
-Download a Chat (JSON with embeded emotes)
+Download a Chat (JSON with embeded emotes from Twitch and Bttv)
 
-    TwitchDownloaderCLI -m ChatDownload --id 612942303 --embed-emotes -o chat.json
+    TwitchDownloaderCLI -m ChatDownload --id 612942303 --embed-emotes --bttv=true --ffz=false --stv=false -o chat.json
 Render a chat with defaults
 
     TwitchDownloaderCLI -m ChatRender -i chat.json -o chat.mp4
@@ -172,3 +173,7 @@ Render a chat with different heights and values
 Render a chat with custom ffmpeg arguments
 
     TwitchDownloaderCLI -m ChatRender -i chat.json --output-args='-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"' -o chat.mp4
+
+## Notes
+
+Default true boolean flags must be assigned as `--true-bool=false`. Default false boolean flags must be raised normally `--false-bool`

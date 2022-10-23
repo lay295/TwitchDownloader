@@ -30,15 +30,15 @@ namespace TwitchDownloaderCLI
         public int CropBeginningTime { get; set; }
         [Option('e', "ending", HelpText = "Time in seconds to crop ending.")]
         public int CropEndingTime { get; set; }
-        [Option('t', "threads", HelpText = "Number of download threads.", Default = 10)]
+        [Option('t', "threads", Default = 10, HelpText = "Number of download threads.")]
         public int DownloadThreads { get; set; }
         [Option("oauth", HelpText = "OAuth to be passed when downloading a VOD.")]
         public string Oauth { get; set; }
-        [Option("timestamp", HelpText = "Enable timestamp in chat render.", Default = false)]
+        [Option("timestamp", Default = false, HelpText = "Enable timestamp in chat render.")]
         public bool Timestamp { get; set; }
-        [Option("timestamp-format", HelpText = "Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None", Default = TimestampFormat.Relative)]
+        [Option("timestamp-format", Default = TimestampFormat.Relative, HelpText = "Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None")]
         public TimestampFormat TimeFormat { get; set; }
-        [Option("embed-emotes", HelpText = "Embed emotes into chat download.", Default = false)]
+        [Option("embed-emotes", Default = false, HelpText = "Embed emotes into chat download.")]
         public bool EmbedEmotes { get; set; }
         [Option("background-color", Default = "#111111", HelpText = "Color of background for chat render.")]
         public string BackgroundColor { get; set; }
@@ -80,19 +80,19 @@ namespace TwitchDownloaderCLI
         public string InputArgs { get; set; }
         [Option("output-args", Default = "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"", HelpText = "Output arguments for ffmpeg chat render.")]
         public string OutputArgs { get; set; }
-        [Option("download-ffmpeg", Required = false, HelpText = "Downloads ffmpeg and exits.", Default = false)]
+        [Option("download-ffmpeg", Default = false, Required = false, HelpText = "Downloads ffmpeg and exits.")]
         public bool DownloadFfmpeg { get; set; }
         [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]
         public string FfmpegPath { get; set; }
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
-        [Option("chat-connections", Default = 1, HelpText = "Number of downloading connections for chat")]
+        [Option("chat-connections", Default = 4, HelpText = "Number of downloading connections for chat")]
         public int ChatConnections { get; set; }
         [Option("badge-filter", Default = 0, HelpText = "Chat Badge filter mask")]
         public int BadgeFilterMask { get; set; }
         [Option("ignore-users", Default = "", HelpText = "List of usernames to ignore when rendering, separated by commas.")]
         public string IgnoreUsersList { get; set; }
         [Option("clear-cache", Default = false, HelpText = "Clears the default cache folder.")]
-        public bool? ClearCache { get; set; }
+        public bool ClearCache { get; set; }
     }
 }
