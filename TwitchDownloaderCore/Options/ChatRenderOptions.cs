@@ -87,21 +87,21 @@ namespace TwitchDownloaderCore.Options
         {
             get
             {
-                return (int)(14 * EmoteScale);
+                return (int)(12 * EmoteScale);
             }
         }
         public int WordSpacing
         {
             get
             {
-                return (int)(6 * EmoteScale);
+                return (int)(4 * EmoteScale);
             }
         }
         public int EmoteSpacing
         {
             get
             {
-                return (int)(6 * EmoteScale);
+                return (int)(4 * EmoteScale);
             }
         }
     }
