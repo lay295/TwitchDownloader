@@ -13,13 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Inter-Regular.otf" />
+    <None Remove="Resources\interbold.otf" />
+    <None Remove="Resources\interregular.otf" />
     <None Remove="Resources\template.html" />
     <None Remove="Resources\twemoji-14.0.0.zip" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Inter-Regular.otf" />
+    <EmbeddedResource Include="Resources\interbold.otf" />
+    <EmbeddedResource Include="Resources\interregular.otf" />
     <EmbeddedResource Include="Resources\template.html" />
     <EmbeddedResource Include="Resources\twemoji-14.0.0.zip" />
   </ItemGroup>
