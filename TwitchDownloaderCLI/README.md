@@ -68,13 +68,13 @@ Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, an
 Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.
 
 **-\-bttv**
-Enable BTTV emote embedding. Requires `-\-embed-emotes`.
+BTTV emote embedding. Requires `-\-embed-emotes`.
 
 **-\-ffz**
-Enable FFZ emote embedding. Requires `-\-embed-emotes`.
+FFZ emote embedding. Requires `-\-embed-emotes`.
 
 **-\-stv**
-Enable 7TV emote embedding. Requires `-\-embed-emotes`. (7TV can return 404 if the streamer is not registered)
+7TV emote embedding. Requires `-\-embed-emotes`.
 
 **-\-chat-connections**
 The number of parallel downloads for chat. Default 4.
