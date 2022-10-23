@@ -59,8 +59,8 @@ namespace TwitchDownloaderCore
                         }
                     }
 
-                    if (videoQualities.Any(x => x.Key.Equals(downloadOptions.Quality)))
-                        playlistUrl = videoQualities.Where(x => x.Key.Equals(downloadOptions.Quality)).First().Value;
+                    if (videoQualities.Any(x => x.Key.StartsWith(downloadOptions.Quality)))
+                        playlistUrl = videoQualities.Where(x => x.Key.StartsWith(downloadOptions.Quality)).First().Value;
                     else
                     {
                         //Unable to find specified quality, defaulting to highest quality
