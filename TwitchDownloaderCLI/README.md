@@ -95,13 +95,13 @@ Path to JSON chat file input.
 (Default: 350) Width of chat render.
 
 **-\-bttv**
-(Default: false) Enable BTTV emotes.
+(Default: true) Enable BTTV emotes.
 
 **-\-ffz**
-(Default: false) Enable FFZ emotes.
+(Default: true) Enable FFZ emotes.
 
 **-\-stv**
-(Default: false) Enable 7TV emotes.
+(Default: true) Enable 7TV emotes.
 
 **-\-sub-messages**
 (Default: true) Enable sub/re-sub messages.
