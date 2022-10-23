@@ -68,13 +68,13 @@ Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, an
 Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.
 
 **-\-bttv**
-BTTV emote embedding. Requires `-\-embed-emotes`.
+(Default: True) BTTV emote embedding. Requires `-\-embed-emotes`.
 
 **-\-ffz**
-FFZ emote embedding. Requires `-\-embed-emotes`.
+(Default: True) FFZ emote embedding. Requires `-\-embed-emotes`.
 
 **-\-stv**
-7TV emote embedding. Requires `-\-embed-emotes`.
+(Default: True) 7TV emote embedding. Requires `-\-embed-emotes`.
 
 **-\-chat-connections**
 The number of parallel downloads for chat. Default 4.
@@ -159,7 +159,7 @@ Download a Chat (plain text with timestamps)
     TwitchDownloaderCLI -m ChatDownload --id 612942303 --timestamp-format Relative -o chat.txt
 Download a Chat (JSON with embeded emotes)
 
-    TwitchDownloaderCLI -m ChatDownload --id 612942303 --embed-emotes -o chat.json
+    TwitchDownloaderCLI -m ChatDownload --id 612942303 --embed-emotes=true -o chat.json
 Render a chat with defaults
 
     TwitchDownloaderCLI -m ChatRender -i chat.json -o chat.mp4
