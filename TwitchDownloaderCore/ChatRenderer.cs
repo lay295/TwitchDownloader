@@ -65,8 +65,20 @@ namespace TwitchDownloaderCore
             await Task.Run(() => ScaleImages());
 
             outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.EmoteScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-            nameFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.UsernameFontStyle), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-            messageFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.MessageFontStyle), LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
+
+            nameFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
+            messageFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
+
+            if (renderOptions.Font == "Inter")
+            {
+                nameFont.Typeface = GetInterTypeface(renderOptions.UsernameFontStyle);
+                messageFont.Typeface = GetInterTypeface(renderOptions.UsernameFontStyle);
+            }
+            else
+            {
+                nameFont.Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.UsernameFontStyle);
+                messageFont.Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.MessageFontStyle);
+            }
 
             (int, int) tickValues = GetTotalTicks();
             int totalTicks = tickValues.Item2;
@@ -89,6 +101,20 @@ namespace TwitchDownloaderCore
             else
             {
                 await Task.Run(() => RenderVideoSection(processInfo.Item1, null, startTick, startTick + totalTicks, progress), cancellationToken);
+            }
+        }
+
+        private SKTypeface GetInterTypeface(SKFontStyle usernameFontStyle)
+        {
+            if (usernameFontStyle == SKFontStyle.Bold)
+            {
+                using MemoryStream stream = new MemoryStream(Properties.Resources.InterBold);
+                return SKTypeface.FromStream(stream);
+            }
+            else
+            {
+                using MemoryStream stream = new MemoryStream(Properties.Resources.Inter);
+                return SKTypeface.FromStream(stream);
             }
         }
 
@@ -738,7 +764,12 @@ namespace TwitchDownloaderCore
             using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last()))
             {
                 TimeSpan timestamp = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
-                string timeString = timestamp.ToString(@"h\:mm\:ss");
+                string timeString = "";
+
+                if (timestamp.Hours >= 1)
+                    timeString = timestamp.ToString(@"h\:mm\:ss");
+                else
+                    timeString = timestamp.ToString(@"m\:ss");
                 int textWidth = (int)messageFont.MeasureText(timeString);
                 if (renderOptions.Outline)
                 {
@@ -746,7 +777,7 @@ namespace TwitchDownloaderCore
                     sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
                 }
                 sectionImageCanvas.DrawText(timeString, drawPos.X, drawPos.Y, messageFont);
-                drawPos.X += textWidth + renderOptions.WordSpacing;
+                drawPos.X += textWidth + (renderOptions.WordSpacing * 2);
                 defaultPos.X = drawPos.X;
             }
         }
