@@ -174,7 +174,7 @@ namespace TwitchDownloaderWPF
         private void OnProgressChanged(ProgressReport progress)
         {
             if (progress.reportType == ReportType.Percent)
-                statusProgressBar.Value = (int) progress.data;
+                statusProgressBar.Value = (int)progress.data;
             if (progress.reportType == ReportType.Message || progress.reportType == ReportType.MessageInfo)
                 statusMessage.Text = (string)progress.data;
             if (progress.reportType == ReportType.Log)
@@ -290,6 +290,7 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized && numDownloadThreads.IsEnabled)
             {
+                numDownloadThreads.Value = Math.Clamp((int)numDownloadThreads.Value, 1, 50);
                 Settings.Default.VodDownloadThreads = (int)numDownloadThreads.Value;
                 Settings.Default.Save();
             }

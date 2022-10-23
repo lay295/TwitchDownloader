@@ -36,7 +36,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageChatDownload : Page
     {
-       
+
         public DownloadType downloadType;
         public string downloadId;
         public int streamerId;
@@ -78,7 +78,7 @@ namespace TwitchDownloaderWPF
             numEndHour.IsEnabled = isEnabled;
             numEndMinute.IsEnabled = isEnabled;
             numEndSecond.IsEnabled = isEnabled;
-            
+
             if (!onlyCrop)
             {
                 radioRelative.IsEnabled = isEnabled;
@@ -275,9 +275,9 @@ namespace TwitchDownloaderWPF
 
         private void numChatDownloadConnections_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            numChatDownloadConnections.Value = Math.Clamp((int)numChatDownloadConnections.Value, 1, 50);
             if (this.IsInitialized)
             {
+                numChatDownloadConnections.Value = Math.Clamp((int)numChatDownloadConnections.Value, 1, 50);
                 Settings.Default.ChatDownloadThreads = (int)numChatDownloadConnections.Value;
                 Settings.Default.Save();
             }
