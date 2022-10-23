@@ -453,8 +453,6 @@ namespace TwitchDownloaderCore
                                     using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
                                         canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
 
-                                    drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
-
                                     fragmentString = fragmentString.Substring(selectedEmoji.Sequence.AsString.Trim('\uFE0F').Length);
                                 }
                                 else
