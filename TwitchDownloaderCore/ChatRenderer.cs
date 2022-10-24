@@ -359,7 +359,7 @@ namespace TwitchDownloaderCore
             defaultPos.Y = (int)(((renderOptions.SectionHeight - textBounds.Height) / 2.0) + textBounds.Height);
             drawPos.Y = defaultPos.Y;
 
-            if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
+            if ((comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift")) || IsSubMessage(comment))
             {
                 ascentMessage = true;
                 drawPos.X += renderOptions.AscentIndentWidth;
@@ -381,6 +381,15 @@ namespace TwitchDownloaderCore
             newSection.Emotes = emoteSectionList;
 
             return newSection;
+        }
+
+        private bool IsSubMessage(Comment comment)
+        {
+            //If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
+            if (comment.message.body.StartsWith(comment.commenter.display_name + " subscribed at Tier") || comment.message.body.StartsWith(comment.commenter.display_name + " subscribed with Prime"))
+                return true;
+
+            return false;
         }
 
         private SKBitmap CombineImages(List<SKBitmap> sectionImages, bool ascent)
