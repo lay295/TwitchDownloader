@@ -312,7 +312,7 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.ChatEmbedEmotes = true;
+                Settings.Default.ChatEmbedEmotes = false;
                 Settings.Default.Save();
                 thirdPartyEmoteText.Visibility = Visibility.Collapsed;
                 thirdPartyEmbedOptions.Visibility = Visibility.Collapsed;
