@@ -64,7 +64,7 @@ namespace TwitchDownloaderCore
 
             await Task.Run(() => ScaleImages());
 
-            outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.EmoteScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
+            outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
 
             nameFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             messageFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
@@ -362,7 +362,8 @@ namespace TwitchDownloaderCore
             if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift"))
             {
                 ascentMessage = true;
-                drawPos.X += (int)(24 * renderOptions.EmoteScale);
+                drawPos.X += renderOptions.AscentIndentWidth;
+                defaultPos.X = drawPos.X;
                 DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, ref defaultPos);
             }
             else
@@ -394,7 +395,7 @@ namespace TwitchDownloaderCore
                 }
 
                 if (ascent)
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, (float)(12 * renderOptions.EmoteScale), finalBitmap.Height, new SKPaint() { Color = SKColor.Parse("#7b2cf2") });
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AscentStrokeWidth, finalBitmap.Height, new SKPaint() { Color = SKColor.Parse("#7b2cf2") });
             }
             sectionImages.Clear();
             return finalBitmap;
@@ -616,7 +617,7 @@ namespace TwitchDownloaderCore
                 {
                     //TODO: Fix outline for RTL
                     SKPath outlinePath = textFont.GetTextPath(drawText, drawPos.X, drawPos.Y);
-                    SKPaint outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.EmoteScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
+                    SKPaint outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
                     sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
                 }
 

@@ -51,7 +51,7 @@ namespace TwitchDownloaderCLI
                 Environment.Exit(1);
             }
 
-            if ((bool)inputOptions.ClearCache)
+            if (inputOptions.ClearCache)
             {
                 Console.Write("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly\nYes/No: ");
                 string userInput = Console.ReadLine().Trim().ToLower();

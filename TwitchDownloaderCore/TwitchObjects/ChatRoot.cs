@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 public class Streamer
 {
@@ -59,7 +60,7 @@ public class Message
 
 public class UserNoticeParams
 {
-    [JsonProperty("msg-id")]
+    [JsonPropertyName("msg-id")]
     public string msg_id { get; set; }
 }
 

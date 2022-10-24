@@ -80,28 +80,42 @@ namespace TwitchDownloaderCore.Options
         {
             get
             {
-                return (int)(6 * EmoteScale * ReferenceScale);
+                return (int)(6 * ReferenceScale);
             }
         }
         public int VerticalPadding
         {
             get
             {
-                return (int)(24 * EmoteScale * ReferenceScale);
+                return (int)(24 * ReferenceScale);
             }
         }
         public int WordSpacing
         {
             get
             {
-                return (int)(6 * EmoteScale * ReferenceScale);
+                return (int)(6 * ReferenceScale);
             }
         }
         public int EmoteSpacing
         {
             get
             {
-                return (int)(6 * EmoteScale * ReferenceScale);
+                return (int)(6 * ReferenceScale);
+            }
+        }
+        public int AscentStrokeWidth
+        {
+            get
+            {
+                return (int)(12 * ReferenceScale);
+            }
+        }
+        public int AscentIndentWidth
+        {
+            get
+            {
+                return (int)(24 * ReferenceScale);
             }
         }
     }
