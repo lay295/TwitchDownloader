@@ -59,7 +59,7 @@ namespace TwitchDownloaderCore
                         }
                     }
 
-                    if (videoQualities.Any(x => x.Key.StartsWith(downloadOptions.Quality)))
+                    if (downloadOptions.Quality != null && videoQualities.Any(x => x.Key.StartsWith(downloadOptions.Quality)))
                         playlistUrl = videoQualities.Where(x => x.Key.StartsWith(downloadOptions.Quality)).First().Value;
                     else
                     {
