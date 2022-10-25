@@ -186,7 +186,7 @@ jobs:
         asset_content_type: application/zip
   
   build-cli-mac:
-    runs-on: macos-10.15
+    runs-on: macos-latest
     needs: [create-release, build-cli]
     steps:
     - uses: actions/checkout@v2
