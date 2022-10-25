@@ -780,7 +780,7 @@ namespace TwitchDownloaderCore
                     timeString = timestamp.ToString(@"h\:mm\:ss");
                 else
                     timeString = timestamp.ToString(@"m\:ss");
-                int textWidth = (int)messageFont.MeasureText(timeString);
+                int textWidth = (int)messageFont.MeasureText(Regex.Replace(timeString, "[0-9]", "0"));
                 if (renderOptions.Outline)
                 {
                     SKPath outlinePath = messageFont.GetTextPath(timeString, drawPos.X, drawPos.Y);
