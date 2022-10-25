@@ -34,8 +34,13 @@ https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-8
 https://www.youtube.com/watch?v=0W3MhfhnYjk
 (older version, same concept)
 
-## Linux? MacOS?
-Sorry, the GUI version is only avaliable for Windows :(  
+## Linux?
+
+Check [twitch-downloader-gui](https://github.com/mohad12211/twitch-downloader-gui) for a linux GUI wrapper for the CLI.
+
+## MacOS?
+
+No GUI is avaiable for MacOS yet :(
 
 # CLI
 
