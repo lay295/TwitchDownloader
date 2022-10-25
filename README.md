@@ -1,11 +1,24 @@
+<p align="center">
+  <a href="https://github.com/lay295/TwitchDownloader">
+    <img src="TwitchDownloaderWPF/Images/Logo.png" alt="Logo" width="80" height="80">
+    
+  </a>
 
-# TwitchDownloader
-Twitch VOD/Clip/Chat downloader and chat renderer I wrote.
+  <h3 align="center">Twitch Downloader</h3>
 
-**THIS USES UNDOCUMENTED API ENDPOINTS, MAY BREAK EASILY. I'LL TRY AND UPDATE WHEN IT DOES.**
+  <p align="center">
+    Twitch VOD/Clip/Chat Downloader and Chat Renderer
+    <br />
+    <br />
+    <a href="https://github.com/lay295/TwitchDownloader/issues">Report Bug</a>
+  </p>
+</p>
+
+
 
 ## Chat Render Example
-![](https://i.imgur.com/I4Z2bWo.gif)
+https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4
+
 
 ## What can it do?
 - Download Twitch VODs
@@ -13,13 +26,9 @@ Twitch VOD/Clip/Chat downloader and chat renderer I wrote.
 - Download chat for VODS and Clips, in either a [JSON with all the information](https://pastebin.com/raw/YDgRe6X4) or a [simple text file](https://pastebin.com/raw/016azeQX)
 - Use a previously generated JSON chat file to render the chat with FFZ, BTTV and 7TV support (including GIFS)
 
-## Things still to be done
-- Fix bugs that slipped by
-- More options for chat rendering
-
 # GUI
 
-![](https://i.imgur.com/BmGqYbm.gif)
+![](https://i.imgur.com/bLegxGX.gif)
 
 ## Video Demonstration
 https://www.youtube.com/watch?v=0W3MhfhnYjk

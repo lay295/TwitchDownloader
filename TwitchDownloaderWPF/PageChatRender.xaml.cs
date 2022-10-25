@@ -301,13 +301,13 @@ namespace TwitchDownloaderWPF
             List<string> fonts = new List<string>();
             foreach (var fontFamily in fontManager.FontFamilies)
                 fonts.Add(fontFamily);
-            fonts.Add("Inter");
+            fonts.Add("Inter Embedded");
             fonts.Sort();
             foreach (var font in fonts)
             {
                 comboFont.Items.Add(font);
             }
-            comboFont.SelectedItem = "Inter";
+            comboFont.SelectedItem = "Inter Embedded";
 
             Codec h264Codec = new Codec() { Name = "H264", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
             Codec h264NvencCodec = new Codec() { Name = "H264 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_nvenc -preset fast -cq 20 -pix_fmt yuv420p \"{save_path}\"" };

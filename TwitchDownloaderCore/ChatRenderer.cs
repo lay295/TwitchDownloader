@@ -69,10 +69,10 @@ namespace TwitchDownloaderCore
             nameFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             messageFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
 
-            if (renderOptions.Font == "Inter")
+            if (renderOptions.Font == "Inter Embedded")
             {
                 nameFont.Typeface = GetInterTypeface(renderOptions.UsernameFontStyle);
-                messageFont.Typeface = GetInterTypeface(renderOptions.UsernameFontStyle);
+                messageFont.Typeface = GetInterTypeface(renderOptions.MessageFontStyle);
             }
             else
             {
@@ -451,14 +451,14 @@ namespace TwitchDownloaderCore
                                     AddImageSection(sectionImages, ref drawPos, ref defaultPos);
 
                                 emotePoint.X = drawPos.X;
+                                drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
                             }
                             else
                             {
                                 emotePoint.X = drawPos.X - renderOptions.EmoteSpacing - twitchEmote.Width;
                             }
-                            emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight - renderOptions.VerticalPadding + (renderOptions.SectionHeight - twitchEmote.Height / 2.0));
+                            emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
                             emotePositionList.Add((emotePoint, twitchEmote));
-                            drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
                         }
                         else if (Regex.Match(fragmentString, emojiRegex).Success)
                         {
@@ -485,7 +485,7 @@ namespace TwitchDownloaderCore
                                         AddImageSection(sectionImages, ref drawPos, ref defaultPos);
                                     Point emotePoint = new Point();
                                     emotePoint.X = drawPos.X;
-                                    emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight - renderOptions.VerticalPadding + (renderOptions.SectionHeight - emojiImage.Height / 2.0));
+                                    emotePoint.Y = (int)((renderOptions.SectionHeight - emojiImage.Height) / 2.0);
                                     using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
                                         canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
 
@@ -557,7 +557,7 @@ namespace TwitchDownloaderCore
                                             AddImageSection(sectionImages, ref drawPos, ref defaultPos);
                                         Point emotePoint = new Point();
                                         emotePoint.X = drawPos.X;
-                                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight - renderOptions.VerticalPadding + (renderOptions.SectionHeight - twitchEmote.Height / 2.0));
+                                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
                                         emotePositionList.Add((emotePoint, twitchEmote));
                                         drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
                                         bitsPrinted = true;
@@ -582,7 +582,7 @@ namespace TwitchDownloaderCore
                             AddImageSection(sectionImages, ref drawPos, ref defaultPos);
                         Point emotePoint = new Point();
                         emotePoint.X = drawPos.X;
-                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight - renderOptions.VerticalPadding + (renderOptions.SectionHeight - twitchEmote.Height / 2.0));
+                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
                         emotePositionList.Add((emotePoint, twitchEmote));
                         drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
                     }
@@ -617,7 +617,7 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            if (drawPos.X + textWidth > renderOptions.ChatWidth + renderOptions.SidePadding)
+            if (drawPos.X + textWidth > renderOptions.ChatWidth - renderOptions.SidePadding)
                 AddImageSection(sectionImages, ref drawPos, ref defaultPos);
 
             using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last()))
@@ -780,7 +780,7 @@ namespace TwitchDownloaderCore
                     timeString = timestamp.ToString(@"h\:mm\:ss");
                 else
                     timeString = timestamp.ToString(@"m\:ss");
-                int textWidth = (int)messageFont.MeasureText(timeString);
+                int textWidth = (int)messageFont.MeasureText(Regex.Replace(timeString, "[0-9]", "0"));
                 if (renderOptions.Outline)
                 {
                     SKPath outlinePath = messageFont.GetTextPath(timeString, drawPos.X, drawPos.Y);

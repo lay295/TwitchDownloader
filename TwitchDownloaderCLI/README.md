@@ -120,7 +120,7 @@ Path to JSON chat file input.
 (Default: 4) Size of outline if outline is enabled.
 
 **-f/-\-font**
-(Default: Inter) Font to use.
+(Default: Inter Embedded) Font to use.
 
 **-\-font-size**
 (Default: 12) Size of font.
