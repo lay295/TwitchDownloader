@@ -617,7 +617,7 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            if (drawPos.X + textWidth > renderOptions.ChatWidth + renderOptions.SidePadding)
+            if (drawPos.X + textWidth > renderOptions.ChatWidth - renderOptions.SidePadding)
                 AddImageSection(sectionImages, ref drawPos, ref defaultPos);
 
             using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last()))
