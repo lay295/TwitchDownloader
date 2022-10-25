@@ -69,10 +69,10 @@ namespace TwitchDownloaderCore
             nameFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             messageFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
 
-            if (renderOptions.Font == "Inter")
+            if (renderOptions.Font == "Inter Embedded")
             {
                 nameFont.Typeface = GetInterTypeface(renderOptions.UsernameFontStyle);
-                messageFont.Typeface = GetInterTypeface(renderOptions.UsernameFontStyle);
+                messageFont.Typeface = GetInterTypeface(renderOptions.MessageFontStyle);
             }
             else
             {
