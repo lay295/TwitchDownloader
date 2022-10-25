@@ -12,10 +12,12 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TwitchDownloader.Properties;
 using TwitchDownloader.TwitchTasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderWPF;
+using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloader
 {
@@ -238,5 +240,10 @@ namespace TwitchDownloader
             }
             textCount.Content = "Selected Items: " + selectedItems.Count;
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+			themeHelper.UpdateTitleBarTheme(this);
+		}
     }
 }

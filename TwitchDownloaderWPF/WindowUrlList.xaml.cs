@@ -16,6 +16,7 @@ using TwitchDownloader.TwitchTasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderWPF;
+using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloader
 {
@@ -168,5 +169,10 @@ namespace TwitchDownloader
 
             btnQueue.IsEnabled = true;
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+		{
+			themeHelper.UpdateTitleBarTheme(this);
+		}
     }
 }
