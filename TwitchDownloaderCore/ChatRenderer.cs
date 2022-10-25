@@ -456,7 +456,7 @@ namespace TwitchDownloaderCore
                             {
                                 emotePoint.X = drawPos.X - renderOptions.EmoteSpacing - twitchEmote.Width;
                             }
-                            emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight - renderOptions.VerticalPadding + (renderOptions.SectionHeight - twitchEmote.Height / 2.0));
+                            emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
                             emotePositionList.Add((emotePoint, twitchEmote));
                             drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
                         }
@@ -485,7 +485,7 @@ namespace TwitchDownloaderCore
                                         AddImageSection(sectionImages, ref drawPos, ref defaultPos);
                                     Point emotePoint = new Point();
                                     emotePoint.X = drawPos.X;
-                                    emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight - renderOptions.VerticalPadding + (renderOptions.SectionHeight - emojiImage.Height / 2.0));
+                                    emotePoint.Y = (int)((renderOptions.SectionHeight - emojiImage.Height) / 2.0);
                                     using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
                                         canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
 
@@ -557,7 +557,7 @@ namespace TwitchDownloaderCore
                                             AddImageSection(sectionImages, ref drawPos, ref defaultPos);
                                         Point emotePoint = new Point();
                                         emotePoint.X = drawPos.X;
-                                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight - renderOptions.VerticalPadding + (renderOptions.SectionHeight - twitchEmote.Height / 2.0));
+                                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
                                         emotePositionList.Add((emotePoint, twitchEmote));
                                         drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
                                         bitsPrinted = true;
@@ -582,7 +582,7 @@ namespace TwitchDownloaderCore
                             AddImageSection(sectionImages, ref drawPos, ref defaultPos);
                         Point emotePoint = new Point();
                         emotePoint.X = drawPos.X;
-                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight - renderOptions.VerticalPadding + (renderOptions.SectionHeight - twitchEmote.Height / 2.0));
+                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
                         emotePositionList.Add((emotePoint, twitchEmote));
                         drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
                     }
