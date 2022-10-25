@@ -124,9 +124,14 @@ namespace TwitchDownloaderCore
 
                 if (streamerId != null)
                 {
-                    JObject bttvChannel = JObject.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/users/twitch/" + streamerId));
-                    BTTV.Merge(bttvChannel["channelEmotes"]);
-                    BTTV.Merge(bttvChannel["sharedEmotes"]);
+                    //Channel might not have BTTV emotes
+                    try
+                    {
+                        JObject bttvChannel = JObject.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/users/twitch/" + streamerId));
+                        BTTV.Merge(bttvChannel["channelEmotes"]);
+                        BTTV.Merge(bttvChannel["sharedEmotes"]);
+                    }
+                    catch { }
                 }
 
                 foreach (var emote in BTTV)
@@ -144,7 +149,14 @@ namespace TwitchDownloaderCore
                 JArray FFZ = JArray.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/emotes/global"));
 
                 if (streamerId != null)
-                    FFZ.Merge(JArray.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/users/twitch/" + streamerId)));
+                {
+                    //Channel might not have FFZ emotes
+                    try
+                    {
+                        FFZ.Merge(JArray.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/users/twitch/" + streamerId)));
+                    }
+                    catch { }
+                }
 
                 foreach (var emote in FFZ)
                 {
