@@ -23,7 +23,7 @@ namespace TwitchDownloaderWPF
 			themeHelper = new ThemeHelper(this);
 			themeHelper.WatchTheme();
 
-			MainWindow wnd = new MainWindow();
+			MainWindow wnd = new();
 			wnd.Show();
 		}
 

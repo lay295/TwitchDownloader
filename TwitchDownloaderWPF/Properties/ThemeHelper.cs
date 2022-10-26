@@ -16,7 +16,7 @@ namespace TwitchDownloader.Properties
 	public partial class ThemeHelper
 	{
 		public readonly App app;
-		private bool WindowsIsDarkOrHighContrast { get; set; }
+		private bool WindowsIsDarkTheme { get; set; }
 
 		[DllImport("dwmapi.dll", PreserveSig = true)]
 		public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref bool attrValue, int attrSize);
@@ -33,8 +33,7 @@ namespace TwitchDownloader.Properties
 		public enum AppTheme
 		{
 			Light,
-			Dark,
-			HighContrast // Not yet implemented
+			Dark
 		}
 
 		public ThemeHelper(App _app)
@@ -44,12 +43,12 @@ namespace TwitchDownloader.Properties
 
 		public void UpdateTitleBarTheme(Window wnd)
 		{
-			if ((AppTheme)Settings.Default.GuiTheme == AppTheme.Dark || (Settings.Default.GuiTheme == -1 && WindowsIsDarkOrHighContrast))
+			if ((AppTheme)Settings.Default.GuiTheme == AppTheme.Dark || (Settings.Default.GuiTheme == -1 && WindowsIsDarkTheme))
 			{
 				bool isDarkTheme = true;
 				DwmSetWindowAttribute(new System.Windows.Interop.WindowInteropHelper(wnd).Handle, 20, ref isDarkTheme, Marshal.SizeOf(isDarkTheme));
 
-				Window _wnd = new Window();
+				Window _wnd = new();
 				_wnd.SizeToContent = SizeToContent.WidthAndHeight;
 				_wnd.Show();
 				_wnd.Close();
@@ -73,31 +72,21 @@ namespace TwitchDownloader.Properties
 				var watcher = new ManagementEventWatcher(query);
 				watcher.EventArrived += (sender, args) =>
 				{
-					WindowsIsDarkOrHighContrast = false;
 					if (Settings.Default.GuiTheme == -1)
 					{
 						WindowsTheme newWindowsTheme = GetWindowsTheme();
-						if (newWindowsTheme.ToString().Equals("Dark"))
-						{
-							WindowsIsDarkOrHighContrast = true;
-						}
 						ChangeThemePath((AppTheme)newWindowsTheme);
 					}
 				};
 
 				watcher.Start();
 			}
-			catch (Exception ex) { MessageBox.Show(ex.Message.ToString()); }
+			catch { MessageBox.Show("Unable to fetch Windows theme.", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
 
-			WindowsIsDarkOrHighContrast = false;
 			// -1 = System, 0 = Light, 1 = Dark
 			if (Settings.Default.GuiTheme == -1)
 			{
 				WindowsTheme initialTheme = GetWindowsTheme();
-				if (initialTheme.ToString().Equals("Dark"))
-				{
-					WindowsIsDarkOrHighContrast = true;
-				}
 				ChangeThemePath((AppTheme)initialTheme);
 			}
 			else
@@ -114,8 +103,7 @@ namespace TwitchDownloader.Properties
 			}
 			else
 			{
-				WindowsTheme windowsTheme = GetWindowsTheme();
-				ChangeThemePath((AppTheme)windowsTheme);
+				ChangeThemePath((AppTheme)GetWindowsTheme());
 			}
 		}
 
@@ -124,7 +112,7 @@ namespace TwitchDownloader.Properties
 			app.Resources.MergedDictionaries[2].Source = new Uri($"Themes/{newTheme}.xaml", UriKind.Relative);
 		}
 
-		private static WindowsTheme GetWindowsTheme()
+		private WindowsTheme GetWindowsTheme()
 		{
 			using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath))
 			{
@@ -135,6 +123,8 @@ namespace TwitchDownloader.Properties
 				}
 
 				int registryValue = (int)registryValueObject;
+
+				WindowsIsDarkTheme = registryValue > 0 ? false : true;
 
 				return registryValue > 0 ? WindowsTheme.Light : WindowsTheme.Dark;
 			}
