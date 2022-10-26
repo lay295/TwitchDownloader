@@ -21,6 +21,7 @@ using TwitchDownloader;
 using TwitchDownloader.Properties;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
+using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloaderWPF
 {
@@ -68,6 +69,8 @@ namespace TwitchDownloaderWPF
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            themeHelper.UpdateTitleBarTheme(this);
+
             Main.Content = pageVodDownload;
             if (Settings.Default.UpgradeRequired)
             {
@@ -75,7 +78,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.UpgradeRequired = false;
                 Settings.Default.Save();
             }
-            
+
             if (!File.Exists("ffmpeg.exe"))
                 await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
 

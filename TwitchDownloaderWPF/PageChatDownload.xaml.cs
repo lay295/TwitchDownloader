@@ -27,8 +27,6 @@ using System.Threading;
 using TwitchDownloader;
 using TwitchDownloader.Properties;
 using TwitchDownloaderCore.TwitchObjects;
-using System.Security.Policy;
-using System.Reflection;
 
 namespace TwitchDownloaderWPF
 {

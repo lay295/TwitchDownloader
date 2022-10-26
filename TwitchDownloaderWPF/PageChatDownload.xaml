@@ -31,80 +31,80 @@
         </Grid.RowDefinitions>
         <!-- LEFT -->
         <StackPanel Grid.Column="1" Grid.Row="2" Grid.RowSpan="2">
-            <TextBlock Margin="0,3,3,3" Text="Thumbnail:"/>
+            <TextBlock Margin="0,3,3,3" Text="Thumbnail:" Foreground="{DynamicResource AppText}" />
             <Border BorderBrush="#FFE0E0E0" BorderThickness="1">
                 <Image Stretch="Fill" StretchDirection="Both" x:Name="imgThumbnail" MinHeight="100"/>
             </Border>
             <WrapPanel Orientation="Horizontal">
-                <TextBlock Margin="0,3,3,3" Text="Streamer:"/>
-                <TextBlock Margin="3" x:Name="textStreamer"/>
+                <TextBlock Margin="0,3,3,3" Text="Streamer:" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3" x:Name="textStreamer" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
             <WrapPanel Orientation="Horizontal">
-                <TextBlock Margin="0,3,3,3" Text="Created:"/>
-                <TextBlock Margin="3" x:Name="textCreatedAt"/>
+                <TextBlock Margin="0,3,3,3" Text="Created:" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3" x:Name="textCreatedAt" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
             <WrapPanel Orientation="Horizontal">
-                <TextBlock Margin="0,3,3,3" Text="Title:"/>
+                <TextBlock Margin="0,3,3,3" Text="Title:" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
-            <emoji:TextBlock TextWrapping="Wrap" x:Name="textTitle"/>
+            <emoji:TextBlock TextWrapping="Wrap" x:Name="textTitle" Foreground="{DynamicResource AppText}" />
         </StackPanel>
         <!-- MIDDLE -->
         <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Margin="3,8,3,3" Text="VOD/Clip Link:"/>
-            <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400"/>
-            <Button x:Name="btnGetInfo" Style="{StaticResource ButtonInfo}" Margin="3" MinWidth="50" Content="Get Info" RenderTransformOrigin="0.503,0.508" Click="btnGetInfo_Click"/>
+            <TextBlock Margin="3,8,3,3" Text="VOD/Clip Link:" Foreground="{DynamicResource AppText}" />
+            <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+            <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="Get Info" RenderTransformOrigin="0.503,0.508" Click="btnGetInfo_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
         </WrapPanel>
         <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
             <StackPanel HorizontalAlignment="Left">
-                <TextBlock Text="Download Format:" HorizontalAlignment="Right" Margin="0,10,0,0"/>
-                <TextBlock Visibility="Collapsed" x:Name="timeText" Text="Timestamp Format:" HorizontalAlignment="Right" Margin="0,16,0,0"/>
-                <TextBlock x:Name="textCrop" Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,20,0,0"/>
-                <TextBlock HorizontalAlignment="Right" Margin="0,46,0,0">Embed Emotes <Hyperlink ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Embeds emotes into the JSON/HTML file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
-                <TextBlock Visibility="Collapsed" x:Name="thirdPartyEmoteText" HorizontalAlignment="Right" Margin="0,9,0,0">Embed 3rd Party Emotes <Hyperlink ToolTipService.ShowDuration="30000"><Hyperlink.ToolTip>Also embed third party emotes into the file. File size will be much larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
-                <TextBlock HorizontalAlignment="Right" Text="Connections:" Margin="0,14,0,0"/>
+                <TextBlock Text="Download Format:" HorizontalAlignment="Right" Margin="0,10,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock Visibility="Collapsed" x:Name="timeText" Text="Timestamp Format:" HorizontalAlignment="Right" Margin="0,16,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock x:Name="textCrop" Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,20,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock HorizontalAlignment="Right" Margin="0,46,0,0" Foreground="{DynamicResource AppText}" >Embed Emotes <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Embeds emotes into the JSON/HTML file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock Visibility="Collapsed" x:Name="thirdPartyEmoteText" HorizontalAlignment="Right" Margin="0,9,0,0" Foreground="{DynamicResource AppText}" >Embed 3rd Party Emotes <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Also embed third party emotes into the file. File size will be much larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock HorizontalAlignment="Right" Text="Connections:" Margin="0,14,0,0" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel>
                 <hc:ButtonGroup Margin="5,6,0,0">
-                    <RadioButton x:Name="radioJson" IsChecked="True" Content="JSON" Checked="radioJson_Checked"/>
-                    <RadioButton x:Name="radioText" Checked="radioText_Checked" Content="Text"/>
-                    <RadioButton x:Name="radioHTML" Content="HTML" Checked="radioHTML_Checked" />
+                    <RadioButton x:Name="radioJson" IsChecked="True" Content="JSON" Checked="radioJson_Checked" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioText" Checked="radioText_Checked" Content="Text" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioHTML" Content="HTML" Checked="radioHTML_Checked" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </hc:ButtonGroup>
                 <StackPanel Visibility="Collapsed" x:Name="timeOptions" Margin="5,8,0,0" Orientation="Horizontal">
-                    <RadioButton x:Name="radioUTC" IsChecked="True" Content="UTC"/>
-                    <RadioButton x:Name="radioRelative" Content="Relative" Margin="3,0,0,0"/>
-                    <RadioButton x:Name="radioNone" Content="None" Margin="3,0,0,0"/>
+                    <RadioButton x:Name="radioUTC" IsChecked="True" Content="UTC" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioRelative" Content="Relative" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioNone" Content="None" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
                 <StackPanel Margin="5,5,0,0">
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                        <TextBlock Margin="2,0,0,0" Text="Start" VerticalAlignment="Center" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartHour" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartMinute" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartSecond" />
+                        <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" />
+                        <TextBlock Margin="2,0,0,0" Text="Start" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartHour" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartMinute" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartSecond" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                        <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                        <TextBlock Margin="2,0,5,0" Text="End" VerticalAlignment="Center" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndHour" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndMinute" />
-                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndSecond" />
+                        <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" />
+                        <TextBlock Margin="2,0,5,0" Text="End" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndHour" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndMinute" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndSecond" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
 
                     </StackPanel>
                 </StackPanel>
-                <CheckBox x:Name="checkEmbed" Margin="5,8,0,0" Checked="checkEmbed_Checked" Unchecked="checkEmbed_Unchecked"></CheckBox>
+                <CheckBox x:Name="checkEmbed" Margin="5,8,0,0" Checked="checkEmbed_Checked" Unchecked="checkEmbed_Unchecked" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" />
                 <StackPanel Visibility="Collapsed" x:Name="thirdPartyEmbedOptions" Orientation="Horizontal">
-                    <CheckBox x:Name="checkBttvEmbed" Margin="5,8,0,0" Checked="checkBttvEmbed_Checked" Unchecked="checkBttvEmbed_Unchecked" Content="BTTV"></CheckBox>
-                    <CheckBox x:Name="checkFfzEmbed" Margin="5,8,0,0" Checked="checkFfzEmbed_Checked" Unchecked="checkFfzEmbed_Unchecked" Content="FFZ"></CheckBox>
-                    <CheckBox x:Name="checkStvEmbed" Margin="5,8,0,0" Checked="checkStvEmbed_Checked" Unchecked="checkStvEmbed_Unchecked" Content="7TV"></CheckBox>
+                    <CheckBox x:Name="checkBttvEmbed" Margin="5,8,0,0" Checked="checkBttvEmbed_Checked" Unchecked="checkBttvEmbed_Unchecked" Content="BTTV" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <CheckBox x:Name="checkFfzEmbed" Margin="5,8,0,0" Checked="checkFfzEmbed_Checked" Unchecked="checkFfzEmbed_Unchecked" Content="FFZ" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <CheckBox x:Name="checkStvEmbed" Margin="5,8,0,0" Checked="checkStvEmbed_Checked" Unchecked="checkStvEmbed_Unchecked" Content="7TV" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
-                <hc:NumericUpDown Margin="4,5,0,0" Minimum="1" Value="1" Width="60" x:Name="numChatDownloadConnections" HorizontalAlignment="Left" ValueChanged="numChatDownloadConnections_ValueChanged" />
+                <hc:NumericUpDown Margin="4,5,0,0" Minimum="1" Value="1" Width="60" x:Name="numChatDownloadConnections" HorizontalAlignment="Left" ValueChanged="numChatDownloadConnections_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom">
-            <hc:SplitButton x:Name="btnDownload" Style="{StaticResource SplitButtonInfo}" Height="40" Width="120" Content="Download" Click="SplitButton_Click" >
+            <hc:SplitButton x:Name="btnDownload" Height="40" Width="120" Content="Download" Click="SplitButton_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
-                        <MenuItem x:Name="btnQueue" Header="Enqueue Download" Click="MenuItem_Click"/>
+                        <MenuItem x:Name="btnQueue" Header="Enqueue Download" Click="MenuItem_Click" />
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
@@ -112,13 +112,13 @@
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal">
-                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="Use the program often and want to support me? Buy me a coffee :)" Height="26" Width="40" Click="btnDonate_Click"/>
-                <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click"/>
+                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="Use the program often and want to support me? Buy me a coffee :)" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
-            <TextBlock Text="Log:"/>
-            <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230">
+            <TextBlock Text="Log:" Foreground="{DynamicResource AppText}" />
+            <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
                         <Setter Property="Margin" Value="0" />
@@ -127,15 +127,15 @@
             </RichTextBox>
         </StackPanel>
         <!--STATUS BAR-->
-        <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6">
+        <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
             <StatusBarItem>
                 <Image x:Name="statusImage" gif:ImageBehavior.AnimatedSource="Images/ppHop.gif"/>
             </StatusBarItem>
             <StatusBarItem>
-                <TextBlock Text="Idle" x:Name="statusMessage" FontWeight="Bold"/>
+                <TextBlock Text="Idle" x:Name="statusMessage" FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <ProgressBar Width="200" Height="14" x:Name="statusProgressBar"/>
+                <ProgressBar Width="200" Height="14" x:Name="statusProgressBar" Background="{DynamicResource StatusBarElement}" Foreground="{DynamicResource ProgressBarForeground}"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>

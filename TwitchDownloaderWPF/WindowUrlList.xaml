@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchDownloader"
         mc:Ignorable="d"
-        Title="Mass Download URL List" Height="600" Width="500">
-    <Grid>
-        <Button x:Name="btnQueue" Content="Add To Queue" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="110" Height="45" Margin="0,0,0,10" Click="btnQueue_Click"/>
-        <Label Content="List of VODs/Clips (One per line)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="textList" HorizontalAlignment="Left" AcceptsReturn="True" Height="454" Margin="10,41,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="466"/>
+        Title="Mass Download URL List" Height="600" Width="500" Loaded="Window_Loaded">
+	<Grid Background="{DynamicResource AppBackground}">
+		<Button x:Name="btnQueue" Content="Add To Queue" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="110" Height="45" Margin="0,0,0,10" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+		<Label Content="List of VODs/Clips (One per line)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+		<TextBox x:Name="textList" HorizontalAlignment="Left" AcceptsReturn="True" Height="454" Margin="10,41,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="466" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 
     </Grid>
 </Window>
