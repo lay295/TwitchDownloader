@@ -33,14 +33,14 @@
 						<Border BorderThickness="1" CornerRadius="8" Margin="0,0,8,8" Padding="4" MouseUp="Border_MouseUp" Initialized="Border_Initialized" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
 							<StackPanel Orientation="Vertical" Width="220" Background="{DynamicResource AppElementBackground}">
 								<Image Source="{Binding Thumbnail}" MaxHeight="90"></Image>
-								<TextBlock TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppText}">
-									<TextBlock.Text>
+								<emoji:TextBlock TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppText}">
+									<emoji:TextBlock.Text>
 										<MultiBinding StringFormat="{}[{0:d}] - {1}">
 											<Binding Path="Time" />
 											<Binding Path="Title" />
 										</MultiBinding>
-									</TextBlock.Text>
-								</TextBlock>
+									</emoji:TextBlock.Text>
+								</emoji:TextBlock>
 								<DockPanel>
 									<TextBlock Text="{Binding LengthFormatted, StringFormat=Duration: {0}}" HorizontalAlignment="Left" Foreground="{DynamicResource AppText}"></TextBlock>
 									<TextBlock Text="{Binding Views, StringFormat=Views: {0}}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}"></TextBlock>
