@@ -83,7 +83,7 @@ namespace TwitchDownloader.Properties
 			}
 			catch { MessageBox.Show("Unable to fetch Windows theme.", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
 
-			// -1 = System, 0 = Light, 1 = Dark
+			// -1 = System
 			if (Settings.Default.GuiTheme == -1)
 			{
 				WindowsTheme initialTheme = GetWindowsTheme();

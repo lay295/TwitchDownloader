@@ -52,10 +52,12 @@ namespace TwitchDownloader
 			textChatTemplate.Text = Settings.Default.TemplateChat;
 			checkDonation.IsChecked = Settings.Default.HideDonation;
 
-			// -1 = System, 0 = Light, 2 = Dark
 			comboTheme.Items.Add("System");
-			comboTheme.Items.Add("Light");
-			comboTheme.Items.Add("Dark");
+			int appthemeLength = Enum.GetValues(typeof(ThemeHelper.AppTheme)).Length;
+			for (int i = 0; i < appthemeLength; i++)
+			{
+				comboTheme.Items.Add((ThemeHelper.AppTheme)i);
+			}
 			comboTheme.SelectedIndex = Settings.Default.GuiTheme + 1;
 		}
 
