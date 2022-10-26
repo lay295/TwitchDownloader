@@ -76,14 +76,14 @@
                 </StackPanel>
                 <StackPanel Margin="5,5,0,0">
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" />
+                        <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" BorderBrush="{DynamicResource AppElementBorder}" />
                         <TextBlock Margin="2,0,0,0" Text="Start" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartHour" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartMinute" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numStartSecond" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                        <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" />
+                        <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" BorderBrush="{DynamicResource AppElementBorder}" />
                         <TextBlock Margin="2,0,5,0" Text="End" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndHour" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndMinute" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
@@ -91,11 +91,11 @@
 
                     </StackPanel>
                 </StackPanel>
-                <CheckBox x:Name="checkEmbed" Margin="5,8,0,0" Checked="checkEmbed_Checked" Unchecked="checkEmbed_Unchecked" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" />
+                <CheckBox x:Name="checkEmbed" Margin="5,8,0,0" Checked="checkEmbed_Checked" Unchecked="checkEmbed_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" />
                 <StackPanel Visibility="Collapsed" x:Name="thirdPartyEmbedOptions" Orientation="Horizontal">
-                    <CheckBox x:Name="checkBttvEmbed" Margin="5,8,0,0" Checked="checkBttvEmbed_Checked" Unchecked="checkBttvEmbed_Unchecked" Content="BTTV" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <CheckBox x:Name="checkFfzEmbed" Margin="5,8,0,0" Checked="checkFfzEmbed_Checked" Unchecked="checkFfzEmbed_Unchecked" Content="FFZ" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <CheckBox x:Name="checkStvEmbed" Margin="5,8,0,0" Checked="checkStvEmbed_Checked" Unchecked="checkStvEmbed_Unchecked" Content="7TV" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <CheckBox x:Name="checkBttvEmbed" Margin="5,8,0,0" Checked="checkBttvEmbed_Checked" Unchecked="checkBttvEmbed_Unchecked" Content="BTTV" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <CheckBox x:Name="checkFfzEmbed" Margin="5,8,0,0" Checked="checkFfzEmbed_Checked" Unchecked="checkFfzEmbed_Unchecked" Content="FFZ" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <CheckBox x:Name="checkStvEmbed" Margin="5,8,0,0" Checked="checkStvEmbed_Checked" Unchecked="checkStvEmbed_Unchecked" Content="7TV" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
                 <hc:NumericUpDown Margin="4,5,0,0" Minimum="1" Value="1" Width="60" x:Name="numChatDownloadConnections" HorizontalAlignment="Left" ValueChanged="numChatDownloadConnections_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>

@@ -62,10 +62,10 @@
 						<TextBlock Text="Emote Scale:" HorizontalAlignment="Right" Margin="0,22,0,0" Foreground="{DynamicResource AppText}"/>
 					</StackPanel>
 					<StackPanel Orientation="Vertical" Margin="0,10,0,5">
-						<CheckBox x:Name="checkOutline" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}"/>
-						<CheckBox x:Name="checkTimestamp" HorizontalAlignment="Left" Margin="0,6,0,0" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}"/>
-						<CheckBox x:Name="checkSub" HorizontalAlignment="Left" Margin="0,6,0,0" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}"/>
-						<CheckBox x:Name="checkBadge" HorizontalAlignment="Left" Margin="0,6,0,0" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}"/>
+						<CheckBox x:Name="checkOutline" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+						<CheckBox x:Name="checkTimestamp" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+						<CheckBox x:Name="checkSub" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+						<CheckBox x:Name="checkBadge" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
 						<TextBox x:Name="textUpdateTime" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 						<TextBox x:Name="textEmoteScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 					</StackPanel>
@@ -75,9 +75,9 @@
 						<TextBlock Text="7TV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
 					</StackPanel>
 					<StackPanel Orientation="Vertical" Margin="0,10,0,2">
-						<CheckBox x:Name="checkBTTV" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}"/>
-						<CheckBox x:Name="checkFFZ" HorizontalAlignment="Left" Margin="0,6,0,0" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}"/>
-						<CheckBox x:Name="checkSTV" HorizontalAlignment="Left" Margin="0,6,0,0" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}"/>
+						<CheckBox x:Name="checkBTTV" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+						<CheckBox x:Name="checkFFZ" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+						<CheckBox x:Name="checkSTV" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
 					</StackPanel>
 					<StackPanel Orientation="Vertical" Margin="20,10,0,5">
 						<TextBlock Text="Chat Badge Filter:" Foreground="{DynamicResource AppText}"></TextBlock>
@@ -99,7 +99,7 @@
 						<ComboBox x:Name="comboFormat" MinWidth="120" MaxWidth="300" HorizontalAlignment="Left" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}"/>
 						<ComboBox x:Name="comboCodec" MinWidth="120" MaxWidth="300" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}"/>
 						<TextBox x:Name="textFramerate" Text="30" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-						<CheckBox x:Name="checkMask" HorizontalAlignment="Left" Margin="0,6,0,0" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}"/>
+						<CheckBox x:Name="checkMask" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                     </StackPanel>
                 </DockPanel>
             </TabItem>

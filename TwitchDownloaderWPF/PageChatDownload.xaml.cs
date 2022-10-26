@@ -27,6 +27,7 @@ using System.Threading;
 using TwitchDownloader;
 using TwitchDownloader.Properties;
 using TwitchDownloaderCore.TwitchObjects;
+using System.Diagnostics;
 
 namespace TwitchDownloaderWPF
 {
@@ -253,7 +254,7 @@ namespace TwitchDownloaderWPF
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://www.buymeacoffee.com/lay295");
+            System.Diagnostics.Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
         }
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)

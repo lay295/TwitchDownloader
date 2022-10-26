@@ -32,7 +32,7 @@
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
 				<TextBlock Margin="3,4,3,3" Text="Hide Donation Button:" Foreground="{DynamicResource AppText}" />
-                <CheckBox x:Name="checkDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppCheckBox}" BorderBrush="{DynamicResource AppElementBorder}" />
+                <CheckBox x:Name="checkDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
 				<TextBlock Margin="3,8,3,3" Text="Application Theme:" Foreground="{DynamicResource AppText}" />
