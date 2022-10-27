@@ -11,7 +11,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using TwitchDownloader.Properties;
-using TwitchDownloader.Properties.Models;
+using TwitchDownloader.Models;
 using TwitchDownloaderWPF;
 
 namespace TwitchDownloader

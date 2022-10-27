@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace TwitchDownloader.Properties.Models
+namespace TwitchDownloader.Models
 {
 	[XmlRoot(ElementName = "SolidColorBrush", Namespace = "http://schemas.microsoft.com/winfx/2006/xaml/presentation")]
 	public class SolidColorBrushModel
