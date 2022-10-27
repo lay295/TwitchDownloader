@@ -286,7 +286,7 @@ namespace TwitchDownloaderCore
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
             {
                 double currentTimeSeconds = currentTick / renderOptions.Framerate;
-                int commentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds < currentTimeSeconds);
+                int commentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds);
 
                 int frameHeight = renderOptions.ChatHeight;
                 frameCanvas.Clear(renderOptions.BackgroundColor);

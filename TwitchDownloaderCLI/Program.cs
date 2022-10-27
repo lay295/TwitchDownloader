@@ -204,6 +204,7 @@ namespace TwitchDownloaderCLI
             renderOptions.OutlineSize = inputOptions.OutlineSize;
             renderOptions.Font = inputOptions.Font;
             renderOptions.FontSize = inputOptions.FontSize;
+            renderOptions.ChatBadgeMask = inputOptions.BadgeFilterMask;
 
             switch (inputOptions.MessageFontStyle.ToLower())
             {

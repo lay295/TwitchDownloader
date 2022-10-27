@@ -1,3 +1,4 @@
+
 ### TwitchDownloaderCLI
 A cross platform command line tool that can do the main functions of the GUI program, which can download VODs/Clips/Chats and render chats.
 
@@ -151,6 +152,19 @@ Path to JSON chat file input.
 
 **-\-ignore-users**
 (Default: ) List of usernames to ignore when rendering, separated by commas.
+
+**-\-badge-filter**
+(Default: 0) Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, to filter out Moderator and Broadcaster badges only enter the value of 6.
+
+Other = 1
+Broadcaster = 2
+Moderator = 4
+VIP = 8
+Subscriber = 16
+Predictions = 32
+NoAudioVisual = 64
+PrimeGaming = 128
+
 ## Example Commands
 Download a VOD
 
