@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -19,7 +18,7 @@ namespace TwitchDownloader
 {
 	public partial class ThemeHelper
 	{
-		private bool WindowsIsDarkTheme { get; set; }
+		private bool WindowsIsDarkTheme;
 
 		[DllImport("dwmapi.dll", PreserveSig = true)]
 		public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref bool attrValue, int attrSize);
