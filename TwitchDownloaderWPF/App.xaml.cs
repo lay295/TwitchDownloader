@@ -9,11 +9,11 @@ namespace TwitchDownloaderWPF
 	public partial class App : Application
 	{
 		public static ThemeHelper themeHelper;
-		public static App appSingleton;
+		public static App AppSingleton;
 
 		public App()
 		{
-			appSingleton = this;
+			AppSingleton = this;
 		}
 
 		private void Application_Startup(object sender, StartupEventArgs e)

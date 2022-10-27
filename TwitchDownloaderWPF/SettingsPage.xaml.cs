@@ -1,26 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using TwitchDownloader.Properties;
+using MessageBox = System.Windows.MessageBox;
 using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloader
 {
-    /// <summary>
-    /// Interaction logic for SettingsPage.xaml
-    /// </summary>
-    public partial class SettingsPage : Window
+	/// <summary>
+	/// Interaction logic for SettingsPage.xaml
+	/// </summary>
+	public partial class SettingsPage : Window
 	{
 		public SettingsPage()
 		{
@@ -63,11 +55,11 @@ namespace TwitchDownloader
 
 		private void btnClearCache_Click(object sender, RoutedEventArgs e)
 		{
-			MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("Are you sure you want to clear your cache?\nYou should only really do this if the program isn't working correctly", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
+			MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to clear your cache?\nYou should only really do this if the program isn't working correctly", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
 			if (messageBoxResult == MessageBoxResult.Yes)
 			{
 				//Let's clear the user selected temp folder and the default one
-				string defaultDir = Path.Combine(System.IO.Path.GetTempPath(), "TwitchDownloader");
+				string defaultDir = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
 				string tempDir = Path.Combine(Settings.Default.TempPath, "TwitchDownloader");
 				if (Directory.Exists(defaultDir))
 				{
@@ -114,7 +106,7 @@ namespace TwitchDownloader
 			if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
 			{
 				Settings.Default.GuiTheme = comboTheme.SelectedItem.ToString();
-				appSingleton.RequestAppThemeChange();
+				AppSingleton.RequestAppThemeChange();
 				textThemeWarning.Visibility = Visibility.Visible;
 			}
 		}

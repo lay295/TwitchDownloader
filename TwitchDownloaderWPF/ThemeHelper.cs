@@ -18,10 +18,10 @@ namespace TwitchDownloader
 {
 	public partial class ThemeHelper
 	{
-		private bool WindowsIsDarkTheme;
+		private bool WindowsIsDarkTheme = false;
 
 		[DllImport("dwmapi.dll", PreserveSig = true)]
-		public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref bool attrValue, int attrSize);
+		private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref bool attrValue, int attrSize);
 
 		private const string RegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
 		private const string RegistryValueName = "AppsUseLightTheme";
@@ -34,7 +34,7 @@ namespace TwitchDownloader
 			}
 			WriteDefaultThemes();
 
-			if (!Settings.Default.GuiTheme.Equals("System") && !File.Exists($"{Path.Combine("Themes", Settings.Default.GuiTheme)}.xaml"))
+			if (!Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && !File.Exists($"{Path.Combine("Themes", Settings.Default.GuiTheme)}.xaml"))
 			{
 				MessageBox.Show($"{Settings.Default.GuiTheme}.xaml was not found. Reverting theme to System", "Theme not found", MessageBoxButton.OK, MessageBoxImage.Information);
 				Settings.Default.GuiTheme = "System";
@@ -43,18 +43,19 @@ namespace TwitchDownloader
 
 		public void UpdateTitleBarTheme(Window wnd)
 		{
+			bool isDarkTheme = false;
 			if (Settings.Default.GuiTheme.Contains("Dark", StringComparison.OrdinalIgnoreCase) || Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && WindowsIsDarkTheme)
 			{
-				bool isDarkTheme = true;
-				DwmSetWindowAttribute(new System.Windows.Interop.WindowInteropHelper(wnd).Handle, 20, ref isDarkTheme, Marshal.SizeOf(isDarkTheme));
-
-				Window _wnd = new();
-				_wnd.SizeToContent = SizeToContent.WidthAndHeight;
-				_wnd.Show();
-				_wnd.Close();
-				// Dark title bar is a bit buggy, requires window resize or focus change to fully apply
-				// Win11 might not have this issue but Win10 does so please leave this
+				isDarkTheme = true;
 			}
+			DwmSetWindowAttribute(new System.Windows.Interop.WindowInteropHelper(wnd).Handle, 20, ref isDarkTheme, Marshal.SizeOf(isDarkTheme));
+
+			Window _wnd = new();
+			_wnd.SizeToContent = SizeToContent.WidthAndHeight;
+			_wnd.Show();
+			_wnd.Close();
+			// Dark title bar is a bit buggy, requires window resize or focus change to fully apply
+			// Win11 might not have this issue but Win10 does so please leave this
 		}
 
 		public void WatchTheme(App app)
@@ -75,7 +76,7 @@ namespace TwitchDownloader
 					if (Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
 					{
 						string newWindowsTheme = GetWindowsTheme();
-						ChangeThemePath(newWindowsTheme.ToString(), app);
+						ChangeThemePath(newWindowsTheme, app);
 					}
 				};
 
@@ -101,14 +102,12 @@ namespace TwitchDownloader
 		private void ChangeThemePath(string newTheme, App app)
 		{
 			string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
+			string newThemeString = $"{Path.Combine("Themes", newTheme)}.xaml";
 
-			string newThemeString = $"{Path.Combine("Themes", newTheme.ToString())}.xaml";
 			foreach (string themeFile in themeFiles)
 			{
 				if (newThemeString.Equals(themeFile, StringComparison.OrdinalIgnoreCase))
 				{
-					var dictionary = new ResourceDictionary();
-
 					XmlSerializer xmlReader = new XmlSerializer(typeof(ResourceDictionaryModel));
 					using StreamReader streamReader = new StreamReader(themeFile);
 					ResourceDictionaryModel themeValues = (ResourceDictionaryModel)xmlReader.Deserialize(streamReader);
