@@ -2,7 +2,7 @@
   "profiles": {
     "TwitchDownloaderCLI": {
       "commandName": "Project",
-      "commandLineArgs": "-m ChatRender -i chat.json -o chat.mp4"
+      "commandLineArgs": "-m ChatRender -i chat.json --badge-filter 255 -o chat.mp4"
     },
     "WSL": {
       "commandName": "WSL2",
