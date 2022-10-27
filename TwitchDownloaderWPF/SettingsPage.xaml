@@ -36,10 +36,10 @@
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
 				<TextBlock Margin="3,8,3,3" Text="Application Theme:" Foreground="{DynamicResource AppText}" />
-				<ComboBox x:Name="comboTheme" Width="90" HorizontalAlignment="Left" SelectionChanged="comboAppTheme_SelectionChaned" Margin="3,0,3,0" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}" />
-				<StackPanel x:Name="textThemeWarning" Visibility="Collapsed" Orientation="Horizontal" >
+				<ComboBox x:Name="comboTheme" MinWidth="90" MaxWidth="195" HorizontalAlignment="Left" SelectionChanged="comboAppTheme_SelectionChaned" Margin="3,0,3,0" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}" />
+				<StackPanel x:Name="textThemeWarning" Visibility="Visible" Orientation="Horizontal" >
 					<fa:SvgAwesome Icon="Solid_InfoCircle" Width="18" Margin="8,-0,2,0" Foreground="{DynamicResource AppText}" />
-					<TextBlock Margin="3,1,3,0" Width="160" Text="A restart is required to apply to title bars" TextWrapping="Wrap" Foreground="{DynamicResource AppText}" />
+					<TextBlock Margin="3,1,3,0" Width="120" Text="A restart is required to apply to title bars" TextWrapping="Wrap" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
             </StackPanel>
 			<TextBlock Margin="3,5,3,3" Text="Download Filename Templates:" Foreground="{DynamicResource AppText}" />

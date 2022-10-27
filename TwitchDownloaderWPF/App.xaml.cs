@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
-using TwitchDownloader.Properties;
+﻿using System.Windows;
+using TwitchDownloader;
 
 namespace TwitchDownloaderWPF
 {
@@ -17,11 +9,17 @@ namespace TwitchDownloaderWPF
 	public partial class App : Application
 	{
 		public static ThemeHelper themeHelper;
+		public static App appSingleton;
+
+		public App()
+		{
+			appSingleton = this;
+		}
 
 		private void Application_Startup(object sender, StartupEventArgs e)
 		{
-			themeHelper = new ThemeHelper(this);
-			themeHelper.WatchTheme();
+			themeHelper = new ThemeHelper();
+			themeHelper.WatchTheme(this);
 
 			MainWindow wnd = new();
 			wnd.Show();
@@ -29,7 +27,7 @@ namespace TwitchDownloaderWPF
 
 		public void RequestAppThemeChange()
 		{
-			themeHelper.ChangeAppTheme();
+			themeHelper.ChangeAppTheme(this);
 		}
 	}
 }

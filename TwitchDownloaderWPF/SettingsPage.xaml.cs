@@ -17,10 +17,10 @@ using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloader
 {
-	/// <summary>
-	/// Interaction logic for SettingsPage.xaml
-	/// </summary>
-	public partial class SettingsPage : Window
+    /// <summary>
+    /// Interaction logic for SettingsPage.xaml
+    /// </summary>
+    public partial class SettingsPage : Window
 	{
 		public SettingsPage()
 		{
@@ -53,12 +53,12 @@ namespace TwitchDownloader
 			checkDonation.IsChecked = Settings.Default.HideDonation;
 
 			comboTheme.Items.Add("System");
-			int appthemeLength = Enum.GetValues(typeof(ThemeHelper.AppTheme)).Length;
-			for (int i = 0; i < appthemeLength; i++)
+			string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
+			foreach (string themeFile in themeFiles)
 			{
-				comboTheme.Items.Add((ThemeHelper.AppTheme)i);
+				comboTheme.Items.Add(Path.GetFileNameWithoutExtension(themeFile));
 			}
-			comboTheme.SelectedIndex = Settings.Default.GuiTheme + 1;
+			comboTheme.SelectedItem = Settings.Default.GuiTheme;
 		}
 
 		private void btnClearCache_Click(object sender, RoutedEventArgs e)
@@ -111,10 +111,10 @@ namespace TwitchDownloader
 
 		private void comboAppTheme_SelectionChaned(object sender, SelectionChangedEventArgs e)
 		{
-			if (comboTheme.SelectedIndex - 1 != Settings.Default.GuiTheme)
+			if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
 			{
-				Settings.Default.GuiTheme = comboTheme.SelectedIndex - 1;
-				themeHelper.app.RequestAppThemeChange();
+				Settings.Default.GuiTheme = comboTheme.SelectedItem.ToString();
+				appSingleton.RequestAppThemeChange();
 				textThemeWarning.Visibility = Visibility.Visible;
 			}
 		}
