@@ -13,6 +13,7 @@ using System.Xml.Serialization;
 using TwitchDownloader.Properties;
 using TwitchDownloader.Models;
 using TwitchDownloaderWPF;
+using System.Windows.Threading;
 
 namespace TwitchDownloader
 {
@@ -41,14 +42,17 @@ namespace TwitchDownloader
 			}
 		}
 
-		public void UpdateTitleBarTheme(Window wnd)
+		public void UpdateTitleBarThemes(WindowCollection windows)
 		{
 			bool isDarkTheme = false;
 			if (Settings.Default.GuiTheme.Contains("Dark", StringComparison.OrdinalIgnoreCase) || Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && WindowsIsDarkTheme)
 			{
 				isDarkTheme = true;
 			}
-			DwmSetWindowAttribute(new System.Windows.Interop.WindowInteropHelper(wnd).Handle, 20, ref isDarkTheme, Marshal.SizeOf(isDarkTheme));
+			foreach (Window wnd in windows)
+			{
+				DwmSetWindowAttribute(new System.Windows.Interop.WindowInteropHelper(wnd).Handle, 20, ref isDarkTheme, Marshal.SizeOf(isDarkTheme));
+			}
 
 			Window _wnd = new();
 			_wnd.SizeToContent = SizeToContent.WidthAndHeight;
@@ -75,8 +79,7 @@ namespace TwitchDownloader
 				{
 					if (Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
 					{
-						string newWindowsTheme = GetWindowsTheme();
-						ChangeThemePath(newWindowsTheme, app);
+						app.Dispatcher.Invoke(new Action(() => ChangeAppTheme(app)));
 					}
 				};
 
@@ -96,6 +99,11 @@ namespace TwitchDownloader
 			else
 			{
 				ChangeThemePath(Settings.Default.GuiTheme, app);
+			}
+
+			if (app.Windows.Count > 0)
+			{
+				UpdateTitleBarThemes(app.Windows);
 			}
 		}
 

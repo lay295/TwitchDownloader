@@ -8,8 +8,8 @@ namespace TwitchDownloaderWPF
 	/// </summary>
 	public partial class App : Application
 	{
-		public static ThemeHelper themeHelper;
-		public static App AppSingleton;
+		public static ThemeHelper themeHelper { get; private set; }
+		public static App AppSingleton { get; private set; }
 
 		public App()
 		{
