@@ -19,7 +19,7 @@ namespace TwitchDownloader
 {
 	public partial class ThemeHelper
 	{
-		private bool WindowsIsDarkTheme = false;
+		private bool ThemeDarkTitleBar = false;
 
 		[DllImport("dwmapi.dll", PreserveSig = true)]
 		private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref bool attrValue, int attrSize);
@@ -44,14 +44,9 @@ namespace TwitchDownloader
 
 		public void UpdateTitleBarThemes(WindowCollection windows)
 		{
-			bool isDarkTheme = false;
-			if (Settings.Default.GuiTheme.Contains("Dark", StringComparison.OrdinalIgnoreCase) || Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && WindowsIsDarkTheme)
-			{
-				isDarkTheme = true;
-			}
 			foreach (Window wnd in windows)
 			{
-				DwmSetWindowAttribute(new System.Windows.Interop.WindowInteropHelper(wnd).Handle, 20, ref isDarkTheme, Marshal.SizeOf(isDarkTheme));
+				DwmSetWindowAttribute(new System.Windows.Interop.WindowInteropHelper(wnd).Handle, 20, ref ThemeDarkTitleBar, Marshal.SizeOf(ThemeDarkTitleBar));
 			}
 
 			Window _wnd = new();
@@ -99,6 +94,12 @@ namespace TwitchDownloader
 			else
 			{
 				ChangeThemePath(Settings.Default.GuiTheme, app);
+
+				ThemeDarkTitleBar = false;
+				if (Settings.Default.GuiTheme.Contains("Dark", StringComparison.OrdinalIgnoreCase))
+				{
+					ThemeDarkTitleBar = true;
+				}
 			}
 
 			if (app.Windows.Count > 0)
@@ -168,12 +169,13 @@ namespace TwitchDownloader
 				object registryValueObject = key?.GetValue(RegistryValueName);
 				if (registryValueObject == null)
 				{
+					ThemeDarkTitleBar = false;
 					return "Light";
 				}
 
 				int registryValue = (int)registryValueObject;
 
-				WindowsIsDarkTheme = registryValue > 0 ? false : true;
+				ThemeDarkTitleBar = registryValue <= 0;
 
 				return registryValue > 0 ? "Light" : "Dark";
 			}
