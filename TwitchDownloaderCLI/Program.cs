@@ -153,7 +153,7 @@ namespace TwitchDownloaderCLI
                 Environment.Exit(1);
             }
             
-            //If output file doesn't end in .txt, assume JSON
+            //If output file doesn't end in .json or.html, assume text
             if (Path.GetFileName(inputOptions.OutputFile).Contains('.'))
             {
                 string extension = Path.GetFileName(inputOptions.OutputFile).Split('.').Last();
@@ -161,6 +161,8 @@ namespace TwitchDownloaderCLI
                     downloadOptions.DownloadFormat = DownloadFormat.Json;
                 else if (extension.ToLower() == "html")
                     downloadOptions.DownloadFormat = DownloadFormat.Html;
+                else
+                    downloadOptions.DownloadFormat = DownloadFormat.Text;
             }
             else
             {
