@@ -238,7 +238,7 @@ namespace TwitchDownloader
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-			themeHelper.UpdateTitleBarThemes(AppSingleton.Windows);
+			themeHelper.SetTitleBarThemes(AppSingleton.Windows);
 		}
     }
 }

@@ -21,11 +21,14 @@ namespace TwitchDownloader
 	{
 		private bool ThemeDarkTitleBar = false;
 
-		[DllImport("dwmapi.dll", PreserveSig = true)]
-		private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref bool attrValue, int attrSize);
+		[DllImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute", PreserveSig = true)]
+		private static extern int SetWindowAttribute(IntPtr handle, int attribute, ref bool attributeValue, int attributeSize);
+		private const int THEME_ATTRIBUTE = 20;
 
-		private const string RegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
-		private const string RegistryValueName = "AppsUseLightTheme";
+		private const string REGISTRY_KEY_PATH = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+		private const string REGISTRY_KEY_NAME = "AppsUseLightTheme";
+		private const string WINDOWS_LIGHT_THEME = "Light";
+		private const string WINDOWS_DARK_THEME = "Dark";
 
 		public ThemeHelper()
 		{
@@ -42,11 +45,12 @@ namespace TwitchDownloader
 			}
 		}
 
-		public void UpdateTitleBarThemes(WindowCollection windows)
+		public void SetTitleBarThemes(WindowCollection windows)
 		{
-			foreach (Window wnd in windows)
+			foreach (Window window in windows)
 			{
-				DwmSetWindowAttribute(new System.Windows.Interop.WindowInteropHelper(wnd).Handle, 20, ref ThemeDarkTitleBar, Marshal.SizeOf(ThemeDarkTitleBar));
+				var windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
+				SetWindowAttribute(windowHandle, THEME_ATTRIBUTE, ref ThemeDarkTitleBar, Marshal.SizeOf(ThemeDarkTitleBar));
 			}
 
 			Window _wnd = new();
@@ -60,16 +64,13 @@ namespace TwitchDownloader
 		public void WatchTheme(App app)
 		{
 			var currentUser = WindowsIdentity.GetCurrent();
-			string query = string.Format(
-				CultureInfo.InvariantCulture,
-				@"SELECT * FROM RegistryValueChangeEvent WHERE Hive = 'HKEY_USERS' AND KeyPath = '{0}\\{1}' AND ValueName = '{2}'",
-				currentUser.User.Value,
-				RegistryKeyPath.Replace(@"\", @"\\"),
-				RegistryValueName);
+			string windowsQuery = $"SELECT * FROM RegistryValueChangeEvent WHERE Hive = 'HKEY_USERS' AND KeyPath = " +
+				$"'{currentUser.User.Value}\\{REGISTRY_KEY_PATH}' AND ValueName = '{REGISTRY_KEY_NAME}'";
+			windowsQuery = windowsQuery.Replace("\\", @"\\");
 
 			try
 			{
-				var watcher = new ManagementEventWatcher(query);
+				var watcher = new ManagementEventWatcher(windowsQuery);
 				watcher.EventArrived += (sender, args) =>
 				{
 					if (Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
@@ -80,31 +81,32 @@ namespace TwitchDownloader
 
 				watcher.Start();
 			}
-			catch { MessageBox.Show("Unable to fetch Windows theme.", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+			catch
+			{
+				MessageBox.Show("Unable to fetch Windows theme.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 
 			ChangeAppTheme(app);
 		}
 
 		public void ChangeAppTheme(App app)
 		{
-			if (Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
+			string newTheme = Settings.Default.GuiTheme;
+			if (newTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
 			{
-				ChangeThemePath(GetWindowsTheme(), app);
+				newTheme = GetWindowsTheme();
 			}
-			else
-			{
-				ChangeThemePath(Settings.Default.GuiTheme, app);
+			ChangeThemePath(newTheme, app);
 
-				ThemeDarkTitleBar = false;
-				if (Settings.Default.GuiTheme.Contains("Dark", StringComparison.OrdinalIgnoreCase))
-				{
-					ThemeDarkTitleBar = true;
-				}
+			ThemeDarkTitleBar = false;
+			if (newTheme.Contains("Dark", StringComparison.OrdinalIgnoreCase))
+			{
+				ThemeDarkTitleBar = true;
 			}
 
 			if (app.Windows.Count > 0)
 			{
-				UpdateTitleBarThemes(app.Windows);
+				SetTitleBarThemes(app.Windows);
 			}
 		}
 
@@ -139,47 +141,40 @@ namespace TwitchDownloader
 			{
 				var themeData = ReadResource(themePath);
 				var themePathSplit = themePath.Split(".");
+
 				var themeName = themePathSplit[^2];
 				var themeExtension = themePathSplit[^1];
-				File.WriteAllText(Path.Combine("Themes", $"{themeName}.{themeExtension}"), themeData);
+				var themeFullName = $"{themeName}.{themeExtension}";
+
+				File.WriteAllText(Path.Combine("Themes", themeFullName), themeData);
 			}
 		}
 
 		private string[] GetResourceNames()
 		{
-			var asm = Assembly.GetExecutingAssembly();
-			return asm.GetManifestResourceNames();
+			var assembly = Assembly.GetExecutingAssembly();
+			return assembly.GetManifestResourceNames();
 		}
 
 		private string ReadResource(string resourcePath)
 		{
-			var asm = Assembly.GetExecutingAssembly();
+			var assembly = Assembly.GetExecutingAssembly();
 
-			using (var stream = asm.GetManifestResourceStream(resourcePath))
-			using (var reader = new StreamReader(stream))
-			{
-				return reader.ReadToEnd();
-			}
+			using var manifestStream = assembly.GetManifestResourceStream(resourcePath);
+			using var streamReader = new StreamReader(manifestStream);
+
+			return streamReader.ReadToEnd();
 		}
 
 		private string GetWindowsTheme()
 		{
-			using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath))
+			using var key = Registry.CurrentUser.OpenSubKey(REGISTRY_KEY_PATH);
+			if (!(key.GetValue(REGISTRY_KEY_NAME) is int windowsThemeValue))
 			{
-				object registryValueObject = key?.GetValue(RegistryValueName);
-				if (registryValueObject == null)
-				{
-					ThemeDarkTitleBar = false;
-					return "Light";
-				}
-
-				int registryValue = (int)registryValueObject;
-
-				ThemeDarkTitleBar = registryValue <= 0;
-
-				return registryValue > 0 ? "Light" : "Dark";
+				return WINDOWS_LIGHT_THEME;
 			}
+
+			return windowsThemeValue > 0 ? WINDOWS_LIGHT_THEME : WINDOWS_DARK_THEME;
 		}
-		//https://engy.us/blog/2018/10/20/dark-theme-in-wpf/
 	}
 }

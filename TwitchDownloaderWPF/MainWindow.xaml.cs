@@ -56,7 +56,7 @@ namespace TwitchDownloaderWPF
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            themeHelper.UpdateTitleBarThemes(AppSingleton.Windows);
+            themeHelper.SetTitleBarThemes(AppSingleton.Windows);
 
             Main.Content = pageVodDownload;
             if (Settings.Default.UpgradeRequired)
