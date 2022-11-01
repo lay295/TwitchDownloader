@@ -13,13 +13,13 @@ using System.Xml.Serialization;
 using TwitchDownloader.Properties;
 using TwitchDownloader.Models;
 using TwitchDownloaderWPF;
-using System.Windows.Threading;
+using HandyControl.Data;
 
 namespace TwitchDownloader
 {
 	public partial class ThemeHelper
 	{
-		private bool ThemeDarkTitleBar = false;
+		private bool AppComponentsDarkTheme = false;
 
 		[DllImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute", PreserveSig = true)]
 		private static extern int SetWindowAttribute(IntPtr handle, int attribute, ref bool attributeValue, int attributeSize);
@@ -50,7 +50,7 @@ namespace TwitchDownloader
 			foreach (Window window in windows)
 			{
 				var windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
-				SetWindowAttribute(windowHandle, THEME_ATTRIBUTE, ref ThemeDarkTitleBar, Marshal.SizeOf(ThemeDarkTitleBar));
+				SetWindowAttribute(windowHandle, THEME_ATTRIBUTE, ref AppComponentsDarkTheme, Marshal.SizeOf(AppComponentsDarkTheme));
 			}
 
 			Window _wnd = new();
@@ -98,11 +98,10 @@ namespace TwitchDownloader
 			}
 			ChangeThemePath(newTheme, app);
 
-			ThemeDarkTitleBar = false;
-			if (newTheme.Contains("Dark", StringComparison.OrdinalIgnoreCase))
-			{
-				ThemeDarkTitleBar = true;
-			}
+			AppComponentsDarkTheme = DetermineDarkMode(app);
+
+			SkinType newSkin = AppComponentsDarkTheme ? SkinType.Dark : SkinType.Default;
+			WriteHandyControlTheme(newSkin, app);
 
 			if (app.Windows.Count > 0)
 			{
@@ -119,9 +118,9 @@ namespace TwitchDownloader
 			{
 				if (newThemeString.Equals(themeFile, StringComparison.OrdinalIgnoreCase))
 				{
-					XmlSerializer xmlReader = new XmlSerializer(typeof(ResourceDictionaryModel));
-					using StreamReader streamReader = new StreamReader(themeFile);
-					ResourceDictionaryModel themeValues = (ResourceDictionaryModel)xmlReader.Deserialize(streamReader);
+					var xmlReader = new XmlSerializer(typeof(ResourceDictionaryModel));
+					using var streamReader = new StreamReader(themeFile);
+					var themeValues = (ResourceDictionaryModel)xmlReader.Deserialize(streamReader);
 
 					foreach (SolidColorBrushModel solidBrush in themeValues.SolidColorBrush)
 					{
@@ -130,6 +129,31 @@ namespace TwitchDownloader
 					return;
 				}
 			}
+		}
+
+		private bool DetermineDarkMode(App app)
+		{
+			var appBackgroundColor = (Color)new ColorConverter().ConvertFrom(app.Resources["AppBackground"].ToString());
+			var r = appBackgroundColor.R / 255f;
+			var g = appBackgroundColor.G / 255f;
+			var b = appBackgroundColor.B / 255f;
+			float luminance = 0.5f * (Math.Min(Math.Min(r, g), b) + Math.Max(Math.Max(r, g), b));
+			if (luminance < 0.33f)
+			{
+				return true;
+			}
+			return false;
+		}
+
+		private bool ColorsAreClose(Color color1, Color color2)
+		{
+			return false;
+		}
+
+		private void WriteHandyControlTheme(SkinType newSkin, App app)
+		{
+			app.Resources.MergedDictionaries[0].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Skin{newSkin}.xaml", UriKind.Absolute);
+			app.Resources.MergedDictionaries[1].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Theme.xaml", UriKind.Absolute);
 		}
 
 		private void WriteDefaultThemes()

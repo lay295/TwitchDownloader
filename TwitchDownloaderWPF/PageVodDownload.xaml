@@ -65,7 +65,7 @@
             </StackPanel>
             <StackPanel>
 				<TextBlock x:Name="labelLength" Text="0:0:0" Margin="5,0,0,0" Foreground="{DynamicResource AppText}" />
-				<ComboBox x:Name="comboQuality" Margin="5,10,0,0" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}"/>
+				<ComboBox x:Name="comboQuality" Margin="5,10,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 <StackPanel Margin="5,5,0,0">
                     <StackPanel Orientation="Horizontal">
 						<CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkStart_OnCheckStateChanged" Unchecked="checkStart_OnCheckStateChanged" BorderBrush="{DynamicResource AppElementBorder}"/>

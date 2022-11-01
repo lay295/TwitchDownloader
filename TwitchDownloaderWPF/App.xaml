@@ -9,7 +9,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
 				<ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
-				<!-- Other merged dictionaries here -->
+				<!-- Top dictionaries must be HandyControl, other merged dictionaries below -->
 			</ResourceDictionary.MergedDictionaries>
 			<SolidColorBrush x:Key="AppBackground" Color="#FFFFFF"/>
 			<SolidColorBrush x:Key="AppElementBackground" Color="#FFFFFF"/>
@@ -23,10 +23,6 @@
 			<SolidColorBrush x:Key="AppRadio" Color="#2388ED"/>
 			<SolidColorBrush x:Key="AppDivider" Color="#E0E0E0"/>
 			<SolidColorBrush x:Key="AppDividerText" Color="#212121"/>
-
-			<SolidColorBrush x:Key="DropdownText" Color="#212121"/>
-			<SolidColorBrush x:Key="DropdownBackground" Color="#FFFFFF"/>
-			<SolidColorBrush x:Key="DropdownBorder" Color="#E0E0E0"/>
 
 			<SolidColorBrush x:Key="BigButtonBackground" Color="#326CF3"/>
 			<SolidColorBrush x:Key="BigButtonBorder" Color="#326CF3"/>
