@@ -316,7 +316,7 @@ namespace TwitchDownloaderCore
                                 alreadyAdded.Add(id);
                                 returnList.Add(newEmote);
                             }
-                            catch (HttpRequestException)
+                            catch (HttpRequestException ex) when (ex.Message.Contains("404"))
                             {
                                 failedEmotes.Add(id);
                             }
