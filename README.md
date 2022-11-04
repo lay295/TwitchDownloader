@@ -44,7 +44,9 @@ No GUI is avaiable for MacOS yet :(
 
 # CLI
 
-The CLI is cross platform and performs the main functions of the program. It works on Windows Linux, and MacOS. Currently, only Intel Macs have been tested.
+The CLI is cross platform and performs the main functions of the program. It works on Windows, Linux, and MacOS.*
+
+*As of 1.50.5, only Intel Macs have been tested
 
 ### [CLI Documentation here](TwitchDownloaderCLI/README.md). 
 
