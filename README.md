@@ -73,7 +73,7 @@ sudo chmod +x TwitchDownloaderCLI
 ```
 ./TwitchDownloaderCLI --download-ffmpeg
 ```
-If not downloaded from [ffmpeg.org](https://ffmpeg.org/download.html), you must also give it executable rights with:
+If downloaded via TwitchDownloaderCLI, you must also give it executable rights with:
 ```
 sudo chmod +x ffmpeg
 ```
@@ -94,7 +94,7 @@ chmod +x TwitchDownloaderCLI
 ```
 ./TwitchDownloaderCLI --download-ffmpeg
 ```
-If not downloaded from [ffmpeg.org](https://ffmpeg.org/download.html), you must also give it executable rights with:
+If downloaded via TwitchDownloaderCLI, you must also give it executable rights with:
 ```
 chmod +x ffmpeg
 ```
