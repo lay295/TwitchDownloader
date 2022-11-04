@@ -1,5 +1,5 @@
 
-### TwitchDownloaderCLI
+# TwitchDownloaderCLI
 A cross platform command line tool that can do the main functions of the GUI program, which can download VODs/Clips/Chats and render chats.
 
  - [Global Arguments](#global-arguments)
@@ -29,6 +29,7 @@ Path to temporary folder for cache.
 **-\-clear-cache**
 Clears the default cache folder.
 
+
 ## Arguments for mode VideoDownload
 **-u/-\-id**
 The ID of the VOD to download, currently only accepts Integer IDs and will accept URLs in the future.
@@ -48,12 +49,16 @@ Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b
 
 **-\-oauth**
 OAuth to be passed when downloading a VOD. Used when downloading sub only VODs.
+
+
 ## Arguments for mode ClipDownload
 **-u/-\-id**
 The ID of the Clip to download, currently only accepts the string identifier and will accept URLs in the future.
 
 **-q/-\-quality**
 The quality the program will attempt to download, for example "1080p60", if not found will download highest quality video.
+
+
 ## Arguments for mode ChatDownload
 **IMPORTANT NOTE**: If output file argument does not end in .json or .html it will download it as a plain text file
 
@@ -73,16 +78,18 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 (Default: false) Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.
 
 **-\-bttv**
-(Default: true) BTTV emote embedding. Requires `-\-embed-emotes`.
+(Default: true) BTTV emote embedding. Requires `--embed-emotes`.
 
 **-\-ffz**
-(Default: true) FFZ emote embedding. Requires `-\-embed-emotes`.
+(Default: true) FFZ emote embedding. Requires `--embed-emotes`.
 
 **-\-stv**
-(Default: true) 7TV emote embedding. Requires `-\-embed-emotes`.
+(Default: true) 7TV emote embedding. Requires `--embed-emotes`.
 
 **-\-chat-connections**
 (Default: 4) The number of parallel downloads for chat.
+
+
 ## Arguments for mode ChatRender
 **-i/-\-input**
 Path to JSON chat file input.
@@ -156,14 +163,15 @@ Path to JSON chat file input.
 **-\-badge-filter**
 (Default: 0) Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, to filter out Moderator and Broadcaster badges only enter the value of 6.
 
-Other = 1
-Broadcaster = 2
-Moderator = 4
-VIP = 8
-Subscriber = 16
-Predictions = 32
-NoAudioVisual = 64
-PrimeGaming = 128
+Other = `1`,
+Broadcaster = `2`,
+Moderator = `4`,
+VIP = `8`,
+Subscriber = `16`,
+Predictions = `32`,
+NoAudioVisual = `64`,
+PrimeGaming = `128`
+
 
 ## Example Commands
 Download a VOD
@@ -188,6 +196,6 @@ Render a chat with custom ffmpeg arguments
 
     TwitchDownloaderCLI -m ChatRender -i chat.json --output-args='-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"' -o chat.mp4
 
-## Notes
 
-Default true boolean flags must be assigned as `--true-bool=false`. Default false boolean flags must be raised normally `--false-bool`
+## Notes
+Due to some limitations, default true boolean flags must be assigned: `--default-true-flag=false`. Default false boolean flags must still be raised normally: `--default-false-flag`
