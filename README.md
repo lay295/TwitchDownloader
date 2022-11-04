@@ -73,11 +73,11 @@ sudo chmod +x TwitchDownloaderCLI
 ```
 ./TwitchDownloaderCLI --download-ffmpeg
 ```
-5. If not downloaded from [ffmpeg.org](https://ffmpeg.org/download.html), you must also give it executable rights with:
+If not downloaded from [ffmpeg.org](https://ffmpeg.org/download.html), you must also give it executable rights with:
 ```
 sudo chmod +x ffmpeg
 ```
-6. You can now start using the downloader, for example:
+5. You can now start using the downloader, for example:
 ```
 ./TwitchDownloaderCLI -m VideoDownload --id <vod-id-here> -o out.mp4
 ```
@@ -94,11 +94,11 @@ chmod +x TwitchDownloaderCLI
 ```
 ./TwitchDownloaderCLI --download-ffmpeg
 ```
-5. If not downloaded from [ffmpeg.org](https://ffmpeg.org/download.html), you must also give it executable rights with:
+If not downloaded from [ffmpeg.org](https://ffmpeg.org/download.html), you must also give it executable rights with:
 ```
 chmod +x ffmpeg
 ```
-6. You can now start using the downloader, for example:
+5. You can now start using the downloader, for example:
 ```
 ./TwitchDownloaderCLI -m VideoDownload --id <vod-id-here> -o out.mp4
 ```
