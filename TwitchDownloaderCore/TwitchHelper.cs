@@ -6,11 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
@@ -181,7 +179,7 @@ namespace TwitchDownloaderCore
                     }
                     catch { }
                 }
-                    
+
 
                 foreach (var emote in STV)
                 {
@@ -311,10 +309,17 @@ namespace TwitchDownloaderCore
                         string id = fragment.emoticon.emoticon_id;
                         if (!alreadyAdded.Contains(id) && !failedEmotes.Contains(id))
                         {
-                            byte[] bytes = await GetImage(emoteFolder, String.Format("https://static-cdn.jtvnw.net/emoticons/v2/{0}/default/dark/2.0", id), id, "2", "png");
-                            TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
-                            alreadyAdded.Add(id);
-                            returnList.Add(newEmote);
+                            try
+                            {
+                                byte[] bytes = await GetImage(emoteFolder, String.Format("https://static-cdn.jtvnw.net/emoticons/v2/{0}/default/dark/2.0", id), id, "2", "png");
+                                TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
+                                alreadyAdded.Add(id);
+                                returnList.Add(newEmote);
+                            }
+                            catch (HttpRequestException ex) when (ex.Message.Contains("404"))
+                            {
+                                failedEmotes.Add(id);
+                            }
                         }
                     }
                 }
@@ -345,7 +350,7 @@ namespace TwitchDownloaderCore
                     JProperty jVersionProperty = version.ToObject<JProperty>();
                     string versionString = jVersionProperty.Name;
                     string downloadUrl = version.First["image_url_2x"].ToString();
-                    
+
                     try
                     {
                         string[] id_parts = downloadUrl.Split('/');
@@ -520,7 +525,7 @@ namespace TwitchDownloaderCore
                     Content = new StringContent("{\"query\":\"query{user(id:\\\"" + id.ToString() + "\\\"){login}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
                 };
                 request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-                string response = await(await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
+                string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
                 JObject res = JObject.Parse(response);
                 return res["data"]["user"]["login"].ToString();
             }
