@@ -36,7 +36,7 @@ https://www.youtube.com/watch?v=0W3MhfhnYjk
 
 ## Linux?
 
-Check [twitch-downloader-gui](https://github.com/mohad12211/twitch-downloader-gui) for a linux GUI wrapper for the CLI.
+Check twitch-downloader-gui on [github](https://github.com/mohad12211/twitch-downloader-gui) or on the [AUR](https://aur.archlinux.org/packages/twitch-downloader-gui) for a Linux GUI wrapper for the CLI.
 
 ## MacOS?
 
@@ -44,9 +44,11 @@ No GUI is avaiable for MacOS yet :(
 
 # CLI
 
-The CLI is cross platform and performs the main functions of the program. It works on Windows and Linux, but has not been tested on MacOS. 
+The CLI is cross platform and performs the main functions of the program. It works on Windows, Linux, and MacOS.*
 
-[Documentation here](TwitchDownloaderCLI/README.md). 
+*As of 1.50.5, only `VideoDownload`, `ClipDownload`, and `ChatDownload` **without embeded emotes** are known to work on MacOS. Only Intel Macs have been tested
+
+### [CLI Documentation here](TwitchDownloaderCLI/README.md). 
 
 I've never really made a command line utility before so things may change in the future. If you're on Linux, make sure `fontconfig` and `libfontconfig1` are installed `(apt-get install fontconfig libfontconfig1)`.
 
@@ -67,8 +69,40 @@ TwitchDownloaderCLI -m ChatRender -i %vodid%_chat.json -h 1080 -w 422 --framerat
 ```
 sudo chmod +x TwitchDownloaderCLI
 ```
-4. You can now start using the downloader, for example:
+4. If you do not have ffmpeg, you should install it via your distro package manager, however you can also get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+```
+./TwitchDownloaderCLI --download-ffmpeg
+```
+If downloaded as a standalone file, you must also give it executable rights with:
+```
+sudo chmod +x ffmpeg
+```
+5. You can now start using the downloader, for example:
 ```
 ./TwitchDownloaderCLI -m VideoDownload --id <vod-id-here> -o out.mp4
 ```
 For Arch Linux, there's an [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/)
+
+### MacOS – Getting started
+1. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest version for MacOS.
+2. Extract `TwitchDownloaderCLI`
+3. Browse to where you extracted the file and give it executable rights in Terminal:
+```
+chmod +x TwitchDownloaderCLI
+```
+1. If you do not have ffmpeg, you can install it via [Homebrew package manager](https://brew.sh/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+```
+./TwitchDownloaderCLI --download-ffmpeg
+```
+If downloaded as a standalone file, you must also give it executable rights with:
+```
+chmod +x ffmpeg
+```
+5. You can now start using the downloader, for example:
+```
+./TwitchDownloaderCLI -m VideoDownload --id <vod-id-here> -o out.mp4
+```
+
+# License
+
+[MIT](./LICENSE.txt)
