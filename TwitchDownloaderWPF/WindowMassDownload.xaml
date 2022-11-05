@@ -9,7 +9,7 @@
         Title="Mass Downloader" Height="700" Width="1100" Loaded="Window_Loaded">
 	<Grid Background="{DynamicResource AppBackground}">
 		<Label x:Name="labelSort" Content="Sort:" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<ComboBox SelectedIndex="2" x:Name="comboSort" HorizontalAlignment="Left" Margin="61,6,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboSort_SelectionChanged" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}">
+		<ComboBox SelectedIndex="2" x:Name="comboSort" HorizontalAlignment="Left" Margin="61,6,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboSort_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
 			<ComboBoxItem Content="Top 24 Hours" Tag="LAST_DAY"/>
 			<ComboBoxItem Content="Top 7 Days" Tag="LAST_WEEK"/>
 			<ComboBoxItem Content="Top 30 Days" Tag="LAST_MONTH"/>
@@ -33,14 +33,14 @@
 						<Border BorderThickness="1" CornerRadius="8" Margin="0,0,8,8" Padding="4" MouseUp="Border_MouseUp" Initialized="Border_Initialized" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
 							<StackPanel Orientation="Vertical" Width="220" Background="{DynamicResource AppElementBackground}">
 								<Image Source="{Binding Thumbnail}" MaxHeight="90"></Image>
-								<TextBlock TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppText}">
-									<TextBlock.Text>
+								<emoji:TextBlock TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppText}">
+									<emoji:TextBlock.Text>
 										<MultiBinding StringFormat="{}[{0:d}] - {1}">
 											<Binding Path="Time" />
 											<Binding Path="Title" />
 										</MultiBinding>
-									</TextBlock.Text>
-								</TextBlock>
+									</emoji:TextBlock.Text>
+								</emoji:TextBlock>
 								<DockPanel>
 									<TextBlock Text="{Binding LengthFormatted, StringFormat=Duration: {0}}" HorizontalAlignment="Left" Foreground="{DynamicResource AppText}"></TextBlock>
 									<TextBlock Text="{Binding Views, StringFormat=Views: {0}}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}"></TextBlock>

@@ -14,10 +14,6 @@
 	<SolidColorBrush x:Key="AppDivider" Color="#919191"/>
 	<SolidColorBrush x:Key="AppDividerText" Color="#E0E0E0"/>
 
-	<SolidColorBrush x:Key="DropdownText" Color="#212121"/>
-	<SolidColorBrush x:Key="DropdownBackground" Color="#FFFFFF"/>
-	<SolidColorBrush x:Key="DropdownBorder" Color="#4C4C4F"/>
-	
 	<SolidColorBrush x:Key="BigButtonBackground" Color="#2463D8"/>
     <SolidColorBrush x:Key="BigButtonBorder" Color="#1A58CC"/>
     <SolidColorBrush x:Key="BigButtonText" Color="#FFFFFF"/>

@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using TwitchDownloader.Properties;
+using MessageBox = System.Windows.MessageBox;
 using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloader
@@ -52,20 +44,22 @@ namespace TwitchDownloader
 			textChatTemplate.Text = Settings.Default.TemplateChat;
 			checkDonation.IsChecked = Settings.Default.HideDonation;
 
-			// -1 = System, 0 = Light, 2 = Dark
 			comboTheme.Items.Add("System");
-			comboTheme.Items.Add("Light");
-			comboTheme.Items.Add("Dark");
-			comboTheme.SelectedIndex = Settings.Default.GuiTheme + 1;
+			string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
+			foreach (string themeFile in themeFiles)
+			{
+				comboTheme.Items.Add(Path.GetFileNameWithoutExtension(themeFile));
+			}
+			comboTheme.SelectedItem = Settings.Default.GuiTheme;
 		}
 
 		private void btnClearCache_Click(object sender, RoutedEventArgs e)
 		{
-			MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("Are you sure you want to clear your cache?\nYou should only really do this if the program isn't working correctly", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
+			MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to clear your cache?\nYou should only really do this if the program isn't working correctly", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
 			if (messageBoxResult == MessageBoxResult.Yes)
 			{
 				//Let's clear the user selected temp folder and the default one
-				string defaultDir = Path.Combine(System.IO.Path.GetTempPath(), "TwitchDownloader");
+				string defaultDir = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
 				string tempDir = Path.Combine(Settings.Default.TempPath, "TwitchDownloader");
 				if (Directory.Exists(defaultDir))
 				{
@@ -88,7 +82,7 @@ namespace TwitchDownloader
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-			themeHelper.UpdateTitleBarTheme(this);
+			themeHelper.SetTitleBarThemes(AppSingleton.Windows);
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -109,11 +103,10 @@ namespace TwitchDownloader
 
 		private void comboAppTheme_SelectionChaned(object sender, SelectionChangedEventArgs e)
 		{
-			if (comboTheme.SelectedIndex - 1 != Settings.Default.GuiTheme)
+			if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
 			{
-				Settings.Default.GuiTheme = comboTheme.SelectedIndex - 1;
-				themeHelper.app.RequestAppThemeChange();
-				textThemeWarning.Visibility = Visibility.Visible;
+				Settings.Default.GuiTheme = comboTheme.SelectedItem.ToString();
+				AppSingleton.RequestAppThemeChange();
 			}
 		}
 	}

@@ -31,7 +31,7 @@
         </Grid.RowDefinitions>
 
 		<TabControl Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,0,20,0" Background="{DynamicResource AppBackground}" BorderThickness="1">
-			<TabItem Header="General" Background="White">
+			<TabItem Header="General" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
 				<DockPanel Background="{DynamicResource AppBackground}">
                     <StackPanel Orientation="Vertical" Margin="5,10,5,5">
 						<TextBlock Text="Font:" HorizontalAlignment="Right" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"/>
@@ -42,7 +42,7 @@
 						<TextBlock Text="Height:" HorizontalAlignment="Right" Margin="0,20,0,0" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Margin="0,10,0,5" Orientation="Vertical">
-						<ComboBox x:Name="comboFont" MinWidth="180" MaxWidth="300" HorizontalAlignment="Left" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}"/>
+						<ComboBox x:Name="comboFont" MinWidth="180" MaxWidth="300" HorizontalAlignment="Left" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 						<hc:NumericUpDown x:Name="numFontSize" Value="12" Width="75" HorizontalAlignment="Left" Margin="0,7,0,0" Minimum="1" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
 						<xctk:ColorPicker x:Name="colorFont" SelectedColor="#FFFFFF" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" Background="White" BorderBrush="{DynamicResource AppElementInnerBorder}" DropDownBackground="{DynamicResource AppElementInnerBackground}" Foreground="{DynamicResource AppText}" HeaderBackground="{DynamicResource AppElementInnerBackground}" HeaderForeground="{DynamicResource AppText}" TabBackground="{DynamicResource AppElementBorder}" TabForeground="{DynamicResource AppText}"/>
                         <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" UsingAlphaChannel="True" Margin="0,5,0,0" HorizontalAlignment="Left" Background="White" BorderBrush="{DynamicResource AppElementInnerBorder}" DropDownBackground="{DynamicResource AppElementInnerBackground}" Foreground="{DynamicResource AppText}" HeaderBackground="{DynamicResource AppElementInnerBackground}" HeaderForeground="{DynamicResource AppText}" TabBackground="{DynamicResource AppElementBorder}" TabForeground="{DynamicResource AppText}"/>
@@ -51,7 +51,7 @@
                     </StackPanel>
                 </DockPanel>
             </TabItem>
-			<TabItem Header="Rendering" Background="White">
+			<TabItem Header="Rendering" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
 				<DockPanel Background="{DynamicResource AppBackground}">
 					<StackPanel Orientation="Vertical" Margin="5,10,5,5">
 						<TextBlock Text="Outline:" HorizontalAlignment="Right" Margin="0,0,0,0" Foreground="{DynamicResource AppText}"/>
@@ -81,13 +81,13 @@
 					</StackPanel>
 					<StackPanel Orientation="Vertical" Margin="20,10,0,5">
 						<TextBlock Text="Chat Badge Filter:" Foreground="{DynamicResource AppText}"></TextBlock>
-						<hc:CheckComboBox x:Name="comboBadges" MinWidth="200" HorizontalAlignment="Left" Margin="0,4,0,0" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}"/>
+						<hc:CheckComboBox x:Name="comboBadges" MinWidth="200" HorizontalAlignment="Left" Margin="0,4,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 						<TextBlock Margin="0,10,0,0"><Run Text="Ignore users list " Foreground="{DynamicResource AppText}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>List of usernames - comma separated, spaces around commas ignored, NOT case-sensitive.</Hyperlink.ToolTip><Run Text="(?)"/></Hyperlink><Run Text=":"/></TextBlock>
 						<TextBox x:Name="textIgnoreUsersList" Margin="0,4,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 					</StackPanel>
 				</DockPanel>
 			</TabItem>
-			<TabItem Header="Encoding" Background="White">
+			<TabItem Header="Encoding" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
 				<DockPanel Background="{DynamicResource AppBackground}">
                     <StackPanel Orientation="Vertical" Margin="5,10,5,5">
 						<TextBlock Text="File Format:" HorizontalAlignment="Right" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"/>
@@ -96,14 +96,14 @@
                         <TextBlock Text="Generate Mask:" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,5,5">
-						<ComboBox x:Name="comboFormat" MinWidth="120" MaxWidth="300" HorizontalAlignment="Left" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}"/>
-						<ComboBox x:Name="comboCodec" MinWidth="120" MaxWidth="300" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}"/>
+						<ComboBox x:Name="comboFormat" MinWidth="120" MaxWidth="300" HorizontalAlignment="Left" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+						<ComboBox x:Name="comboCodec" MinWidth="120" MaxWidth="300" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 						<TextBox x:Name="textFramerate" Text="30" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 						<CheckBox x:Name="checkMask" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                     </StackPanel>
                 </DockPanel>
             </TabItem>
-			<TabItem Header="Ffmpeg" Background="White">
+			<TabItem Header="Ffmpeg" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
 				<StackPanel Orientation="Vertical" Background="{DynamicResource AppBackground}" Margin="5,10,5,5">
                     <StackPanel Orientation="Horizontal">
                         <Image x:Name="imageWarning" Height="16" Width="16" Margin="0,0,3,0" />
