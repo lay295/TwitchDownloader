@@ -4,14 +4,40 @@
              xmlns:local="clr-namespace:TwitchDownloaderWPF"
              Startup="Application_Startup"
              xmlns:hc="https://handyorg.github.io/handycontrol">
-    <Application.Resources>
-        <ResourceDictionary>
+	<Application.Resources>
+		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
 				<ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
-				<ResourceDictionary Source="/Themes/Dark.xaml"/>
-				<!-- Other merged dictionaries here. Theme dictionary must remain 3rd! -->
+				<!-- Top dictionaries must be HandyControl, other merged dictionaries below -->
 			</ResourceDictionary.MergedDictionaries>
+			<SolidColorBrush x:Key="AppBackground" Color="#FFFFFF"/>
+			<SolidColorBrush x:Key="AppElementBackground" Color="#FFFFFF"/>
+			<SolidColorBrush x:Key="AppElementBorder" Color="#E0E0E0"/>
+			<SolidColorBrush x:Key="AppText" Color="#212121"/>
+			<SolidColorBrush x:Key="AppElementInnerBackground" Color="#D1D1D1"/>
+			<SolidColorBrush x:Key="AppElementInnerBorder" Color="#BABABA"/>
+			<SolidColorBrush x:Key="AppInnerText" Color="#212121"/>
+			<SolidColorBrush x:Key="AppHyperlink" Color="#0066CC"/>
+			<SolidColorBrush x:Key="AppCheckBox" Color="#3A96F2"/>
+			<SolidColorBrush x:Key="AppRadio" Color="#2388ED"/>
+			<SolidColorBrush x:Key="AppDivider" Color="#E0E0E0"/>
+			<SolidColorBrush x:Key="AppDividerText" Color="#212121"/>
+
+			<SolidColorBrush x:Key="BigButtonBackground" Color="#326CF3"/>
+			<SolidColorBrush x:Key="BigButtonBorder" Color="#326CF3"/>
+			<SolidColorBrush x:Key="BigButtonText" Color="#FFFFFF"/>
+
+			<SolidColorBrush x:Key="ActionButtonBackground" Color="#00BCD4"/>
+			<SolidColorBrush x:Key="ActionButtonBorder" Color="#E0E0E0"/>
+			<SolidColorBrush x:Key="ActionButtonText" Color="#FFFFFF"/>
+
+			<SolidColorBrush x:Key="StatusBarBackground" Color="#FFFFFF"/>
+			<SolidColorBrush x:Key="StatusBarBorder" Color="#E0E0E0"/>
+			<SolidColorBrush x:Key="StatusBarElement" Color="#EEEEEE"/>
+			<SolidColorBrush x:Key="StatusBarElementBorder" Color="#E0E0E0"/>
+			<SolidColorBrush x:Key="StatusBarText" Color="#212121"/>
+			<SolidColorBrush x:Key="ProgressBarForeground" Color="#326CF3"/>
 		</ResourceDictionary>
-    </Application.Resources>
+	</Application.Resources>
 </Application>

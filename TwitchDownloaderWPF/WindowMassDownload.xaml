@@ -9,7 +9,7 @@
         Title="Mass Downloader" Height="700" Width="1100" Loaded="Window_Loaded">
 	<Grid Background="{DynamicResource AppBackground}">
 		<Label x:Name="labelSort" Content="Sort:" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<ComboBox SelectedIndex="2" x:Name="comboSort" HorizontalAlignment="Left" Margin="61,6,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboSort_SelectionChanged" Background="{DynamicResource DropdownBackground}" BorderBrush="{DynamicResource DropdownBorder}" Foreground="{DynamicResource DropdownText}">
+		<ComboBox SelectedIndex="2" x:Name="comboSort" HorizontalAlignment="Left" Margin="61,6,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboSort_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
 			<ComboBoxItem Content="Top 24 Hours" Tag="LAST_DAY"/>
 			<ComboBoxItem Content="Top 7 Days" Tag="LAST_WEEK"/>
 			<ComboBoxItem Content="Top 30 Days" Tag="LAST_MONTH"/>

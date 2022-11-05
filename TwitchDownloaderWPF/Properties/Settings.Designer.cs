@@ -529,10 +529,10 @@ namespace TwitchDownloader.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
-        public int GuiTheme {
+        [global::System.Configuration.DefaultSettingValueAttribute("System")]
+        public string GuiTheme {
             get {
-                return ((int)(this["GuiTheme"]));
+                return ((string)(this["GuiTheme"]));
             }
             set {
                 this["GuiTheme"] = value;
