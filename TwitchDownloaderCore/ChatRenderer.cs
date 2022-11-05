@@ -386,7 +386,7 @@ namespace TwitchDownloaderCore
         private bool IsSubMessage(Comment comment)
         {
             //If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " subscribed at Tier") || comment.message.body.StartsWith(comment.commenter.display_name + " subscribed with Prime"))
+            if (comment.message.body.StartsWith(comment.commenter.display_name + " subscribed at Tier") || comment.message.body.StartsWith(comment.commenter.display_name + " subscribed with Prime") || comment.message.body.StartsWith(comment.commenter.display_name + " is gifting") || comment.message.body.StartsWith(comment.commenter.display_name + " gifted a Tier"))
                 return true;
 
             return false;
