@@ -160,7 +160,7 @@ namespace TwitchDownloaderCore
             }
             progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = "Rendering Video 100%" });
             stopwatch.Stop();
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick-startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });
+            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });
 
             ffmpegStream.Dispose();
             if (maskProcess != null)
@@ -509,32 +509,36 @@ namespace TwitchDownloaderCore
                                 AddImageSection(sectionImages, ref drawPos, ref defaultPos);
 
                             //There are either surrogate pairs or characters not in the messageFont, draw one at a time
-                            string messageBuffer = "";
+                            string messageBuffer = string.Empty;
                             for (int j = 0; j < charList.Count; j++)
                             {
                                 if (char.IsHighSurrogate(charList[j]) && j + 1 < charList.Count && char.IsLowSurrogate(charList[j + 1]))
                                 {
-                                    if (messageBuffer != "")
+                                    if (messageBuffer != string.Empty)
                                         DrawText(messageBuffer, messageFont, true, sectionImages, ref drawPos, ref defaultPos);
                                     SKPaint fallbackFont = GetFallbackFont(char.ConvertToUtf32(charList[j], charList[j + 1]), renderOptions);
                                     fallbackFont.Color = renderOptions.MessageColor;
                                     DrawText(charList[j].ToString() + charList[j + 1].ToString(), fallbackFont, false, sectionImages, ref drawPos, ref defaultPos);
-                                    messageBuffer = "";
+                                    messageBuffer = string.Empty;
                                     j++;
                                 }
                                 else if (new StringInfo(charList[j].ToString()).LengthInTextElements == 0 || !messageFont.ContainsGlyphs(charList[j].ToString()))
                                 {
-                                    if (messageBuffer != "")
+                                    if (messageBuffer != string.Empty)
                                         DrawText(messageBuffer, messageFont, true, sectionImages, ref drawPos, ref defaultPos);
                                     SKPaint fallbackFont = GetFallbackFont(charList[j], renderOptions);
                                     fallbackFont.Color = renderOptions.MessageColor;
                                     DrawText(charList[j].ToString(), fallbackFont, true, sectionImages, ref drawPos, ref defaultPos);
-                                    messageBuffer = "";
+                                    messageBuffer = string.Empty;
                                 }
                                 else
                                 {
                                     messageBuffer += charList[j];
                                 }
+                            }
+                            if (messageBuffer != string.Empty)
+                            {
+                                DrawText(messageBuffer, messageFont, true, sectionImages, ref drawPos, ref defaultPos);
                             }
                         }
                         else
@@ -735,7 +739,7 @@ namespace TwitchDownloaderCore
 
         private List<(SKBitmap, ChatBadgeType)> ParseCommentBadges(Comment comment)
         {
-            List<(SKBitmap,ChatBadgeType)> returnList = new List<(SKBitmap, ChatBadgeType)>();
+            List<(SKBitmap, ChatBadgeType)> returnList = new List<(SKBitmap, ChatBadgeType)>();
 
             if (comment.message.user_badges != null)
             {
