@@ -359,7 +359,7 @@ namespace TwitchDownloaderCore
             defaultPos.Y = (int)(((renderOptions.SectionHeight - textBounds.Height) / 2.0) + textBounds.Height);
             drawPos.Y = defaultPos.Y;
 
-            if ((comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null && (comment.message.user_notice_params.msg_id == "sub" || comment.message.user_notice_params.msg_id == "resub" || comment.message.user_notice_params.msg_id == "subgift")) || IsSubMessage(comment))
+            if ((comment.message.user_notice_params != null && (comment.message.user_notice_params.msg_id is "sub" or "resub" or "subgift")) || IsSubMessage(comment))
             {
                 ascentMessage = true;
                 drawPos.X += renderOptions.AscentIndentWidth;
@@ -518,7 +518,7 @@ namespace TwitchDownloaderCore
                                         DrawText(messageBuffer, messageFont, true, sectionImages, ref drawPos, ref defaultPos);
                                     SKPaint fallbackFont = GetFallbackFont(char.ConvertToUtf32(charList[j], charList[j + 1]), renderOptions);
                                     fallbackFont.Color = renderOptions.MessageColor;
-                                    DrawText(charList[j].ToString() + charList[j + 1].ToString(), messageFont, false, sectionImages, ref drawPos, ref defaultPos);
+                                    DrawText(charList[j].ToString() + charList[j + 1].ToString(), fallbackFont, false, sectionImages, ref drawPos, ref defaultPos);
                                     messageBuffer = "";
                                     j++;
                                 }
@@ -528,7 +528,7 @@ namespace TwitchDownloaderCore
                                         DrawText(messageBuffer, messageFont, true, sectionImages, ref drawPos, ref defaultPos);
                                     SKPaint fallbackFont = GetFallbackFont(charList[j], renderOptions);
                                     fallbackFont.Color = renderOptions.MessageColor;
-                                    DrawText(messageBuffer, fallbackFont, true, sectionImages, ref drawPos, ref defaultPos);
+                                    DrawText(charList[j].ToString(), fallbackFont, true, sectionImages, ref drawPos, ref defaultPos);
                                     messageBuffer = "";
                                 }
                                 else
@@ -661,7 +661,7 @@ namespace TwitchDownloaderCore
 
                 if (comment.commenter.display_name.Any(isNotAscii))
                 {
-                    userPaint = GetFallbackFont((int)comment.commenter.display_name.Where(x => isNotAscii(x)).First(), renderOptions);
+                    userPaint = GetFallbackFont(comment.commenter.display_name.Where(x => isNotAscii(x)).First(), renderOptions);
                     userPaint.Color = userColor;
                 }
 
