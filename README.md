@@ -90,7 +90,7 @@ For Arch Linux, there's an [AUR Package](https://aur.archlinux.org/packages/twit
 ```
 chmod +x TwitchDownloaderCLI
 ```
-1. If you do not have ffmpeg, you can install it via [Homebrew package manager](https://brew.sh/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+4. If you do not have ffmpeg, you can install it via [Homebrew package manager](https://brew.sh/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
 ```
 ./TwitchDownloaderCLI --download-ffmpeg
 ```
