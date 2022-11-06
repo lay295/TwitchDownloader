@@ -24,7 +24,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('t', "threads", Default = 10, HelpText = "Number of download threads.")]
         public int DownloadThreads { get; set; }
         
-        [Option('a', "oauth", HelpText = "OAuth to access subscriber only/unpublished VODs.")]
+        [Option('O', "oauth", HelpText = "OAuth access token to download subscriber only VODs. DO NOT SHARE THIS WITH ANYONE.")]
         public string Oauth { get; set; }
 
         [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]

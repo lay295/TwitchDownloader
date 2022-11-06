@@ -1,4 +1,3 @@
-
 # TwitchDownloaderCLI
 A cross platform command line tool that can do the main functions of the GUI program, which can download VODs/Clips/Chats and render chats.
 
@@ -13,7 +12,7 @@ A cross platform command line tool that can do the main functions of the GUI pro
 
 ---
 
-## Arguments for mode `videodownload`
+## Arguments for mode videodownload
 Downloads a stream VOD from Twitch
 
 **-u/-\-id (REQUIRED)**
@@ -36,8 +35,8 @@ Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b
 **-t/-\-threads**
 (Default: 10) Number of download threads.
 
-**-\-oauth**
-OAuth to be passed when downloading a VOD. Used when downloading sub only VODs.
+**-O/-\-oauth**
+OAuth access token to download subscriber only VODs. **DO NOT SHARE THIS WITH ANYONE.**
 
 **-\-ffmpeg-path**
 Path to ffmpeg executable.
@@ -46,7 +45,7 @@ Path to ffmpeg executable.
 Path to temporary folder for cache.
 
 
-## Arguments for mode `clipdownload`
+## Arguments for mode clipdownload
 Downloads a clip from Twitch
 
 **-u/-\-id (REQUIRED)**
@@ -59,10 +58,10 @@ File the program will output to.
 The quality the program will attempt to download, for example "1080p60", if not found will download highest quality video.
 
 
-## Arguments for mode `chatdownload`
+## Arguments for mode chatdownload
 Downloads the chat from a VOD or clip
 
-**-u/-\-id**
+**-u/-\-id (REQUIRED)**
 The ID of the VOD or clip to download. Does not currently accept URLs.
 
 **-o/-\-output (REQUIRED)**
@@ -96,7 +95,7 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 (Default: 4) The number of parallel downloads for chat.
 
 
-## Arguments for mode `chatrender` 
+## Arguments for mode chatrender
 Renders a chat JSON as a video
 
 **-i/-\-input (REQUIRED)**
@@ -190,14 +189,14 @@ Path to ffmpeg executable.
 Path to temporary folder for cache.
 
 
-## Arguments for mode `ffmpeg`
+## Arguments for mode ffmpeg
 Manage standalone ffmpeg
 
 **-d/-\-download**
 (Default: false) Downloads ffmpeg as a standalone file.
 
 
-## Arguments for mode `cache`
+## Arguments for mode cache
  Manage the working cache.
 
 **-c/-\-clear-cache**
