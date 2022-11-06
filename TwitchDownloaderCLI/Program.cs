@@ -11,15 +11,18 @@ namespace TwitchDownloaderCLI
     {
         static void Main(string[] args)
         {
-            args[0] = args[0].ToLower();
-
+            string[] preParsedArgs;
             if (args.Any(x => x.Equals("-m") || x.Equals("--mode")))
             {
-                Console.WriteLine("[INFO] The program has switched from --mode <mode> to verbs (like \"git <mode>\"). Run \"TwitchDownloaderCLI help\" for more info.");
-                Environment.Exit(1);
+                Console.WriteLine("[INFO] The program has switched from --mode <mode> to verbs (like \"git <verb>\"), consider using verbs instead. Run \"TwitchDownloaderCLI help\" for more info.");
+                preParsedArgs = PreParseArgs.Process(PreParseArgs.ConvertFromOldSyntax(args));
+            }
+            else
+            {
+                preParsedArgs = PreParseArgs.Process(args);
             }
 
-            Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(args)
+            Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs)
                 .WithParsed<VideoDownloadArgs>(r => DownloadVideo.Download(r))
                 .WithParsed<ClipDownloadArgs>(r => DownloadClip.Download(r))
                 .WithParsed<ChatDownloadArgs>(r => DownloadChat.Download(r))
