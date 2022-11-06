@@ -13,7 +13,7 @@ namespace TwitchDownloaderCLI
         {
             args[0] = args[0].ToLower();
 
-            if (args.Any(x => x.Equals("-m")))
+            if (args.Any(x => x.Equals("-m") || x.Equals("--mode")))
             {
                 Console.WriteLine("[INFO] The program has switched from --mode <mode> to verbs (like \"git <mode>\"). Run \"TwitchDownloaderCLI help\" for more info.");
                 Environment.Exit(1);
