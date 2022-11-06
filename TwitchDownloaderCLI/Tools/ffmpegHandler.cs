@@ -7,9 +7,11 @@ using static TwitchDownloaderCLI.Tools.PathExtensions;
 
 namespace TwitchDownloaderCLI.Tools
 {
-    internal static class FfmpegHandler
+    public static class FfmpegHandler
     {
-        internal static void DownloadFfmpeg()
+        public static readonly string ffmpegExecutableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg";
+
+        public static void DownloadFfmpeg()
         {
             Console.WriteLine("[INFO] - Downloading ffmpeg and exiting");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -33,7 +35,7 @@ namespace TwitchDownloaderCLI.Tools
             Environment.Exit(0);
         }
 
-        internal static void DetectFfmpeg(string ffmpegExecutableName, string ffmpegPath, RunMode runMode)
+        public static void DetectFfmpeg(string ffmpegPath, RunMode runMode)
         {
             if (runMode is RunMode.ChatDownload or RunMode.ClipDownload)
             {

@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using System.Collections.Generic;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI

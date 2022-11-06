@@ -10,7 +10,7 @@ namespace TwitchDownloaderCLI.Modes
 {
     internal static class DownloadVideo
     {
-        internal static void Download(Options inputOptions, string ffmpegExecutableName)
+        internal static void Download(Options inputOptions)
         {
             if (inputOptions.Id == string.Empty || !inputOptions.Id.All(char.IsDigit))
             {
@@ -29,7 +29,7 @@ namespace TwitchDownloaderCLI.Modes
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
-                FfmpegPath = inputOptions.FfmpegPath is null || inputOptions.FfmpegPath == string.Empty ? ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
+                FfmpegPath = inputOptions.FfmpegPath is null or "" ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder
             };
 

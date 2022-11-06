@@ -11,7 +11,7 @@ namespace TwitchDownloaderCLI.Modes
 {
     internal class RenderChat
     {
-        internal static void Render(Options inputOptions, string ffmpegExecutableName)
+        internal static void Render(Options inputOptions)
         {
             ChatRenderOptions renderOptions = new()
             {
@@ -51,7 +51,7 @@ namespace TwitchDownloaderCLI.Modes
                 GenerateMask = inputOptions.GenerateMask,
                 InputArgs = inputOptions.InputArgs,
                 OutputArgs = inputOptions.OutputArgs,
-                FfmpegPath = inputOptions.FfmpegPath is null || inputOptions.FfmpegPath == string.Empty ? ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
+                FfmpegPath = inputOptions.FfmpegPath is null or "" ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder,
                 SubMessages = (bool)inputOptions.SubMessages,
                 ChatBadges = (bool)inputOptions.ChatBadges,
@@ -68,9 +68,13 @@ namespace TwitchDownloaderCLI.Modes
             {
                 Console.WriteLine("[WARNING] - Height and Width MUST be even, rounding up to the nearest even number to prevent errors");
                 if (renderOptions.ChatHeight % 2 != 0)
+                {
                     renderOptions.ChatHeight++;
+                }
                 if (renderOptions.ChatWidth % 2 != 0)
+                {
                     renderOptions.ChatWidth++;
+                }
             }
 
             if (inputOptions.IgnoreUsersList != string.Empty)
@@ -80,11 +84,11 @@ namespace TwitchDownloaderCLI.Modes
             }
 
 
-            ChatRenderer chatDownloader = new(renderOptions);
+            ChatRenderer chatRenderer = new(renderOptions);
             Progress<ProgressReport> progress = new();
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            chatDownloader.ParseJson().Wait();
-            chatDownloader.RenderVideoAsync(progress, new CancellationToken()).Wait();
+            chatRenderer.ParseJson().Wait();
+            chatRenderer.RenderVideoAsync(progress, new CancellationToken()).Wait();
         }
     }
 }
