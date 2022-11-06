@@ -1,7 +1,8 @@
-﻿using System;
-using CommandLine;
+﻿using CommandLine;
+using System;
 using System.Linq;
 using TwitchDownloaderCLI.Modes;
+using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 
 namespace TwitchDownloaderCLI
@@ -10,40 +11,20 @@ namespace TwitchDownloaderCLI
     {
         static void Main(string[] args)
         {
-            if (args.Any(x => x.Equals("--download-ffmpeg")))
+            if (args.Any(x => x.Equals("-m")))
             {
-                FfmpegHandler.DownloadFfmpeg();
-            }
-
-            if (args.Any(x => x.Equals("--clear-cache")))
-            {
-                ClearCache.PromptClearCache();
-            }
-
-            Options inputOptions = new();
-            var optionsResult = Parser.Default.ParseArguments<Options>(args).WithParsed(r => { inputOptions = r; });
-            if (optionsResult.Tag == ParserResultType.NotParsed)
-            {
+                Console.WriteLine("The program has switched from --mode <mode> to verbs (like \"git <mode>\"). Run \"TwitchDownloaderCLI help\" for more info.");
                 Environment.Exit(1);
             }
 
-            FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, inputOptions.RunMode);
-
-            switch (inputOptions.RunMode)
-            {
-                case RunMode.VideoDownload:
-                    DownloadVideo.Download(inputOptions);
-                    break;
-                case RunMode.ClipDownload:
-                    DownloadClip.Download(inputOptions);
-                    break;
-                case RunMode.ChatDownload:
-                    DownloadChat.Download(inputOptions);
-                    break;
-                case RunMode.ChatRender:
-                    RenderChat.Render(inputOptions);
-                    break;
-            }
+            Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(args)
+                .WithParsed<VideoDownloadArgs>(r => DownloadVideo.Download(r))
+                .WithParsed<ClipDownloadArgs>(r => DownloadClip.Download(r))
+                .WithParsed<ChatDownloadArgs>(r => DownloadChat.Download(r))
+                .WithParsed<ChatRenderArgs>(r => RenderChat.Render(r))
+                .WithParsed<FfmpegArgs>(r => FfmpegHandler.ParseArgs(r))
+                .WithParsed<CacheArgs>(r => CacheHandler.ParseArgs(r))
+                .WithNotParsed(_ => Environment.Exit(1));
         }
     }
 }

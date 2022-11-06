@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 
@@ -7,7 +8,7 @@ namespace TwitchDownloaderCLI.Modes
 {
     internal class DownloadClip
     {
-        internal static void Download(Options inputOptions)
+        internal static void Download(ClipDownloadArgs inputOptions)
         {
             if (inputOptions.Id == string.Empty || inputOptions.Id.All(char.IsDigit))
             {

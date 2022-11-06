@@ -1,10 +1,19 @@
 ﻿using System;
 using System.IO;
+using TwitchDownloaderCLI.Modes.Arguments;
 
 namespace TwitchDownloaderCLI.Tools
 {
-    internal class ClearCache
+    public static class CacheHandler
     {
+        public static void ParseArgs(CacheArgs args)
+        {
+            if (args.ClearCache)
+            {
+                PromptClearCache();
+            }
+        }
+
         internal static void PromptClearCache()
         {
             Console.WriteLine("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly.");
@@ -18,7 +27,7 @@ namespace TwitchDownloaderCLI.Tools
             if (userInput.Equals("y") || userInput.Equals("yes"))
             {
                 ClearTempCache();
-                Environment.Exit(0);
+                return;
             }
             else if (userInput.Equals("n") || userInput.Equals("no"))
             {

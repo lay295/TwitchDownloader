@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
+using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
@@ -10,8 +11,10 @@ namespace TwitchDownloaderCLI.Modes
 {
     internal static class DownloadVideo
     {
-        internal static void Download(Options inputOptions)
+        internal static void Download(VideoDownloadArgs inputOptions)
         {
+            FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
+
             if (inputOptions.Id == string.Empty || !inputOptions.Id.All(char.IsDigit))
             {
                 Console.WriteLine("[ERROR] - Invalid VOD ID, unable to parse. Must be only numbers.");

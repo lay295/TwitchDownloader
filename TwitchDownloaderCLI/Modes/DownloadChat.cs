@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
@@ -9,7 +10,7 @@ namespace TwitchDownloaderCLI.Modes
 {
     internal class DownloadChat
     {
-        internal static void Download(Options inputOptions)
+        internal static void Download(ChatDownloadArgs inputOptions)
         {
             if (inputOptions.Id == string.Empty)
             {

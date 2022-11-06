@@ -6,12 +6,13 @@ using System.Threading;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCLI.Modes.Arguments;
 
 namespace TwitchDownloaderCLI.Modes
 {
     internal class RenderChat
     {
-        internal static void Render(Options inputOptions)
+        internal static void Render(ChatRenderArgs inputOptions)
         {
             ChatRenderOptions renderOptions = new()
             {
@@ -37,7 +38,6 @@ namespace TwitchDownloaderCLI.Modes
                     "italics" => SKFontStyle.Italic,
                     _ => throw new NotImplementedException("Invalid message font style")
                 },
-
                 UsernameFontStyle = inputOptions.UsernameFontStyle.ToLower() switch
                 {
                     "normal" => SKFontStyle.Normal,
@@ -56,7 +56,6 @@ namespace TwitchDownloaderCLI.Modes
                 SubMessages = (bool)inputOptions.SubMessages,
                 ChatBadges = (bool)inputOptions.ChatBadges,
                 Timestamp = inputOptions.Timestamp
-
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
@@ -66,7 +65,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (renderOptions.ChatHeight % 2 != 0 || renderOptions.ChatWidth % 2 != 0)
             {
-                Console.WriteLine("[WARNING] - Height and Width MUST be even, rounding up to the nearest even number to prevent errors");
+                Console.WriteLine("[WARNING] - Width and Height MUST be even, rounding up to the nearest even number to prevent errors");
                 if (renderOptions.ChatHeight % 2 != 0)
                 {
                     renderOptions.ChatHeight++;

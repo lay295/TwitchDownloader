@@ -2,8 +2,8 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using TwitchDownloaderCLI.Modes.Arguments;
 using Xabe.FFmpeg.Downloader;
-using static TwitchDownloaderCLI.Tools.PathExtensions;
 
 namespace TwitchDownloaderCLI.Tools
 {
@@ -11,9 +11,17 @@ namespace TwitchDownloaderCLI.Tools
     {
         public static readonly string ffmpegExecutableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg";
 
+        public static void ParseArgs(FfmpegArgs args)
+        {
+            if (args.DownloadFfmpeg)
+            {
+                DownloadFfmpeg();
+            }
+        }
+
         public static void DownloadFfmpeg()
         {
-            Console.WriteLine("[INFO] - Downloading ffmpeg and exiting");
+            Console.WriteLine("[INFO] - Downloading ffmpeg");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official).Wait();
@@ -32,21 +40,16 @@ namespace TwitchDownloaderCLI.Tools
             {
                 FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full).Wait();
             }
-            Environment.Exit(0);
         }
 
-        public static void DetectFfmpeg(string ffmpegPath, RunMode runMode)
+        public static void DetectFfmpeg(string ffmpegPath)
         {
-            if (runMode is RunMode.ChatDownload or RunMode.ClipDownload)
-            {
-                return;
-            }
-            if (File.Exists(ffmpegExecutableName) || ExistsOnPath(ffmpegExecutableName) || File.Exists(ffmpegPath))
+            if (File.Exists(ffmpegExecutableName) || PathExtensions.ExistsOnPath(ffmpegExecutableName) || File.Exists(ffmpegPath))
             {
                 return;
             }
 
-            Console.WriteLine("[ERROR] - Unable to find ffmpeg, exiting. You can download ffmpeg automatically with the argument --download-ffmpeg");
+            Console.WriteLine("[ERROR] - Unable to find ffmpeg, exiting. You can download ffmpeg automatically with the command \"TwitchDownloaderClI ffmpeg -d\"");
             Environment.Exit(1);
         }
     }
