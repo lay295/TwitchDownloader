@@ -168,14 +168,14 @@ namespace TwitchDownloaderCore
 
             if (getStv)
             {
-                JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://7tv.io/v2/emotes/global"));
+                JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://7tv.io/v3/emote-sets/global"));
 
                 if (streamerId != null)
                 {
                     //Channel might not have 7TV emotes
                     try
                     {
-                        STV.Merge(JArray.Parse(await httpClient.GetStringAsync(String.Format("https://api.7tv.app/v2/users/{0}/emotes", streamerId))));
+                        STV.Merge(JArray.Parse(await httpClient.GetStringAsync(String.Format("https://7tv.io/v3/users/twitch/{0}", streamerId))));
                     }
                     catch { }
                 }
