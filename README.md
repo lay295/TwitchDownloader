@@ -46,7 +46,7 @@ No GUI is avaiable for MacOS yet :(
 
 The CLI is cross platform and performs the main functions of the program. It works on Windows, Linux, and MacOS.*
 
-*As of 1.50.5, only `VideoDownload`, `ClipDownload`, and `ChatDownload` **without embeded emotes** are known to work on MacOS. Only Intel Macs have been tested
+*Only Intel Macs have been tested
 
 ### [CLI Documentation here](TwitchDownloaderCLI/README.md). 
 
@@ -56,9 +56,9 @@ For example, you could copy/paste this into a `.bat` file on Windows, to downloa
 ```
 @echo off
 set /p vodid="Enter VOD ID: "
-TwitchDownloaderCLI videodownload --id %vodid% --ffmpeg-path "ffmpeg.exe" -o %vodid%.mp4
-TwitchDownloaderCLI chatdownload --id %vodid% -o %vodid%_chat.json
-TwitchDownloaderCLI chatrender -i %vodid%_chat.json -h 1080 -w 422 --framerate 30 --update-rate 0 --font-size 18 -o %vodid%_chat.mp4
+TwitchDownloaderCLI.exe videodownload --id %vodid% --ffmpeg-path "ffmpeg.exe" -o %vodid%.mp4
+TwitchDownloaderCLI.exe chatdownload --id %vodid% -o %vodid%_chat.json
+TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framerate 30 --update-rate 0 --font-size 18 -o %vodid%_chat.mp4
 ```
 ---
 ### Linux – Getting started
