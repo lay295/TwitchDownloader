@@ -13,8 +13,7 @@ namespace TwitchDownloaderCLI
         {
             if (args.Any(x => x.Equals("-m")))
             {
-                Console.WriteLine("The program has switched from --mode <mode> to verbs (like \"git <mode>\"). Run \"TwitchDownloaderCLI help\" for more info.");
-                Environment.Exit(1);
+                throw new Exception("The program has switched from --mode <mode> to verbs (like \"git <mode>\"). Run \"TwitchDownloaderCLI help\" for more info.");
             }
 
             Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(args)
