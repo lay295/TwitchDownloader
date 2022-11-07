@@ -50,7 +50,11 @@ namespace TwitchDownloader
 			foreach (Window window in windows)
 			{
 				var windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
-				SetWindowAttribute(windowHandle, THEME_ATTRIBUTE, ref AppComponentsDarkTheme, Marshal.SizeOf(AppComponentsDarkTheme));
+				try
+				{
+					SetWindowAttribute(windowHandle, THEME_ATTRIBUTE, ref AppComponentsDarkTheme, Marshal.SizeOf(AppComponentsDarkTheme));
+				}
+				catch { }
 			}
 
 			Window _wnd = new();
@@ -81,10 +85,15 @@ namespace TwitchDownloader
 
 				watcher.Start();
 			}
-			catch
+			catch (PlatformNotSupportedException)
 			{
-				MessageBox.Show("Unable to fetch Windows theme.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				Settings.Default.GuiTheme = WINDOWS_LIGHT_THEME;
+				MessageBox.Show("Unable to fetch Windows theme. System theming is now disabled.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
+			catch (Exception ex)
+            {
+                MessageBox.Show(ex.StackTrace, ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
 			ChangeAppTheme(app);
 		}
@@ -142,11 +151,6 @@ namespace TwitchDownloader
 			{
 				return true;
 			}
-			return false;
-		}
-
-		private bool ColorsAreClose(Color color1, Color color2)
-		{
 			return false;
 		}
 
