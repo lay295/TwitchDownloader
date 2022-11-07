@@ -36,7 +36,7 @@ namespace TwitchDownloaderCLI.Modes
                     "bold" => SKFontStyle.Bold,
                     "italic" => SKFontStyle.Italic,
                     "italics" => SKFontStyle.Italic,
-                    _ => throw new NotImplementedException("Invalid message font style")
+                    _ => throw new NotImplementedException("Invalid message font style. Valid values are: normal, bold, and italic")
                 },
                 UsernameFontStyle = inputOptions.UsernameFontStyle.ToLower() switch
                 {
@@ -44,7 +44,7 @@ namespace TwitchDownloaderCLI.Modes
                     "bold" => SKFontStyle.Bold,
                     "italic" => SKFontStyle.Italic,
                     "italics" => SKFontStyle.Italic,
-                    _ => throw new NotImplementedException("Invalid username font style")
+                    _ => throw new NotImplementedException("Invalid username font style. Valid values are: normal, bold, and italic")
                 },
                 UpdateRate = inputOptions.UpdateRate,
                 Framerate = inputOptions.Framerate,

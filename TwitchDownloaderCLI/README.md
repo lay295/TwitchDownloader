@@ -35,7 +35,7 @@ Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b
 **-t/-\-threads**
 (Default: 10) Number of download threads.
 
-**-O/-\-oauth**
+**-\-oauth**
 OAuth access token to download subscriber only VODs. **DO NOT SHARE THIS WITH ANYONE.**
 
 **-\-ffmpeg-path**
