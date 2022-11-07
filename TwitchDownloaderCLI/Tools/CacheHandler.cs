@@ -8,7 +8,11 @@ namespace TwitchDownloaderCLI.Tools
     {
         public static void ParseArgs(CacheArgs args)
         {
-            if (args.ClearCache)
+            if (args.ForceClearCache)
+            {
+                ClearTempCache();
+            }
+            else if (args.ClearCache)
             {
                 PromptClearCache();
             }

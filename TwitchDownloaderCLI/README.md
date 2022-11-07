@@ -199,8 +199,11 @@ Manage standalone ffmpeg
 ## Arguments for mode cache
  Manage the working cache.
 
-**-c/-\-clear-cache**
+**-c/-\-clear**
 (Default: false) Clears the default cache folder.
+
+**force-clear**
+(Default: false) Clears the default cache folder, bypassing the confirmation prompt.
 
 ---
 

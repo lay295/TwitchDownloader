@@ -8,5 +8,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
     {
         [Option('c', "clear", Default = false, Required = false, HelpText = "Clears the default cache folder.")]
         public bool ClearCache { get; set; }
+
+        [Option("force-clear", Default = false, Required = false, HelpText = "Clears the default cache folder, bypassing the confirmation prompt")]
+        public bool ForceClearCache { get; set; }
     }
 }
