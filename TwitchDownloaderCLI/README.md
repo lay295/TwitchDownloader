@@ -65,7 +65,7 @@ Downloads the chat from a VOD or clip
 The ID of the VOD or clip to download. Does not currently accept URLs.
 
 **-o/-\-output (REQUIRED)**
-File the program will output to. If output file does not end in `.json`, `.html` or `.htm` it will download it as a plain text file
+File the program will output to. File extension will be used to determine download type. Valid extensions are `json`, `html`, and `txt`.
 
 **-b/-\-beginning**
 Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.

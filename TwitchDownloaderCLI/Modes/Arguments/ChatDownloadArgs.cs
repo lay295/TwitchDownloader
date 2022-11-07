@@ -10,7 +10,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('u', "id", Required = true, HelpText = "The ID of the VOD or clip to download that chat of.")]
         public string Id { get; set; }
 
-        [Option('o', "output", Required = true, HelpText = "Path to output file.")]
+        [Option('o', "output", Required = true, HelpText = "Path to output file. File extension will be used to determine download type. Valid extensions are json, html, and txt.")]
         public string OutputFile { get; set; }
 
         [Option('b', "beginning", HelpText = "Time in seconds to crop beginning.")]
