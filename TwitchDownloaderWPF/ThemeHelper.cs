@@ -28,6 +28,7 @@ namespace TwitchDownloader
         private const string REGISTRY_KEY_NAME = "AppsUseLightTheme";
         private const string WINDOWS_LIGHT_THEME = "Light";
         private const string WINDOWS_DARK_THEME = "Dark";
+        private bool systemThemesUnsupported = false;
 
         public ThemeHelper()
         {
@@ -46,6 +47,12 @@ namespace TwitchDownloader
 
         public void SetTitleBarThemes(WindowCollection windows)
         {
+            // If windows 10 build is before 1903, it doesn't support dark title bars
+            if (Environment.OSVersion.Version.Build < 18362)
+            {
+                return;
+            }
+
             try
             {
                 foreach (Window window in windows)
@@ -88,11 +95,13 @@ namespace TwitchDownloader
             }
             catch (PlatformNotSupportedException)
             {
+                systemThemesUnsupported = true;
                 Settings.Default.GuiTheme = WINDOWS_LIGHT_THEME;
                 MessageBox.Show("Unable to fetch Windows theme. System theming is now disabled.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
+                systemThemesUnsupported = true;
                 MessageBox.Show(ex.StackTrace, ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
@@ -198,7 +207,7 @@ namespace TwitchDownloader
         private string GetWindowsTheme()
         {
             using var key = Registry.CurrentUser.OpenSubKey(REGISTRY_KEY_PATH);
-            if (!(key.GetValue(REGISTRY_KEY_NAME) is int windowsThemeValue))
+            if (!(key.GetValue(REGISTRY_KEY_NAME) is int windowsThemeValue) || systemThemesUnsupported)
             {
                 return WINDOWS_LIGHT_THEME;
             }
