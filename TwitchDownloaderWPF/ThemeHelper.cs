@@ -35,7 +35,7 @@ namespace TwitchDownloader
             {
                 Directory.CreateDirectory("Themes");
             }
-            WriteDefaultThemes();
+            WriteIncludedThemes();
 
             if (!Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && !File.Exists($"{Path.Combine("Themes", Settings.Default.GuiTheme)}.xaml"))
             {
@@ -51,7 +51,6 @@ namespace TwitchDownloader
                 foreach (Window window in windows)
                 {
                     var windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
-
                     SetWindowAttribute(windowHandle, THEME_ATTRIBUTE, ref AppComponentsDarkTheme, Marshal.SizeOf(AppComponentsDarkTheme));
                 }
 
@@ -162,7 +161,7 @@ namespace TwitchDownloader
             app.Resources.MergedDictionaries[1].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Theme.xaml", UriKind.Absolute);
         }
 
-        private void WriteDefaultThemes()
+        private void WriteIncludedThemes()
         {
             var resourceNames = GetResourceNames();
             var themePaths = resourceNames.Where((i) => i.StartsWith($"{nameof(TwitchDownloader)}.Themes."));
