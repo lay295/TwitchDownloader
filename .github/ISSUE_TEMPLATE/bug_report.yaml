@@ -17,7 +17,7 @@ body:
       - label: I am running the latest version ([download here](https://github.com/lay295/TwitchDownloader/releases/latest))
         required: true
 - type: dropdown
-  id: version
+  id: edition
   attributes:
     label: Edition
     description: Which edition of the program are you using?
@@ -25,7 +25,7 @@ body:
       - Windows GUI Application
       - Command Line Interface
       - Both
-      required: true
+    required: true
 - type: textarea
   id: issue_text
   attributes:
