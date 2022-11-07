@@ -75,6 +75,14 @@ namespace TwitchDownloader
 
         public void WatchTheme(App app)
         {
+            // If windows 10 build is before 1809, it doesn't have the theming regkey
+            if (Environment.OSVersion.Version.Build < 17763)
+            {
+                systemThemesUnsupported = true;
+                ChangeAppTheme(app);
+                return;
+            }
+
             var currentUser = WindowsIdentity.GetCurrent();
             string windowsQuery = $"SELECT * FROM RegistryValueChangeEvent WHERE Hive = 'HKEY_USERS' AND KeyPath = " +
                 $"'{currentUser.User.Value}\\{REGISTRY_KEY_PATH}' AND ValueName = '{REGISTRY_KEY_NAME}'";
@@ -101,7 +109,6 @@ namespace TwitchDownloader
             }
             catch (Exception ex)
             {
-                systemThemesUnsupported = true;
                 MessageBox.Show(ex.StackTrace, ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
