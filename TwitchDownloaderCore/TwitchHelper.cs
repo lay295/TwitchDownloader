@@ -213,7 +213,11 @@ namespace TwitchDownloaderCore
                     {
                         emoteResponse.IsZeroWidth = true;
                     }
-                    if ((emoteFlags & EmoteFlags.ContentTwitchDisallowed) != EmoteFlags.ContentTwitchDisallowed && emoteIsListed.Equals("true"))
+                    if ((emoteFlags & EmoteFlags.ContentTwitchDisallowed) != EmoteFlags.ContentTwitchDisallowed || (emoteFlags & EmoteFlags.Private) != EmoteFlags.Private)
+                    {
+                        continue;
+                    }
+                    if (emoteIsListed.Equals("true"))
                     {
                         emoteReponse.STV.Add(emoteResponse);
                     }
