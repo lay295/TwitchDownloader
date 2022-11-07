@@ -205,7 +205,7 @@ namespace TwitchDownloaderCore
                         }
                     }
                     string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost["url"].ToString(), "[scale]x", emoteFormat);
-                    StvFlags emoteFlags = (StvFlags)int.Parse(emoteData["flags"].ToString());
+                    StvFlags emoteFlags = (StvFlags)(int)emoteData["flags"];
                     bool emoteIsListed = (bool)emoteData["listed"];
 
                     EmoteResponseItem emoteResponse = new() { Id = emoteId, Code = emoteName, ImageType = emoteFormat, ImageUrl = emoteUrl };
