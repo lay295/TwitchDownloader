@@ -170,19 +170,16 @@ namespace TwitchDownloaderCore
 
             if (getStv)
             {
-                string globalEmoteResponse = await httpClient.GetStringAsync("https://7tv.io/v3/emote-sets/global");
-                JsonElement globalEmoteElement = JsonDocument.Parse(globalEmoteResponse).RootElement.GetProperty("emotes");
-                JArray stvEmotes = JArray.Parse(globalEmoteElement.ToString());
+                JObject globalEmoteObject = JObject.Parse(await httpClient.GetStringAsync("https://7tv.io/v3/emote-sets/global"));
+                JArray stvEmotes = (JArray)globalEmoteObject["emotes"];
 
                 if (streamerId != null)
                 {
                     //Channel might not have 7TV emotes
                     try
                     {
-                        string streamerEmoteResponse = await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId));
-                        JsonElement streamerEmoteSetElement = JsonDocument.Parse(streamerEmoteResponse).RootElement.GetProperty("emote_set");
-                        JArray streamerEmoteArray = JArray.Parse(streamerEmoteSetElement.GetProperty("emotes").ToString());
-                        stvEmotes.Merge(streamerEmoteArray);
+                        JObject streamerEmoteObject = JObject.Parse(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
+                        stvEmotes.Merge((JArray)streamerEmoteObject["emote_set"]["emotes"]);
                     }
                     catch { }
                 }
@@ -193,7 +190,7 @@ namespace TwitchDownloaderCore
                     string emoteName = stvEmote["name"].ToString();
                     JObject emoteData = (JObject)stvEmote["data"];
                     JObject emoteHost = (JObject)emoteData["host"];
-                    JArray emoteFiles = JArray.Parse(emoteHost["files"].ToString());
+                    JArray emoteFiles = (JArray)emoteHost["files"];
                     string emoteFormat = "avif";
                     foreach (var fileItem in emoteFiles)
                     {
