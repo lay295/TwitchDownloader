@@ -202,7 +202,7 @@ Manage standalone ffmpeg
 **-c/-\-clear**
 (Default: false) Clears the default cache folder.
 
-**force-clear**
+**-\-force-clear**
 (Default: false) Clears the default cache folder, bypassing the confirmation prompt.
 
 ---
