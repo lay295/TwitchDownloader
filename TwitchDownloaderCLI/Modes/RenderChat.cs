@@ -14,6 +14,9 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Render(ChatRenderArgs inputOptions)
         {
+
+            FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
+
             ChatRenderOptions renderOptions = new()
             {
                 InputFile = inputOptions.InputFile,
