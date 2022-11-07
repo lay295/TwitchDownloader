@@ -25,6 +25,7 @@ body:
       - Windows GUI Application
       - Command Line Interface
       - Both
+  validations:
     required: true
 - type: textarea
   id: issue_text
