@@ -6,7 +6,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         // https://github.com/SevenTV/Common/blob/4139fcc3eb8d79003573b26b552ef112ec85b8df/structures/v3/type.emote.go#L62
         [Flags]
-        public enum EmoteFlags
+        public enum StvFlags
         {
             Private = 1 << 0, // The emote is private and can only be accessed by its owner, editors and moderators
 

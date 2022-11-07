@@ -205,19 +205,19 @@ namespace TwitchDownloaderCore
                         }
                     }
                     string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost["url"].ToString(), "[scale]x", emoteFormat);
-                    EmoteFlags emoteFlags = (EmoteFlags)int.Parse(emoteData["flags"].ToString());
-                    string emoteIsListed = emoteData["listed"].ToString().ToLower();
+                    StvFlags emoteFlags = (StvFlags)int.Parse(emoteData["flags"].ToString());
+                    bool emoteIsListed = (bool)emoteData["listed"];
 
                     EmoteResponseItem emoteResponse = new() { Id = emoteId, Code = emoteName, ImageType = emoteFormat, ImageUrl = emoteUrl };
-                    if ((emoteFlags & EmoteFlags.ZeroWidth) == EmoteFlags.ZeroWidth)
+                    if ((emoteFlags & StvFlags.ZeroWidth) == StvFlags.ZeroWidth)
                     {
                         emoteResponse.IsZeroWidth = true;
                     }
-                    if ((emoteFlags & EmoteFlags.ContentTwitchDisallowed) != EmoteFlags.ContentTwitchDisallowed || (emoteFlags & EmoteFlags.Private) != EmoteFlags.Private)
+                    if ((emoteFlags & StvFlags.ContentTwitchDisallowed) == StvFlags.ContentTwitchDisallowed || (emoteFlags & StvFlags.Private) == StvFlags.Private)
                     {
                         continue;
                     }
-                    if (emoteIsListed.Equals("true"))
+                    if (emoteIsListed)
                     {
                         emoteReponse.STV.Add(emoteResponse);
                     }
