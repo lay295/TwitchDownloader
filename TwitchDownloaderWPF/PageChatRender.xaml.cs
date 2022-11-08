@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -68,8 +69,8 @@ namespace TwitchDownloaderWPF
                 Outline = (bool)checkOutline.IsChecked,
                 Font = (string)comboFont.SelectedItem,
                 FontSize = numFontSize.Value,
-                UpdateRate = double.Parse(textUpdateTime.Text.Replace(",", ".")),
-                EmoteScale = double.Parse(textEmoteScale.Text.Replace(",", ".")),
+                UpdateRate = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture),
+                EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture),
                 IgnoreUsersList = textIgnoreUsersList.Text.ToLower().Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList(),
                 Timestamp = (bool)checkTimestamp.IsChecked,
                 MessageColor = messageColor,
@@ -229,9 +230,9 @@ namespace TwitchDownloaderWPF
                 Settings.Default.Height = int.Parse(textHeight.Text);
                 Settings.Default.Width = int.Parse(textWidth.Text);
                 Settings.Default.FontSize = (float)numFontSize.Value;
-                Settings.Default.UpdateTime = double.Parse(textUpdateTime.Text.Replace(",", "."));
+                Settings.Default.UpdateTime = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture);
                 Settings.Default.Framerate = int.Parse(textFramerate.Text);
-                Settings.Default.EmoteScale = double.Parse(textEmoteScale.Text.Replace(",", "."));
+                Settings.Default.EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
             }
             catch { }
             Settings.Default.Save();
@@ -249,9 +250,9 @@ namespace TwitchDownloaderWPF
             {
                 int.Parse(textHeight.Text);
                 int.Parse(textWidth.Text);
-                double.Parse(textUpdateTime.Text.Replace(",", "."));
+                double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture);
                 int.Parse(textFramerate.Text);
-                double.Parse(textEmoteScale.Text.Replace(",", "."));
+                double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
             }
             catch (Exception ex)
             {
