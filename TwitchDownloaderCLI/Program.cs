@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using System;
+using System.IO;
 using System.Linq;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
@@ -11,6 +12,14 @@ namespace TwitchDownloaderCLI
     {
         static void Main(string[] args)
         {
+            if (args.Length == 0)
+            {
+                Console.WriteLine("This is a command line tool.\n{0}Please open a terminal and run \"{1} --help\" from there.",
+                    Environment.NewLine, Environment.ProcessPath.Split(Path.DirectorySeparatorChar).Last());
+                Console.ReadKey();
+                Environment.Exit(1);
+            }
+
             string[] preParsedArgs;
             if (args.Any(x => x.Equals("-m") || x.Equals("--mode")))
             {
