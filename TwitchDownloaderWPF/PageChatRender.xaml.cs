@@ -233,8 +233,7 @@ namespace TwitchDownloaderWPF
             if (comboCodec.SelectedItem != null)
             {
                 Settings.Default.VideoCodec = ((Codec)comboCodec.SelectedItem).Name;
-                Settings.Default.IgnoreUsersList = String.Join(",", textIgnoreUsersList.Text
-                    .ToLower()
+                Settings.Default.IgnoreUsersList = string.Join(",", textIgnoreUsersList.Text.ToLower()
                     .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
                 int newMask = 0;
                 foreach (var item in comboBadges.SelectedItems)
