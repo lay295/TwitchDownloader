@@ -1,4 +1,5 @@
 ﻿using HandyControl.Controls;
+using HandyControl.Tools.Extension;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SkiaSharp;
@@ -21,6 +22,7 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 using WpfAnimatedGif;
+using static System.Windows.Forms.Design.AxImporter;
 using MessageBox = System.Windows.MessageBox;
 
 namespace TwitchDownloaderWPF
@@ -125,6 +127,7 @@ namespace TwitchDownloaderWPF
                 checkSub.IsChecked = Settings.Default.SubMessages;
                 checkBadge.IsChecked = Settings.Default.ChatBadges;
                 textEmoteScale.Text = Settings.Default.EmoteScale.ToString("0.0#");
+                textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
 
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Broadcaster, Name = "Broadcaster" });
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Moderator, Name = "Mods" });
@@ -134,6 +137,12 @@ namespace TwitchDownloaderWPF
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.NoAudioVisual, Name = "No Audio/Visual" });
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.PrimeGaming, Name = "Prime" });
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Other, Name = "Others" });
+
+                foreach(ChatBadgeListItem item in comboBadges.Items)
+                {
+                    if (((ChatBadgeType)Settings.Default.ChatBadgeMask).HasFlag(item.Type))
+                        comboBadges.SelectedItems.Add(item);
+                }
 
                 foreach (VideoContainer container in comboFormat.Items)
                 {
@@ -209,6 +218,15 @@ namespace TwitchDownloaderWPF
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
             if (comboCodec.SelectedItem != null)
                 Settings.Default.VideoCodec = ((Codec)comboCodec.SelectedItem).Name;
+            Settings.Default.IgnoreUsersList = String.Join(",",textIgnoreUsersList.Text
+                .ToLower()
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            int newMask = 0;
+            foreach (var item in comboBadges.SelectedItems)
+            {
+                newMask += (int)((ChatBadgeListItem)item).Type;
+            }
+            Settings.Default.ChatBadgeMask = newMask;
             try
             {
                 Settings.Default.Height = Int32.Parse(textHeight.Text);
@@ -216,7 +234,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.FontSize = (float)numFontSize.Value;
                 Settings.Default.UpdateTime = float.Parse(textUpdateTime.Text);
                 Settings.Default.Framerate = Int32.Parse(textFramerate.Text);
-                Settings.Default.EmoteScale = Int32.Parse(textEmoteScale.Text);
+                Settings.Default.EmoteScale = float.Parse(textEmoteScale.Text);
             }
             catch { }
             Settings.Default.Save();
