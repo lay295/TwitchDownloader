@@ -9,11 +9,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
-using static TwitchDownloaderCore.TwitchObjects.StvEmoteFlags;
 
 namespace TwitchDownloaderCore
 {
@@ -202,15 +200,15 @@ namespace TwitchDownloaderCore
                         }
                     }
                     string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost["url"].ToString(), "[scale]x", emoteFormat);
-                    StvFlags emoteFlags = (StvFlags)(int)emoteData["flags"];
+                    StvEmoteFlags emoteFlags = (StvEmoteFlags)(int)emoteData["flags"];
                     bool emoteIsListed = (bool)emoteData["listed"];
 
                     EmoteResponseItem emoteResponse = new() { Id = emoteId, Code = emoteName, ImageType = emoteFormat, ImageUrl = emoteUrl };
-                    if ((emoteFlags & StvFlags.ZeroWidth) == StvFlags.ZeroWidth)
+                    if ((emoteFlags & StvEmoteFlags.ZeroWidth) == StvEmoteFlags.ZeroWidth)
                     {
                         emoteResponse.IsZeroWidth = true;
                     }
-                    if ((emoteFlags & StvFlags.ContentTwitchDisallowed) == StvFlags.ContentTwitchDisallowed || (emoteFlags & StvFlags.Private) == StvFlags.Private)
+                    if ((emoteFlags & StvEmoteFlags.ContentTwitchDisallowed) == StvEmoteFlags.ContentTwitchDisallowed || (emoteFlags & StvEmoteFlags.Private) == StvEmoteFlags.Private)
                     {
                         continue;
                     }
