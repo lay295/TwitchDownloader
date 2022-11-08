@@ -233,27 +233,28 @@ namespace TwitchDownloaderWPF
             if (comboCodec.SelectedItem != null)
             {
                 Settings.Default.VideoCodec = ((Codec)comboCodec.SelectedItem).Name;
-            Settings.Default.IgnoreUsersList = String.Join(",",textIgnoreUsersList.Text
-                .ToLower()
-                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-            int newMask = 0;
-            foreach (var item in comboBadges.SelectedItems)
-            {
-                newMask += (int)((ChatBadgeListItem)item).Type;
+                Settings.Default.IgnoreUsersList = String.Join(",", textIgnoreUsersList.Text
+                    .ToLower()
+                    .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+                int newMask = 0;
+                foreach (var item in comboBadges.SelectedItems)
+                {
+                    newMask += (int)((ChatBadgeListItem)item).Type;
+                }
+                Settings.Default.ChatBadgeMask = newMask;
+
+                try
+                {
+                    Settings.Default.Height = int.Parse(textHeight.Text);
+                    Settings.Default.Width = int.Parse(textWidth.Text);
+                    Settings.Default.FontSize = (float)numFontSize.Value;
+                    Settings.Default.UpdateTime = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture);
+                    Settings.Default.Framerate = int.Parse(textFramerate.Text);
+                    Settings.Default.EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
+                }
+                catch { }
+                Settings.Default.Save();
             }
-            Settings.Default.ChatBadgeMask = newMask;
-            
-            try
-            {
-                Settings.Default.Height = int.Parse(textHeight.Text);
-                Settings.Default.Width = int.Parse(textWidth.Text);
-                Settings.Default.FontSize = (float)numFontSize.Value;
-                Settings.Default.UpdateTime = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture);
-                Settings.Default.Framerate = int.Parse(textFramerate.Text);
-                Settings.Default.EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
-            }
-            catch { }
-            Settings.Default.Save();
         }
 
         private bool ValidateInputs()
