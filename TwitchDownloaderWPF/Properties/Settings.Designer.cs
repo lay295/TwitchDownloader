@@ -538,5 +538,29 @@ namespace TwitchDownloader.Properties {
                 this["GuiTheme"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string IgnoreUsersList {
+            get {
+                return ((string)(this["IgnoreUsersList"]));
+            }
+            set {
+                this["IgnoreUsersList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ChatBadgeMask {
+            get {
+                return ((int)(this["ChatBadgeMask"]));
+            }
+            set {
+                this["ChatBadgeMask"] = value;
+            }
+        }
     }
 }
