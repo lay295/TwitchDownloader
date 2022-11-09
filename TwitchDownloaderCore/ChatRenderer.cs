@@ -63,6 +63,7 @@ namespace TwitchDownloaderCore
             emojiCache = emojiTask.Result;
 
             await Task.Run(() => ScaleImages());
+            FloorCommentOffsets(chatRoot.comments);
 
             outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
 
@@ -101,6 +102,20 @@ namespace TwitchDownloaderCore
             else
             {
                 await Task.Run(() => RenderVideoSection(processInfo.Item1, null, startTick, startTick + totalTicks, progress), cancellationToken);
+            }
+        }
+
+        /* Why are we doing this? The question is when to display a 0.5 second offset comment with an update rate of 1.
+         * At the update frame at 0 seconds, or 1 second? We're choosing at 0 seconds here. Flooring to either the 
+         * update rate, or if the update rate is greater than 1 just to the next whole number */
+        private void FloorCommentOffsets(List<Comment> comments)
+        {
+            foreach (var comment in comments)
+            {
+                if (renderOptions.UpdateRate > 1)
+                    comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds);
+                else
+                    comment.content_offset_seconds = Math.Truncate(comment.content_offset_seconds * (1 / renderOptions.UpdateRate)) * (1 / renderOptions.UpdateRate);
             }
         }
 
