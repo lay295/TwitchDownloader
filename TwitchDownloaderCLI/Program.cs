@@ -14,9 +14,19 @@ namespace TwitchDownloaderCLI
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("This is a command line tool.\n{0}Please open a terminal and run \"{1} --help\" from there.",
-                    Environment.NewLine, Environment.ProcessPath.Split(Path.DirectorySeparatorChar).Last());
-                Console.ReadKey();
+                string processName = Environment.ProcessPath.Split(Path.DirectorySeparatorChar).Last();
+                if (Path.GetExtension(processName).Equals(".exe"))
+                {
+                    // Windows users are far more likely to double click the executable like a normal program
+                    Console.WriteLine("This is a command line tool. Please open a terminal and run \"{0} --help\" from there for more information.{1}Press any key to close...",
+                        processName, Environment.NewLine);
+                    Console.ReadKey();
+                }
+                else
+                {
+                    Console.WriteLine("USAGE: {0} [VERB] [OPTIONS]{1}Try \'{2} --help\' for more information.",
+                        processName, Environment.NewLine, processName);
+                }
                 Environment.Exit(1);
             }
 
@@ -32,12 +42,12 @@ namespace TwitchDownloaderCLI
             }
 
             Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs)
-                .WithParsed<VideoDownloadArgs>(r => DownloadVideo.Download(r))
-                .WithParsed<ClipDownloadArgs>(r => DownloadClip.Download(r))
-                .WithParsed<ChatDownloadArgs>(r => DownloadChat.Download(r))
-                .WithParsed<ChatRenderArgs>(r => RenderChat.Render(r))
-                .WithParsed<FfmpegArgs>(r => FfmpegHandler.ParseArgs(r))
-                .WithParsed<CacheArgs>(r => CacheHandler.ParseArgs(r))
+                .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
+                .WithParsed<ClipDownloadArgs>(DownloadClip.Download)
+                .WithParsed<ChatDownloadArgs>(DownloadChat.Download)
+                .WithParsed<ChatRenderArgs>(RenderChat.Render)
+                .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
+                .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
                 .WithNotParsed(_ => Environment.Exit(1));
         }
     }
