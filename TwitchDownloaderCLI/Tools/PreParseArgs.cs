@@ -9,6 +9,11 @@
             return processedArgs;
         }
 
+        /// <summary>
+        /// Converts an argument array that uses the old -m/--mode syntax to verb syntax
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns>The same <paramref name="args"/> array but using a verb instead of -m</returns>
         internal static string[] ConvertFromOldSyntax(string[] args)
         {
             int argsLength = args.Length;
