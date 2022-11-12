@@ -451,7 +451,7 @@ namespace TwitchDownloaderCore
                 if (fragment.emoticon == null)
                 {
                     // Either text or third party emote
-                    string[] fragmentParts = SwapRTL(fragment.text.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+                    string[] fragmentParts = SwapRightToLeft(fragment.text.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
                     for (int i = 0; i < fragmentParts.Length; i++)
                     {
                         string fragmentString = fragmentParts[i];
@@ -639,7 +639,8 @@ namespace TwitchDownloaderCore
         private void DrawText(string drawText, SKPaint textFont, bool padding, List<SKBitmap> sectionImages, ref Point drawPos, ref Point defaultPos)
         {
             float textWidth;
-            bool isRtl = IsRTL(drawText);
+            bool isRtl = IsRightToLeft(drawText);
+            int effectiveChatWidth = renderOptions.ChatWidth - renderOptions.SidePadding;
             try
             {
                 if (isRtl)
@@ -658,7 +659,17 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            if (drawPos.X + textWidth > renderOptions.ChatWidth - renderOptions.SidePadding)
+            // TODO: add RTL support
+            while (!isRtl && textWidth > effectiveChatWidth)
+            {
+                string newDrawText = SubstringToEffectiveChatWidth(drawText, textFont, effectiveChatWidth);
+
+                DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, ref defaultPos);
+
+                drawText = drawText[newDrawText.Length..];
+                textWidth = textFont.MeasureText(drawText);
+            }
+            if (drawPos.X + textWidth > effectiveChatWidth)
             {
                 AddImageSection(sectionImages, ref drawPos, ref defaultPos);
             }
@@ -691,6 +702,26 @@ namespace TwitchDownloaderCore
             {
                 drawPos.X += (int)Math.Floor(textWidth + (padding ? renderOptions.WordSpacing : 0));
             }
+        }
+
+        private static string SubstringToEffectiveChatWidth(string drawText, SKPaint textFont, int effectiveChatWidth)
+        {
+            // cut in string half until <= effective width
+            string newDrawText = drawText;
+            do
+            {
+                newDrawText = newDrawText[..(newDrawText.Length / 2)];
+            } while (textFont.MeasureText(newDrawText) > effectiveChatWidth);
+
+            // add chars until 1 too long effective width
+            int charAt = newDrawText.Length;
+            do
+            {
+                newDrawText += drawText[charAt];
+                charAt++;
+            } while (textFont.MeasureText(newDrawText) < effectiveChatWidth);
+            
+            return newDrawText[..^1];
         }
 
         private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos)
@@ -908,13 +939,13 @@ namespace TwitchDownloaderCore
         {
             return input > 127;
         }
-        private static string[] SwapRTL(string[] words)
+        private static string[] SwapRightToLeft(string[] words)
         {
             List<string> finalWords = new List<string>();
             Stack<string> rtlStack = new Stack<string>();
             foreach (var word in words)
             {
-                if (IsRTL(word))
+                if (IsRightToLeft(word))
                 {
                     rtlStack.Push(word);
                 }
@@ -929,7 +960,7 @@ namespace TwitchDownloaderCore
                 finalWords.Add(rtlStack.Pop());
             return finalWords.ToArray();
         }
-        private static bool IsRTL(string message)
+        private static bool IsRightToLeft(string message)
         {
             if (message.Length > 0)
             {
