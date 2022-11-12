@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchDownloader"
         mc:Ignorable="d"
-        Title="Queue Options" Height="200" Width="500">
+        Title="Queue Options" Height="200" Width="500" Loaded="Window_loaded">
 	<Grid Background="{DynamicResource AppBackground}">
 		<TextBox x:Name="textFolder" HorizontalAlignment="Left" Height="23" Margin="106,10,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="279" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 		<Button x:Name="btnFolder" Content="Select Folder" HorizontalAlignment="Left" Margin="390,10,0,0" VerticalAlignment="Top" Width="89" Click="btnFolder_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
