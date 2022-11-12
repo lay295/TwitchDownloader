@@ -717,7 +717,7 @@ namespace TwitchDownloaderCore
             } while (textFont.MeasureText(newDrawText) > effectiveChatWidth);
 
             // prioritize wrappiung at ? to increase URL readability
-            int delimiterIndex = newDrawText.IndexOf('?');
+            int delimiterIndex = newDrawText.LastIndexOf('?');
             if (delimiterIndex != -1)
             {
                 return newDrawText[..++delimiterIndex];
