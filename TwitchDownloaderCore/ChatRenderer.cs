@@ -716,12 +716,24 @@ namespace TwitchDownloaderCore
                 newDrawText = newDrawText[..(newDrawText.Length / 2)];
             } while (textFont.MeasureText(newDrawText) > effectiveChatWidth);
 
-            // add chars until 1 too long effective width
+            // prioritize wrappiung at ? to increase URL readability
+            int delimiterIndex = newDrawText.IndexOf('?');
+            if (delimiterIndex != -1)
+            {
+                return newDrawText[..++delimiterIndex];
+            }
+
+            // add chars until 1 too long for effective width
             int charAt = newDrawText.Length;
             do
             {
                 newDrawText += drawText[charAt];
                 charAt++;
+                // prioritize wrapping at ? to increase URL readability
+                if (newDrawText[^1].Equals('?'))
+                {
+                    return newDrawText;
+                }
             } while (textFont.MeasureText(newDrawText) < effectiveChatWidth);
             
             return newDrawText[..^1];
