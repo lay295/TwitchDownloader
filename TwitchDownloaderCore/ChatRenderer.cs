@@ -110,6 +110,9 @@ namespace TwitchDownloaderCore
          * update rate, or if the update rate is greater than 1 just to the next whole number */
         private void FloorCommentOffsets(List<Comment> comments)
         {
+            if (renderOptions.UpdateRate <= 0)
+                return;
+
             foreach (var comment in comments)
             {
                 if (renderOptions.UpdateRate > 1)
