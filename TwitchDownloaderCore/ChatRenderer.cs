@@ -106,12 +106,15 @@ namespace TwitchDownloaderCore
          * update rate, or if the update rate is greater than 1 just to the next whole number */
         private void FloorCommentOffsets(List<Comment> comments)
         {
+            if (renderOptions.UpdateRate <= 0)
+                return;
+
             foreach (var comment in comments)
             {
                 if (renderOptions.UpdateRate > 1)
                     comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds);
                 else
-                    comment.content_offset_seconds = Math.Truncate(comment.content_offset_seconds * (1 / renderOptions.UpdateRate)) * (1 / renderOptions.UpdateRate);
+                    comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds * (1 / renderOptions.UpdateRate)) / (1 / renderOptions.UpdateRate);
             }
         }
 
