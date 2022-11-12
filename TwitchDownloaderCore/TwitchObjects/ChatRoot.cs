@@ -111,8 +111,12 @@ public class CommentResponse
 
 public class ChatRoot
 {
+    [JsonPropertyOrder(0)]
     public Streamer streamer { get; set; }
-    public List<Comment> comments { get; set; }
+    [JsonPropertyOrder(1)]
     public VideoTime video { get; set; }
+    [JsonPropertyOrder(2)]
+    public List<Comment> comments { get; set; }
+    [JsonPropertyOrder(3)]
     public Emotes emotes { get; set; }
 }
