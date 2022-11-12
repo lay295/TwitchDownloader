@@ -16,6 +16,17 @@ body:
         required: true
       - label: I am running the latest version ([download here](https://github.com/lay295/TwitchDownloader/releases/latest))
         required: true
+- type: dropdown
+  id: edition
+  attributes:
+    label: Edition
+    description: Which edition of the program are you using?
+    options:
+      - Windows GUI Application
+      - Command Line Interface
+      - Both
+  validations:
+    required: true
 - type: textarea
   id: issue_text
   attributes:
