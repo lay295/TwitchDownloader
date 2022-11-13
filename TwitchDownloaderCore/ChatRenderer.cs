@@ -152,13 +152,15 @@ namespace TwitchDownloaderCore
                     lastestUpdate = GenerateUpdateFrame(currentTick);
                 }
 
-                using SKBitmap frame = GetFrameFromTick(currentTick, lastestUpdate);
-                ffmpegStream.Write(frame.Bytes);
-
-                if (maskProcess != null)
+                using (SKBitmap frame = GetFrameFromTick(currentTick, lastestUpdate))
                 {
-                    SetFrameMask(frame);
-                    maskStream.Write(frame.Bytes);
+                    ffmpegStream.Write(frame.Bytes);
+
+                    if (maskProcess != null)
+                    {
+                        SetFrameMask(frame);
+                        maskStream.Write(frame.Bytes);
+                    }
                 }
 
                 double percentDouble = (double)(currentTick - startTick) / (double)(endTick - startTick) * 100.0;
@@ -485,7 +487,7 @@ namespace TwitchDownloaderCore
                         }
                         else if (Regex.Match(fragmentString, emojiRegex).Success)
                         {
-                            while (!String.IsNullOrWhiteSpace(fragmentString))
+                            while (!string.IsNullOrWhiteSpace(fragmentString))
                             {
                                 List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
 
@@ -648,10 +650,7 @@ namespace TwitchDownloaderCore
             {
                 if (isRtl)
                 {
-                    SKShaper messageShape = new SKShaper(textFont.Typeface);
-                    SKShaper.Result measure = messageShape.Shape(drawText, textFont);
-                    textWidth = measure.Points[^1].X;
-                    messageShape.Dispose();
+                    textWidth = MeasureRTL(drawText, textFont);
                 }
                 else
                 {
@@ -686,6 +685,8 @@ namespace TwitchDownloaderCore
                     SKPath outlinePath = textFont.GetTextPath(drawText, drawPos.X, drawPos.Y);
                     SKPaint outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
                     sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
+                    outlinePath.Dispose();
+                    outlinePaint.Dispose();
                 }
 
                 try
@@ -743,6 +744,18 @@ namespace TwitchDownloaderCore
             return newDrawText[..^1];
         }
 
+        private static float MeasureRTL(string rtlText, SKPaint textFont)
+        {
+            float textWidth;
+
+            SKShaper messageShape = new SKShaper(textFont.Typeface);
+            SKShaper.Result measure = messageShape.Shape(rtlText, textFont);
+            textWidth = measure.Points[^1].X;
+            messageShape.Dispose();
+
+            return textWidth;
+        }
+
         private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos)
         {
             using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
@@ -766,6 +779,8 @@ namespace TwitchDownloaderCore
             userPaint.Color = userColor;
             sectionImageCanvas.DrawText(comment.commenter.display_name + ":", drawPos.X, drawPos.Y, userPaint);
             drawPos.X += textWidth + renderOptions.WordSpacing;
+
+            userPaint.Dispose();
         }
 
         private static SKColor GenerateUserColor(SKColor userColor, SKColor background_color, ChatRenderOptions renderOptions)
@@ -999,30 +1014,27 @@ namespace TwitchDownloaderCore
         }
         public async Task<ChatRoot> ParseJson()
         {
-            using (FileStream fs = new FileStream(renderOptions.InputFile, FileMode.Open, FileAccess.Read))
+            using FileStream fs = new FileStream(renderOptions.InputFile, FileMode.Open, FileAccess.Read);
+            using var jsonDocument = JsonDocument.Parse(fs);
+
+            if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
             {
-                using (var jsonDocument = JsonDocument.Parse(fs))
+                chatRoot.streamer = streamerJson.Deserialize<Streamer>();
+            }
+            if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
+            {
+                if (videoJson.TryGetProperty("start", out _) && videoJson.TryGetProperty("end", out _))
                 {
-                    if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
-                    {
-                        chatRoot.streamer = streamerJson.Deserialize<Streamer>();
-                    }
-                    if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
-                    {
-                        if (videoJson.TryGetProperty("start", out JsonElement videoStartJson) && videoJson.TryGetProperty("end", out JsonElement videoEndJson))
-                        {
-                            chatRoot.video = videoJson.Deserialize<VideoTime>();
-                        }
-                    }
-                    if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
-                    {
-                        chatRoot.emotes = emotesJson.Deserialize<Emotes>();
-                    }
-                    if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
-                    {
-                        chatRoot.comments = commentsJson.Deserialize<List<Comment>>();
-                    }
+                    chatRoot.video = videoJson.Deserialize<VideoTime>();
                 }
+            }
+            if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
+            {
+                chatRoot.emotes = emotesJson.Deserialize<Emotes>();
+            }
+            if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
+            {
+                chatRoot.comments = commentsJson.Deserialize<List<Comment>>();
             }
 
             if (chatRoot.streamer == null)
