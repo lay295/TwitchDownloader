@@ -665,7 +665,7 @@ namespace TwitchDownloaderCore
             // TODO: add RTL support
             while (!isRtl && textWidth > effectiveChatWidth)
             {
-                string newDrawText = SubstringToEffectiveChatWidth(drawText, textFont, effectiveChatWidth);
+                string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, new char[] { '?', '-' });
 
                 DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, ref defaultPos);
 
@@ -707,37 +707,37 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static string SubstringToEffectiveChatWidth(string drawText, SKPaint textFont, int effectiveChatWidth)
+        private static string SubstringToTextWidth(string drawText, SKPaint textFont, int maxWidth, char[] delimiters)
         {
-            // cut in string half until <= effective width
+            // cut in string half until <= width
             string newDrawText = drawText;
             do
             {
                 newDrawText = newDrawText[..(newDrawText.Length / 2)];
-            } while (textFont.MeasureText(newDrawText) > effectiveChatWidth);
+            } while (textFont.MeasureText(newDrawText) > maxWidth);
 
-            // add chars until 1 too long for effective width
+            // add chars until 1 too long for width
             int charAt = newDrawText.Length - 1;
-            int delimiterIndex = newDrawText.LastIndexOf('?') + 1;
+            int delimiterIndex = newDrawText.LastIndexOfAny(delimiters) + 1;
             do
             {
                 charAt++;
                 newDrawText += drawText[charAt];
-                if (newDrawText[charAt].Equals('?'))
+                if (delimiters.Any(x => x.Equals(newDrawText[charAt])))
                 {
                     delimiterIndex = charAt;
                 }
 
-                // prioritize wrapping at last '?' to increase URL readability
+                // prioritize wrapping at last '?'/'-' to increase URL readability
                 if (delimiterIndex > 0)
                 {
-                    // we're at the end of a '?' chain
+                    // we're at the end of a '?'/'-' chain
                     if (delimiterIndex != charAt)
                     {
                         return newDrawText[..delimiterIndex];
                     }
                 }
-            } while (textFont.MeasureText(newDrawText) < effectiveChatWidth);
+            } while (textFont.MeasureText(newDrawText) < maxWidth);
 
             return newDrawText[..^1];
         }
@@ -970,12 +970,16 @@ namespace TwitchDownloaderCore
                 else
                 {
                     while (rtlStack.Count > 0)
+                    {
                         finalWords.Add(rtlStack.Pop());
+                    }
                     finalWords.Add(word);
                 }
             }
             while (rtlStack.Count > 0)
+            {
                 finalWords.Add(rtlStack.Pop());
+            }
             return finalWords.ToArray();
         }
         private static bool IsRightToLeft(string message)
