@@ -695,8 +695,17 @@ namespace TwitchDownloaderCore
             {
                 if (renderOptions.Outline)
                 {
-                    //TODO: Fix outline for RTL
-                    SKPath outlinePath = textFont.GetTextPath(drawText, drawPos.X, drawPos.Y);
+                    SKPath outlinePath;
+                    if (isRtl)
+                    {
+                        // SKPath.GetTextPath is weird and requires RTL text to be swapped
+                        string reversedText = new string(drawText.Reverse().ToArray());
+                        outlinePath = textFont.GetTextPath(reversedText, drawPos.X, drawPos.Y);
+                    }
+                    else
+                    {
+                        outlinePath = textFont.GetTextPath(drawText, drawPos.X, drawPos.Y);
+                    }
                     SKPaint outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
                     sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
                     outlinePath.Dispose();
