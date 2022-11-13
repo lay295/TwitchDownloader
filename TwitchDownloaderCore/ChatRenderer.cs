@@ -678,7 +678,7 @@ namespace TwitchDownloaderCore
             {
                 while (textWidth > effectiveChatWidth - defaultPos.X)
                 {
-                    string newDrawText = SubstringRtlToTextWidth(drawText, textFont, effectiveChatWidth - defaultPos.X);
+                    string newDrawText = SubstringRtlToTextWidth(drawText, textFont, effectiveChatWidth - defaultPos.X, new char[] { '?', '-' });
 
                     DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, ref defaultPos);
 
@@ -713,14 +713,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            if (!isRtl)
-            {
-                drawPos.X += (int)Math.Floor(textWidth + (padding ? renderOptions.WordSpacing : 0));
-            }
-            else
-            {
-                drawPos.X += (int)Math.Floor(textWidth + (padding ? renderOptions.WordSpacing : 0));
-            }
+            drawPos.X += (int)Math.Floor(textWidth + (padding ? renderOptions.WordSpacing : 0));
         }
 
         private static string SubstringToTextWidth(string drawText, SKPaint textFont, int maxWidth, char[] delimiters)
@@ -744,10 +737,10 @@ namespace TwitchDownloaderCore
                     delimiterIndex = charAt;
                 }
 
-                // prioritize wrapping at last '?'/'-' to increase URL readability
+                // prioritize wrapping at last delimiter char to increase URL readability
                 if (delimiterIndex > 0)
                 {
-                    // we're at the end of a '?'/'-' chain
+                    // we're at the end of a delimiter char chain
                     if (delimiterIndex != charAt)
                     {
                         return newDrawText[..delimiterIndex];
@@ -758,7 +751,7 @@ namespace TwitchDownloaderCore
             return newDrawText[..^1];
         }
 
-        private static string SubstringRtlToTextWidth(string drawText, SKPaint textFont, int maxWidth)
+        private static string SubstringRtlToTextWidth(string drawText, SKPaint textFont, int maxWidth, char[] delimiters)
         {
             // cut in string half until <= width
             string newDrawText = drawText;
@@ -769,10 +762,25 @@ namespace TwitchDownloaderCore
 
             // add chars until 1 too long for width
             int charAt = newDrawText.Length - 1;
+            int delimiterIndex = newDrawText.LastIndexOfAny(delimiters) + 1;
             do
             {
                 charAt++;
                 newDrawText += drawText[charAt];
+                if (delimiters.Any(x => x.Equals(newDrawText[charAt])))
+                {
+                    delimiterIndex = charAt;
+                }
+
+                // prioritize wrapping at last delimiter char to increase URL readability
+                if (delimiterIndex > 0)
+                {
+                    // we're at the end of a delimiter char chain
+                    if (delimiterIndex != charAt)
+                    {
+                        return newDrawText[..delimiterIndex];
+                    }
+                }
             } while (MeasureRtl(newDrawText, textFont) < maxWidth);
 
             return newDrawText[..^1];
