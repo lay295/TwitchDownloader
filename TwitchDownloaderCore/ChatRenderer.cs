@@ -650,7 +650,7 @@ namespace TwitchDownloaderCore
             {
                 if (isRtl)
                 {
-                    textWidth = MeasureRtl(drawText, textFont);
+                    textWidth = MeasureRtlText(drawText, textFont);
                 }
                 else
                 {
@@ -683,7 +683,7 @@ namespace TwitchDownloaderCore
                     DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, ref defaultPos);
 
                     drawText = drawText[newDrawText.Length..];
-                    textWidth = MeasureRtl(drawText, textFont);
+                    textWidth = MeasureRtlText(drawText, textFont);
                 }
             }
             if (drawPos.X + textWidth > effectiveChatWidth)
@@ -758,7 +758,7 @@ namespace TwitchDownloaderCore
             do
             {
                 newDrawText = newDrawText[..(newDrawText.Length / 2)];
-            } while (MeasureRtl(newDrawText, textFont) > maxWidth);
+            } while (MeasureRtlText(newDrawText, textFont) > maxWidth);
 
             // add chars until 1 too long for width
             int charAt = newDrawText.Length - 1;
@@ -781,12 +781,12 @@ namespace TwitchDownloaderCore
                         return newDrawText[..delimiterIndex];
                     }
                 }
-            } while (MeasureRtl(newDrawText, textFont) < maxWidth);
+            } while (MeasureRtlText(newDrawText, textFont) < maxWidth);
 
             return newDrawText[..^1];
         }
 
-        private static float MeasureRtl(string rtlText, SKPaint textFont)
+        private static float MeasureRtlText(string rtlText, SKPaint textFont)
         {
             float textWidth;
 
