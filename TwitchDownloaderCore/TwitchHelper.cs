@@ -114,7 +114,7 @@ namespace TwitchDownloaderCore
 
         public static async Task<EmoteResponse> GetThirdPartyEmoteData(string streamerId, bool getBttv, bool getFfz, bool getStv)
         {
-            EmoteResponse data = new EmoteResponse();
+            EmoteResponse emoteReponse = new EmoteResponse();
 
             if (getBttv)
             {
@@ -138,7 +138,7 @@ namespace TwitchDownloaderCore
                     string name = emote["code"].ToString();
                     string mime = emote["imageType"].ToString();
                     string url = String.Format("https://cdn.betterttv.net/emote/{0}/[scale]x", id);
-                    data.BTTV.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = bttvZeroWidth.Contains(name) });
+                    emoteReponse.BTTV.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = bttvZeroWidth.Contains(name) });
                 }
             }
 
@@ -162,39 +162,64 @@ namespace TwitchDownloaderCore
                     string name = emote["code"].ToString();
                     string mime = emote["imageType"].ToString();
                     string url = String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/[scale]", id);
-                    data.FFZ.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url });
+                    emoteReponse.FFZ.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url });
                 }
             }
 
             if (getStv)
             {
-                JArray STV = JArray.Parse(await httpClient.GetStringAsync("https://7tv.io/v2/emotes/global"));
+                JObject globalEmoteObject = JObject.Parse(await httpClient.GetStringAsync("https://7tv.io/v3/emote-sets/global"));
+                JArray stvEmotes = (JArray)globalEmoteObject["emotes"];
 
                 if (streamerId != null)
                 {
                     //Channel might not have 7TV emotes
                     try
                     {
-                        STV.Merge(JArray.Parse(await httpClient.GetStringAsync(String.Format("https://api.7tv.app/v2/users/{0}/emotes", streamerId))));
+                        JObject streamerEmoteObject = JObject.Parse(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
+                        stvEmotes.Merge((JArray)streamerEmoteObject["emote_set"]["emotes"]);
                     }
                     catch { }
                 }
 
-
-                foreach (var emote in STV)
+                foreach (var stvEmote in stvEmotes)
                 {
-                    string id = emote["id"].ToString();
-                    string name = emote["name"].ToString();
-                    string mime = emote["mime"].ToString().Split('/')[1];
-                    string url = String.Format("https://cdn.7tv.app/emote/{0}/[scale]x", id);
-                    EmoteResponseItem emoteResponse = new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url };
-                    if (emote["visibility_simple"].ToList().Contains("ZERO_WIDTH"))
+                    string emoteId = stvEmote["id"].ToString();
+                    string emoteName = stvEmote["name"].ToString();
+                    JObject emoteData = (JObject)stvEmote["data"];
+                    JObject emoteHost = (JObject)emoteData["host"];
+                    JArray emoteFiles = (JArray)emoteHost["files"];
+                    string emoteFormat = "avif";
+                    foreach (var fileItem in emoteFiles)
+                    {
+                        // prefer webp
+                        if (fileItem["format"].ToString().ToLower().Equals("webp"))
+                        {
+                            emoteFormat = "webp";
+                            break;
+                        }
+                    }
+                    string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost["url"].ToString(), "[scale]x", emoteFormat);
+                    StvEmoteFlags emoteFlags = (StvEmoteFlags)(int)emoteData["flags"];
+                    bool emoteIsListed = (bool)emoteData["listed"];
+
+                    EmoteResponseItem emoteResponse = new() { Id = emoteId, Code = emoteName, ImageType = emoteFormat, ImageUrl = emoteUrl };
+                    if ((emoteFlags & StvEmoteFlags.ZeroWidth) == StvEmoteFlags.ZeroWidth)
+                    {
                         emoteResponse.IsZeroWidth = true;
-                    data.STV.Add(emoteResponse);
+                    }
+                    if ((emoteFlags & StvEmoteFlags.ContentTwitchDisallowed) == StvEmoteFlags.ContentTwitchDisallowed || (emoteFlags & StvEmoteFlags.Private) == StvEmoteFlags.Private)
+                    {
+                        continue;
+                    }
+                    if (emoteIsListed)
+                    {
+                        emoteReponse.STV.Add(emoteResponse);
+                    }
                 }
             }
 
-            return data;
+            return emoteReponse;
         }
         public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool bttv = true, bool ffz = true, bool stv = true)
         {
