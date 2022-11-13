@@ -651,6 +651,7 @@ namespace TwitchDownloaderCore
                     SKShaper messageShape = new SKShaper(textFont.Typeface);
                     SKShaper.Result measure = messageShape.Shape(drawText, textFont);
                     textWidth = measure.Points[^1].X;
+                    messageShape.Dispose();
                 }
                 else
                 {
