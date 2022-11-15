@@ -32,7 +32,7 @@ jobs:
         name: upload_url
         path: upload_url.txt
   
-  build:
+  build-gui:
     runs-on: windows-latest
     needs: [create-release]
     env:
@@ -92,7 +92,7 @@ jobs:
 
   build-cli:
     runs-on: ubuntu-20.04
-    needs: [create-release, build]
+    needs: [create-release, build-gui]
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
