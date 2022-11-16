@@ -646,36 +646,12 @@ namespace TwitchDownloaderCore
             float textWidth;
             bool isRtl = IsRightToLeft(drawText);
             int effectiveChatWidth = renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X;
-            try
-            {
-                if (isRtl)
-                {
-                    textWidth = MeasureRtlText(drawText, textFont);
-                }
-                else
-                {
-                    textWidth = textFont.MeasureText(drawText);
-                }
-            }
-            catch
-            {
-                return;
-            }
 
-            if (!isRtl)
+            if (isRtl)
             {
-                while (textWidth > effectiveChatWidth)
-                {
-                    string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, new char[] { '?', '-' });
+                textWidth = MeasureRtlText(drawText, textFont);
 
-                    DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos);
-
-                    drawText = drawText[newDrawText.Length..];
-                    textWidth = textFont.MeasureText(drawText);
-                }
-            }
-            else
-            {
+                // while drawText is wider than the chat width
                 while (textWidth > effectiveChatWidth)
                 {
                     string newDrawText = SubstringRtlToTextWidth(drawText, textFont, effectiveChatWidth, new char[] { '?', '-' });
@@ -684,6 +660,21 @@ namespace TwitchDownloaderCore
 
                     drawText = drawText[newDrawText.Length..];
                     textWidth = MeasureRtlText(drawText, textFont);
+                }
+            }
+            else
+            {
+                textWidth = textFont.MeasureText(drawText);
+
+                // while drawText is wider than the chat width
+                while (textWidth > effectiveChatWidth)
+                {
+                    string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, new char[] { '?', '-' });
+
+                    DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos);
+
+                    drawText = drawText[newDrawText.Length..];
+                    textWidth = textFont.MeasureText(drawText);
                 }
             }
             if (drawPos.X + textWidth > effectiveChatWidth)
@@ -725,23 +716,33 @@ namespace TwitchDownloaderCore
             drawPos.X += (int)Math.Floor(textWidth + (padding ? renderOptions.WordSpacing : 0));
         }
 
-        private static string SubstringToTextWidth(string drawText, SKPaint textFont, int maxWidth, char[] delimiters)
+        /// <summary>
+        /// Produces a <see langword="string"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/> OR substringed to the last index of any character in <paramref name="delimiters"/>.
+        /// </summary>
+        /// <returns>A shorter width or delimited <see langword="string"/>, whichever comes first.</returns>
+        private static string SubstringToTextWidth(string text, SKPaint textFont, int maxWidth, char[] delimiters)
         {
+            // input text was already less than max width
+            if (textFont.MeasureText(text) <= maxWidth)
+            {
+                return text;
+            }
+
             // cut in string half until <= width
-            string newDrawText = drawText;
+            string shortText = text;
             do
             {
-                newDrawText = newDrawText[..(newDrawText.Length / 2)];
-            } while (textFont.MeasureText(newDrawText) > maxWidth);
+                shortText = shortText[..(shortText.Length / 2)];
+            } while (textFont.MeasureText(shortText) > maxWidth);
 
             // add chars until 1 too long for width
-            int charAt = newDrawText.Length - 1;
-            int delimiterIndex = newDrawText.LastIndexOfAny(delimiters) + 1;
+            int charAt = shortText.Length - 1;
+            int delimiterIndex = shortText.LastIndexOfAny(delimiters) + 1;
             do
             {
                 charAt++;
-                newDrawText += drawText[charAt];
-                if (delimiters.Any(x => x.Equals(newDrawText[charAt])))
+                shortText += text[charAt];
+                if (delimiters.Any(x => x.Equals(shortText[charAt])))
                 {
                     delimiterIndex = charAt;
                 }
@@ -752,57 +753,65 @@ namespace TwitchDownloaderCore
                     // we're at the end of a delimiter char chain
                     if (delimiterIndex != charAt)
                     {
-                        return newDrawText[..delimiterIndex];
+                        return shortText[..delimiterIndex];
                     }
                 }
-            } while (textFont.MeasureText(newDrawText) < maxWidth);
+            } while (textFont.MeasureText(shortText) < maxWidth);
 
-            return newDrawText[..^1];
+            return shortText[..^1];
         }
 
-        private static string SubstringRtlToTextWidth(string drawText, SKPaint textFont, int maxWidth, char[] delimiters)
+        /// <summary>
+        /// Produces a <see langword="string"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/> OR substringed to the last index of any character in <paramref name="delimiters"/>.
+        /// </summary>
+        /// <param name="rtlText">Right to left text</param>
+        /// <returns>A shorter width or delimited <see langword="string"/>, whichever comes first.</returns>
+        private static string SubstringRtlToTextWidth(string rtlText, SKPaint textFont, int maxWidth, char[] delimiters)
         {
+            // input text was already less than max width
+            if (MeasureRtlText(rtlText, textFont) <= maxWidth)
+            {
+                return rtlText;
+            }
+
             // cut in string half until <= width
-            string newDrawText = drawText;
+            string shortText = rtlText;
             do
             {
-                newDrawText = newDrawText[..(newDrawText.Length / 2)];
-            } while (MeasureRtlText(newDrawText, textFont) > maxWidth);
+                shortText = shortText[..(shortText.Length / 2)];
+            } while (MeasureRtlText(shortText, textFont) > maxWidth);
 
             // add chars until 1 too long for width
-            int charAt = newDrawText.Length - 1;
-            int delimiterIndex = newDrawText.LastIndexOfAny(delimiters) + 1;
+            int charAt = shortText.Length - 1;
+            int delimiterIndex = shortText.LastIndexOfAny(delimiters) + 1;
             do
             {
                 charAt++;
-                newDrawText += drawText[charAt];
-                if (delimiters.Any(x => x.Equals(newDrawText[charAt])))
+                shortText += rtlText[charAt];
+                if (delimiters.Any(x => x.Equals(shortText[charAt])))
                 {
                     delimiterIndex = charAt;
                 }
 
-                // prioritize wrapping at last delimiter char to increase URL readability
+                // prioritize wrapping at last delimiter char
                 if (delimiterIndex > 0)
                 {
                     // we're at the end of a delimiter char chain
                     if (delimiterIndex != charAt)
                     {
-                        return newDrawText[..delimiterIndex];
+                        return shortText[..delimiterIndex];
                     }
                 }
-            } while (MeasureRtlText(newDrawText, textFont) < maxWidth);
+            } while (MeasureRtlText(shortText, textFont) < maxWidth);
 
-            return newDrawText[..^1];
+            return shortText[..^1];
         }
 
         private static float MeasureRtlText(string rtlText, SKPaint textFont)
         {
-            float textWidth;
-
-            SKShaper messageShape = new SKShaper(textFont.Typeface);
+            using SKShaper messageShape = new SKShaper(textFont.Typeface);
             SKShaper.Result measure = messageShape.Shape(rtlText, textFont);
-            textWidth = measure.Points[^1].X;
-            messageShape.Dispose();
+            float textWidth = measure.Points[^1].X;
 
             return textWidth;
         }
