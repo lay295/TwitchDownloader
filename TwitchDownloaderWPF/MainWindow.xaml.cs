@@ -1,6 +1,7 @@
 ﻿using AutoUpdaterDotNET;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -74,13 +75,13 @@ namespace TwitchDownloaderWPF
             AutoUpdater.InstalledVersion = currentVersion;
             AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
 
-            Title = String.Format("Twitch Downloader v{0}", currentVersion);
+            Title = string.Format("Twitch Downloader v{0}", currentVersion);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             pageChatRender.SaveSettings();
-            string tempFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "TwitchDownloader", "Chat Render");
+            string tempFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader", "Chat Render");
             try
             {
                 DeleteDirectory(tempFolder);
@@ -109,17 +110,17 @@ namespace TwitchDownloaderWPF
 
         internal static string GetFilename(string template, string title, string id, DateTime date, string channel)
         {
-            StringBuilder returnString = new StringBuilder(template.Replace("{title}", title).Replace("{id}", id).Replace("{channel}", channel).Replace("{date}", date.ToString("Mdyy")));
-            Regex regex = new Regex("{date_custom=\"(.*)\"}");
+            StringBuilder returnString = new StringBuilder(template.Replace("{title}", title).Replace("{id}", id).Replace("{channel}", channel).Replace("{date}", date.ToString("Mdyy")).Replace("{random_string}", Path.GetRandomFileName().Split('.').First()));
+            Regex dateRegex = new Regex("{date_custom=\"(.*)\"}");
             bool done = false;
             while (!done)
             {
-                Match match = regex.Match(returnString.ToString());
-                if (match.Success)
+                Match dateRegexMatch = dateRegex.Match(returnString.ToString());
+                if (dateRegexMatch.Success)
                 {
-                    string formatString = match.Groups[1].ToString();
-                    returnString.Remove(match.Groups[0].Index, match.Groups[0].Length);
-                    returnString.Insert(match.Groups[0].Index, date.ToString(formatString));
+                    string formatString = dateRegexMatch.Groups[1].ToString();
+                    returnString.Remove(dateRegexMatch.Groups[0].Index, dateRegexMatch.Groups[0].Length);
+                    returnString.Insert(dateRegexMatch.Groups[0].Index, date.ToString(formatString));
                 }
                 else
                 {
@@ -132,7 +133,7 @@ namespace TwitchDownloaderWPF
 
         public static string RemoveInvalidChars(string filename)
         {
-            return string.Concat(filename.Split(System.IO.Path.GetInvalidFileNameChars()));
+            return string.Concat(filename.Split(Path.GetInvalidFileNameChars()));
         }
     }
 }

@@ -23,7 +23,7 @@
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Loaded="Window_Loaded">
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,9,3,3" Text="Temp Folder:" Foreground="{DynamicResource AppText}"/>
-				<TextBox x:Name="textTempPath" Margin="3" MinWidth="300" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+				<TextBox x:Name="textTempPath" Margin="3" MinWidth="300" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" TextChanged="textTempPath_TextChanged" />
 				<Button x:Name="btnTempBrowse" Margin="3" MinWidth="50" Content="Browse" Click="btnTempBrowse_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
@@ -51,8 +51,8 @@
 					<TextBox x:Name="textChatTemplate" Margin="3" MinWidth="300" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
             </StackPanel>
-			<TextBlock Margin="3,5,3,3" Foreground="{DynamicResource AppText}" >
-                Avaliable paramaters are: <Bold>{title} {id} {date} {channel} {date_custom=""}</Bold>
+			<TextBlock Margin="3,5,3,3" Foreground="{DynamicResource AppText}" TextWrapping="Wrap">
+                Avaliable paramaters are: <Bold>{title} {id} {date} {channel} {date_custom=""} {random_string}</Bold>
                 <LineBreak/>
                 Date custom formatting is based on the C# <Hyperlink NavigateUri="https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}">standard date and time format strings</Hyperlink>
             </TextBlock>
