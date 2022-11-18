@@ -194,9 +194,9 @@ namespace TwitchDownloaderWPF
 
 		private void AppendLog(string message)
 		{
-			textLog.Dispatcher.BeginInvoke((Action)(() =>
+			textLog.Dispatcher.BeginInvoke(() =>
 				textLog.AppendText(message + Environment.NewLine)
-			));
+			);
 		}
 
 		public ChatDownloadOptions GetOptions(string filename)
@@ -475,6 +475,10 @@ namespace TwitchDownloaderWPF
 							statusMessage.Text = "ERROR";
 							SetImage("Images/peepoSad.png", false);
 							AppendLog("ERROR: " + ex.Message);
+							if (Settings.Default.VerboseErrors)
+							{
+								MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+							}
 						}
 						btnGetInfo.IsEnabled = true;
 						statusProgressBar.Value = 0;

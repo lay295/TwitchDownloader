@@ -126,6 +126,10 @@ namespace TwitchDownloaderWPF
                     btnGetInfo.IsEnabled = true;
                     AppendLog("ERROR: " + ex.Message);
                     MessageBox.Show("Unable to get the video information." + Environment.NewLine + "Please make sure the video ID is correct and try again.", "Unable To Fetch Video Info", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
             else
@@ -188,27 +192,25 @@ namespace TwitchDownloaderWPF
         {
             if (text.All(Char.IsDigit))
             {
-                int number;
-                bool success = Int32.TryParse(text, out number);
-                if (success)
+                if (int.TryParse(text, out int number))
                     return number;
                 else
                     return -1;
             }
             else if (text.Contains("twitch.tv/videos/"))
             {
-                int number;
                 //Extract just the numbers from the URL, also remove query string
                 Uri url = new UriBuilder(text).Uri;
                 string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
-                bool success = Int32.TryParse(Regex.Match(path, @"\d+").Value, out number);
-                if (success)
+                if (int.TryParse(Regex.Match(path, @"\d+").Value, out int number))
                     return number;
                 else
                     return -1;
             }
             else
+            {
                 return -1;
+            }
         }
 
         public bool ValidateInput()

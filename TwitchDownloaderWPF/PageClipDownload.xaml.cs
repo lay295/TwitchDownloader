@@ -32,7 +32,7 @@ namespace TwitchDownloaderWPF
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
             clipId = ValidateUrl(textUrl.Text);
-            if (clipId == "")
+            if (string.IsNullOrWhiteSpace(clipId))
             {
                 MessageBox.Show("Please enter a valid clip ID/URL" + Environment.NewLine + "Examples:" + Environment.NewLine + "https://clips.twitch.tv/ImportantPlausibleMetalOSsloth" + Environment.NewLine + "ImportantPlausibleMetalOSsloth", "Invalid Video ID/URL", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -72,6 +72,10 @@ namespace TwitchDownloaderWPF
                 {
                     MessageBox.Show("Unable to get Clip information. Please double check Clip Slug and try again", "Unable to get info", MessageBoxButton.OK, MessageBoxImage.Error);
                     AppendLog("ERROR: " + ex);
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                     btnGetInfo.IsEnabled = true;
                 }
             }
@@ -90,7 +94,7 @@ namespace TwitchDownloaderWPF
                 string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
                 return path.Split('/').Last();
             }
-            return "";
+            return null;
         }
 
         private void AppendLog(string message)
@@ -173,6 +177,10 @@ namespace TwitchDownloaderWPF
                         statusMessage.Text = "ERROR";
                         SetImage("Images/peepoSad.png", false);
                         AppendLog("ERROR: " + ex.Message);
+                        if (Settings.Default.VerboseErrors)
+                        {
+                            MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                     }
                     btnGetInfo.IsEnabled = true;
                     btnDownload.IsEnabled = true;

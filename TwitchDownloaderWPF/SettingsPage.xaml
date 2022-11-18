@@ -23,7 +23,7 @@
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Loaded="Window_Loaded">
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,9,3,3" Text="Temp Folder:" Foreground="{DynamicResource AppText}"/>
-				<TextBox x:Name="textTempPath" Margin="3" MinWidth="300" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" TextChanged="textTempPath_TextChanged" />
+				<TextBox x:Name="textTempPath" Margin="3" MinWidth="300" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
 				<Button x:Name="btnTempBrowse" Margin="3" MinWidth="50" Content="Browse" Click="btnTempBrowse_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
@@ -31,8 +31,12 @@
                 <Button x:Name="btnClearCache" Margin="3" MinWidth="50" Content="Clear Cache" Click="btnClearCache_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}"/>
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-				<TextBlock Margin="3,4,3,3" Text="Hide Donation Button:" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3,4,3,3" Text="Hide Donation Button:" Foreground="{DynamicResource AppText}" />
                 <CheckBox x:Name="checkDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                <TextBlock Margin="3,4,3,3" Text="Verbose Errors:" Foreground="{DynamicResource AppText}" />
+                <CheckBox x:Name="checkVerboseErrors" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
 				<TextBlock Margin="3,8,3,3" Text="Application Theme:" Foreground="{DynamicResource AppText}" />
