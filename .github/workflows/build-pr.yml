@@ -2,7 +2,7 @@ name: Build and Upload Release
  
 on: 
   push:
-    branches: [ master ]
+    branches: [ master, new_ci_stuff ]
   pull_request:
 
 jobs:
