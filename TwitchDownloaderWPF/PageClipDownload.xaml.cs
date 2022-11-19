@@ -42,20 +42,30 @@ namespace TwitchDownloaderWPF
                 {
                     btnGetInfo.IsEnabled = false;
                     comboQuality.Items.Clear();
-                    Task<GqlClipResponse> taskInfo = TwitchHelper.GetClipInfo(clipId);
+                    Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
                     Task<JArray> taskLinks = TwitchHelper.GetClipLinks(clipId);
-                    await Task.WhenAll(taskInfo, taskLinks);
+                    await Task.WhenAll(taskClipInfo, taskLinks);
 
-                    GqlClipResponse clipData = taskInfo.Result;
+                    GqlClipResponse clipData = taskClipInfo.Result;
                     string thumbUrl = clipData.data.clip.thumbnailURL;
                     Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
-                    await Task.WhenAll(taskThumb);
 
-                    imgThumbnail.Source = taskThumb.Result;
+                    try
+                    {
+                        await taskThumb;
+                    }
+                    catch
+                    {
+                        AppendLog("ERROR: Unable to find thumbnail");
+                    }
+                    if (!taskThumb.IsFaulted)
+                        imgThumbnail.Source = taskThumb.Result;
+                    TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                     textStreamer.Text = clipData.data.clip.broadcaster.displayName;
                     textCreatedAt.Text = clipData.data.clip.createdAt.ToString();
                     currentVideoTime = clipData.data.clip.createdAt.ToLocalTime();
                     textTitle.Text = clipData.data.clip.title;
+                    labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)clipLength.TotalHours, clipLength.Minutes, clipLength.Seconds);
 
                     foreach (var quality in taskLinks.Result[0]["data"]["clip"]["videoQualities"])
                     {

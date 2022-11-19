@@ -56,6 +56,7 @@
         </WrapPanel>
         <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
             <StackPanel HorizontalAlignment="Left">
+                <TextBlock Text="Length:" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="Download Format:" HorizontalAlignment="Right" Margin="0,10,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock Visibility="Collapsed" x:Name="timeText" Text="Timestamp Format:" HorizontalAlignment="Right" Margin="0,16,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock x:Name="textCrop" Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,20,0,0" Foreground="{DynamicResource AppText}" />
@@ -64,6 +65,7 @@
                 <TextBlock HorizontalAlignment="Right" Text="Connections:" Margin="0,14,0,0" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel>
+                <TextBlock x:Name="labelLength" Text="0:0:0" Margin="5,0,0,0" Foreground="{DynamicResource AppText}" />
                 <hc:ButtonGroup Margin="5,6,0,0">
                     <RadioButton x:Name="radioJson" IsChecked="True" Content="JSON" Checked="radioJson_Checked" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     <RadioButton x:Name="radioText" Checked="radioText_Checked" Content="Text" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />

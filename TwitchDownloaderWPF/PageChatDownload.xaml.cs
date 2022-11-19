@@ -108,9 +108,9 @@ namespace TwitchDownloaderWPF
 				{
 					if (downloadType == DownloadType.Video)
 					{
-						GqlVideoResponse taskInfo = await TwitchHelper.GetVideoInfo(Int32.Parse(downloadId));
-
-						string thumbUrl = taskInfo.data.video.thumbnailURLs.FirstOrDefault();
+                        Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(int.Parse(downloadId));
+                        await Task.WhenAll(taskVideoInfo);
+                        string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
 						Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
 
 						try
@@ -123,29 +123,53 @@ namespace TwitchDownloaderWPF
 						}
 						if (!taskThumb.IsFaulted)
 							imgThumbnail.Source = taskThumb.Result;
-						textTitle.Text = taskInfo.data.video.title;
-						textStreamer.Text = taskInfo.data.video.owner.displayName;
-						textCreatedAt.Text = taskInfo.data.video.createdAt.ToString();
-						currentVideoTime = taskInfo.data.video.createdAt.ToLocalTime();
-						streamerId = int.Parse(taskInfo.data.video.owner.id);
-						SetEnabled(true, false);
+                        TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
+                        textTitle.Text = taskVideoInfo.Result.data.video.title;
+						textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
+						textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToString();
+						currentVideoTime = taskVideoInfo.Result.data.video.createdAt.ToLocalTime();
+						streamerId = int.Parse(taskVideoInfo.Result.data.video.owner.id);
+                        Regex urlTimecodeRegex = new Regex(@"\?t=(\d?\dh)(\d?\dm)(\d?\ds)"); // ?t=##h##m##s
+                        Match urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
+                        if (urlTimecodeMatch.Success)
+                        {
+                            checkStart.IsChecked = true;
+                            numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].Value[..urlTimecodeMatch.Groups[1].ToString().IndexOf('h')]);
+                            numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
+                            numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
+                        }
+                        numEndHour.Value = (int)vodLength.TotalHours;
+                        numEndMinute.Value = vodLength.Minutes;
+                        numEndSecond.Value = vodLength.Seconds;
+                        labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
+                        SetEnabled(true, false);
 					}
 					else if (downloadType == DownloadType.Clip)
 					{
 						string clipId = downloadId;
-						GqlClipResponse taskInfo = await TwitchHelper.GetClipInfo(clipId);
-
-						string thumbUrl = taskInfo.data.clip.thumbnailURL;
+                        Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
+                        await Task.WhenAll(taskClipInfo);
+                        string thumbUrl = taskClipInfo.Result.data.clip.thumbnailURL;
 						Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
-						await Task.WhenAll(taskThumb);
 
-						imgThumbnail.Source = taskThumb.Result;
-						textStreamer.Text = taskInfo.data.clip.broadcaster.displayName;
-						textCreatedAt.Text = taskInfo.data.clip.createdAt.ToString();
-						currentVideoTime = taskInfo.data.clip.createdAt.ToLocalTime();
-						textTitle.Text = taskInfo.data.clip.title;
-						streamerId = int.Parse(taskInfo.data.clip.broadcaster.id);
-						SetEnabled(true, true);
+                        try
+                        {
+                            await taskThumb;
+                        }
+                        catch
+                        {
+                            AppendLog("ERROR: Unable to find thumbnail");
+                        }
+                        if (!taskThumb.IsFaulted)
+                            imgThumbnail.Source = taskThumb.Result;
+                        TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
+                        textStreamer.Text = taskClipInfo.Result.data.clip.broadcaster.displayName;
+						textCreatedAt.Text = taskClipInfo.Result.data.clip.createdAt.ToString();
+						currentVideoTime = taskClipInfo.Result.data.clip.createdAt.ToLocalTime();
+						textTitle.Text = taskClipInfo.Result.data.clip.title;
+						streamerId = int.Parse(taskClipInfo.Result.data.clip.broadcaster.id);
+                        labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)clipLength.TotalHours, clipLength.Minutes, clipLength.Seconds);
+                        SetEnabled(true, true);
 						SetEnabledCropStart(false);
 						SetEnabledCropEnd(false);
 					}

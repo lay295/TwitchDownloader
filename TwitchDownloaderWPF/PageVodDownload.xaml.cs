@@ -72,10 +72,10 @@ namespace TwitchDownloaderWPF
                 currentVideoId = videoId;
                 try
                 {
-                    Task<GqlVideoResponse> taskInfo = TwitchHelper.GetVideoInfo(videoId);
+                    Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
                     Task<JObject> taskAccessToken = TwitchHelper.GetVideoToken(videoId, textOauth.Text);
-                    await Task.WhenAll(taskInfo, taskAccessToken);
-                    string thumbUrl = taskInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
+                    await Task.WhenAll(taskVideoInfo, taskAccessToken);
+                    string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
                     Task<BitmapImage> thumbImage = InfoHelper.GetThumb(thumbUrl);
                     Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["value"].ToString(), taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["signature"].ToString());
                     await taskPlaylist;
@@ -109,15 +109,24 @@ namespace TwitchDownloaderWPF
 
                     if (!thumbImage.IsFaulted)
                         imgThumbnail.Source = thumbImage.Result;
-                    TimeSpan vodLength = TimeSpan.FromSeconds(taskInfo.Result.data.video.lengthSeconds);
-                    textStreamer.Text = taskInfo.Result.data.video.owner.displayName;
-                    textTitle.Text = taskInfo.Result.data.video.title;
-                    textCreatedAt.Text = taskInfo.Result.data.video.createdAt.ToString();
-                    currentVideoTime = taskInfo.Result.data.video.createdAt.ToLocalTime();
+                    TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
+                    textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
+                    textTitle.Text = taskVideoInfo.Result.data.video.title;
+                    textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToString();
+                    currentVideoTime = taskVideoInfo.Result.data.video.createdAt.ToLocalTime();
+                    Regex urlTimecodeRegex = new Regex(@"\?t=(\d?\dh)(\d?\dm)(\d?\ds)"); // ?t=##h##m##s
+                    Match urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
+                    if (urlTimecodeMatch.Success)
+                    {
+                        checkStart.IsChecked = true;
+                        numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].Value[..urlTimecodeMatch.Groups[1].ToString().IndexOf('h')]);
+                        numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
+                        numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
+                    }
                     numEndHour.Value = (int)vodLength.TotalHours;
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
-                    labelLength.Text = String.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
+                    labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
 
                     SetEnabled(true);
                 }
