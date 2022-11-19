@@ -66,7 +66,7 @@ jobs:
       uses: vimtor/action-zip@v1
       with:
         files: "TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64"
-        dest: TwitchDownloaderGUI-Windows-x64.zip
+        dest: TwitchDownloader-Windows-x64.zip
     
     - name: Download URL
       uses: actions/download-artifact@v2
@@ -86,8 +86,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: TwitchDownloaderGUI-Windows-x64.zip
-        asset_name: TwitchDownloaderGUI-Windows-x64.zip
+        asset_path: TwitchDownloader-Windows-x64.zip
+        asset_name: TwitchDownloader-Windows-x64.zip
         asset_content_type: application/zip
 
   build-cli:
