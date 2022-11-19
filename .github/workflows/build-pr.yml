@@ -51,7 +51,7 @@ jobs:
 
   build-cli:
     runs-on: ubuntu-20.04
-    needs: [build]
+    needs: [build-gui]
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
