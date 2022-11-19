@@ -190,6 +190,10 @@ namespace TwitchDownloaderCore
                     JObject emoteData = (JObject)stvEmote["data"];
                     JObject emoteHost = (JObject)emoteData["host"];
                     JArray emoteFiles = (JArray)emoteHost["files"];
+                    if (emoteFiles.Count == 0) // Sometimes there are no hosted files for the emote
+                    {
+                        continue;
+                    }
                     string emoteFormat = "avif";
                     foreach (var fileItem in emoteFiles)
                     {
@@ -288,15 +292,10 @@ namespace TwitchDownloaderCore
                 {
                     if (alreadyAdded.Contains(emote.Code))
                         continue;
-
-                    try
-                    {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
-                        if (emote.IsZeroWidth)
-                            newEmote.IsZeroWidth = true;
-                        returnList.Add(newEmote);
-                    }
-                    catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound) { } // 7TV response references unavailable emotes for whatever reason
+                    TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                    if (emote.IsZeroWidth)
+                        newEmote.IsZeroWidth = true;
+                    returnList.Add(newEmote);
                     alreadyAdded.Add(emote.Code);
                 }
             }
