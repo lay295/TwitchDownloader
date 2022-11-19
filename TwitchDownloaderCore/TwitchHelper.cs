@@ -288,10 +288,15 @@ namespace TwitchDownloaderCore
                 {
                     if (alreadyAdded.Contains(emote.Code))
                         continue;
-                    TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
-                    if (emote.IsZeroWidth)
-                        newEmote.IsZeroWidth = true;
-                    returnList.Add(newEmote);
+
+                    try
+                    {
+                        TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        if (emote.IsZeroWidth)
+                            newEmote.IsZeroWidth = true;
+                        returnList.Add(newEmote);
+                    }
+                    catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound) { } // 7TV response references unavailable emotes for whatever reason
                     alreadyAdded.Add(emote.Code);
                 }
             }
