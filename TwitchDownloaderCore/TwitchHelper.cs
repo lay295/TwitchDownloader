@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
@@ -437,7 +438,9 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            List<string> emojiList = new List<string>(Directory.GetFiles(emojiFolder, "*.png"));
+            string[] emojiFiles = Directory.GetFiles(emojiFolder);
+            Regex emojiExtensions = new Regex(@"\.(png|PNG)");
+            List<string> emojiList = emojiFiles.Where(i => emojiExtensions.IsMatch(i)).ToList();
             foreach (var emojiPath in emojiList)
             {
                 SKBitmap emojiImage = SKBitmap.Decode(await File.ReadAllBytesAsync(emojiPath));
