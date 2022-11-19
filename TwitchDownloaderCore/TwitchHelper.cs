@@ -410,7 +410,7 @@ namespace TwitchDownloaderCore
             //Twemoji 14 has 3689 emoji images
             if (emojiCount < 3689)
             {
-                string emojiZipPath = Path.GetTempFileName();
+                string emojiZipPath = Path.Combine(emojiFolder, Path.GetRandomFileName());
                 byte[] emojiZipData = Resources.twemoji_14_0_0;
                 await File.WriteAllBytesAsync(emojiZipPath, emojiZipData);
                 using (ZipArchive archive = ZipFile.OpenRead(emojiZipPath))
@@ -429,6 +429,11 @@ namespace TwitchDownloaderCore
                             catch { }
                         }
                     }
+                }
+
+                if (File.Exists(emojiZipPath))
+                {
+                    File.Delete(emojiZipPath);
                 }
             }
 
