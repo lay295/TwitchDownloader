@@ -2,9 +2,9 @@ name: Build and Upload Release
  
 on: 
   push:
-    branches: [ master, new_ci_stuff ]
+    branches: [ master ]
   pull_request:
-    types: [opened, reopened]
+    types: [ opened, reopened ]
 
 jobs:
   
