@@ -117,7 +117,7 @@
 					<TextBox x:Name="textFfmpegInput" LostFocus="textFfmpegInput_LostFocus" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"></TextBox>
                     <TextBlock Text="Output Arguments" Margin="0,10,0,0" Foreground="{DynamicResource AppText}"></TextBlock>
 					<TextBox x:Name="textFfmpegOutput" LostFocus="textFfmpegOutput_LostFocus" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"></TextBox>
-					<Button HorizontalAlignment="Left" Content="Reset To Defaults" Margin="0,6,0,0" Click="Button_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"></Button>
+                    <Button HorizontalAlignment="Left" Content="Reset To Defaults" Margin="0,6,0,0" Click="Button_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"></Button>
 					<TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppText}">
                 Avaliable paramaters are: <Bold>{fps} {height} {width} {max_int} {save_path}</Bold>
                     </TextBlock>
@@ -135,10 +135,10 @@
         <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
 			<TextBlock Margin="3,8,3,3" Text="JSON File:" Foreground="{DynamicResource AppText}"/>
 			<TextBox x:Name="textJson" Margin="3" MinWidth="200" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-			<Button x:Name="btnBrowse" Style="{StaticResource ButtonInfo}" Margin="3" MinWidth="50" Content="Browse" Click="btnBrowse_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+			<Button x:Name="btnBrowse" Margin="3" MinWidth="50" Content="Browse" Click="btnBrowse_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </WrapPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
-			<hc:SplitButton x:Name="btnRender" Style="{StaticResource SplitButtonInfo}" Height="40" Width="120" Margin="0,6,0,0" Content="Render Chat" Click="SplitButton_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
+			<hc:SplitButton x:Name="btnRender" Height="40" Width="120" Margin="0,6,0,0" Content="Render Chat" Click="SplitButton_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
                         <MenuItem Header="Partial Render" Click="MenuItem_Click_1"/>

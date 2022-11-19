@@ -87,7 +87,7 @@
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom">
-            <hc:SplitButton x:Name="btnDownload" Style="{StaticResource SplitButtonInfo}" Height="40" Width="120" Content="Download" Click="SplitButton_Click" >
+            <hc:SplitButton x:Name="btnDownload" Height="40" Width="120" Content="Download" Click="SplitButton_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
                         <MenuItem x:Name="btnQueue" Header="Enqueue Download" Click="MenuItem_Click"/>
