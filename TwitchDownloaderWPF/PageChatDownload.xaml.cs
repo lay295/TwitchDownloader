@@ -211,7 +211,7 @@ namespace TwitchDownloaderWPF
 				options.DownloadFormat = DownloadFormat.Text;
 
 			options.Timestamp = true;
-			options.EmbedEmotes = (bool)checkEmbed.IsChecked;
+			options.EmbedData = (bool)checkEmbed.IsChecked;
 			options.BttvEmotes = (bool)checkBttvEmbed.IsChecked;
 			options.FfzEmotes = (bool)checkFfzEmbed.IsChecked;
 			options.StvEmotes = (bool)checkStvEmbed.IsChecked;

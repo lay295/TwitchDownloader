@@ -32,12 +32,10 @@ namespace TwitchDownloaderCLI
             }
 
             string[] preParsedArgs;
-            if (args.Any(x => x.Equals("-m") || x.Equals("--mode")))
+            if (args.Any(x => x is "-m" or "--mode" or "--embed-emotes"))
             {
-                // Old -m/--mode syntax was used, print an info message and convert to verb syntax
-                Console.WriteLine("[INFO] The program has switched from --mode <mode> to verbs (like \"git <verb>\"), consider using verbs instead." +
-                    " Run \"{0} help\" for more information.", processFileName);
-                preParsedArgs = PreParseArgs.Process(PreParseArgs.ConvertFromOldSyntax(args));
+                // A legacy syntax was used, convert to new syntax
+                preParsedArgs = PreParseArgs.Process(PreParseArgs.ConvertFromOldSyntax(args, processFileName));
             }
             else
             {

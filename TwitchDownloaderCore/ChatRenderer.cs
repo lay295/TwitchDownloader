@@ -48,10 +48,10 @@ namespace TwitchDownloaderCore
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Images" });
-            Task<List<ChatBadge>> badgeTask = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.emotes, offline: renderOptions.Offline));
-            Task<List<TwitchEmote>> emoteTask = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.emotes, offline: renderOptions.Offline));
-            Task<List<TwitchEmote>> emoteThirdTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.emotes, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, offline: renderOptions.Offline));
-            Task<List<CheerEmote>> cheerTask = Task.Run(() => TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.emotes, offline: renderOptions.Offline));
+            Task<List<ChatBadge>> badgeTask = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, offline: renderOptions.Offline));
+            Task<List<TwitchEmote>> emoteTask = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, offline: renderOptions.Offline));
+            Task<List<TwitchEmote>> emoteThirdTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, offline: renderOptions.Offline));
+            Task<List<CheerEmote>> cheerTask = Task.Run(() => TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, offline: renderOptions.Offline));
             Task<Dictionary<string, SKBitmap>> emojiTask = Task.Run(() => TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder));
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
@@ -932,7 +932,23 @@ namespace TwitchDownloaderCore
         }
         public async Task<ChatRoot> ParseJson()
         {
-            using (FileStream fs = new FileStream(renderOptions.InputFile, FileMode.Open, FileAccess.Read))
+            chatRoot = Task.Run(() => ParseJsonStatic(renderOptions.InputFile)).Result;
+
+            if (chatRoot.streamer == null)
+            {
+                chatRoot.streamer = new Streamer();
+                chatRoot.streamer.id = int.Parse(chatRoot.comments.First().channel_id);
+                chatRoot.streamer.name = await TwitchHelper.GetStreamerName(chatRoot.streamer.id);
+            }
+
+            return chatRoot;
+        }
+
+        public static async Task<ChatRoot> ParseJsonStatic(string inputJson)
+        {
+            ChatRoot chatRoot = new ChatRoot();
+
+            using (FileStream fs = new FileStream(inputJson, FileMode.Open, FileAccess.Read))
             {
                 using (var jsonDocument = JsonDocument.Parse(fs))
                 {
@@ -940,6 +956,7 @@ namespace TwitchDownloaderCore
                     {
                         chatRoot.streamer = streamerJson.Deserialize<Streamer>();
                     }
+
                     if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
                     {
                         if (videoJson.TryGetProperty("start", out JsonElement videoStartJson) && videoJson.TryGetProperty("end", out JsonElement videoEndJson))
@@ -947,22 +964,21 @@ namespace TwitchDownloaderCore
                             chatRoot.video = videoJson.Deserialize<VideoTime>();
                         }
                     }
-                    if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
+
+                    if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embedDataJson))
                     {
-                        chatRoot.emotes = emotesJson.Deserialize<Emotes>();
+                        chatRoot.embeddedData = embedDataJson.Deserialize<EmbeddedData>();
                     }
+                    else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
+                    {
+                        chatRoot.embeddedData = emotesJson.Deserialize<EmbeddedData>();
+                    }
+
                     if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
                     {
                         chatRoot.comments = commentsJson.Deserialize<List<Comment>>();
                     }
                 }
-            }
-
-            if (chatRoot.streamer == null)
-            {
-                chatRoot.streamer = new Streamer();
-                chatRoot.streamer.id = int.Parse(chatRoot.comments.First().channel_id);
-                chatRoot.streamer.name = await TwitchHelper.GetStreamerName(chatRoot.streamer.id);
             }
 
             return chatRoot;
