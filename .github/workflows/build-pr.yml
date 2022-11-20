@@ -1,4 +1,4 @@
-name: Build and Upload Release
+name: Build and Upload Pull Request
  
 on: 
   push:
