@@ -111,7 +111,7 @@ namespace TwitchDownloader
                                 chatOptions.DownloadFormat = DownloadFormat.Html;
                             else
                                 chatOptions.DownloadFormat = DownloadFormat.Text;
-                            chatOptions.EmbedEmotes = (bool)checkEmbed.IsChecked;
+                            chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
                             chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, vodPage.currentVideoTime, vodPage.textStreamer.Text) + "." + chatOptions.DownloadFormat);
 
                             if (downloadOptions.CropBeginning)
@@ -200,7 +200,7 @@ namespace TwitchDownloader
                             else
                                 chatOptions.DownloadFormat = DownloadFormat.Text;
                             chatOptions.TimeFormat = TimestampFormat.Relative;
-                            chatOptions.EmbedEmotes = (bool)checkEmbed.IsChecked;
+                            chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
                             chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text) + "." + chatOptions.FileExtension);
 
                             chatTask.DownloadOptions = chatOptions;
@@ -378,7 +378,7 @@ namespace TwitchDownloader
                                     downloadOptions.DownloadFormat = DownloadFormat.Html;
                                 else
                                     downloadOptions.DownloadFormat = DownloadFormat.Text;
-                                downloadOptions.EmbedEmotes = (bool)checkEmbed.IsChecked;
+                                downloadOptions.EmbedData = (bool)checkEmbed.IsChecked;
                                 downloadOptions.TimeFormat = TimestampFormat.Relative;
                                 downloadOptions.Id = dataList[i].Id;
                                 downloadOptions.CropBeginning = false;

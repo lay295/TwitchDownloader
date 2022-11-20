@@ -1,7 +1,11 @@
-﻿using SkiaSharp;
+﻿using NeoSmart.Unicode;
+using Newtonsoft.Json.Linq;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 
 namespace TwitchDownloaderCore.TwitchObjects
@@ -23,12 +27,23 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public string Name;
         public Dictionary<string, SKBitmap> Versions;
+        public Dictionary<string, byte[]> VersionsData;
         public ChatBadgeType Type;
 
-        public ChatBadge(string name, Dictionary<string, SKBitmap> versions)
+        public ChatBadge(string name, Dictionary<string, byte[]> versions)
         {
             Name = name;
-            Versions = versions;
+            Versions = new Dictionary<string, SKBitmap>();
+            VersionsData = versions;
+
+            foreach (var version in versions)
+            {
+                using MemoryStream ms = new MemoryStream(version.Value);
+                //For some reason, twitch has corrupted images sometimes :) for example
+                //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
+                SKBitmap badgeImage = SKBitmap.Decode(ms);
+                Versions.Add(version.Key, badgeImage);
+            }
 
             switch (name)
             {

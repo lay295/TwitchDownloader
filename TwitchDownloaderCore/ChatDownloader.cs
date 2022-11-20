@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+using NeoSmart.Unicode;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -324,19 +327,25 @@ namespace TwitchDownloaderCore
             comments = commentsSet.DistinctBy(x => x._id).ToList();
             chatRoot.comments = comments;
 
-            if (downloadOptions.EmbedEmotes && (downloadOptions.DownloadFormat == DownloadFormat.Json || downloadOptions.DownloadFormat == DownloadFormat.Html))
+            if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat == DownloadFormat.Json || downloadOptions.DownloadFormat == DownloadFormat.Html))
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Downloading + Embedding Emotes" });
-                chatRoot.emotes = new Emotes();
-                List<EmbedEmoteData> firstParty = new List<EmbedEmoteData>();
-                List<EmbedEmoteData> thirdParty = new List<EmbedEmoteData>();
+                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Downloading + Embedding Images" });
+                chatRoot.embeddedData = new EmbeddedData();
+                List<EmbedEmoteData> firstPartyReturnList = new List<EmbedEmoteData>();
+                List<EmbedEmoteData> thirdPartyReturnList = new List<EmbedEmoteData>();
+                List<EmbedChatBadge> badgesReturnList = new List<EmbedChatBadge>();
+                List<EmbedCheerEmote> bitsReturnList = new List<EmbedCheerEmote>();
 
                 string cacheFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader", "cache");
                 List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();
                 List<TwitchEmote> firstPartyEmotes = new List<TwitchEmote>();
+                List<ChatBadge> twitchBadges = new List<ChatBadge>();
+                List<CheerEmote> twitchBits = new List<CheerEmote>();
 
                 thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes);
                 firstPartyEmotes = await TwitchHelper.GetEmotes(comments, cacheFolder);
+                twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, cacheFolder);
+                twitchBits = await TwitchHelper.GetBits(cacheFolder, chatRoot.streamer.id.ToString());
 
                 foreach (TwitchEmote emote in thirdPartyEmotes)
                 {
@@ -347,7 +356,7 @@ namespace TwitchDownloaderCore
                     newEmote.name = emote.Name;
                     newEmote.width = emote.Width / emote.ImageScale;
                     newEmote.height = emote.Height / emote.ImageScale;
-                    thirdParty.Add(newEmote);
+                    thirdPartyReturnList.Add(newEmote);
                 }
                 foreach (TwitchEmote emote in firstPartyEmotes)
                 {
@@ -357,11 +366,38 @@ namespace TwitchDownloaderCore
                     newEmote.data = emote.ImageData;
                     newEmote.width = emote.Width / emote.ImageScale;
                     newEmote.height = emote.Height / emote.ImageScale;
-                    firstParty.Add(newEmote);
+                    firstPartyReturnList.Add(newEmote);
+                }
+                foreach (ChatBadge badge in twitchBadges)
+                {
+                    EmbedChatBadge newBadge = new EmbedChatBadge();
+                    newBadge.name = badge.Name;
+                    newBadge.versions = badge.VersionsData;
+                    badgesReturnList.Add(newBadge);
+                }
+                foreach (CheerEmote bit in twitchBits)
+                {
+                    EmbedCheerEmote newBit = new EmbedCheerEmote();
+                    newBit.prefix = bit.prefix;
+                    newBit.tierList = new Dictionary<int, EmbedEmoteData>();
+                    foreach (KeyValuePair<int, TwitchEmote> emotePair in bit.tierList)
+                    {
+                        EmbedEmoteData newEmote = new EmbedEmoteData();
+                        newEmote.id = emotePair.Value.Id;
+                        newEmote.imageScale = emotePair.Value.ImageScale;
+                        newEmote.data = emotePair.Value.ImageData;
+                        newEmote.name = emotePair.Value.Name;
+                        newEmote.width = emotePair.Value.Width / emotePair.Value.ImageScale;
+                        newEmote.height = emotePair.Value.Height / emotePair.Value.ImageScale;
+                        newBit.tierList.Add(emotePair.Key, newEmote);
+                    }
+                    bitsReturnList.Add(newBit);
                 }
 
-                chatRoot.emotes.thirdParty = thirdParty;
-                chatRoot.emotes.firstParty = firstParty;
+                chatRoot.embeddedData.thirdParty = thirdPartyReturnList;
+                chatRoot.embeddedData.firstParty = firstPartyReturnList;
+                chatRoot.embeddedData.twitchBadges = badgesReturnList;
+                chatRoot.embeddedData.twitchBits = bitsReturnList;
             }
 
             if (downloadOptions.DownloadFormat == DownloadFormat.Json)
@@ -415,9 +451,9 @@ namespace TwitchDownloaderCore
                 {
                     if (!thirdEmoteData.ContainsKey(item.Code))
                     {
-                        if (downloadOptions.EmbedEmotes)
+                        if (downloadOptions.EmbedData)
                         {
-                            EmbedEmoteData embedEmoteData = chatRoot.emotes.thirdParty.FirstOrDefault(x => x.id == item.Id);
+                            EmbedEmoteData embedEmoteData = chatRoot.embeddedData.thirdParty.FirstOrDefault(x => x.id == item.Id);
                             if (embedEmoteData != null)
                             {
                                 embedEmoteData.url = item.ImageUrl.Replace("[scale]", "1");
@@ -444,13 +480,13 @@ namespace TwitchDownloaderCore
                             finalString.AppendLine(HttpUtility.HtmlEncode(Path.GetFileNameWithoutExtension(downloadOptions.Filename)));
                             break;
                         case "/* [CUSTOM CSS] */":
-                            if (downloadOptions.EmbedEmotes)
+                            if (downloadOptions.EmbedData)
                             {
-                                foreach (var emote in chatRoot.emotes.firstParty)
+                                foreach (var emote in chatRoot.embeddedData.firstParty)
                                 {
                                     finalString.AppendLine(".first-" + emote.id + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(emote.data) + "\"); }");
                                 }
-                                foreach (var emote in chatRoot.emotes.thirdParty)
+                                foreach (var emote in chatRoot.embeddedData.thirdParty)
                                 {
                                     finalString.AppendLine(".third-" + emote.id + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(emote.data) + "\"); }");
                                 }
@@ -461,7 +497,7 @@ namespace TwitchDownloaderCore
                             {
                                 TimeSpan time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
                                 string timestamp = time.ToString(@"h\:mm\:ss");
-                                finalString.Append($"<pre class=\"comment-root\">[{timestamp}] <a href=\"https://www.twitch.tv/{comment.commenter.name}\" target=\"_blank\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? ($"{comment.commenter.display_name} ({comment.commenter.name})") : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(downloadOptions.EmbedEmotes, thirdEmoteData, chatRoot, comment)}</span></pre>\n");
+                                finalString.Append($"<pre class=\"comment-root\">[{timestamp}] <a href=\"https://www.twitch.tv/{comment.commenter.name}\" target=\"_blank\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? ($"{comment.commenter.display_name} ({comment.commenter.name})") : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(downloadOptions.EmbedData, thirdEmoteData, chatRoot, comment)}</span></pre>\n");
                             }
                             break;
                         default:
@@ -533,7 +569,7 @@ namespace TwitchDownloaderCore
                 }
                 else
                 {
-                    if (embedEmotes && chatRoot.emotes.firstParty.Any(x => x.id == fragment.emoticon.emoticon_id))
+                    if (embedEmotes && chatRoot.embeddedData.firstParty.Any(x => x.id == fragment.emoticon.emoticon_id))
                     {
                         message.Append($"<img class=\"emote-image first-{fragment.emoticon.emoticon_id}\" title=\"{fragment.text}\"><div class=\"invis-text\">{fragment.text}</div> ");
                     }

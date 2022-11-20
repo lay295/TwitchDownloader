@@ -118,5 +118,6 @@ namespace TwitchDownloaderCore.Options
                 return (int)(24 * ReferenceScale);
             }
         }
+        public bool Offline { get; set; }
     }
 }

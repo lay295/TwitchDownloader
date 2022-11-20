@@ -5,6 +5,7 @@ A cross platform command line tool that can do the main functions of the GUI pro
  - [Arguments for mode clipdownload](#arguments-for-mode-clipdownload)
  - [Arguments for mode chatdownload](#arguments-for-mode-chatdownload)
  - [Arguments for mode chatrender](#arguments-for-mode-chatrender)
+ - [Arguments for mode chatupdate](#arguments-for-mode-chatupdate)
  - [Arguments for mode ffmpeg](#arguments-for-mode-ffmpeg)
  - [Arguments for mode cache](#arguments-for-mode-cache)
  - [Example commands](#example-commands)
@@ -73,17 +74,17 @@ Time in seconds to crop beginning. For example if I had a 10 second stream but o
 **-e/-\-ending**
 Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
-**-E/-\-embed-emotes**
-(Default: false) Embeds emotes into the JSON file so in the future when an emote is removed from Twitch or a 3rd party, it will still render correctly. Useful for archival purposes, file size will be larger.
+**-E/-\-embed-images**
+(Default: false) Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.
 
 **-\-bttv**
-(Default: true) BTTV emote embedding. Requires `-E / --embed-emotes`.
+(Default: true) BTTV emote embedding. Requires `-E / --embed-images`.
 
 **-\-ffz**
-(Default: true) FFZ emote embedding. Requires `-E / --embed-emotes`.
+(Default: true) FFZ emote embedding. Requires `-E / --embed-images`.
 
 **-\-stv**
-(Default: true) 7TV emote embedding. Requires `-E / --embed-emotes`.
+(Default: true) 7TV emote embedding. Requires `-E / --embed-images`.
 
 **-\-timestamp**
 (Default: false) Enable timestamps
@@ -162,7 +163,7 @@ File the program will output to.
 (Default: 0.2) Time in seconds to update chat render output.
 
 **-\-input-args**
- (Default: -framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -) Input (pass1) arguments for ffmpeg chat render.
+(Default: -framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -) Input (pass1) arguments for ffmpeg chat render.
 
 **-\-output-args**
 (Default: -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}") Output (pass2) arguments for ffmpeg chat render.
@@ -182,8 +183,38 @@ Predictions = `32`,
 NoAudioVisual = `64`,
 PrimeGaming = `128`
 
+**-\-offline**
+Render completely offline, using only resources embedded emotes, badges, and bits in the input json.
+
 **-\-ffmpeg-path**
 Path to ffmpeg executable.
+
+**-\-temp-path**
+Path to temporary folder for cache.
+
+
+## Arguments for mode chatupdate
+
+**-i/-\-input (REQUIRED)**
+Path to input file. Valid extensions are json
+
+**-o/-\-output (REQUIRED)**
+Path to output file. Extension should match the input.
+
+**-E/-\-embed-missing**
+(Default: true) Embed missing emotes, badges, and bits. Already embedded images will be untouched.
+
+**-U/-\-update-old**
+(Default: false) Update old emotes, badges, and bits to the current. All embedded images will be overwritten!
+
+**-\-bttv**
+(Default: true) Enable embedding BTTV emotes.
+
+**-\-ffz**
+(Default: true) Enable embedding FFZ emotes.
+
+**-\-stv**
+(Default: true) Enable embedding 7TV emotes.
 
 **-\-temp-path**
 Path to temporary folder for cache.
@@ -219,7 +250,7 @@ Download a Chat (plain text with timestamps)
     TwitchDownloaderCLI chatdownload --id 612942303 --timestamp-format Relative -o chat.txt
 Download a Chat (JSON with embeded emotes from Twitch and Bttv)
 
-    TwitchDownloaderCLI chatdownload --id 612942303 --embed-emotes --bttv=true --ffz=false --stv=false -o chat.json
+    TwitchDownloaderCLI chatdownload --id 612942303 --embed-images --bttv=true --ffz=false --stv=false -o chat.json
 Render a chat with defaults
 
     TwitchDownloaderCLI chatrender -i chat.json -o chat.mp4

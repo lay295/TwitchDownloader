@@ -86,7 +86,8 @@ namespace TwitchDownloaderWPF
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath,
                 SubMessages = (bool)checkSub.IsChecked,
-                ChatBadges = (bool)checkBadge.IsChecked
+                ChatBadges = (bool)checkBadge.IsChecked,
+                Offline = false
             };
             foreach (var item in comboBadges.SelectedItems)
             {

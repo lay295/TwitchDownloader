@@ -33,7 +33,7 @@ namespace TwitchDownloaderCLI.Modes
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
                 Timestamp = inputOptions.Timestamp,
-                EmbedEmotes = inputOptions.EmbedEmotes,
+                EmbedData = inputOptions.EmbedData,
                 Filename = inputOptions.OutputFile,
                 TimeFormat = inputOptions.TimeFormat,
                 ConnectionCount = inputOptions.ChatConnections,

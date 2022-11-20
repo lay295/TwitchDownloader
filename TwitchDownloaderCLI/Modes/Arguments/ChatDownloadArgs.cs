@@ -19,16 +19,16 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('e', "ending", HelpText = "Time in seconds to crop ending.")]
         public int CropEndingTime { get; set; }
         
-        [Option('E', "embed-emotes", Default = false, HelpText = "Embed emotes into the chat download.")]
-        public bool EmbedEmotes { get; set; }
+        [Option('E', "embed-images", Default = false, HelpText = "Embed first party emotes, badges, and cheermotes into the chat download for offline rendering.")]
+        public bool EmbedData { get; set; }
 
-        [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download. Requires -E / --embed-emotes!")]
+        [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download. Requires -E / --embed-images!")]
         public bool? BttvEmotes { get; set; }
         
-        [Option("ffz", Default = true, HelpText = "Enable FFZ embedding in chat download. Requires -E / --embed-emotes!")]
+        [Option("ffz", Default = true, HelpText = "Enable FFZ embedding in chat download. Requires -E / --embed-images!")]
         public bool? FfzEmotes { get; set; }
         
-        [Option("stv", Default = true, HelpText = "Enable 7tv embedding in chat download. Requires -E / --embed-emotes!")]
+        [Option("stv", Default = true, HelpText = "Enable 7tv embedding in chat download. Requires -E / --embed-images!")]
         public bool? StvEmotes { get; set; }
 
         [Option("timestamp", Default = false, HelpText = "Enable timestamps for .txt chat downloads.")]
