@@ -47,7 +47,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build Windows GUI
-      run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
+      run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
     
     - name: Download File To Workspace
       # You may pin to the exact commit or the version.
