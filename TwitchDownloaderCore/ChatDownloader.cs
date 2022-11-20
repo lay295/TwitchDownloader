@@ -70,7 +70,7 @@ namespace TwitchDownloaderCore
                     {
                         foreach (var comment in commentResponse.comments)
                         {
-                            if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
+                            if (latestMessage < videoEnd && comment.content_offset_seconds >= videoStart)
                                 comments.Add(comment);
 
                             latestMessage = comment.content_offset_seconds;
@@ -554,7 +554,7 @@ namespace TwitchDownloaderCore
     {
         public int Compare(Comment x, Comment y)
         {
-            return x.content_offset_seconds.CompareTo(y.content_offset_seconds);
+            return x.content_offset_seconds.CompareTo(y.content_offset_seconds) + 1;
         }
     }
 }
