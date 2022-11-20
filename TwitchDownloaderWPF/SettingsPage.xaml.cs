@@ -43,6 +43,7 @@ namespace TwitchDownloader
 			textClipTemplate.Text = Settings.Default.TemplateClip;
 			textChatTemplate.Text = Settings.Default.TemplateChat;
 			checkDonation.IsChecked = Settings.Default.HideDonation;
+			checkVerboseErrors.IsChecked = Settings.Default.VerboseErrors;
 
 			comboTheme.Items.Add("System");
 			string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
@@ -92,6 +93,7 @@ namespace TwitchDownloader
 			Settings.Default.TemplateChat = textChatTemplate.Text;
 			Settings.Default.TempPath = textTempPath.Text;
 			Settings.Default.HideDonation = (bool)checkDonation.IsChecked;
+			Settings.Default.VerboseErrors= (bool)checkVerboseErrors.IsChecked;
 			Settings.Default.Save();
 		}
 

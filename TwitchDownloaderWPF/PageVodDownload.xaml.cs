@@ -72,10 +72,10 @@ namespace TwitchDownloaderWPF
                 currentVideoId = videoId;
                 try
                 {
-                    Task<GqlVideoResponse> taskInfo = TwitchHelper.GetVideoInfo(videoId);
+                    Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
                     Task<JObject> taskAccessToken = TwitchHelper.GetVideoToken(videoId, textOauth.Text);
-                    await Task.WhenAll(taskInfo, taskAccessToken);
-                    string thumbUrl = taskInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
+                    await Task.WhenAll(taskVideoInfo, taskAccessToken);
+                    string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
                     Task<BitmapImage> thumbImage = InfoHelper.GetThumb(thumbUrl);
                     Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["value"].ToString(), taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["signature"].ToString());
                     await taskPlaylist;
@@ -109,15 +109,24 @@ namespace TwitchDownloaderWPF
 
                     if (!thumbImage.IsFaulted)
                         imgThumbnail.Source = thumbImage.Result;
-                    TimeSpan vodLength = TimeSpan.FromSeconds(taskInfo.Result.data.video.lengthSeconds);
-                    textStreamer.Text = taskInfo.Result.data.video.owner.displayName;
-                    textTitle.Text = taskInfo.Result.data.video.title;
-                    textCreatedAt.Text = taskInfo.Result.data.video.createdAt.ToString();
-                    currentVideoTime = taskInfo.Result.data.video.createdAt.ToLocalTime();
+                    TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
+                    textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
+                    textTitle.Text = taskVideoInfo.Result.data.video.title;
+                    textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToString();
+                    currentVideoTime = taskVideoInfo.Result.data.video.createdAt.ToLocalTime();
+                    Regex urlTimecodeRegex = new Regex(@"\?t=(\d?\dh)(\d?\dm)(\d?\ds)"); // ?t=##h##m##s
+                    Match urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
+                    if (urlTimecodeMatch.Success)
+                    {
+                        checkStart.IsChecked = true;
+                        numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].Value[..urlTimecodeMatch.Groups[1].ToString().IndexOf('h')]);
+                        numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
+                        numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
+                    }
                     numEndHour.Value = (int)vodLength.TotalHours;
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
-                    labelLength.Text = String.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
+                    labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
 
                     SetEnabled(true);
                 }
@@ -126,6 +135,10 @@ namespace TwitchDownloaderWPF
                     btnGetInfo.IsEnabled = true;
                     AppendLog("ERROR: " + ex.Message);
                     MessageBox.Show("Unable to get the video information." + Environment.NewLine + "Please make sure the video ID is correct and try again.", "Unable To Fetch Video Info", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
             else
@@ -188,27 +201,25 @@ namespace TwitchDownloaderWPF
         {
             if (text.All(Char.IsDigit))
             {
-                int number;
-                bool success = Int32.TryParse(text, out number);
-                if (success)
+                if (int.TryParse(text, out int number))
                     return number;
                 else
                     return -1;
             }
             else if (text.Contains("twitch.tv/videos/"))
             {
-                int number;
                 //Extract just the numbers from the URL, also remove query string
                 Uri url = new UriBuilder(text).Uri;
                 string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
-                bool success = Int32.TryParse(Regex.Match(path, @"\d+").Value, out number);
-                if (success)
+                if (int.TryParse(Regex.Match(path, @"\d+").Value, out int number))
                     return number;
                 else
                     return -1;
             }
             else
+            {
                 return -1;
+            }
         }
 
         public bool ValidateInput()
