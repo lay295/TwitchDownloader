@@ -97,10 +97,24 @@ public class EmbedEmoteData
     public int height { get; set; }
 }
 
+public class EmbedChatBadge
+{
+    public string name { get; set; }
+    public Dictionary<string, byte[]> versions { get; set; }
+}
+
+public class EmbedCheerEmote
+{
+    public string prefix { get; set; }
+    public Dictionary<int, EmbedEmoteData> tierList { get; set; }
+}
+
 public class Emotes
 {
     public List<EmbedEmoteData> thirdParty { get; set; }
     public List<EmbedEmoteData> firstParty { get; set; }
+    public List<EmbedChatBadge> twitchBadges { get; set; }
+    public List<EmbedCheerEmote> twitchBits { get; set; }
 }
 
 public class CommentResponse

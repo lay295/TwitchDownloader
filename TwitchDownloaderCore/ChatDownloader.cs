@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using NeoSmart.Unicode;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using System;
@@ -333,13 +334,19 @@ namespace TwitchDownloaderCore
                 chatRoot.emotes = new Emotes();
                 List<EmbedEmoteData> firstParty = new List<EmbedEmoteData>();
                 List<EmbedEmoteData> thirdParty = new List<EmbedEmoteData>();
+                List<EmbedChatBadge> badges = new List<EmbedChatBadge>();
+                List<EmbedCheerEmote> bits = new List<EmbedCheerEmote>();
 
                 string cacheFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader", "cache");
                 List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();
                 List<TwitchEmote> firstPartyEmotes = new List<TwitchEmote>();
+                List<ChatBadge> twitchBadges = new List<ChatBadge>();
+                List<CheerEmote> twitchBits = new List<CheerEmote>();
 
                 thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes);
                 firstPartyEmotes = await TwitchHelper.GetEmotes(comments, cacheFolder);
+                twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, cacheFolder);
+                twitchBits = await TwitchHelper.GetBits(cacheFolder, chatRoot.streamer.id.ToString());
 
                 foreach (TwitchEmote emote in thirdPartyEmotes)
                 {
@@ -362,9 +369,36 @@ namespace TwitchDownloaderCore
                     newEmote.height = emote.Height / emote.ImageScale;
                     firstParty.Add(newEmote);
                 }
+                foreach (ChatBadge badge in twitchBadges)
+                {
+                    EmbedChatBadge newBadge = new EmbedChatBadge();
+                    newBadge.name = badge.Name;
+                    newBadge.versions = badge.VersionsData;
+                    badges.Add(newBadge);
+                }
+                foreach (CheerEmote bit in twitchBits)
+                {
+                    EmbedCheerEmote newBit = new EmbedCheerEmote();
+                    newBit.prefix = bit.prefix;
+                    newBit.tierList = new Dictionary<int, EmbedEmoteData>();
+                    foreach (KeyValuePair<int, TwitchEmote> emotePair in bit.tierList)
+                    {
+                        EmbedEmoteData newEmote = new EmbedEmoteData();
+                        newEmote.id = emotePair.Value.Id;
+                        newEmote.imageScale = emotePair.Value.ImageScale;
+                        newEmote.data = emotePair.Value.ImageData;
+                        newEmote.name = emotePair.Value.Name;
+                        newEmote.width = emotePair.Value.Width / emotePair.Value.ImageScale;
+                        newEmote.height = emotePair.Value.Height / emotePair.Value.ImageScale;
+                        newBit.tierList.Add(emotePair.Key, newEmote);
+                    }
+                    bits.Add(newBit);
+                }
 
                 chatRoot.emotes.thirdParty = thirdParty;
                 chatRoot.emotes.firstParty = firstParty;
+                chatRoot.emotes.twitchBadges = badges;
+                chatRoot.emotes.twitchBits = bits;
             }
 
             if (downloadOptions.DownloadFormat == DownloadFormat.Json)

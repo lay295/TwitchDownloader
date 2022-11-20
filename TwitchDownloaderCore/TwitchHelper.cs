@@ -357,6 +357,8 @@ namespace TwitchDownloaderCore
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
 
+            // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
+            // TODO: would want to make this configurable as we do for emotes though...
             JObject globalBadges = JObject.Parse(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display"));
             JObject subBadges = JObject.Parse(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display"));
 
@@ -368,7 +370,7 @@ namespace TwitchDownloaderCore
             {
                 JProperty jBadgeProperty = badge.ToObject<JProperty>();
                 string name = jBadgeProperty.Name;
-                Dictionary<string, SKBitmap> versions = new Dictionary<string, SKBitmap>();
+                Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
 
                 foreach (var version in badge.First["versions"])
                 {
@@ -381,11 +383,7 @@ namespace TwitchDownloaderCore
                         string[] id_parts = downloadUrl.Split('/');
                         string id = id_parts[id_parts.Length - 2];
                         byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
-                        using MemoryStream ms = new MemoryStream(bytes);
-                        //For some reason, twitch has corrupted images sometimes :) for example
-                        //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
-                        SKBitmap badgeImage = SKBitmap.Decode(ms);
-                        versions.Add(versionString, badgeImage);
+                        versions.Add(versionString, bytes);
                     }
                     catch (HttpRequestException)
                     { }
