@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -131,7 +132,7 @@ namespace TwitchDownloaderCore
                         BTTV.Merge(bttvChannel["channelEmotes"]);
                         BTTV.Merge(bttvChannel["sharedEmotes"]);
                     }
-                    catch { }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
 
                 foreach (var emote in BTTV)
@@ -155,7 +156,7 @@ namespace TwitchDownloaderCore
                     {
                         FFZ.Merge(JArray.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/users/twitch/" + streamerId)));
                     }
-                    catch { }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
 
                 foreach (var emote in FFZ)
@@ -181,7 +182,7 @@ namespace TwitchDownloaderCore
                         JObject streamerEmoteObject = JObject.Parse(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
                         stvEmotes.Merge((JArray)streamerEmoteObject["emote_set"]["emotes"]);
                     }
-                    catch { }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
 
                 foreach (var stvEmote in stvEmotes)
@@ -239,7 +240,7 @@ namespace TwitchDownloaderCore
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emoteData.name);
                     }
-                    catch { }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
             }
 
@@ -272,7 +273,7 @@ namespace TwitchDownloaderCore
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emote.Code);
                     }
-                    catch { }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
             }
 
@@ -291,7 +292,7 @@ namespace TwitchDownloaderCore
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emote.Code);
                     }
-                    catch { }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
             }
 
@@ -312,7 +313,7 @@ namespace TwitchDownloaderCore
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emote.Code);
                     }
-                    catch { }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
             }
 
@@ -369,7 +370,7 @@ namespace TwitchDownloaderCore
                                 alreadyAdded.Add(id);
                                 returnList.Add(newEmote);
                             }
-                            catch (HttpRequestException ex) when (ex.Message.Contains("404"))
+                            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                             {
                                 failedEmotes.Add(id);
                             }
@@ -419,25 +420,24 @@ namespace TwitchDownloaderCore
                 if (alreadyAdded.Contains(name))
                     continue;
 
-                Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
-                foreach (var version in badge.First["versions"])
+                try
                 {
-                    JProperty jVersionProperty = version.ToObject<JProperty>();
-                    string versionString = jVersionProperty.Name;
-                    string downloadUrl = version.First["image_url_2x"].ToString();
-
-                    try
+                    Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
+                    foreach (var version in badge.First["versions"])
                     {
+                        JProperty jVersionProperty = version.ToObject<JProperty>();
+                        string versionString = jVersionProperty.Name;
+                        string downloadUrl = version.First["image_url_2x"].ToString();
+
                         string[] id_parts = downloadUrl.Split('/');
                         string id = id_parts[id_parts.Length - 2];
                         byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
                         versions.Add(versionString, bytes);
                     }
-                    catch (HttpRequestException)
-                    { }
-                }
 
-                returnList.Add(new ChatBadge(name, versions));
+                    returnList.Add(new ChatBadge(name, versions));
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
             }
 
             return returnList;
@@ -556,17 +556,19 @@ namespace TwitchDownloaderCore
                         string prefix = node.prefix;
                         if (alreadyAdded.Contains(prefix))
                             continue;
-
-                        List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
-                        CheerEmote newEmote = new CheerEmote() { prefix = prefix, tierList = tierList };
-                        foreach (Tier tier in node.tiers)
+                        try
                         {
-                            int minBits = tier.bits;
-                            string url = templateURL.Replace("PREFIX", node.prefix.ToLower()).Replace("BACKGROUND", "dark").Replace("ANIMATION", "animated").Replace("TIER", tier.bits.ToString()).Replace("SCALE.EXTENSION", "2.gif");
-                            TwitchEmote emote = new TwitchEmote(await GetImage(bitFolder, url, node.id + tier.bits, "2", "gif"), EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
-                            tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
-                        }
-                        returnList.Add(newEmote);
+                            List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
+                            CheerEmote newEmote = new CheerEmote() { prefix = prefix, tierList = tierList };
+                            foreach (Tier tier in node.tiers)
+                            {
+                                int minBits = tier.bits;
+                                string url = templateURL.Replace("PREFIX", node.prefix.ToLower()).Replace("BACKGROUND", "dark").Replace("ANIMATION", "animated").Replace("TIER", tier.bits.ToString()).Replace("SCALE.EXTENSION", "2.gif");
+                                TwitchEmote emote = new TwitchEmote(await GetImage(bitFolder, url, node.id + tier.bits, "2", "gif"), EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
+                                tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
+                            }
+                            returnList.Add(newEmote);
+                        } catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                     }
                 }
             }
