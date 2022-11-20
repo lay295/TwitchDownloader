@@ -61,6 +61,7 @@ namespace TwitchDownloaderCLI.Modes
 
             string cacheFolder = Path.Combine(string.IsNullOrWhiteSpace(inputOptions.TempFolder) ? Path.GetTempPath() : inputOptions.TempFolder, "TwitchDownloader", "chatupdatecache");
 
+            // Clear working directory if it already exists
             if (Directory.Exists(cacheFolder))
                 Directory.Delete(cacheFolder, true);
 
@@ -71,7 +72,7 @@ namespace TwitchDownloaderCLI.Modes
             }
             Console.WriteLine("Input third party emote count: " + chatRoot.embeddedData.thirdParty.Count);
             List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();
-            thirdPartyEmotes = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder, bttv: inputOptions.BttvEmotes, ffz: inputOptions.FfzEmotes, stv: inputOptions.StvEmotes, embededData: chatRoot.embeddedData)).Result;
+            thirdPartyEmotes = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder, bttv: inputOptions.BttvEmotes, ffz: inputOptions.FfzEmotes, stv: inputOptions.StvEmotes, embeddedData: chatRoot.embeddedData)).Result;
             foreach (TwitchEmote emote in thirdPartyEmotes)
             {
                 EmbedEmoteData newEmote = new EmbedEmoteData();
@@ -92,7 +93,7 @@ namespace TwitchDownloaderCLI.Modes
             }
             Console.WriteLine("Input first party emote count: " + chatRoot.embeddedData.firstParty.Count);
             List<TwitchEmote> firstPartyEmotes = new List<TwitchEmote>();
-            firstPartyEmotes = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, cacheFolder, embededData: chatRoot.embeddedData)).Result;
+            firstPartyEmotes = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, cacheFolder, embeddedData: chatRoot.embeddedData)).Result;
             foreach (TwitchEmote emote in firstPartyEmotes)
             {
                 EmbedEmoteData newEmote = new EmbedEmoteData();
@@ -112,7 +113,7 @@ namespace TwitchDownloaderCLI.Modes
             }
             Console.WriteLine("Input twitch badge count: " + chatRoot.embeddedData.twitchBadges.Count);
             List<ChatBadge> twitchBadges = new List<ChatBadge>();
-            twitchBadges = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, cacheFolder, embededData: chatRoot.embeddedData)).Result;
+            twitchBadges = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, cacheFolder, embeddedData: chatRoot.embeddedData)).Result;
             foreach (ChatBadge badge in twitchBadges)
             {
                 EmbedChatBadge newBadge = new EmbedChatBadge();
@@ -129,7 +130,7 @@ namespace TwitchDownloaderCLI.Modes
             }
             Console.WriteLine("Input twitch bit count: " + chatRoot.embeddedData.twitchBits.Count);
             List<CheerEmote> twitchBits = new List<CheerEmote>();
-            twitchBits = Task.Run(() => TwitchHelper.GetBits(cacheFolder, chatRoot.streamer.id.ToString(), embededData: chatRoot.embeddedData)).Result;
+            twitchBits = Task.Run(() => TwitchHelper.GetBits(cacheFolder, chatRoot.streamer.id.ToString(), embeddedData: chatRoot.embeddedData)).Result;
             foreach (CheerEmote bit in twitchBits)
             {
                 EmbedCheerEmote newBit = new EmbedCheerEmote();
@@ -161,6 +162,7 @@ namespace TwitchDownloaderCLI.Modes
                 }
             }
 
+            // Clear our working directory, it's highly unlikely we would reuse it anyways
             if (Directory.Exists(cacheFolder))
                 Directory.Delete(cacheFolder, true);
         }
