@@ -197,7 +197,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore TwitchDownloaderCLI
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=None -p:DebugSymbols=false
       
     - name: Zip Release
       uses: vimtor/action-zip@v1
