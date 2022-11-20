@@ -48,10 +48,10 @@ namespace TwitchDownloaderCore
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Images" });
-            Task<List<ChatBadge>> badgeTask = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.emotes));
-            Task<List<TwitchEmote>> emoteTask = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.emotes));
-            Task<List<TwitchEmote>> emoteThirdTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.emotes, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes));
-            Task<List<CheerEmote>> cheerTask = Task.Run(() => TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.emotes));
+            Task<List<ChatBadge>> badgeTask = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.emotes, offline: renderOptions.Offline));
+            Task<List<TwitchEmote>> emoteTask = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.emotes, offline: renderOptions.Offline));
+            Task<List<TwitchEmote>> emoteThirdTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.emotes, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, offline: renderOptions.Offline));
+            Task<List<CheerEmote>> cheerTask = Task.Run(() => TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.emotes, offline: renderOptions.Offline));
             Task<Dictionary<string, SKBitmap>> emojiTask = Task.Run(() => TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder));
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);

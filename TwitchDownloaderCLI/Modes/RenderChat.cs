@@ -58,7 +58,8 @@ namespace TwitchDownloaderCLI.Modes
                 TempFolder = inputOptions.TempFolder,
                 SubMessages = (bool)inputOptions.SubMessages,
                 ChatBadges = (bool)inputOptions.ChatBadges,
-                Timestamp = inputOptions.Timestamp
+                Timestamp = inputOptions.Timestamp,
+                Offline = (bool)inputOptions.Offline,
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)

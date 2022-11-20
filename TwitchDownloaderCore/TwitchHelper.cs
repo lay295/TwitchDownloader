@@ -223,11 +223,12 @@ namespace TwitchDownloaderCore
 
             return emoteReponse;
         }
-        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool bttv = true, bool ffz = true, bool stv = true)
+        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool bttv = true, bool ffz = true, bool stv = true, bool offline = false)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
 
+            // Load our embedded data from file
             if (embededEmotes != null && embededEmotes.thirdParty != null)
             {
                 foreach (EmbedEmoteData emoteData in embededEmotes.thirdParty)
@@ -242,8 +243,11 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            // TODO: RETURN HERE IF IN OFFLINE MODE!
-            return returnList;
+            // Directly return if we are in offline, no need for a network request
+            if (offline)
+            {
+                return returnList;
+            }
 
             string bttvFolder = Path.Combine(cacheFolder, "bttv");
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
@@ -303,7 +307,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, Emotes embededEmotes = null)
+        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, Emotes embededEmotes = null, bool offline = false)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -313,6 +317,7 @@ namespace TwitchDownloaderCore
             if (!Directory.Exists(emoteFolder))
                 TwitchHelper.CreateDirectory(emoteFolder);
 
+            // Load our embedded emotes
             if (embededEmotes != null && embededEmotes.firstParty != null)
             {
                 foreach (EmbedEmoteData emoteData in embededEmotes.firstParty)
@@ -327,8 +332,11 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            // TODO: RETURN HERE IF IN OFFLINE MODE!
-            return returnList;
+            // Directly return if we are in offline, no need for a network request
+            if (offline)
+            {
+                return returnList;
+            }
 
             foreach (var comment in comments)
             {
@@ -361,11 +369,12 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder, Emotes embededEmotes = null)
+        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool offline = false)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
             List<string> alreadyAdded = new List<string>();
 
+            // Load our embedded data from file
             if (embededEmotes != null && embededEmotes.twitchBadges != null)
             {
                 foreach (EmbedChatBadge data in embededEmotes.twitchBadges)
@@ -376,8 +385,11 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            // TODO: RETURN HERE IF IN OFFLINE MODE!
-            return returnList;
+            // Directly return if we are in offline, no need for a network request
+            if (offline)
+            {
+                return returnList;
+            }
 
             // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
             // TODO: would want to make this configurable as we do for emotes though...
@@ -464,11 +476,12 @@ namespace TwitchDownloaderCore
             return returnCache;
         }
 
-        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "", Emotes embededEmotes = null)
+        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "", Emotes embededEmotes = null, bool offline = false)
         {
             List<CheerEmote> returnList = new List<CheerEmote>();
             List<string> alreadyAdded = new List<string>();
 
+            // Load our embedded data from file
             if (embededEmotes != null && embededEmotes.twitchBits != null)
             {
                 foreach (EmbedCheerEmote data in embededEmotes.twitchBits)
@@ -485,8 +498,11 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            // TODO: RETURN HERE IF IN OFFLINE MODE!
-            return returnList;
+            // Directly return if we are in offline, no need for a network request
+            if (offline)
+            {
+                return returnList;
+            }
 
             var request = new HttpRequestMessage()
             {

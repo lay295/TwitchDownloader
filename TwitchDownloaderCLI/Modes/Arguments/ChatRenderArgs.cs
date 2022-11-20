@@ -86,5 +86,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
+
+        [Option("offline", Default = false, HelpText = "Enable to render without pulling latest emotes, badges, and bits.")]
+        public bool Offline { get; set; }
     }
 }
