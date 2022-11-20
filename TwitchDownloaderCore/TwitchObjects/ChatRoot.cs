@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -109,7 +108,7 @@ public class EmbedCheerEmote
     public Dictionary<int, EmbedEmoteData> tierList { get; set; }
 }
 
-public class Emotes
+public class EmbeddedData
 {
     public List<EmbedEmoteData> thirdParty { get; set; }
     public List<EmbedEmoteData> firstParty { get; set; }
@@ -132,5 +131,5 @@ public class ChatRoot
     [JsonPropertyOrder(2)]
     public List<Comment> comments { get; set; }
     [JsonPropertyOrder(3)]
-    public Emotes emotes { get; set; }
+    public EmbeddedData embeddedData { get; set; }
 }

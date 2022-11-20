@@ -81,13 +81,13 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("badge-filter", Default = 0, HelpText = "Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, 6 = no broadcaster or moderator badges.\r\nKey: Other = 1, Broadcaster = 2, Moderator = 4, VIP = 8, Subscriber = 16, Predictions = 32, NoAudio/NoVideo = 64, PrimeGaming = 128")]
         public int BadgeFilterMask { get; set; }
 
+        [Option("offline", Default = false, HelpText = "Render completely offline, using only resources embedded emotes, badges, and bits in the input json.")]
+        public bool Offline { get; set; }
+
         [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]
         public string FfmpegPath { get; set; }
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
-
-        [Option("offline", Default = false, HelpText = "Enable to render without pulling latest emotes, badges, and bits.")]
-        public bool Offline { get; set; }
     }
 }

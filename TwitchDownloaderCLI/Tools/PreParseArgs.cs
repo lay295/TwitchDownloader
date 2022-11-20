@@ -1,4 +1,8 @@
-﻿namespace TwitchDownloaderCLI.Tools
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace TwitchDownloaderCLI.Tools
 {
     internal static class PreParseArgs
     {
@@ -10,30 +14,50 @@
         }
 
         /// <summary>
-        /// Converts an argument array that uses the old -m/--mode syntax to verb syntax
+        /// Converts an argument array that uses any legacy syntax to the current syntax
         /// </summary>
         /// <param name="args"></param>
-        /// <returns>The same <paramref name="args"/> array but using a verb instead of -m</returns>
-        internal static string[] ConvertFromOldSyntax(string[] args)
+        /// <returns>The same <paramref name="args"/> array but using current syntax instead
+        internal static string[] ConvertFromOldSyntax(string[] args, string processFileName)
         {
             int argsLength = args.Length;
-            string[] processedArgs = new string[argsLength - 1];
+            List<string> processedArgs = args.ToList();
 
-            int j = 1;
-            for (int i = 0; i < argsLength; i++)
+            if (args.Any(x => x.Equals("--embed-emotes")))
             {
-                if (args[i].Equals("-m") || args[i].Equals("--mode"))
+                Console.WriteLine("[INFO] The program has switched from --embed-emotes to --embed-images OR -E, consider using those instead. Run \'{0} help\' for more information.", processFileName);
+                for (int i = 0; i < argsLength; i++)
                 {
-                    // Copy the runmode to the verb position
-                    processedArgs[0] = args[i + 1];
-                    i++;
-                    continue;
+                    if (processedArgs[i].Equals("--embed-emotes"))
+                    {
+                        processedArgs[i] = "-E";
+                        break;
+                    }
                 }
-                processedArgs[j] = args[i];
-                j++;
             }
 
-            return processedArgs;
+            // This must always be performed last
+            if (args.Any(x => x.Equals("-m") || x.Equals("--mode")))
+            {
+                Console.WriteLine("[INFO] The program has switched from --mode <mode> to verbs (like \'git <verb>\'), consider using verbs instead. Run \'{0} help\' for more information.", processFileName);
+                int j = 1;
+                for (int i = 0; i < argsLength; i++)
+                {
+                    if (processedArgs[i].Equals("-m") || processedArgs[i].Equals("--mode"))
+                    {
+                        // Copy the runmode to the verb position
+                        processedArgs[0] = processedArgs[i + 1];
+                        i++;
+                        continue;
+                    }
+                    processedArgs[j] = processedArgs[i];
+                    j++;
+                }
+                // Remove last element as it will be a duplicate of second last element
+                processedArgs.RemoveAt(processedArgs.Count - 1);
+            }
+
+            return processedArgs.ToArray();
         }
     }
 }

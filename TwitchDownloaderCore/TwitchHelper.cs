@@ -223,15 +223,15 @@ namespace TwitchDownloaderCore
 
             return emoteReponse;
         }
-        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool bttv = true, bool ffz = true, bool stv = true, bool offline = false)
+        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool offline = false)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
 
             // Load our embedded data from file
-            if (embededEmotes != null && embededEmotes.thirdParty != null)
+            if (embeddedData != null && embeddedData.thirdParty != null)
             {
-                foreach (EmbedEmoteData emoteData in embededEmotes.thirdParty)
+                foreach (EmbedEmoteData emoteData in embeddedData.thirdParty)
                 {
                     try
                     {
@@ -307,7 +307,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, Emotes embededEmotes = null, bool offline = false)
+        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -318,9 +318,9 @@ namespace TwitchDownloaderCore
                 TwitchHelper.CreateDirectory(emoteFolder);
 
             // Load our embedded emotes
-            if (embededEmotes != null && embededEmotes.firstParty != null)
+            if (embeddedData != null && embeddedData.firstParty != null)
             {
-                foreach (EmbedEmoteData emoteData in embededEmotes.firstParty)
+                foreach (EmbedEmoteData emoteData in embeddedData.firstParty)
                 {
                     try
                     {
@@ -369,15 +369,15 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder, Emotes embededEmotes = null, bool offline = false)
+        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
             List<string> alreadyAdded = new List<string>();
 
             // Load our embedded data from file
-            if (embededEmotes != null && embededEmotes.twitchBadges != null)
+            if (embeddedData != null && embeddedData.twitchBadges != null)
             {
-                foreach (EmbedChatBadge data in embededEmotes.twitchBadges)
+                foreach (EmbedChatBadge data in embeddedData.twitchBadges)
                 {
                     ChatBadge newBadge = new ChatBadge(data.name, data.versions);
                     returnList.Add(newBadge);
@@ -476,15 +476,15 @@ namespace TwitchDownloaderCore
             return returnCache;
         }
 
-        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "", Emotes embededEmotes = null, bool offline = false)
+        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "", EmbeddedData embeddedData = null, bool offline = false)
         {
             List<CheerEmote> returnList = new List<CheerEmote>();
             List<string> alreadyAdded = new List<string>();
 
             // Load our embedded data from file
-            if (embededEmotes != null && embededEmotes.twitchBits != null)
+            if (embeddedData != null && embeddedData.twitchBits != null)
             {
-                foreach (EmbedCheerEmote data in embededEmotes.twitchBits)
+                foreach (EmbedCheerEmote data in embeddedData.twitchBits)
                 {
                     List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
                     CheerEmote newEmote = new CheerEmote() { prefix = data.prefix, tierList = tierList };
