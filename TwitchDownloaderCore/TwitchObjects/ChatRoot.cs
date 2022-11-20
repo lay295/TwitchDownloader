@@ -79,10 +79,11 @@ public class Comment
     public bool more_replies { get; set; }
 }
 
-public class VideoTime
+public class Video
 {
     public double start { get; set; }
     public double end { get; set; }
+    public string id { get; set; }
 }
 
 public class EmbedEmoteData
@@ -127,7 +128,7 @@ public class ChatRoot
     [JsonPropertyOrder(0)]
     public Streamer streamer { get; set; }
     [JsonPropertyOrder(1)]
-    public VideoTime video { get; set; }
+    public Video video { get; set; }
     [JsonPropertyOrder(2)]
     public List<Comment> comments { get; set; }
     [JsonPropertyOrder(3)]

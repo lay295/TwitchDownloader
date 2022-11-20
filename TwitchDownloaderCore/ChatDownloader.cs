@@ -1,7 +1,4 @@
-using NeoSmart.Unicode;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -239,7 +236,7 @@ namespace TwitchDownloaderCore
             string videoId = "";
 
             List<Comment> comments = new List<Comment>();
-            ChatRoot chatRoot = new ChatRoot() { streamer = new Streamer(), video = new VideoTime(), comments = comments };
+            ChatRoot chatRoot = new ChatRoot() { streamer = new Streamer(), video = new Video(), comments = comments };
 
             double videoStart = 0.0;
             double videoEnd = 0.0;
@@ -276,6 +273,7 @@ namespace TwitchDownloaderCore
 
             chatRoot.video.start = videoStart;
             chatRoot.video.end = videoEnd;
+            chatRoot.video.id = downloadOptions.Id;
             videoDuration = videoEnd - videoStart;
 
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
