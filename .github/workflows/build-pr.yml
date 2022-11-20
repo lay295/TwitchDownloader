@@ -22,7 +22,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build Windows GUI
-      run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
+      run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
     
     - name: Download File To Workspace
       # You may pin to the exact commit or the version.
@@ -61,13 +61,13 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore TwitchDownloaderCLI
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Linux /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Linux -p:DebugType=None -p:DebugSymbols=false
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine -p:DebugType=None -p:DebugSymbols=false
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm -p:DebugType=None -p:DebugSymbols=false
         
     - name: Zip Windows CLI
       uses: vimtor/action-zip@v1
@@ -138,7 +138,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore TwitchDownloaderCLI
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=None -p:DebugSymbols=false
       
     - name: Zip Release
       uses: vimtor/action-zip@v1
