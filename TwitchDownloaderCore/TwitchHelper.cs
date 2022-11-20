@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using NeoSmart.Unicode;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using System;
@@ -10,6 +11,7 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
 
@@ -226,13 +228,7 @@ namespace TwitchDownloaderCore
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
 
-            string bttvFolder = Path.Combine(cacheFolder, "bttv");
-            string ffzFolder = Path.Combine(cacheFolder, "ffz");
-            string stvFolder = Path.Combine(cacheFolder, "stv");
-
-            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId.ToString(), bttv, ffz, stv);
-
-            if (embededEmotes != null)
+            if (embededEmotes != null && embededEmotes.thirdParty != null)
             {
                 foreach (EmbedEmoteData emoteData in embededEmotes.thirdParty)
                 {
@@ -245,6 +241,15 @@ namespace TwitchDownloaderCore
                     catch { }
                 }
             }
+
+            // TODO: RETURN HERE IF IN OFFLINE MODE!
+            return returnList;
+
+            string bttvFolder = Path.Combine(cacheFolder, "bttv");
+            string ffzFolder = Path.Combine(cacheFolder, "ffz");
+            string stvFolder = Path.Combine(cacheFolder, "stv");
+
+            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId.ToString(), bttv, ffz, stv);
 
             if (bttv)
             {
@@ -308,7 +313,7 @@ namespace TwitchDownloaderCore
             if (!Directory.Exists(emoteFolder))
                 TwitchHelper.CreateDirectory(emoteFolder);
 
-            if (embededEmotes != null)
+            if (embededEmotes != null && embededEmotes.firstParty != null)
             {
                 foreach (EmbedEmoteData emoteData in embededEmotes.firstParty)
                 {
@@ -321,6 +326,9 @@ namespace TwitchDownloaderCore
                     catch { }
                 }
             }
+
+            // TODO: RETURN HERE IF IN OFFLINE MODE!
+            return returnList;
 
             foreach (var comment in comments)
             {
@@ -353,9 +361,23 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder)
+        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder, Emotes embededEmotes = null)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
+            List<string> alreadyAdded = new List<string>();
+
+            if (embededEmotes != null && embededEmotes.twitchBadges != null)
+            {
+                foreach (EmbedChatBadge data in embededEmotes.twitchBadges)
+                {
+                    ChatBadge newBadge = new ChatBadge(data.name, data.versions);
+                    returnList.Add(newBadge);
+                    alreadyAdded.Add(data.name);
+                }
+            }
+
+            // TODO: RETURN HERE IF IN OFFLINE MODE!
+            return returnList;
 
             // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
             // TODO: would want to make this configurable as we do for emotes though...
@@ -370,8 +392,10 @@ namespace TwitchDownloaderCore
             {
                 JProperty jBadgeProperty = badge.ToObject<JProperty>();
                 string name = jBadgeProperty.Name;
-                Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
+                if (alreadyAdded.Contains(name))
+                    continue;
 
+                Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
                 foreach (var version in badge.First["versions"])
                 {
                     JProperty jVersionProperty = version.ToObject<JProperty>();
@@ -440,9 +464,29 @@ namespace TwitchDownloaderCore
             return returnCache;
         }
 
-        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "")
+        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "", Emotes embededEmotes = null)
         {
-            List<CheerEmote> returnCheermotes = new List<CheerEmote>();
+            List<CheerEmote> returnList = new List<CheerEmote>();
+            List<string> alreadyAdded = new List<string>();
+
+            if (embededEmotes != null && embededEmotes.twitchBits != null)
+            {
+                foreach (EmbedCheerEmote data in embededEmotes.twitchBits)
+                {
+                    List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
+                    CheerEmote newEmote = new CheerEmote() { prefix = data.prefix, tierList = tierList };
+                    foreach (KeyValuePair<int, EmbedEmoteData> tier in data.tierList)
+                    {
+                        TwitchEmote tierEmote = new TwitchEmote(tier.Value.data, EmoteProvider.FirstParty, tier.Value.imageScale, tier.Value.id, tier.Value.name);
+                        tierList.Add(new KeyValuePair<int, TwitchEmote>(tier.Key, tierEmote));
+                    }
+                    returnList.Add(newEmote);
+                    alreadyAdded.Add(data.prefix);
+                }
+            }
+
+            // TODO: RETURN HERE IF IN OFFLINE MODE!
+            return returnList;
 
             var request = new HttpRequestMessage()
             {
@@ -482,6 +526,9 @@ namespace TwitchDownloaderCore
                     foreach (CheerNode node in group.nodes)
                     {
                         string prefix = node.prefix;
+                        if (alreadyAdded.Contains(prefix))
+                            continue;
+
                         List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
                         CheerEmote newEmote = new CheerEmote() { prefix = prefix, tierList = tierList };
                         foreach (Tier tier in node.tiers)
@@ -491,12 +538,12 @@ namespace TwitchDownloaderCore
                             TwitchEmote emote = new TwitchEmote(await GetImage(bitFolder, url, node.id + tier.bits, "2", "gif"), EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
                             tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
                         }
-                        returnCheermotes.Add(newEmote);
+                        returnList.Add(newEmote);
                     }
                 }
             }
 
-            return returnCheermotes;
+            return returnList;
         }
 
         public static DirectoryInfo CreateDirectory(string path)
