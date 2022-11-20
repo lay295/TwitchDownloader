@@ -264,11 +264,15 @@ namespace TwitchDownloaderCore
                 {
                     if (alreadyAdded.Contains(emote.Code))
                         continue;
-                    TwitchEmote newEmote = new TwitchEmote(await GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
-                    if (emote.IsZeroWidth)
-                        newEmote.IsZeroWidth = true;
-                    returnList.Add(newEmote);
-                    alreadyAdded.Add(emote.Code);
+                    try
+                    {
+                        TwitchEmote newEmote = new TwitchEmote(await GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        if (emote.IsZeroWidth)
+                            newEmote.IsZeroWidth = true;
+                        returnList.Add(newEmote);
+                        alreadyAdded.Add(emote.Code);
+                    }
+                    catch { }
                 }
             }
 
@@ -281,9 +285,13 @@ namespace TwitchDownloaderCore
                 {
                     if (alreadyAdded.Contains(emote.Code))
                         continue;
-                    TwitchEmote newEmote = new TwitchEmote(await GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
-                    returnList.Add(newEmote);
-                    alreadyAdded.Add(emote.Code);
+                    try
+                    {
+                        TwitchEmote newEmote = new TwitchEmote(await GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        returnList.Add(newEmote);
+                        alreadyAdded.Add(emote.Code);
+                    }
+                    catch { }
                 }
             }
 
@@ -296,11 +304,15 @@ namespace TwitchDownloaderCore
                 {
                     if (alreadyAdded.Contains(emote.Code))
                         continue;
-                    TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
-                    if (emote.IsZeroWidth)
-                        newEmote.IsZeroWidth = true;
-                    returnList.Add(newEmote);
-                    alreadyAdded.Add(emote.Code);
+                    try
+                    {
+                        TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        if (emote.IsZeroWidth)
+                            newEmote.IsZeroWidth = true;
+                        returnList.Add(newEmote);
+                        alreadyAdded.Add(emote.Code);
+                    }
+                    catch { }
                 }
             }
 
