@@ -1,10 +1,9 @@
-﻿using NeoSmart.Unicode;
+using NeoSmart.Unicode;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -12,7 +11,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using System.Xml.Linq;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 
@@ -71,7 +69,7 @@ namespace TwitchDownloaderCore
                     {
                         foreach (var comment in commentResponse.comments)
                         {
-                            if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
+                            if (latestMessage < videoEnd && comment.content_offset_seconds >= videoStart)
                                 comments.Add(comment);
 
                             latestMessage = comment.content_offset_seconds;
@@ -210,7 +208,7 @@ namespace TwitchDownloaderCore
                         newEmote.end = newEmote.begin + fragment.text.Length + 1;
                         emoticons.Add(newEmote);
                     }
-   
+
                     newFragment.text = fragment.text;
                     fragments.Add(newFragment);
                 }
@@ -292,7 +290,8 @@ namespace TwitchDownloaderCore
             {
                 int tc = i;
                 percentages.Add(0);
-                var taskProgress = new Progress<ProgressReport>(progressReport => {
+                var taskProgress = new Progress<ProgressReport>(progressReport =>
+                {
                     if (progressReport.reportType != ReportType.Percent)
                     {
                         progress.Report(progressReport);
@@ -509,7 +508,7 @@ namespace TwitchDownloaderCore
 
                 File.WriteAllText(downloadOptions.Filename, finalString.ToString(), Encoding.Unicode);
             }
-                
+
             chatRoot = null;
             GC.Collect();
         }
@@ -586,9 +585,20 @@ namespace TwitchDownloaderCore
 
     internal class SortedCommentComparer : IComparer<Comment>
     {
+        // Modified from double.CompareTo
         public int Compare(Comment x, Comment y)
         {
-            return x.content_offset_seconds.CompareTo(y.content_offset_seconds);
+            double m_value = x.content_offset_seconds;
+            double value = y.content_offset_seconds;
+            if (m_value < value) return -1;
+            if (m_value > value) return 1;
+            if (m_value == value) return 1;
+
+            // At least one of the values is NaN.
+            if (double.IsNaN(m_value))
+                return double.IsNaN(value) ? 0 : -1;
+            else
+                return 1;
         }
     }
 }

@@ -45,7 +45,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("outline-size", Default = 4, HelpText = "Size of outline if outline is enabled.")]
         public double OutlineSize { get; set; }
 
-        [Option('f', "font", Default = "Inter", HelpText = "Font to use.")]
+        [Option('f', "font", Default = "Inter Embedded", HelpText = "Font to use.")]
         public string Font { get; set; }
 
         [Option("font-size", Default = 12, HelpText = "Font size.")]

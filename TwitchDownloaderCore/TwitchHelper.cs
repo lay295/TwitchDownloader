@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using TwitchDownloaderCore.Properties;
@@ -192,6 +193,10 @@ namespace TwitchDownloaderCore
                     JObject emoteData = (JObject)stvEmote["data"];
                     JObject emoteHost = (JObject)emoteData["host"];
                     JArray emoteFiles = (JArray)emoteHost["files"];
+                    if (emoteFiles.Count == 0) // Sometimes there are no hosted files for the emote
+                    {
+                        continue;
+                    }
                     string emoteFormat = "avif";
                     foreach (var fileItem in emoteFiles)
                     {
@@ -456,7 +461,7 @@ namespace TwitchDownloaderCore
             //Twemoji 14 has 3689 emoji images
             if (emojiCount < 3689)
             {
-                string emojiZipPath = Path.GetTempFileName();
+                string emojiZipPath = Path.Combine(emojiFolder, Path.GetRandomFileName());
                 byte[] emojiZipData = Resources.twemoji_14_0_0;
                 await File.WriteAllBytesAsync(emojiZipPath, emojiZipData);
                 using (ZipArchive archive = ZipFile.OpenRead(emojiZipPath))
@@ -476,9 +481,16 @@ namespace TwitchDownloaderCore
                         }
                     }
                 }
+
+                if (File.Exists(emojiZipPath))
+                {
+                    File.Delete(emojiZipPath);
+                }
             }
 
-            List<string> emojiList = new List<string>(Directory.GetFiles(emojiFolder, "*.png"));
+            string[] emojiFiles = Directory.GetFiles(emojiFolder);
+            Regex emojiExtensions = new Regex(@"\.(png|PNG)");
+            List<string> emojiList = emojiFiles.Where(i => emojiExtensions.IsMatch(i)).ToList();
             foreach (var emojiPath in emojiList)
             {
                 SKBitmap emojiImage = SKBitmap.Decode(await File.ReadAllBytesAsync(emojiPath));

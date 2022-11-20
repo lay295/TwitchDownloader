@@ -42,6 +42,7 @@ namespace TwitchDownloader
             {
                 MessageBox.Show($"{Settings.Default.GuiTheme}.xaml was not found. Reverting theme to System", "Theme not found", MessageBoxButton.OK, MessageBoxImage.Information);
                 Settings.Default.GuiTheme = "System";
+                Settings.Default.Save();
             }
         }
 
@@ -105,6 +106,7 @@ namespace TwitchDownloader
             {
                 systemThemesUnsupported = true;
                 Settings.Default.GuiTheme = WINDOWS_LIGHT_THEME;
+                Settings.Default.Save();
                 MessageBox.Show("Unable to fetch Windows theme. System theming is now disabled.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
