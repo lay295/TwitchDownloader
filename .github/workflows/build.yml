@@ -102,13 +102,13 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore TwitchDownloaderCLI
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Linux /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Linux -p:DebugType=None -p:DebugSymbols=false
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine -p:DebugType=None -p:DebugSymbols=false
     - name: Build
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm /p:DebugType=None /p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm -p:DebugType=None -p:DebugSymbols=false
         
     - name: Zip Windows CLI
       uses: vimtor/action-zip@v1
