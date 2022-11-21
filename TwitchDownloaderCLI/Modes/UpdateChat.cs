@@ -40,25 +40,22 @@ namespace TwitchDownloaderCLI.Modes
             {
                 Console.WriteLine("[WARNING] - Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanantly overwritten!");
             }
-            if (!inputOptions.EmbedMissing && !inputOptions.ReplaceEmbeds)
+            if (!inputOptions.EmbedMissing && !inputOptions.ReplaceEmbeds && double.IsNegative(inputOptions.CropBeginningTime) && double.IsNegative(inputOptions.CropEndingTime))
             {
-                Console.WriteLine("[ERROR] - Please enable either embed-missing or replace-embeds");
+                Console.WriteLine("[ERROR] - No update options were passed. Please pass --embed-missing, --replace-embeds, -b, or -e");
                 Environment.Exit(1);
             }
-
-            // Ensure beginning crop <= ending crop
-            inputOptions.CropBeginningTime = Math.Min(inputOptions.CropBeginningTime, inputOptions.CropEndingTime);
-            inputOptions.CropEndingTime = Math.Max(inputOptions.CropBeginningTime, inputOptions.CropEndingTime);
 
             ChatUpdateOptions updateOptions = new ChatUpdateOptions()
             {
                 InputFile = inputOptions.InputFile,
                 OutputFile = inputOptions.OutputFile,
                 FileFormat = inFormat,
+                EmbedMissing = inputOptions.EmbedMissing,
                 ReplaceEmbeds = inputOptions.ReplaceEmbeds,
-                CropBeginning = inputOptions.CropBeginningTime > 0.0,
+                CropBeginning = !double.IsNegative(inputOptions.CropBeginningTime),
                 CropBeginningTime = inputOptions.CropBeginningTime,
-                CropEnding = inputOptions.CropEndingTime > 0.0,
+                CropEnding = !double.IsNegative(inputOptions.CropEndingTime),
                 CropEndingTime = inputOptions.CropEndingTime,
                 BttvEmotes = inputOptions.BttvEmotes,
                 FfzEmotes = inputOptions.FfzEmotes,

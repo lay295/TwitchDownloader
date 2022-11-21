@@ -209,10 +209,10 @@ Path to output file. Extension should match the input.
 (Default: false) Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!
 
 **b/\-\beginning**
-(Default: 0) New time in seconds for chat beginning. Comments may be added but not removed. 0 = none.
+(Default: -1) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
 
 **-e/-\-ending**
-(Default: 0) New time in seconds for chat beginning. Comments may be added but not removed. 0 = none.
+(Default: -1) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
 
 **-\-bttv**
 (Default: true) Enable embedding BTTV emotes.
@@ -222,6 +222,9 @@ Path to output file. Extension should match the input.
 
 **-\-stv**
 (Default: true) Enable embedding 7TV emotes.
+
+**-\-offline**
+(Default: false) Attempt to update using only cached resources. Usually not recommended.
 
 **-\-temp-path**
 Path to temporary folder for cache.

@@ -15,8 +15,8 @@ namespace TwitchDownloaderCore
 {
     public class ChatDownloader
     {
-        ChatDownloadOptions downloadOptions;
-        enum DownloadType { Clip, Video }
+        internal ChatDownloadOptions downloadOptions { get; private set; }
+        private enum DownloadType { Clip, Video }
 
         public ChatDownloader(ChatDownloadOptions DownloadOptions)
         {
@@ -24,7 +24,7 @@ namespace TwitchDownloaderCore
             downloadOptions.TempFolder = Path.Combine(string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder, "TwitchDownloader");
         }
 
-        public async Task DownloadSection(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
+        internal static async Task DownloadSection(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
         {
             using (WebClient client = new WebClient())
             {
@@ -90,7 +90,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadSectionGql(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
+        internal static async Task DownloadSectionGql(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
         {
             using (WebClient client = new WebClient())
             {
@@ -158,7 +158,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private List<Comment> ConvertComments(CommentVideo video)
+        private static List<Comment> ConvertComments(CommentVideo video)
         {
             List<Comment> returnList = new List<Comment>();
 
@@ -233,8 +233,12 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            DownloadType downloadType = downloadOptions.Id.All(x => Char.IsDigit(x)) ? DownloadType.Video : DownloadType.Clip;
-            string videoId = "";
+            if (string.IsNullOrWhiteSpace(downloadOptions.Id))
+            {
+                throw new NullReferenceException("Null or empty video/clip ID");
+            }
+            DownloadType downloadType = downloadOptions.Id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
+            string videoId = downloadOptions.Id;
 
             List<Comment> comments = new List<Comment>();
             ChatRoot chatRoot = new ChatRoot() { streamer = new Streamer(), video = new VideoTime(), comments = comments };
@@ -246,8 +250,10 @@ namespace TwitchDownloaderCore
 
             if (downloadType == DownloadType.Video)
             {
-                videoId = downloadOptions.Id;
-                GqlVideoResponse taskInfo = await TwitchHelper.GetVideoInfo(Int32.Parse(videoId));
+                GqlVideoResponse taskInfo = await TwitchHelper.GetVideoInfo(int.Parse(videoId));
+                if (taskInfo.data.video == null)
+                    throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+
                 chatRoot.streamer.name = taskInfo.data.video.owner.displayName;
                 chatRoot.streamer.id = int.Parse(taskInfo.data.video.owner.id);
                 videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
@@ -256,11 +262,9 @@ namespace TwitchDownloaderCore
             else
             {
                 GqlClipResponse taskInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
-
                 if (taskInfo.data.clip.video == null || taskInfo.data.clip.videoOffsetSeconds == null)
-                    throw new Exception("Invalid VOD for clip, deleted/expired VOD possibly?");
+                    throw new NullReferenceException("Invalid VOD for clip, deleted/expired VOD possibly?");
 
-                videoId = taskInfo.data.clip.video.id;
                 downloadOptions.CropBeginning = true;
                 downloadOptions.CropBeginningTime = (int)taskInfo.data.clip.videoOffsetSeconds;
                 downloadOptions.CropEnding = true;
@@ -296,7 +300,7 @@ namespace TwitchDownloaderCore
                     }
                     else
                     {
-                        int percent = (int)(progressReport.data);
+                        int percent = (int)progressReport.data;
                         if (percent > 100)
                         {
                             percent = 100;
@@ -306,8 +310,10 @@ namespace TwitchDownloaderCore
 
                         percent = 0;
                         for (int j = 0; j < connectionCount; j++)
+                        {
                             percent += percentages[j];
-                        percent = percent / connectionCount;
+                        }
+                        percent /= connectionCount;
 
                         progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = $"Downloading {percent}%" });
                         progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
@@ -315,9 +321,13 @@ namespace TwitchDownloaderCore
                 });
                 double start = videoStart + chunk * i;
                 if (LegacyApiWorks)
+                {
                     tasks.Add(DownloadSection(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet, commentLock));
+                }
                 else
+                {
                     tasks.Add(DownloadSectionGql(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet, commentLock));
+                }
             }
 
             await Task.WhenAll(tasks);
@@ -501,7 +511,7 @@ namespace TwitchDownloaderCore
             GC.Collect();
         }
 
-        private async Task<bool> CheckLegacyApiAsync(string videoId)
+        internal static async Task<bool> CheckLegacyApiAsync(string videoId)
         {
             using (WebClient client = new WebClient())
             {
@@ -522,7 +532,7 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private string GetMessageHtml(bool embedEmotes, Dictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
+        internal static string GetMessageHtml(bool embedEmotes, Dictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
         {
             StringBuilder message = new StringBuilder();
 
