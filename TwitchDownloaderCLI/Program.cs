@@ -42,11 +42,11 @@ namespace TwitchDownloaderCLI
                 preParsedArgs = PreParseArgs.Process(args);
             }
 
-            Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatDownloadUpdaterArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs)
+            Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs)
                 .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
                 .WithParsed<ClipDownloadArgs>(DownloadClip.Download)
                 .WithParsed<ChatDownloadArgs>(DownloadChat.Download)
-                .WithParsed<ChatDownloadUpdaterArgs>(DownloadChatUpdater.Update)
+                .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
                 .WithParsed<ChatRenderArgs>(RenderChat.Render)
                 .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
                 .WithParsed<CacheArgs>(CacheHandler.ParseArgs)

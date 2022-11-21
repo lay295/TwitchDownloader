@@ -2,77 +2,40 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using TwitchDownloaderCLI.Modes.Arguments;
-using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
-namespace TwitchDownloaderCLI.Modes
+namespace TwitchDownloaderCore
 {
-    internal class DownloadChatUpdater
+    public class ChatUpdater
     {
-        internal static void Update(ChatDownloadUpdaterArgs inputOptions)
+        public ChatRoot chatRoot { get; set; } = new ChatRoot();
+        private readonly ChatUpdateOptions updateOptions;
+
+        public ChatUpdater(ChatUpdateOptions UpdateOptions)
         {
-            DownloadFormat inFormat = Path.GetExtension(inputOptions.InputFile)!.ToLower() switch
-            {
-                ".json" => DownloadFormat.Json,
-                ".html" => DownloadFormat.Html,
-                ".htm" => DownloadFormat.Html,
-                _ => DownloadFormat.Text
-            };
-            DownloadFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
-            {
-                ".json" => DownloadFormat.Json,
-                ".html" => DownloadFormat.Html,
-                ".htm" => DownloadFormat.Html,
-                _ => DownloadFormat.Text
-            };
-            // Check that both input and output are json
-            if (inFormat != DownloadFormat.Json || outFormat != DownloadFormat.Json)
-            {
-                Console.WriteLine("[ERROR] - {0} format must be be json!", inFormat != DownloadFormat.Json ? "Input" : "Output");
-                Environment.Exit(1);
-            }
-            if (!File.Exists(inputOptions.InputFile))
-            {
-                Console.WriteLine("[ERROR] - Input file does not exist!");
-                Environment.Exit(1);
-            }
-            if (!inputOptions.EmbedMissing && !inputOptions.UpdateOldEmbeds)
-            {
-                Console.WriteLine("[ERROR] - Please enable either EmbedMissingEmotes or UpdateOldEmotes");
-                Environment.Exit(1);
-            }
+            updateOptions = UpdateOptions;
+        }
 
-            // Read in the old input file
-            ChatRoot chatRoot = Task.Run(() => ChatRenderer.ParseJsonStatic(inputOptions.InputFile)).Result;
-            if (chatRoot.streamer == null)
-            {
-                chatRoot.streamer = new Streamer();
-                chatRoot.streamer.id = int.Parse(chatRoot.comments.First().channel_id);
-                chatRoot.streamer.name = Task.Run(() => TwitchHelper.GetStreamerName(chatRoot.streamer.id)).Result;
-            }
-            if (chatRoot.embeddedData == null)
-            {
-                chatRoot.embeddedData = new EmbeddedData();
-            }
-
-            string cacheFolder = Path.Combine(string.IsNullOrWhiteSpace(inputOptions.TempFolder) ? Path.GetTempPath() : inputOptions.TempFolder, "TwitchDownloader", "chatupdatecache");
+        public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        {
+            string cacheFolder = Path.Combine(string.IsNullOrWhiteSpace(updateOptions.TempFolder) ? Path.GetTempPath() : updateOptions.TempFolder, "TwitchDownloader", "chatupdatecache");
 
             // Clear working directory if it already exists
             if (Directory.Exists(cacheFolder))
                 Directory.Delete(cacheFolder, true);
 
             // Thirdparty emotes
-            if (chatRoot.embeddedData.thirdParty == null || inputOptions.UpdateOldEmbeds)
+            if (chatRoot.embeddedData.thirdParty == null || updateOptions.UpdateOldEmbeds)
             {
                 chatRoot.embeddedData.thirdParty = new List<EmbedEmoteData>();
             }
             Console.WriteLine("Input third party emote count: " + chatRoot.embeddedData.thirdParty.Count);
             List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();
-            thirdPartyEmotes = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder, bttv: inputOptions.BttvEmotes, ffz: inputOptions.FfzEmotes, stv: inputOptions.StvEmotes, embeddedData: chatRoot.embeddedData)).Result;
+            thirdPartyEmotes = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder, bttv: updateOptions.BttvEmotes, ffz: updateOptions.FfzEmotes, stv: inputOptions.StvEmotes, embeddedData: chatRoot.embeddedData)).Result;
             foreach (TwitchEmote emote in thirdPartyEmotes)
             {
                 EmbedEmoteData newEmote = new EmbedEmoteData();
@@ -87,7 +50,7 @@ namespace TwitchDownloaderCLI.Modes
             Console.WriteLine("Output third party emote count: " + chatRoot.embeddedData.thirdParty.Count);
 
             // Firstparty emotes
-            if (chatRoot.embeddedData.firstParty == null || inputOptions.UpdateOldEmbeds)
+            if (chatRoot.embeddedData.firstParty == null || updateOptions.UpdateOldEmbeds)
             {
                 chatRoot.embeddedData.firstParty = new List<EmbedEmoteData>();
             }
@@ -107,7 +70,7 @@ namespace TwitchDownloaderCLI.Modes
             Console.WriteLine("Output third party emote count: " + chatRoot.embeddedData.firstParty.Count);
 
             // Twitch badges
-            if (chatRoot.embeddedData.twitchBadges == null || inputOptions.UpdateOldEmbeds)
+            if (chatRoot.embeddedData.twitchBadges == null || updateOptions.UpdateOldEmbeds)
             {
                 chatRoot.embeddedData.twitchBadges = new List<EmbedChatBadge>();
             }
@@ -124,7 +87,7 @@ namespace TwitchDownloaderCLI.Modes
             Console.WriteLine("Output twitch badge count: " + chatRoot.embeddedData.twitchBadges.Count);
 
             // Twitch bits / cheers
-            if (chatRoot.embeddedData.twitchBits == null || inputOptions.UpdateOldEmbeds)
+            if (chatRoot.embeddedData.twitchBits == null || updateOptions.UpdateOldEmbeds)
             {
                 chatRoot.embeddedData.twitchBits = new List<EmbedCheerEmote>();
             }
@@ -153,9 +116,9 @@ namespace TwitchDownloaderCLI.Modes
 
             // Finally save the output to file!
             // TODO: maybe in the future we could also export as HTML here too?
-            if (outFormat == DownloadFormat.Json)
+            if (updateOptions.FileFormat == DownloadFormat.Json)
             {
-                using (TextWriter writer = File.CreateText(inputOptions.OutputFile))
+                using (TextWriter writer = File.CreateText(updateOptions.OutputFile))
                 {
                     var serializer = new Newtonsoft.Json.JsonSerializer();
                     serializer.Serialize(writer, chatRoot);
@@ -165,6 +128,20 @@ namespace TwitchDownloaderCLI.Modes
             // Clear our working directory, it's highly unlikely we would reuse it anyways
             if (Directory.Exists(cacheFolder))
                 Directory.Delete(cacheFolder, true);
+        }
+
+        public async Task<ChatRoot> ParseJson()
+        {
+            chatRoot = await ChatJsonParser.ParseJsonStatic(updateOptions.InputFile);
+
+            if (chatRoot.streamer == null)
+            {
+                chatRoot.streamer = new Streamer();
+                chatRoot.streamer.id = int.Parse(chatRoot.comments.First().channel_id);
+                chatRoot.streamer.name = await TwitchHelper.GetStreamerName(chatRoot.streamer.id);
+            }
+
+            return chatRoot;
         }
     }
 }

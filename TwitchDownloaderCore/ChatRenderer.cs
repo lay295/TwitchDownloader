@@ -8,11 +8,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
@@ -1074,50 +1074,13 @@ namespace TwitchDownloaderCore
         }
         public async Task<ChatRoot> ParseJson()
         {
-            chatRoot = await ParseJsonStatic(renderOptions.InputFile);
+            chatRoot = await ChatJsonParser.ParseJsonStatic(renderOptions.InputFile);
 
             if (chatRoot.streamer == null)
             {
                 chatRoot.streamer = new Streamer();
                 chatRoot.streamer.id = int.Parse(chatRoot.comments.First().channel_id);
                 chatRoot.streamer.name = await TwitchHelper.GetStreamerName(chatRoot.streamer.id);
-            }
-
-            return chatRoot;
-        }
-
-        public static async Task<ChatRoot> ParseJsonStatic(string inputJson)
-        {
-            ChatRoot chatRoot = new ChatRoot();
-
-            using FileStream fs = new FileStream(inputJson, FileMode.Open, FileAccess.Read);
-            using var jsonDocument = JsonDocument.Parse(fs);
-
-            if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
-            {
-                chatRoot.streamer = streamerJson.Deserialize<Streamer>();
-            }
-
-            if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
-            {
-                if (videoJson.TryGetProperty("start", out JsonElement videoStartJson) && videoJson.TryGetProperty("end", out JsonElement videoEndJson))
-                {
-                    chatRoot.video = videoJson.Deserialize<VideoTime>();
-                }
-            }
-
-            if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embedDataJson))
-            {
-                chatRoot.embeddedData = embedDataJson.Deserialize<EmbeddedData>();
-            }
-            else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
-            {
-                chatRoot.embeddedData = emotesJson.Deserialize<EmbeddedData>();
-            }
-
-            if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
-            {
-                chatRoot.comments = commentsJson.Deserialize<List<Comment>>();
             }
 
             return chatRoot;

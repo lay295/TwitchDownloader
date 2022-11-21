@@ -4,7 +4,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 {
 
     [Verb("chatupdate", HelpText = "Updates the embeded emotes, badges, and bits of a chat download.")]
-    public class ChatDownloadUpdaterArgs
+    public class ChatUpdateArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are json")]
         public string InputFile { get; set; }
@@ -17,6 +17,12 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option('U', "update-old", Default = false, HelpText = "Update old emotes, badges, and bits to the current. All embedded images will be overwritten")]
         public bool UpdateOldEmbeds { get; set; }
+
+        [Option('b', "beginning", HelpText = "New time in seconds for chat beginning. Comments may be added but not removed.")]
+        public int CropBeginningTime { get; set; }
+
+        [Option('e', "ending", HelpText = "New time in seconds for chat beginning. Comments may be added but not removed.")]
+        public int CropEndingTime { get; set; }
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download.")]
         public bool BttvEmotes { get; set; }
