@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,12 +28,13 @@ namespace TwitchDownloaderCore
 
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
+            progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Images" });
             GetDataToEmbed().Wait(cancellationToken);
 
             chatRoot.embeddedData ??= new EmbeddedData();
 
             // Firstparty emotes
-            if (chatRoot.embeddedData.firstParty == null || updateOptions.UpdateOldEmbeds)
+            if (chatRoot.embeddedData.firstParty == null || updateOptions.ReplaceEmbeds)
             {
                 chatRoot.embeddedData.firstParty = new List<EmbedEmoteData>();
             }
@@ -52,10 +52,10 @@ namespace TwitchDownloaderCore
                 newEmote.height = emote.Height / emote.ImageScale;
                 chatRoot.embeddedData.firstParty.Add(newEmote);
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input firsty party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.firstParty.Count) });
+            progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input first party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.firstParty.Count) });
 
             // Thirdparty emotes
-            if (chatRoot.embeddedData.thirdParty == null || updateOptions.UpdateOldEmbeds)
+            if (chatRoot.embeddedData.thirdParty == null || updateOptions.ReplaceEmbeds)
             {
                 chatRoot.embeddedData.thirdParty = new List<EmbedEmoteData>();
             }
@@ -77,7 +77,7 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input third party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.thirdParty.Count) });
 
             // Twitch badges
-            if (chatRoot.embeddedData.twitchBadges == null || updateOptions.UpdateOldEmbeds)
+            if (chatRoot.embeddedData.twitchBadges == null || updateOptions.ReplaceEmbeds)
             {
                 chatRoot.embeddedData.twitchBadges = new List<EmbedChatBadge>();
             }
@@ -95,7 +95,7 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input badge count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBadges.Count) });
 
             // Twitch bits / cheers
-            if (chatRoot.embeddedData.twitchBits == null || updateOptions.UpdateOldEmbeds)
+            if (chatRoot.embeddedData.twitchBits == null || updateOptions.ReplaceEmbeds)
             {
                 chatRoot.embeddedData.twitchBits = new List<EmbedCheerEmote>();
             }
@@ -130,7 +130,7 @@ namespace TwitchDownloaderCore
             }
             if (updateOptions.CropEnding)
             {
-                // TODO: implement fetching vod length from json and cap ending crop to length
+                // TODO: implement fetching vod length from json and cap ending crop to length (requires lay295#440)
                 chatRoot.video.end = updateOptions.CropEndingTime;
             }
 
@@ -163,7 +163,7 @@ namespace TwitchDownloaderCore
 
         public async Task<ChatRoot> ParseJsonAsync()
         {
-            chatRoot = await ChatJsonParser.ParseJsonStatic(updateOptions.InputFile);
+            chatRoot = await ChatJsonParser.ParseJsonAsync(updateOptions.InputFile);
 
             if (chatRoot.streamer == null)
             {

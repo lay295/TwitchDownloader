@@ -7,7 +7,7 @@ namespace TwitchDownloaderCore.Tools
 {
     public class ChatJsonParser
     {
-        public static async Task<ChatRoot> ParseJsonStatic(string inputJson)
+        public static async Task<ChatRoot> ParseJsonAsync(string inputJson)
         {
             ChatRoot chatRoot = new ChatRoot();
 

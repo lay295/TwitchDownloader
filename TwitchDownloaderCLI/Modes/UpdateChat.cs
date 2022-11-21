@@ -36,9 +36,13 @@ namespace TwitchDownloaderCLI.Modes
                 Console.WriteLine("[ERROR] - Input file does not exist!");
                 Environment.Exit(1);
             }
-            if (!inputOptions.EmbedMissing && !inputOptions.UpdateOldEmbeds)
+            if (inputOptions.InputFile == inputOptions.OutputFile)
             {
-                Console.WriteLine("[ERROR] - Please enable either EmbedMissingEmotes or UpdateOldEmotes");
+                Console.WriteLine("[WARNING] - Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanantly overwritten!");
+            }
+            if (!inputOptions.EmbedMissing && !inputOptions.ReplaceEmbeds)
+            {
+                Console.WriteLine("[ERROR] - Please enable either embed-missing or replace-embeds");
                 Environment.Exit(1);
             }
 
@@ -51,7 +55,7 @@ namespace TwitchDownloaderCLI.Modes
                 InputFile = inputOptions.InputFile,
                 OutputFile = inputOptions.OutputFile,
                 FileFormat = inFormat,
-                UpdateOldEmbeds = inputOptions.UpdateOldEmbeds,
+                ReplaceEmbeds = inputOptions.ReplaceEmbeds,
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,

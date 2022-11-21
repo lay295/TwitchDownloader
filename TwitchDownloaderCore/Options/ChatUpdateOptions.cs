@@ -5,7 +5,7 @@
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
         public DownloadFormat FileFormat { get; set; } = DownloadFormat.Json;
-        public bool UpdateOldEmbeds { get; set; }
+        public bool ReplaceEmbeds { get; set; }
         public bool CropBeginning { get; set; }
         public double CropBeginningTime { get; set; }
         public bool CropEnding { get; set; }
