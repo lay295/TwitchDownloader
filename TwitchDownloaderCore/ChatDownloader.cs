@@ -243,6 +243,7 @@ namespace TwitchDownloaderCore
             double videoStart = 0.0;
             double videoEnd = 0.0;
             double videoDuration = 0.0;
+            double videoTotalLength;
             int connectionCount = downloadOptions.ConnectionCount;
 
             if (downloadType == DownloadType.Video)
@@ -255,6 +256,7 @@ namespace TwitchDownloaderCore
                 videoCreatedAt = taskVideoInfo.data.video.createdAt;
                 videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
                 videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : taskVideoInfo.data.video.lengthSeconds;
+                videoTotalLength = taskVideoInfo.data.video.lengthSeconds;
             }
             else
             {
@@ -274,6 +276,7 @@ namespace TwitchDownloaderCore
                 videoCreatedAt = taskClipInfo.data.clip.createdAt;
                 videoStart = (int)taskClipInfo.data.clip.videoOffsetSeconds;
                 videoEnd = (int)taskClipInfo.data.clip.videoOffsetSeconds + taskClipInfo.data.clip.durationSeconds;
+                videoTotalLength = taskClipInfo.data.clip.durationSeconds;
                 connectionCount = 1;
             }
 
@@ -282,6 +285,7 @@ namespace TwitchDownloaderCore
             chatRoot.video.created_at = videoCreatedAt;
             chatRoot.video.start = videoStart;
             chatRoot.video.end = videoEnd;
+            chatRoot.video.length = videoTotalLength;
             videoDuration = videoEnd - videoStart;
 
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());

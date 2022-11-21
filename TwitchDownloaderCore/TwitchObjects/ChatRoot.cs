@@ -86,6 +86,7 @@ public class Video
     public DateTime created_at { get; set; }
     public double start { get; set; }
     public double end { get; set; }
+    public double length { get; set; }
 }
 
 public class EmbedEmoteData
