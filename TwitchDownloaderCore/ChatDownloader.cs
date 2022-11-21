@@ -235,7 +235,7 @@ namespace TwitchDownloaderCore
             DownloadType downloadType = downloadOptions.Id.All(x => char.IsDigit(x)) ? DownloadType.Video : DownloadType.Clip;
 
             List<Comment> comments = new List<Comment>();
-            ChatRoot chatRoot = new ChatRoot() { streamer = new Streamer(), video = new VideoInfo(), comments = comments };
+            ChatRoot chatRoot = new ChatRoot() { streamer = new Streamer(), video = new Video(), comments = comments };
 
             string videoId = "";
             string videoTitle = "";

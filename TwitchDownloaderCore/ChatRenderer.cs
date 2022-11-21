@@ -1100,7 +1100,7 @@ namespace TwitchDownloaderCore
 
             if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
             {
-                chatRoot.video = videoJson.Deserialize<VideoInfo>();
+                chatRoot.video = videoJson.Deserialize<Video>();
             }
 
             if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embedDataJson))

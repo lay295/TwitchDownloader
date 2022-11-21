@@ -79,7 +79,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public bool more_replies { get; set; }
     }
 
-    public class VideoInfo
+    public class Video
     {
         public string title { get; set; }
         public string id { get; set; }
@@ -129,7 +129,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     public class ChatRoot
     {
         public Streamer streamer { get; set; }
-        public VideoInfo video { get; set; }
+        public Video video { get; set; }
         public List<Comment> comments { get; set; }
         public EmbeddedData embeddedData { get; set; }
     }
