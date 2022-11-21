@@ -41,17 +41,16 @@ namespace TwitchDownloaderCore
             int inputCount = chatRoot.embeddedData.firstParty.Count;
             foreach (TwitchEmote emote in firstPartyEmoteList)
             {
+                if (chatRoot.embeddedData.firstParty.Any(x => x.id.Equals(emote.Id)))
+                    continue;
+
                 EmbedEmoteData newEmote = new EmbedEmoteData();
                 newEmote.id = emote.Id;
                 newEmote.imageScale = emote.ImageScale;
                 newEmote.data = emote.ImageData;
                 newEmote.width = emote.Width / emote.ImageScale;
                 newEmote.height = emote.Height / emote.ImageScale;
-
-                if (!chatRoot.embeddedData.firstParty.Any(x => x.id.Equals(newEmote.id)))
-                {
-                    chatRoot.embeddedData.firstParty.Add(newEmote);
-                }
+                chatRoot.embeddedData.firstParty.Add(newEmote);
             }
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input firsty party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.firstParty.Count) });
 
@@ -63,6 +62,9 @@ namespace TwitchDownloaderCore
             inputCount = chatRoot.embeddedData.thirdParty.Count;
             foreach (TwitchEmote emote in thirdPartyEmoteList)
             {
+                if (chatRoot.embeddedData.thirdParty.Any(x => x.id.Equals(emote.Id)))
+                    continue;
+
                 EmbedEmoteData newEmote = new EmbedEmoteData();
                 newEmote.id = emote.Id;
                 newEmote.imageScale = emote.ImageScale;
@@ -70,11 +72,7 @@ namespace TwitchDownloaderCore
                 newEmote.name = emote.Name;
                 newEmote.width = emote.Width / emote.ImageScale;
                 newEmote.height = emote.Height / emote.ImageScale;
-
-                if (!chatRoot.embeddedData.thirdParty.Any(x => x.id.Equals(newEmote.id)))
-                {
-                    chatRoot.embeddedData.thirdParty.Add(newEmote);
-                }
+                chatRoot.embeddedData.thirdParty.Add(newEmote);
             }
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input third party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.thirdParty.Count) });
 
@@ -86,13 +84,13 @@ namespace TwitchDownloaderCore
             inputCount = chatRoot.embeddedData.twitchBadges.Count;
             foreach (ChatBadge badge in badgeList)
             {
+                if (chatRoot.embeddedData.twitchBadges.Any(x => x.name.Equals(badge.Name)))
+                    continue;
+
                 EmbedChatBadge newBadge = new EmbedChatBadge();
                 newBadge.name = badge.Name;
                 newBadge.versions = badge.VersionsData;
-                if (!chatRoot.embeddedData.twitchBadges.Any(x => x.name.Equals(newBadge.name)))
-                {
-                    chatRoot.embeddedData.twitchBadges.Add(newBadge);
-                }
+                chatRoot.embeddedData.twitchBadges.Add(newBadge);
             }
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input badge count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBadges.Count) });
 
@@ -104,6 +102,9 @@ namespace TwitchDownloaderCore
             inputCount = chatRoot.embeddedData.twitchBits.Count;
             foreach (CheerEmote bit in bitList)
             {
+                if (!chatRoot.embeddedData.twitchBits.Any(x => x.prefix.Equals(bit.prefix)))
+                    continue;
+
                 EmbedCheerEmote newBit = new EmbedCheerEmote();
                 newBit.prefix = bit.prefix;
                 newBit.tierList = new Dictionary<int, EmbedEmoteData>();
@@ -118,10 +119,7 @@ namespace TwitchDownloaderCore
                     newEmote.height = emotePair.Value.Height / emotePair.Value.ImageScale;
                     newBit.tierList.Add(emotePair.Key, newEmote);
                 }
-                if (!chatRoot.embeddedData.twitchBits.Any(x => x.prefix.Equals(newBit.prefix)))
-                {
-                    chatRoot.embeddedData.twitchBits.Add(newBit);
-                }
+                chatRoot.embeddedData.twitchBits.Add(newBit);
             }
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input cheermote emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBits.Count) });
 
