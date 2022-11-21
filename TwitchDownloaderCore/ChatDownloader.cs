@@ -1,7 +1,4 @@
-using NeoSmart.Unicode;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,6 +21,7 @@ namespace TwitchDownloaderCore
         public ChatDownloader(ChatDownloadOptions DownloadOptions)
         {
             downloadOptions = DownloadOptions;
+            downloadOptions.TempFolder = Path.Combine(string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder, "TwitchDownloader");
         }
 
         public async Task DownloadSection(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
@@ -336,16 +334,15 @@ namespace TwitchDownloaderCore
                 List<EmbedChatBadge> badgesReturnList = new List<EmbedChatBadge>();
                 List<EmbedCheerEmote> bitsReturnList = new List<EmbedCheerEmote>();
 
-                string cacheFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader", "cache");
                 List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();
                 List<TwitchEmote> firstPartyEmotes = new List<TwitchEmote>();
                 List<ChatBadge> twitchBadges = new List<ChatBadge>();
                 List<CheerEmote> twitchBits = new List<CheerEmote>();
 
-                thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, cacheFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes);
-                firstPartyEmotes = await TwitchHelper.GetEmotes(comments, cacheFolder);
-                twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, cacheFolder);
-                twitchBits = await TwitchHelper.GetBits(cacheFolder, chatRoot.streamer.id.ToString());
+                thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, downloadOptions.TempFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes);
+                firstPartyEmotes = await TwitchHelper.GetEmotes(comments, downloadOptions.TempFolder);
+                twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, downloadOptions.TempFolder);
+                twitchBits = await TwitchHelper.GetBits(downloadOptions.TempFolder, chatRoot.streamer.id.ToString());
 
                 foreach (TwitchEmote emote in thirdPartyEmotes)
                 {

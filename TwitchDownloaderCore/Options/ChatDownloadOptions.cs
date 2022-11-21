@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TwitchDownloaderCore.Options
+﻿namespace TwitchDownloaderCore.Options
 {
     public enum TimestampFormat { Utc, Relative, None }
     public enum DownloadFormat { Json, Text, Html }
@@ -25,14 +21,15 @@ namespace TwitchDownloaderCore.Options
         public string FileExtension { 
             get 
             {
-                if (DownloadFormat == DownloadFormat.Json)
-                    return "json";
-                else if (DownloadFormat == DownloadFormat.Html)
-                    return "html";
-                else if (DownloadFormat == DownloadFormat.Text)
-                    return "txt";
-                return "";
+                return DownloadFormat switch
+                {
+                    DownloadFormat.Json => "json",
+                    DownloadFormat.Html => "html",
+                    DownloadFormat.Text => "txt",
+                    _ => ""
+                };
             }
         }
+        public string TempFolder { get; set; }
     }
 }

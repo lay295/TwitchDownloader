@@ -12,7 +12,7 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Download(ChatDownloadArgs inputOptions)
         {
-            if (inputOptions.Id == string.Empty)
+            if (string.IsNullOrWhiteSpace(inputOptions.Id))
             {
                 Console.WriteLine("[ERROR] - Invalid ID, unable to parse.");
                 Environment.Exit(1);
@@ -39,7 +39,8 @@ namespace TwitchDownloaderCLI.Modes
                 ConnectionCount = inputOptions.ChatConnections,
                 BttvEmotes = (bool)inputOptions.BttvEmotes,
                 FfzEmotes = (bool)inputOptions.FfzEmotes,
-                StvEmotes = (bool)inputOptions.StvEmotes
+                StvEmotes = (bool)inputOptions.StvEmotes,
+                TempFolder = inputOptions.TempFolder
             };
 
             ChatDownloader chatDownloader = new(downloadOptions);
