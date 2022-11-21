@@ -38,16 +38,16 @@ namespace TwitchDownloaderCore
         public ChatRenderer(ChatRenderOptions chatRenderOptions)
         {
             renderOptions = chatRenderOptions;
-            renderOptions.TempFolder = string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(renderOptions.TempFolder, "TwitchDownloader");
+            renderOptions.TempFolder = Path.Combine(string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : renderOptions.TempFolder, "TwitchDownloader");
         }
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Images" });
-            Task<List<ChatBadge>> badgeTask = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, offline: renderOptions.Offline));
-            Task<List<TwitchEmote>> emoteTask = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, offline: renderOptions.Offline));
-            Task<List<TwitchEmote>> emoteThirdTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, offline: renderOptions.Offline));
-            Task<List<CheerEmote>> cheerTask = Task.Run(() => TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, offline: renderOptions.Offline));
+            Task<List<ChatBadge>> badgeTask = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline));
+            Task<List<TwitchEmote>> emoteTask = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline));
+            Task<List<TwitchEmote>> emoteThirdTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline));
+            Task<List<CheerEmote>> cheerTask = Task.Run(() => TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline));
             Task<Dictionary<string, SKBitmap>> emojiTask = Task.Run(() => TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder));
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
@@ -57,6 +57,14 @@ namespace TwitchDownloaderCore
             emoteThirdList = emoteThirdTask.Result;
             cheermotesList = cheerTask.Result;
             emojiCache = emojiTask.Result;
+
+            // Dispose of the tasks to free up the memory now
+            // TODO: move the tasks to a dedicated function so they are disposed by the scope instead
+            badgeTask.Dispose();
+            emoteTask.Dispose();
+            emoteThirdTask.Dispose();
+            cheerTask.Dispose();
+            emojiTask.Dispose();
 
             await Task.Run(ScaleImages);
             FloorCommentOffsets(chatRoot.comments);
@@ -112,9 +120,13 @@ namespace TwitchDownloaderCore
             foreach (var comment in comments)
             {
                 if (renderOptions.UpdateRate > 1)
+                {
                     comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds);
+                }
                 else
-                    comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds * (1 / renderOptions.UpdateRate)) / (1 / renderOptions.UpdateRate);
+                {
+                    comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds / renderOptions.UpdateRate) * renderOptions.UpdateRate;
+                }
             }
         }
 

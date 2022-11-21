@@ -61,7 +61,7 @@ namespace TwitchDownloaderCLI.Modes
             ChatUpdater chatUpdater = new(updateOptions);
             Progress<ProgressReport> progress = new();
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            chatUpdater.ParseJson().Wait();
+            chatUpdater.ParseJsonAsync().Wait();
             chatUpdater.UpdateAsync(progress, new CancellationToken()).Wait();
         }
     }
