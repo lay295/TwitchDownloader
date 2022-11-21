@@ -223,9 +223,6 @@ Path to output file. Extension should match the input.
 **-\-stv**
 (Default: true) Enable embedding 7TV emotes.
 
-**-\-offline**
-(Default: false) Attempt to update using only cached resources. Usually not recommended.
-
 **-\-temp-path**
 Path to temporary folder for cache.
 
