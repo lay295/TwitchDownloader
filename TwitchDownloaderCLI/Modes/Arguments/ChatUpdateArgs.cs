@@ -12,16 +12,16 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('o', "output", Required = true, HelpText = "Path to output file. Extension should match the input.")]
         public string OutputFile { get; set; }
 
-        [Option('E', "embed-missing", Default = true, HelpText = "Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched")]
+        [Option('E', "embed-missing", Default = true, HelpText = "Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.")]
         public bool EmbedMissing { get; set; }
 
         [Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
         public bool ReplaceEmbeds { get; set; }
 
-        [Option('b', "beginning", HelpText = "New time in seconds for chat beginning. Comments may be added but not removed.")]
+        [Option('b', "beginning", Default = 0.0, HelpText = "New time in seconds for chat beginning. Comments may be added but not removed. 0 = none.")]
         public int CropBeginningTime { get; set; }
 
-        [Option('e', "ending", HelpText = "New time in seconds for chat beginning. Comments may be added but not removed.")]
+        [Option('e', "ending", Default = 0.0, HelpText = "New time in seconds for chat ending. Comments may be added but not removed. 0 = none.")]
         public int CropEndingTime { get; set; }
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download.")]

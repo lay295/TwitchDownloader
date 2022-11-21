@@ -1,15 +1,16 @@
 # TwitchDownloaderCLI
 A cross platform command line tool that can do the main functions of the GUI program, which can download VODs/Clips/Chats and render chats.
 
- - [Arguments for mode videodownload](#arguments-for-mode-videodownload)
- - [Arguments for mode clipdownload](#arguments-for-mode-clipdownload)
- - [Arguments for mode chatdownload](#arguments-for-mode-chatdownload)
- - [Arguments for mode chatrender](#arguments-for-mode-chatrender)
- - [Arguments for mode chatupdate](#arguments-for-mode-chatupdate)
- - [Arguments for mode ffmpeg](#arguments-for-mode-ffmpeg)
- - [Arguments for mode cache](#arguments-for-mode-cache)
- - [Example commands](#example-commands)
- - [Notes](#notes)
+- [TwitchDownloaderCLI](#twitchdownloadercli)
+  - [Arguments for mode videodownload](#arguments-for-mode-videodownload)
+  - [Arguments for mode clipdownload](#arguments-for-mode-clipdownload)
+  - [Arguments for mode chatdownload](#arguments-for-mode-chatdownload)
+  - [Arguments for mode chatrender](#arguments-for-mode-chatrender)
+  - [Arguments for mode chatupdate](#arguments-for-mode-chatupdate)
+  - [Arguments for mode ffmpeg](#arguments-for-mode-ffmpeg)
+  - [Arguments for mode cache](#arguments-for-mode-cache)
+  - [Example Commands](#example-commands)
+  - [Notes](#notes)
 
 ---
 
@@ -202,10 +203,16 @@ Path to input file. Valid extensions are json
 Path to output file. Extension should match the input.
 
 **-E/-\-embed-missing**
-(Default: true) Embed missing emotes, badges, and bits. Already embedded images will be untouched.
+(Default: true) Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.
 
-**-U/-\-update-old**
-(Default: false) Update old emotes, badges, and bits to the current. All embedded images will be overwritten!
+**-R/-\-replace-embeds**
+(Default: false) Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!
+
+**b/\-\beginning**
+(Default: 0) New time in seconds for chat beginning. Comments may be added but not removed. 0 = none.
+
+**-e/-\-ending**
+(Default: 0) New time in seconds for chat beginning. Comments may be added but not removed. 0 = none.
 
 **-\-bttv**
 (Default: true) Enable embedding BTTV emotes.
@@ -251,6 +258,9 @@ Download a Chat (plain text with timestamps)
 Download a Chat (JSON with embeded emotes from Twitch and Bttv)
 
     TwitchDownloaderCLI chatdownload --id 612942303 --embed-images --bttv=true --ffz=false --stv=false -o chat.json
+Add embeds to a chat download without embeds
+
+    TwitchDownloaderCLI chatupdate -i chat.json -o chat_embedded.json --embed-missing
 Render a chat with defaults
 
     TwitchDownloaderCLI chatrender -i chat.json -o chat.mp4
