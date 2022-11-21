@@ -102,7 +102,7 @@ namespace TwitchDownloaderCore
             inputCount = chatRoot.embeddedData.twitchBits.Count;
             foreach (CheerEmote bit in bitList)
             {
-                if (!chatRoot.embeddedData.twitchBits.Any(x => x.prefix.Equals(bit.prefix)))
+                if (chatRoot.embeddedData.twitchBits.Any(x => x.prefix.Equals(bit.prefix)))
                     continue;
 
                 EmbedCheerEmote newBit = new EmbedCheerEmote();
@@ -122,6 +122,17 @@ namespace TwitchDownloaderCore
                 chatRoot.embeddedData.twitchBits.Add(newBit);
             }
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input cheermote emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBits.Count) });
+
+            // TODO: download missing chats
+            if (updateOptions.CropBeginning)
+            {
+                chatRoot.video.start = updateOptions.CropBeginningTime;
+            }
+            if (updateOptions.CropEnding)
+            {
+                // TODO: implement fetching vod length from json and cap ending crop to length
+                chatRoot.video.end = updateOptions.CropEndingTime;
+            }
 
             // Finally save the output to file!
             // TODO: maybe in the future we could also export as HTML here too?

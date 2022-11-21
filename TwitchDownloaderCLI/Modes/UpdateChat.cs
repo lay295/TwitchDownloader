@@ -42,6 +42,10 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
+            // Ensure beginning crop <= ending crop
+            inputOptions.CropBeginningTime = Math.Min(inputOptions.CropBeginningTime, inputOptions.CropEndingTime);
+            inputOptions.CropEndingTime = Math.Max(inputOptions.CropBeginningTime, inputOptions.CropEndingTime);
+
             ChatUpdateOptions updateOptions = new ChatUpdateOptions()
             {
                 InputFile = inputOptions.InputFile,
