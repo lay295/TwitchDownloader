@@ -12,7 +12,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('o', "output", Required = true, HelpText = "Path to output file. Extension should match the input.")]
         public string OutputFile { get; set; }
 
-        [Option('E', "embed-missing", Default = true, HelpText = "Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.")]
+        [Option('E', "embed-missing", Default = false, HelpText = "Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.")]
         public bool EmbedMissing { get; set; }
 
         [Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
@@ -25,13 +25,13 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public int CropEndingTime { get; set; }
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download.")]
-        public bool BttvEmotes { get; set; }
+        public bool? BttvEmotes { get; set; }
 
         [Option("ffz", Default = true, HelpText = "Enable FFZ embedding in chat download.")]
-        public bool FfzEmotes { get; set; }
+        public bool? FfzEmotes { get; set; }
 
         [Option("stv", Default = true, HelpText = "Enable 7TV embedding in chat download.")]
-        public bool StvEmotes { get; set; }
+        public bool? StvEmotes { get; set; }
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }

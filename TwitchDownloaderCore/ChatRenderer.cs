@@ -1086,7 +1086,7 @@ namespace TwitchDownloaderCore
         }
         public async Task<ChatRoot> ParseJson()
         {
-            chatRoot = await ChatJsonParser.ParseJsonAsync(renderOptions.InputFile);
+            chatRoot = await ChatJsonTools.ParseJsonAsync(renderOptions.InputFile);
 
             if (chatRoot.streamer == null)
             {

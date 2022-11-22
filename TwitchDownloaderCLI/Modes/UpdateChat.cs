@@ -57,9 +57,9 @@ namespace TwitchDownloaderCLI.Modes
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = !double.IsNegative(inputOptions.CropEndingTime),
                 CropEndingTime = inputOptions.CropEndingTime,
-                BttvEmotes = inputOptions.BttvEmotes,
-                FfzEmotes = inputOptions.FfzEmotes,
-                StvEmotes = inputOptions.StvEmotes,
+                BttvEmotes = (bool)inputOptions.BttvEmotes,
+                FfzEmotes = (bool)inputOptions.FfzEmotes,
+                StvEmotes = (bool)inputOptions.StvEmotes,
                 TempFolder = inputOptions.TempFolder
             };
 

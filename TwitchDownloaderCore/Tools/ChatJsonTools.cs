@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TwitchDownloaderCore.Tools
 {
-    public class ChatJsonParser
+    public class ChatJsonTools
     {
-        public static async Task<ChatRoot> ParseJsonAsync(string inputJson)
+        public static async Task<ChatRoot> ParseJsonAsync(string inputJson, CancellationToken cancellationToken = new())
         {
             ChatRoot chatRoot = new ChatRoot();
 
             using FileStream fs = new FileStream(inputJson, FileMode.Open, FileAccess.Read);
-            using var jsonDocument = JsonDocument.Parse(fs);
+            using var jsonDocument = await JsonDocument.ParseAsync(fs, cancellationToken: cancellationToken);
 
             if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
             {

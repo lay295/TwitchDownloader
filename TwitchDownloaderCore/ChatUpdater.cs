@@ -25,13 +25,17 @@ namespace TwitchDownloaderCore
             updateOptions = UpdateOptions;
             updateOptions.TempFolder = Path.Combine(string.IsNullOrWhiteSpace(updateOptions.TempFolder) ? Path.GetTempPath() : updateOptions.TempFolder, "TwitchDownloader");
         }
+        internal static class SharedObjects
+        {
+            internal static object ChatCropLock = new object();
+        }
 
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             // If we are updating/replacing embeds
             if (updateOptions.EmbedMissing || updateOptions.ReplaceEmbeds)
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Images" });
+                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Updating Embeds" });
 
                 chatRoot.embeddedData ??= new EmbeddedData();
 
@@ -40,7 +44,7 @@ namespace TwitchDownloaderCore
                     FirstPartyEmoteTask(progress),
                     ThirdPartyEmoteTask(progress),
                     ChatBadgeTask(progress),
-                    CheermoteBadgeTask(progress)
+                    BitTask(progress)
                 };
 
                 await Task.WhenAll(embedTasks);
@@ -58,7 +62,7 @@ namespace TwitchDownloaderCore
                 {
                     if (report.data.ToString().ToLower().Contains("vod is expired"))
                     {
-                        // If the user is moving both crops at once, we only want to propagate this report once 
+                        // If the user is moving both crops in one command, we only want to propagate this report once 
                         if (cropTaskVodExpired)
                         {
                             return;
@@ -72,7 +76,7 @@ namespace TwitchDownloaderCore
                     }
                 });
 
-                // TODO: uncomment fetching video id from json (requires https://github.com/lay295/TwitchDownloader/pull/440)
+                // TODO: uncomment fetching video id and length from json (requires https://github.com/lay295/TwitchDownloader/pull/440)
                 List<Task> chatCropTasks = new List<Task>
                 {
                     ChatBeginningCropTask(cropTaskProgress, cancellationToken),
@@ -84,6 +88,8 @@ namespace TwitchDownloaderCore
 
             // Finally save the output to file!
             // TODO: maybe in the future we could also export as HTML here too?
+            progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Writing output file" });
+
             if (updateOptions.FileFormat == DownloadFormat.Json)
             {
                 using TextWriter writer = File.CreateText(updateOptions.OutputFile);
@@ -165,7 +171,7 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport() { reportType = ReportType.Message, data = string.Format("Input badge count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBadges.Count) });
         }
 
-        private async Task CheermoteBadgeTask(IProgress<ProgressReport> progress)
+        private async Task BitTask(IProgress<ProgressReport> progress)
         {
             bitList = await TwitchHelper.GetBits(updateOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData);
 
@@ -208,7 +214,7 @@ namespace TwitchDownloaderCore
             string tempFile = Path.Combine(updateOptions.TempFolder, Path.GetRandomFileName());
             ChatDownloadOptions downloadOptions = new ChatDownloadOptions()
             {
-                Id = null,
+                Id = "",
                 DownloadFormat = updateOptions.FileFormat,
                 Filename = tempFile,
                 ConnectionCount = 4,
@@ -227,7 +233,6 @@ namespace TwitchDownloaderCore
             try
             {
                 // Only download missing comments if new start crop is less than old start crop
-                // TODO: extract newly aquired comments from tempfile into chatRoot
                 if (downloadOptions.Id != null && updateOptions.CropBeginningTime < chatRoot.video.start)
                 {
                     downloadOptions.CropBeginning = true;
@@ -235,7 +240,26 @@ namespace TwitchDownloaderCore
                     downloadOptions.CropEnding = true;
                     downloadOptions.CropEndingTime = chatRoot.video.start;
                     ChatDownloader chatDownloader = new(downloadOptions);
-                    await chatDownloader.DownloadAsync(progress, cancellationToken);
+                    await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
+
+                    ChatRoot newChatRoot = await ChatJsonTools.ParseJsonAsync(tempFile, cancellationToken);
+                    SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
+                    foreach (var comment in newChatRoot.comments)
+                    {
+                        if (comment.content_offset_seconds < downloadOptions.CropEndingTime && comment.content_offset_seconds >= downloadOptions.CropBeginningTime)
+                        {
+                            commentsSet.Add(comment);
+                        }
+                    }
+                    foreach (var comment in chatRoot.comments)
+                    {
+                        commentsSet.Add(comment);
+                    }
+                    List<Comment> comments = commentsSet.DistinctBy(x => x._id).ToList();
+                    lock (SharedObjects.ChatCropLock)
+                    {
+                        chatRoot.comments = comments;
+                    }
                 }
             }
             catch (NullReferenceException)
@@ -262,7 +286,7 @@ namespace TwitchDownloaderCore
             string tempFile = Path.Combine(updateOptions.TempFolder, Path.GetRandomFileName());
             ChatDownloadOptions downloadOptions = new ChatDownloadOptions()
             {
-                Id = null,
+                Id = "",
                 DownloadFormat = updateOptions.FileFormat,
                 Filename = tempFile,
                 ConnectionCount = 4,
@@ -281,7 +305,6 @@ namespace TwitchDownloaderCore
             try
             {
                 // Only download missing comments if new end crop is greater than old end crop
-                // TODO: extract newly aquired comments from tempfile into chatRoot
                 if (downloadOptions.Id != null && updateOptions.CropEndingTime > chatRoot.video.end)
                 {
                     downloadOptions.CropBeginning = true;
@@ -289,7 +312,26 @@ namespace TwitchDownloaderCore
                     downloadOptions.CropEnding = true;
                     downloadOptions.CropEndingTime = updateOptions.CropEndingTime;
                     ChatDownloader chatDownloader = new(downloadOptions);
-                    await chatDownloader.DownloadAsync(progress, cancellationToken);
+                    await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
+
+                    ChatRoot newChatRoot = await ChatJsonTools.ParseJsonAsync(tempFile, cancellationToken);
+                    SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
+                    foreach (var comment in newChatRoot.comments)
+                    {
+                        if (comment.content_offset_seconds < downloadOptions.CropEndingTime && comment.content_offset_seconds >= downloadOptions.CropBeginningTime)
+                        {
+                            commentsSet.Add(comment);
+                        }
+                    }
+                    foreach (var comment in chatRoot.comments)
+                    {
+                        commentsSet.Add(comment);
+                    }
+                    List<Comment> comments = commentsSet.DistinctBy(x => x._id).ToList();
+                    lock (SharedObjects.ChatCropLock)
+                    {
+                        chatRoot.comments = comments;
+                    }
                 }
             }
             catch (NullReferenceException)
@@ -313,7 +355,7 @@ namespace TwitchDownloaderCore
 
         public async Task<ChatRoot> ParseJsonAsync()
         {
-            chatRoot = await ChatJsonParser.ParseJsonAsync(updateOptions.InputFile);
+            chatRoot = await ChatJsonTools.ParseJsonAsync(updateOptions.InputFile);
 
             chatRoot.streamer ??= new Streamer
             {
