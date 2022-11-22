@@ -1088,12 +1088,11 @@ namespace TwitchDownloaderCore
         {
             chatRoot = await ChatJsonTools.ParseJsonAsync(renderOptions.InputFile);
 
-            if (chatRoot.streamer == null)
+            chatRoot.streamer ??= new Streamer
             {
-                chatRoot.streamer = new Streamer();
-                chatRoot.streamer.id = int.Parse(chatRoot.comments.First().channel_id);
-                chatRoot.streamer.name = await TwitchHelper.GetStreamerName(chatRoot.streamer.id);
-            }
+                id = int.Parse(chatRoot.comments.First().channel_id),
+                name = await TwitchHelper.GetStreamerName(int.Parse(chatRoot.comments.First().channel_id))
+            };
 
             return chatRoot;
         }

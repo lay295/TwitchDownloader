@@ -203,7 +203,7 @@ Path to input file. Valid extensions are json
 Path to output file. Extension should match the input.
 
 **-E/-\-embed-missing**
-(Default: true) Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.
+(Default: false) Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.
 
 **-R/-\-replace-embeds**
 (Default: false) Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!
