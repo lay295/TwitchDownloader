@@ -32,24 +32,6 @@ namespace TwitchDownloaderCore
 
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            // If we are updating/replacing embeds
-            if (updateOptions.EmbedMissing || updateOptions.ReplaceEmbeds)
-            {
-                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Updating Embeds" });
-
-                chatRoot.embeddedData ??= new EmbeddedData();
-
-                List<Task> embedTasks = new List<Task>
-                {
-                    FirstPartyEmoteTask(progress),
-                    ThirdPartyEmoteTask(progress),
-                    ChatBadgeTask(progress),
-                    BitTask(progress)
-                };
-
-                await Task.WhenAll(embedTasks);
-            }
-
             // If we are editing the chat crop
             if (updateOptions.CropBeginning || updateOptions.CropEnding)
             {
@@ -84,6 +66,24 @@ namespace TwitchDownloaderCore
                 };
 
                 await Task.WhenAll(chatCropTasks);
+            }
+
+            // If we are updating/replacing embeds
+            if (updateOptions.EmbedMissing || updateOptions.ReplaceEmbeds)
+            {
+                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Updating Embeds" });
+
+                chatRoot.embeddedData ??= new EmbeddedData();
+
+                List<Task> embedTasks = new List<Task>
+                {
+                    FirstPartyEmoteTask(progress),
+                    ThirdPartyEmoteTask(progress),
+                    ChatBadgeTask(progress),
+                    BitTask(progress)
+                };
+
+                await Task.WhenAll(embedTasks);
             }
 
             // Finally save the output to file!
@@ -212,18 +212,7 @@ namespace TwitchDownloaderCore
             }
 
             string tempFile = Path.Combine(updateOptions.TempFolder, Path.GetRandomFileName());
-            ChatDownloadOptions downloadOptions = new ChatDownloadOptions()
-            {
-                Id = "",
-                DownloadFormat = updateOptions.FileFormat,
-                Filename = tempFile,
-                ConnectionCount = 4,
-                EmbedData = false,
-                BttvEmotes = false,
-                FfzEmotes = false,
-                StvEmotes = false,
-                TempFolder = null
-            };
+            ChatDownloadOptions downloadOptions = GetCropDownloadOptions(tempFile, updateOptions.FileFormat);
 
             //if (chatRoot.video.id != null)
             //{
@@ -235,31 +224,7 @@ namespace TwitchDownloaderCore
                 // Only download missing comments if new start crop is less than old start crop
                 if (downloadOptions.Id != null && updateOptions.CropBeginningTime < chatRoot.video.start)
                 {
-                    downloadOptions.CropBeginning = true;
-                    downloadOptions.CropBeginningTime = updateOptions.CropBeginningTime;
-                    downloadOptions.CropEnding = true;
-                    downloadOptions.CropEndingTime = chatRoot.video.start;
-                    ChatDownloader chatDownloader = new(downloadOptions);
-                    await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
-
-                    ChatRoot newChatRoot = await ChatJsonTools.ParseJsonAsync(tempFile, cancellationToken);
-                    SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
-                    foreach (var comment in newChatRoot.comments)
-                    {
-                        if (comment.content_offset_seconds < downloadOptions.CropEndingTime && comment.content_offset_seconds >= downloadOptions.CropBeginningTime)
-                        {
-                            commentsSet.Add(comment);
-                        }
-                    }
-                    foreach (var comment in chatRoot.comments)
-                    {
-                        commentsSet.Add(comment);
-                    }
-                    List<Comment> comments = commentsSet.DistinctBy(x => x._id).ToList();
-                    lock (SharedObjects.ChatCropLock)
-                    {
-                        chatRoot.comments = comments;
-                    }
+                    await AppendCommentSection(downloadOptions, tempFile, updateOptions.CropBeginningTime, chatRoot.video.start, cancellationToken);
                 }
             }
             catch (NullReferenceException)
@@ -269,11 +234,6 @@ namespace TwitchDownloaderCore
 
             // Adjust the crop parameter
             chatRoot.video.start = Math.Max(updateOptions.CropBeginningTime, 0.0);
-
-            if (File.Exists(tempFile))
-            {
-                File.Delete(tempFile);
-            }
         }
 
         private async Task ChatEndingCropTask(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
@@ -284,18 +244,7 @@ namespace TwitchDownloaderCore
             }
 
             string tempFile = Path.Combine(updateOptions.TempFolder, Path.GetRandomFileName());
-            ChatDownloadOptions downloadOptions = new ChatDownloadOptions()
-            {
-                Id = "",
-                DownloadFormat = updateOptions.FileFormat,
-                Filename = tempFile,
-                ConnectionCount = 4,
-                EmbedData = false,
-                BttvEmotes = false,
-                FfzEmotes = false,
-                StvEmotes = false,
-                TempFolder = null
-            };
+            ChatDownloadOptions downloadOptions = GetCropDownloadOptions(tempFile, updateOptions.FileFormat);
 
             //if (chatRoot.video.id != null)
             //{
@@ -307,31 +256,7 @@ namespace TwitchDownloaderCore
                 // Only download missing comments if new end crop is greater than old end crop
                 if (downloadOptions.Id != null && updateOptions.CropEndingTime > chatRoot.video.end)
                 {
-                    downloadOptions.CropBeginning = true;
-                    downloadOptions.CropBeginningTime = chatRoot.video.end;
-                    downloadOptions.CropEnding = true;
-                    downloadOptions.CropEndingTime = updateOptions.CropEndingTime;
-                    ChatDownloader chatDownloader = new(downloadOptions);
-                    await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
-
-                    ChatRoot newChatRoot = await ChatJsonTools.ParseJsonAsync(tempFile, cancellationToken);
-                    SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
-                    foreach (var comment in newChatRoot.comments)
-                    {
-                        if (comment.content_offset_seconds < downloadOptions.CropEndingTime && comment.content_offset_seconds >= downloadOptions.CropBeginningTime)
-                        {
-                            commentsSet.Add(comment);
-                        }
-                    }
-                    foreach (var comment in chatRoot.comments)
-                    {
-                        commentsSet.Add(comment);
-                    }
-                    List<Comment> comments = commentsSet.DistinctBy(x => x._id).ToList();
-                    lock (SharedObjects.ChatCropLock)
-                    {
-                        chatRoot.comments = comments;
-                    }
+                    await AppendCommentSection(downloadOptions, tempFile, chatRoot.video.end, updateOptions.CropEndingTime, cancellationToken);
                 }
             }
             catch (NullReferenceException)
@@ -346,11 +271,59 @@ namespace TwitchDownloaderCore
             //    endingCropClamp = chatRoot.video.length;
             //}
             chatRoot.video.end = Math.Min(updateOptions.CropEndingTime, endingCropClamp);
+        }
+
+        private async Task AppendCommentSection(ChatDownloadOptions downloadOptions, string tempFile, double sectionStart, double sectionEnd, CancellationToken cancellationToken = new())
+        {
+            downloadOptions.CropBeginning = true;
+            downloadOptions.CropBeginningTime = sectionStart;
+            downloadOptions.CropEnding = true;
+            downloadOptions.CropEndingTime = sectionEnd;
+            ChatDownloader chatDownloader = new(downloadOptions);
+            await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
+
+            ChatRoot newChatRoot = await ChatJsonTools.ParseJsonAsync(tempFile, cancellationToken);
+            SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
+            foreach (var comment in newChatRoot.comments)
+            {
+                if (comment.content_offset_seconds < downloadOptions.CropEndingTime && comment.content_offset_seconds >= downloadOptions.CropBeginningTime)
+                {
+                    commentsSet.Add(comment);
+                }
+            }
+            foreach (var comment in chatRoot.comments)
+            {
+                commentsSet.Add(comment);
+            }
+
+            List<Comment> comments = commentsSet.DistinctBy(x => x._id).ToList();
+            commentsSet.Clear();
+            
+            lock (SharedObjects.ChatCropLock)
+            {
+                chatRoot.comments = comments;
+            }
 
             if (File.Exists(tempFile))
             {
                 File.Delete(tempFile);
             }
+        }
+
+        private static ChatDownloadOptions GetCropDownloadOptions(string tempFile, DownloadFormat fileFormat)
+        {
+            return new ChatDownloadOptions()
+            {
+                Id = null,
+                DownloadFormat = fileFormat,
+                Filename = tempFile,
+                ConnectionCount = 4,
+                EmbedData = false,
+                BttvEmotes = false,
+                FfzEmotes = false,
+                StvEmotes = false,
+                TempFolder = null
+            };
         }
 
         public async Task<ChatRoot> ParseJsonAsync()
