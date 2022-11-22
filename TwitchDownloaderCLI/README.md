@@ -258,7 +258,7 @@ Download a Chat (plain text with timestamps)
 Download a Chat (JSON with embeded emotes from Twitch and Bttv)
 
     TwitchDownloaderCLI chatdownload --id 612942303 --embed-images --bttv=true --ffz=false --stv=false -o chat.json
-Add embeds to a chat download without embeds
+Add embeds to a chat file that was downloaded without embeds
 
     TwitchDownloaderCLI chatupdate -i chat.json -o chat_embedded.json --embed-missing
 Render a chat with defaults
