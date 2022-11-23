@@ -22,7 +22,6 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 using WpfAnimatedGif;
-using static System.Windows.Forms.Design.AxImporter;
 using MessageBox = System.Windows.MessageBox;
 
 namespace TwitchDownloaderWPF

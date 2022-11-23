@@ -1,5 +1,4 @@
-﻿using NeoSmart.Unicode;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using System;
@@ -13,7 +12,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
 
@@ -344,7 +342,7 @@ namespace TwitchDownloaderCore
                     {
                         TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.FirstParty, emoteData.imageScale, emoteData.id, emoteData.name);
                         returnList.Add(newEmote);
-                        alreadyAdded.Add(emoteData.name);
+                        alreadyAdded.Add(emoteData.id);
                     }
                     catch { }
                 }
@@ -453,10 +451,12 @@ namespace TwitchDownloaderCore
             Dictionary<string, SKBitmap> returnCache = new Dictionary<string, SKBitmap>();
 
             string emojiFolder = Path.Combine(cacheFolder, "emojis");
+            Regex emojiExtensions = new Regex(@"\.(png|PNG)");
+
             if (!Directory.Exists(emojiFolder))
                 TwitchHelper.CreateDirectory(emojiFolder);
 
-            int emojiCount = Directory.GetFiles(emojiFolder, "*.png").Length;
+            int emojiCount = Directory.GetFiles(emojiFolder).Where(i => emojiExtensions.IsMatch(i)).Count();
 
             //Twemoji 14 has 3689 emoji images
             if (emojiCount < 3689)
@@ -488,9 +488,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            string[] emojiFiles = Directory.GetFiles(emojiFolder);
-            Regex emojiExtensions = new Regex(@"\.(png|PNG)");
-            List<string> emojiList = emojiFiles.Where(i => emojiExtensions.IsMatch(i)).ToList();
+            List<string> emojiList = Directory.GetFiles(emojiFolder).Where(i => emojiExtensions.IsMatch(i)).ToList();
             foreach (var emojiPath in emojiList)
             {
                 SKBitmap emojiImage = SKBitmap.Decode(await File.ReadAllBytesAsync(emojiPath));
@@ -580,7 +578,8 @@ namespace TwitchDownloaderCore
                                 tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
                             }
                             returnList.Add(newEmote);
-                        } catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
+                        }
+                        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                     }
                 }
             }
