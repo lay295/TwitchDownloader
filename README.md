@@ -44,15 +44,15 @@ No GUI is avaiable for MacOS yet :(
 
 # CLI
 
-The CLI is cross platform and performs the main functions of the program. It works on Windows, Linux, and MacOS.*
+The CLI is cross-platform and implements the main functions of the program. It works on Windows, Linux, and MacOS*.
 
-*Only Intel Macs have been tested
+<sub>*Only Intel Macs have been tested</sub>
 
 ### [CLI Documentation here](TwitchDownloaderCLI/README.md). 
 
-I've never really made a command line utility before so things may change in the future. If you're on Linux, make sure `fontconfig` and `libfontconfig1` are installed `(apt-get install fontconfig libfontconfig1)`.
+If you're on Linux, make sure `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 
-For example, you could copy/paste this into a `.bat` file on Windows, to download a VOD, chat, and then render in a single go.  
+For example, you could copy-paste the following code into a `.bat` file on Windows to download a VOD and chat, then render the chat in a single action.
 ```
 @echo off
 set /p vodid="Enter VOD ID: "

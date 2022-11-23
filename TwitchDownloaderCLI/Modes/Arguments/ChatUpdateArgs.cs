@@ -3,7 +3,7 @@
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
 
-    [Verb("chatupdate", HelpText = "Updates the embeded emotes, badges, and bits of a chat download.")]
+    [Verb("chatupdate", HelpText = "Updates the embeded emotes, badges, bits, and crops of a chat download.")]
     public class ChatUpdateArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are json")]
