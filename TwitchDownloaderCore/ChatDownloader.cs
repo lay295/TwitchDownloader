@@ -316,7 +316,7 @@ namespace TwitchDownloaderCore
                         }
                         percent /= connectionCount;
 
-                        progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = $"Downloading {percent}%" });
+                        progress.Report(new ProgressReport() { reportType = ReportType.StatusInfo, data = $"Downloading {percent}%" });
                         progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
                     }
                 });
@@ -338,7 +338,7 @@ namespace TwitchDownloaderCore
 
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is DownloadFormat.Json or DownloadFormat.Html))
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Downloading + Embedding Images" });
+                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Downloading + Embedding Images" });
                 chatRoot.embeddedData = new EmbeddedData();
 
                 List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();

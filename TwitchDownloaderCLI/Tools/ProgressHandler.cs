@@ -10,7 +10,7 @@ namespace TwitchDownloaderCLI.Tools
 
         internal static void Progress_ProgressChanged(object sender, ProgressReport e)
         {
-            if (e.reportType == ReportType.Message)
+            if (e.reportType == ReportType.Status)
             {
                 if (was_last_message_percent)
                 {
@@ -24,6 +24,11 @@ namespace TwitchDownloaderCLI.Tools
                     Console.WriteLine(currentStatus);
                 }
             }
+            else if (e.reportType == ReportType.StatusInfo)
+            {
+                Console.Write("\r[STATUS] - " + e.data);
+                was_last_message_percent = true;
+            }
             else if (e.reportType == ReportType.Log)
             {
                 if (was_last_message_percent)
@@ -32,11 +37,6 @@ namespace TwitchDownloaderCLI.Tools
                     Console.WriteLine();
                 }
                 Console.WriteLine("[LOG] - " + e.data);
-            }
-            else if (e.reportType == ReportType.MessageInfo)
-            {
-                Console.Write("\r[STATUS] - " + e.data);
-                was_last_message_percent = true;
             }
         }
     }

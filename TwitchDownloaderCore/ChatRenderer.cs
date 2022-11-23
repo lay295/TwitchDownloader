@@ -43,7 +43,7 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Images" });
+            progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Fetching Images" });
             Task<List<ChatBadge>> badgeTask = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline));
             Task<List<TwitchEmote>> emoteTask = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline));
             Task<List<TwitchEmote>> emoteThirdTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline));
@@ -95,7 +95,7 @@ namespace TwitchDownloaderCore
             if (renderOptions.GenerateMask && File.Exists(renderOptions.OutputFileMask))
                 File.Delete(renderOptions.OutputFileMask);
 
-            progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = "Rendering Video 0%" });
+            progress.Report(new ProgressReport() { reportType = ReportType.StatusInfo, data = "Rendering Video 0%" });
             (Process, string) processInfo = GetFfmpegProcess(0, false);
 
             if (renderOptions.GenerateMask)
@@ -182,10 +182,10 @@ namespace TwitchDownloaderCore
                     progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percentInt });
                     int timeLeftInt = (int)Math.Floor(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
                     TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
-                    progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = $"Rendering Video {percentInt}% ({timeLeft.ToString(@"h\hm\ms\s")} left)" });
+                    progress.Report(new ProgressReport() { reportType = ReportType.StatusInfo, data = $"Rendering Video {percentInt}% ({timeLeft.ToString(@"h\hm\ms\s")} left)" });
                 }
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = "Rendering Video 100%" });
+            progress.Report(new ProgressReport() { reportType = ReportType.StatusInfo, data = "Rendering Video 100%" });
             stopwatch.Stop();
             progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });
 

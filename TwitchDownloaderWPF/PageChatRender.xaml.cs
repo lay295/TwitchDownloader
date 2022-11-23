@@ -1,5 +1,4 @@
 ﻿using HandyControl.Controls;
-using HandyControl.Tools.Extension;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SkiaSharp;
@@ -103,7 +102,7 @@ namespace TwitchDownloaderWPF
             {
                 statusProgressBar.Value = (int)progress.data;
             }
-            if (progress.reportType is ReportType.Message or ReportType.MessageInfo)
+            if (progress.reportType is ReportType.Status or ReportType.StatusInfo)
             {
                 statusMessage.Text = (string)progress.data;
             }
