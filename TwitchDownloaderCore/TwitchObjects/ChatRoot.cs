@@ -128,7 +128,7 @@ namespace TwitchDownloaderCore.TwitchObjects
 
     public class ChatRootInfo
     {
-        public string version { get; } = "1.1.0"; // Incrment this when making changes to the chatroot structure
+        public string version { get; set; } = "1.1.0"; // Incrment this when making changes to the chatroot structure
         public DateTime created_at { get; set; } = DateTime.Now;
     }
 
