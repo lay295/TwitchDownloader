@@ -126,8 +126,15 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string _next { get; set; }
     }
 
+    public class ChatRootInfo
+    {
+        public string version { get; } = "1.1.0"; // Incrment this when making changes to the chatroot structure
+        public DateTime created_at { get; set; } = DateTime.Now;
+    }
+
     public class ChatRoot
     {
+        public ChatRootInfo fileInfo { get; set; } = new ChatRootInfo();
         public Streamer streamer { get; set; }
         public Video video { get; set; }
         public List<Comment> comments { get; set; }
