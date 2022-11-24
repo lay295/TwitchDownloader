@@ -91,7 +91,6 @@ namespace TwitchDownloader
                             currentChat++;
                             task.RunAsync();
                         }
-
                         if (task is ChatUpdateTask && (currentChat + 1) <= maxChat)
                         {
                             currentChat++;

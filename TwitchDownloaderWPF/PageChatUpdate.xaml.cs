@@ -255,7 +255,8 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.ChatEmbedEmotes = true;
+                Settings.Default.EmbedMissing = true;
+                Settings.Default.ReplaceEmbeds = false;
                 Settings.Default.Save();
                 checkReplaceEmbeds.IsChecked = false;
                 checkBttvEmbed.IsEnabled = true;
@@ -268,7 +269,7 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.ChatEmbedEmotes = false;
+                Settings.Default.EmbedMissing = false;
                 Settings.Default.Save();
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;
@@ -280,7 +281,8 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.ChatEmbedEmotes = true;
+                Settings.Default.EmbedMissing = false;
+                Settings.Default.ReplaceEmbeds = true;
                 Settings.Default.Save();
                 checkEmbedMissing.IsChecked = false;
                 checkBttvEmbed.IsEnabled = true;
@@ -293,7 +295,7 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.ChatEmbedEmotes = false;
+                Settings.Default.ReplaceEmbeds = false;
                 Settings.Default.Save();
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;
