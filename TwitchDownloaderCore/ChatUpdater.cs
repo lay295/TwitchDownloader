@@ -228,7 +228,7 @@ namespace TwitchDownloaderCore
                 // Only download missing comments if new start crop is less than old start crop
                 if (_updateOptions.CropBeginningTime < chatRoot.video.start)
                 {
-                    ChatDownloadOptions downloadOptions = GetCropDownloadOptions(/*chatRoot.video.id,*/null, tempFile, _updateOptions.FileFormat, _updateOptions.CropBeginningTime, chatRoot.video.start);
+                    ChatDownloadOptions downloadOptions = GetCropDownloadOptions(/*chatRoot.video.id,*/null, tempFile, _updateOptions.CropBeginningTime, chatRoot.video.start);
                     await AppendCommentSection(downloadOptions, tempFile, cancellationToken);
                 }
             }
@@ -261,7 +261,7 @@ namespace TwitchDownloaderCore
                 // Only download missing comments if new end crop is greater than old end crop
                 if (_updateOptions.CropEndingTime > chatRoot.video.end)
                 {
-                    ChatDownloadOptions downloadOptions = GetCropDownloadOptions(/*chatRoot.video.id,*/null, tempFile, _updateOptions.FileFormat, chatRoot.video.end, _updateOptions.CropEndingTime);
+                    ChatDownloadOptions downloadOptions = GetCropDownloadOptions(/*chatRoot.video.id,*/null, tempFile, chatRoot.video.end, _updateOptions.CropEndingTime);
                     await AppendCommentSection(downloadOptions, tempFile, cancellationToken);
                 }
             }
@@ -311,12 +311,12 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static ChatDownloadOptions GetCropDownloadOptions(string videoId, string tempFile, ChatFormat fileFormat, double sectionStart, double sectionEnd)
+        private static ChatDownloadOptions GetCropDownloadOptions(string videoId, string tempFile, double sectionStart, double sectionEnd)
         {
             return new ChatDownloadOptions()
             {
                 Id = videoId,
-                DownloadFormat = fileFormat,
+                DownloadFormat = ChatFormat.Json, // json is required to parse as a new chatroot object
                 Filename = tempFile,
                 CropBeginning = true,
                 CropBeginningTime = sectionStart,
