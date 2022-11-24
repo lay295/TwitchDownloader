@@ -14,17 +14,15 @@ namespace TwitchDownloaderCLI.Modes
         {
             ChatFormat inFormat = Path.GetExtension(inputOptions.InputFile)!.ToLower() switch
             {
-                ".json" => ChatFormat.Json,
-                ".html" => ChatFormat.Html,
-                ".htm" => ChatFormat.Html,
-                _ => ChatFormat.Text
+                ".json"             => ChatFormat.Json,
+                ".html" or ".htm"   => ChatFormat.Html,
+                _                   => ChatFormat.Text
             };
             ChatFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
             {
-                ".json" => ChatFormat.Json,
-                ".html" => ChatFormat.Html,
-                ".htm" => ChatFormat.Html,
-                _ => ChatFormat.Text
+                ".json"             => ChatFormat.Json,
+                ".html" or ".htm"   => ChatFormat.Html,
+                _                   => ChatFormat.Text
             };
             if (inFormat != outFormat)
             {

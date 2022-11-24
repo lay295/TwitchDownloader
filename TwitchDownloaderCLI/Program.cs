@@ -1,6 +1,5 @@
 ﻿using CommandLine;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using TwitchDownloaderCLI.Modes;
@@ -13,7 +12,7 @@ namespace TwitchDownloaderCLI
     {
         static void Main(string[] args)
         {
-            string processFileName = Environment.ProcessPath.Split(Path.DirectorySeparatorChar).Last();
+            string processFileName = Path.GetFileName(Environment.ProcessPath);
             if (args.Length == 0)
             {
                 if (Path.GetExtension(processFileName).Equals(".exe"))

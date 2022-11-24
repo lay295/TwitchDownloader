@@ -44,20 +44,12 @@ namespace TwitchDownloaderWPF
 			checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
 			checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
 			numChatDownloadConnections.Value = Settings.Default.ChatDownloadThreads;
-			switch (Settings.Default.ChatDownloadType)
+			_ = (ChatFormat)Settings.Default.ChatDownloadType switch
 			{
-				case (int)ChatFormat.Text:
-					radioText.IsChecked = true;
-					break;
-				case (int)ChatFormat.Html:
-					radioHTML.IsChecked = true;
-					break;
-				case (int)ChatFormat.Json:
-					radioJson.IsChecked = true;
-					break;
-				default:
-					break;
-			}
+				ChatFormat.Text => radioText.IsChecked = true,
+				ChatFormat.Html => radioHTML.IsChecked = true,
+				_ => radioJson.IsChecked = true
+			};
 		}
 
 		private void SetEnabled(bool isEnabled, bool isClip)

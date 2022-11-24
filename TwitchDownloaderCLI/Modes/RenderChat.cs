@@ -35,18 +35,16 @@ namespace TwitchDownloaderCLI.Modes
                 ChatBadgeMask = inputOptions.BadgeFilterMask,
                 MessageFontStyle = inputOptions.MessageFontStyle.ToLower() switch
                 {
-                    "normal" => SKFontStyle.Normal,
-                    "bold" => SKFontStyle.Bold,
-                    "italic" => SKFontStyle.Italic,
-                    "italics" => SKFontStyle.Italic,
+                    "normal"                => SKFontStyle.Normal,
+                    "bold"                  => SKFontStyle.Bold,
+                    "italic" or "italics"   => SKFontStyle.Italic,
                     _ => throw new NotImplementedException("Invalid message font style. Valid values are: normal, bold, and italic")
                 },
                 UsernameFontStyle = inputOptions.UsernameFontStyle.ToLower() switch
                 {
-                    "normal" => SKFontStyle.Normal,
-                    "bold" => SKFontStyle.Bold,
-                    "italic" => SKFontStyle.Italic,
-                    "italics" => SKFontStyle.Italic,
+                    "normal"                => SKFontStyle.Normal,
+                    "bold"                  => SKFontStyle.Bold,
+                    "italic" or "italics"   => SKFontStyle.Italic,
                     _ => throw new NotImplementedException("Invalid username font style. Valid values are: normal, bold, and italic")
                 },
                 UpdateRate = inputOptions.UpdateRate,
@@ -59,7 +57,7 @@ namespace TwitchDownloaderCLI.Modes
                 SubMessages = (bool)inputOptions.SubMessages,
                 ChatBadges = (bool)inputOptions.ChatBadges,
                 Timestamp = inputOptions.Timestamp,
-                Offline = (bool)inputOptions.Offline,
+                Offline = inputOptions.Offline,
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
@@ -80,7 +78,7 @@ namespace TwitchDownloaderCLI.Modes
                 }
             }
 
-            if (inputOptions.IgnoreUsersList != string.Empty)
+            if (inputOptions.IgnoreUsersList != "")
             {
                 renderOptions.IgnoreUsersList = inputOptions.IgnoreUsersList.ToLower().Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
