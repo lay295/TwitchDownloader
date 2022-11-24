@@ -130,7 +130,7 @@ namespace TwitchDownloaderCore
                 newEmote.height = emote.Height / emote.ImageScale;
                 chatRoot.embeddedData.firstParty.Add(newEmote);
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input first party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.firstParty.Count) });
+            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input 1st party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.firstParty.Count) });
         }
 
         private async Task ThirdPartyEmoteTask(IProgress<ProgressReport> progress)
@@ -156,7 +156,7 @@ namespace TwitchDownloaderCore
                 newEmote.height = emote.Height / emote.ImageScale;
                 chatRoot.embeddedData.thirdParty.Add(newEmote);
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input third party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.thirdParty.Count) });
+            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input 3rd party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.thirdParty.Count) });
         }
 
         private async Task ChatBadgeTask(IProgress<ProgressReport> progress)
@@ -211,7 +211,7 @@ namespace TwitchDownloaderCore
                 }
                 chatRoot.embeddedData.twitchBits.Add(newBit);
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input cheermote emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBits.Count) });
+            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input bit emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBits.Count) });
         }
 
         private async Task ChatBeginningCropTask(IProgress<ProgressReport> progress, CancellationToken cancellationToken)

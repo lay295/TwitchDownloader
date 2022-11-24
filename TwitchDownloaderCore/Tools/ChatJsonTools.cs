@@ -44,5 +44,28 @@ namespace TwitchDownloaderCore.Tools
 
             return chatRoot;
         }
+
+        public static async Task<ChatRoot> ParseJsonInfoAsync(string inputJson, CancellationToken cancellationToken = new())
+        {
+            ChatRoot chatRoot = new ChatRoot();
+
+            using FileStream fs = new FileStream(inputJson, FileMode.Open, FileAccess.Read);
+            using var jsonDocument = await JsonDocument.ParseAsync(fs, cancellationToken: cancellationToken);
+
+            if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
+            {
+                chatRoot.streamer = streamerJson.Deserialize<Streamer>();
+            }
+
+            if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
+            {
+                if (videoJson.TryGetProperty("start", out _) && videoJson.TryGetProperty("end", out _))
+                {
+                    chatRoot.video = videoJson.Deserialize<VideoTime>();
+                }
+            }
+
+            return chatRoot;
+        }
     }
 }

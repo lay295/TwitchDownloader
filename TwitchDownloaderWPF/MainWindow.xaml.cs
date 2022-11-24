@@ -21,6 +21,7 @@ namespace TwitchDownloaderWPF
         static public PageVodDownload pageVodDownload = new PageVodDownload();
         static public PageClipDownload pageClipDownload = new PageClipDownload();
         static public PageChatDownload pageChatDownload = new PageChatDownload();
+        static public PageChatUpdate pageChatUpdate = new PageChatUpdate();
         static public PageChatRender pageChatRender = new PageChatRender();
         static public PageQueue pageQueue = new PageQueue();
 
@@ -43,6 +44,11 @@ namespace TwitchDownloaderWPF
         private void btnChatDownload_Click(object sender, RoutedEventArgs e)
         {
             Main.Content = pageChatDownload;
+        }
+
+        private void btnChatUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            Main.Content = pageChatUpdate;
         }
 
         private void btnChatRender_Click(object sender, RoutedEventArgs e)
