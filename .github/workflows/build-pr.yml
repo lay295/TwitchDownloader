@@ -41,13 +41,13 @@ jobs:
       uses: vimtor/action-zip@v1
       with:
         files: "TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64"
-        dest: TwitchDownloader-Windows-x64.zip
+        dest: TwitchDownloaderGUI-Windows-x64.zip
 
     - name: Upload Artifact Asset
       uses: actions/upload-artifact@v3
       with:
-        name: TwitchDownloader-Windows-x64.zip
-        path: TwitchDownloader-Windows-x64.zip
+        name: TwitchDownloaderGUI-Windows-x64.zip
+        path: TwitchDownloaderGUI-Windows-x64.zip
 
   build-cli:
     runs-on: ubuntu-20.04
