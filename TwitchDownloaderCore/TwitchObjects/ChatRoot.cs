@@ -128,23 +128,36 @@ namespace TwitchDownloaderCore.TwitchObjects
 
     public class ChatRootVersion
     {
-        public uint major { get; set; }
-        public uint minor { get; set; }
-        public uint patch { get; set; }
+        public int major { get; set; }
+        public int minor { get; set; }
+        public int patch { get; set; }
 
         public ChatRootVersion() { }
 
-        public ChatRootVersion(string version)
+        public ChatRootVersion(int _major, int _minor, int _patch)
         {
-            string[] versionArray = version.Split('.');
-
-            uint.TryParse(versionArray[0] ?? "1", out uint _major);
-            uint.TryParse(versionArray[1] ?? "0", out uint _minor);
-            uint.TryParse(versionArray[2] ?? "0", out uint _patch);
-
             major = _major;
             minor = _minor;
             patch = _patch;
+        }
+
+        public ChatRootVersion(string version)
+        {
+            string[] versionArray = version.Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (versionArray.Length == 0)
+                return;
+
+            major = int.Parse(versionArray[0]);
+
+            if (versionArray.Length == 1)
+                return;
+
+            minor = int.Parse(versionArray[1]);
+
+            if (versionArray.Length == 2)
+                return;
+
+            patch = int.Parse(versionArray[2]);
         }
     }
 
