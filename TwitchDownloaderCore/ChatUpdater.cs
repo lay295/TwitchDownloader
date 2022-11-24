@@ -29,6 +29,11 @@ namespace TwitchDownloaderCore
 
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
+            if (_updateOptions.FileFormat != ChatFormat.Json)
+            {
+                throw new NotImplementedException("Only chat JSONs can be updated. HTML support may come in the future.");
+            }
+
             // If we are editing the chat crop
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding)
             {
@@ -95,7 +100,7 @@ namespace TwitchDownloaderCore
             // TODO: maybe in the future we could also export as HTML here too?
             progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Writing output file" });
 
-            if (_updateOptions.FileFormat == DownloadFormat.Json)
+            if (_updateOptions.FileFormat == ChatFormat.Json)
             {
                 using TextWriter writer = File.CreateText(_updateOptions.OutputFile);
                 JsonSerializer serializer = new JsonSerializer();
@@ -306,7 +311,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static ChatDownloadOptions GetCropDownloadOptions(string videoId, string tempFile, DownloadFormat fileFormat, double sectionStart, double sectionEnd)
+        private static ChatDownloadOptions GetCropDownloadOptions(string videoId, string tempFile, ChatFormat fileFormat, double sectionStart, double sectionEnd)
         {
             return new ChatDownloadOptions()
             {

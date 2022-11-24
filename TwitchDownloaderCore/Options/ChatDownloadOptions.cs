@@ -1,10 +1,23 @@
 ﻿namespace TwitchDownloaderCore.Options
 {
-    public enum TimestampFormat { Utc, Relative, None }
-    public enum DownloadFormat { Json, Text, Html }
+    public enum TimestampFormat
+    {
+        Utc,
+        Relative,
+        None
+    }
+
+    // TODO: Move ChatFormat to dedicated file
+    public enum ChatFormat
+    {
+        Json,
+        Text,
+        Html
+    }
+
     public class ChatDownloadOptions
     {
-        public DownloadFormat DownloadFormat { get; set; } = DownloadFormat.Json;
+        public ChatFormat DownloadFormat { get; set; } = ChatFormat.Json;
         public string Id { get; set; }
         public string Filename { get; set; }
         public bool CropBeginning { get; set; }
@@ -18,14 +31,15 @@
         public bool StvEmotes { get; set; }
         public int ConnectionCount { get; set; } = 1;
         public TimestampFormat TimeFormat { get; set; }
-        public string FileExtension { 
-            get 
+        public string FileExtension
+        {
+            get
             {
                 return DownloadFormat switch
                 {
-                    DownloadFormat.Json => "json",
-                    DownloadFormat.Html => "html",
-                    DownloadFormat.Text => "txt",
+                    ChatFormat.Json => "json",
+                    ChatFormat.Html => "html",
+                    ChatFormat.Text => "txt",
                     _ => ""
                 };
             }

@@ -336,7 +336,7 @@ namespace TwitchDownloaderCore
             comments = commentsSet.DistinctBy(x => x._id).ToList();
             chatRoot.comments = comments;
 
-            if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is DownloadFormat.Json or DownloadFormat.Html))
+            if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
                 progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Downloading + Embedding Images" });
                 chatRoot.embeddedData = new EmbeddedData();
@@ -399,7 +399,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            if (downloadOptions.DownloadFormat == DownloadFormat.Json)
+            if (downloadOptions.DownloadFormat == ChatFormat.Json)
             {
                 using (TextWriter writer = File.CreateText(downloadOptions.Filename))
                 {
@@ -407,7 +407,7 @@ namespace TwitchDownloaderCore
                     serializer.Serialize(writer, chatRoot);
                 }
             }
-            else if (downloadOptions.DownloadFormat == DownloadFormat.Text)
+            else if (downloadOptions.DownloadFormat == ChatFormat.Text)
             {
                 using (StreamWriter sw = new StreamWriter(downloadOptions.Filename))
                 {
@@ -436,7 +436,7 @@ namespace TwitchDownloaderCore
                     sw.Close();
                 }
             }
-            else if (downloadOptions.DownloadFormat == DownloadFormat.Html)
+            else if (downloadOptions.DownloadFormat == ChatFormat.Html)
             {
                 Dictionary<string, EmbedEmoteData> thirdEmoteData = null;
                 EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmoteData(chatRoot.streamer.id.ToString(), true, true, true);

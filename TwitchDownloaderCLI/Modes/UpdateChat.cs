@@ -12,23 +12,23 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Update(ChatUpdateArgs inputOptions)
         {
-            DownloadFormat inFormat = Path.GetExtension(inputOptions.InputFile)!.ToLower() switch
+            ChatFormat inFormat = Path.GetExtension(inputOptions.InputFile)!.ToLower() switch
             {
-                ".json" => DownloadFormat.Json,
-                ".html" => DownloadFormat.Html,
-                ".htm" => DownloadFormat.Html,
-                _ => DownloadFormat.Text
+                ".json" => ChatFormat.Json,
+                ".html" => ChatFormat.Html,
+                ".htm" => ChatFormat.Html,
+                _ => ChatFormat.Text
             };
-            DownloadFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
+            ChatFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
             {
-                ".json" => DownloadFormat.Json,
-                ".html" => DownloadFormat.Html,
-                ".htm" => DownloadFormat.Html,
-                _ => DownloadFormat.Text
+                ".json" => ChatFormat.Json,
+                ".html" => ChatFormat.Html,
+                ".htm" => ChatFormat.Html,
+                _ => ChatFormat.Text
             };
-            if (inFormat != DownloadFormat.Json || outFormat != DownloadFormat.Json)
+            if (inFormat != outFormat)
             {
-                Console.WriteLine("[ERROR] - {0} format must be be json!", inFormat != DownloadFormat.Json ? "Input" : "Output");
+                Console.WriteLine("[ERROR] - Input file extension must match output file extension!");
                 Environment.Exit(1);
             }
             if (!File.Exists(inputOptions.InputFile))

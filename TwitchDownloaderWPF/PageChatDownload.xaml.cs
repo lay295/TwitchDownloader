@@ -46,13 +46,13 @@ namespace TwitchDownloaderWPF
 			numChatDownloadConnections.Value = Settings.Default.ChatDownloadThreads;
 			switch (Settings.Default.ChatDownloadType)
 			{
-				case (int)DownloadFormat.Text:
+				case (int)ChatFormat.Text:
 					radioText.IsChecked = true;
 					break;
-				case (int)DownloadFormat.Html:
+				case (int)ChatFormat.Html:
 					radioHTML.IsChecked = true;
 					break;
-				case (int)DownloadFormat.Json:
+				case (int)ChatFormat.Json:
 					radioJson.IsChecked = true;
 					break;
 				default:
@@ -228,11 +228,11 @@ namespace TwitchDownloaderWPF
 			ChatDownloadOptions options = new ChatDownloadOptions();
 
 			if (radioJson.IsChecked == true)
-				options.DownloadFormat = DownloadFormat.Json;
+				options.DownloadFormat = ChatFormat.Json;
 			else if (radioHTML.IsChecked == true)
-				options.DownloadFormat = DownloadFormat.Html;
+				options.DownloadFormat = ChatFormat.Html;
 			else if (radioText.IsChecked == true)
-				options.DownloadFormat = DownloadFormat.Text;
+				options.DownloadFormat = ChatFormat.Text;
 
 			options.Timestamp = true;
 			options.EmbedData = (bool)checkEmbed.IsChecked;
@@ -298,7 +298,7 @@ namespace TwitchDownloaderWPF
 				checkStvEmbed.IsEnabled = false;
 				textCrop.Margin = new Thickness(0, 14, 0, 0);
 
-				Settings.Default.ChatDownloadType = (int)DownloadFormat.Text;
+				Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
 				Settings.Default.Save();
 			}
 		}
@@ -401,7 +401,7 @@ namespace TwitchDownloaderWPF
 				checkStvEmbed.IsEnabled = true;
 				textCrop.Margin = new Thickness(0, 20, 0, 0);
 
-				Settings.Default.ChatDownloadType = (int)DownloadFormat.Json;
+				Settings.Default.ChatDownloadType = (int)ChatFormat.Json;
 				Settings.Default.Save();
 			}
 		}
@@ -418,7 +418,7 @@ namespace TwitchDownloaderWPF
 				checkStvEmbed.IsEnabled = true;
 				textCrop.Margin = new Thickness(0, 20, 0, 0);
 
-				Settings.Default.ChatDownloadType = (int)DownloadFormat.Html;
+				Settings.Default.ChatDownloadType = (int)ChatFormat.Html;
 				Settings.Default.Save();
 			}
 		}

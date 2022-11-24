@@ -4,7 +4,7 @@
     {
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
-        public DownloadFormat FileFormat { get; set; } = DownloadFormat.Json;
+        public ChatFormat FileFormat { get; set; } = ChatFormat.Json;
         public bool EmbedMissing { get; set; }
         public bool ReplaceEmbeds { get; set; }
         public bool CropBeginning { get; set; }
