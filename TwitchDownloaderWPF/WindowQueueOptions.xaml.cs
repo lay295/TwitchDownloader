@@ -17,6 +17,8 @@ namespace TwitchDownloader
     /// </summary>
     public partial class WindowQueueOptions : Window
     {
+        // This file is absolutely attrocious, but fixing it would mean rewriting the entire GUI in a more abstract form
+
         List<TaskData> dataList;
 
         Page parentPage { get; set; }
@@ -53,6 +55,16 @@ namespace TwitchDownloader
                 {
                     checkRender.Margin = new Thickness(10, 85, 0, 0);
                 }
+            }
+            if (page is PageChatUpdate)
+            {
+                checkVideo.Visibility = Visibility.Collapsed;
+                checkChat.Visibility = Visibility.Collapsed;
+                radioJson.Visibility = Visibility.Collapsed;
+                radioTxt.Visibility = Visibility.Collapsed;
+                radioHTML.Visibility = Visibility.Collapsed;
+                checkEmbed.Visibility = Visibility.Collapsed;
+                checkRender.Visibility = Visibility.Collapsed;
             }
             if (page is PageChatRender)
             {
@@ -280,6 +292,35 @@ namespace TwitchDownloader
                             {
                                 PageQueue.taskList.Add(renderTask);
                             }
+                        }
+
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+
+                if (parentPage is PageChatUpdate)
+                {
+                    PageChatUpdate chatPage = (PageChatUpdate)parentPage;
+                    string folderPath = textFolder.Text;
+                    if (!string.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
+                    {
+                        ChatUpdateTask chatTask = new ChatUpdateTask();
+                        ChatUpdateOptions chatOptions = MainWindow.pageChatUpdate.GetOptions("temp.json");
+                        chatOptions.InputFile = chatPage.InputFile;
+                        chatOptions.OutputFile = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatPage.VideoId, chatPage.VideoCreatedAt, chatPage.textStreamer.Text) + "." + chatOptions.FileFormat);
+
+                        chatTask.UpdateOptions = chatOptions;
+                        chatTask.Info.Title = chatPage.textTitle.Text;
+                        chatTask.Info.Thumbnail = chatPage.imgThumbnail.Source;
+                        chatTask.Status = TwitchTaskStatus.Ready;
+
+                        lock (PageQueue.taskLock)
+                        {
+                            PageQueue.taskList.Add(chatTask);
                         }
 
                         this.Close();

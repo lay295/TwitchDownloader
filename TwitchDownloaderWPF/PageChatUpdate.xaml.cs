@@ -24,9 +24,10 @@ namespace TwitchDownloaderWPF
     public partial class PageChatUpdate : Page
     {
 
-        public string downloadId;
-        public int streamerId;
-        public DateTime currentVideoTime;
+        public string InputFile;
+        public ChatRoot ChatJsonInfo;
+        public string VideoId;
+        public DateTime VideoCreatedAt;
 
         public PageChatUpdate()
         {
@@ -42,48 +43,79 @@ namespace TwitchDownloaderWPF
             if (openFileDialog.ShowDialog() == true)
             {
                 textJson.Text = openFileDialog.FileName;
+                InputFile = openFileDialog.FileName;
                 SetEnabled(true);
 
-                if (Path.GetExtension(openFileDialog.FileName).ToLower() == ".json")
+                if (Path.GetExtension(InputFile).ToLower() == ".json")
                 {
-                    ChatRoot chatJsonInfo = await ChatJsonTools.ParseJsonInfoAsync(openFileDialog.FileName);
-                    textStreamer.Text = chatJsonInfo.streamer.name;
+                    ChatJsonInfo = await ChatJsonTools.ParseJsonInfoAsync(InputFile);
+                    textStreamer.Text = ChatJsonInfo.streamer.name;
                     textCreatedAt.Text = /*chatJsonInfo.video.created_at*/null ?? "Unknown";
                     textTitle.Text = /*chatJsonInfo.video.title*/null ?? "Unknown";
 
-                    TimeSpan chatStart = TimeSpan.FromSeconds(chatJsonInfo.video.start);
+                    VideoCreatedAt = DateTime.Parse(/*chatJsonInfo.video.created_at*/null ?? "0001-01-01T00:00:01");
+
+                    TimeSpan chatStart = TimeSpan.FromSeconds(ChatJsonInfo.video.start);
                     numStartHour.Value = (int)chatStart.TotalHours;
                     numStartMinute.Value = chatStart.Minutes;
                     numStartSecond.Value = chatStart.Seconds;
 
-                    TimeSpan chatEnd = TimeSpan.FromSeconds(chatJsonInfo.video.end);
+                    TimeSpan chatEnd = TimeSpan.FromSeconds(ChatJsonInfo.video.end);
                     numEndHour.Value = (int)chatEnd.TotalHours;
                     numEndMinute.Value = chatEnd.Minutes;
                     numEndSecond.Value = chatEnd.Seconds;
 
-                    GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(/*chatJsonInfo.video.id*/0);
-                    if (videoInfo.data.video == null)
-                    {
-                        AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
+                    TimeSpan videoLength = TimeSpan.FromSeconds(/*chatJsonInfo.video.length ??*/0.0);
+                    labelLength.Text = videoLength.Seconds > 0
+                        ? string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds)
+                        : "Unknown";
 
-                        TimeSpan vodLength = TimeSpan.FromSeconds(/*chatJsonInfo.video.length ??*/0.0);
-                        labelLength.Text = vodLength.Seconds > 0
-                            ? string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds)
-                            : "Unknown";
+                    VideoId = /*chatJsonInfo.video.id*/null ?? "-1";
+
+                    if (VideoId.All(char.IsDigit))
+                    {
+                        GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(VideoId));
+                        if (videoInfo.data.video == null)
+                        {
+                            AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
+                        }
+                        else
+                        {
+                            videoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
+                            labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds);
+
+                            Task<BitmapImage> taskThumb = InfoHelper.GetThumb(videoInfo.data.video.thumbnailURLs.FirstOrDefault());
+                            try
+                            {
+                                imgThumbnail.Source = await taskThumb;
+                            }
+                            catch
+                            {
+                                AppendLog("ERROR: Unable to find thumbnail");
+                            }
+                        }
                     }
                     else
                     {
-                        TimeSpan vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
-                        labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
-
-                        Task<BitmapImage> taskThumb = InfoHelper.GetThumb(videoInfo.data.video.thumbnailURLs.FirstOrDefault());
-                        try
+                        GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
+                        if (videoInfo.data.clip.video == null)
                         {
-                            imgThumbnail.Source = await taskThumb;
+                            AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
                         }
-                        catch
+                        else
                         {
-                            AppendLog("ERROR: Unable to find thumbnail");
+                            videoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
+                            labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds);
+
+                            Task<BitmapImage> taskThumb = InfoHelper.GetThumb(videoInfo.data.clip.thumbnailURL);
+                            try
+                            {
+                                imgThumbnail.Source = await taskThumb;
+                            }
+                            catch
+                            {
+                                AppendLog("ERROR: Unable to find thumbnail");
+                            }
                         }
                     }
                 }
@@ -140,7 +172,7 @@ namespace TwitchDownloaderWPF
             );
         }
 
-        public ChatUpdateOptions GetOptions(string filename)
+        public ChatUpdateOptions GetOptions(string outputFile)
         {
             ChatUpdateOptions options = new ChatUpdateOptions()
             {
@@ -150,14 +182,29 @@ namespace TwitchDownloaderWPF
                 FfzEmotes = (bool)checkFfzEmbed.IsChecked,
                 StvEmotes = (bool)checkStvEmbed.IsChecked,
                 InputFile = textJson.Text,
-                OutputFile = filename,
-                FileFormat = Path.GetExtension(filename)!.ToLower() switch
+                OutputFile = outputFile,
+                FileFormat = Path.GetExtension(outputFile)!.ToLower() switch
                 {
                     ".json" => ChatFormat.Json,
                     ".html" or ".htm" => ChatFormat.Html,
                     _ => ChatFormat.Text // Default is needed to properly throw NIE in ChatUpdater.UpdateAsync()
-                }
+                },
+                CropBeginningTime = -1,
+                CropEndingTime= -1
             };
+
+            if (checkStart.IsChecked == true)
+            {
+                options.CropBeginning = true;
+                TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
+                options.CropBeginningTime = (int)Math.Round(start.TotalSeconds);
+            }
+            if (checkEnd.IsChecked == true)
+            {
+                options.CropEnding = true;
+                TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
+                options.CropEndingTime = (int)Math.Round(end.TotalSeconds);
+            }
 
             return options;
         }
@@ -322,32 +369,13 @@ namespace TwitchDownloaderWPF
                 };
 
                 saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text);
+                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, /*ChatJsonInfo.video.id*/ null ?? "-1", VideoCreatedAt, textStreamer.Text);
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
                     try
                     {
                         ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
-
-                        int startTime = -1;
-                        int endTime = -1;
-
-                        if (checkStart.IsChecked == true)
-                        {
-                            updateOptions.CropBeginning = true;
-                            TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                            startTime = (int)Math.Round(start.TotalSeconds);
-                            updateOptions.CropBeginningTime = startTime;
-                        }
-
-                        if (checkEnd.IsChecked == true)
-                        {
-                            updateOptions.CropEnding = true;
-                            TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                            endTime = (int)Math.Round(end.TotalSeconds);
-                            updateOptions.CropEndingTime = endTime;
-                        }
 
                         ChatUpdater currentDownload = new ChatUpdater(updateOptions);
                         await currentDownload.ParseJsonAsync();
