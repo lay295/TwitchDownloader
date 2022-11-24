@@ -39,11 +39,6 @@
                 <TextBlock Margin="3,8,3,3" Text="Theme:" Foreground="{DynamicResource AppText}" />
                 <ComboBox x:Name="comboTheme" MinWidth="100" MaxWidth="345" HorizontalAlignment="Left" SelectionChanged="comboAppTheme_SelectionChaned" Margin="3,0,3,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
-            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <fa:SvgAwesome Margin="3,2,1,-2" Icon="Solid_Language" Width="32" Height="26" Foreground="{DynamicResource AppText}" />
-                <TextBlock Margin="3,8,3,3" Text="Language:" Foreground="{DynamicResource AppText}" />
-                <ComboBox x:Name="comboLocale" MinWidth="100" MaxWidth="330" HorizontalAlignment="Left" SelectionChanged="comboAppTheme_SelectionChaned" Margin="3,0,3,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-            </StackPanel>
             <TextBlock Margin="3,5,3,3" Text="Download Filename Templates:" Foreground="{DynamicResource AppText}" />
             <StackPanel Margin="0" Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
