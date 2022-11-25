@@ -34,10 +34,16 @@ namespace TwitchDownloaderCore
                 throw new NotImplementedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
             }
 
+            // Dynamic step count setup
+            int currentStep = 0;
+            int totalSteps = 1;
+            if (_updateOptions.CropBeginning || _updateOptions.CropEnding) totalSteps++;
+            if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds) totalSteps++;
+
             // If we are editing the chat crop
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding)
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Updating Chat Crop" });
+                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = string.Format("Updating Chat Crop [{0}/{1}]", ++currentStep, totalSteps) });
 
                 chatRoot.video ??= new VideoTime();
 
@@ -81,7 +87,7 @@ namespace TwitchDownloaderCore
             // If we are updating/replacing embeds
             if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Updating Embeds" });
+                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = string.Format("Updating Embeds [{0}/{1}]", ++currentStep, totalSteps) });
 
                 chatRoot.embeddedData ??= new EmbeddedData();
 
@@ -97,7 +103,7 @@ namespace TwitchDownloaderCore
             }
 
             // Finally save the output to file!
-            progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Writing output file" });
+            progress.Report(new ProgressReport() { reportType = ReportType.Status, data = string.Format("Writing Output File [{0}/{1}]", ++currentStep, totalSteps) });
 
             if (_updateOptions.OutputFormat == ChatFormat.Json)
             {

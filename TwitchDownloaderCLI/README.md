@@ -95,7 +95,7 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 
 
 ## Arguments for mode chatupdate
-<sup>Updates the embeded emotes, badges, bits, and crops of a chat download</sup>
+<sup>Updates the embeded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format</sup>
 
 **-i / --input (REQUIRED)**
 Path to input file. Valid extensions are: `json`.

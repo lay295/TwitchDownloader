@@ -4,7 +4,7 @@ using TwitchDownloaderCore.Options;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
 
-    [Verb("chatupdate", HelpText = "Updates the embeded emotes, badges, bits, and crops of a chat download.")]
+    [Verb("chatupdate", HelpText = "Updates the embeded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format.")]
     public class ChatUpdateArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are: json.")]
