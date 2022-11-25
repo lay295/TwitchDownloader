@@ -12,26 +12,26 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Update(ChatUpdateArgs inputOptions)
         {
-            ChatFormat inFormat = Path.GetExtension(inputOptions.InputFile)!.ToLower() switch
-            {
-                ".json"             => ChatFormat.Json,
-                ".html" or ".htm"   => ChatFormat.Html,
-                _                   => ChatFormat.Text
-            };
-            ChatFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
-            {
-                ".json"             => ChatFormat.Json,
-                ".html" or ".htm"   => ChatFormat.Html,
-                _                   => ChatFormat.Text
-            };
-            if (inFormat != outFormat)
-            {
-                Console.WriteLine("[ERROR] - Input file extension must match output file extension!");
-                Environment.Exit(1);
-            }
             if (!File.Exists(inputOptions.InputFile))
             {
                 Console.WriteLine("[ERROR] - Input file does not exist!");
+                Environment.Exit(1);
+            }
+            ChatFormat inFormat = Path.GetExtension(inputOptions.InputFile)!.ToLower() switch
+            {
+                ".html" or ".htm" => ChatFormat.Html,
+                ".json" => ChatFormat.Json,
+                _ => ChatFormat.Text
+            };
+            ChatFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
+            {
+                ".html" or ".htm" => ChatFormat.Html,
+                ".json" => ChatFormat.Json,
+                _ => ChatFormat.Text
+            };
+            if (inFormat != ChatFormat.Json)
+            {
+                Console.WriteLine("[ERROR] - Input file must be json!");
                 Environment.Exit(1);
             }
             if (inputOptions.InputFile == inputOptions.OutputFile)
@@ -44,11 +44,11 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            ChatUpdateOptions updateOptions = new ChatUpdateOptions()
+            ChatUpdateOptions updateOptions = new()
             {
                 InputFile = inputOptions.InputFile,
                 OutputFile = inputOptions.OutputFile,
-                FileFormat = inFormat,
+                OutputFormat = outFormat,
                 EmbedMissing = inputOptions.EmbedMissing,
                 ReplaceEmbeds = inputOptions.ReplaceEmbeds,
                 CropBeginning = !double.IsNegative(inputOptions.CropBeginningTime),
@@ -58,6 +58,7 @@ namespace TwitchDownloaderCLI.Modes
                 BttvEmotes = (bool)inputOptions.BttvEmotes,
                 FfzEmotes = (bool)inputOptions.FfzEmotes,
                 StvEmotes = (bool)inputOptions.StvEmotes,
+                TextTimestampFormat = inputOptions.TimeFormat,
                 TempFolder = inputOptions.TempFolder
             };
 

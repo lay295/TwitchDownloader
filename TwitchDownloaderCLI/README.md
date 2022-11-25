@@ -5,8 +5,8 @@ A cross platform command line tool that can do the main functions of the GUI pro
   - [Arguments for mode videodownload](#arguments-for-mode-videodownload)
   - [Arguments for mode clipdownload](#arguments-for-mode-clipdownload)
   - [Arguments for mode chatdownload](#arguments-for-mode-chatdownload)
-  - [Arguments for mode chatrender](#arguments-for-mode-chatrender)
   - [Arguments for mode chatupdate](#arguments-for-mode-chatupdate)
+  - [Arguments for mode chatrender](#arguments-for-mode-chatrender)
   - [Arguments for mode ffmpeg](#arguments-for-mode-ffmpeg)
   - [Arguments for mode cache](#arguments-for-mode-cache)
   - [Example Commands](#example-commands)
@@ -67,7 +67,7 @@ The quality the program will attempt to download, for example "1080p60", if not 
 The ID of the VOD or clip to download. Does not currently accept URLs.
 
 **-o / --output (REQUIRED)**
-File the program will output to. File extension will be used to determine download type. Valid extensions are `json`, `html`, and `txt`.
+File the program will output to. File extension will be used to determine download type. Valid extensions are: `json`, `html`, and `txt`.
 
 **-b / --beginning**
 Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
@@ -87,14 +87,48 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 **--stv**
 (Default: true) 7TV emote embedding. Requires `-E / --embed-images`.
 
-**--timestamp**
-(Default: false) Enable timestamps
-
 **--timestamp-format**
-(Default: Relative) Sets the timestamp format for .txt chat logs. Valid values are Utc, Relative, and None.
+(Default: Relative) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `Relative`, and `None`.
 
 **--chat-connections**
 (Default: 4) The number of parallel downloads for chat.
+
+
+## Arguments for mode chatupdate
+<sup>Updates the embeded emotes, badges, bits, and crops of a chat download</sup>
+
+**-i / --input (REQUIRED)**
+Path to input file. Valid extensions are: `json`.
+
+**-o / --output (REQUIRED)**
+Path to output file. File extension will be used to determine new chat type. Valid extensions are: `json`, `html`, and `txt`.
+
+**-E / --embed-missing**
+(Default: false) Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.
+
+**-R / --replace-embeds**
+(Default: false) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
+
+**b / --beginning**
+(Default: -1) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+
+**-e / --ending**
+(Default: -1) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+
+**--bttv**
+(Default: true) Enable embedding BTTV emotes.
+
+**--ffz**
+(Default: true) Enable embedding FFZ emotes.
+
+**--stv**
+(Default: true) Enable embedding 7TV emotes.
+
+**--timestamp-format**
+(Default: Relative) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `Relative`, and `None`.
+
+**--temp-path**
+Path to temporary folder for cache.
 
 
 ## Arguments for mode chatrender
@@ -187,40 +221,6 @@ Path to ffmpeg executable.
 Path to temporary folder for cache.
 
 
-## Arguments for mode chatupdate
-<sup>Updates the embeded emotes, badges, bits, and crops of a chat download</sup>
-
-**-i / --input (REQUIRED)**
-Path to input file. Valid extensions are json
-
-**-o / --output (REQUIRED)**
-Path to output file. Extension should match the input.
-
-**-E / --embed-missing**
-(Default: false) Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.
-
-**-R / --replace-embeds**
-(Default: false) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
-
-**b / --beginning**
-(Default: -1) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
-
-**-e / --ending**
-(Default: -1) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
-
-**--bttv**
-(Default: true) Enable embedding BTTV emotes.
-
-**--ffz**
-(Default: true) Enable embedding FFZ emotes.
-
-**--stv**
-(Default: true) Enable embedding 7TV emotes.
-
-**--temp-path**
-Path to temporary folder for cache.
-
-
 ## Arguments for mode ffmpeg
 <sup>Manage standalone ffmpeg</sup>
 
@@ -261,6 +261,10 @@ Download a Chat as plain text with timestamps
 Add embeds to a chat file that was downloaded without embeds
 
     TwitchDownloaderCLI chatupdate -i chat.json -o chat_embedded.json --embed-missing
+
+Convert a JSON chat file to HTML
+
+    TwitchDownloaderCLI chatupdate -i chat.json -o chat.html
 
 Render a chat with defaults
 

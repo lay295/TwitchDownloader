@@ -226,7 +226,6 @@ namespace TwitchDownloaderWPF
             else if (radioText.IsChecked == true)
                 options.DownloadFormat = ChatFormat.Text;
 
-            options.Timestamp = true;
             options.EmbedData = (bool)checkEmbed.IsChecked;
             options.BttvEmotes = (bool)checkBttvEmbed.IsChecked;
             options.FfzEmotes = (bool)checkFfzEmbed.IsChecked;

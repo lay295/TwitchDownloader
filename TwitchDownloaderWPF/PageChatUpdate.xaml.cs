@@ -48,7 +48,7 @@ namespace TwitchDownloaderWPF
 
                 if (Path.GetExtension(InputFile).ToLower() == ".json")
                 {
-                    ChatJsonInfo = await ChatJsonTools.ParseJsonInfoAsync(InputFile);
+                    ChatJsonInfo = await ChatFileTools.ParseJsonInfoAsync(InputFile);
                     textStreamer.Text = ChatJsonInfo.streamer.name;
                     textCreatedAt.Text = /*chatJsonInfo.video.created_at*/null ?? "Unknown";
                     textTitle.Text = /*chatJsonInfo.video.title*/null ?? "Unknown";
@@ -132,6 +132,12 @@ namespace TwitchDownloaderWPF
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
             checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
+            _ = (ChatFormat)Settings.Default.ChatDownloadType switch
+            {
+                ChatFormat.Text => radioText.IsChecked = true,
+                ChatFormat.Html => radioHTML.IsChecked = true,
+                _ => radioJson.IsChecked = true
+            };
         }
 
         private void SetEnabled(bool isEnabled)
@@ -142,6 +148,12 @@ namespace TwitchDownloaderWPF
             checkReplaceEmbeds.IsEnabled = isEnabled;
             btnDownload.IsEnabled = isEnabled;
             btnQueue.IsEnabled = isEnabled;
+            radioRelative.IsEnabled = isEnabled;
+            radioUTC.IsEnabled = isEnabled;
+            radioNone.IsEnabled = isEnabled;
+            radioJson.IsEnabled = isEnabled;
+            radioText.IsEnabled = isEnabled;
+            radioHTML.IsEnabled = isEnabled;
 
             if (isEnabled)
                 return;
@@ -183,15 +195,16 @@ namespace TwitchDownloaderWPF
                 StvEmotes = (bool)checkStvEmbed.IsChecked,
                 InputFile = textJson.Text,
                 OutputFile = outputFile,
-                FileFormat = Path.GetExtension(outputFile)!.ToLower() switch
-                {
-                    ".json" => ChatFormat.Json,
-                    ".html" or ".htm" => ChatFormat.Html,
-                    _ => ChatFormat.Text // Default is needed to properly throw NIE in ChatUpdater.UpdateAsync()
-                },
                 CropBeginningTime = -1,
-                CropEndingTime= -1
+                CropEndingTime = -1
             };
+
+            if ((bool) radioJson.IsChecked)
+                options.OutputFormat = ChatFormat.Json;
+            else if ((bool)radioHTML.IsChecked)
+                options.OutputFormat = ChatFormat.Html;
+            else if ((bool)radioText.IsChecked)
+                options.OutputFormat = ChatFormat.Text;
 
             if (checkStart.IsChecked == true)
             {
@@ -205,6 +218,13 @@ namespace TwitchDownloaderWPF
                 TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
                 options.CropEndingTime = (int)Math.Round(end.TotalSeconds);
             }
+
+            if ((bool)radioUTC.IsChecked)
+                options.TextTimestampFormat = TimestampFormat.Utc;
+            else if ((bool)radioRelative.IsChecked)
+                options.TextTimestampFormat = TimestampFormat.Relative;
+            else if ((bool)radioNone.IsChecked)
+                options.TextTimestampFormat = TimestampFormat.None;
 
             return options;
         }
@@ -363,12 +383,12 @@ namespace TwitchDownloaderWPF
             {
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
 
-                saveFileDialog.Filter = Path.GetExtension(textJson.Text)!.ToLower() switch
-                {
-                    ".json" => "JSON Files | *.json",
-                    ".html" or ".htm" => "HTML Files | *.html;*.htm",
-                    _ => "Text Files | *.txt"
-                };
+                if ((bool)radioJson.IsChecked)
+                    saveFileDialog.Filter = "JSON Files | *.json";
+                if ((bool)radioHTML.IsChecked)
+                    saveFileDialog.Filter = "HTML Files | *.html;*.htm";
+                if ((bool)radioText.IsChecked)
+                    saveFileDialog.Filter = "TXT Files | *.txt";
 
                 saveFileDialog.RestoreDirectory = true;
                 saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, /*ChatJsonInfo.video.id*/ null ?? "-1", VideoCreatedAt, textStreamer.Text);
@@ -392,6 +412,8 @@ namespace TwitchDownloaderWPF
                         try
                         {
                             await currentDownload.UpdateAsync(downloadProgress, new CancellationToken());
+                            await Task.Delay(500); // we need to wait a bit incase the "writing to output file" report comes late
+                            textJson.Text = "";
                             statusMessage.Text = "Done";
                             SetImage("Images/ppHop.gif", true);
                         }
@@ -413,6 +435,51 @@ namespace TwitchDownloaderWPF
                         AppendLog("ERROR: " + ex.Message);
                     }
                 }
+            }
+        }
+
+        private void radioJson_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                timeText.Visibility = Visibility.Collapsed;
+                timeOptions.Visibility = Visibility.Collapsed;
+                stackEmbedText.Visibility = Visibility.Visible;
+                stackEmbedChecks.Visibility = Visibility.Visible;
+                textCrop.Margin = new Thickness(0, 15, 0, 0);
+
+                Settings.Default.ChatDownloadType = (int)ChatFormat.Json;
+                Settings.Default.Save();
+            }
+        }
+
+        private void radioHTML_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                timeText.Visibility = Visibility.Collapsed;
+                timeOptions.Visibility = Visibility.Collapsed;
+                stackEmbedText.Visibility = Visibility.Visible;
+                stackEmbedChecks.Visibility = Visibility.Visible;
+                textCrop.Margin = new Thickness(0, 15, 0, 0);
+
+                Settings.Default.ChatDownloadType = (int)ChatFormat.Html;
+                Settings.Default.Save();
+            }
+        }
+
+        private void radioText_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                timeText.Visibility = Visibility.Visible;
+                timeOptions.Visibility = Visibility.Visible;
+                stackEmbedText.Visibility = Visibility.Collapsed;
+                stackEmbedChecks.Visibility = Visibility.Collapsed;
+                textCrop.Margin = new Thickness(0, 10, 0, 0);
+
+                Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
+                Settings.Default.Save();
             }
         }
 

@@ -309,9 +309,9 @@ namespace TwitchDownloader
                     if (!string.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
                     {
                         ChatUpdateTask chatTask = new ChatUpdateTask();
-                        ChatUpdateOptions chatOptions = MainWindow.pageChatUpdate.GetOptions("temp.json");
+                        ChatUpdateOptions chatOptions = MainWindow.pageChatUpdate.GetOptions(null);
                         chatOptions.InputFile = chatPage.InputFile;
-                        chatOptions.OutputFile = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatPage.VideoId, chatPage.VideoCreatedAt, chatPage.textStreamer.Text) + "." + chatOptions.FileFormat);
+                        chatOptions.OutputFile = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatPage.VideoId, chatPage.VideoCreatedAt, chatPage.textStreamer.Text) + "." + chatOptions.FileExtension);
 
                         chatTask.UpdateOptions = chatOptions;
                         chatTask.Info.Title = chatPage.textTitle.Text;

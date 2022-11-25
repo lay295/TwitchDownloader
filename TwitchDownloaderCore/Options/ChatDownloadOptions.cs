@@ -1,5 +1,6 @@
 ﻿namespace TwitchDownloaderCore.Options
 {
+    // TODO: Move TimestampFormat to dedicated file
     public enum TimestampFormat
     {
         Utc,
@@ -24,7 +25,6 @@
         public double CropBeginningTime { get; set; }
         public bool CropEnding { get; set; }
         public double CropEndingTime { get; set; }
-        public bool Timestamp { get; set; }
         public bool EmbedData { get; set; }
         public bool BttvEmotes { get; set; }
         public bool FfzEmotes { get; set; }

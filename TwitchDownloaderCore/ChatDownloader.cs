@@ -401,115 +401,20 @@ namespace TwitchDownloaderCore
 
             if (downloadOptions.DownloadFormat == ChatFormat.Json)
             {
-                using (TextWriter writer = File.CreateText(downloadOptions.Filename))
-                {
-                    var serializer = new JsonSerializer();
-                    serializer.Serialize(writer, chatRoot);
-                }
+                await ChatFileTools.WriteJsonChatAsync(downloadOptions.Filename, chatRoot);
             }
             else if (downloadOptions.DownloadFormat == ChatFormat.Text)
             {
-                using (StreamWriter sw = new StreamWriter(downloadOptions.Filename))
-                {
-                    foreach (var comment in chatRoot.comments)
-                    {
-                        string username = comment.commenter.display_name;
-                        string message = comment.message.body;
-                        if (downloadOptions.TimeFormat == TimestampFormat.Utc)
-                        {
-                            string timestamp = comment.created_at.ToString("u").Replace("Z", " UTC");
-                            sw.WriteLine(String.Format("[{0}] {1}: {2}", timestamp, username, message));
-                        }
-                        else if (downloadOptions.TimeFormat == TimestampFormat.Relative)
-                        {
-                            TimeSpan time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
-                            string timestamp = time.ToString(@"h\:mm\:ss");
-                            sw.WriteLine(String.Format("[{0}] {1}: {2}", timestamp, username, message));
-                        }
-                        else if (downloadOptions.TimeFormat == TimestampFormat.None)
-                        {
-                            sw.WriteLine(String.Format("{0}: {1}", username, message));
-                        }
-                    }
-
-                    sw.Flush();
-                    sw.Close();
-                }
+                await ChatFileTools.WriteTextChatAsync(downloadOptions.Filename, downloadOptions.TimeFormat, chatRoot);
             }
             else if (downloadOptions.DownloadFormat == ChatFormat.Html)
             {
-                Dictionary<string, EmbedEmoteData> thirdEmoteData = null;
-                EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmoteData(chatRoot.streamer.id.ToString(), true, true, true);
-                thirdEmoteData = new Dictionary<string, EmbedEmoteData>();
-                List<EmoteResponseItem> itemList = new List<EmoteResponseItem>();
-                itemList.AddRange(emotes.BTTV);
-                itemList.AddRange(emotes.FFZ);
-                itemList.AddRange(emotes.STV);
-
-                foreach (var item in itemList)
-                {
-                    if (!thirdEmoteData.ContainsKey(item.Code))
-                    {
-                        if (downloadOptions.EmbedData)
-                        {
-                            EmbedEmoteData embedEmoteData = chatRoot.embeddedData.thirdParty.FirstOrDefault(x => x.id == item.Id);
-                            if (embedEmoteData != null)
-                            {
-                                embedEmoteData.url = item.ImageUrl.Replace("[scale]", "1");
-                                thirdEmoteData[item.Code] = embedEmoteData;
-                            }
-                        }
-                        else
-                        {
-                            EmbedEmoteData embedEmoteData = new EmbedEmoteData();
-                            embedEmoteData.url = item.ImageUrl.Replace("[scale]", "1");
-                            thirdEmoteData[item.Code] = embedEmoteData;
-                        }
-                    }
-                }
-
-                List<string> templateStrings = new List<string>(Properties.Resources.template.Split('\n'));
-                StringBuilder finalString = new StringBuilder();
-
-                for (int i = 0; i < templateStrings.Count; i++)
-                {
-                    switch (templateStrings[i].TrimEnd('\r', '\n'))
-                    {
-                        case "<!-- TITLE -->":
-                            finalString.AppendLine(HttpUtility.HtmlEncode(Path.GetFileNameWithoutExtension(downloadOptions.Filename)));
-                            break;
-                        case "/* [CUSTOM CSS] */":
-                            if (downloadOptions.EmbedData)
-                            {
-                                foreach (var emote in chatRoot.embeddedData.firstParty)
-                                {
-                                    finalString.AppendLine(".first-" + emote.id + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(emote.data) + "\"); }");
-                                }
-                                foreach (var emote in chatRoot.embeddedData.thirdParty)
-                                {
-                                    finalString.AppendLine(".third-" + emote.id + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(emote.data) + "\"); }");
-                                }
-                            }
-                            break;
-                        case "<!-- CUSTOM HTML -->":
-                            foreach (Comment comment in chatRoot.comments)
-                            {
-                                TimeSpan time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
-                                string timestamp = time.ToString(@"h\:mm\:ss");
-                                finalString.Append($"<pre class=\"comment-root\">[{timestamp}] <a href=\"https://www.twitch.tv/{comment.commenter.name}\" target=\"_blank\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? ($"{comment.commenter.display_name} ({comment.commenter.name})") : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(downloadOptions.EmbedData, thirdEmoteData, chatRoot, comment)}</span></pre>\n");
-                            }
-                            break;
-                        default:
-                            finalString.AppendLine(templateStrings[i].TrimEnd('\r', '\n'));
-                            break;
-                    }
-                }
-
-                File.WriteAllText(downloadOptions.Filename, finalString.ToString(), Encoding.Unicode);
+                await ChatFileTools.WriteHtmlChatAsync(downloadOptions.Filename, downloadOptions.EmbedData, chatRoot);
             }
-
-            chatRoot = null;
-            GC.Collect();
+            else
+            {
+                throw new NotImplementedException("Requested output chat format is not implemented");
+            }
         }
 
         internal static async Task<bool> CheckLegacyApiAsync(string videoId)
@@ -531,54 +436,6 @@ namespace TwitchDownloaderCore
                 }
             }
             return true;
-        }
-
-        internal static string GetMessageHtml(bool embedEmotes, Dictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
-        {
-            StringBuilder message = new StringBuilder();
-
-            if (comment.message.fragments == null)
-            {
-                comment.message.fragments = new List<Fragment>();
-                comment.message.fragments.Add(new Fragment() { text = comment.message.body });
-            }
-
-            foreach (var fragment in comment.message.fragments)
-            {
-                if (fragment.emoticon == null)
-                {
-                    List<string> wordList = new List<string>(fragment.text.Split(' '));
-
-                    foreach (var word in wordList)
-                    {
-                        if (thirdEmoteData.ContainsKey(word))
-                        {
-                            if (embedEmotes)
-                            {
-                                message.Append($"<img width=\"{thirdEmoteData[word].width}\" height=\"{thirdEmoteData[word].height}\" class=\"emote-image third-{thirdEmoteData[word].id}\" title=\"{word}\"\"><div class=\"invis-text\">{word}</div> ");
-                            }
-                            else
-                            {
-                                message.Append($"<img class=\"emote-image\" title=\"{word}\" src=\"{thirdEmoteData[word].url}\"><div class=\"invis-text\">{word}</div> ");
-                            }
-                        }
-                        else if (word != "")
-                            message.Append(HttpUtility.HtmlEncode(word) + " ");
-                    }
-                }
-                else
-                {
-                    if (embedEmotes && chatRoot.embeddedData.firstParty.Any(x => x.id == fragment.emoticon.emoticon_id))
-                    {
-                        message.Append($"<img class=\"emote-image first-{fragment.emoticon.emoticon_id}\" title=\"{fragment.text}\"><div class=\"invis-text\">{fragment.text}</div> ");
-                    }
-                    else
-                    {
-                        message.Append($"<img class=\"emote-image\" src=\"https://static-cdn.jtvnw.net/emoticons/v2/{fragment.emoticon.emoticon_id}/default/dark/1.0\" title=\"{fragment.text}\"><div class=\"invis-text\">{fragment.text}</div> ");
-                    }
-                }
-            }
-            return message.ToString();
         }
     }
 }

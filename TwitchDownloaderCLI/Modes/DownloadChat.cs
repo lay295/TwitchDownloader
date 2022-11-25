@@ -22,16 +22,15 @@ namespace TwitchDownloaderCLI.Modes
             {
                 DownloadFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
                 {
-                    ".json"             => ChatFormat.Json,
-                    ".html" or ".htm"   => ChatFormat.Html,
-                    _                   => ChatFormat.Text
+                    ".html" or ".htm" => ChatFormat.Html,
+                    ".json" => ChatFormat.Json,
+                    _ => ChatFormat.Text
                 },
                 Id = inputOptions.Id,
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
-                Timestamp = inputOptions.Timestamp,
                 EmbedData = inputOptions.EmbedData,
                 Filename = inputOptions.OutputFile,
                 TimeFormat = inputOptions.TimeFormat,

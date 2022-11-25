@@ -15,7 +15,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
 
-            if (inputOptions.Id == "" || !inputOptions.Id.All(char.IsDigit))
+            if (string.IsNullOrWhiteSpace(inputOptions.Id) || !inputOptions.Id.All(char.IsDigit))
             {
                 Console.WriteLine("[ERROR] - Invalid VOD ID, unable to parse. Must be only numbers.");
                 Environment.Exit(1);

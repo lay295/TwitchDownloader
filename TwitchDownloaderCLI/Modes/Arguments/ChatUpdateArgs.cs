@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
@@ -6,10 +7,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
     [Verb("chatupdate", HelpText = "Updates the embeded emotes, badges, bits, and crops of a chat download.")]
     public class ChatUpdateArgs
     {
-        [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are json")]
+        [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are: json.")]
         public string InputFile { get; set; }
 
-        [Option('o', "output", Required = true, HelpText = "Path to output file. Extension should match the input.")]
+        [Option('o', "output", Required = true, HelpText = "Path to output file. File extension will be used to determine new chat type. Valid extensions are: json, html, and txt.")]
         public string OutputFile { get; set; }
 
         [Option('E', "embed-missing", Default = false, HelpText = "Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.")]
@@ -32,6 +33,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("stv", Default = true, HelpText = "Enable 7TV embedding in chat download.")]
         public bool? StvEmotes { get; set; }
+
+        [Option("timestamp-format", Default = TimestampFormat.Relative, HelpText = "Sets the timestamp format for .txt chat logs. Valid values are: Utc, Relative, and None")]
+        public TimestampFormat TimeFormat { get; set; }
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }

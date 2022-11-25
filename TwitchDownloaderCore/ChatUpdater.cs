@@ -29,9 +29,9 @@ namespace TwitchDownloaderCore
 
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            if (_updateOptions.FileFormat != ChatFormat.Json)
+            if (Path.GetExtension(_updateOptions.InputFile).ToLower() != ".json")
             {
-                throw new NotImplementedException("Only chat JSONs can be updated. HTML support may come in the future.");
+                throw new NotImplementedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
             }
 
             // If we are editing the chat crop
@@ -97,14 +97,23 @@ namespace TwitchDownloaderCore
             }
 
             // Finally save the output to file!
-            // TODO: maybe in the future we could also export as HTML here too?
             progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Writing output file" });
 
-            if (_updateOptions.FileFormat == ChatFormat.Json)
+            if (_updateOptions.OutputFormat == ChatFormat.Json)
             {
-                using TextWriter writer = File.CreateText(_updateOptions.OutputFile);
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(writer, chatRoot);
+                await ChatFileTools.WriteJsonChatAsync(_updateOptions.OutputFile, chatRoot);
+            }
+            else if (_updateOptions.OutputFormat == ChatFormat.Html)
+            {
+                await ChatFileTools.WriteHtmlChatAsync(_updateOptions.OutputFile, chatRoot.embeddedData != null, chatRoot);
+            }
+            else if (_updateOptions.OutputFormat == ChatFormat.Text)
+            {
+                await ChatFileTools.WriteTextChatAsync(_updateOptions.OutputFile, _updateOptions.TextTimestampFormat, chatRoot);
+            }
+            else
+            {
+                throw new NotImplementedException("Requested output chat format is not implemented");
             }
         }
 
@@ -285,7 +294,7 @@ namespace TwitchDownloaderCore
             ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
             await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
 
-            ChatRoot newChatRoot = await ChatJsonTools.ParseJsonAsync(tempFile, cancellationToken);
+            ChatRoot newChatRoot = await ChatFileTools.ParseJsonAsync(tempFile, cancellationToken);
 
             // Append the new comment section
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
@@ -333,7 +342,7 @@ namespace TwitchDownloaderCore
 
         public async Task<ChatRoot> ParseJsonAsync()
         {
-            chatRoot = await ChatJsonTools.ParseJsonAsync(_updateOptions.InputFile);
+            chatRoot = await ChatFileTools.ParseJsonAsync(_updateOptions.InputFile);
 
             chatRoot.streamer ??= new Streamer
             {
