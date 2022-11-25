@@ -43,7 +43,8 @@ namespace TwitchDownloaderCore
             // If we are editing the chat crop
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding)
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = string.Format("Updating Chat Crop [{0}/{1}]", ++currentStep, totalSteps) });
+                progress.Report(new ProgressReport(ReportType.Status, string.Format("Updating Chat Crop [{0}/{1}]", ++currentStep, totalSteps)));
+                progress.Report(new ProgressReport(totalSteps / currentStep));
 
                 chatRoot.video ??= new VideoTime();
 
@@ -80,14 +81,15 @@ namespace TwitchDownloaderCore
                 // If the comment count didn't change, it probably failed so don't report the counts
                 if (inputCommentCount != chatRoot.comments.Count)
                 {
-                    progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input comment count: {0}. Output count: {1}", inputCommentCount, chatRoot.comments.Count) });
+                    progress.Report(new ProgressReport(ReportType.Log, string.Format("Input comment count: {0}. Output count: {1}", inputCommentCount, chatRoot.comments.Count)));
                 }
             }
 
             // If we are updating/replacing embeds
             if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = string.Format("Updating Embeds [{0}/{1}]", ++currentStep, totalSteps) });
+                progress.Report(new ProgressReport(ReportType.Status, string.Format("Updating Embeds [{0}/{1}]", ++currentStep, totalSteps)));
+                progress.Report(new ProgressReport(totalSteps / currentStep));
 
                 chatRoot.embeddedData ??= new EmbeddedData();
 
@@ -103,7 +105,8 @@ namespace TwitchDownloaderCore
             }
 
             // Finally save the output to file!
-            progress.Report(new ProgressReport() { reportType = ReportType.Status, data = string.Format("Writing Output File [{0}/{1}]", ++currentStep, totalSteps) });
+            progress.Report(new ProgressReport(ReportType.Status, string.Format("Writing Output File [{0}/{1}]", ++currentStep, totalSteps)));
+            progress.Report(new ProgressReport(totalSteps / currentStep));
 
             if (_updateOptions.OutputFormat == ChatFormat.Json)
             {
@@ -145,7 +148,7 @@ namespace TwitchDownloaderCore
                 newEmote.height = emote.Height / emote.ImageScale;
                 chatRoot.embeddedData.firstParty.Add(newEmote);
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input 1st party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.firstParty.Count) });
+            progress.Report(new ProgressReport(ReportType.Log, string.Format("Input 1st party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.firstParty.Count)));
         }
 
         private async Task ThirdPartyEmoteTask(IProgress<ProgressReport> progress)
@@ -171,7 +174,7 @@ namespace TwitchDownloaderCore
                 newEmote.height = emote.Height / emote.ImageScale;
                 chatRoot.embeddedData.thirdParty.Add(newEmote);
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input 3rd party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.thirdParty.Count) });
+            progress.Report(new ProgressReport(ReportType.Log, string.Format("Input 3rd party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.thirdParty.Count)));
         }
 
         private async Task ChatBadgeTask(IProgress<ProgressReport> progress)
@@ -193,7 +196,7 @@ namespace TwitchDownloaderCore
                 newBadge.versions = badge.VersionsData;
                 chatRoot.embeddedData.twitchBadges.Add(newBadge);
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input badge count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBadges.Count) });
+            progress.Report(new ProgressReport(ReportType.Log, string.Format("Input badge count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBadges.Count)));
         }
 
         private async Task BitTask(IProgress<ProgressReport> progress)
@@ -226,7 +229,7 @@ namespace TwitchDownloaderCore
                 }
                 chatRoot.embeddedData.twitchBits.Add(newBit);
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = string.Format("Input bit emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBits.Count) });
+            progress.Report(new ProgressReport(ReportType.Log, string.Format("Input bit emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBits.Count)));
         }
 
         private async Task ChatBeginningCropTask(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
@@ -249,7 +252,7 @@ namespace TwitchDownloaderCore
             }
             catch (NullReferenceException)
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Log, data = "Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt" });
+                progress.Report(new ProgressReport(ReportType.Log, "Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt"));
             }
 
             if (File.Exists(tempFile))
@@ -282,7 +285,7 @@ namespace TwitchDownloaderCore
             }
             catch (NullReferenceException)
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Log, data = "Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt" });
+                progress.Report(new ProgressReport(ReportType.Log, "Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt"));
             }
 
             if (File.Exists(tempFile))

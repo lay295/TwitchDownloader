@@ -412,7 +412,7 @@ namespace TwitchDownloaderWPF
                         try
                         {
                             await currentDownload.UpdateAsync(downloadProgress, new CancellationToken());
-                            await Task.Delay(500); // we need to wait a bit incase the "writing to output file" report comes late
+                            await Task.Delay(300); // we need to wait a bit incase the "writing to output file" report comes late
                             textJson.Text = "";
                             statusMessage.Text = "Done";
                             SetImage("Images/ppHop.gif", true);
