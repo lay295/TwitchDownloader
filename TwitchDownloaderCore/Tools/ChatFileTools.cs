@@ -19,46 +19,7 @@ namespace TwitchDownloaderCore.Tools
         /// Parses an input chat json file with the most up-to-date parsing
         /// </summary>
         /// <returns>The <paramref name="inputJson"/> file as a <see cref="ChatRoot"/> object</returns>
-        public static async Task<ChatRoot> ParseJsonAsync(string inputJson, CancellationToken cancellationToken = new())
-        {
-            ChatRoot chatRoot = new ChatRoot();
-
-            using FileStream fs = new FileStream(inputJson, FileMode.Open, FileAccess.Read);
-            using var jsonDocument = await JsonDocument.ParseAsync(fs, cancellationToken: cancellationToken);
-
-            if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
-            {
-                chatRoot.streamer = streamerJson.Deserialize<Streamer>();
-            }
-
-
-            if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
-            {
-                chatRoot.video = videoJson.Deserialize<VideoTime>();
-            }
-
-            if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embedDataJson))
-            {
-                chatRoot.embeddedData = embedDataJson.Deserialize<EmbeddedData>();
-            }
-            else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
-            {
-                chatRoot.embeddedData = emotesJson.Deserialize<EmbeddedData>();
-            }
-
-            if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
-            {
-                chatRoot.comments = commentsJson.Deserialize<List<Comment>>();
-            }
-
-            return chatRoot;
-        }
-
-        /// <summary>
-        /// Parses an input chat json file with the most up-to-date parsing
-        /// </summary>
-        /// <returns>The <see cref="Streamer"/> and <see cref="VideoTime"/> properties of the <paramref name="inputJson"/> </returns>
-        public static async Task<ChatRoot> ParseJsonInfoAsync(string inputJson, CancellationToken cancellationToken = new())
+        public static async Task<ChatRoot> ParseJsonAsync(string inputJson, bool getComments = true, bool getEmbeds = true, CancellationToken cancellationToken = new())
         {
             ChatRoot chatRoot = new ChatRoot();
 
@@ -73,6 +34,26 @@ namespace TwitchDownloaderCore.Tools
             if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
             {
                 chatRoot.video = videoJson.Deserialize<VideoTime>();
+            }
+
+            if (getComments)
+            {
+                if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
+                {
+                    chatRoot.comments = commentsJson.Deserialize<List<Comment>>();
+                }
+            }
+
+            if (getEmbeds)
+            {
+                if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embedDataJson))
+                {
+                    chatRoot.embeddedData = embedDataJson.Deserialize<EmbeddedData>();
+                }
+                else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
+                {
+                    chatRoot.embeddedData = emotesJson.Deserialize<EmbeddedData>();
+                }
             }
 
             return chatRoot;
@@ -82,7 +63,7 @@ namespace TwitchDownloaderCore.Tools
         /// Parses an input chat json file with older properties
         /// </summary>
         /// <returns>The <paramref name="inputJson"/> file as a <see cref="ChatRoot"/> object</returns>
-        public static async Task<ChatRoot> ParseLegacyJsonAsync(string inputJson, CancellationToken cancellationToken = new())
+        public static async Task<ChatRoot> ParseLegacyJsonAsync(string inputJson, bool getComments = true, bool getEmbeds = true, CancellationToken cancellationToken = new())
         {
             ChatRoot chatRoot = new ChatRoot();
 
@@ -102,18 +83,24 @@ namespace TwitchDownloaderCore.Tools
                 }
             }
 
-            if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embedDataJson))
+            if (getComments)
             {
-                chatRoot.embeddedData = embedDataJson.Deserialize<EmbeddedData>();
-            }
-            else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
-            {
-                chatRoot.embeddedData = emotesJson.Deserialize<EmbeddedData>();
+                if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
+                {
+                    chatRoot.comments = commentsJson.Deserialize<List<Comment>>();
+                }
             }
 
-            if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
+            if (getEmbeds)
             {
-                chatRoot.comments = commentsJson.Deserialize<List<Comment>>();
+                if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embedDataJson))
+                {
+                    chatRoot.embeddedData = embedDataJson.Deserialize<EmbeddedData>();
+                }
+                else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
+                {
+                    chatRoot.embeddedData = emotesJson.Deserialize<EmbeddedData>();
+                }
             }
 
             return chatRoot;
@@ -125,6 +112,7 @@ namespace TwitchDownloaderCore.Tools
             JsonSerializer serializer = new JsonSerializer();
             serializer.Serialize(writer, chatRoot);
         }
+
         public static async Task WriteTextChatAsync(string outputFile, TimestampFormat timeFormat, ChatRoot chatRoot)
         {
             using StreamWriter sw = new StreamWriter(outputFile);
@@ -135,21 +123,20 @@ namespace TwitchDownloaderCore.Tools
                 if (timeFormat == TimestampFormat.Utc)
                 {
                     string timestamp = comment.created_at.ToString("u").Replace("Z", " UTC");
-                    sw.WriteLine(String.Format("[{0}] {1}: {2}", timestamp, username, message));
+                    await sw.WriteLineAsync(String.Format("[{0}] {1}: {2}", timestamp, username, message));
                 }
                 else if (timeFormat == TimestampFormat.Relative)
                 {
                     TimeSpan time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
                     string timestamp = time.ToString(@"h\:mm\:ss");
-                    sw.WriteLine(String.Format("[{0}] {1}: {2}", timestamp, username, message));
+                    await sw.WriteAsync(String.Format("[{0}] {1}: {2}", timestamp, username, message));
                 }
                 else if (timeFormat == TimestampFormat.None)
                 {
-                    sw.WriteLine(String.Format("{0}: {1}", username, message));
+                    await sw.WriteLineAsync(String.Format("{0}: {1}", username, message));
                 }
             }
-
-            sw.Flush();
+            await sw.FlushAsync();
             sw.Close();
         }
 

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -108,21 +107,19 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport(ReportType.Status, string.Format("Writing Output File [{0}/{1}]", ++currentStep, totalSteps)));
             progress.Report(new ProgressReport(totalSteps / currentStep));
 
-            if (_updateOptions.OutputFormat == ChatFormat.Json)
+            switch (_updateOptions.OutputFormat)
             {
-                await ChatFileTools.WriteJsonChatAsync(_updateOptions.OutputFile, chatRoot);
-            }
-            else if (_updateOptions.OutputFormat == ChatFormat.Html)
-            {
-                await ChatFileTools.WriteHtmlChatAsync(_updateOptions.OutputFile, chatRoot.embeddedData != null, chatRoot);
-            }
-            else if (_updateOptions.OutputFormat == ChatFormat.Text)
-            {
-                await ChatFileTools.WriteTextChatAsync(_updateOptions.OutputFile, _updateOptions.TextTimestampFormat, chatRoot);
-            }
-            else
-            {
-                throw new NotImplementedException("Requested output chat format is not implemented");
+                case ChatFormat.Json:
+                    await ChatFileTools.WriteJsonChatAsync(_updateOptions.OutputFile, chatRoot);
+                    break;
+                case ChatFormat.Html:
+                    await ChatFileTools.WriteHtmlChatAsync(_updateOptions.OutputFile, chatRoot.embeddedData != null, chatRoot);
+                    break;
+                case ChatFormat.Text:
+                    await ChatFileTools.WriteTextChatAsync(_updateOptions.OutputFile, _updateOptions.TextTimestampFormat, chatRoot);
+                    break;
+                default:
+                    throw new NotImplementedException("Requested output chat format is not implemented");
             }
         }
 
@@ -298,12 +295,12 @@ namespace TwitchDownloaderCore
             chatRoot.video.end = Math.Min(Math.Max(_updateOptions.CropEndingTime, 0.0), endingCropClamp);
         }
 
-        private async Task AppendCommentSection(ChatDownloadOptions downloadOptions, string tempFile, CancellationToken cancellationToken = new())
+        private async Task AppendCommentSection(ChatDownloadOptions downloadOptions, string inputFile, CancellationToken cancellationToken = new())
         {
             ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
             await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
 
-            ChatRoot newChatRoot = await ChatFileTools.ParseJsonAsync(tempFile, cancellationToken);
+            ChatRoot newChatRoot = await ChatFileTools.ParseJsonAsync(inputFile, getComments: true, getEmbeds: false, cancellationToken);
 
             // Append the new comment section
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());

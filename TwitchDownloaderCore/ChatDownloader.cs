@@ -7,10 +7,9 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
 {
@@ -399,21 +398,19 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            if (downloadOptions.DownloadFormat == ChatFormat.Json)
+            switch (downloadOptions.DownloadFormat)
             {
-                await ChatFileTools.WriteJsonChatAsync(downloadOptions.Filename, chatRoot);
-            }
-            else if (downloadOptions.DownloadFormat == ChatFormat.Text)
-            {
-                await ChatFileTools.WriteTextChatAsync(downloadOptions.Filename, downloadOptions.TimeFormat, chatRoot);
-            }
-            else if (downloadOptions.DownloadFormat == ChatFormat.Html)
-            {
-                await ChatFileTools.WriteHtmlChatAsync(downloadOptions.Filename, downloadOptions.EmbedData, chatRoot);
-            }
-            else
-            {
-                throw new NotImplementedException("Requested output chat format is not implemented");
+                case ChatFormat.Json:
+                    await ChatFileTools.WriteJsonChatAsync(downloadOptions.Filename, chatRoot);
+                    break;
+                case ChatFormat.Html:
+                    await ChatFileTools.WriteHtmlChatAsync(downloadOptions.Filename, downloadOptions.EmbedData, chatRoot);
+                    break;
+                case ChatFormat.Text:
+                    await ChatFileTools.WriteTextChatAsync(downloadOptions.Filename, downloadOptions.TimeFormat, chatRoot);
+                    break;
+                default:
+                    throw new NotImplementedException("Requested output chat format is not implemented");
             }
         }
 

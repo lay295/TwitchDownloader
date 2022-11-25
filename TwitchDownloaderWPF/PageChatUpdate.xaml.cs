@@ -48,7 +48,7 @@ namespace TwitchDownloaderWPF
 
                 if (Path.GetExtension(InputFile).ToLower() == ".json")
                 {
-                    ChatJsonInfo = await ChatFileTools.ParseJsonInfoAsync(InputFile);
+                    ChatJsonInfo = await ChatFileTools.ParseJsonAsync(InputFile, getComments: false, getEmbeds: false);
                     textStreamer.Text = ChatJsonInfo.streamer.name;
                     textCreatedAt.Text = /*chatJsonInfo.video.created_at*/null ?? "Unknown";
                     textTitle.Text = /*chatJsonInfo.video.title*/null ?? "Unknown";
