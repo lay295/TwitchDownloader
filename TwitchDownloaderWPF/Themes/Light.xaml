@@ -1,6 +1,11 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-	
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <!--Boolean values MUST be lower-case-->
+    <system:Boolean x:Key="DarkTitleBar">false</system:Boolean>
+    <system:Boolean x:Key="DarkModeElements">false</system:Boolean>
+
     <SolidColorBrush x:Key="AppBackground" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="AppElementBackground" Color="#FFFFFF"/>
 	<SolidColorBrush x:Key="AppElementBorder" Color="#E0E0E0"/>
