@@ -126,52 +126,6 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string _next { get; set; }
     }
 
-    public class ChatRootVersion
-    {
-        public int Major { get; set; }
-        public int Minor { get; set; }
-        public int Patch { get; set; }
-
-        public ChatRootVersion() { }
-
-        public ChatRootVersion(int major, int minor, int patch)
-        {
-            Major = major;
-            Minor = minor;
-            Patch = patch;
-        }
-
-        public ChatRootVersion(string version)
-        {
-            string[] versionArray = version.Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            if (versionArray.Length == 0)
-                return;
-
-            Major = int.Parse(versionArray[0]);
-
-            if (versionArray.Length == 1)
-                return;
-
-            Minor = int.Parse(versionArray[1]);
-
-            if (versionArray.Length == 2)
-                return;
-
-            Patch = int.Parse(versionArray[2]);
-        }
-
-        public override string ToString()
-        {
-            return $"{Major}.{Minor}.{Patch}";
-        }
-    }
-
-    public class ChatRootInfo
-    {
-        public ChatRootVersion Version { get; set; } = new ChatRootVersion("1.0.0"); // Default to 1.0.0 for older jsons that don't have this field
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-    }
-
     public class ChatRoot
     {
         public ChatRootInfo FileInfo { get; set; } = new ChatRootInfo();

@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using TwitchDownloader.TwitchTasks;
 using TwitchDownloaderCore;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF;
 using static TwitchDownloaderWPF.App;
 

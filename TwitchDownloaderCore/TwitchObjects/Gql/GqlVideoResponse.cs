@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TwitchDownloaderCore.TwitchObjects
+namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
     public class VideoOwner
     {
