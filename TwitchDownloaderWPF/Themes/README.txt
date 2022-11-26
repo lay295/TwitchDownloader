@@ -15,6 +15,7 @@ the HandyControl theme.
 The SolidColorBrush keys control the color of the application and app elements, such as the
 app background, text, and border colors.
 
+
 The 'Inner' keys are used to add depth to double-recursive elements.
 The following diagram illustrates this:
 
@@ -30,13 +31,20 @@ The following diagram illustrates this:
 | \-------------------------------/ |
 |                                   |
 \-----------------------------------/
+
 In this case AppElementBackground is being used by a frame, while AppInnerElementBackground
 is being used by a bordered label, blank image background, or similar.
 
 
-If you created a theme that you believe should be included with the program, feel free
-to make a pull request on the github! https://github.com/lay295/TwitchDownloader/pulls
+If you created a theme and would like to be included with the program, feel free to make
+a pull request on the github! https://github.com/lay295/TwitchDownloader/pulls
 
 
-Note: File names are read in a non-case sensitive manner, meaning
-'Dark.xaml' and 'dark.xaml' cannot be differentiated.
+Important Notes:
+
+'Dark.xaml' and 'Light.xaml' will always be overwritten on application launch.
+
+File names are read in a non-case sensitive manner, meaning 'Dark.xaml' and 'dark.xaml'
+cannot be differentiated.
+
+Don't forget to edit the author comment at the top of the theme file
