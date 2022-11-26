@@ -128,17 +128,17 @@ namespace TwitchDownloaderCore.TwitchObjects
 
     public class ChatRootVersion
     {
-        public int major { get; set; }
-        public int minor { get; set; }
-        public int patch { get; set; }
+        public int Major { get; set; }
+        public int Minor { get; set; }
+        public int Patch { get; set; }
 
         public ChatRootVersion() { }
 
-        public ChatRootVersion(int _major, int _minor, int _patch)
+        public ChatRootVersion(int major, int minor, int patch)
         {
-            major = _major;
-            minor = _minor;
-            patch = _patch;
+            Major = major;
+            Minor = minor;
+            Patch = patch;
         }
 
         public ChatRootVersion(string version)
@@ -147,29 +147,34 @@ namespace TwitchDownloaderCore.TwitchObjects
             if (versionArray.Length == 0)
                 return;
 
-            major = int.Parse(versionArray[0]);
+            Major = int.Parse(versionArray[0]);
 
             if (versionArray.Length == 1)
                 return;
 
-            minor = int.Parse(versionArray[1]);
+            Minor = int.Parse(versionArray[1]);
 
             if (versionArray.Length == 2)
                 return;
 
-            patch = int.Parse(versionArray[2]);
+            Patch = int.Parse(versionArray[2]);
+        }
+
+        public override string ToString()
+        {
+            return $"{Major}.{Minor}.{Patch}";
         }
     }
 
     public class ChatRootInfo
     {
-        public ChatRootVersion version { get; set; } = new ChatRootVersion("1.0.0"); // Default to 1.0.0 for older jsons that don't have this field
-        public DateTime created_at { get; set; } = DateTime.Now;
+        public ChatRootVersion Version { get; set; } = new ChatRootVersion("1.0.0"); // Default to 1.0.0 for older jsons that don't have this field
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 
     public class ChatRoot
     {
-        public ChatRootInfo fileInfo { get; set; } = new ChatRootInfo();
+        public ChatRootInfo FileInfo { get; set; } = new ChatRootInfo();
         public Streamer streamer { get; set; }
         public Video video { get; set; }
         public List<Comment> comments { get; set; }
