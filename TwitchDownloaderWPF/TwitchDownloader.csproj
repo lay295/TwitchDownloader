@@ -36,13 +36,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Themes\README.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Remove="Themes\Dark.xaml" />
-    <Page Remove="Themes\Light.xaml" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\settings.png" />
     <Resource Include="Images\donate.png" />
   </ItemGroup>
