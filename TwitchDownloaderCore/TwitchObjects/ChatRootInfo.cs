@@ -4,48 +4,31 @@ namespace TwitchDownloaderCore.TwitchObjects
 {
     public class ChatRootInfo
     {
-        public ChatRootVersion Version { get; set; } = new ChatRootVersion("1.0.0"); // Default to 1.0.0 for older jsons that don't have this field
+        public ChatRootVersion Version { get; set; } = new ChatRootVersion();
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 
     public class ChatRootVersion
     {
         // Fields
-        public int Major { get; set; }
-        public int Minor { get; set; }
-        public int Patch { get; set; }
+        public int Major { get; set; } = 1;
+        public int Minor { get; set; } = 0;
+        public int Patch { get; set; } = 0;
 
         // Constructors
-        public ChatRootVersion() { Major = 1; Minor = 0; Patch = 0; }
+        /// <summary>
+        /// Initializes a new <see cref="ChatRootVersion"/> object with the default version of 1.0.0
+        /// </summary>
+        public ChatRootVersion() { }
 
+        /// <summary>
+        /// Initializes a new <see cref="ChatRootVersion"/> object with the version number of <paramref name="major"/>.<paramref name="minor"/>.<paramref name="patch"/>
+        /// </summary>
         public ChatRootVersion(int major, int minor, int patch)
         {
             Major = major;
             Minor = minor;
             Patch = patch;
-        }
-
-        public ChatRootVersion(string version)
-        {
-            string[] versionArray = version.Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            Major = 1;
-            Minor = 0;
-            Patch = 0;
-
-            if (versionArray.Length == 0)
-                return;
-
-            Major = int.Parse(versionArray[0]);
-
-            if (versionArray.Length == 1)
-                return;
-
-            Minor = int.Parse(versionArray[1]);
-
-            if (versionArray.Length == 2)
-                return;
-
-            Patch = int.Parse(versionArray[2]);
         }
 
         // Methods
@@ -67,49 +50,49 @@ namespace TwitchDownloaderCore.TwitchObjects
         }
 
         // Operators
-        public static bool operator >(ChatRootVersion crvA, ChatRootVersion crvB)
+        public static bool operator >(ChatRootVersion left, ChatRootVersion right)
         {
-            if (crvA.Major > crvB.Major) return true;
-            else if (crvA.Major == crvB.Major)
+            if (left.Major > right.Major) return true;
+            else if (left.Major == right.Major)
             {
-                if (crvA.Minor > crvB.Minor) return true;
-                else if (crvA.Minor == crvB.Minor)
+                if (left.Minor > right.Minor) return true;
+                else if (left.Minor == right.Minor)
                 {
-                    if (crvA.Patch > crvB.Patch) return true;
+                    if (left.Patch > right.Patch) return true;
                 }
             }
             return false;
         }
 
-        public static bool operator <(ChatRootVersion crvA, ChatRootVersion crvB)
+        public static bool operator <(ChatRootVersion left, ChatRootVersion right)
         {
-            if (crvA.Major < crvB.Major) return true;
-            else if (crvA.Major == crvB.Major)
+            if (left.Major < right.Major) return true;
+            else if (left.Major == right.Major)
             {
-                if (crvA.Minor < crvB.Minor) return true;
-                else if (crvA.Minor == crvB.Minor)
+                if (left.Minor < right.Minor) return true;
+                else if (left.Minor == right.Minor)
                 {
-                    if (crvA.Patch < crvB.Patch) return true;
+                    if (left.Patch < right.Patch) return true;
                 }
             }
             return false;
         }
 
-        public static bool operator ==(ChatRootVersion crvA, ChatRootVersion crvB)
+        public static bool operator ==(ChatRootVersion left, ChatRootVersion right)
         {
-            if (crvA.Major != crvB.Major) return false;
-            if (crvA.Minor != crvB.Minor) return false;
-            if (crvA.Patch != crvB.Patch) return false;
+            if (left.Major != right.Major) return false;
+            if (left.Minor != right.Minor) return false;
+            if (left.Patch != right.Patch) return false;
             return true;
         }
 
-        public static bool operator !=(ChatRootVersion crvA, ChatRootVersion crvB)
-            => !(crvA == crvB);
+        public static bool operator !=(ChatRootVersion left, ChatRootVersion right)
+            => !(left == right);
 
-        public static bool operator >=(ChatRootVersion crvA, ChatRootVersion crvB)
-            => (crvA > crvB) || (crvA == crvB);
+        public static bool operator >=(ChatRootVersion left, ChatRootVersion right)
+            => (left > right) || (left == right);
 
-        public static bool operator <=(ChatRootVersion crvA, ChatRootVersion crvB)
-            => (crvA < crvB) || (crvA == crvB);
+        public static bool operator <=(ChatRootVersion left, ChatRootVersion right)
+            => (left < right) || (left == right);
     }
 }
