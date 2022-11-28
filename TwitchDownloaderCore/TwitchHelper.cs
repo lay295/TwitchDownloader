@@ -243,7 +243,7 @@ namespace TwitchDownloaderCore
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emoteData.name);
                     }
-                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
+                    catch { }
                 }
             }
 

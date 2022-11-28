@@ -340,15 +340,15 @@ namespace TwitchDownloaderCore
                 progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Downloading + Embedding Images" });
                 chatRoot.embeddedData = new EmbeddedData();
 
-                List<TwitchEmote> thirdPartyEmotes = new List<TwitchEmote>();
-                List<TwitchEmote> firstPartyEmotes = new List<TwitchEmote>();
-                List<ChatBadge> twitchBadges = new List<ChatBadge>();
-                List<CheerEmote> twitchBits = new List<CheerEmote>();
+                List<EmbedEmoteData> thirdPartyReturnList = new List<EmbedEmoteData>();
+                List<EmbedEmoteData> firstPartyReturnList = new List<EmbedEmoteData>();
+                List<EmbedChatBadge> badgesReturnList = new List<EmbedChatBadge>();
+                List<EmbedCheerEmote> bitsReturnList = new List<EmbedCheerEmote>();
 
-                thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, downloadOptions.TempFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes);
-                firstPartyEmotes = await TwitchHelper.GetEmotes(comments, downloadOptions.TempFolder);
-                twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, downloadOptions.TempFolder);
-                twitchBits = await TwitchHelper.GetBits(downloadOptions.TempFolder, chatRoot.streamer.id.ToString());
+                List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, downloadOptions.TempFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes);
+                List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(comments, downloadOptions.TempFolder);
+                List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, downloadOptions.TempFolder);
+                List<CheerEmote> twitchBits = await TwitchHelper.GetBits(downloadOptions.TempFolder, chatRoot.streamer.id.ToString());
 
                 foreach (TwitchEmote emote in thirdPartyEmotes)
                 {
@@ -359,8 +359,10 @@ namespace TwitchDownloaderCore
                     newEmote.name = emote.Name;
                     newEmote.width = emote.Width / emote.ImageScale;
                     newEmote.height = emote.Height / emote.ImageScale;
-                    chatRoot.embeddedData.thirdParty.Add(newEmote);
+                    thirdPartyReturnList.Add(newEmote);
                 }
+                chatRoot.embeddedData.thirdParty = thirdPartyReturnList;
+                thirdPartyReturnList.Clear();
                 foreach (TwitchEmote emote in firstPartyEmotes)
                 {
                     EmbedEmoteData newEmote = new EmbedEmoteData();
@@ -369,15 +371,19 @@ namespace TwitchDownloaderCore
                     newEmote.data = emote.ImageData;
                     newEmote.width = emote.Width / emote.ImageScale;
                     newEmote.height = emote.Height / emote.ImageScale;
-                    chatRoot.embeddedData.firstParty.Add(newEmote);
+                    firstPartyReturnList.Add(newEmote);
                 }
+                chatRoot.embeddedData.firstParty= firstPartyReturnList;
+                firstPartyReturnList.Clear();
                 foreach (ChatBadge badge in twitchBadges)
                 {
                     EmbedChatBadge newBadge = new EmbedChatBadge();
                     newBadge.name = badge.Name;
                     newBadge.versions = badge.VersionsData;
-                    chatRoot.embeddedData.twitchBadges.Add(newBadge);
+                    badgesReturnList.Add(newBadge);
                 }
+                chatRoot.embeddedData.twitchBadges = badgesReturnList;
+                badgesReturnList.Clear();
                 foreach (CheerEmote bit in twitchBits)
                 {
                     EmbedCheerEmote newBit = new EmbedCheerEmote();
@@ -394,8 +400,10 @@ namespace TwitchDownloaderCore
                         newEmote.height = emotePair.Value.Height / emotePair.Value.ImageScale;
                         newBit.tierList.Add(emotePair.Key, newEmote);
                     }
-                    chatRoot.embeddedData.twitchBits.Add(newBit);
+                    bitsReturnList.Add(newBit);
                 }
+                chatRoot.embeddedData.twitchBits = bitsReturnList;
+                bitsReturnList.Clear();
             }
 
             switch (downloadOptions.DownloadFormat)
