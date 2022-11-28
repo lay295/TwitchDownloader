@@ -838,7 +838,7 @@ namespace TwitchDownloaderCore
 
             if (comment.commenter.display_name.Any(IsNotAscii))
             {
-                userPaint = GetFallbackFont(comment.commenter.display_name.Where(x => IsNotAscii(x)).First(), renderOptions);
+                userPaint = GetFallbackFont(comment.commenter.display_name.Where(IsNotAscii).First(), renderOptions);
                 userPaint.Color = userColor;
             }
 
@@ -851,8 +851,6 @@ namespace TwitchDownloaderCore
             userPaint.Color = userColor;
             sectionImageCanvas.DrawText(comment.commenter.display_name + ":", drawPos.X, drawPos.Y, userPaint);
             drawPos.X += textWidth + renderOptions.WordSpacing;
-
-            userPaint.Dispose();
         }
 
         private static SKColor GenerateUserColor(SKColor userColor, SKColor background_color, ChatRenderOptions renderOptions)
