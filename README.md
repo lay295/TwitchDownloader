@@ -100,7 +100,7 @@ chmod +x ffmpeg
 ```
 5. You can now start using the downloader, for example:
 ```
-./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
+./TwitchDownloaderCLI -m VideoDownload -u <vod-id-here> -o out.mp4
 ```
 
 # License
