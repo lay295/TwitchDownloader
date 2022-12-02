@@ -110,10 +110,10 @@ public class EmbedCheerEmote
 
 public class EmbeddedData
 {
-    public List<EmbedEmoteData> thirdParty { get; set; }
-    public List<EmbedEmoteData> firstParty { get; set; }
-    public List<EmbedChatBadge> twitchBadges { get; set; }
-    public List<EmbedCheerEmote> twitchBits { get; set; }
+    public List<EmbedEmoteData> thirdParty { get; set; } = new();
+    public List<EmbedEmoteData> firstParty { get; set; } = new();
+    public List<EmbedChatBadge> twitchBadges { get; set; } = new();
+    public List<EmbedCheerEmote> twitchBits { get; set; } = new();
 }
 
 public class CommentResponse
