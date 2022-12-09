@@ -54,8 +54,8 @@ namespace TwitchDownloaderWPF
 
         private void SetEnabled(bool isEnabled, bool isClip)
         {
-            checkStart.IsEnabled = isEnabled & !isClip;
-            checkEnd.IsEnabled = isEnabled & !isClip;
+            checkCropStart.IsEnabled = isEnabled & !isClip;
+            checkCropEnd.IsEnabled = isEnabled & !isClip;
             radioRelative.IsEnabled = isEnabled;
             radioUTC.IsEnabled = isEnabled;
             radioNone.IsEnabled = isEnabled;
@@ -125,7 +125,7 @@ namespace TwitchDownloaderWPF
                         Match urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
                         if (urlTimecodeMatch.Success)
                         {
-                            checkStart.IsChecked = true;
+                            checkCropStart.IsChecked = true;
                             numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].Value[..urlTimecodeMatch.Groups[1].ToString().IndexOf('h')]);
                             numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
                             numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
@@ -225,7 +225,7 @@ namespace TwitchDownloaderWPF
                 options.DownloadFormat = ChatFormat.Html;
             else if (radioText.IsChecked == true)
                 options.DownloadFormat = ChatFormat.Text;
-
+            
             options.EmbedData = (bool)checkEmbed.IsChecked;
             options.BttvEmotes = (bool)checkBttvEmbed.IsChecked;
             options.FfzEmotes = (bool)checkFfzEmbed.IsChecked;
@@ -237,12 +237,12 @@ namespace TwitchDownloaderWPF
 
         private void OnProgressChanged(ProgressReport progress)
         {
-            if (progress.reportType == ReportType.Percent)
-                statusProgressBar.Value = (int)progress.data;
-            if (progress.reportType is ReportType.Status or ReportType.StatusInfo)
-                statusMessage.Text = (string)progress.data;
-            if (progress.reportType == ReportType.Log)
-                AppendLog((string)progress.data);
+            if (progress.ReportType == ReportType.Percent)
+                statusProgressBar.Value = (int)progress.Data;
+            if (progress.ReportType is ReportType.Status or ReportType.StatusInfo)
+                statusMessage.Text = (string)progress.Data;
+            if (progress.ReportType == ReportType.Log)
+                AppendLog((string)progress.Data);
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -252,7 +252,9 @@ namespace TwitchDownloaderWPF
             image.UriSource = new Uri(imageUri, UriKind.Relative);
             image.EndInit();
             if (isGif)
+            {
                 ImageBehavior.SetAnimatedSource(statusImage, image);
+            }
             else
             {
                 ImageBehavior.SetAnimatedSource(statusImage, null);
@@ -420,7 +422,7 @@ namespace TwitchDownloaderWPF
                     saveFileDialog.Filter = "JSON Files | *.json";
                 else if (radioHTML.IsChecked == true)
                     saveFileDialog.Filter = "HTML Files | *.html;*.htm";
-                else
+                else if (radioText.IsChecked == true)
                     saveFileDialog.Filter = "TXT Files | *.txt";
 
                 saveFileDialog.RestoreDirectory = true;
@@ -436,7 +438,7 @@ namespace TwitchDownloaderWPF
                             int startTime = 0;
                             int endTime = 0;
 
-                            if (checkStart.IsChecked == true)
+                            if (checkCropStart.IsChecked == true)
                             {
                                 downloadOptions.CropBeginning = true;
                                 TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
@@ -444,7 +446,7 @@ namespace TwitchDownloaderWPF
                                 downloadOptions.CropBeginningTime = startTime;
                             }
 
-                            if (checkEnd.IsChecked == true)
+                            if (checkCropEnd.IsChecked == true)
                             {
                                 downloadOptions.CropEnding = true;
                                 TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
@@ -459,11 +461,11 @@ namespace TwitchDownloaderWPF
                             downloadOptions.Id = downloadId;
                         }
 
-                        if ((bool)radioUTC.IsChecked)
+                        if (radioUTC.IsChecked == true)
                             downloadOptions.TimeFormat = TimestampFormat.Utc;
-                        if ((bool)radioRelative.IsChecked)
+                        else if (radioRelative.IsChecked == true)
                             downloadOptions.TimeFormat = TimestampFormat.Relative;
-                        if ((bool)radioNone.IsChecked)
+                        else if (radioNone.IsChecked == true)
                             downloadOptions.TimeFormat = TimestampFormat.None;
 
                         ChatDownloader currentDownload = new ChatDownloader(downloadOptions);
@@ -502,14 +504,14 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void checkStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
+        private void checkCropStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropStart((bool)checkStart.IsChecked);
+            SetEnabledCropStart((bool)checkCropStart.IsChecked);
         }
 
-        private void checkEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
+        private void checkCropEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropEnd((bool)checkEnd.IsChecked);
+            SetEnabledCropEnd((bool)checkCropEnd.IsChecked);
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)

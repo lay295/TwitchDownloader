@@ -5,38 +5,51 @@ namespace TwitchDownloaderCLI.Tools
 {
     internal class ProgressHandler
     {
-        private static string previousStatus = string.Empty;
-        private static bool was_last_message_percent = false;
+        private static string previousMessage = "";
+        private static bool previousMessageWasStatusInfo = false;
 
         internal static void Progress_ProgressChanged(object sender, ProgressReport e)
         {
-            if (e.reportType == ReportType.Status)
+            if (e.ReportType == ReportType.Status)
             {
-                if (was_last_message_percent)
+                if (previousMessageWasStatusInfo)
                 {
-                    was_last_message_percent = false;
+                    previousMessageWasStatusInfo = false;
                     Console.WriteLine();
                 }
-                string currentStatus = "[STATUS] - " + e.data;
-                if (currentStatus != previousStatus)
+
+                string currentStatus = "[STATUS] - " + e.Data;
+                if (currentStatus != previousMessage)
                 {
-                    previousStatus = currentStatus;
+                    previousMessage = currentStatus;
                     Console.WriteLine(currentStatus);
                 }
             }
-            else if (e.reportType == ReportType.StatusInfo)
+            else if (e.ReportType == ReportType.StatusInfo)
             {
-                Console.Write("\r[STATUS] - " + e.data);
-                was_last_message_percent = true;
-            }
-            else if (e.reportType == ReportType.Log)
-            {
-                if (was_last_message_percent)
+                string currentStatus = "\r[STATUS] - " + e.Data;
+                if (currentStatus != previousMessage)
                 {
-                    was_last_message_percent = false;
+                    previousMessageWasStatusInfo = true;
+
+                    // This ensures the previous message is fully overwritten
+                    currentStatus = currentStatus.PadRight(previousMessage.Length);
+                    
+                    previousMessage = currentStatus.TrimEnd();
+                    Console.Write(currentStatus);
+                }
+            }
+            else if (e.ReportType == ReportType.Log)
+            {
+                if (previousMessageWasStatusInfo)
+                {
+                    previousMessageWasStatusInfo = false;
                     Console.WriteLine();
                 }
-                Console.WriteLine("[LOG] - " + e.data);
+
+                string currentStatus = "[LOG] - " + e.Data;
+                previousMessage = currentStatus;
+                Console.WriteLine(currentStatus);
             }
         }
     }

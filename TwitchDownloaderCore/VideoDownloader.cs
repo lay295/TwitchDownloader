@@ -169,8 +169,8 @@ namespace TwitchDownloaderCore
 
                             doneCount++;
                             int percent = (int)Math.Floor(((double)doneCount / (double)partCount) * 100);
-                            progress.Report(new ProgressReport() { reportType = ReportType.StatusInfo, data = String.Format("Downloading {0}% (1/3)", percent) });
-                            progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
+                            progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = String.Format("Downloading {0}% (1/3)", percent) });
+                            progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
 
                             return;
                         }
@@ -188,8 +188,8 @@ namespace TwitchDownloaderCore
 
                 CheckCancelation(cancellationToken, downloadFolder);
 
-                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Combining Parts (2/3)" });
-                progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = 0 });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Combining Parts (2/3)" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = 0 });
 
                 await Task.Run(() =>
                 {
@@ -216,7 +216,7 @@ namespace TwitchDownloaderCore
                 });
 
 
-                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Finalizing MP4 (3/3)" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Finalizing MP4 (3/3)" });
 
                 double startOffset = 0.0;
 

@@ -63,8 +63,8 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 ## Windows - Getting started
 
 1. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest version for Windows or [build from source](#building-from-source).
-2. Extract `TwitchDownloaderCLI.exe`
-3. Browse to where you extracted the file in the terminal
+2. Extract `TwitchDownloaderCLI.exe`.
+3. Browse to where you extracted the file in the terminal.
 4. If you do not have ffmpeg, you can install it via [Chocolatey package manager](https://community.chocolatey.org/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
 ```
 TwitchDownloaderCLI.exe ffmpeg --download
@@ -78,7 +78,7 @@ TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 
 1. Ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 2. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for Linux, grab the [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/) for Arch Linux, or [build from source](#building-from-source).
-3. Extract `TwitchDownloaderCLI`
+3. Extract `TwitchDownloaderCLI`.
 4. Browse to where you extracted the file and give it executable rights in the terminal:
 ```
 sudo chmod +x TwitchDownloaderCLI
@@ -98,7 +98,7 @@ sudo chmod +x ffmpeg
 
 ## MacOS – Getting started
 1. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for MacOS or [build from source](#building-from-source).
-2. Extract `TwitchDownloaderCLI`
+2. Extract `TwitchDownloaderCLI`.
 3. Browse to where you extracted the file and give it executable rights in the terminal:
 ```
 chmod +x TwitchDownloaderCLI
@@ -145,11 +145,11 @@ dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile> -p:DebugType=None -p:DebugSymbols=false
 ```
 - Applicable Profiles: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `MacOS`
-5. a) Navigate to the built GUI application
+5. a) Navigate to the GUI build folder:
 ```
 cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
 ```
-5. b) Navigate to the CLI build folder
+5. b) Navigate to the CLI build folder:
 ```
 cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 ```

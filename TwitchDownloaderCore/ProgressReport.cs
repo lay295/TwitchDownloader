@@ -14,17 +14,17 @@
 
         public ProgressReport(int percent)
         {
-            reportType = ReportType.Percent;
-            data = percent;
+            ReportType = ReportType.Percent;
+            Data = percent;
         }
 
-        public ProgressReport(ReportType type, string _data)
+        public ProgressReport(ReportType reportType, string message)
         {
-            reportType = type;
-            data = _data;
+            ReportType = reportType;
+            Data = message;
         }
 
-        public ReportType reportType { get; set; }
-        public object data { get; set; }
+        public ReportType ReportType { get; set; }
+        public object Data { get; set; }
     }
 }

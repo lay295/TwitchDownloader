@@ -50,7 +50,7 @@ namespace TwitchDownloaderCore
                 bool cropTaskVodExpired = false;
                 var cropTaskProgress = new Progress<ProgressReport>(report =>
                 {
-                    if (report.data.ToString().ToLower().Contains("vod is expired"))
+                    if (report.Data.ToString().ToLower().Contains("vod is expired"))
                     {
                         // If the user is moving both crops in one command, we only want to propagate a 'vod expired/id corrupt' report once 
                         if (cropTaskVodExpired)
@@ -110,13 +110,13 @@ namespace TwitchDownloaderCore
             switch (_updateOptions.OutputFormat)
             {
                 case ChatFormat.Json:
-                    await ChatFileTools.WriteJsonChatAsync(_updateOptions.OutputFile, chatRoot);
+                    ChatJson.Serialize(_updateOptions.OutputFile, chatRoot);
                     break;
                 case ChatFormat.Html:
-                    await ChatFileTools.WriteHtmlChatAsync(_updateOptions.OutputFile, chatRoot.embeddedData != null, chatRoot);
+                    await ChatHtml.SerializeAsync(_updateOptions.OutputFile, chatRoot, chatRoot.embeddedData != null);
                     break;
                 case ChatFormat.Text:
-                    await ChatFileTools.WriteTextChatAsync(_updateOptions.OutputFile, _updateOptions.TextTimestampFormat, chatRoot);
+                    await ChatText.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.TextTimestampFormat);
                     break;
                 default:
                     throw new NotImplementedException("Requested output chat format is not implemented");
@@ -300,7 +300,7 @@ namespace TwitchDownloaderCore
             ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
             await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
 
-            ChatRoot newChatRoot = await ChatFileTools.ParseJsonAsync(inputFile, getComments: true, getEmbeds: false, cancellationToken);
+            ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, getEmbeds: false, cancellationToken);
 
             // Append the new comment section
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
@@ -348,7 +348,7 @@ namespace TwitchDownloaderCore
 
         public async Task<ChatRoot> ParseJsonAsync()
         {
-            chatRoot = await ChatFileTools.ParseJsonAsync(_updateOptions.InputFile);
+            chatRoot = await ChatJson.DeserializeAsync(_updateOptions.InputFile);
 
             chatRoot.streamer ??= new Streamer
             {

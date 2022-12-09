@@ -79,7 +79,7 @@ namespace TwitchDownloaderCore
                         cursor = commentResponse._next;
 
                     int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                    progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
+                    progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
 
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -147,7 +147,7 @@ namespace TwitchDownloaderCore
                         cursor = commentResponse.data.video.comments.edges.Last().cursor;
 
                     int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                    progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
+                    progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
 
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -294,13 +294,13 @@ namespace TwitchDownloaderCore
                 percentages.Add(0);
                 var taskProgress = new Progress<ProgressReport>(progressReport =>
                 {
-                    if (progressReport.reportType != ReportType.Percent)
+                    if (progressReport.ReportType != ReportType.Percent)
                     {
                         progress.Report(progressReport);
                     }
                     else
                     {
-                        int percent = (int)progressReport.data;
+                        int percent = (int)progressReport.Data;
                         if (percent > 100)
                         {
                             percent = 100;
@@ -315,8 +315,8 @@ namespace TwitchDownloaderCore
                         }
                         percent /= connectionCount;
 
-                        progress.Report(new ProgressReport() { reportType = ReportType.StatusInfo, data = $"Downloading {percent}%" });
-                        progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
+                        progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = $"Downloading {percent}%" });
+                        progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
                     }
                 });
                 double start = videoStart + chunk * i;
@@ -337,7 +337,7 @@ namespace TwitchDownloaderCore
 
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
-                progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Downloading + Embedding Images" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Downloading + Embedding Images" });
                 chatRoot.embeddedData = new EmbeddedData();
 
                 // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
@@ -398,13 +398,13 @@ namespace TwitchDownloaderCore
             switch (downloadOptions.DownloadFormat)
             {
                 case ChatFormat.Json:
-                    await ChatFileTools.WriteJsonChatAsync(downloadOptions.Filename, chatRoot);
+                    ChatJson.Serialize(downloadOptions.Filename, chatRoot);
                     break;
                 case ChatFormat.Html:
-                    await ChatFileTools.WriteHtmlChatAsync(downloadOptions.Filename, downloadOptions.EmbedData, chatRoot);
+                    await ChatHtml.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.EmbedData);
                     break;
                 case ChatFormat.Text:
-                    await ChatFileTools.WriteTextChatAsync(downloadOptions.Filename, downloadOptions.TimeFormat, chatRoot);
+                    await ChatText.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.TimeFormat);
                     break;
                 default:
                     throw new NotImplementedException("Requested output chat format is not implemented");

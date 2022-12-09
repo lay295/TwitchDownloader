@@ -48,7 +48,7 @@ namespace TwitchDownloaderWPF
 
                 if (Path.GetExtension(InputFile).ToLower() == ".json")
                 {
-                    ChatJsonInfo = await ChatFileTools.ParseJsonAsync(InputFile, getComments: false, getEmbeds: false);
+                    ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getComments: false, getEmbeds: false);
                     textStreamer.Text = ChatJsonInfo.streamer.name;
                     textCreatedAt.Text = /*chatJsonInfo.video.created_at*/null ?? "Unknown";
                     textTitle.Text = /*chatJsonInfo.video.title*/null ?? "Unknown";
@@ -231,12 +231,12 @@ namespace TwitchDownloaderWPF
 
         private void OnProgressChanged(ProgressReport progress)
         {
-            if (progress.reportType == ReportType.Percent)
-                statusProgressBar.Value = (int)progress.data;
-            if (progress.reportType == ReportType.Status || progress.reportType == ReportType.StatusInfo)
-                statusMessage.Text = (string)progress.data;
-            if (progress.reportType == ReportType.Log)
-                AppendLog((string)progress.data);
+            if (progress.ReportType == ReportType.Percent)
+                statusProgressBar.Value = (int)progress.Data;
+            if (progress.ReportType is ReportType.Status or ReportType.StatusInfo)
+                statusMessage.Text = (string)progress.Data;
+            if (progress.ReportType == ReportType.Log)
+                AppendLog((string)progress.Data);
         }
 
         public void SetImage(string imageUri, bool isGif)

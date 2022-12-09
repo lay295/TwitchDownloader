@@ -38,17 +38,20 @@ namespace TwitchDownloaderCore
         public ChatRenderer(ChatRenderOptions chatRenderOptions)
         {
             renderOptions = chatRenderOptions;
-            renderOptions.TempFolder = Path.Combine(string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : renderOptions.TempFolder, "TwitchDownloader");
+            renderOptions.TempFolder = Path.Combine(
+                string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : renderOptions.TempFolder,
+                "TwitchDownloader");
         }
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            progress.Report(new ProgressReport() { reportType = ReportType.Status, data = "Fetching Images" });
-            Task<List<ChatBadge>> badgeTask = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline));
-            Task<List<TwitchEmote>> emoteTask = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline));
-            Task<List<TwitchEmote>> emoteThirdTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline));
-            Task<List<CheerEmote>> cheerTask = Task.Run(() => TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline));
-            Task<Dictionary<string, SKBitmap>> emojiTask = Task.Run(() => TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder));
+            progress.Report(new ProgressReport(ReportType.Status, "Fetching Images"));
+
+            Task<List<ChatBadge>> badgeTask = TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            Task<List<TwitchEmote>> emoteTask = TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            Task<List<TwitchEmote>> emoteThirdTask = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline);
+            Task<List<CheerEmote>> cheerTask = TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
+            Task<Dictionary<string, SKBitmap>> emojiTask = TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
 
@@ -66,11 +69,10 @@ namespace TwitchDownloaderCore
             cheerTask.Dispose();
             emojiTask.Dispose();
 
-            await Task.Run(ScaleImages);
+            await Task.Run(ScaleImages, cancellationToken);
             FloorCommentOffsets(chatRoot.comments);
 
             outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-
             nameFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             messageFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
 
@@ -85,27 +87,25 @@ namespace TwitchDownloaderCore
                 messageFont.Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.MessageFontStyle);
             }
 
-            (int, int) tickValues = GetTotalTicks();
-            int totalTicks = tickValues.Item2;
-            int startTick = tickValues.Item1;
+            (int startTick, int totalTicks) = GetVideoTicks();
 
             if (File.Exists(renderOptions.OutputFile))
                 File.Delete(renderOptions.OutputFile);
 
-            if (renderOptions.GenerateMask && File.Exists(renderOptions.OutputFileMask))
-                File.Delete(renderOptions.OutputFileMask);
+            if (renderOptions.GenerateMask && File.Exists(renderOptions.MaskFile))
+                File.Delete(renderOptions.MaskFile);
 
-            progress.Report(new ProgressReport() { reportType = ReportType.StatusInfo, data = "Rendering Video 0%" });
-            (Process, string) processInfo = GetFfmpegProcess(0, false);
+            progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
+            (Process ffmpegProcess, string ffmpegSavePath) = GetFfmpegProcess(0, false);
 
             if (renderOptions.GenerateMask)
             {
-                (Process, string) maskInfo = GetFfmpegProcess(0, true);
-                await Task.Run(() => RenderVideoSection(processInfo.Item1, maskInfo.Item1, startTick, startTick + totalTicks, progress), cancellationToken);
+                (Process maskProcess, string maskSavePath) = GetFfmpegProcess(0, true);
+                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress), cancellationToken);
             }
             else
             {
-                await Task.Run(() => RenderVideoSection(processInfo.Item1, null, startTick, startTick + totalTicks, progress), cancellationToken);
+                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, progress: progress), cancellationToken);
             }
         }
 
@@ -144,9 +144,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void RenderVideoSection(Process ffmpegProcess, Process maskProcess, int startTick, int endTick, IProgress<ProgressReport> progress = null)
+        private void RenderVideoSection(int startTick, int endTick, Process ffmpegProcess, Process maskProcess = null, IProgress<ProgressReport> progress = null)
         {
-            UpdateFrame lastestUpdate = null;
+            UpdateFrame latestUpdate = null;
             BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.StandardInput.BaseStream);
             BinaryWriter maskStream = null;
             if (maskProcess != null)
@@ -155,16 +155,20 @@ namespace TwitchDownloaderCore
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
+            // Measure some sample text to determine the text height, cannot assume it is font size
+            SKRect sampleTextBounds = new SKRect();
+            messageFont.MeasureText("abc123", ref sampleTextBounds);
+
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    lastestUpdate?.Image.Dispose();
+                    latestUpdate?.Image.Dispose();
 
-                    lastestUpdate = GenerateUpdateFrame(currentTick);
+                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height);
                 }
 
-                using (SKBitmap frame = GetFrameFromTick(currentTick, lastestUpdate))
+                using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, latestUpdate))
                 {
                     ffmpegStream.Write(frame.Bytes);
 
@@ -175,19 +179,19 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                double percentDouble = (double)(currentTick - startTick) / (double)(endTick - startTick) * 100.0;
+                double percentDouble = (currentTick - startTick) / (double)(endTick - startTick) * 100.0;
                 int percentInt = (int)Math.Floor(percentDouble);
-                if (progress != null)
-                {
-                    progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percentInt });
-                    int timeLeftInt = (int)Math.Floor(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
-                    TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
-                    progress.Report(new ProgressReport() { reportType = ReportType.StatusInfo, data = $"Rendering Video {percentInt}% ({timeLeft.ToString(@"h\hm\ms\s")} left)" });
-                }
+                progress?.Report(new ProgressReport(percentInt));
+
+                int timeLeftInt = (int)Math.Floor(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
+                TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
+                TimeSpan timeElapsed = new TimeSpan(0, 0, (int)stopwatch.Elapsed.TotalSeconds);
+                progress?.Report(new ProgressReport(ReportType.StatusInfo, $"Rendering Video: {percentInt}% ({timeElapsed.ToString(@"h\hm\ms\s")} Elapsed | {timeLeft.ToString(@"h\hm\ms\s")} Remaining)"));
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.StatusInfo, data = "Rendering Video 100%" });
+
             stopwatch.Stop();
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });
+            progress?.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 100%"));
+            progress?.Report(new ProgressReport(ReportType.Log, $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x"));
 
             ffmpegStream.Dispose();
             maskStream?.Dispose();
@@ -218,13 +222,13 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private (Process, string) GetFfmpegProcess(int partNumer, bool isMask)
+        private (Process process, string savePath) GetFfmpegProcess(int partNumber, bool isMask)
         {
             string savePath;
-            if (partNumer == 0)
+            if (partNumber == 0)
             {
                 if (isMask)
-                    savePath = renderOptions.OutputFileMask;
+                    savePath = renderOptions.MaskFile;
                 else
                     savePath = renderOptions.OutputFile;
             }
@@ -262,9 +266,9 @@ namespace TwitchDownloaderCore
             return (process, savePath);
         }
 
-        private SKBitmap GetFrameFromTick(int currentTick, UpdateFrame currentFrame = null)
+        private SKBitmap GetFrameFromTick(int currentTick, float sampleTextHeight, UpdateFrame currentFrame = null)
         {
-            currentFrame ??= GenerateUpdateFrame(currentTick);
+            currentFrame ??= GenerateUpdateFrame(currentTick, sampleTextHeight);
             SKBitmap frame = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
             return frame;
         }
@@ -303,7 +307,7 @@ namespace TwitchDownloaderCore
             return newFrame;
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight)
         {
             List<CommentSection> commentList = new List<CommentSection>();
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
@@ -323,7 +327,7 @@ namespace TwitchDownloaderCore
                         continue;
                     }
 
-                    CommentSection comment = GenerateCommentSection(commentIndex);
+                    CommentSection comment = GenerateCommentSection(commentIndex, sampleTextHeight);
                     if (comment != null)
                     {
                         commentList.Add(comment);
@@ -347,7 +351,7 @@ namespace TwitchDownloaderCore
             return new UpdateFrame() { Image = newFrame, Comments = commentList };
         }
 
-        private CommentSection GenerateCommentSection(int commentIndex)
+        private CommentSection GenerateCommentSection(int commentIndex, float sampleTextHeight)
         {
             CommentSection newSection = new CommentSection();
             List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
@@ -384,10 +388,7 @@ namespace TwitchDownloaderCore
             }
 
             AddImageSection(sectionImages, ref drawPos, defaultPos);
-            //Measure some sample text to determine position to draw text in, cannot assume height is font size
-            SKRect textBounds = new SKRect();
-            messageFont.MeasureText("abc123", ref textBounds);
-            defaultPos.Y = (int)(((renderOptions.SectionHeight - textBounds.Height) / 2.0) + textBounds.Height);
+            defaultPos.Y = (int)(((renderOptions.SectionHeight - sampleTextHeight) / 2.0) + sampleTextHeight);
             drawPos.Y = defaultPos.Y;
 
             if ((comment.message.user_notice_params != null && (comment.message.user_notice_params.msg_id is "sub" or "resub" or "subgift")) || IsSubMessage(comment))
@@ -734,43 +735,38 @@ namespace TwitchDownloaderCore
         /// <returns>A shorter width or delimited <see langword="string"/>, whichever comes first.</returns>
         private static string SubstringToTextWidth(string text, SKPaint textFont, int maxWidth, char[] delimiters)
         {
+            ReadOnlySpan<char> inputText = text.AsSpan();
+
             // input text was already less than max width
-            if (textFont.MeasureText(text) <= maxWidth)
+            if (textFont.MeasureText(inputText) <= maxWidth)
             {
                 return text;
             }
 
-            // cut in string half until <= width
-            string shortText = text;
+            // Cut in half until <= width
+            int length = inputText.Length;
             do
             {
-                shortText = shortText[..(shortText.Length / 2)];
-            } while (textFont.MeasureText(shortText) > maxWidth);
+                length /= 2;
+            }
+            while (textFont.MeasureText(inputText.Slice(0, length)) > maxWidth);
 
-            // add chars until 1 too long for width
-            int charAt = shortText.Length - 1;
-            int delimiterIndex = shortText.LastIndexOfAny(delimiters) + 1;
+            // Add chars until greater than width, then remove the last
+            int charAt = length;
             do
             {
                 charAt++;
-                shortText += text[charAt];
-                if (delimiters.Any(x => x.Equals(shortText[charAt])))
-                {
-                    delimiterIndex = charAt;
-                }
+            } while (textFont.MeasureText(inputText.Slice(0, charAt)) < maxWidth);
+            ReadOnlySpan<char> shortenedText = inputText.Slice(0, charAt - 1);
 
-                // prioritize wrapping at last delimiter char to increase URL readability
-                if (delimiterIndex > 0)
-                {
-                    // we're at the end of a delimiter char chain
-                    if (delimiterIndex != charAt)
-                    {
-                        return shortText[..delimiterIndex];
-                    }
-                }
-            } while (textFont.MeasureText(shortText) < maxWidth);
+            // Cut at the last delimiter
+            int delimiterIndex = shortenedText.LastIndexOfAny(delimiters);
+            if (delimiterIndex != -1)
+            {
+                return shortenedText.Slice(0, delimiterIndex).ToString();
+            }
 
-            return shortText[..^1];
+            return shortenedText.ToString();
         }
 
         /// <summary>
@@ -780,52 +776,49 @@ namespace TwitchDownloaderCore
         /// <returns>A shorter width or delimited <see langword="string"/>, whichever comes first.</returns>
         private static string SubstringRtlToTextWidth(string rtlText, SKPaint textFont, int maxWidth, char[] delimiters)
         {
-            // input text was already less than max width
-            if (MeasureRtlText(rtlText, textFont) <= maxWidth)
+
+            ReadOnlySpan<char> inputText = rtlText.AsSpan();
+
+            // Input text was already less than max width
+            if (MeasureRtlText(inputText, textFont) <= maxWidth)
             {
                 return rtlText;
             }
 
-            // cut in string half until <= width
-            string shortText = rtlText;
+            // Cut in string half until <= width
+            int length = inputText.Length;
             do
             {
-                shortText = shortText[..(shortText.Length / 2)];
-            } while (MeasureRtlText(shortText, textFont) > maxWidth);
+                length /= 2;
+            }
+            while (MeasureRtlText(inputText.Slice(0, length), textFont) > maxWidth);
 
-            // add chars until 1 too long for width
-            int charAt = shortText.Length - 1;
-            int delimiterIndex = shortText.LastIndexOfAny(delimiters) + 1;
+            // Add chars until greater than width, then remove the last
+            int charAt = length;
             do
             {
                 charAt++;
-                shortText += rtlText[charAt];
-                if (delimiters.Any(x => x.Equals(shortText[charAt])))
-                {
-                    delimiterIndex = charAt;
-                }
+            } while (MeasureRtlText(inputText.Slice(0, charAt), textFont) < maxWidth);
+            ReadOnlySpan<char> shortenedText = inputText.Slice(0, charAt - 1);
 
-                // prioritize wrapping at last delimiter char
-                if (delimiterIndex > 0)
-                {
-                    // we're at the end of a delimiter char chain
-                    if (delimiterIndex != charAt)
-                    {
-                        return shortText[..delimiterIndex];
-                    }
-                }
-            } while (MeasureRtlText(shortText, textFont) < maxWidth);
+            // Cut at the last delimiter
+            int delimiterIndex = shortenedText.LastIndexOfAny(delimiters);
+            if (delimiterIndex != -1)
+            {
+                return shortenedText.Slice(0, delimiterIndex).ToString();
+            }
 
-            return shortText[..^1];
+            return shortenedText.ToString();
         }
+
+        private static float MeasureRtlText(ReadOnlySpan<char> rtlText, SKPaint textFont)
+            => MeasureRtlText(rtlText.ToString(), textFont);
 
         private static float MeasureRtlText(string rtlText, SKPaint textFont)
         {
             using SKShaper messageShape = new SKShaper(textFont.Typeface);
             SKShaper.Result measure = messageShape.Shape(rtlText, textFont);
-            float textWidth = measure.Points[^1].X;
-
-            return textWidth;
+            return measure.Points[^1].X;
         }
 
         private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos)
@@ -879,6 +872,7 @@ namespace TwitchDownloaderCore
             return userColor;
         }
 
+#if DEBUG
         //For debugging, works on Windows only
         void OpenImage(SKBitmap newBitmap)
         {
@@ -888,7 +882,7 @@ namespace TwitchDownloaderCore
 
             Process.Start(new ProcessStartInfo(tempFile) { UseShellExecute = true });
         }
-
+#endif
         private void DrawBadges(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos)
         {
             using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
@@ -1006,7 +1000,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private (int, int) GetTotalTicks()
+        private (int startTick, int totalTicks) GetVideoTicks()
         {
             if (renderOptions.StartOverride != -1 && renderOptions.EndOverride != -1)
             {
@@ -1029,6 +1023,7 @@ namespace TwitchDownloaderCore
                 return (videoStartTick, totalTicks);
             }
         }
+
         public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions)
         {
             if (fallbackCache.ContainsKey(input))
@@ -1043,6 +1038,7 @@ namespace TwitchDownloaderCore
         {
             return input > 127;
         }
+
         private static string[] SwapRightToLeft(string[] words)
         {
             List<string> finalWords = new List<string>();
@@ -1068,6 +1064,7 @@ namespace TwitchDownloaderCore
             }
             return finalWords.ToArray();
         }
+
         private static bool IsRightToLeft(string message)
         {
             if (message.Length > 0)
@@ -1082,9 +1079,10 @@ namespace TwitchDownloaderCore
                 return false;
             }
         }
+
         public async Task<ChatRoot> ParseJson()
         {
-            chatRoot = await ChatFileTools.ParseJsonAsync(renderOptions.InputFile);
+            chatRoot = await ChatJson.DeserializeAsync(renderOptions.InputFile);
 
             chatRoot.streamer ??= new Streamer
             {
