@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TwitchDownloaderCore.TwitchObjects
+namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
     public class ClipNode
     {

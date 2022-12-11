@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace TwitchDownloaderCore.TwitchObjects
+namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
     public class VideoOwner
     {
@@ -10,7 +9,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string displayName { get; set; }
     }
 
-    public class Video
+    public class VideoInfo
     {
         public string title { get; set; }
         public List<string> thumbnailURLs { get; set; }
@@ -21,7 +20,7 @@ namespace TwitchDownloaderCore.TwitchObjects
 
     public class VideoData
     {
-        public Video video { get; set; }
+        public VideoInfo video { get; set; }
     }
 
     public class GqlVideoResponse

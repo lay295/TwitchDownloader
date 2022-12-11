@@ -1,7 +1,4 @@
-using NeoSmart.Unicode;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
@@ -235,47 +233,60 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            DownloadType downloadType = downloadOptions.Id.All(x => Char.IsDigit(x)) ? DownloadType.Video : DownloadType.Clip;
-            string videoId = "";
+            DownloadType downloadType = downloadOptions.Id.All(x => char.IsDigit(x)) ? DownloadType.Video : DownloadType.Clip;
 
             List<Comment> comments = new List<Comment>();
-            ChatRoot chatRoot = new ChatRoot() { streamer = new Streamer(), video = new VideoTime(), comments = comments };
+            ChatRoot chatRoot = new ChatRoot() { FileInfo = new ChatRootInfo() { Version = new ChatRootVersion(1, 1, 0) }, streamer = new Streamer(), video = new Video(), comments = comments };
 
+            string videoId = "";
+            string videoTitle = "";
+            DateTime videoCreatedAt;
             double videoStart = 0.0;
             double videoEnd = 0.0;
             double videoDuration = 0.0;
+            double videoTotalLength;
             int connectionCount = downloadOptions.ConnectionCount;
 
             if (downloadType == DownloadType.Video)
             {
                 videoId = downloadOptions.Id;
-                GqlVideoResponse taskInfo = await TwitchHelper.GetVideoInfo(Int32.Parse(videoId));
-                chatRoot.streamer.name = taskInfo.data.video.owner.displayName;
-                chatRoot.streamer.id = int.Parse(taskInfo.data.video.owner.id);
+                GqlVideoResponse taskVideoInfo = await TwitchHelper.GetVideoInfo(int.Parse(videoId));
+                chatRoot.streamer.name = taskVideoInfo.data.video.owner.displayName;
+                chatRoot.streamer.id = int.Parse(taskVideoInfo.data.video.owner.id);
+                videoTitle = taskVideoInfo.data.video.title;
+                videoCreatedAt = taskVideoInfo.data.video.createdAt;
                 videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
-                videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : taskInfo.data.video.lengthSeconds;
+                videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : taskVideoInfo.data.video.lengthSeconds;
+                videoTotalLength = taskVideoInfo.data.video.lengthSeconds;
             }
             else
             {
-                GqlClipResponse taskInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
+                GqlClipResponse taskClipInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
 
-                if (taskInfo.data.clip.video == null || taskInfo.data.clip.videoOffsetSeconds == null)
+                if (taskClipInfo.data.clip.video == null || taskClipInfo.data.clip.videoOffsetSeconds == null)
                     throw new Exception("Invalid VOD for clip, deleted/expired VOD possibly?");
 
-                videoId = taskInfo.data.clip.video.id;
+                videoId = taskClipInfo.data.clip.video.id;
                 downloadOptions.CropBeginning = true;
-                downloadOptions.CropBeginningTime = (int)taskInfo.data.clip.videoOffsetSeconds;
+                downloadOptions.CropBeginningTime = (int)taskClipInfo.data.clip.videoOffsetSeconds;
                 downloadOptions.CropEnding = true;
-                downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + taskInfo.data.clip.durationSeconds;
-                chatRoot.streamer.name = taskInfo.data.clip.broadcaster.displayName;
-                chatRoot.streamer.id = int.Parse(taskInfo.data.clip.broadcaster.id);
-                videoStart = (int)taskInfo.data.clip.videoOffsetSeconds;
-                videoEnd = (int)taskInfo.data.clip.videoOffsetSeconds + taskInfo.data.clip.durationSeconds;
+                downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + taskClipInfo.data.clip.durationSeconds;
+                chatRoot.streamer.name = taskClipInfo.data.clip.broadcaster.displayName;
+                chatRoot.streamer.id = int.Parse(taskClipInfo.data.clip.broadcaster.id);
+                videoTitle = taskClipInfo.data.clip.title;
+                videoCreatedAt = taskClipInfo.data.clip.createdAt;
+                videoStart = (int)taskClipInfo.data.clip.videoOffsetSeconds;
+                videoEnd = (int)taskClipInfo.data.clip.videoOffsetSeconds + taskClipInfo.data.clip.durationSeconds;
+                videoTotalLength = taskClipInfo.data.clip.durationSeconds;
                 connectionCount = 1;
             }
 
+            chatRoot.video.title = videoTitle;
+            chatRoot.video.id = videoId;
+            chatRoot.video.created_at = videoCreatedAt;
             chatRoot.video.start = videoStart;
             chatRoot.video.end = videoEnd;
+            chatRoot.video.length = videoTotalLength;
             videoDuration = videoEnd - videoStart;
 
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());

@@ -12,12 +12,12 @@ using TwitchDownloader;
 using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
 {
-	public enum DownloadType { Clip, Video }
+    public enum DownloadType { Clip, Video }
 	/// <summary>
 	/// Interaction logic for PageChatDownload.xaml
 	/// </summary>
