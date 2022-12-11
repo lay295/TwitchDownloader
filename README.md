@@ -28,9 +28,21 @@ https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-8
 
 # GUI
 
+## Windows
+
 ![](https://i.imgur.com/bLegxGX.gif)
 
-## Video Demonstration
+### Functionality
+
+The Windows GUI implements all of the main functions of the program along with some extra quality of life functions:
+- Queue up multiple download/render jobs to run simultaneously
+- Create a list of download jobs from a list of vod/clip links
+- Search for and download multiple vods/clips from any streamer without leaving the app
+
+### Theming
+The Windows GUI comes with a light and dark theme and will update according the current Windows theme by default. The GUI also supports user created themes! See `Themes/README.txt` (generated on every run) for more details.
+
+### Video Demonstration
 https://www.youtube.com/watch?v=0W3MhfhnYjk
 (older version, same concept)
 

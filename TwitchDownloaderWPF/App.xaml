@@ -9,7 +9,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
 				<ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
-				<!-- Top dictionaries must be HandyControl, other merged dictionaries below -->
+				<!-- Top dictionaries MUST be HandyControl, other merged dictionaries below -->
 			</ResourceDictionary.MergedDictionaries>
 			<SolidColorBrush x:Key="AppBackground" Color="#FFFFFF"/>
 			<SolidColorBrush x:Key="AppElementBackground" Color="#FFFFFF"/>

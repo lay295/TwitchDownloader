@@ -83,7 +83,7 @@ namespace TwitchDownloader
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-			themeHelper.SetTitleBarThemes(AppSingleton.Windows);
+			AppSingleton.RequestTitleBarChange();
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -103,7 +103,7 @@ namespace TwitchDownloader
 			e.Handled = true;
 		}
 
-		private void comboAppTheme_SelectionChaned(object sender, SelectionChangedEventArgs e)
+		private void comboTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
 			{
