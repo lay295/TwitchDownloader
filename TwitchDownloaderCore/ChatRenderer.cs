@@ -711,11 +711,11 @@ namespace TwitchDownloaderCore
                     outlinePaint.Dispose();
                 }
 
-                try
+                if (isRtl)
                 {
                     sectionImageCanvas.DrawShapedText(drawText, drawPos.X, drawPos.Y, textFont);
                 }
-                catch
+                else
                 {
                     sectionImageCanvas.DrawText(drawText, drawPos.X, drawPos.Y, textFont);
                 }
@@ -834,7 +834,7 @@ namespace TwitchDownloaderCore
 
             if (comment.commenter.display_name.Any(IsNotAscii))
             {
-                userPaint = GetFallbackFont(comment.commenter.display_name.Where(x => IsNotAscii(x)).First(), renderOptions);
+                userPaint = GetFallbackFont(comment.commenter.display_name.Where(x => IsNotAscii(x)).First(), renderOptions).Clone();
                 userPaint.Color = userColor;
             }
 
