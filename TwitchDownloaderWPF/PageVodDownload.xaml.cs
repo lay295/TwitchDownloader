@@ -18,7 +18,7 @@ using TwitchDownloader;
 using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
@@ -26,73 +27,7 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        internal static async Task DownloadSection(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
-        {
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json; charset=UTF-8");
-                client.Headers.Add("Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-
-                double videoDuration = videoEnd - videoStart;
-                double latestMessage = videoStart - 1;
-                bool isFirst = true;
-                string cursor = "";
-                int errorCount = 0;
-
-                while (latestMessage < videoEnd)
-                {
-                    string response;
-
-                    try
-                    {
-                        if (isFirst)
-                            response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?content_offset_seconds={1}", videoId, videoStart));
-                        else
-                            response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?cursor={1}", videoId, cursor));
-                        errorCount = 0;
-                    }
-                    catch (WebException ex)
-                    {
-                        await Task.Delay(1000 * errorCount);
-                        errorCount++;
-
-                        if (errorCount >= 10)
-                            throw ex;
-
-                        continue;
-                    }
-
-                    CommentResponse commentResponse = JsonConvert.DeserializeObject<CommentResponse>(response);
-
-                    lock (commentLock)
-                    {
-                        foreach (var comment in commentResponse.comments)
-                        {
-                            if (latestMessage < videoEnd && comment.content_offset_seconds >= videoStart)
-                                comments.Add(comment);
-
-                            latestMessage = comment.content_offset_seconds;
-                        }
-                    }
-                    if (commentResponse._next == null)
-                        break;
-                    else
-                        cursor = commentResponse._next;
-
-                    int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                    progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
-
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    if (isFirst)
-                        isFirst = false;
-
-                }
-            }
-        }
-
-        internal static async Task DownloadSectionGql(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
+        private static async Task DownloadSection(double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             using (WebClient client = new WebClient())
             {
@@ -240,54 +175,69 @@ namespace TwitchDownloaderCore
                 throw new NullReferenceException("Null or empty video/clip ID");
             }
             DownloadType downloadType = downloadOptions.Id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
-            string videoId = downloadOptions.Id;
 
             List<Comment> comments = new List<Comment>();
-            ChatRoot chatRoot = new ChatRoot() { streamer = new Streamer(), video = new VideoTime(), comments = comments };
+            ChatRoot chatRoot = new ChatRoot() { FileInfo = new ChatRootInfo() { Version = new ChatRootVersion(1, 1, 0) }, streamer = new Streamer(), video = new Video(), comments = comments };
 
+            string videoId = downloadOptions.Id;
+            string videoTitle;
+            DateTime videoCreatedAt;
             double videoStart = 0.0;
             double videoEnd = 0.0;
             double videoDuration = 0.0;
+            double videoTotalLength;
             int connectionCount = downloadOptions.ConnectionCount;
 
             if (downloadType == DownloadType.Video)
             {
-                GqlVideoResponse taskInfo = await TwitchHelper.GetVideoInfo(int.Parse(videoId));
-                if (taskInfo.data.video == null)
+                GqlVideoResponse taskVideoInfo = await TwitchHelper.GetVideoInfo(int.Parse(videoId));
+                if (taskVideoInfo.data.video == null)
+                {
                     throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                }
 
-                chatRoot.streamer.name = taskInfo.data.video.owner.displayName;
-                chatRoot.streamer.id = int.Parse(taskInfo.data.video.owner.id);
+                chatRoot.streamer.name = taskVideoInfo.data.video.owner.displayName;
+                chatRoot.streamer.id = int.Parse(taskVideoInfo.data.video.owner.id);
+                videoTitle = taskVideoInfo.data.video.title;
+                videoCreatedAt = taskVideoInfo.data.video.createdAt;
                 videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
-                videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : taskInfo.data.video.lengthSeconds;
+                videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : taskVideoInfo.data.video.lengthSeconds;
+                videoTotalLength = taskVideoInfo.data.video.lengthSeconds;
             }
             else
             {
-                GqlClipResponse taskInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
-                if (taskInfo.data.clip.video == null || taskInfo.data.clip.videoOffsetSeconds == null)
+                GqlClipResponse taskClipInfo = await TwitchHelper.GetClipInfo(videoId);
+                if (taskClipInfo.data.clip.video == null || taskClipInfo.data.clip.videoOffsetSeconds == null)
+                {
                     throw new NullReferenceException("Invalid VOD for clip, deleted/expired VOD possibly?");
+                }
 
                 downloadOptions.CropBeginning = true;
-                downloadOptions.CropBeginningTime = (int)taskInfo.data.clip.videoOffsetSeconds;
+                downloadOptions.CropBeginningTime = (int)taskClipInfo.data.clip.videoOffsetSeconds;
                 downloadOptions.CropEnding = true;
-                downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + taskInfo.data.clip.durationSeconds;
-                chatRoot.streamer.name = taskInfo.data.clip.broadcaster.displayName;
-                chatRoot.streamer.id = int.Parse(taskInfo.data.clip.broadcaster.id);
-                videoStart = (int)taskInfo.data.clip.videoOffsetSeconds;
-                videoEnd = (int)taskInfo.data.clip.videoOffsetSeconds + taskInfo.data.clip.durationSeconds;
+                downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + taskClipInfo.data.clip.durationSeconds;
+                chatRoot.streamer.name = taskClipInfo.data.clip.broadcaster.displayName;
+                chatRoot.streamer.id = int.Parse(taskClipInfo.data.clip.broadcaster.id);
+                videoTitle = taskClipInfo.data.clip.title;
+                videoCreatedAt = taskClipInfo.data.clip.createdAt;
+                videoStart = (int)taskClipInfo.data.clip.videoOffsetSeconds;
+                videoEnd = (int)taskClipInfo.data.clip.videoOffsetSeconds + taskClipInfo.data.clip.durationSeconds;
+                videoTotalLength = taskClipInfo.data.clip.durationSeconds;
                 connectionCount = 1;
             }
 
+            chatRoot.video.title = videoTitle;
+            chatRoot.video.id = videoId;
+            chatRoot.video.created_at = videoCreatedAt;
             chatRoot.video.start = videoStart;
             chatRoot.video.end = videoEnd;
+            chatRoot.video.length = videoTotalLength;
             videoDuration = videoEnd - videoStart;
 
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
             object commentLock = new object();
             List<Task> tasks = new List<Task>();
             List<int> percentages = new List<int>(connectionCount);
-
-            bool LegacyApiWorks = await CheckLegacyApiAsync(videoId);
 
             double chunk = videoDuration / connectionCount;
             for (int i = 0; i < connectionCount; i++)
@@ -322,14 +272,7 @@ namespace TwitchDownloaderCore
                     }
                 });
                 double start = videoStart + chunk * i;
-                if (LegacyApiWorks)
-                {
-                    tasks.Add(DownloadSection(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet, commentLock));
-                }
-                else
-                {
-                    tasks.Add(DownloadSectionGql(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet, commentLock));
-                }
+                tasks.Add(DownloadSection(start, start + chunk, videoId, commentsSet, commentLock, taskProgress, cancellationToken));
             }
 
             await Task.WhenAll(tasks);
@@ -411,27 +354,6 @@ namespace TwitchDownloaderCore
                 default:
                     throw new NotImplementedException("Requested output chat format is not implemented");
             }
-        }
-
-        internal static async Task<bool> CheckLegacyApiAsync(string videoId)
-        {
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json; charset=UTF-8");
-                client.Headers.Add("Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-
-                try
-                {
-                    await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?content_offset_seconds={1}", videoId, 0));
-                }
-                catch (WebException ex)
-                {
-                    if (ex.Status == WebExceptionStatus.ProtocolError)
-                        return false;
-                }
-            }
-            return true;
         }
     }
 }

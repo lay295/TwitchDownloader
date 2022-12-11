@@ -1051,7 +1051,6 @@ namespace TwitchDownloaderCore
                 return false;
             }
         }
-
         public async Task<ChatRoot> ParseJson()
         {
             chatRoot = await ChatJson.DeserializeAsync(renderOptions.InputFile);

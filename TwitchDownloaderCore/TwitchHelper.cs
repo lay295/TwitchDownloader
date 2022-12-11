@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {

@@ -14,6 +14,7 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -50,10 +51,10 @@ namespace TwitchDownloaderWPF
                 {
                     ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getComments: false, getEmbeds: false);
                     textStreamer.Text = ChatJsonInfo.streamer.name;
-                    textCreatedAt.Text = /*chatJsonInfo.video.created_at*/null ?? "Unknown";
-                    textTitle.Text = /*chatJsonInfo.video.title*/null ?? "Unknown";
+                    textCreatedAt.Text = ChatJsonInfo.video.created_at.ToShortDateString();
+                    textTitle.Text = ChatJsonInfo.video.title ?? "Unknown";
 
-                    VideoCreatedAt = DateTime.Parse(/*chatJsonInfo.video.created_at*/null ?? "0001-01-01T00:00:01");
+                    VideoCreatedAt = ChatJsonInfo.video.created_at;
 
                     TimeSpan chatStart = TimeSpan.FromSeconds(ChatJsonInfo.video.start);
                     numStartHour.Value = (int)chatStart.TotalHours;
@@ -65,12 +66,12 @@ namespace TwitchDownloaderWPF
                     numEndMinute.Value = chatEnd.Minutes;
                     numEndSecond.Value = chatEnd.Seconds;
 
-                    TimeSpan videoLength = TimeSpan.FromSeconds(/*chatJsonInfo.video.length ??*/0.0);
+                    TimeSpan videoLength = TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.length) ? 0.0 : ChatJsonInfo.video.length);
                     labelLength.Text = videoLength.Seconds > 0
                         ? string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds)
                         : "Unknown";
 
-                    VideoId = /*chatJsonInfo.video.id*/null ?? "-1";
+                    VideoId = ChatJsonInfo.video.id ?? "-1";
 
                     if (VideoId.All(char.IsDigit))
                     {
@@ -391,7 +392,7 @@ namespace TwitchDownloaderWPF
                     saveFileDialog.Filter = "TXT Files | *.txt";
 
                 saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, /*ChatJsonInfo.video.id*/ null ?? "-1", VideoCreatedAt, textStreamer.Text);
+                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, ChatJsonInfo.video.id ?? "-1", VideoCreatedAt, textStreamer.Text);
 
                 if (saveFileDialog.ShowDialog() == true)
                 {

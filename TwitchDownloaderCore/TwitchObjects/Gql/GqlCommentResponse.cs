@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TwitchDownloaderCore.TwitchObjects
+namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
     public class CommentChannel
     {

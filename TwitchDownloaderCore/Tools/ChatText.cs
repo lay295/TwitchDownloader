@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Tools
 {

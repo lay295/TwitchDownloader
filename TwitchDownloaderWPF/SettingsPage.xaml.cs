@@ -81,10 +81,10 @@ namespace TwitchDownloader
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            themeHelper.SetTitleBarThemes(AppSingleton.Windows);
-        }
+		private void Window_Loaded(object sender, RoutedEventArgs e)
+		{
+			AppSingleton.RequestTitleBarChange();
+		}
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -103,13 +103,13 @@ namespace TwitchDownloader
             e.Handled = true;
         }
 
-        private void comboAppTheme_SelectionChaned(object sender, SelectionChangedEventArgs e)
-        {
-            if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
-            {
-                Settings.Default.GuiTheme = comboTheme.SelectedItem.ToString();
-                AppSingleton.RequestAppThemeChange();
-            }
-        }
-    }
+		private void comboTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
+			{
+				Settings.Default.GuiTheme = comboTheme.SelectedItem.ToString();
+				AppSingleton.RequestAppThemeChange();
+			}
+		}
+	}
 }

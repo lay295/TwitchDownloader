@@ -48,7 +48,7 @@ namespace TwitchDownloaderCore
                 progress.Report(new ProgressReport(ReportType.Status, string.Format("Updating Chat Crop [{0}/{1}]", ++currentStep, totalSteps)));
                 progress.Report(new ProgressReport(totalSteps / currentStep));
 
-                chatRoot.video ??= new VideoTime();
+                chatRoot.video ??= new Video();
 
                 bool cropTaskVodExpired = false;
                 var cropTaskProgress = new Progress<ProgressReport>(report =>
@@ -246,7 +246,7 @@ namespace TwitchDownloaderCore
                 // Only download missing comments if new start crop is less than old start crop
                 if (_updateOptions.CropBeginningTime < chatRoot.video.start)
                 {
-                    ChatDownloadOptions downloadOptions = GetCropDownloadOptions(/*chatRoot.video.id,*/null, tempFile, _updateOptions.CropBeginningTime, chatRoot.video.start);
+                    ChatDownloadOptions downloadOptions = GetCropDownloadOptions(chatRoot.video.id, tempFile, _updateOptions.CropBeginningTime, chatRoot.video.start);
                     await AppendCommentSection(downloadOptions, tempFile, cancellationToken);
                 }
             }
@@ -261,7 +261,7 @@ namespace TwitchDownloaderCore
             }
 
             // Adjust the crop parameter
-            double beginningCropClamp = /*chatRoot.video.length ??*/ 172_800; // Get length from chatroot or if null max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+            double beginningCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negavite (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
             chatRoot.video.start = Math.Min(Math.Max(_updateOptions.CropBeginningTime, 0.0), beginningCropClamp);
         }
 
@@ -279,7 +279,7 @@ namespace TwitchDownloaderCore
                 // Only download missing comments if new end crop is greater than old end crop
                 if (_updateOptions.CropEndingTime > chatRoot.video.end)
                 {
-                    ChatDownloadOptions downloadOptions = GetCropDownloadOptions(/*chatRoot.video.id,*/null, tempFile, chatRoot.video.end, _updateOptions.CropEndingTime);
+                    ChatDownloadOptions downloadOptions = GetCropDownloadOptions(chatRoot.video.id, tempFile, chatRoot.video.end, _updateOptions.CropEndingTime);
                     await AppendCommentSection(downloadOptions, tempFile, cancellationToken);
                 }
             }
@@ -294,7 +294,7 @@ namespace TwitchDownloaderCore
             }
 
             // Adjust the crop parameter
-            double endingCropClamp = /*chatRoot.video.length ??*/ 172_800; // Get length from chatroot or if null max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+            double endingCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negavite (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
             chatRoot.video.end = Math.Min(Math.Max(_updateOptions.CropEndingTime, 0.0), endingCropClamp);
         }
 

@@ -1,14 +1,14 @@
 ﻿using System.Windows;
-using TwitchDownloader;
+using TwitchDownloader.Tools;
 
 namespace TwitchDownloaderWPF
 {
-	/// <summary>
-	/// Interaction logic for App.xaml
-	/// </summary>
-	public partial class App : Application
+    /// <summary>
+    /// Interaction logic for App.xaml
+    /// </summary>
+    public partial class App : Application
 	{
-		public static ThemeHelper themeHelper { get; private set; }
+		public static ThemeService ThemeServiceSingleton { get; private set; }
 		public static App AppSingleton { get; private set; }
 
 		public App()
@@ -18,8 +18,9 @@ namespace TwitchDownloaderWPF
 
 		private void Application_Startup(object sender, StartupEventArgs e)
 		{
-			themeHelper = new ThemeHelper();
-			themeHelper.WatchTheme(this);
+			WindowsThemeService windowsThemeService = new();
+
+			ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
 			MainWindow wnd = new();
 			wnd.Show();
@@ -27,7 +28,12 @@ namespace TwitchDownloaderWPF
 
 		public void RequestAppThemeChange()
 		{
-			themeHelper.ChangeAppTheme(this);
+			ThemeServiceSingleton.ChangeAppTheme();
 		}
-	}
+
+		public void RequestTitleBarChange()
+		{
+			ThemeServiceSingleton.SetTitleBarTheme(this.Windows);
+		}
+    }
 }
