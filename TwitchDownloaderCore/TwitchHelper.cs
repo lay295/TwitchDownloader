@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
@@ -21,6 +22,7 @@ namespace TwitchDownloaderCore
     {
         private static HttpClient httpClient = new HttpClient();
         private static readonly string[] bttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
+
         public static async Task<GqlVideoResponse> GetVideoInfo(int videoId)
         {
             var request = new HttpRequestMessage()
@@ -227,10 +229,17 @@ namespace TwitchDownloaderCore
 
             return emoteReponse;
         }
+
         public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool offline = false)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
+
+            // No 3rd party emotes are wanted
+            if (!bttv && !ffz && !stv)
+            {
+                return returnList;
+            }
 
             // Load our embedded data from file
             if (embeddedData != null && embeddedData.thirdParty != null)
@@ -456,7 +465,8 @@ namespace TwitchDownloaderCore
             if (!Directory.Exists(emojiFolder))
                 TwitchHelper.CreateDirectory(emojiFolder);
 
-            int emojiCount = Directory.GetFiles(emojiFolder).Where(i => emojiExtensions.IsMatch(i)).Count();
+            string[] emojiFiles = Directory.GetFiles(emojiFolder).Where(i => emojiExtensions.IsMatch(i)).ToArray();
+            int emojiCount = emojiFiles.Length;
 
             //Twemoji 14 has 3689 emoji images
             if (emojiCount < 3689)
@@ -488,8 +498,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            List<string> emojiList = Directory.GetFiles(emojiFolder).Where(i => emojiExtensions.IsMatch(i)).ToList();
-            foreach (var emojiPath in emojiList)
+            foreach (var emojiPath in emojiFiles)
             {
                 SKBitmap emojiImage = SKBitmap.Decode(await File.ReadAllBytesAsync(emojiPath));
                 returnCache.Add(Path.GetFileNameWithoutExtension(emojiPath), emojiImage);
@@ -633,7 +642,7 @@ namespace TwitchDownloaderCore
                 {
                     RequestUri = new Uri("https://gql.twitch.tv/gql"),
                     Method = HttpMethod.Post,
-                    Content = new StringContent("{\"query\":\"query{user(id:\\\"" + id.ToString() + "\\\"){login}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                    Content = new StringContent($$$"""{"query":"query{user(id:\"{{{id}}}\"){login}}","variables":{}}""", Encoding.UTF8, "application/json")
                 };
                 request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
                 string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
@@ -643,7 +652,7 @@ namespace TwitchDownloaderCore
             catch { return ""; }
         }
 
-        public static async Task<byte[]> GetImage(string cachePath, string imageUrl, string imageId, string imageScale, string imageType)
+        public static async Task<byte[]> GetImage(string cachePath, string imageUrl, string imageId, string imageScale, string imageType, CancellationToken cancellationToken = new())
         {
             byte[] imageBytes = null;
 
@@ -652,30 +661,28 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    using (FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    {
-                        byte[] bytes = new byte[stream.Length];
-                        stream.Seek(0, SeekOrigin.Begin);
-                        await stream.ReadAsync(bytes, 0, bytes.Length);
+                    using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    byte[] bytes = new byte[stream.Length];
+                    stream.Seek(0, SeekOrigin.Begin);
+                    await stream.ReadAsync(bytes, cancellationToken);
 
-                        //Check if image file is not corrupt
-                        if (bytes.Length > 0)
+                    //Check if image file is not corrupt
+                    if (bytes.Length > 0)
+                    {
+                        using SKImage image = SKImage.FromEncodedData(bytes);
+                        if (image != null)
                         {
-                            using SKImage image = SKImage.FromEncodedData(bytes);
-                            if (image != null)
+                            imageBytes = bytes;
+                        }
+                        else
+                        {
+                            //Try to delete the corrupted image
+                            try
                             {
-                                imageBytes = bytes;
+                                await stream.DisposeAsync();
+                                File.Delete(filePath);
                             }
-                            else
-                            {
-                                //Try to delete the corrupted image
-                                try
-                                {
-                                    stream.Dispose();
-                                    File.Delete(filePath);
-                                }
-                                catch { }
-                            }
+                            catch { }
                         }
                     }
                 }
@@ -685,18 +692,18 @@ namespace TwitchDownloaderCore
                 }
             }
 
+            // If fetching from cache failed
             if (imageBytes != null)
                 return imageBytes;
 
-            imageBytes = await httpClient.GetByteArrayAsync(imageUrl);
+            // Fallback to HTTP request
+            imageBytes = await httpClient.GetByteArrayAsync(imageUrl, cancellationToken);
 
             //Let's save this image to the cache
             try
             {
-                using (FileStream stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
-                {
-                    stream.Write(imageBytes, 0, imageBytes.Length);
-                }
+                using FileStream stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                await stream.WriteAsync(imageBytes, cancellationToken);
             }
             catch { }
 

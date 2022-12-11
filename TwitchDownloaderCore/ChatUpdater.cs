@@ -10,15 +10,18 @@ using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
 {
-    public class ChatUpdater
+    public sealed class ChatUpdater
     {
         public ChatRoot chatRoot { get; internal set; } = new();
+
         private readonly ChatUpdateOptions _updateOptions = new();
 
         public ChatUpdater(ChatUpdateOptions updateOptions)
         {
             _updateOptions = updateOptions;
-            _updateOptions.TempFolder = Path.Combine(string.IsNullOrWhiteSpace(_updateOptions.TempFolder) ? Path.GetTempPath() : _updateOptions.TempFolder, "TwitchDownloader");
+            _updateOptions.TempFolder = Path.Combine(
+                string.IsNullOrWhiteSpace(_updateOptions.TempFolder) ? Path.GetTempPath() : _updateOptions.TempFolder,
+                "TwitchDownloader");
         }
 
         internal static class SharedObjects

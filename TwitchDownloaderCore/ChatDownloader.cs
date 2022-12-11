@@ -13,15 +13,17 @@ using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
 {
-    public class ChatDownloader
+    public sealed class ChatDownloader
     {
-        internal ChatDownloadOptions downloadOptions { get; private set; }
+        private readonly ChatDownloadOptions downloadOptions;
         private enum DownloadType { Clip, Video }
 
         public ChatDownloader(ChatDownloadOptions DownloadOptions)
         {
             downloadOptions = DownloadOptions;
-            downloadOptions.TempFolder = Path.Combine(string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder, "TwitchDownloader");
+            downloadOptions.TempFolder = Path.Combine(
+                string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
+                "TwitchDownloader");
         }
 
         internal static async Task DownloadSection(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)

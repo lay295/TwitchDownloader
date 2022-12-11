@@ -6,27 +6,28 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCore
 {
-    public class VideoDownloader
+    public sealed class VideoDownloader
     {
-        VideoDownloadOptions downloadOptions;
+        private readonly VideoDownloadOptions downloadOptions;
 
         public VideoDownloader(VideoDownloadOptions DownloadOptions)
         {
             downloadOptions = DownloadOptions;
+            downloadOptions.TempFolder = Path.Combine(
+                string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
+                "TwitchDownloader");
         }
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            string tempFolder = downloadOptions.TempFolder == null || downloadOptions.TempFolder == "" ?  Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(downloadOptions.TempFolder, "TwitchDownloader");
-            string downloadFolder = Path.Combine(tempFolder, downloadOptions.Id.ToString() == "0" ? Guid.NewGuid().ToString() : downloadOptions.Id.ToString());
+            string downloadFolder = Path.Combine(downloadOptions.TempFolder, downloadOptions.Id.ToString() == "0" ? Guid.NewGuid().ToString() : downloadOptions.Id.ToString());
+
             try
             {
                 ServicePointManager.DefaultConnectionLimit = downloadOptions.DownloadThreads;
