@@ -166,9 +166,7 @@ namespace TwitchDownloaderCore
             {
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    latestUpdate?.Image.Dispose();
-
-                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height);
+                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height, latestUpdate);
                 }
 
                 using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, latestUpdate))
@@ -315,15 +313,25 @@ namespace TwitchDownloaderCore
             return newFrame;
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, UpdateFrame lastestUpdate = null)
         {
             List<CommentSection> commentList = new List<CommentSection>();
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
+            double currentTimeSeconds = currentTick / renderOptions.Framerate;
+            int newestCommentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds);
+
+            if (newestCommentIndex == lastestUpdate?.CommentIndex)
+            {
+                return lastestUpdate;
+            }
+            else
+            {
+                lastestUpdate?.Image.Dispose();
+            }
+
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
             {
-                double currentTimeSeconds = currentTick / renderOptions.Framerate;
-                int commentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds);
-
+                int commentIndex = newestCommentIndex;
                 int frameHeight = renderOptions.ChatHeight;
                 frameCanvas.Clear(renderOptions.BackgroundColor);
                 while (commentIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
@@ -356,7 +364,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            return new UpdateFrame() { Image = newFrame, Comments = commentList };
+            return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
         }
 
         private CommentSection GenerateCommentSection(int commentIndex, float sampleTextHeight)
