@@ -643,7 +643,7 @@ namespace TwitchDownloaderCore
                 {
                     RequestUri = new Uri("https://gql.twitch.tv/gql"),
                     Method = HttpMethod.Post,
-                    Content = new StringContent($$$"""{"query":"query{user(id:\"{{{id}}}\"){login}}","variables":{}}""", Encoding.UTF8, "application/json")
+                    Content = new StringContent("{\"query\":\"query{user(id:\\\"" + id.ToString() + "\\\"){login}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
                 };
                 request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
                 string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();

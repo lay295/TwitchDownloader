@@ -591,7 +591,7 @@ namespace TwitchDownloaderCore
                                         DrawText(messageBuffer.ToString(), messageFont, true, sectionImages, ref drawPos, defaultPos);
                                         messageBuffer.Clear();
                                     }
-                                    SKPaint fallbackFont = GetFallbackFont(char.ConvertToUtf32(fragmentChars[j], fragmentChars[j + 1]), renderOptions);
+                                    using SKPaint fallbackFont = GetFallbackFont(char.ConvertToUtf32(fragmentChars[j], fragmentChars[j + 1]), renderOptions).Clone();
                                     fallbackFont.Color = renderOptions.MessageColor;
                                     DrawText(fragmentChars[j].ToString() + fragmentChars[j + 1].ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                     j++;
@@ -603,7 +603,7 @@ namespace TwitchDownloaderCore
                                         DrawText(messageBuffer.ToString(), messageFont, true, sectionImages, ref drawPos, defaultPos);
                                         messageBuffer.Clear();
                                     }
-                                    SKPaint fallbackFont = GetFallbackFont(fragmentChars[j], renderOptions);
+                                    using SKPaint fallbackFont = GetFallbackFont(fragmentChars[j], renderOptions).Clone();
                                     fallbackFont.Color = renderOptions.MessageColor;
                                     DrawText(fragmentChars[j].ToString(), fallbackFont, true, sectionImages, ref drawPos, defaultPos);
                                 }
@@ -824,6 +824,7 @@ namespace TwitchDownloaderCore
             userPaint.Color = userColor;
             sectionImageCanvas.DrawText(comment.commenter.display_name + ":", drawPos.X, drawPos.Y, userPaint);
             drawPos.X += textWidth + renderOptions.WordSpacing;
+            userPaint.Dispose();
         }
 
         private static SKColor GenerateUserColor(SKColor userColor, SKColor background_color, ChatRenderOptions renderOptions)
