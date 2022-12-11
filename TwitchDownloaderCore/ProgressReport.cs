@@ -4,13 +4,27 @@
     {
         Log,
         Percent,
-        Message,
-        MessageInfo
+        Status,
+        StatusInfo
     }
 
     public class ProgressReport
     {
-        public ReportType reportType { get; set; }
-        public object data { get; set; }
+        public ProgressReport() { }
+
+        public ProgressReport(int percent)
+        {
+            ReportType = ReportType.Percent;
+            Data = percent;
+        }
+
+        public ProgressReport(ReportType reportType, string message)
+        {
+            ReportType = reportType;
+            Data = message;
+        }
+
+        public ReportType ReportType { get; set; }
+        public object Data { get; set; }
     }
 }

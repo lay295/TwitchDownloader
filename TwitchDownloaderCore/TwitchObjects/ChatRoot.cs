@@ -86,7 +86,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public DateTime created_at { get; set; }
         public double start { get; set; }
         public double end { get; set; }
-        public double length { get; set; }
+        public double length { get; set; } = -1;
     }
 
     public class EmbedEmoteData
@@ -114,10 +114,10 @@ namespace TwitchDownloaderCore.TwitchObjects
 
     public class EmbeddedData
     {
-        public List<EmbedEmoteData> thirdParty { get; set; }
-        public List<EmbedEmoteData> firstParty { get; set; }
-        public List<EmbedChatBadge> twitchBadges { get; set; }
-        public List<EmbedCheerEmote> twitchBits { get; set; }
+        public List<EmbedEmoteData> thirdParty { get; set; } = new();
+        public List<EmbedEmoteData> firstParty { get; set; } = new();
+        public List<EmbedChatBadge> twitchBadges { get; set; } = new();
+        public List<EmbedCheerEmote> twitchBits { get; set; } = new(); 
     }
 
     public class CommentResponse

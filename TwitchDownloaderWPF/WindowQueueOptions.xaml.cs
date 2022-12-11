@@ -17,6 +17,8 @@ namespace TwitchDownloader
     /// </summary>
     public partial class WindowQueueOptions : Window
     {
+        // This file is absolutely attrocious, but fixing it would mean rewriting the entire GUI in a more abstract form
+
         List<TaskData> dataList;
 
         Page parentPage { get; set; }
@@ -53,6 +55,16 @@ namespace TwitchDownloader
                 {
                     checkRender.Margin = new Thickness(10, 85, 0, 0);
                 }
+            }
+            if (page is PageChatUpdate)
+            {
+                checkVideo.Visibility = Visibility.Collapsed;
+                checkChat.Visibility = Visibility.Collapsed;
+                radioJson.Visibility = Visibility.Collapsed;
+                radioTxt.Visibility = Visibility.Collapsed;
+                radioHTML.Visibility = Visibility.Collapsed;
+                checkEmbed.Visibility = Visibility.Collapsed;
+                checkRender.Visibility = Visibility.Collapsed;
             }
             if (page is PageChatRender)
             {
@@ -106,11 +118,11 @@ namespace TwitchDownloader
                             ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
                             chatOptions.Id = downloadOptions.Id.ToString();
                             if (radioJson.IsChecked == true)
-                                chatOptions.DownloadFormat = DownloadFormat.Json;
+                                chatOptions.DownloadFormat = ChatFormat.Json;
                             else if (radioHTML.IsChecked == true)
-                                chatOptions.DownloadFormat = DownloadFormat.Html;
+                                chatOptions.DownloadFormat = ChatFormat.Html;
                             else
-                                chatOptions.DownloadFormat = DownloadFormat.Text;
+                                chatOptions.DownloadFormat = ChatFormat.Text;
                             chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
                             chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, vodPage.currentVideoTime, vodPage.textStreamer.Text) + "." + chatOptions.DownloadFormat);
 
@@ -136,7 +148,7 @@ namespace TwitchDownloader
                                 PageQueue.taskList.Add(chatTask);
                             }
 
-                            if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == DownloadFormat.Json)
+                            if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == ChatFormat.Json)
                             {
                                 ChatRenderTask renderTask = new ChatRenderTask();
                                 ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename, ".mp4"));
@@ -194,11 +206,11 @@ namespace TwitchDownloader
                             ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
                             chatOptions.Id = downloadOptions.Id.ToString();
                             if (radioJson.IsChecked == true)
-                                chatOptions.DownloadFormat = DownloadFormat.Json;
+                                chatOptions.DownloadFormat = ChatFormat.Json;
                             else if (radioHTML.IsChecked == true)
-                                chatOptions.DownloadFormat = DownloadFormat.Html;
+                                chatOptions.DownloadFormat = ChatFormat.Html;
                             else
-                                chatOptions.DownloadFormat = DownloadFormat.Text;
+                                chatOptions.DownloadFormat = ChatFormat.Text;
                             chatOptions.TimeFormat = TimestampFormat.Relative;
                             chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
                             chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text) + "." + chatOptions.FileExtension);
@@ -213,7 +225,7 @@ namespace TwitchDownloader
                                 PageQueue.taskList.Add(chatTask);
                             }
 
-                            if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == DownloadFormat.Json)
+                            if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == ChatFormat.Json)
                             {
                                 ChatRenderTask renderTask = new ChatRenderTask();
                                 ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename, ".mp4"));
@@ -265,7 +277,7 @@ namespace TwitchDownloader
                             PageQueue.taskList.Add(chatTask);
                         }
 
-                        if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == DownloadFormat.Json)
+                        if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == ChatFormat.Json)
                         {
                             ChatRenderTask renderTask = new ChatRenderTask();
                             ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename, ".mp4"));
@@ -280,6 +292,35 @@ namespace TwitchDownloader
                             {
                                 PageQueue.taskList.Add(renderTask);
                             }
+                        }
+
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+
+                if (parentPage is PageChatUpdate)
+                {
+                    PageChatUpdate chatPage = (PageChatUpdate)parentPage;
+                    string folderPath = textFolder.Text;
+                    if (!string.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
+                    {
+                        ChatUpdateTask chatTask = new ChatUpdateTask();
+                        ChatUpdateOptions chatOptions = MainWindow.pageChatUpdate.GetOptions(null);
+                        chatOptions.InputFile = chatPage.InputFile;
+                        chatOptions.OutputFile = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatPage.VideoId, chatPage.VideoCreatedAt, chatPage.textStreamer.Text) + "." + chatOptions.FileExtension);
+
+                        chatTask.UpdateOptions = chatOptions;
+                        chatTask.Info.Title = chatPage.textTitle.Text;
+                        chatTask.Info.Thumbnail = chatPage.imgThumbnail.Source;
+                        chatTask.Status = TwitchTaskStatus.Ready;
+
+                        lock (PageQueue.taskLock)
+                        {
+                            PageQueue.taskList.Add(chatTask);
                         }
 
                         this.Close();
@@ -373,11 +414,11 @@ namespace TwitchDownloader
                                 ChatDownloadTask downloadTask = new ChatDownloadTask();
                                 ChatDownloadOptions downloadOptions = new ChatDownloadOptions();
                                 if (radioJson.IsChecked == true)
-                                    downloadOptions.DownloadFormat = DownloadFormat.Json;
+                                    downloadOptions.DownloadFormat = ChatFormat.Json;
                                 else if (radioHTML.IsChecked == true)
-                                    downloadOptions.DownloadFormat = DownloadFormat.Html;
+                                    downloadOptions.DownloadFormat = ChatFormat.Html;
                                 else
-                                    downloadOptions.DownloadFormat = DownloadFormat.Text;
+                                    downloadOptions.DownloadFormat = ChatFormat.Text;
                                 downloadOptions.EmbedData = (bool)checkEmbed.IsChecked;
                                 downloadOptions.TimeFormat = TimestampFormat.Relative;
                                 downloadOptions.Id = dataList[i].Id;
@@ -394,7 +435,7 @@ namespace TwitchDownloader
                                     PageQueue.taskList.Add(downloadTask);
                                 }
 
-                                if ((bool)checkRender.IsChecked && downloadOptions.DownloadFormat == DownloadFormat.Json)
+                                if ((bool)checkRender.IsChecked && downloadOptions.DownloadFormat == ChatFormat.Json)
                                 {
                                     ChatRenderTask renderTask = new ChatRenderTask();
                                     ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(downloadOptions.Filename, ".mp4"));

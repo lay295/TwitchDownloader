@@ -1,41 +1,25 @@
 ﻿namespace TwitchDownloaderCore.Options
 {
-    // TODO: Move TimestampFormat to dedicated file
-    public enum TimestampFormat
+    public class ChatUpdateOptions
     {
-        Utc,
-        Relative,
-        None
-    }
-
-    // TODO: Move ChatFormat to dedicated file
-    public enum ChatFormat
-    {
-        Json,
-        Text,
-        Html
-    }
-
-    public class ChatDownloadOptions
-    {
-        public ChatFormat DownloadFormat { get; set; } = ChatFormat.Json;
-        public string Id { get; set; }
-        public string Filename { get; set; }
+        public string InputFile { get; set; }
+        public string OutputFile { get; set; }
+        public ChatFormat OutputFormat { get; set; } = ChatFormat.Json;
+        public bool EmbedMissing { get; set; }
+        public bool ReplaceEmbeds { get; set; }
         public bool CropBeginning { get; set; }
         public double CropBeginningTime { get; set; }
         public bool CropEnding { get; set; }
         public double CropEndingTime { get; set; }
-        public bool EmbedData { get; set; }
         public bool BttvEmotes { get; set; }
         public bool FfzEmotes { get; set; }
         public bool StvEmotes { get; set; }
-        public int ConnectionCount { get; set; } = 1;
-        public TimestampFormat TimeFormat { get; set; }
+        public TimestampFormat TextTimestampFormat { get; set; }
         public string FileExtension
         {
             get
             {
-                return DownloadFormat switch
+                return OutputFormat switch
                 {
                     ChatFormat.Json => "json",
                     ChatFormat.Html => "html",

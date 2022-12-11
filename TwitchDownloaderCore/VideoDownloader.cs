@@ -6,27 +6,28 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCore
 {
-    public class VideoDownloader
+    public sealed class VideoDownloader
     {
-        VideoDownloadOptions downloadOptions;
+        private readonly VideoDownloadOptions downloadOptions;
 
         public VideoDownloader(VideoDownloadOptions DownloadOptions)
         {
             downloadOptions = DownloadOptions;
+            downloadOptions.TempFolder = Path.Combine(
+                string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
+                "TwitchDownloader");
         }
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            string tempFolder = downloadOptions.TempFolder == null || downloadOptions.TempFolder == "" ?  Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(downloadOptions.TempFolder, "TwitchDownloader");
-            string downloadFolder = Path.Combine(tempFolder, downloadOptions.Id.ToString() == "0" ? Guid.NewGuid().ToString() : downloadOptions.Id.ToString());
+            string downloadFolder = Path.Combine(downloadOptions.TempFolder, downloadOptions.Id.ToString() == "0" ? Guid.NewGuid().ToString() : downloadOptions.Id.ToString());
+
             try
             {
                 ServicePointManager.DefaultConnectionLimit = downloadOptions.DownloadThreads;
@@ -169,8 +170,8 @@ namespace TwitchDownloaderCore
 
                             doneCount++;
                             int percent = (int)Math.Floor(((double)doneCount / (double)partCount) * 100);
-                            progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = String.Format("Downloading {0}% (1/3)", percent) });
-                            progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
+                            progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = String.Format("Downloading {0}% (1/3)", percent) });
+                            progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
 
                             return;
                         }
@@ -188,8 +189,8 @@ namespace TwitchDownloaderCore
 
                 CheckCancelation(cancellationToken, downloadFolder);
 
-                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Combining Parts (2/3)" });
-                progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = 0 });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Combining Parts (2/3)" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = 0 });
 
                 await Task.Run(() =>
                 {
@@ -216,7 +217,7 @@ namespace TwitchDownloaderCore
                 });
 
 
-                progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Finalizing MP4 (3/3)" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Finalizing MP4 (3/3)" });
 
                 double startOffset = 0.0;
 

@@ -1,17 +1,14 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCore
 {
-    public class ClipDownloader
+    public sealed class ClipDownloader
     {
-        ClipDownloadOptions downloadOptions;
+        private readonly ClipDownloadOptions downloadOptions;
 
         public ClipDownloader(ClipDownloadOptions DownloadOptions)
         {

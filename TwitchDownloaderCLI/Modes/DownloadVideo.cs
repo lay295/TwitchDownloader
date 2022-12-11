@@ -15,7 +15,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
 
-            if (inputOptions.Id == string.Empty || !inputOptions.Id.All(char.IsDigit))
+            if (string.IsNullOrWhiteSpace(inputOptions.Id) || !inputOptions.Id.All(char.IsDigit))
             {
                 Console.WriteLine("[ERROR] - Invalid VOD ID, unable to parse. Must be only numbers.");
                 Environment.Exit(1);
@@ -32,7 +32,7 @@ namespace TwitchDownloaderCLI.Modes
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
-                FfmpegPath = inputOptions.FfmpegPath is null or "" ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
+                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder
             };
 

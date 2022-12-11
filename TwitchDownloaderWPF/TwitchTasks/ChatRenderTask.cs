@@ -63,7 +63,7 @@ namespace TwitchDownloader.TwitchTasks
             OnPropertyChanged("Status");
             try
             {
-                await downloader.ParseJson();
+                await downloader.ParseJsonAsync();
                 await downloader.RenderVideoAsync(progress, TokenSource.Token);
                 if (TokenSource.IsCancellationRequested)
                 {
@@ -87,9 +87,9 @@ namespace TwitchDownloader.TwitchTasks
 
         private void Progress_ProgressChanged(object sender, ProgressReport e)
         {
-            if (e.reportType == ReportType.Percent)
+            if (e.ReportType == ReportType.Percent)
             {
-                int percent = (int)e.data;
+                int percent = (int)e.Data;
                 if (percent > Progress)
                 {
                     Progress = percent;

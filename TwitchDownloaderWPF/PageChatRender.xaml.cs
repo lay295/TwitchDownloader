@@ -1,5 +1,4 @@
 ﻿using HandyControl.Controls;
-using HandyControl.Tools.Extension;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SkiaSharp;
@@ -23,7 +22,6 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 using WpfAnimatedGif;
-using static System.Windows.Forms.Design.AxImporter;
 using MessageBox = System.Windows.MessageBox;
 
 namespace TwitchDownloaderWPF
@@ -99,18 +97,12 @@ namespace TwitchDownloaderWPF
 
         private void OnProgressChanged(ProgressReport progress)
         {
-            if (progress.reportType == ReportType.Percent)
-            {
-                statusProgressBar.Value = (int)progress.data;
-            }
-            if (progress.reportType is ReportType.Message or ReportType.MessageInfo)
-            {
-                statusMessage.Text = (string)progress.data;
-            }
-            if (progress.reportType == ReportType.Log)
-            {
-                AppendLog((string)progress.data);
-            }
+            if (progress.ReportType == ReportType.Percent)
+                statusProgressBar.Value = (int)progress.Data;
+            if (progress.ReportType is ReportType.Status or ReportType.StatusInfo)
+                statusMessage.Text = (string)progress.Data;
+            if (progress.ReportType == ReportType.Log)
+                AppendLog((string)progress.Data);
         }
 
         private void LoadSettings()
@@ -480,7 +472,7 @@ namespace TwitchDownloaderWPF
                         btnRender.IsEnabled = false;
 
                         ChatRenderer currentRender = new ChatRenderer(options);
-                        await currentRender.ParseJson();
+                        await currentRender.ParseJsonAsync();
 
                         if (sender == null)
                         {

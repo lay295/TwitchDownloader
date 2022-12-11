@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Options
 {
@@ -24,20 +22,8 @@ namespace TwitchDownloaderCore.Options
         public double FontSize { get; set; } = 24.0;
         public SKFontStyle MessageFontStyle { get; set; }
         public SKFontStyle UsernameFontStyle { get; set; }
-        public double ReferenceScale
-        {
-            get
-            {
-                return FontSize / 24;
-            }
-        }
-        public int SectionHeight
-        {
-            get
-            {
-                return (int)Math.Floor(40 * ReferenceScale);
-            }
-        }
+        public double ReferenceScale => FontSize / 24;
+        public int SectionHeight => (int)(40 * ReferenceScale);
         public bool Timestamp { get; set; }
         public int Framerate { get; set; }
         public double UpdateRate { get; set; }
@@ -48,11 +34,11 @@ namespace TwitchDownloaderCore.Options
                 if (UpdateRate == 0)
                     return 1;
                 else
-                    return (int)Math.Floor(UpdateRate / (1.0 / Framerate));
+                    return (int)(UpdateRate * Framerate);
             }
         }
         public bool GenerateMask { get; set; }
-        public string OutputFileMask
+        public string MaskFile
         {
             get
             {
@@ -60,8 +46,8 @@ namespace TwitchDownloaderCore.Options
                     return OutputFile;
 
                 string extension = Path.GetExtension(OutputFile);
-                int lastIndex = OutputFile.LastIndexOf(extension);
-                return OutputFile.Substring(0, lastIndex) + "_mask" + extension;
+                int extensionIndex = OutputFile.LastIndexOf(extension);
+                return string.Concat(OutputFile.AsSpan(0, extensionIndex), "_mask", extension);
             }
         }
         public string InputArgs { get; set; }
@@ -76,48 +62,12 @@ namespace TwitchDownloaderCore.Options
         public int ChatBadgeMask { get; set; } = 0;
         public int StartOverride { get; set; } = -1;
         public int EndOverride { get; set; } = -1;
-        public int SidePadding
-        {
-            get
-            {
-                return (int)(6 * ReferenceScale);
-            }
-        }
-        public int VerticalPadding
-        {
-            get
-            {
-                return (int)(24 * ReferenceScale);
-            }
-        }
-        public int WordSpacing
-        {
-            get
-            {
-                return (int)(6 * ReferenceScale);
-            }
-        }
-        public int EmoteSpacing
-        {
-            get
-            {
-                return (int)(6 * ReferenceScale);
-            }
-        }
-        public int AscentStrokeWidth
-        {
-            get
-            {
-                return (int)(12 * ReferenceScale);
-            }
-        }
-        public int AscentIndentWidth
-        {
-            get
-            {
-                return (int)(24 * ReferenceScale);
-            }
-        }
+        public int SidePadding => (int)(6 * ReferenceScale);
+        public int VerticalPadding => (int)(24 * ReferenceScale);
+        public int WordSpacing => (int)(6 * ReferenceScale);
+        public int EmoteSpacing => (int)(6 * ReferenceScale);
+        public int AscentStrokeWidth => (int)(12 * ReferenceScale);
+        public int AscentIndentWidth => (int)(24 * ReferenceScale);
         public bool Offline { get; set; }
     }
 }

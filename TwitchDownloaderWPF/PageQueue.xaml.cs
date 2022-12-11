@@ -65,6 +65,8 @@ namespace TwitchDownloader
                             currentClip++;
                         if (task is ChatDownloadTask)
                             currentChat++;
+                        if (task is ChatUpdateTask)
+                            currentChat++;
                         if (task is ChatRenderTask)
                             currentRender++;
                     }
@@ -85,6 +87,11 @@ namespace TwitchDownloader
                             task.RunAsync();
                         }
                         if (task is ChatDownloadTask && (currentChat + 1) <= maxChat)
+                        {
+                            currentChat++;
+                            task.RunAsync();
+                        }
+                        if (task is ChatUpdateTask && (currentChat + 1) <= maxChat)
                         {
                             currentChat++;
                             task.RunAsync();

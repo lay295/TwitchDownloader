@@ -37,16 +37,14 @@ namespace TwitchDownloaderCLI.Modes
                 {
                     "normal" => SKFontStyle.Normal,
                     "bold" => SKFontStyle.Bold,
-                    "italic" => SKFontStyle.Italic,
-                    "italics" => SKFontStyle.Italic,
+                    "italic" or "italics" => SKFontStyle.Italic,
                     _ => throw new NotImplementedException("Invalid message font style. Valid values are: normal, bold, and italic")
                 },
                 UsernameFontStyle = inputOptions.UsernameFontStyle.ToLower() switch
                 {
                     "normal" => SKFontStyle.Normal,
                     "bold" => SKFontStyle.Bold,
-                    "italic" => SKFontStyle.Italic,
-                    "italics" => SKFontStyle.Italic,
+                    "italic" or "italics" => SKFontStyle.Italic,
                     _ => throw new NotImplementedException("Invalid username font style. Valid values are: normal, bold, and italic")
                 },
                 UpdateRate = inputOptions.UpdateRate,
@@ -59,7 +57,7 @@ namespace TwitchDownloaderCLI.Modes
                 SubMessages = (bool)inputOptions.SubMessages,
                 ChatBadges = (bool)inputOptions.ChatBadges,
                 Timestamp = inputOptions.Timestamp,
-                Offline = (bool)inputOptions.Offline,
+                Offline = inputOptions.Offline,
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
@@ -80,7 +78,7 @@ namespace TwitchDownloaderCLI.Modes
                 }
             }
 
-            if (inputOptions.IgnoreUsersList != string.Empty)
+            if (inputOptions.IgnoreUsersList != "")
             {
                 renderOptions.IgnoreUsersList = inputOptions.IgnoreUsersList.ToLower().Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -90,7 +88,7 @@ namespace TwitchDownloaderCLI.Modes
             ChatRenderer chatRenderer = new(renderOptions);
             Progress<ProgressReport> progress = new();
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            chatRenderer.ParseJson().Wait();
+            chatRenderer.ParseJsonAsync().Wait();
             chatRenderer.RenderVideoAsync(progress, new CancellationToken()).Wait();
         }
     }

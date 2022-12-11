@@ -8,22 +8,25 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
 {
-    public class ChatRenderer
+    public sealed class ChatRenderer
     {
         static readonly string[] defaultColors = new string[] { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
-        static readonly string emojiRegex = @"(?:[#*0-9]\uFE0F?\u20E3|©\uFE0F?|[®\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23ED-\u23EF\u23F1\u23F2\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB\u25FC\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692\u2694-\u2697\u2699\u269B\u269C\u26A0\u26A7\u26AA\u26B0\u26B1\u26BD\u26BE\u26C4\u26C8\u26CF\u26D1\u26D3\u26E9\u26F0-\u26F5\u26F7\u26F8\u26FA\u2702\u2708\u2709\u270F\u2712\u2714\u2716\u271D\u2721\u2733\u2734\u2744\u2747\u2757\u2763\u27A1\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B55\u3030\u303D\u3297\u3299]\uFE0F?|[\u261D\u270C\u270D](?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?|[\u270A\u270B](?:\uD83C[\uDFFB-\uDFFF])?|[\u23E9-\u23EC\u23F0\u23F3\u25FD\u2693\u26A1\u26AB\u26C5\u26CE\u26D4\u26EA\u26FD\u2705\u2728\u274C\u274E\u2753-\u2755\u2795-\u2797\u27B0\u27BF\u2B50]|\u26F9(?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|\u2764\uFE0F?(?:\u200D(?:\uD83D\uDD25|\uD83E\uDE79))?|\uD83C(?:[\uDC04\uDD70\uDD71\uDD7E\uDD7F\uDE02\uDE37\uDF21\uDF24-\uDF2C\uDF36\uDF7D\uDF96\uDF97\uDF99-\uDF9B\uDF9E\uDF9F\uDFCD\uDFCE\uDFD4-\uDFDF\uDFF5\uDFF7]\uFE0F?|[\uDF85\uDFC2\uDFC7](?:\uD83C[\uDFFB-\uDFFF])?|[\uDFC3\uDFC4\uDFCA](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDFCB\uDFCC](?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDCCF\uDD8E\uDD91-\uDD9A\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF84\uDF86-\uDF93\uDFA0-\uDFC1\uDFC5\uDFC6\uDFC8\uDFC9\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF8-\uDFFF]|\uDDE6\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF]|\uDDE7\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF]|\uDDE8\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF]|\uDDE9\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF]|\uDDEA\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA]|\uDDEB\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7]|\uDDEC\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE]|\uDDED\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA]|\uDDEE\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9]|\uDDEF\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5]|\uDDF0\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF]|\uDDF1\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE]|\uDDF2\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF]|\uDDF3\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF]|\uDDF4\uD83C\uDDF2|\uDDF5\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE]|\uDDF6\uD83C\uDDE6|\uDDF7\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC]|\uDDF8\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF]|\uDDF9\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF]|\uDDFA\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF]|\uDDFB\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA]|\uDDFC\uD83C[\uDDEB\uDDF8]|\uDDFD\uD83C\uDDF0|\uDDFE\uD83C[\uDDEA\uDDF9]|\uDDFF\uD83C[\uDDE6\uDDF2\uDDFC]|\uDFF3\uFE0F?(?:\u200D(?:\u26A7\uFE0F?|\uD83C\uDF08))?|\uDFF4(?:\u200D\u2620\uFE0F?|\uDB40\uDC67\uDB40\uDC62\uDB40(?:\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDC73\uDB40\uDC63\uDB40\uDC74|\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F)?)|\uD83D(?:[\uDC3F\uDCFD\uDD49\uDD4A\uDD6F\uDD70\uDD73\uDD76-\uDD79\uDD87\uDD8A-\uDD8D\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA\uDECB\uDECD-\uDECF\uDEE0-\uDEE5\uDEE9\uDEF0\uDEF3]\uFE0F?|[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDC8F\uDC91\uDCAA\uDD7A\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC](?:\uD83C[\uDFFB-\uDFFF])?|[\uDC6E\uDC70\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD74\uDD90](?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?|[\uDC00-\uDC07\uDC09-\uDC14\uDC16-\uDC3A\uDC3C-\uDC3E\uDC40\uDC44\uDC45\uDC51-\uDC65\uDC6A\uDC79-\uDC7B\uDC7D-\uDC80\uDC84\uDC88-\uDC8E\uDC90\uDC92-\uDCA9\uDCAB-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDDA4\uDDFB-\uDE2D\uDE2F-\uDE34\uDE37-\uDE44\uDE48-\uDE4A\uDE80-\uDEA2\uDEA4-\uDEB3\uDEB7-\uDEBF\uDEC1-\uDEC5\uDED0-\uDED2\uDED5-\uDED7\uDEDD-\uDEDF\uDEEB\uDEEC\uDEF4-\uDEFC\uDFE0-\uDFEB\uDFF0]|\uDC08(?:\u200D\u2B1B)?|\uDC15(?:\u200D\uD83E\uDDBA)?|\uDC3B(?:\u200D\u2744\uFE0F?)?|\uDC41\uFE0F?(?:\u200D\uD83D\uDDE8\uFE0F?)?|\uDC68(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDC68\uDC69]\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFE])))?))?|\uDC69(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?[\uDC68\uDC69]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?|\uDC69\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?))|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFE])))?))?|\uDC6F(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDD75(?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDE2E(?:\u200D\uD83D\uDCA8)?|\uDE35(?:\u200D\uD83D\uDCAB)?|\uDE36(?:\u200D\uD83C\uDF2B\uFE0F?)?)|\uD83E(?:[\uDD0C\uDD0F\uDD18-\uDD1F\uDD30-\uDD34\uDD36\uDD77\uDDB5\uDDB6\uDDBB\uDDD2\uDDD3\uDDD5\uDEC3-\uDEC5\uDEF0\uDEF2-\uDEF6](?:\uD83C[\uDFFB-\uDFFF])?|[\uDD26\uDD35\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD4\uDDD6-\uDDDD](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDDDE\uDDDF](?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD0D\uDD0E\uDD10-\uDD17\uDD20-\uDD25\uDD27-\uDD2F\uDD3A\uDD3F-\uDD45\uDD47-\uDD76\uDD78-\uDDB4\uDDB7\uDDBA\uDDBC-\uDDCC\uDDD0\uDDE0-\uDDFF\uDE70-\uDE74\uDE78-\uDE7C\uDE80-\uDE86\uDE90-\uDEAC\uDEB0-\uDEBA\uDEC0-\uDEC2\uDED0-\uDED9\uDEE0-\uDEE7]|\uDD3C(?:\u200D[\u2640\u2642]\uFE0F?|\uD83C[\uDFFB-\uDFFF])?|\uDDD1(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFC-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFD-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFD\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFE]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?))?|\uDEF1(?:\uD83C(?:\uDFFB(?:\u200D\uD83E\uDEF2\uD83C[\uDFFC-\uDFFF])?|\uDFFC(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFD-\uDFFF])?|\uDFFD(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])?|\uDFFE(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFD\uDFFF])?|\uDFFF(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFE])?))?))";
-
+        static readonly Regex rtlRegex = new("[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]");
+        static readonly Regex emojiRegex = new(@"(?:[#*0-9]\uFE0F?\u20E3|©\uFE0F?|[®\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23ED-\u23EF\u23F1\u23F2\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB\u25FC\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692\u2694-\u2697\u2699\u269B\u269C\u26A0\u26A7\u26AA\u26B0\u26B1\u26BD\u26BE\u26C4\u26C8\u26CF\u26D1\u26D3\u26E9\u26F0-\u26F5\u26F7\u26F8\u26FA\u2702\u2708\u2709\u270F\u2712\u2714\u2716\u271D\u2721\u2733\u2734\u2744\u2747\u2757\u2763\u27A1\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B55\u3030\u303D\u3297\u3299]\uFE0F?|[\u261D\u270C\u270D](?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?|[\u270A\u270B](?:\uD83C[\uDFFB-\uDFFF])?|[\u23E9-\u23EC\u23F0\u23F3\u25FD\u2693\u26A1\u26AB\u26C5\u26CE\u26D4\u26EA\u26FD\u2705\u2728\u274C\u274E\u2753-\u2755\u2795-\u2797\u27B0\u27BF\u2B50]|\u26F9(?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|\u2764\uFE0F?(?:\u200D(?:\uD83D\uDD25|\uD83E\uDE79))?|\uD83C(?:[\uDC04\uDD70\uDD71\uDD7E\uDD7F\uDE02\uDE37\uDF21\uDF24-\uDF2C\uDF36\uDF7D\uDF96\uDF97\uDF99-\uDF9B\uDF9E\uDF9F\uDFCD\uDFCE\uDFD4-\uDFDF\uDFF5\uDFF7]\uFE0F?|[\uDF85\uDFC2\uDFC7](?:\uD83C[\uDFFB-\uDFFF])?|[\uDFC3\uDFC4\uDFCA](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDFCB\uDFCC](?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDCCF\uDD8E\uDD91-\uDD9A\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF84\uDF86-\uDF93\uDFA0-\uDFC1\uDFC5\uDFC6\uDFC8\uDFC9\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF8-\uDFFF]|\uDDE6\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF]|\uDDE7\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF]|\uDDE8\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF]|\uDDE9\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF]|\uDDEA\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA]|\uDDEB\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7]|\uDDEC\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE]|\uDDED\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA]|\uDDEE\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9]|\uDDEF\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5]|\uDDF0\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF]|\uDDF1\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE]|\uDDF2\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF]|\uDDF3\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF]|\uDDF4\uD83C\uDDF2|\uDDF5\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE]|\uDDF6\uD83C\uDDE6|\uDDF7\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC]|\uDDF8\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF]|\uDDF9\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF]|\uDDFA\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF]|\uDDFB\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA]|\uDDFC\uD83C[\uDDEB\uDDF8]|\uDDFD\uD83C\uDDF0|\uDDFE\uD83C[\uDDEA\uDDF9]|\uDDFF\uD83C[\uDDE6\uDDF2\uDDFC]|\uDFF3\uFE0F?(?:\u200D(?:\u26A7\uFE0F?|\uD83C\uDF08))?|\uDFF4(?:\u200D\u2620\uFE0F?|\uDB40\uDC67\uDB40\uDC62\uDB40(?:\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDC73\uDB40\uDC63\uDB40\uDC74|\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F)?)|\uD83D(?:[\uDC3F\uDCFD\uDD49\uDD4A\uDD6F\uDD70\uDD73\uDD76-\uDD79\uDD87\uDD8A-\uDD8D\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA\uDECB\uDECD-\uDECF\uDEE0-\uDEE5\uDEE9\uDEF0\uDEF3]\uFE0F?|[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDC8F\uDC91\uDCAA\uDD7A\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC](?:\uD83C[\uDFFB-\uDFFF])?|[\uDC6E\uDC70\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD74\uDD90](?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?|[\uDC00-\uDC07\uDC09-\uDC14\uDC16-\uDC3A\uDC3C-\uDC3E\uDC40\uDC44\uDC45\uDC51-\uDC65\uDC6A\uDC79-\uDC7B\uDC7D-\uDC80\uDC84\uDC88-\uDC8E\uDC90\uDC92-\uDCA9\uDCAB-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDDA4\uDDFB-\uDE2D\uDE2F-\uDE34\uDE37-\uDE44\uDE48-\uDE4A\uDE80-\uDEA2\uDEA4-\uDEB3\uDEB7-\uDEBF\uDEC1-\uDEC5\uDED0-\uDED2\uDED5-\uDED7\uDEDD-\uDEDF\uDEEB\uDEEC\uDEF4-\uDEFC\uDFE0-\uDFEB\uDFF0]|\uDC08(?:\u200D\u2B1B)?|\uDC15(?:\u200D\uD83E\uDDBA)?|\uDC3B(?:\u200D\u2744\uFE0F?)?|\uDC41\uFE0F?(?:\u200D\uD83D\uDDE8\uFE0F?)?|\uDC68(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDC68\uDC69]\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFE])))?))?|\uDC69(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?[\uDC68\uDC69]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?|\uDC69\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?))|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFE])))?))?|\uDC6F(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDD75(?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDE2E(?:\u200D\uD83D\uDCA8)?|\uDE35(?:\u200D\uD83D\uDCAB)?|\uDE36(?:\u200D\uD83C\uDF2B\uFE0F?)?)|\uD83E(?:[\uDD0C\uDD0F\uDD18-\uDD1F\uDD30-\uDD34\uDD36\uDD77\uDDB5\uDDB6\uDDBB\uDDD2\uDDD3\uDDD5\uDEC3-\uDEC5\uDEF0\uDEF2-\uDEF6](?:\uD83C[\uDFFB-\uDFFF])?|[\uDD26\uDD35\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD4\uDDD6-\uDDDD](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDDDE\uDDDF](?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD0D\uDD0E\uDD10-\uDD17\uDD20-\uDD25\uDD27-\uDD2F\uDD3A\uDD3F-\uDD45\uDD47-\uDD76\uDD78-\uDDB4\uDDB7\uDDBA\uDDBC-\uDDCC\uDDD0\uDDE0-\uDDFF\uDE70-\uDE74\uDE78-\uDE7C\uDE80-\uDE86\uDE90-\uDEAC\uDEB0-\uDEBA\uDEC0-\uDEC2\uDED0-\uDED9\uDEE0-\uDEE7]|\uDD3C(?:\u200D[\u2640\u2642]\uFE0F?|\uD83C[\uDFFB-\uDFFF])?|\uDDD1(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFC-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFD-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFD\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFE]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?))?|\uDEF1(?:\uD83C(?:\uDFFB(?:\u200D\uD83E\uDEF2\uD83C[\uDFFC-\uDFFF])?|\uDFFC(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFD-\uDFFF])?|\uDFFD(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])?|\uDFFE(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFD\uDFFF])?|\uDFFF(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFE])?))?))",
+            RegexOptions.Compiled);
         public ChatRoot chatRoot { get; set; } = new ChatRoot();
-        private readonly ChatRenderOptions renderOptions = new ChatRenderOptions();
+
+        private readonly ChatRenderOptions renderOptions;
         private List<ChatBadge> badgeList = new List<ChatBadge>();
         private List<TwitchEmote> emoteList = new List<TwitchEmote>();
         private List<TwitchEmote> emoteThirdList = new List<TwitchEmote>();
@@ -38,17 +41,20 @@ namespace TwitchDownloaderCore
         public ChatRenderer(ChatRenderOptions chatRenderOptions)
         {
             renderOptions = chatRenderOptions;
-            renderOptions.TempFolder = string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.Combine(Path.GetTempPath(), "TwitchDownloader") : Path.Combine(renderOptions.TempFolder, "TwitchDownloader");
+            renderOptions.TempFolder = Path.Combine(
+                string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : renderOptions.TempFolder,
+                "TwitchDownloader");
         }
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            progress.Report(new ProgressReport() { reportType = ReportType.Message, data = "Fetching Images" });
-            Task<List<ChatBadge>> badgeTask = Task.Run(() => TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, offline: renderOptions.Offline));
-            Task<List<TwitchEmote>> emoteTask = Task.Run(() => TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, offline: renderOptions.Offline));
-            Task<List<TwitchEmote>> emoteThirdTask = Task.Run(() => TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, offline: renderOptions.Offline));
-            Task<List<CheerEmote>> cheerTask = Task.Run(() => TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, offline: renderOptions.Offline));
-            Task<Dictionary<string, SKBitmap>> emojiTask = Task.Run(() => TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder));
+            progress.Report(new ProgressReport(ReportType.Status, "Fetching Images"));
+
+            Task<List<ChatBadge>> badgeTask = TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            Task<List<TwitchEmote>> emoteTask = TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            Task<List<TwitchEmote>> emoteThirdTask = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline);
+            Task<List<CheerEmote>> cheerTask = TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
+            Task<Dictionary<string, SKBitmap>> emojiTask = TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
 
@@ -58,11 +64,18 @@ namespace TwitchDownloaderCore
             cheermotesList = cheerTask.Result;
             emojiCache = emojiTask.Result;
 
-            await Task.Run(ScaleImages);
+            // Dispose of the tasks to free up the memory now
+            // TODO: move the tasks to a dedicated function so they are disposed by the scope instead
+            badgeTask.Dispose();
+            emoteTask.Dispose();
+            emoteThirdTask.Dispose();
+            cheerTask.Dispose();
+            emojiTask.Dispose();
+
+            await Task.Run(ScaleImages, cancellationToken);
             FloorCommentOffsets(chatRoot.comments);
 
             outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-
             nameFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             messageFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
 
@@ -77,27 +90,25 @@ namespace TwitchDownloaderCore
                 messageFont.Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.MessageFontStyle);
             }
 
-            (int, int) tickValues = GetTotalTicks();
-            int totalTicks = tickValues.Item2;
-            int startTick = tickValues.Item1;
+            (int startTick, int totalTicks) = GetVideoTicks();
 
             if (File.Exists(renderOptions.OutputFile))
                 File.Delete(renderOptions.OutputFile);
 
-            if (renderOptions.GenerateMask && File.Exists(renderOptions.OutputFileMask))
-                File.Delete(renderOptions.OutputFileMask);
+            if (renderOptions.GenerateMask && File.Exists(renderOptions.MaskFile))
+                File.Delete(renderOptions.MaskFile);
 
-            progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = "Rendering Video 0%" });
-            (Process, string) processInfo = GetFfmpegProcess(0, false);
+            progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
+            (Process ffmpegProcess, string ffmpegSavePath) = GetFfmpegProcess(0, false);
 
             if (renderOptions.GenerateMask)
             {
-                (Process, string) maskInfo = GetFfmpegProcess(0, true);
-                await Task.Run(() => RenderVideoSection(processInfo.Item1, maskInfo.Item1, startTick, startTick + totalTicks, progress), cancellationToken);
+                (Process maskProcess, string maskSavePath) = GetFfmpegProcess(0, true);
+                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress), cancellationToken);
             }
             else
             {
-                await Task.Run(() => RenderVideoSection(processInfo.Item1, null, startTick, startTick + totalTicks, progress), cancellationToken);
+                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, progress: progress), cancellationToken);
             }
         }
 
@@ -112,9 +123,13 @@ namespace TwitchDownloaderCore
             foreach (var comment in comments)
             {
                 if (renderOptions.UpdateRate > 1)
+                {
                     comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds);
+                }
                 else
-                    comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds * (1 / renderOptions.UpdateRate)) / (1 / renderOptions.UpdateRate);
+                {
+                    comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds / renderOptions.UpdateRate) * renderOptions.UpdateRate;
+                }
             }
         }
 
@@ -132,9 +147,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void RenderVideoSection(Process ffmpegProcess, Process maskProcess, int startTick, int endTick, IProgress<ProgressReport> progress = null)
+        private void RenderVideoSection(int startTick, int endTick, Process ffmpegProcess, Process maskProcess = null, IProgress<ProgressReport> progress = null)
         {
-            UpdateFrame lastestUpdate = null;
+            UpdateFrame latestUpdate = null;
             BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.StandardInput.BaseStream);
             BinaryWriter maskStream = null;
             if (maskProcess != null)
@@ -143,14 +158,18 @@ namespace TwitchDownloaderCore
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
+            // Measure some sample text to determine the text height, cannot assume it is font size
+            SKRect sampleTextBounds = new SKRect();
+            messageFont.MeasureText("abc123", ref sampleTextBounds);
+
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    lastestUpdate = GenerateUpdateFrame(currentTick, lastestUpdate);
+                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height, latestUpdate);
                 }
 
-                using (SKBitmap frame = GetFrameFromTick(currentTick, lastestUpdate))
+                using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, latestUpdate))
                 {
                     ffmpegStream.Write(frame.Bytes);
 
@@ -161,19 +180,24 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                double percentDouble = (double)(currentTick - startTick) / (double)(endTick - startTick) * 100.0;
-                int percentInt = (int)Math.Floor(percentDouble);
                 if (progress != null)
                 {
-                    progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percentInt });
-                    int timeLeftInt = (int)Math.Floor(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
+                    double percentDouble = (currentTick - startTick) / (double)(endTick - startTick) * 100.0;
+                    int percentInt = (int)percentDouble;
+                    progress.Report(new ProgressReport(percentInt));
+
+                    int timeLeftInt = (int)(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
                     TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
-                    progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = $"Rendering Video {percentInt}% ({timeLeft.ToString(@"h\hm\ms\s")} left)" });
+                    TimeSpan timeElapsed = new TimeSpan(0, 0, (int)stopwatch.Elapsed.TotalSeconds);
+                    progress.Report(new ProgressReport(ReportType.StatusInfo, $"Rendering Video: {percentInt}% ({timeElapsed.ToString(@"h\hm\ms\s")} Elapsed | {timeLeft.ToString(@"h\hm\ms\s")} Remaining)"));
                 }
             }
-            progress.Report(new ProgressReport() { reportType = ReportType.MessageInfo, data = "Rendering Video 100%" });
+
             stopwatch.Stop();
-            progress.Report(new ProgressReport() { reportType = ReportType.Log, data = $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x" });
+            progress?.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 100%"));
+            progress?.Report(new ProgressReport(ReportType.Log, $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x"));
+
+            latestUpdate?.Image.Dispose();
 
             ffmpegStream.Dispose();
             maskStream?.Dispose();
@@ -204,13 +228,13 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private (Process, string) GetFfmpegProcess(int partNumer, bool isMask)
+        private (Process process, string savePath) GetFfmpegProcess(int partNumber, bool isMask)
         {
             string savePath;
-            if (partNumer == 0)
+            if (partNumber == 0)
             {
                 if (isMask)
-                    savePath = renderOptions.OutputFileMask;
+                    savePath = renderOptions.MaskFile;
                 else
                     savePath = renderOptions.OutputFile;
             }
@@ -248,9 +272,9 @@ namespace TwitchDownloaderCore
             return (process, savePath);
         }
 
-        private SKBitmap GetFrameFromTick(int currentTick, UpdateFrame currentFrame = null)
+        private SKBitmap GetFrameFromTick(int currentTick, float sampleTextHeight, UpdateFrame currentFrame = null)
         {
-            currentFrame ??= GenerateUpdateFrame(currentTick);
+            currentFrame ??= GenerateUpdateFrame(currentTick, sampleTextHeight);
             SKBitmap frame = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
             return frame;
         }
@@ -289,7 +313,7 @@ namespace TwitchDownloaderCore
             return newFrame;
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, UpdateFrame lastestUpdate = null)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, UpdateFrame lastestUpdate = null)
         {
             List<CommentSection> commentList = new List<CommentSection>();
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
@@ -319,7 +343,7 @@ namespace TwitchDownloaderCore
                         continue;
                     }
 
-                    CommentSection comment = GenerateCommentSection(commentIndex);
+                    CommentSection comment = GenerateCommentSection(commentIndex, sampleTextHeight);
                     if (comment != null)
                     {
                         commentList.Add(comment);
@@ -343,7 +367,7 @@ namespace TwitchDownloaderCore
             return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
         }
 
-        private CommentSection GenerateCommentSection(int commentIndex)
+        private CommentSection GenerateCommentSection(int commentIndex, float sampleTextHeight)
         {
             CommentSection newSection = new CommentSection();
             List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
@@ -380,10 +404,7 @@ namespace TwitchDownloaderCore
             }
 
             AddImageSection(sectionImages, ref drawPos, defaultPos);
-            //Measure some sample text to determine position to draw text in, cannot assume height is font size
-            SKRect textBounds = new SKRect();
-            messageFont.MeasureText("abc123", ref textBounds);
-            defaultPos.Y = (int)(((renderOptions.SectionHeight - textBounds.Height) / 2.0) + textBounds.Height);
+            defaultPos.Y = (int)(((renderOptions.SectionHeight - sampleTextHeight) / 2.0) + sampleTextHeight);
             drawPos.Y = defaultPos.Y;
 
             if ((comment.message.user_notice_params != null && (comment.message.user_notice_params.msg_id is "sub" or "resub" or "subgift")) || IsSubMessage(comment))
@@ -452,7 +473,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            string emojiKey = string.Join(" ", codepointList);
+            string emojiKey = string.Join(' ', codepointList);
             return emojiKey;
         }
 
@@ -493,23 +514,35 @@ namespace TwitchDownloaderCore
                             emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
                             emotePositionList.Add((emotePoint, twitchEmote));
                         }
-                        else if (Regex.Match(fragmentString, emojiRegex).Success)
+                        else if (emojiRegex.IsMatch(fragmentString))
                         {
                             while (!string.IsNullOrWhiteSpace(fragmentString))
                             {
-                                List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
+                                // Old LINQ method. Leaving this for reference
+                                //List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
+                                
+                                List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
+                                foreach (var emoji in Emoji.All)
+                                {
+                                    if (fragmentString.StartsWith(emoji.ToString()))
+                                    {
+                                        emojiMatches.Add(emoji);
+                                    }
+                                }
 
-                                //Make sure the found emojis actually exist in our cache
-                                for (int j = 0; j < emojiMatches.Count; j++)
+                                // Make sure the found emojis actually exist in our cache
+                                int emojiMatchesCount = emojiMatches.Count;
+                                for (int j = 0; j < emojiMatchesCount; j++)
                                 {
                                     if (!emojiCache.ContainsKey(GetKeyName(emojiMatches[j].Sequence.Codepoints)))
                                     {
                                         emojiMatches.RemoveAt(j);
+                                        emojiMatchesCount--;
                                         j--;
                                     }
                                 }
 
-                                if (emojiMatches.Count > 0)
+                                if (emojiMatchesCount > 0)
                                 {
                                     SingleEmoji selectedEmoji = emojiMatches.OrderByDescending(x => x.Sequence.Codepoints.Count()).First();
                                     SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
@@ -539,50 +572,50 @@ namespace TwitchDownloaderCore
                         }
                         else if (new StringInfo(fragmentString).LengthInTextElements < fragmentString.Length || !messageFont.ContainsGlyphs(fragmentString))
                         {
-                            List<char> charList = new List<char>(fragmentString.ToArray());
+                            char[] fragmentChars = fragmentString.ToCharArray();
                             //Very rough estimation of width of text, because we don't know the font yet. This is to show ASCII spam properly
-                            int textWidth = (int)Math.Floor(charList.Count * messageFont.MeasureText("0"));
+                            int textWidth = (int)(fragmentChars.Length * messageFont.MeasureText("0"));
                             if (drawPos.X + textWidth > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
                             {
                                 AddImageSection(sectionImages, ref drawPos, defaultPos);
                             }
 
-                            //There are either surrogate pairs or characters not in the messageFont, draw one at a time
-                            string messageBuffer = "";
-                            for (int j = 0; j < charList.Count; j++)
+                            // The fragment has either surrogate pairs or characters not in the messageFont, draw one at a time
+                            var messageBuffer = new StringBuilder();
+                            for (int j = 0; j < fragmentChars.Length; j++)
                             {
-                                if (char.IsHighSurrogate(charList[j]) && j + 1 < charList.Count && char.IsLowSurrogate(charList[j + 1]))
+                                if (char.IsHighSurrogate(fragmentChars[j]) && j + 1 < fragmentChars.Length && char.IsLowSurrogate(fragmentChars[j + 1]))
                                 {
-                                    if (messageBuffer != "")
+                                    if (messageBuffer.Length > 0)
                                     {
-                                        DrawText(messageBuffer, messageFont, true, sectionImages, ref drawPos, defaultPos);
+                                        DrawText(messageBuffer.ToString(), messageFont, true, sectionImages, ref drawPos, defaultPos);
+                                        messageBuffer.Clear();
                                     }
-                                    SKPaint fallbackFont = GetFallbackFont(char.ConvertToUtf32(charList[j], charList[j + 1]), renderOptions);
+                                    SKPaint fallbackFont = GetFallbackFont(char.ConvertToUtf32(fragmentChars[j], fragmentChars[j + 1]), renderOptions);
                                     fallbackFont.Color = renderOptions.MessageColor;
-                                    DrawText(charList[j].ToString() + charList[j + 1].ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos);
-                                    messageBuffer = "";
+                                    DrawText(fragmentChars[j].ToString() + fragmentChars[j + 1].ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                     j++;
                                 }
-                                else if (new StringInfo(charList[j].ToString()).LengthInTextElements == 0 || !messageFont.ContainsGlyphs(charList[j].ToString()))
+                                else if (new StringInfo(fragmentChars[j].ToString()).LengthInTextElements == 0 || !messageFont.ContainsGlyphs(fragmentChars[j].ToString()))
                                 {
-                                    if (messageBuffer != "")
+                                    if (messageBuffer.Length > 0)
                                     {
-                                        DrawText(messageBuffer, messageFont, true, sectionImages, ref drawPos, defaultPos);
+                                        DrawText(messageBuffer.ToString(), messageFont, true, sectionImages, ref drawPos, defaultPos);
+                                        messageBuffer.Clear();
                                     }
-                                    SKPaint fallbackFont = GetFallbackFont(charList[j], renderOptions);
+                                    SKPaint fallbackFont = GetFallbackFont(fragmentChars[j], renderOptions);
                                     fallbackFont.Color = renderOptions.MessageColor;
-                                    DrawText(charList[j].ToString(), fallbackFont, true, sectionImages, ref drawPos, defaultPos);
-                                    messageBuffer = "";
+                                    DrawText(fragmentChars[j].ToString(), fallbackFont, true, sectionImages, ref drawPos, defaultPos);
                                 }
                                 else
                                 {
-                                    messageBuffer += charList[j];
+                                    messageBuffer.Append(fragmentChars[j]);
                                 }
                             }
-                            if (messageBuffer != "")
+                            if (messageBuffer.Length > 0)
                             {
-                                DrawText(messageBuffer, messageFont, true, sectionImages, ref drawPos, defaultPos);
-                                messageBuffer = "";
+                                DrawText(messageBuffer.ToString(), messageFont, true, sectionImages, ref drawPos, defaultPos);
+                                messageBuffer.Clear();
                             }
                         }
                         else
@@ -614,8 +647,7 @@ namespace TwitchDownloaderCore
                                     }
                                 }
                             }
-                            catch
-                            { }
+                            catch { }
                             if (!bitsPrinted)
                             {
                                 DrawText(fragmentString, messageFont, true, sectionImages, ref drawPos, defaultPos);
@@ -651,39 +683,19 @@ namespace TwitchDownloaderCore
 
         private void DrawText(string drawText, SKPaint textFont, bool padding, List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos)
         {
-            float textWidth;
             bool isRtl = IsRightToLeft(drawText);
+            float textWidth = MeasureText(drawText, textFont, isRtl);
             int effectiveChatWidth = renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X;
 
-            if (isRtl)
+            // while drawText is wider than the chat width
+            while (textWidth > effectiveChatWidth)
             {
-                textWidth = MeasureRtlText(drawText, textFont);
+                string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, new char[] { '?', '-' });
 
-                // while drawText is wider than the chat width
-                while (textWidth > effectiveChatWidth)
-                {
-                    string newDrawText = SubstringRtlToTextWidth(drawText, textFont, effectiveChatWidth, new char[] { '?', '-' });
+                DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos);
 
-                    DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos);
-
-                    drawText = drawText[newDrawText.Length..];
-                    textWidth = MeasureRtlText(drawText, textFont);
-                }
-            }
-            else
-            {
-                textWidth = textFont.MeasureText(drawText);
-
-                // while drawText is wider than the chat width
-                while (textWidth > effectiveChatWidth)
-                {
-                    string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, new char[] { '?', '-' });
-
-                    DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos);
-
-                    drawText = drawText[newDrawText.Length..];
-                    textWidth = textFont.MeasureText(drawText);
-                }
+                drawText = drawText[newDrawText.Length..];
+                textWidth = MeasureText(drawText, textFont, isRtl);
             }
             if (drawPos.X + textWidth > effectiveChatWidth)
             {
@@ -711,7 +723,7 @@ namespace TwitchDownloaderCore
                     outlinePaint.Dispose();
                 }
 
-                if (isRtl)
+                if (rtlRegex.IsMatch(drawText))
                 {
                     sectionImageCanvas.DrawShapedText(drawText, drawPos.X, drawPos.Y, textFont);
                 }
@@ -724,104 +736,69 @@ namespace TwitchDownloaderCore
             drawPos.X += (int)Math.Floor(textWidth + (padding ? renderOptions.WordSpacing : 0));
         }
 
+#pragma warning disable IDE0057
         /// <summary>
         /// Produces a <see langword="string"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/> OR substringed to the last index of any character in <paramref name="delimiters"/>.
         /// </summary>
-        /// <returns>A shorter width or delimited <see langword="string"/>, whichever comes first.</returns>
-        private static string SubstringToTextWidth(string text, SKPaint textFont, int maxWidth, char[] delimiters)
+        /// <returns>A shortened in visual width or delimited <see langword="string"/>, whichever comes first.</returns>
+        private static string SubstringToTextWidth(string text, SKPaint textFont, int maxWidth, bool isRtl, char[] delimiters)
         {
+            ReadOnlySpan<char> inputText = text.AsSpan();
+
             // input text was already less than max width
-            if (textFont.MeasureText(text) <= maxWidth)
+            if (MeasureText(inputText, textFont, isRtl) <= maxWidth)
             {
                 return text;
             }
 
-            // cut in string half until <= width
-            string shortText = text;
+            // Cut in half until <= width
+            int length = inputText.Length;
             do
             {
-                shortText = shortText[..(shortText.Length / 2)];
-            } while (textFont.MeasureText(shortText) > maxWidth);
+                length /= 2;
+            }
+            while (MeasureText(inputText.Slice(0, length), textFont, isRtl) > maxWidth);
 
-            // add chars until 1 too long for width
-            int charAt = shortText.Length - 1;
-            int delimiterIndex = shortText.LastIndexOfAny(delimiters) + 1;
+            // Add chars until greater than width, then remove the last
             do
             {
-                charAt++;
-                shortText += text[charAt];
-                if (delimiters.Any(x => x.Equals(shortText[charAt])))
-                {
-                    delimiterIndex = charAt;
-                }
+                length++;
+            } while (MeasureText(inputText.Slice(0, length), textFont, isRtl) < maxWidth);
+            inputText = inputText.Slice(0, length - 1);
 
-                // prioritize wrapping at last delimiter char to increase URL readability
-                if (delimiterIndex > 0)
-                {
-                    // we're at the end of a delimiter char chain
-                    if (delimiterIndex != charAt)
-                    {
-                        return shortText[..delimiterIndex];
-                    }
-                }
-            } while (textFont.MeasureText(shortText) < maxWidth);
-
-            return shortText[..^1];
-        }
-
-        /// <summary>
-        /// Produces a <see langword="string"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/> OR substringed to the last index of any character in <paramref name="delimiters"/>.
-        /// </summary>
-        /// <param name="rtlText">Right to left text</param>
-        /// <returns>A shorter width or delimited <see langword="string"/>, whichever comes first.</returns>
-        private static string SubstringRtlToTextWidth(string rtlText, SKPaint textFont, int maxWidth, char[] delimiters)
-        {
-            // input text was already less than max width
-            if (MeasureRtlText(rtlText, textFont) <= maxWidth)
+            // Cut at the last delimiter character if applicable
+            int delimiterIndex = inputText.LastIndexOfAny(delimiters);
+            if (delimiterIndex != -1)
             {
-                return rtlText;
+                return inputText.Slice(0, delimiterIndex).ToString();
             }
 
-            // cut in string half until <= width
-            string shortText = rtlText;
-            do
-            {
-                shortText = shortText[..(shortText.Length / 2)];
-            } while (MeasureRtlText(shortText, textFont) > maxWidth);
-
-            // add chars until 1 too long for width
-            int charAt = shortText.Length - 1;
-            int delimiterIndex = shortText.LastIndexOfAny(delimiters) + 1;
-            do
-            {
-                charAt++;
-                shortText += rtlText[charAt];
-                if (delimiters.Any(x => x.Equals(shortText[charAt])))
-                {
-                    delimiterIndex = charAt;
-                }
-
-                // prioritize wrapping at last delimiter char
-                if (delimiterIndex > 0)
-                {
-                    // we're at the end of a delimiter char chain
-                    if (delimiterIndex != charAt)
-                    {
-                        return shortText[..delimiterIndex];
-                    }
-                }
-            } while (MeasureRtlText(shortText, textFont) < maxWidth);
-
-            return shortText[..^1];
+            return inputText.ToString();
         }
+#pragma warning restore IDE0057
+
+        private static float MeasureText(ReadOnlySpan<char> text, SKPaint textFont, bool? isRtl = null)
+        {
+            isRtl ??= IsRightToLeft(text[0].ToString());
+
+            if (isRtl == false)
+            {
+                return textFont.MeasureText(text);
+            }
+            else
+            {
+                return MeasureRtlText(text, textFont);
+            }
+        }
+
+        private static float MeasureRtlText(ReadOnlySpan<char> rtlText, SKPaint textFont)
+            => MeasureRtlText(rtlText.ToString(), textFont);
 
         private static float MeasureRtlText(string rtlText, SKPaint textFont)
         {
             using SKShaper messageShape = new SKShaper(textFont.Typeface);
             SKShaper.Result measure = messageShape.Shape(rtlText, textFont);
-            float textWidth = measure.Points[^1].X;
-
-            return textWidth;
+            return measure.Points[^1].X;
         }
 
         private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos)
@@ -834,7 +811,7 @@ namespace TwitchDownloaderCore
 
             if (comment.commenter.display_name.Any(IsNotAscii))
             {
-                userPaint = GetFallbackFont(comment.commenter.display_name.Where(x => IsNotAscii(x)).First(), renderOptions).Clone();
+                userPaint = GetFallbackFont(comment.commenter.display_name.Where(IsNotAscii).First(), renderOptions).Clone();
                 userPaint.Color = userColor;
             }
 
@@ -847,8 +824,6 @@ namespace TwitchDownloaderCore
             userPaint.Color = userColor;
             sectionImageCanvas.DrawText(comment.commenter.display_name + ":", drawPos.X, drawPos.Y, userPaint);
             drawPos.X += textWidth + renderOptions.WordSpacing;
-
-            userPaint.Dispose();
         }
 
         private static SKColor GenerateUserColor(SKColor userColor, SKColor background_color, ChatRenderOptions renderOptions)
@@ -877,6 +852,7 @@ namespace TwitchDownloaderCore
             return userColor;
         }
 
+#if DEBUG
         //For debugging, works on Windows only
         void OpenImage(SKBitmap newBitmap)
         {
@@ -886,7 +862,7 @@ namespace TwitchDownloaderCore
 
             Process.Start(new ProcessStartInfo(tempFile) { UseShellExecute = true });
         }
-
+#endif
         private void DrawBadges(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos)
         {
             using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
@@ -917,21 +893,21 @@ namespace TwitchDownloaderCore
 
                     foreach (var cachedBadge in badgeList)
                     {
-                        if (cachedBadge.Name == id)
-                        {
-                            foreach (var cachedVersion in cachedBadge.Versions)
-                            {
-                                if (cachedVersion.Key == version)
-                                {
-                                    returnList.Add((cachedVersion.Value, cachedBadge.Type));
-                                    foundBadge = true;
-                                    break;
-                                }
-                            }
+                        if (cachedBadge.Name != id)
+                            continue;
 
-                            if (foundBadge)
+                        foreach (var cachedVersion in cachedBadge.Versions)
+                        {
+                            if (cachedVersion.Key == version)
+                            {
+                                returnList.Add((cachedVersion.Value, cachedBadge.Type));
+                                foundBadge = true;
                                 break;
+                            }
                         }
+
+                        if (foundBadge)
+                            break;
                     }
                 }
             }
@@ -1004,7 +980,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private (int, int) GetTotalTicks()
+        private (int startTick, int totalTicks) GetVideoTicks()
         {
             if (renderOptions.StartOverride != -1 && renderOptions.EndOverride != -1)
             {
@@ -1027,6 +1003,7 @@ namespace TwitchDownloaderCore
                 return (videoStartTick, totalTicks);
             }
         }
+
         public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions)
         {
             if (fallbackCache.ContainsKey(input))
@@ -1041,6 +1018,7 @@ namespace TwitchDownloaderCore
         {
             return input > 127;
         }
+
         private static string[] SwapRightToLeft(string[] words)
         {
             List<string> finalWords = new List<string>();
@@ -1066,6 +1044,7 @@ namespace TwitchDownloaderCore
             }
             return finalWords.ToArray();
         }
+
         private static bool IsRightToLeft(string message)
         {
             if (message.Length > 0)
@@ -1080,50 +1059,16 @@ namespace TwitchDownloaderCore
                 return false;
             }
         }
-        public async Task<ChatRoot> ParseJson()
+
+        public async Task<ChatRoot> ParseJsonAsync()
         {
-            chatRoot = await ParseJsonStatic(renderOptions.InputFile);
+            chatRoot = await ChatJson.DeserializeAsync(renderOptions.InputFile);
 
-            if (chatRoot.streamer == null)
+            chatRoot.streamer ??= new Streamer
             {
-                chatRoot.streamer = new Streamer();
-                chatRoot.streamer.id = int.Parse(chatRoot.comments.First().channel_id);
-                chatRoot.streamer.name = await TwitchHelper.GetStreamerName(chatRoot.streamer.id);
-            }
-
-            return chatRoot;
-        }
-
-        public static async Task<ChatRoot> ParseJsonStatic(string inputJson)
-        {
-            ChatRoot chatRoot = new ChatRoot();
-
-            using FileStream fs = new FileStream(inputJson, FileMode.Open, FileAccess.Read);
-            using var jsonDocument = JsonDocument.Parse(fs);
-
-            if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerJson))
-            {
-                chatRoot.streamer = streamerJson.Deserialize<Streamer>();
-            }
-
-            if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoJson))
-            {
-                chatRoot.video = videoJson.Deserialize<Video>();
-            }
-
-            if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embedDataJson))
-            {
-                chatRoot.embeddedData = embedDataJson.Deserialize<EmbeddedData>();
-            }
-            else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesJson))
-            {
-                chatRoot.embeddedData = emotesJson.Deserialize<EmbeddedData>();
-            }
-
-            if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsJson))
-            {
-                chatRoot.comments = commentsJson.Deserialize<List<Comment>>();
-            }
+                id = int.Parse(chatRoot.comments.First().channel_id),
+                name = await TwitchHelper.GetStreamerName(int.Parse(chatRoot.comments.First().channel_id))
+            };
 
             return chatRoot;
         }
