@@ -24,73 +24,7 @@ namespace TwitchDownloaderCore
             downloadOptions = DownloadOptions;
         }
 
-        public async Task DownloadSection(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
-        {
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json; charset=UTF-8");
-                client.Headers.Add("Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-
-                double videoDuration = videoEnd - videoStart;
-                double latestMessage = videoStart - 1;
-                bool isFirst = true;
-                string cursor = "";
-                int errorCount = 0;
-
-                while (latestMessage < videoEnd)
-                {
-                    string response;
-
-                    try
-                    {
-                        if (isFirst)
-                            response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?content_offset_seconds={1}", videoId, videoStart));
-                        else
-                            response = await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?cursor={1}", videoId, cursor));
-                        errorCount = 0;
-                    }
-                    catch (WebException ex)
-                    {
-                        await Task.Delay(1000 * errorCount);
-                        errorCount++;
-
-                        if (errorCount >= 10)
-                            throw ex;
-
-                        continue;
-                    }
-
-                    CommentResponse commentResponse = JsonConvert.DeserializeObject<CommentResponse>(response);
-
-                    lock (commentLock)
-                    {
-                        foreach (var comment in commentResponse.comments)
-                        {
-                            if (latestMessage < videoEnd && comment.content_offset_seconds >= videoStart)
-                                comments.Add(comment);
-
-                            latestMessage = comment.content_offset_seconds;
-                        }
-                    }
-                    if (commentResponse._next == null)
-                        break;
-                    else
-                        cursor = commentResponse._next;
-
-                    int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                    progress.Report(new ProgressReport() { reportType = ReportType.Percent, data = percent });
-
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    if (isFirst)
-                        isFirst = false;
-
-                }
-            }
-        }
-
-        private async Task DownloadSectionGql(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
+        private async Task DownloadSection(IProgress<ProgressReport> progress, CancellationToken cancellationToken, double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock)
         {
             using (WebClient client = new WebClient())
             {
@@ -294,8 +228,6 @@ namespace TwitchDownloaderCore
             List<Task> tasks = new List<Task>();
             List<int> percentages = new List<int>(connectionCount);
 
-            bool LegacyApiWorks = await CheckLegacyApiAsync(videoId);
-
             double chunk = videoDuration / connectionCount;
             for (int i = 0; i < connectionCount; i++)
             {
@@ -327,10 +259,7 @@ namespace TwitchDownloaderCore
                     }
                 });
                 double start = videoStart + chunk * i;
-                if (LegacyApiWorks)
-                    tasks.Add(DownloadSection(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet, commentLock));
-                else
-                    tasks.Add(DownloadSectionGql(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet, commentLock));
+                tasks.Add(DownloadSection(taskProgress, cancellationToken, start, start + chunk, videoId, commentsSet, commentLock));
             }
 
             await Task.WhenAll(tasks);
@@ -522,27 +451,6 @@ namespace TwitchDownloaderCore
 
             chatRoot = null;
             GC.Collect();
-        }
-
-        private async Task<bool> CheckLegacyApiAsync(string videoId)
-        {
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                client.Headers.Add("Accept", "application/vnd.twitchtv.v5+json; charset=UTF-8");
-                client.Headers.Add("Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-
-                try
-                {
-                    await client.DownloadStringTaskAsync(String.Format("https://api.twitch.tv/v5/videos/{0}/comments?content_offset_seconds={1}", videoId, 0));
-                }
-                catch (WebException ex)
-                {
-                    if (ex.Status == WebExceptionStatus.ProtocolError)
-                        return false;
-                }
-            }
-            return true;
         }
 
         private string GetMessageHtml(bool embedEmotes, Dictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
