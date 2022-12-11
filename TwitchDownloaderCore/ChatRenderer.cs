@@ -811,7 +811,7 @@ namespace TwitchDownloaderCore
 
             if (comment.commenter.display_name.Any(IsNotAscii))
             {
-                userPaint = GetFallbackFont(comment.commenter.display_name.Where(IsNotAscii).First(), renderOptions);
+                userPaint = GetFallbackFont(comment.commenter.display_name.Where(IsNotAscii).First(), renderOptions).Clone();
                 userPaint.Color = userColor;
             }
 
