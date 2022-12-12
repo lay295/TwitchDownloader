@@ -39,7 +39,7 @@ namespace TwitchDownloaderCore.Tools
                 {
                     TimeSpan time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
                     string timestamp = time.ToString(@"h\:mm\:ss");
-                    await sw.WriteAsync(string.Format("[{0}] {1}: {2}", timestamp, username, message));
+                    await sw.WriteLineAsync(string.Format("[{0}] {1}: {2}", timestamp, username, message));
                 }
                 else if (timeFormat == TimestampFormat.None)
                 {
