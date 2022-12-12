@@ -76,7 +76,7 @@ namespace TwitchDownloaderWPF
             if (!File.Exists("ffmpeg.exe"))
                 await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
 
-            Version currentVersion = new Version("1.50.8");
+            Version currentVersion = new Version("1.50.9");
 
             AutoUpdater.InstalledVersion = currentVersion;
             AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
