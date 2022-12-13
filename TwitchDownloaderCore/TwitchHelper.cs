@@ -182,7 +182,10 @@ namespace TwitchDownloaderCore
                     try
                     {
                         JObject streamerEmoteObject = JObject.Parse(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
-                        stvEmotes.Merge((JArray)streamerEmoteObject["emote_set"]["emotes"]);
+                        if (streamerEmoteObject.GetValue("emote_set").HasValues)
+                        {
+                            stvEmotes.Merge((JArray)streamerEmoteObject["emote_set"]["emotes"]);
+                        }
                     }
                     catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
