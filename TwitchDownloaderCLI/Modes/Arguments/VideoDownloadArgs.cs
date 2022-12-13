@@ -30,7 +30,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]
         public string FfmpegPath { get; set; }
 
-        [Option("cache-path", Default = "", HelpText = "Path to temporary caching folder.")]
+        [Option("temp-path", Default = "", HelpText = "Path to temporary caching folder.")]
         public string TempFolder { get; set; }
     }
 }
