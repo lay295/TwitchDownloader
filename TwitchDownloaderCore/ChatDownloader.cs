@@ -212,6 +212,7 @@ namespace TwitchDownloaderCore
                     throw new NullReferenceException("Invalid VOD for clip, deleted/expired VOD possibly?");
                 }
 
+                videoId = taskClipInfo.data.clip.video.id;
                 downloadOptions.CropBeginning = true;
                 downloadOptions.CropBeginningTime = (int)taskClipInfo.data.clip.videoOffsetSeconds;
                 downloadOptions.CropEnding = true;
@@ -226,8 +227,8 @@ namespace TwitchDownloaderCore
                 connectionCount = 1;
             }
 
-            chatRoot.video.title = videoTitle;
             chatRoot.video.id = videoId;
+            chatRoot.video.title = videoTitle;
             chatRoot.video.created_at = videoCreatedAt;
             chatRoot.video.start = videoStart;
             chatRoot.video.end = videoEnd;
