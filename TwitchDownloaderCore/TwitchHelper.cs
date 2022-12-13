@@ -117,7 +117,7 @@ namespace TwitchDownloaderCore
             return JsonConvert.DeserializeObject<GqlClipSearchResponse>(response);
         }
 
-        public static async Task<EmoteResponse> GetThirdPartyEmoteData(string streamerId, bool getBttv, bool getFfz, bool getStv)
+        public static async Task<EmoteResponse> GetThirdPartyEmoteData(string streamerId, bool getBttv, bool getFfz, bool getStv, CancellationToken cancellationToken = new())
         {
             EmoteResponse emoteReponse = new EmoteResponse();
 
@@ -126,10 +126,14 @@ namespace TwitchDownloaderCore
                 await GetBttvEmoteData(streamerId, emoteReponse.BTTV);
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+            
             if (getFfz)
             {
                 await GetFfzEmoteData(streamerId, emoteReponse.FFZ);
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (getStv)
             {
@@ -250,7 +254,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool offline = false)
+        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool offline = false, CancellationToken cancellationToken = new())
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -286,7 +290,7 @@ namespace TwitchDownloaderCore
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
             string stvFolder = Path.Combine(cacheFolder, "stv");
 
-            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId.ToString(), bttv, ffz, stv);
+            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId.ToString(), bttv, ffz, stv, cancellationToken);
 
             if (bttv)
             {
@@ -309,6 +313,8 @@ namespace TwitchDownloaderCore
                 }
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (ffz)
             {
                 if (!Directory.Exists(ffzFolder))
@@ -327,6 +333,8 @@ namespace TwitchDownloaderCore
                     catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (stv)
             {
