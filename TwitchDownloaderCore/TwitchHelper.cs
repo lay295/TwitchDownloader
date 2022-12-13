@@ -196,10 +196,11 @@ namespace TwitchDownloaderCore
 
             if (streamerId != null)
             {
-                //Channel might not be registered on 7tv
+                // Channel might not be registered on 7tv
                 try
                 {
                     JObject streamerEmoteObject = JObject.Parse(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
+                    // Channel might not have emotes setup
                     if (streamerEmoteObject["emote_set"].HasValues)
                     {
                         stvEmotes.Merge((JArray)streamerEmoteObject["emote_set"]["emotes"]);
