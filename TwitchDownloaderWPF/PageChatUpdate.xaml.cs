@@ -400,8 +400,8 @@ namespace TwitchDownloaderWPF
                     {
                         ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
 
-                        ChatUpdater currentDownload = new ChatUpdater(updateOptions);
-                        await currentDownload.ParseJsonAsync();
+                        ChatUpdater currentUpdate = new ChatUpdater(updateOptions);
+                        await currentUpdate.ParseJsonAsync();
 
                         btnBrowse.IsEnabled = false;
                         SetEnabled(false);
@@ -412,7 +412,7 @@ namespace TwitchDownloaderWPF
 
                         try
                         {
-                            await currentDownload.UpdateAsync(downloadProgress, new CancellationToken());
+                            await currentUpdate.UpdateAsync(downloadProgress, new CancellationToken());
                             await Task.Delay(300); // we need to wait a bit incase the "writing to output file" report comes late
                             textJson.Text = "";
                             statusMessage.Text = "Done";
@@ -430,6 +430,10 @@ namespace TwitchDownloaderWPF
                         }
                         btnBrowse.IsEnabled = true;
                         statusProgressBar.Value = 0;
+
+                        currentUpdate = null;
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
                     }
                     catch (Exception ex)
                     {

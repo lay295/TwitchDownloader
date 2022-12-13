@@ -85,7 +85,7 @@ namespace TwitchDownloaderWPF
                 TempFolder = Settings.Default.TempPath,
                 SubMessages = (bool)checkSub.IsChecked,
                 ChatBadges = (bool)checkBadge.IsChecked,
-                Offline = false
+                Offline = (bool)checkOffline.IsChecked
             };
             foreach (var item in comboBadges.SelectedItems)
             {
@@ -127,6 +127,7 @@ namespace TwitchDownloaderWPF
                 checkBadge.IsChecked = Settings.Default.ChatBadges;
                 textEmoteScale.Text = Settings.Default.EmoteScale.ToString("0.0#");
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
+                checkOffline.IsChecked = Settings.Default.Offline;
 
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Broadcaster, Name = "Broadcaster" });
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Moderator, Name = "Mods" });
@@ -219,6 +220,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.GenerateMask = (bool)checkMask.IsChecked;
             Settings.Default.SubMessages = (bool)checkSub.IsChecked;
             Settings.Default.ChatBadges = (bool)checkBadge.IsChecked;
+            Settings.Default.Offline = (bool)checkOffline.IsChecked;
             if (comboFormat.SelectedItem != null)
             {
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
@@ -325,7 +327,6 @@ namespace TwitchDownloaderWPF
 
         private void Page_Initialized(object sender, EventArgs e)
         {
-            imageWarning.Source = Imaging.CreateBitmapSourceFromHIcon(SystemIcons.Warning.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             List<string> fonts = new List<string>();
             foreach (var fontFamily in fontManager.FontFamilies)
                 fonts.Add(fontFamily);
@@ -378,7 +379,7 @@ namespace TwitchDownloaderWPF
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void btnResetFfmpeg_Click(object sender, RoutedEventArgs e)
         {
             textFfmpegInput.Text = ((Codec)comboCodec.SelectedItem).InputArgs;
             textFfmpegOutput.Text = ((Codec)comboCodec.SelectedItem).OutputArgs;
@@ -513,6 +514,10 @@ namespace TwitchDownloaderWPF
                         }
                         statusProgressBar.Value = 0;
                         btnRender.IsEnabled = true;
+
+                        currentRender = null;
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
                     }
                 }
                 else

@@ -292,6 +292,8 @@ namespace TwitchDownloaderCore
                 List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(comments, downloadOptions.TempFolder);
                 List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, downloadOptions.TempFolder);
                 List<CheerEmote> twitchBits = await TwitchHelper.GetBits(downloadOptions.TempFolder, chatRoot.streamer.id.ToString());
+                
+                cancellationToken.ThrowIfCancellationRequested();
 
                 foreach (TwitchEmote emote in thirdPartyEmotes)
                 {

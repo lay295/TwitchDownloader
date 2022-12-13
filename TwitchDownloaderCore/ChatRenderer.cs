@@ -32,8 +32,8 @@ namespace TwitchDownloaderCore
         private List<TwitchEmote> emoteThirdList = new List<TwitchEmote>();
         private List<CheerEmote> cheermotesList = new List<CheerEmote>();
         private Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
-        private readonly ConcurrentDictionary<int, SKPaint> fallbackCache = new ConcurrentDictionary<int, SKPaint>();
-        private readonly SKFontManager fontManager = SKFontManager.CreateDefault();
+        private ConcurrentDictionary<int, SKPaint> fallbackCache = new ConcurrentDictionary<int, SKPaint>();
+        private SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont = new SKPaint();
         private SKPaint nameFont = new SKPaint();
         private SKPaint outlinePaint = new SKPaint();
@@ -52,7 +52,7 @@ namespace TwitchDownloaderCore
 
             Task<List<ChatBadge>> badgeTask = TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
             Task<List<TwitchEmote>> emoteTask = TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
-            Task<List<TwitchEmote>> emoteThirdTask = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline);
+            Task<List<TwitchEmote>> emoteThirdTask = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline, cancellationToken);
             Task<List<CheerEmote>> cheerTask = TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
             Task<Dictionary<string, SKBitmap>> emojiTask = TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
 
@@ -101,14 +101,22 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
             (Process ffmpegProcess, string ffmpegSavePath) = GetFfmpegProcess(0, false);
 
-            if (renderOptions.GenerateMask)
+            try
             {
-                (Process maskProcess, string maskSavePath) = GetFfmpegProcess(0, true);
-                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress), cancellationToken);
+                if (renderOptions.GenerateMask)
+                {
+                    (Process maskProcess, string maskSavePath) = GetFfmpegProcess(0, true);
+                    await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken));
+                }
+                else
+                {
+                    await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess: null, progress, cancellationToken));
+                }
             }
-            else
+            catch (OperationCanceledException)
             {
-                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, progress: progress), cancellationToken);
+                GC.Collect();
+                throw;
             }
         }
 
@@ -147,7 +155,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void RenderVideoSection(int startTick, int endTick, Process ffmpegProcess, Process maskProcess = null, IProgress<ProgressReport> progress = null)
+        private void RenderVideoSection(int startTick, int endTick, Process ffmpegProcess, Process maskProcess = null, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = new())
         {
             UpdateFrame latestUpdate = null;
             BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.StandardInput.BaseStream);
@@ -164,6 +172,8 @@ namespace TwitchDownloaderCore
 
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
                     latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height, latestUpdate);
@@ -520,7 +530,7 @@ namespace TwitchDownloaderCore
                             {
                                 // Old LINQ method. Leaving this for reference
                                 //List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
-                                
+
                                 List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
                                 foreach (var emoji in Emoji.All)
                                 {
@@ -560,14 +570,12 @@ namespace TwitchDownloaderCore
                                     }
 
                                     drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
-
-                                    fragmentString = fragmentString.Substring(selectedEmoji.Sequence.AsString.Trim('\uFE0F').Length);
                                 }
                                 else
                                 {
                                     DrawText(fragmentString[0].ToString(), messageFont, false, sectionImages, ref drawPos, defaultPos);
-                                    fragmentString = fragmentString.Substring(1);
                                 }
+                                fragmentString = fragmentString[1..];
                             }
                         }
                         else if (new StringInfo(fragmentString).LengthInTextElements < fragmentString.Length || !messageFont.ContainsGlyphs(fragmentString))
@@ -1072,6 +1080,21 @@ namespace TwitchDownloaderCore
             };
 
             return chatRoot;
+        }
+
+        ~ChatRenderer()
+        {
+            chatRoot = null;
+            badgeList = null;
+            emoteList = null;
+            emoteThirdList = null;
+            cheermotesList = null;
+            emojiCache = null;
+            fallbackCache = null;
+            fontManager.Dispose();
+            outlinePaint.Dispose();
+            nameFont.Dispose();
+            messageFont.Dispose();
         }
     }
 }

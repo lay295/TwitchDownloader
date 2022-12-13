@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 
@@ -15,7 +11,7 @@ namespace TwitchDownloader.TwitchTasks
     {
         public TaskData Info { get; set; } = new TaskData();
         public int Progress { get; set; }
-        public TwitchTaskStatus Status { get; set; } = TwitchTaskStatus.Ready;
+        public TwitchTaskStatus Status { get; private set; } = TwitchTaskStatus.Ready;
         public ChatDownloadOptions DownloadOptions { get; set; }
         public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
         public ITwitchTask DependantTask { get; set; }
@@ -25,8 +21,7 @@ namespace TwitchDownloader.TwitchTasks
 
         public void Cancel()
         {
-            Status = TwitchTaskStatus.Stopping;
-            OnPropertyChanged("Status");
+            ChangeStatus(TwitchTaskStatus.Stopping);
             TokenSource.Cancel();
         }
 
@@ -34,35 +29,46 @@ namespace TwitchDownloader.TwitchTasks
         {
             return Status == TwitchTaskStatus.Ready;
         }
+        public void ChangeStatus(TwitchTaskStatus newStatus)
+        {
+            Status = newStatus;
+            OnPropertyChanged(nameof(Status));
+        }
 
         public async Task RunAsync()
         {
             ChatDownloader downloader = new ChatDownloader(DownloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
-            Status = TwitchTaskStatus.Running;
-            OnPropertyChanged("Status");
+            ChangeStatus(TwitchTaskStatus.Running);
             try
             {
                 await downloader.DownloadAsync(progress, TokenSource.Token);
                 if (TokenSource.IsCancellationRequested)
                 {
-                    Status = TwitchTaskStatus.Cancelled;
-                    OnPropertyChanged("Status");
+                    ChangeStatus(TwitchTaskStatus.Cancelled);
                 }
                 else
                 {
                     Progress = 100;
-                    OnPropertyChanged("Progress");
-                    Status = TwitchTaskStatus.Finished;
-                    OnPropertyChanged("Status");
+                    OnPropertyChanged(nameof(Progress));
+                    ChangeStatus(TwitchTaskStatus.Finished);
                 }
             }
             catch
             {
-                Status = TwitchTaskStatus.Failed;
-                OnPropertyChanged("Status");
+                if (TokenSource.IsCancellationRequested)
+                {
+                    ChangeStatus(TwitchTaskStatus.Cancelled);
+                }
+                else
+                {
+                    ChangeStatus(TwitchTaskStatus.Failed);
+                }
             }
+            downloader = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         private void Progress_ProgressChanged(object sender, ProgressReport e)
@@ -73,15 +79,14 @@ namespace TwitchDownloader.TwitchTasks
                 if (percent > Progress)
                 {
                     Progress = percent;
-                    OnPropertyChanged("Progress");
+                    OnPropertyChanged(nameof(Progress));
                 }
             }
         }
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -598,5 +598,17 @@ namespace TwitchDownloader.Properties {
                 this["ReplaceEmbeds"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Offline {
+            get {
+                return ((bool)(this["Offline"]));
+            }
+            set {
+                this["Offline"] = value;
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Options;
@@ -15,7 +16,7 @@ namespace TwitchDownloaderCore
             downloadOptions = DownloadOptions;
         }
 
-        public async Task DownloadAsync()
+        public async Task DownloadAsync(CancellationToken cancellationToken = new())
         {
             JArray taskLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
 
@@ -31,6 +32,8 @@ namespace TwitchDownloaderCore
                 downloadUrl = taskLinks[0]["data"]["clip"]["videoQualities"].First["sourceURL"].ToString();
 
             downloadUrl += "?sig=" + taskLinks[0]["data"]["clip"]["playbackAccessToken"]["signature"] + "&token=" + HttpUtility.UrlEncode(taskLinks[0]["data"]["clip"]["playbackAccessToken"]["value"].ToString());
+            
+            cancellationToken.ThrowIfCancellationRequested();
 
             using (WebClient client = new WebClient())
                 await client.DownloadFileTaskAsync(downloadUrl, downloadOptions.Filename);

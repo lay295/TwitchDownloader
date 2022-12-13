@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media;
 
 namespace TwitchDownloader.TwitchTasks
 {
@@ -25,7 +19,7 @@ namespace TwitchDownloader.TwitchTasks
     {
         TaskData Info { get; set; }
         int Progress { get; set; }
-        TwitchTaskStatus Status { get; set; }
+        TwitchTaskStatus Status { get; }
         CancellationTokenSource TokenSource { get; set; }
         ITwitchTask DependantTask { get; set; }
         string TaskType { get; set; }
@@ -33,5 +27,6 @@ namespace TwitchDownloader.TwitchTasks
         Task RunAsync();
         void Cancel();
         bool CanRun();
+        void ChangeStatus(TwitchTaskStatus newStatus);
     }
 }
