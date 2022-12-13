@@ -5,7 +5,8 @@
         Log,
         Percent,
         Status,
-        StatusInfo
+        StatusInfo,
+        FfmpegLog
     }
 
     public class ProgressReport

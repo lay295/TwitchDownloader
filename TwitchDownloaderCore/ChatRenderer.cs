@@ -99,7 +99,7 @@ namespace TwitchDownloaderCore
                 File.Delete(renderOptions.MaskFile);
 
             progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
-            (Process ffmpegProcess, string ffmpegSavePath) = GetFfmpegProcess(0, false);
+            (Process ffmpegProcess, string ffmpegSavePath) = GetFfmpegProcess(0, false, progress);
 
             try
             {
@@ -238,7 +238,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private (Process process, string savePath) GetFfmpegProcess(int partNumber, bool isMask)
+        private (Process process, string savePath) GetFfmpegProcess(int partNumber, bool isMask, IProgress<ProgressReport> progress = null)
         {
             string savePath;
             if (partNumber == 0)
@@ -274,6 +274,15 @@ namespace TwitchDownloaderCore
                     RedirectStandardError = true,
                 }
             };
+
+            if (progress != null)
+            {
+                process.ErrorDataReceived += (s, e) =>
+                {
+                    if (e.Data != null)
+                        progress.Report(new ProgressReport() { ReportType = ReportType.FfmpegLog, Data = e.Data });
+                };
+            }
 
             process.Start();
             process.BeginErrorReadLine();

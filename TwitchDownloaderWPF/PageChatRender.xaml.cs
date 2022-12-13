@@ -33,6 +33,7 @@ namespace TwitchDownloaderWPF
     {
         public SKPaint imagePaint = new SKPaint() { IsAntialias = true, FilterQuality = SKFilterQuality.High };
         public SKPaint emotePaint = new SKPaint() { IsAntialias = true, FilterQuality = SKFilterQuality.High };
+        public List<string> ffmpegLog = new List<string>();
         public SKFontManager fontManager = SKFontManager.CreateDefault();
         public ConcurrentDictionary<char, SKPaint> fallbackCache = new ConcurrentDictionary<char, SKPaint>();
         public PageChatRender()
@@ -101,6 +102,8 @@ namespace TwitchDownloaderWPF
                 statusProgressBar.Value = (int)progress.Data;
             if (progress.ReportType is ReportType.Status or ReportType.StatusInfo)
                 statusMessage.Text = (string)progress.Data;
+            if (progress.ReportType == ReportType.FfmpegLog)
+                ffmpegLog.Add((string)progress.Data);
             if (progress.ReportType == ReportType.Log)
                 AppendLog((string)progress.Data);
         }
@@ -498,6 +501,7 @@ namespace TwitchDownloaderWPF
 
                         try
                         {
+                            ffmpegLog.Clear();
                             await currentRender.RenderVideoAsync(renderProgress, new CancellationToken());
                             statusMessage.Text = "Done";
                             SetImage("Images/ppHop.gif", true);
@@ -509,7 +513,16 @@ namespace TwitchDownloaderWPF
                             AppendLog("ERROR: " + ex.Message);
                             if (Settings.Default.VerboseErrors)
                             {
-                                MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                                if (ex.Message.Contains("The pipe has been ended"))
+                                {
+                                    string errorLog = String.Join('\n', ffmpegLog.ToArray());
+                                    Clipboard.SetText(errorLog);
+                                    MessageBox.Show(errorLog, "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                                }
+                                else
+                                {
+                                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                                }
                             }
                         }
                         statusProgressBar.Value = 0;
