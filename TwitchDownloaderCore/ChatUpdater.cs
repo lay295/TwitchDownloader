@@ -79,6 +79,7 @@ namespace TwitchDownloaderCore
                 };
 
                 await Task.WhenAll(chatCropTasks);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 // If the comment count didn't change, it probably failed so don't report the counts
                 if (inputCommentCount != chatRoot.comments.Count)
@@ -104,6 +105,8 @@ namespace TwitchDownloaderCore
                 };
 
                 await Task.WhenAll(embedTasks);
+                cancellationToken.ThrowIfCancellationRequested();
+
             }
 
             // Finally save the output to file!
@@ -360,6 +363,11 @@ namespace TwitchDownloaderCore
             };
 
             return chatRoot;
+        }
+
+        ~ChatUpdater()
+        {
+            chatRoot = null;
         }
     }
 }

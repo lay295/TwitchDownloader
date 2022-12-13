@@ -26,7 +26,9 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            string downloadFolder = Path.Combine(downloadOptions.TempFolder, downloadOptions.Id.ToString() == "0" ? Guid.NewGuid().ToString() : downloadOptions.Id.ToString());
+            string downloadFolder = Path.Combine(
+                downloadOptions.TempFolder,
+                (downloadOptions.Id == 0) ? Guid.NewGuid().ToString() : downloadOptions.Id.ToString());
 
             try
             {
@@ -77,8 +79,8 @@ namespace TwitchDownloaderCore
                 List<KeyValuePair<string, double>> videoList = new List<KeyValuePair<string, double>>();
 
                 double vodAge = 25;
-                
-                
+
+
                 using (WebClient client = new WebClient())
                 {
                     string[] videoChunks = (await client.DownloadStringTaskAsync(playlistUrl)).Split('\n');
@@ -132,6 +134,7 @@ namespace TwitchDownloaderCore
                             int errorCount = 0;
                             while (!isDone && errorCount < 10)
                             {
+                                cancellationToken.ThrowIfCancellationRequested();
                                 try
                                 {
                                     using (WebClient client = new WebClient())
@@ -144,7 +147,7 @@ namespace TwitchDownloaderCore
                                         {
                                             await client.DownloadFileTaskAsync(baseUrl + request, Path.Combine(downloadFolder, RemoveQueryString(request)));
                                         }
-                                        
+
                                         isDone = true;
                                     }
                                 }
@@ -175,13 +178,14 @@ namespace TwitchDownloaderCore
 
                             return;
                         }
-                        catch (Exception ex)
+                        catch (Exception ex) when (ex is not OperationCanceledException)
                         {
                             Debug.WriteLine(ex);
                         }
                         finally
                         {
                             throttler.Release();
+                            CheckCancelation(cancellationToken, downloadFolder);
                         }
                     })).ToArray();
                     await Task.WhenAll(downloadTasks);
@@ -215,7 +219,6 @@ namespace TwitchDownloaderCore
                         }
                     }
                 });
-
 
                 progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Finalizing MP4 (3/3)" });
 
@@ -331,31 +334,6 @@ namespace TwitchDownloaderCore
             }
 
             return returnList;
-        }
-
-        private static void DownloadThread(string videoPart, string baseUrl, string downloadFolder)
-        {
-            bool isDone = false;
-            int errorCount = 0;
-            while (!isDone && errorCount < 10)
-            {
-                try
-                {
-                    using (WebClient client = new WebClient())
-                    {
-                        client.DownloadFile(baseUrl + videoPart, Path.Combine(downloadFolder, videoPart));
-                        isDone = true;
-                    }
-                }
-                catch (WebException)
-                {
-                    errorCount++;
-                    Thread.Sleep(10000);
-                }
-            }
-
-            if (!isDone)
-                throw new Exception("Video part " + videoPart + " failed after 10 retries");
         }
     }
 }

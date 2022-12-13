@@ -105,7 +105,7 @@ namespace TwitchDownloader
                         downloadTask.DownloadOptions = downloadOptions;
                         downloadTask.Info.Title = vodPage.textTitle.Text;
                         downloadTask.Info.Thumbnail = vodPage.imgThumbnail.Source;
-                        downloadTask.Status = TwitchTaskStatus.Ready;
+                        downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -141,7 +141,7 @@ namespace TwitchDownloader
                             chatTask.DownloadOptions = chatOptions;
                             chatTask.Info.Title = vodPage.textTitle.Text;
                             chatTask.Info.Thumbnail = vodPage.imgThumbnail.Source;
-                            chatTask.Status = TwitchTaskStatus.Ready;
+                            chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                             lock (PageQueue.taskLock)
                             {
@@ -161,7 +161,7 @@ namespace TwitchDownloader
                                 renderTask.DownloadOptions = renderOptions;
                                 renderTask.Info.Title = vodPage.textTitle.Text;
                                 renderTask.Info.Thumbnail = vodPage.imgThumbnail.Source;
-                                renderTask.Status = TwitchTaskStatus.Waiting;
+                                renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
                                 renderTask.DependantTask = chatTask;
 
                                 lock (PageQueue.taskLock)
@@ -193,7 +193,7 @@ namespace TwitchDownloader
                         downloadTask.DownloadOptions = downloadOptions;
                         downloadTask.Info.Title = clipPage.textTitle.Text;
                         downloadTask.Info.Thumbnail = clipPage.imgThumbnail.Source;
-                        downloadTask.Status = TwitchTaskStatus.Ready;
+                        downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -218,7 +218,7 @@ namespace TwitchDownloader
                             chatTask.DownloadOptions = chatOptions;
                             chatTask.Info.Title = clipPage.textTitle.Text;
                             chatTask.Info.Thumbnail = clipPage.imgThumbnail.Source;
-                            chatTask.Status = TwitchTaskStatus.Ready;
+                            chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                             lock (PageQueue.taskLock)
                             {
@@ -238,7 +238,7 @@ namespace TwitchDownloader
                                 renderTask.DownloadOptions = renderOptions;
                                 renderTask.Info.Title = clipPage.textTitle.Text;
                                 renderTask.Info.Thumbnail = clipPage.imgThumbnail.Source;
-                                renderTask.Status = TwitchTaskStatus.Waiting;
+                                renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
                                 renderTask.DependantTask = chatTask;
 
                                 lock (PageQueue.taskLock)
@@ -270,7 +270,7 @@ namespace TwitchDownloader
                         chatTask.DownloadOptions = chatOptions;
                         chatTask.Info.Title = chatPage.textTitle.Text;
                         chatTask.Info.Thumbnail = chatPage.imgThumbnail.Source;
-                        chatTask.Status = TwitchTaskStatus.Ready;
+                        chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -285,7 +285,7 @@ namespace TwitchDownloader
                             renderTask.DownloadOptions = renderOptions;
                             renderTask.Info.Title = chatPage.textTitle.Text;
                             renderTask.Info.Thumbnail = chatPage.imgThumbnail.Source;
-                            renderTask.Status = TwitchTaskStatus.Waiting;
+                            renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
                             renderTask.DependantTask = chatTask;
 
                             lock (PageQueue.taskLock)
@@ -316,7 +316,7 @@ namespace TwitchDownloader
                         chatTask.UpdateOptions = chatOptions;
                         chatTask.Info.Title = chatPage.textTitle.Text;
                         chatTask.Info.Thumbnail = chatPage.imgThumbnail.Source;
-                        chatTask.Status = TwitchTaskStatus.Ready;
+                        chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -343,7 +343,7 @@ namespace TwitchDownloader
                         ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(filePath);
                         renderTask.DownloadOptions = renderOptions;
                         renderTask.Info.Title = Path.GetFileNameWithoutExtension(filePath);
-                        renderTask.Status = TwitchTaskStatus.Ready;
+                        renderTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -384,7 +384,7 @@ namespace TwitchDownloader
                                     downloadTask.DownloadOptions = downloadOptions;
                                     downloadTask.Info.Title = dataList[i].Title;
                                     downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
-                                    downloadTask.Status = TwitchTaskStatus.Ready;
+                                    downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                                     lock (PageQueue.taskLock)
                                     {
@@ -400,7 +400,7 @@ namespace TwitchDownloader
                                     downloadTask.DownloadOptions = downloadOptions;
                                     downloadTask.Info.Title = dataList[i].Title;
                                     downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
-                                    downloadTask.Status = TwitchTaskStatus.Ready;
+                                    downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                                     lock (PageQueue.taskLock)
                                     {
@@ -428,7 +428,7 @@ namespace TwitchDownloader
                                 downloadTask.DownloadOptions = downloadOptions;
                                 downloadTask.Info.Title = dataList[i].Title;
                                 downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
-                                downloadTask.Status = TwitchTaskStatus.Ready;
+                                downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                                 lock (PageQueue.taskLock)
                                 {
@@ -448,7 +448,7 @@ namespace TwitchDownloader
                                     renderTask.DownloadOptions = renderOptions;
                                     renderTask.Info.Title = dataList[i].Title;
                                     renderTask.Info.Thumbnail = dataList[i].Thumbnail;
-                                    renderTask.Status = TwitchTaskStatus.Waiting;
+                                    renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
                                     renderTask.DependantTask = downloadTask;
 
                                     lock (PageQueue.taskLock)

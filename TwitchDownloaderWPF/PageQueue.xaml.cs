@@ -61,13 +61,13 @@ namespace TwitchDownloader
                     {
                         if (task is VodDownloadTask)
                             currentVod++;
-                        if (task is ClipDownloadTask)
+                        else if (task is ClipDownloadTask)
                             currentClip++;
-                        if (task is ChatDownloadTask)
+                        else if (task is ChatDownloadTask)
                             currentChat++;
-                        if (task is ChatUpdateTask)
+                        else if (task is ChatUpdateTask)
                             currentChat++;
-                        if (task is ChatRenderTask)
+                        else if (task is ChatRenderTask)
                             currentRender++;
                     }
                 }
@@ -160,6 +160,14 @@ namespace TwitchDownloader
         {
             WindowMassDownload window = new WindowMassDownload(DownloadType.Clip);
             window.ShowDialog();
+        }
+
+        private void btnCancelTask_Click(object sender, RoutedEventArgs e)
+        {
+            Button cancelButton = (Button)sender;
+
+            cancelButton.IsEnabled = false;
+            ((ITwitchTask)cancelButton.DataContext).Cancel();
         }
     }
 }
