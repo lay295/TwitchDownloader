@@ -389,6 +389,10 @@ namespace TwitchDownloaderWPF
                             AppendLog("ERROR: " + ex.Message);
                         }
                         btnGetInfo.IsEnabled = true;
+
+                        currentDownload = null;
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
                     }
                 }
                 else

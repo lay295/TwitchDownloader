@@ -514,6 +514,10 @@ namespace TwitchDownloaderWPF
                         }
                         statusProgressBar.Value = 0;
                         btnRender.IsEnabled = true;
+
+                        currentRender = null;
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
                     }
                 }
                 else
