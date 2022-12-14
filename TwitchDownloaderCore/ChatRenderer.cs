@@ -99,22 +99,17 @@ namespace TwitchDownloaderCore
                 File.Delete(renderOptions.MaskFile);
 
             progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
-            (Process ffmpegProcess, string ffmpegSavePath) = GetFfmpegProcess(0, false, progress);
 
+            (Process ffmpegProcess, string ffmpegSavePath) = GetFfmpegProcess(0, false, progress);
+            (Process maskProcess, string maskSavePath) = renderOptions.GenerateMask ? GetFfmpegProcess(0, true) : (null, null);
             try
             {
-                if (renderOptions.GenerateMask)
-                {
-                    (Process maskProcess, string maskSavePath) = GetFfmpegProcess(0, true);
-                    await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken));
-                }
-                else
-                {
-                    await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess: null, progress, cancellationToken));
-                }
+                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken), cancellationToken);
             }
             catch (OperationCanceledException)
             {
+                ffmpegProcess.Dispose();
+                maskProcess?.Dispose();
                 GC.Collect();
                 throw;
             }
