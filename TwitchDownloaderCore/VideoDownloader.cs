@@ -26,9 +26,7 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            string downloadFolder = Path.Combine(
-                downloadOptions.TempFolder,
-                (downloadOptions.Id == 0) ? Guid.NewGuid().ToString() : downloadOptions.Id.ToString());
+            string downloadFolder = Path.Combine(downloadOptions.TempFolder, $"{downloadOptions.Id.ToString()}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 
             try
             {

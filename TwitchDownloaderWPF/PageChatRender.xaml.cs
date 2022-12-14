@@ -515,8 +515,7 @@ namespace TwitchDownloaderWPF
                             {
                                 if (ex.Message.Contains("The pipe has been ended"))
                                 {
-                                    string errorLog = String.Join('\n', ffmpegLog.ToArray());
-                                    Clipboard.SetText(errorLog);
+                                    string errorLog = String.Join('\n', ffmpegLog.TakeLast(20).ToArray());
                                     MessageBox.Show(errorLog, "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
                                 }
                                 else
