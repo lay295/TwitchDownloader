@@ -38,9 +38,9 @@ namespace TwitchDownloaderCLI.Modes
             {
                 Console.WriteLine("[WARNING] - Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanantly overwritten!");
             }
-            if (!inputOptions.EmbedMissing && !inputOptions.ReplaceEmbeds && double.IsNegative(inputOptions.CropBeginningTime) && double.IsNegative(inputOptions.CropEndingTime))
+            if (!inputOptions.UpdateEmbeds && double.IsNegative(inputOptions.CropBeginningTime) && double.IsNegative(inputOptions.CropEndingTime))
             {
-                Console.WriteLine("[ERROR] - No update options were passed. Please pass --embed-missing, --replace-embeds, -b, or -e");
+                Console.WriteLine("[ERROR] - No update options were passed. Please pass --update-embeds, -b, or -e");
                 Environment.Exit(1);
             }
 
@@ -49,8 +49,7 @@ namespace TwitchDownloaderCLI.Modes
                 InputFile = inputOptions.InputFile,
                 OutputFile = inputOptions.OutputFile,
                 OutputFormat = outFormat,
-                EmbedMissing = inputOptions.EmbedMissing,
-                ReplaceEmbeds = inputOptions.ReplaceEmbeds,
+                UpdateEmbeds = inputOptions.UpdateEmbeds,
                 CropBeginning = !double.IsNegative(inputOptions.CropBeginningTime),
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = !double.IsNegative(inputOptions.CropEndingTime),

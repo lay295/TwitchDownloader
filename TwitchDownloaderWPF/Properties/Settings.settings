@@ -140,10 +140,7 @@
     <Setting Name="VerboseErrors" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="EmbedMissing" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="ReplaceEmbeds" Type="System.Boolean" Scope="User">
+    <Setting Name="UpdateEmbeds" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Offline" Type="System.Boolean" Scope="User">

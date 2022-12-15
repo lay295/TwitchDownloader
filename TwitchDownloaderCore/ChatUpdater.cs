@@ -40,7 +40,7 @@ namespace TwitchDownloaderCore
             int currentStep = 0;
             int totalSteps = 1;
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding) totalSteps++;
-            if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds) totalSteps++;
+            if (_updateOptions.UpdateEmbeds || _updateOptions.ReplaceEmbeds) totalSteps++;
 
             // If we are editing the chat crop
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding)
@@ -89,7 +89,7 @@ namespace TwitchDownloaderCore
             }
 
             // If we are updating/replacing embeds
-            if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)
+            if (_updateOptions.UpdateEmbeds)
             {
                 progress.Report(new ProgressReport(ReportType.Status, string.Format("Updating Embeds [{0}/{1}]", ++currentStep, totalSteps)));
                 progress.Report(new ProgressReport(totalSteps / currentStep));
@@ -133,16 +133,10 @@ namespace TwitchDownloaderCore
         {
             List<TwitchEmote> firstPartyEmoteList = await TwitchHelper.GetEmotes(chatRoot.comments, _updateOptions.TempFolder, chatRoot.embeddedData);
 
-            if (chatRoot.embeddedData.firstParty == null || _updateOptions.ReplaceEmbeds)
-            {
-                chatRoot.embeddedData.firstParty = new List<EmbedEmoteData>();
-            }
             int inputCount = chatRoot.embeddedData.firstParty.Count;
+            chatRoot.embeddedData.firstParty = new List<EmbedEmoteData>();
             foreach (TwitchEmote emote in firstPartyEmoteList)
             {
-                if (chatRoot.embeddedData.firstParty.Any(x => x.id.Equals(emote.Id)))
-                    continue;
-
                 EmbedEmoteData newEmote = new EmbedEmoteData();
                 newEmote.id = emote.Id;
                 newEmote.imageScale = emote.ImageScale;
@@ -158,16 +152,10 @@ namespace TwitchDownloaderCore
         {
             List<TwitchEmote> thirdPartyEmoteList = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, _updateOptions.TempFolder, chatRoot.embeddedData, _updateOptions.BttvEmotes, _updateOptions.FfzEmotes, _updateOptions.StvEmotes);
 
-            if (chatRoot.embeddedData.thirdParty == null || _updateOptions.ReplaceEmbeds)
-            {
-                chatRoot.embeddedData.thirdParty = new List<EmbedEmoteData>();
-            }
             int inputCount = chatRoot.embeddedData.thirdParty.Count;
+            chatRoot.embeddedData.thirdParty = new List<EmbedEmoteData>();
             foreach (TwitchEmote emote in thirdPartyEmoteList)
             {
-                if (chatRoot.embeddedData.thirdParty.Any(x => x.id.Equals(emote.Id)))
-                    continue;
-
                 EmbedEmoteData newEmote = new EmbedEmoteData();
                 newEmote.id = emote.Id;
                 newEmote.imageScale = emote.ImageScale;
@@ -184,16 +172,10 @@ namespace TwitchDownloaderCore
         {
             List<ChatBadge> badgeList = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, _updateOptions.TempFolder, chatRoot.embeddedData);
 
-            if (chatRoot.embeddedData.twitchBadges == null || _updateOptions.ReplaceEmbeds)
-            {
-                chatRoot.embeddedData.twitchBadges = new List<EmbedChatBadge>();
-            }
             int inputCount = chatRoot.embeddedData.twitchBadges.Count;
+            chatRoot.embeddedData.twitchBadges = new List<EmbedChatBadge>();
             foreach (ChatBadge badge in badgeList)
             {
-                if (chatRoot.embeddedData.twitchBadges.Any(x => x.name.Equals(badge.Name)))
-                    continue;
-
                 EmbedChatBadge newBadge = new EmbedChatBadge();
                 newBadge.name = badge.Name;
                 newBadge.versions = badge.VersionsData;
@@ -206,16 +188,10 @@ namespace TwitchDownloaderCore
         {
             List<CheerEmote> bitList = await TwitchHelper.GetBits(_updateOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData);
 
-            if (chatRoot.embeddedData.twitchBits == null || _updateOptions.ReplaceEmbeds)
-            {
-                chatRoot.embeddedData.twitchBits = new List<EmbedCheerEmote>();
-            }
             int inputCount = chatRoot.embeddedData.twitchBits.Count;
+            chatRoot.embeddedData.twitchBits = new List<EmbedCheerEmote>();
             foreach (CheerEmote bit in bitList)
             {
-                if (chatRoot.embeddedData.twitchBits.Any(x => x.prefix.Equals(bit.prefix)))
-                    continue;
-
                 EmbedCheerEmote newBit = new EmbedCheerEmote();
                 newBit.prefix = bit.prefix;
                 newBit.tierList = new Dictionary<int, EmbedEmoteData>();
@@ -332,7 +308,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static ChatDownloadOptions GetCropDownloadOptions(string videoId, string tempFile, double sectionStart, double sectionEnd)
+        private ChatDownloadOptions GetCropDownloadOptions(string videoId, string tempFile, double sectionStart, double sectionEnd)
         {
             return new ChatDownloadOptions()
             {
@@ -348,13 +324,13 @@ namespace TwitchDownloaderCore
                 BttvEmotes = false,
                 FfzEmotes = false,
                 StvEmotes = false,
-                TempFolder = null
+                TempFolder = _updateOptions.TempFolder
             };
         }
 
-        public async Task<ChatRoot> ParseJsonAsync()
+        public async Task<ChatRoot> ParseJsonAsync(CancellationToken cancellationToken = new())
         {
-            chatRoot = await ChatJson.DeserializeAsync(_updateOptions.InputFile);
+            chatRoot = await ChatJson.DeserializeAsync(_updateOptions.InputFile, true, true, cancellationToken);
 
             chatRoot.streamer ??= new Streamer
             {

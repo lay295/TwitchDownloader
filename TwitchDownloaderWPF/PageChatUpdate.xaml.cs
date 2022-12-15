@@ -128,8 +128,7 @@ namespace TwitchDownloaderWPF
             SetEnabled(false);
             SetEnabledCropStart(false);
             SetEnabledCropEnd(false);
-            checkEmbedMissing.IsChecked = Settings.Default.ChatEmbedEmotes;
-            checkReplaceEmbeds.IsChecked = Settings.Default.ChatEmbedEmotes;
+            checkUpdateEmbeds.IsChecked = Settings.Default.UpdateEmbeds;
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
             checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
@@ -145,8 +144,7 @@ namespace TwitchDownloaderWPF
         {
             checkStart.IsEnabled = isEnabled;
             checkEnd.IsEnabled = isEnabled;
-            checkEmbedMissing.IsEnabled = isEnabled;
-            checkReplaceEmbeds.IsEnabled = isEnabled;
+            checkUpdateEmbeds.IsEnabled = isEnabled;
             btnDownload.IsEnabled = isEnabled;
             btnQueue.IsEnabled = isEnabled;
             radioRelative.IsEnabled = isEnabled;
@@ -189,8 +187,7 @@ namespace TwitchDownloaderWPF
         {
             ChatUpdateOptions options = new ChatUpdateOptions()
             {
-                EmbedMissing = (bool)checkEmbedMissing.IsChecked,
-                ReplaceEmbeds = (bool)checkReplaceEmbeds.IsChecked,
+                UpdateEmbeds = (bool)checkUpdateEmbeds.IsChecked,
                 BttvEmotes = (bool)checkBttvEmbed.IsChecked,
                 FfzEmotes = (bool)checkFfzEmbed.IsChecked,
                 StvEmotes = (bool)checkStvEmbed.IsChecked,
@@ -272,51 +269,23 @@ namespace TwitchDownloaderWPF
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void checkEmbedMissing_Checked(object sender, RoutedEventArgs e)
+        private void checkUpdateEmbeds_Checked(object sender, RoutedEventArgs e)
         {
             if (this.IsInitialized)
             {
-                Settings.Default.EmbedMissing = true;
-                Settings.Default.ReplaceEmbeds = false;
+                Settings.Default.UpdateEmbeds = true;
                 Settings.Default.Save();
-                checkReplaceEmbeds.IsChecked = false;
                 checkBttvEmbed.IsEnabled = true;
                 checkFfzEmbed.IsEnabled = true;
                 checkStvEmbed.IsEnabled = true;
             }
         }
 
-        private void checkEmbedMissing_Unchecked(object sender, RoutedEventArgs e)
+        private void checkUpdateEmbeds_Unchecked(object sender, RoutedEventArgs e)
         {
             if (this.IsInitialized)
             {
-                Settings.Default.EmbedMissing = false;
-                Settings.Default.Save();
-                checkBttvEmbed.IsEnabled = false;
-                checkFfzEmbed.IsEnabled = false;
-                checkStvEmbed.IsEnabled = false;
-            }
-        }
-
-        private void checkReplaceEmbeds_Checked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.EmbedMissing = false;
-                Settings.Default.ReplaceEmbeds = true;
-                Settings.Default.Save();
-                checkEmbedMissing.IsChecked = false;
-                checkBttvEmbed.IsEnabled = true;
-                checkFfzEmbed.IsEnabled = true;
-                checkStvEmbed.IsEnabled = true;
-            }
-        }
-
-        private void checkReplaceEmbeds_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.ReplaceEmbeds = false;
+                Settings.Default.UpdateEmbeds = false;
                 Settings.Default.Save();
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;
@@ -401,7 +370,7 @@ namespace TwitchDownloaderWPF
                         ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
 
                         ChatUpdater currentUpdate = new ChatUpdater(updateOptions);
-                        await currentUpdate.ParseJsonAsync();
+                        await currentUpdate.ParseJsonAsync(new CancellationToken());
 
                         btnBrowse.IsEnabled = false;
                         SetEnabled(false);

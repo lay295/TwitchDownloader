@@ -476,7 +476,7 @@ namespace TwitchDownloaderWPF
                         btnRender.IsEnabled = false;
 
                         ChatRenderer currentRender = new ChatRenderer(options);
-                        await currentRender.ParseJsonAsync();
+                        await currentRender.ParseJsonAsync(new CancellationToken());
 
                         if (sender == null)
                         {

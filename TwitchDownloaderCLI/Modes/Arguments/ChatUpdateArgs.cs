@@ -13,11 +13,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('o', "output", Required = true, HelpText = "Path to output file. File extension will be used to determine new chat type. Valid extensions are: json, html, and txt.")]
         public string OutputFile { get; set; }
 
-        [Option('E', "embed-missing", Default = false, HelpText = "Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.")]
-        public bool EmbedMissing { get; set; }
-
-        [Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
-        public bool ReplaceEmbeds { get; set; }
+        [Option('E', "update-embeds", Default = false, HelpText = "Fetchs any missing emotes, badges, and cheermotes. Already embedded images will be untouched.")]
+        public bool UpdateEmbeds { get; set; }
 
         [Option('b', "beginning", Default = -1, HelpText = "New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.")]
         public int CropBeginningTime { get; set; }
