@@ -336,7 +336,7 @@ namespace TwitchDownloaderCore
         {
             List<CommentSection> commentList = new List<CommentSection>();
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
-            double currentTimeSeconds = currentTick / renderOptions.Framerate;
+            double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
             int newestCommentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds);
 
             if (newestCommentIndex == lastestUpdate?.CommentIndex)
