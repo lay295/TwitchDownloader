@@ -10,6 +10,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <LangVersion>default</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<NoWarn>SYSLIB0014</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
