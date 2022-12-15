@@ -71,7 +71,6 @@ namespace TwitchDownloaderCore
 
                 int inputCommentCount = chatRoot.comments.Count;
 
-                // TODO: uncomment fetching video id and length from json (requires https://github.com/lay295/TwitchDownloader/pull/440)
                 List<Task> chatCropTasks = new List<Task>
                 {
                     ChatBeginningCropTask(cropTaskProgress, cancellationToken),
