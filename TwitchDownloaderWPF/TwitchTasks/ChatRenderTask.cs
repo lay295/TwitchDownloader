@@ -65,14 +65,14 @@ namespace TwitchDownloader.TwitchTasks
 
         public async Task RunAsync()
         {
-            ChatRenderer downloader = new ChatRenderer(DownloadOptions);
+            ChatRenderer renderer = new ChatRenderer(DownloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {
-                await downloader.ParseJsonAsync();
-                await downloader.RenderVideoAsync(progress, TokenSource.Token);
+                await renderer.ParseJsonAsync();
+                await renderer.RenderVideoAsync(progress, TokenSource.Token);
                 if (TokenSource.IsCancellationRequested)
                 {
                     ChangeStatus(TwitchTaskStatus.Cancelled);
@@ -94,7 +94,7 @@ namespace TwitchDownloader.TwitchTasks
                 Exception = new TwitchTaskException(ex);
                 OnPropertyChanged(nameof(Exception));
             }
-            downloader = null;
+            renderer = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }

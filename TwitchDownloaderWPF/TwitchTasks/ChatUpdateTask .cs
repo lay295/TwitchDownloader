@@ -15,7 +15,7 @@ namespace TwitchDownloader.TwitchTasks
         public ChatUpdateOptions UpdateOptions { get; set; }
         public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
         public ITwitchTask DependantTask { get; set; }
-        public string TaskType { get; } = "Chat Download";
+        public string TaskType { get; } = "Chat Update";
         public Exception TaskException { get; private set; }
         public TwitchTaskException Exception { get; private set; } = new();
 
