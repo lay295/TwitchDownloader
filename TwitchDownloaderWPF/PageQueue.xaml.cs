@@ -184,23 +184,23 @@ namespace TwitchDownloader
             task.Cancel();
         }
 
-        private void btnTaskException_Click(object sender, RoutedEventArgs e)
+        private void btnTaskError_Click(object sender, RoutedEventArgs e)
         {
-            Button traceButton = (Button)sender;
-            TwitchTaskException taskException = ((ITwitchTask)traceButton.DataContext).Exception;
+            Button errorButton = (Button)sender;
+            TwitchTaskException taskException = ((ITwitchTask)errorButton.DataContext).Exception;
 
             if (taskException == null || taskException.Exception == null)
             {
                 return;
             }
 
-            string exceptionMessage = taskException.Exception.Message;
+            string errorMessage = taskException.Exception.Message;
             if (Settings.Default.VerboseErrors)
             {
-                exceptionMessage = taskException.Exception.ToString();
+                errorMessage = taskException.Exception.ToString();
             }
 
-            MessageBox.Show(exceptionMessage, "Task Exception", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(errorMessage, "Task Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
