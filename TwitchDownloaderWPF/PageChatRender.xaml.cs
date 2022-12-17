@@ -110,6 +110,9 @@ namespace TwitchDownloaderWPF
                 case ReportType.Log:
                     AppendLog((string)progress.Data);
                     break;
+                case ReportType.FfmpegLog:
+                    ffmpegLog.Add((string)progress.Data);
+                    break;
             }
         }
 

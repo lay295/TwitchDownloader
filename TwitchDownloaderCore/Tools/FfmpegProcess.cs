@@ -4,10 +4,9 @@ namespace TwitchDownloaderCore.Tools
 {
     public class FfmpegProcess
     {
-        public Process Process { get; init; }
+        public Process Process { get; private set; }
         public string SavePath { get; private set; }
 
-        public FfmpegProcess() { }
         public FfmpegProcess(Process process, string savePath)
         {
             Process = process;
