@@ -10,7 +10,15 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Download(ClipDownloadArgs inputOptions)
         {
-            if (inputOptions.Id == string.Empty || inputOptions.Id.All(char.IsDigit))
+            ClipDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
+
+            ClipDownloader clipDownloader = new(downloadOptions);
+            clipDownloader.DownloadAsync().Wait();
+        }
+
+        private static ClipDownloadOptions GetDownloadOptions(ClipDownloadArgs inputOptions)
+        {
+            if (string.IsNullOrWhiteSpace(inputOptions.Id) || inputOptions.Id.All(char.IsDigit))
             {
                 Console.WriteLine("[ERROR] - Invalid Clip ID, unable to parse.");
                 Environment.Exit(1);
@@ -23,8 +31,7 @@ namespace TwitchDownloaderCLI.Modes
                 Quality = inputOptions.Quality
             };
 
-            ClipDownloader clipDownloader = new(downloadOptions);
-            clipDownloader.DownloadAsync().Wait();
+            return downloadOptions;
         }
     }
 }
