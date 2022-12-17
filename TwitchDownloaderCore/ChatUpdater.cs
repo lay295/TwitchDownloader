@@ -40,7 +40,7 @@ namespace TwitchDownloaderCore
             int currentStep = 0;
             int totalSteps = 1;
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding) totalSteps++;
-            if (_updateOptions.UpdateEmbeds || _updateOptions.ReplaceEmbeds) totalSteps++;
+            if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds) totalSteps++;
 
             // If we are editing the chat crop
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding)
@@ -88,7 +88,7 @@ namespace TwitchDownloaderCore
             }
 
             // If we are updating/replacing embeds
-            if (_updateOptions.UpdateEmbeds)
+            if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)
             {
                 progress.Report(new ProgressReport(ReportType.Status, string.Format("Updating Embeds [{0}/{1}]", ++currentStep, totalSteps)));
                 progress.Report(new ProgressReport(totalSteps / currentStep));

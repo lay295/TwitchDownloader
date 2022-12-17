@@ -128,7 +128,8 @@ namespace TwitchDownloaderWPF
             SetEnabled(false);
             SetEnabledCropStart(false);
             SetEnabledCropEnd(false);
-            checkUpdateEmbeds.IsChecked = Settings.Default.UpdateEmbeds;
+            checkEmbedMissing.IsChecked = Settings.Default.EmbedMissing;
+            //checkReplaceEmbeds.IsChecked = Settings.Default.ReplaceEmbeds;
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
             checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
@@ -144,7 +145,8 @@ namespace TwitchDownloaderWPF
         {
             checkStart.IsEnabled = isEnabled;
             checkEnd.IsEnabled = isEnabled;
-            checkUpdateEmbeds.IsEnabled = isEnabled;
+            checkEmbedMissing.IsEnabled = isEnabled;
+            //checkReplaceEmbeds.IsChecked = isEnabled;
             btnDownload.IsEnabled = isEnabled;
             btnQueue.IsEnabled = isEnabled;
             radioRelative.IsEnabled = isEnabled;
@@ -187,7 +189,8 @@ namespace TwitchDownloaderWPF
         {
             ChatUpdateOptions options = new ChatUpdateOptions()
             {
-                UpdateEmbeds = (bool)checkUpdateEmbeds.IsChecked,
+                EmbedMissing = (bool)checkEmbedMissing.IsChecked,
+                //ReplaceEmbeds = (bool)checkReplaceEmbeds.IsChecked,
                 BttvEmotes = (bool)checkBttvEmbed.IsChecked,
                 FfzEmotes = (bool)checkFfzEmbed.IsChecked,
                 StvEmotes = (bool)checkStvEmbed.IsChecked,
@@ -269,23 +272,51 @@ namespace TwitchDownloaderWPF
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void checkUpdateEmbeds_Checked(object sender, RoutedEventArgs e)
+        private void checkEmbedMissing_Checked(object sender, RoutedEventArgs e)
         {
             if (this.IsInitialized)
             {
-                Settings.Default.UpdateEmbeds = true;
+                Settings.Default.EmbedMissing = true;
+                Settings.Default.ReplaceEmbeds = false;
                 Settings.Default.Save();
+                //checkReplaceEmbeds.IsChecked = false;
                 checkBttvEmbed.IsEnabled = true;
                 checkFfzEmbed.IsEnabled = true;
                 checkStvEmbed.IsEnabled = true;
             }
         }
 
-        private void checkUpdateEmbeds_Unchecked(object sender, RoutedEventArgs e)
+        private void checkEmbedMissing_Unchecked(object sender, RoutedEventArgs e)
         {
             if (this.IsInitialized)
             {
-                Settings.Default.UpdateEmbeds = false;
+                Settings.Default.EmbedMissing = false;
+                Settings.Default.Save();
+                checkBttvEmbed.IsEnabled = false;
+                checkFfzEmbed.IsEnabled = false;
+                checkStvEmbed.IsEnabled = false;
+            }
+        }
+
+        private void checkReplaceEmbeds_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.EmbedMissing = false;
+                Settings.Default.ReplaceEmbeds = true;
+                Settings.Default.Save();
+                checkEmbedMissing.IsChecked = false;
+                checkBttvEmbed.IsEnabled = true;
+                checkFfzEmbed.IsEnabled = true;
+                checkStvEmbed.IsEnabled = true;
+            }
+        }
+
+        private void checkReplaceEmbeds_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.ReplaceEmbeds = false;
                 Settings.Default.Save();
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;
