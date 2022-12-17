@@ -28,7 +28,7 @@ namespace TwitchDownloaderCore
         {
             string downloadFolder = Path.Combine(
                 downloadOptions.TempFolder,
-                (downloadOptions.Id == 0) ? Guid.NewGuid().ToString() : downloadOptions.Id.ToString());
+                $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 
             try
             {

@@ -769,7 +769,7 @@ namespace TwitchDownloaderCore
             int delimiterIndex = inputText.LastIndexOfAny(delimiters);
             if (delimiterIndex != -1)
             {
-                return inputText.Slice(0, delimiterIndex).ToString();
+                return inputText.Slice(0, delimiterIndex + 1).ToString();
             }
 
             return inputText.ToString();

@@ -518,7 +518,15 @@ namespace TwitchDownloaderWPF
                             AppendLog("ERROR: " + ex.Message);
                             if (Settings.Default.VerboseErrors)
                             {
-                                MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                                if (ex.Message.Contains("The pipe has been ended"))
+                                {
+                                    string errorLog = String.Join('\n', ffmpegLog.TakeLast(20).ToArray());
+                                    MessageBox.Show(errorLog, "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                                }
+                                else
+                                {
+                                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                                }
                             }
                         }
                         statusProgressBar.Value = 0;
