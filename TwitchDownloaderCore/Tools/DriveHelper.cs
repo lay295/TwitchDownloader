@@ -8,11 +8,12 @@ namespace TwitchDownloaderCore.Tools
     public static class DriveHelper
     {
         public static DriveInfo GetOutputDrive(FfmpegProcess ffmpegProcess)
+            => GetOutputDrive(Path.GetFullPath(ffmpegProcess.SavePath));
+
+        public static DriveInfo GetOutputDrive(string outputPath)
         {
             // Cannot instantiate a null DriveInfo
             DriveInfo outputDrive = DriveInfo.GetDrives()[0];
-
-            string outputPath = Path.GetFullPath(ffmpegProcess.SavePath);
 
             // Get the name of the drive we are writing to
             foreach (var drive in DriveInfo.GetDrives())
