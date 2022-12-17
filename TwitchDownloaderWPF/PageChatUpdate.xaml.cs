@@ -128,8 +128,8 @@ namespace TwitchDownloaderWPF
             SetEnabled(false);
             SetEnabledCropStart(false);
             SetEnabledCropEnd(false);
-            checkEmbedMissing.IsChecked = Settings.Default.EmbedMissing;
-            //checkReplaceEmbeds.IsChecked = Settings.Default.ReplaceEmbeds;
+            checkEmbedMissing.IsChecked = Settings.Default.ChatEmbedMissing;
+            //checkReplaceEmbeds.IsChecked = Settings.Default.ChatReplaceEmbeds;
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
             checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
@@ -276,8 +276,8 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.EmbedMissing = true;
-                Settings.Default.ReplaceEmbeds = false;
+                Settings.Default.ChatEmbedMissing = true;
+                Settings.Default.ChatReplaceEmbeds = false;
                 Settings.Default.Save();
                 //checkReplaceEmbeds.IsChecked = false;
                 checkBttvEmbed.IsEnabled = true;
@@ -290,7 +290,7 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.EmbedMissing = false;
+                Settings.Default.ChatEmbedMissing = false;
                 Settings.Default.Save();
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;
@@ -302,8 +302,8 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.EmbedMissing = false;
-                Settings.Default.ReplaceEmbeds = true;
+                Settings.Default.ChatEmbedMissing = false;
+                Settings.Default.ChatReplaceEmbeds = true;
                 Settings.Default.Save();
                 checkEmbedMissing.IsChecked = false;
                 checkBttvEmbed.IsEnabled = true;
@@ -316,7 +316,7 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.ReplaceEmbeds = false;
+                Settings.Default.ChatReplaceEmbeds = false;
                 Settings.Default.Save();
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;

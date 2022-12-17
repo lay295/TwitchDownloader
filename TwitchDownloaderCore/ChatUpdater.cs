@@ -87,6 +87,8 @@ namespace TwitchDownloaderCore
                 }
             }
 
+            // TODO: Fix Replace Embeds: https://github.com/lay295/TwitchDownloader/pull/474#issuecomment-1353747817
+
             // If we are updating/replacing embeds
             if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)
             {

@@ -578,24 +578,24 @@ namespace TwitchDownloader.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool EmbedMissing {
+        public bool ChatEmbedMissing {
             get {
-                return ((bool)(this["EmbedMissing"]));
+                return ((bool)(this["ChatEmbedMissing"]));
             }
             set {
-                this["EmbedMissing"] = value;
+                this["ChatEmbedMissing"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ReplaceEmbeds {
+        public bool ChatReplaceEmbeds {
             get {
-                return ((bool)(this["ReplaceEmbeds"]));
+                return ((bool)(this["ChatReplaceEmbeds"]));
             }
             set {
-                this["ReplaceEmbeds"] = value;
+                this["ChatReplaceEmbeds"] = value;
             }
         }
         
