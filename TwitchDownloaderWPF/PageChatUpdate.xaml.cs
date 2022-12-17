@@ -146,7 +146,7 @@ namespace TwitchDownloaderWPF
             checkStart.IsEnabled = isEnabled;
             checkEnd.IsEnabled = isEnabled;
             checkEmbedMissing.IsEnabled = isEnabled;
-            //checkReplaceEmbeds.IsChecked = isEnabled;
+            //checkReplaceEmbeds.IsEnabled = isEnabled;
             btnDownload.IsEnabled = isEnabled;
             btnQueue.IsEnabled = isEnabled;
             radioRelative.IsEnabled = isEnabled;
