@@ -15,6 +15,16 @@ namespace TwitchDownloaderCLI.Modes
         {
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
 
+            VideoDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
+
+            VideoDownloader videoDownloader = new(downloadOptions);
+            Progress<ProgressReport> progress = new();
+            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
+            videoDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
+        }
+
+        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions)
+        {
             if (string.IsNullOrWhiteSpace(inputOptions.Id) || !inputOptions.Id.All(char.IsDigit))
             {
                 Console.WriteLine("[ERROR] - Invalid VOD ID, unable to parse. Must be only numbers.");
@@ -36,10 +46,7 @@ namespace TwitchDownloaderCLI.Modes
                 TempFolder = inputOptions.TempFolder
             };
 
-            VideoDownloader videoDownloader = new(downloadOptions);
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            videoDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
+            return downloadOptions;
         }
     }
 }

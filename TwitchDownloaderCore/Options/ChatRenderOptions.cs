@@ -69,5 +69,6 @@ namespace TwitchDownloaderCore.Options
         public int AscentStrokeWidth => (int)(12 * ReferenceScale);
         public int AscentIndentWidth => (int)(24 * ReferenceScale);
         public bool Offline { get; set; }
+        public bool LogFfmpegOutput { get; set; } = false;
     }
 }
