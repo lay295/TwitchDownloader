@@ -10,46 +10,74 @@ namespace TwitchDownloaderCLI.Tools
 
         internal static void Progress_ProgressChanged(object sender, ProgressReport e)
         {
-            if (e.ReportType == ReportType.Status)
+            switch (e.ReportType)
             {
-                if (previousMessageWasStatusInfo)
-                {
-                    previousMessageWasStatusInfo = false;
-                    Console.WriteLine();
-                }
-
-                string currentStatus = "[STATUS] - " + e.Data;
-                if (currentStatus != previousMessage)
-                {
-                    previousMessage = currentStatus;
-                    Console.WriteLine(currentStatus);
-                }
+                case ReportType.Log:
+                    ReportLog(e);
+                    break;
+                case ReportType.Status:
+                    ReportStatus(e);
+                    break;
+                case ReportType.StatusInfo:
+                    ReportStatusInfo(e);
+                    break;
+                case ReportType.FfmpegLog:
+                    ReportFfmpegLog(e);
+                    break;
             }
-            else if (e.ReportType == ReportType.StatusInfo)
-            {
-                string currentStatus = "\r[STATUS] - " + e.Data;
-                if (currentStatus != previousMessage)
-                {
-                    previousMessageWasStatusInfo = true;
+        }
 
-                    // This ensures the previous message is fully overwritten
-                    currentStatus = currentStatus.PadRight(previousMessage.Length);
-                    
-                    previousMessage = currentStatus.TrimEnd();
-                    Console.Write(currentStatus);
-                }
-            }
-            else if (e.ReportType == ReportType.Log)
-            {
-                if (previousMessageWasStatusInfo)
-                {
-                    previousMessageWasStatusInfo = false;
-                    Console.WriteLine();
-                }
+        private static void ReportLog(ProgressReport e)
+        {
+            WasLastMessageStatusInfo();
 
-                string currentStatus = "[LOG] - " + e.Data;
+            string currentStatus = "[LOG] - " + e.Data;
+            previousMessage = currentStatus;
+            Console.WriteLine(currentStatus);
+        }
+
+        private static void ReportStatus(ProgressReport e)
+        {
+            WasLastMessageStatusInfo();
+
+            string currentStatus = "[STATUS] - " + e.Data;
+            if (currentStatus != previousMessage)
+            {
                 previousMessage = currentStatus;
                 Console.WriteLine(currentStatus);
+            }
+        }
+
+        private static void ReportStatusInfo(ProgressReport e)
+        {
+            string currentStatus = "\r[STATUS] - " + e.Data;
+            if (currentStatus != previousMessage)
+            {
+                previousMessageWasStatusInfo = true;
+
+                // This ensures the previous message is fully overwritten
+                currentStatus = currentStatus.PadRight(previousMessage.Length);
+
+                previousMessage = currentStatus.TrimEnd();
+                Console.Write(currentStatus);
+            }
+        }
+
+        private static void ReportFfmpegLog(ProgressReport e)
+        {
+            WasLastMessageStatusInfo();
+
+            string currentStatus = "<FFMEPG LOG> " + e.Data;
+            previousMessage = currentStatus;
+            Console.WriteLine(currentStatus);
+        }
+
+        private static void WasLastMessageStatusInfo()
+        {
+            if (previousMessageWasStatusInfo)
+            {
+                previousMessageWasStatusInfo = false;
+                Console.WriteLine();
             }
         }
     }

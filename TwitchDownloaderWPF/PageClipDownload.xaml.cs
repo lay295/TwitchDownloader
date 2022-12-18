@@ -109,9 +109,9 @@ namespace TwitchDownloaderWPF
 
         private void AppendLog(string message)
         {
-            textLog.Dispatcher.BeginInvoke((Action)(() =>
+            textLog.Dispatcher.BeginInvoke(() =>
                 textLog.AppendText(message + Environment.NewLine)
-            ));
+            );
         }
 
         private void Page_Initialized(object sender, EventArgs e)
@@ -138,7 +138,7 @@ namespace TwitchDownloaderWPF
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
         }
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)

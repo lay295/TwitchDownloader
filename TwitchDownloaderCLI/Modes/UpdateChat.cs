@@ -12,6 +12,17 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Update(ChatUpdateArgs inputOptions)
         {
+            ChatUpdateOptions updateOptions = GetUpdateOptions(inputOptions);
+
+            ChatUpdater chatUpdater = new(updateOptions);
+            Progress<ProgressReport> progress = new();
+            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
+            chatUpdater.ParseJsonAsync().Wait();
+            chatUpdater.UpdateAsync(progress, new CancellationToken()).Wait();
+        }
+
+        private static ChatUpdateOptions GetUpdateOptions(ChatUpdateArgs inputOptions)
+        {
             if (!File.Exists(inputOptions.InputFile))
             {
                 Console.WriteLine("[ERROR] - Input file does not exist!");
@@ -62,11 +73,7 @@ namespace TwitchDownloaderCLI.Modes
                 TempFolder = inputOptions.TempFolder
             };
 
-            ChatUpdater chatUpdater = new(updateOptions);
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            chatUpdater.ParseJsonAsync().Wait();
-            chatUpdater.UpdateAsync(progress, new CancellationToken()).Wait();
+            return updateOptions;
         }
     }
 }

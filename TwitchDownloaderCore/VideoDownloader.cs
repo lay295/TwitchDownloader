@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore
 {
@@ -26,7 +27,9 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            string downloadFolder = Path.Combine(downloadOptions.TempFolder, $"{downloadOptions.Id.ToString()}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            string downloadFolder = Path.Combine(
+                downloadOptions.TempFolder,
+                $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 
             try
             {
@@ -194,31 +197,9 @@ namespace TwitchDownloaderCore
                 progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Combining Parts (2/3)" });
                 progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = 0 });
 
-                await Task.Run(() =>
-                {
-                    string outputFile = Path.Combine(downloadFolder, "output.ts");
-                    using (FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
-                    {
-                        foreach (var part in videoPartsList)
-                        {
-                            string file = Path.Combine(downloadFolder, RemoveQueryString(part));
-                            if (File.Exists(file))
-                            {
-                                byte[] writeBytes = File.ReadAllBytes(file);
-                                outputStream.Write(writeBytes, 0, writeBytes.Length);
+                await CombineVideoParts(progress, downloadFolder, videoPartsList, cancellationToken);
 
-                                try
-                                {
-                                    File.Delete(file);
-                                }
-                                catch { }
-                            }
-                            CheckCancelation(cancellationToken, downloadFolder);
-                        }
-                    }
-                });
-
-                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Finalizing MP4 (3/3)" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = $"Finalizing Video (3/3)" });
 
                 double startOffset = 0.0;
 
@@ -257,6 +238,34 @@ namespace TwitchDownloaderCore
             {
                 Cleanup(downloadFolder);
                 throw;
+            }
+        }
+
+        private async Task CombineVideoParts(IProgress<ProgressReport> progress, string downloadFolder, List<string> videoPartsList, CancellationToken cancellationToken)
+        {
+            DriveInfo outputDrive = DriveHelper.GetOutputDrive(downloadFolder);
+
+            string outputFile = Path.Combine(downloadFolder, "output.ts");
+            using (FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+            {
+                foreach (var part in videoPartsList)
+                {
+                    await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
+
+                    string file = Path.Combine(downloadFolder, RemoveQueryString(part));
+                    if (File.Exists(file))
+                    {
+                        byte[] writeBytes = File.ReadAllBytes(file);
+                        outputStream.Write(writeBytes, 0, writeBytes.Length);
+
+                        try
+                        {
+                            File.Delete(file);
+                        }
+                        catch { }
+                    }
+                    CheckCancelation(cancellationToken, downloadFolder);
+                }
             }
         }
 

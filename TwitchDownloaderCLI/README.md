@@ -220,6 +220,9 @@ Path to ffmpeg executable.
 **--temp-path**
 Path to temporary folder for cache.
 
+**--verbose-ffmpeg**
+Prints every message from ffmpeg.
+
 
 ## Arguments for mode ffmpeg
 <sup>Manage standalone ffmpeg</sup>
