@@ -192,8 +192,8 @@ namespace TwitchDownloaderCore
             ffmpegStream.Dispose();
             maskStream?.Dispose();
 
-            ffmpegProcess.Process.WaitForExit(30_000);
-            maskProcess?.Process.WaitForExit(30_000);
+            ffmpegProcess.Process.WaitForExit(100_000);
+            maskProcess?.Process.WaitForExit(100_000);
         }
 
         private void SetFrameMask(SKBitmap frame)
