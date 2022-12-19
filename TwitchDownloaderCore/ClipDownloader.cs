@@ -48,7 +48,7 @@ namespace TwitchDownloaderCore
             {
                 using (var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    await response.Content.CopyToAsync(fs, cancellationToken);
+                    await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

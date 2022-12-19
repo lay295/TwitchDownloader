@@ -34,6 +34,8 @@ namespace TwitchDownloaderCore
                 downloadOptions.TempFolder,
                 $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 
+            progress.Report(new ProgressReport(ReportType.Status, "Fetching Video Info [1/4]"));
+
             try
             {
                 ServicePointManager.DefaultConnectionLimit = downloadOptions.DownloadThreads;
@@ -122,6 +124,8 @@ namespace TwitchDownloaderCore
                 int partCount = videoParts.Count;
                 int doneCount = 0;
 
+                progress.Report(new ProgressReport(ReportType.StatusInfo, "Downloading 0% [2/4]"));
+
                 using (var throttler = new SemaphoreSlim(downloadOptions.DownloadThreads))
                 {
                     Task[] downloadTasks = videoParts.Select(request => Task.Run(async () =>
@@ -168,7 +172,7 @@ namespace TwitchDownloaderCore
 
                             doneCount++;
                             int percent = (int)(doneCount / (double)partCount * 100);
-                            progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = string.Format("Downloading {0}% [1/3]", percent) });
+                            progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = string.Format("Downloading {0}% [2/4]", percent) });
                             progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
 
                             return;
@@ -188,12 +192,12 @@ namespace TwitchDownloaderCore
 
                 CheckCancelation(cancellationToken, downloadFolder);
 
-                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Combining Parts [2/3]" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Combining Parts [3/4]" });
                 progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = 0 });
 
                 await CombineVideoParts(progress, downloadFolder, videoPartsList, cancellationToken);
 
-                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = $"Finalizing Video [3/3]" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = $"Finalizing Video [4/4]" });
 
                 double startOffset = 0.0;
 
@@ -225,7 +229,7 @@ namespace TwitchDownloaderCore
                     };
                     process.Start();
                     process.WaitForExit();
-                });
+                }, cancellationToken);
                 Cleanup(downloadFolder);
             }
             catch
@@ -247,7 +251,7 @@ namespace TwitchDownloaderCore
             {
                 using (var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    await response.Content.CopyToAsync(fs, cancellationToken);
+                    await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -257,21 +261,23 @@ namespace TwitchDownloaderCore
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(downloadFolder);
 
             string outputFile = Path.Combine(downloadFolder, "output.ts");
-            using (FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+            using (FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 foreach (var part in videoPartsList)
                 {
                     await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
 
-                    string file = Path.Combine(downloadFolder, RemoveQueryString(part));
-                    if (File.Exists(file))
+                    string partFile = Path.Combine(downloadFolder, RemoveQueryString(part));
+                    if (File.Exists(partFile))
                     {
-                        byte[] writeBytes = await File.ReadAllBytesAsync(file);
-                        await outputStream.WriteAsync(writeBytes, 0, writeBytes.Length);
+                        using (var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.None))
+                        {
+                            await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
+                        }
 
                         try
                         {
-                            File.Delete(file);
+                            File.Delete(partFile);
                         }
                         catch { }
                     }
