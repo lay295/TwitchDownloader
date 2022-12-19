@@ -13,7 +13,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('o', "output", Required = true, HelpText = "Path to output file. File extension will be used to determine new chat type. Valid extensions are: json, html, and txt.")]
         public string OutputFile { get; set; }
 
-        [Option('E', "embed-missing", Default = false, HelpText = "Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.")]
+        [Option('E', "embed-missing", Default = false, HelpText = "Embeds missing emotes, badges, and cheermotes. Already embedded images will be untouched.")]
         public bool EmbedMissing { get; set; }
 
         [Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
