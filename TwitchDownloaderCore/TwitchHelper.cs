@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Properties;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.TwitchObjects.Api;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
@@ -37,7 +38,7 @@ namespace TwitchDownloaderCore
             return JsonConvert.DeserializeObject<GqlVideoResponse>(response);
         }
 
-        public static async Task<JObject> GetVideoToken(int videoId, string authToken)
+        public static async Task<GqlVideoTokenResponse> GetVideoToken(int videoId, string authToken)
         {
             var request = new HttpRequestMessage()
             {
@@ -49,7 +50,7 @@ namespace TwitchDownloaderCore
             if (authToken != null && authToken != "")
                 request.Headers.Add("Authorization", "OAuth " + authToken);
             string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
-            return JObject.Parse(response);
+            return JsonConvert.DeserializeObject<GqlVideoTokenResponse>(response);
         }
 
         public static async Task<string[]> GetVideoPlaylist(int videoId, string token, string sig)
@@ -77,7 +78,7 @@ namespace TwitchDownloaderCore
             return JsonConvert.DeserializeObject<GqlClipResponse>(response);
         }
 
-        public static async Task<JArray> GetClipLinks(object clipId)
+        public static async Task<List<GqlClipTokenResponse>> GetClipLinks(string clipId)
         {
             var request = new HttpRequestMessage()
             {
@@ -87,8 +88,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
-            JArray result = JArray.Parse(response);
-            return result;
+            return JsonConvert.DeserializeObject<List<GqlClipTokenResponse>>(response);
         }
 
         public static async Task<GqlVideoSearchResponse> GetGqlVideos(string channelName, string cursor = "", int limit = 50)
@@ -145,25 +145,25 @@ namespace TwitchDownloaderCore
 
         private static async Task GetBttvEmoteData(string streamerId, List<EmoteResponseItem> bttvResponse)
         {
-            JArray BTTV = JArray.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/emotes/global"));
+            List<BTTVEmote> BTTV = JsonConvert.DeserializeObject<List<BTTVEmote>>(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/emotes/global"));
 
             if (streamerId != null)
             {
                 //Channel might not have BTTV emotes
                 try
                 {
-                    JObject bttvChannel = JObject.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/users/twitch/" + streamerId));
-                    BTTV.Merge(bttvChannel["channelEmotes"]);
-                    BTTV.Merge(bttvChannel["sharedEmotes"]);
+                    BTTVChannelEmoteResponse bttvChannel = JsonConvert.DeserializeObject<BTTVChannelEmoteResponse>(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/users/twitch/" + streamerId));
+                    BTTV.AddRange(bttvChannel.channelEmotes);
+                    BTTV.AddRange(bttvChannel.sharedEmotes);
                 }
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
             }
 
             foreach (var emote in BTTV)
             {
-                string id = emote["id"].ToString();
-                string name = emote["code"].ToString();
-                string mime = emote["imageType"].ToString();
+                string id = emote.id;
+                string name = emote.code;
+                string mime = emote.imageType;
                 string url = String.Format("https://cdn.betterttv.net/emote/{0}/[scale]x", id);
                 bttvResponse.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = bttvZeroWidth.Contains(name) });
             }
@@ -171,23 +171,24 @@ namespace TwitchDownloaderCore
 
         private static async Task GetFfzEmoteData(string streamerId, List<EmoteResponseItem> ffzResponse)
         {
-            JArray FFZ = JArray.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/emotes/global"));
+            List<FFZEmote> FFZ = JsonConvert.DeserializeObject<List<FFZEmote>>(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/emotes/global"));
 
             if (streamerId != null)
             {
                 //Channel might not have FFZ emotes
                 try
                 {
-                    FFZ.Merge(JArray.Parse(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/users/twitch/" + streamerId)));
+                    List<FFZEmote> channelEmotes = JsonConvert.DeserializeObject<List<FFZEmote>>(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/users/twitch/" + streamerId));
+                    FFZ.AddRange(channelEmotes);
                 }
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
             }
 
             foreach (var emote in FFZ)
             {
-                string id = emote["id"].ToString();
-                string name = emote["code"].ToString();
-                string mime = emote["imageType"].ToString();
+                string id = emote.id.ToString();
+                string name = emote.code;
+                string mime = emote.imageType;
                 string url = String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/[scale]", id);
                 ffzResponse.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url });
             }
@@ -195,19 +196,19 @@ namespace TwitchDownloaderCore
 
         private static async Task GetStvEmoteData(string streamerId, List<EmoteResponseItem> stvResponse)
         {
-            JObject globalEmoteObject = JObject.Parse(await httpClient.GetStringAsync("https://7tv.io/v3/emote-sets/global"));
-            JArray stvEmotes = (JArray)globalEmoteObject["emotes"];
+            STVGlobalEmoteResponse globalEmoteObject = JsonConvert.DeserializeObject<STVGlobalEmoteResponse>(await httpClient.GetStringAsync("https://7tv.io/v3/emote-sets/global"));
+            List<STVEmote> stvEmotes = globalEmoteObject.emotes;
 
             if (streamerId != null)
             {
                 // Channel might not be registered on 7tv
                 try
                 {
-                    JObject streamerEmoteObject = JObject.Parse(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
+                    STVChannelEmoteResponse streamerEmoteObject = JsonConvert.DeserializeObject<STVChannelEmoteResponse>(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
                     // Channel might not have emotes setup
-                    if (streamerEmoteObject["emote_set"].HasValues)
+                    if (streamerEmoteObject.emote_set?.emotes != null) 
                     {
-                        stvEmotes.Merge((JArray)streamerEmoteObject["emote_set"]["emotes"]);
+                        stvEmotes.AddRange(streamerEmoteObject.emote_set.emotes);
                     }
                 }
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
@@ -215,11 +216,11 @@ namespace TwitchDownloaderCore
 
             foreach (var stvEmote in stvEmotes)
             {
-                string emoteId = stvEmote["id"].ToString();
-                string emoteName = stvEmote["name"].ToString();
-                JObject emoteData = (JObject)stvEmote["data"];
-                JObject emoteHost = (JObject)emoteData["host"];
-                JArray emoteFiles = (JArray)emoteHost["files"];
+                string emoteId = stvEmote.id;
+                string emoteName = stvEmote.name;
+                STVData emoteData = stvEmote.data;
+                STVHost emoteHost = emoteData.host;
+                List<STVFile> emoteFiles = emoteHost.files;
                 if (emoteFiles.Count == 0) // Sometimes there are no hosted files for the emote
                 {
                     continue;
@@ -228,15 +229,15 @@ namespace TwitchDownloaderCore
                 foreach (var fileItem in emoteFiles)
                 {
                     // prefer webp
-                    if (fileItem["format"].ToString().ToLower().Equals("webp"))
+                    if (fileItem.format.ToLower().Equals("webp"))
                     {
                         emoteFormat = "webp";
                         break;
                     }
                 }
-                string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost["url"].ToString(), "[scale]x", emoteFormat);
-                StvEmoteFlags emoteFlags = (StvEmoteFlags)(int)emoteData["flags"];
-                bool emoteIsListed = (bool)emoteData["listed"];
+                string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost.url, "[scale]x", emoteFormat);
+                StvEmoteFlags emoteFlags = emoteData.flags;
+                bool emoteIsListed = emoteData.listed;
 
                 EmoteResponseItem emoteResponse = new() { Id = emoteId, Code = emoteName, ImageType = emoteFormat, ImageUrl = emoteUrl };
                 if ((emoteFlags & StvEmoteFlags.ZeroWidth) == StvEmoteFlags.ZeroWidth)
@@ -446,33 +447,30 @@ namespace TwitchDownloaderCore
 
             // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
             // TODO: would want to make this configurable as we do for emotes though...
-            JObject globalBadges = JObject.Parse(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display"));
-            JObject subBadges = JObject.Parse(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display"));
+            TwitchBadgeResponse globalBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display"));
+            TwitchBadgeResponse subBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display"));
 
             string badgeFolder = Path.Combine(cacheFolder, "badges");
             if (!Directory.Exists(badgeFolder))
                 TwitchHelper.CreateDirectory(badgeFolder);
 
-            foreach (var badge in subBadges["badge_sets"].Union(globalBadges["badge_sets"]))
+            foreach (var badge in subBadges.badge_sets.Union(globalBadges.badge_sets))
             {
-                JProperty jBadgeProperty = badge.ToObject<JProperty>();
-                string name = jBadgeProperty.Name;
+                string name = badge.Key;
                 if (alreadyAdded.Contains(name))
                     continue;
 
                 try
                 {
                     Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
-                    foreach (var version in badge.First["versions"])
+                    foreach (var version in badge.Value.versions)
                     {
-                        JProperty jVersionProperty = version.ToObject<JProperty>();
-                        string versionString = jVersionProperty.Name;
-                        string downloadUrl = version.First["image_url_2x"].ToString();
+                        string downloadUrl = version.Value.image_url_2x;
 
                         string[] id_parts = downloadUrl.Split('/');
                         string id = id_parts[id_parts.Length - 2];
                         byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
-                        versions.Add(versionString, bytes);
+                        versions.Add(version.Key, bytes);
                     }
 
                     returnList.Add(new ChatBadge(name, versions));
@@ -666,18 +664,28 @@ namespace TwitchDownloaderCore
         {
             try
             {
+                GqlUserInfoResponse info = await GetUserInfo(new List<int> { id });
+                return info.data.users[0].login;
+            }
+            catch { return ""; }
+        }
+
+        public static async Task<GqlUserInfoResponse> GetUserInfo(List<int> idList)
+        {
+            try
+            {
                 var request = new HttpRequestMessage()
                 {
                     RequestUri = new Uri("https://gql.twitch.tv/gql"),
                     Method = HttpMethod.Post,
-                    Content = new StringContent("{\"query\":\"query{user(id:\\\"" + id.ToString() + "\\\"){login}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                    Content = new StringContent("{\"query\":\"query{users(ids:[" + String.Join(",", idList.Select(x => "\\\"" + x + "\\\"").ToArray()) + "]){login,createdAt,updatedAt,description,profileImageURL(width:300)}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
                 };
                 request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
                 string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
-                JObject res = JObject.Parse(response);
-                return res["data"]["user"]["login"].ToString();
+                GqlUserInfoResponse userInfo = JsonConvert.DeserializeObject<GqlUserInfoResponse>(response);
+                return userInfo;
             }
-            catch { return ""; }
+            catch { return null; }
         }
 
         public static async Task<byte[]> GetImage(string cachePath, string imageUrl, string imageId, string imageScale, string imageType, CancellationToken cancellationToken = new())

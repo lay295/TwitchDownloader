@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
@@ -40,10 +41,10 @@ namespace TwitchDownloaderCore
 
                 if (downloadOptions.PlaylistUrl == null)
                 {
-                    Task<JObject> taskAccessToken = TwitchHelper.GetVideoToken(downloadOptions.Id, downloadOptions.Oauth);
+                    Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(downloadOptions.Id, downloadOptions.Oauth);
                     await taskAccessToken;
 
-                    string[] videoPlaylist = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["value"].ToString(), taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["signature"].ToString());
+                    string[] videoPlaylist = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, taskAccessToken.Result.videoPlaybackAccessToken.value, taskAccessToken.Result.videoPlaybackAccessToken.signature);
                     List<KeyValuePair<string, string>> videoQualities = new List<KeyValuePair<string, string>>();
 
                     for (int i = 0; i < videoPlaylist.Length; i++)

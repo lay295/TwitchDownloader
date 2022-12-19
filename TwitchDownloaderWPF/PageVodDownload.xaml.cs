@@ -73,11 +73,11 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
-                    Task<JObject> taskAccessToken = TwitchHelper.GetVideoToken(videoId, textOauth.Text);
+                    Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, textOauth.Text);
                     await Task.WhenAll(taskVideoInfo, taskAccessToken);
                     string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
                     Task<BitmapImage> thumbImage = InfoHelper.GetThumb(thumbUrl);
-                    Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["value"].ToString(), taskAccessToken.Result["data"]["videoPlaybackAccessToken"]["signature"].ToString());
+                    Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.videoPlaybackAccessToken.value, taskAccessToken.Result.videoPlaybackAccessToken.signature);
                     await taskPlaylist;
                     try
                     {

@@ -1,9 +1,12 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
@@ -18,20 +21,20 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken = new())
         {
-            JArray taskLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
+            List<GqlClipTokenResponse> taskLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
 
             string downloadUrl = "";
 
-            foreach (var quality in taskLinks[0]["data"]["clip"]["videoQualities"])
+            foreach (var quality in taskLinks[0].data.clip.videoQualities)
             {
-                if (quality["quality"].ToString() + "p" + (quality["frameRate"].ToString() == "30" ? "" : quality["frameRate"].ToString()) == downloadOptions.Quality)
-                    downloadUrl = quality["sourceURL"].ToString();
+                if (quality.quality + "p" + (quality.frameRate.ToString() == "30" ? "" : quality.frameRate.ToString()) == downloadOptions.Quality)
+                    downloadUrl = quality.sourceURL;
             }
 
             if (downloadUrl == "")
-                downloadUrl = taskLinks[0]["data"]["clip"]["videoQualities"].First["sourceURL"].ToString();
+                downloadUrl = taskLinks[0].data.clip.videoQualities.First().sourceURL;
 
-            downloadUrl += "?sig=" + taskLinks[0]["data"]["clip"]["playbackAccessToken"]["signature"] + "&token=" + HttpUtility.UrlEncode(taskLinks[0]["data"]["clip"]["playbackAccessToken"]["value"].ToString());
+            downloadUrl += "?sig=" + taskLinks[0].data.clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(taskLinks[0].data.clip.playbackAccessToken.value);
             
             cancellationToken.ThrowIfCancellationRequested();
 
