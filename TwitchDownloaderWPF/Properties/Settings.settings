@@ -140,10 +140,10 @@
     <Setting Name="VerboseErrors" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="EmbedMissing" Type="System.Boolean" Scope="User">
+    <Setting Name="ChatEmbedMissing" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="ReplaceEmbeds" Type="System.Boolean" Scope="User">
+    <Setting Name="ChatReplaceEmbeds" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Offline" Type="System.Boolean" Scope="User">

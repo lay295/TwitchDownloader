@@ -128,8 +128,8 @@ namespace TwitchDownloaderWPF
             SetEnabled(false);
             SetEnabledCropStart(false);
             SetEnabledCropEnd(false);
-            checkEmbedMissing.IsChecked = Settings.Default.ChatEmbedEmotes;
-            checkReplaceEmbeds.IsChecked = Settings.Default.ChatEmbedEmotes;
+            checkEmbedMissing.IsChecked = Settings.Default.ChatEmbedMissing;
+            checkReplaceEmbeds.IsChecked = Settings.Default.ChatReplaceEmbeds;
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
             checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
@@ -200,7 +200,7 @@ namespace TwitchDownloaderWPF
                 CropEndingTime = -1
             };
 
-            if ((bool) radioJson.IsChecked)
+            if ((bool)radioJson.IsChecked)
                 options.OutputFormat = ChatFormat.Json;
             else if ((bool)radioHTML.IsChecked)
                 options.OutputFormat = ChatFormat.Html;
@@ -282,8 +282,8 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.EmbedMissing = true;
-                Settings.Default.ReplaceEmbeds = false;
+                Settings.Default.ChatEmbedMissing = true;
+                Settings.Default.ChatReplaceEmbeds = false;
                 Settings.Default.Save();
                 checkReplaceEmbeds.IsChecked = false;
                 checkBttvEmbed.IsEnabled = true;
@@ -296,7 +296,7 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.EmbedMissing = false;
+                Settings.Default.ChatEmbedMissing = false;
                 Settings.Default.Save();
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;
@@ -308,8 +308,8 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.EmbedMissing = false;
-                Settings.Default.ReplaceEmbeds = true;
+                Settings.Default.ChatEmbedMissing = false;
+                Settings.Default.ChatReplaceEmbeds = true;
                 Settings.Default.Save();
                 checkEmbedMissing.IsChecked = false;
                 checkBttvEmbed.IsEnabled = true;
@@ -322,7 +322,7 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized)
             {
-                Settings.Default.ReplaceEmbeds = false;
+                Settings.Default.ChatReplaceEmbeds = false;
                 Settings.Default.Save();
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;
@@ -407,7 +407,7 @@ namespace TwitchDownloaderWPF
                         ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
 
                         ChatUpdater currentUpdate = new ChatUpdater(updateOptions);
-                        await currentUpdate.ParseJsonAsync();
+                        await currentUpdate.ParseJsonAsync(new CancellationToken());
 
                         btnBrowse.IsEnabled = false;
                         SetEnabled(false);

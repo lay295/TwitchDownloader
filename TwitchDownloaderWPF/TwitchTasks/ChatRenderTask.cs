@@ -71,7 +71,7 @@ namespace TwitchDownloader.TwitchTasks
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {
-                await renderer.ParseJsonAsync();
+                await renderer.ParseJsonAsync(TokenSource.Token);
                 await renderer.RenderVideoAsync(progress, TokenSource.Token);
                 if (TokenSource.IsCancellationRequested)
                 {

@@ -77,8 +77,8 @@ namespace TwitchDownloaderCore
             if (renderOptions.GenerateMask && File.Exists(renderOptions.MaskFile))
                 File.Delete(renderOptions.MaskFile);
 
-            FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false, renderOptions.LogFfmpegOutput ? progress : null);
-            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(0, true, null) : null;
+            FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false, progress);
+            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(0, true) : null;
             progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
 
             try
@@ -255,7 +255,7 @@ namespace TwitchDownloaderCore
                 }
             };
 
-            if (progress != null)
+            if (renderOptions.LogFfmpegOutput && progress != null)
             {
                 process.ErrorDataReceived += (s, e) =>
                 {
@@ -1077,9 +1077,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public async Task<ChatRoot> ParseJsonAsync()
+        public async Task<ChatRoot> ParseJsonAsync(CancellationToken cancellationToken = new())
         {
-            chatRoot = await ChatJson.DeserializeAsync(renderOptions.InputFile);
+            chatRoot = await ChatJson.DeserializeAsync(renderOptions.InputFile, true, true, cancellationToken);
 
             chatRoot.streamer ??= new Streamer
             {
