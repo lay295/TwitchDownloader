@@ -3,10 +3,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
-using TwitchDownloaderCLI.Modes.Arguments;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -14,9 +14,19 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Render(ChatRenderArgs inputOptions)
         {
-
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
 
+            Progress<ProgressReport> progress = new();
+            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
+
+            ChatRenderOptions renderOptions = GetRenderOptions(inputOptions);
+            ChatRenderer chatRenderer = new(renderOptions);
+            chatRenderer.ParseJsonAsync().Wait();
+            chatRenderer.RenderVideoAsync(progress, new CancellationToken()).Wait();
+        }
+
+        private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions)
+        {
             ChatRenderOptions renderOptions = new()
             {
                 InputFile = inputOptions.InputFile,
@@ -52,12 +62,13 @@ namespace TwitchDownloaderCLI.Modes
                 GenerateMask = inputOptions.GenerateMask,
                 InputArgs = inputOptions.InputArgs,
                 OutputArgs = inputOptions.OutputArgs,
-                FfmpegPath = inputOptions.FfmpegPath is null or "" ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
+                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder,
                 SubMessages = (bool)inputOptions.SubMessages,
                 ChatBadges = (bool)inputOptions.ChatBadges,
                 Timestamp = inputOptions.Timestamp,
                 Offline = inputOptions.Offline,
+                LogFfmpegOutput = inputOptions.LogFfmpegOutput
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
@@ -84,12 +95,7 @@ namespace TwitchDownloaderCLI.Modes
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
             }
 
-
-            ChatRenderer chatRenderer = new(renderOptions);
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            chatRenderer.ParseJsonAsync().Wait();
-            chatRenderer.RenderVideoAsync(progress, new CancellationToken()).Wait();
+            return renderOptions;
         }
     }
 }

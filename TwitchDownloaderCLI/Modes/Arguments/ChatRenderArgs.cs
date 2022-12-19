@@ -89,5 +89,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
+
+        [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from ffmpeg.")]
+        public bool LogFfmpegOutput { get; set; }
     }
 }

@@ -174,12 +174,18 @@ namespace TwitchDownloaderWPF
 
         private void OnProgressChanged(ProgressReport progress)
         {
-            if (progress.ReportType == ReportType.Percent)
-                statusProgressBar.Value = (int)progress.Data;
-            if (progress.ReportType is ReportType.Status or ReportType.StatusInfo)
-                statusMessage.Text = (string)progress.Data;
-            if (progress.ReportType == ReportType.Log)
-                AppendLog((string)progress.Data);
+            switch (progress.ReportType)
+            {
+                case ReportType.Percent:
+                    statusProgressBar.Value = (int)progress.Data;
+                    break;
+                case ReportType.Status or ReportType.StatusInfo:
+                    statusMessage.Text = (string)progress.Data;
+                    break;
+                case ReportType.Log:
+                    AppendLog((string)progress.Data);
+                    break;
+            }
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -268,11 +274,11 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        public void AppendLog(string message)
+        private void AppendLog(string message)
         {
-            textLog.Dispatcher.BeginInvoke((Action)(() =>
+            textLog.Dispatcher.BeginInvoke(() =>
                 textLog.AppendText(message + Environment.NewLine)
-            ));
+            );
         }
 
         private void Page_Initialized(object sender, EventArgs e)

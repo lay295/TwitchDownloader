@@ -99,7 +99,14 @@ namespace TwitchDownloader
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+            Uri uri = e.Uri;
+            if (!uri.IsAbsoluteUri)
+            {
+                string destinationPath = Path.Combine(Environment.CurrentDirectory, uri.OriginalString);
+                uri = new Uri(destinationPath);
+            }
+
+            Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
             e.Handled = true;
         }
 

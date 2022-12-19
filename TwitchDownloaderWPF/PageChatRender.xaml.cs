@@ -86,7 +86,8 @@ namespace TwitchDownloaderWPF
                 TempFolder = Settings.Default.TempPath,
                 SubMessages = (bool)checkSub.IsChecked,
                 ChatBadges = (bool)checkBadge.IsChecked,
-                Offline = (bool)checkOffline.IsChecked
+                Offline = (bool)checkOffline.IsChecked,
+                LogFfmpegOutput = true
             };
             foreach (var item in comboBadges.SelectedItems)
             {
@@ -98,14 +99,21 @@ namespace TwitchDownloaderWPF
 
         private void OnProgressChanged(ProgressReport progress)
         {
-            if (progress.ReportType == ReportType.Percent)
-                statusProgressBar.Value = (int)progress.Data;
-            if (progress.ReportType is ReportType.Status or ReportType.StatusInfo)
-                statusMessage.Text = (string)progress.Data;
-            if (progress.ReportType == ReportType.FfmpegLog)
-                ffmpegLog.Add((string)progress.Data);
-            if (progress.ReportType == ReportType.Log)
-                AppendLog((string)progress.Data);
+            switch (progress.ReportType)
+            {
+                case ReportType.Percent:
+                    statusProgressBar.Value = (int)progress.Data;
+                    break;
+                case ReportType.Status or ReportType.StatusInfo:
+                    statusMessage.Text = (string)progress.Data;
+                    break;
+                case ReportType.Log:
+                    AppendLog((string)progress.Data);
+                    break;
+                case ReportType.FfmpegLog:
+                    ffmpegLog.Add((string)progress.Data);
+                    break;
+            }
         }
 
         private void LoadSettings()
