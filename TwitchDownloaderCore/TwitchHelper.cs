@@ -454,7 +454,7 @@ namespace TwitchDownloaderCore
             if (!Directory.Exists(badgeFolder))
                 TwitchHelper.CreateDirectory(badgeFolder);
 
-            foreach (var badge in subBadges.badge_sets.Union(globalBadges.badge_sets))
+            foreach (var badge in globalBadges.badge_sets.Union(subBadges.badge_sets))
             {
                 string name = badge.Key;
                 if (alreadyAdded.Contains(name))
@@ -466,14 +466,27 @@ namespace TwitchDownloaderCore
                     foreach (var version in badge.Value.versions)
                     {
                         string downloadUrl = version.Value.image_url_2x;
-
                         string[] id_parts = downloadUrl.Split('/');
                         string id = id_parts[id_parts.Length - 2];
                         byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
                         versions.Add(version.Key, bytes);
                     }
 
+                    //Prefer channel specific badges over global ones
+                    if (subBadges.badge_sets.ContainsKey(name))
+                    {
+                        foreach (var version in subBadges.badge_sets[name].versions)
+                        {
+                            string downloadUrl = version.Value.image_url_2x;
+                            string[] id_parts = downloadUrl.Split('/');
+                            string id = id_parts[id_parts.Length - 2];
+                            byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
+                            versions[version.Key] = bytes;
+                        }
+                    }
+
                     returnList.Add(new ChatBadge(name, versions));
+                    alreadyAdded.Add(name);
                 }
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
             }
