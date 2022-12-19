@@ -372,7 +372,7 @@ namespace TwitchDownloaderCore
                     catch { failedInfo = true; }
                 }
 
-                if (!failedInfo)
+                if (failedInfo)
                 {
                     progress.Report(new ProgressReport() { ReportType = ReportType.Log, Data = "Failed to backfill some commenter info" });
                 }

@@ -1,14 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.TwitchObjects.Api;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
@@ -32,20 +29,27 @@ namespace TwitchDownloaderCore
             foreach (var quality in taskLinks[0].data.clip.videoQualities)
             {
                 if (quality.quality + "p" + (quality.frameRate.ToString() == "30" ? "" : quality.frameRate.ToString()) == downloadOptions.Quality)
+                {
                     downloadUrl = quality.sourceURL;
+                }
             }
 
             if (downloadUrl == "")
+            {
                 downloadUrl = taskLinks[0].data.clip.videoQualities.First().sourceURL;
+            }
 
             downloadUrl += "?sig=" + taskLinks[0].data.clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(taskLinks[0].data.clip.playbackAccessToken.value);
-            
+
             cancellationToken.ThrowIfCancellationRequested();
 
-            var response = await httpClient.GetAsync(downloadUrl);
-            using (var fs = new FileStream(downloadOptions.Filename, FileMode.Create))
+            var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
+            using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
             {
-                await response.Content.CopyToAsync(fs);
+                using (var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    await response.Content.CopyToAsync(fs, cancellationToken);
+                }
             }
         }
     }

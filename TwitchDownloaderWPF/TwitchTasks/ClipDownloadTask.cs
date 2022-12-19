@@ -65,7 +65,7 @@ namespace TwitchDownloader.TwitchTasks
                     ChangeStatus(TwitchTaskStatus.Finished);
                 }
             }
-            catch (OperationCanceledException)
+            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException)
             {
                 ChangeStatus(TwitchTaskStatus.Cancelled);
             }
