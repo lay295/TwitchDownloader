@@ -19,6 +19,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
 
     public class User
     {
+        public string id { get; set; }
         public string login { get; set; }
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }

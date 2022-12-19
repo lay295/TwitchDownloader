@@ -677,28 +677,24 @@ namespace TwitchDownloaderCore
         {
             try
             {
-                GqlUserInfoResponse info = await GetUserInfo(new List<int> { id });
+                GqlUserInfoResponse info = await GetUserInfo(new List<string> { id.ToString() });
                 return info.data.users[0].login;
             }
             catch { return ""; }
         }
 
-        public static async Task<GqlUserInfoResponse> GetUserInfo(List<int> idList)
+        public static async Task<GqlUserInfoResponse> GetUserInfo(List<string> idList)
         {
-            try
+            var request = new HttpRequestMessage()
             {
-                var request = new HttpRequestMessage()
-                {
-                    RequestUri = new Uri("https://gql.twitch.tv/gql"),
-                    Method = HttpMethod.Post,
-                    Content = new StringContent("{\"query\":\"query{users(ids:[" + String.Join(",", idList.Select(x => "\\\"" + x + "\\\"").ToArray()) + "]){login,createdAt,updatedAt,description,profileImageURL(width:300)}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
-                };
-                request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-                string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
-                GqlUserInfoResponse userInfo = JsonConvert.DeserializeObject<GqlUserInfoResponse>(response);
-                return userInfo;
-            }
-            catch { return null; }
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"query\":\"query{users(ids:[" + String.Join(",", idList.Select(x => "\\\"" + x + "\\\"").ToArray()) + "]){id,login,createdAt,updatedAt,description,profileImageURL(width:300)}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
+            GqlUserInfoResponse userInfo = JsonConvert.DeserializeObject<GqlUserInfoResponse>(response);
+            return userInfo;
         }
 
         public static async Task<byte[]> GetImage(string cachePath, string imageUrl, string imageId, string imageScale, string imageType, CancellationToken cancellationToken = new())
