@@ -77,7 +77,7 @@ namespace TwitchDownloaderWPF
                     await Task.WhenAll(taskVideoInfo, taskAccessToken);
                     string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
                     Task<BitmapImage> thumbImage = InfoHelper.GetThumb(thumbUrl);
-                    Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.videoPlaybackAccessToken.value, taskAccessToken.Result.videoPlaybackAccessToken.signature);
+                    Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
                     await taskPlaylist;
                     try
                     {

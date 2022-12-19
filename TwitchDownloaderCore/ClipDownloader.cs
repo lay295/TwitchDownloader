@@ -1,11 +1,14 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.TwitchObjects.Api;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
@@ -13,6 +16,7 @@ namespace TwitchDownloaderCore
     public sealed class ClipDownloader
     {
         private readonly ClipDownloadOptions downloadOptions;
+        private static HttpClient httpClient = new HttpClient();
 
         public ClipDownloader(ClipDownloadOptions DownloadOptions)
         {
@@ -38,8 +42,11 @@ namespace TwitchDownloaderCore
             
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (WebClient client = new WebClient())
-                await client.DownloadFileTaskAsync(downloadUrl, downloadOptions.Filename);
+            var response = await httpClient.GetAsync(downloadUrl);
+            using (var fs = new FileStream(downloadOptions.Filename, FileMode.Create))
+            {
+                await response.Content.CopyToAsync(fs);
+            }
         }
     }
 }

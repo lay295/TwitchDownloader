@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
-    public class GqlVideoTokenResponse
+    public class GqlVideoData
     {
         public VideoPlaybackAccessToken videoPlaybackAccessToken { get; set; }
     }
 
-    public class Root
+    public class GqlVideoTokenResponse
     {
-        public GqlVideoTokenResponse data { get; set; }
+        public GqlVideoData data { get; set; }
         public Extensions extensions { get; set; }
     }
 

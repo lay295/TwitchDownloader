@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace TwitchDownloaderCore
     public sealed class ChatDownloader
     {
         private readonly ChatDownloadOptions downloadOptions;
+        private static HttpClient httpClient = new HttpClient();
         private enum DownloadType { Clip, Video }
 
         public ChatDownloader(ChatDownloadOptions DownloadOptions)
@@ -29,69 +31,74 @@ namespace TwitchDownloaderCore
 
         private static async Task DownloadSection(double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            using (WebClient client = new WebClient())
+            //GQL only wants ints
+            videoStart = Math.Floor(videoStart);
+            double videoDuration = videoEnd - videoStart;
+            double latestMessage = videoStart - 1;
+            bool isFirst = true;
+            string cursor = "";
+            int errorCount = 0;
+
+            while (latestMessage < videoEnd)
             {
-                client.Encoding = Encoding.UTF8;
-                client.Headers.Add("Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                string response;
 
-                //GQL only wants ints
-                videoStart = Math.Floor(videoStart);
-                double videoDuration = videoEnd - videoStart;
-                double latestMessage = videoStart - 1;
-                bool isFirst = true;
-                string cursor = "";
-                int errorCount = 0;
-
-                while (latestMessage < videoEnd)
+                try
                 {
-                    string response;
-
-                    try
+                    var request = new HttpRequestMessage()
                     {
-                        if (isFirst)
-                            response = await client.UploadStringTaskAsync("https://gql.twitch.tv/gql", "[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"contentOffsetSeconds\":" + videoStart + "},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]");
-                        else
-                            response = await client.UploadStringTaskAsync("https://gql.twitch.tv/gql", "[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"cursor\":\"" + cursor + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]");
-                        errorCount = 0;
-                    }
-                    catch (WebException ex)
-                    {
-                        await Task.Delay(1000 * errorCount);
-                        errorCount++;
-
-                        if (errorCount >= 10)
-                            throw ex;
-
-                        continue;
-                    }
-
-                    GqlCommentResponse commentResponse = JsonConvert.DeserializeObject<List<GqlCommentResponse>>(response)[0];
-                    List<Comment> convertedComments = ConvertComments(commentResponse.data.video);
-
-                    lock (commentLock)
-                    {
-                        foreach (var comment in convertedComments)
-                        {
-                            if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
-                                comments.Add(comment);
-
-                            latestMessage = comment.content_offset_seconds;
-                        }
-                    }
-                    if (!commentResponse.data.video.comments.pageInfo.hasNextPage)
-                        break;
-                    else
-                        cursor = commentResponse.data.video.comments.edges.Last().cursor;
-
-                    int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                    progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
-
-                    cancellationToken.ThrowIfCancellationRequested();
-
+                        RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                        Method = HttpMethod.Post
+                    };
+                    request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
                     if (isFirst)
-                        isFirst = false;
-
+                    {
+                        request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"contentOffsetSeconds\":" + videoStart + "},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
+                    }
+                    else
+                    {
+                        request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"cursor\":\"" + cursor + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
+                    }
+                    response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
+                    errorCount = 0;
                 }
+                catch (WebException ex)
+                {
+                    await Task.Delay(1000 * errorCount);
+                    errorCount++;
+
+                    if (errorCount >= 10)
+                        throw ex;
+
+                    continue;
+                }
+
+                GqlCommentResponse commentResponse = JsonConvert.DeserializeObject<List<GqlCommentResponse>>(response)[0];
+                List<Comment> convertedComments = ConvertComments(commentResponse.data.video);
+
+                lock (commentLock)
+                {
+                    foreach (var comment in convertedComments)
+                    {
+                        if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
+                            comments.Add(comment);
+
+                        latestMessage = comment.content_offset_seconds;
+                    }
+                }
+                if (!commentResponse.data.video.comments.pageInfo.hasNextPage)
+                    break;
+                else
+                    cursor = commentResponse.data.video.comments.edges.Last().cursor;
+
+                int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
+                progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (isFirst)
+                    isFirst = false;
+
             }
         }
 
