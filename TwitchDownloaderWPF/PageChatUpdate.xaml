@@ -61,7 +61,7 @@
                 <TextBlock x:Name="textCrop" Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,17,0,0" Foreground="{DynamicResource AppText}" />
                 <StackPanel x:Name="stackEmbedText" Visibility="Visible">
                     <TextBlock HorizontalAlignment="Right" Margin="0,45,0,0" Foreground="{DynamicResource AppText}" >Embed Missing <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Embeds missing emotes, badges, and cheermotes. Already embedded images will be untouched.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
-                    <!--<TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" >Replace Embeds <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>-->
+                    <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" >Replace Embeds <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                     <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" >3rd Party Emotes <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Also embed third party emotes into the file. File size will be much larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 </StackPanel>
             </StackPanel>
@@ -96,7 +96,7 @@
                 </StackPanel>
                 <StackPanel x:Name="stackEmbedChecks" Visibility="Visible">
                     <CheckBox x:Name="checkEmbedMissing" Margin="5,5,0,0" Checked="checkEmbedMissing_Checked" Unchecked="checkEmbedMissing_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" />
-                    <!--<CheckBox x:Name="checkReplaceEmbeds" Margin="5,8,0,0" Checked="checkReplaceEmbeds_Checked" Unchecked="checkReplaceEmbeds_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" />-->
+                    <CheckBox x:Name="checkReplaceEmbeds" Margin="5,8,0,0" Checked="checkReplaceEmbeds_Checked" Unchecked="checkReplaceEmbeds_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" />
                     <StackPanel Margin="5,8,0,0" Orientation="Horizontal">
                         <CheckBox IsEnabled="True" x:Name="checkBttvEmbed" Margin="0,0,10,0" Checked="checkBttvEmbed_Checked" Unchecked="checkBttvEmbed_Unchecked" Content="BTTV" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <CheckBox IsEnabled="True" x:Name="checkFfzEmbed" Margin="0,0,10,0" Checked="checkFfzEmbed_Checked" Unchecked="checkFfzEmbed_Unchecked" Content="FFZ" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />

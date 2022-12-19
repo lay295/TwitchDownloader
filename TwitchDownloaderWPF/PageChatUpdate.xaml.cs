@@ -129,7 +129,7 @@ namespace TwitchDownloaderWPF
             SetEnabledCropStart(false);
             SetEnabledCropEnd(false);
             checkEmbedMissing.IsChecked = Settings.Default.ChatEmbedMissing;
-            //checkReplaceEmbeds.IsChecked = Settings.Default.ChatReplaceEmbeds;
+            checkReplaceEmbeds.IsChecked = Settings.Default.ChatReplaceEmbeds;
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
             checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
@@ -146,7 +146,7 @@ namespace TwitchDownloaderWPF
             checkStart.IsEnabled = isEnabled;
             checkEnd.IsEnabled = isEnabled;
             checkEmbedMissing.IsEnabled = isEnabled;
-            //checkReplaceEmbeds.IsEnabled = isEnabled;
+            checkReplaceEmbeds.IsEnabled = isEnabled;
             btnDownload.IsEnabled = isEnabled;
             btnQueue.IsEnabled = isEnabled;
             radioRelative.IsEnabled = isEnabled;
@@ -190,7 +190,7 @@ namespace TwitchDownloaderWPF
             ChatUpdateOptions options = new ChatUpdateOptions()
             {
                 EmbedMissing = (bool)checkEmbedMissing.IsChecked,
-                //ReplaceEmbeds = (bool)checkReplaceEmbeds.IsChecked,
+                ReplaceEmbeds = (bool)checkReplaceEmbeds.IsChecked,
                 BttvEmotes = (bool)checkBttvEmbed.IsChecked,
                 FfzEmotes = (bool)checkFfzEmbed.IsChecked,
                 StvEmotes = (bool)checkStvEmbed.IsChecked,
@@ -200,7 +200,7 @@ namespace TwitchDownloaderWPF
                 CropEndingTime = -1
             };
 
-            if ((bool) radioJson.IsChecked)
+            if ((bool)radioJson.IsChecked)
                 options.OutputFormat = ChatFormat.Json;
             else if ((bool)radioHTML.IsChecked)
                 options.OutputFormat = ChatFormat.Html;
@@ -285,7 +285,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.ChatEmbedMissing = true;
                 Settings.Default.ChatReplaceEmbeds = false;
                 Settings.Default.Save();
-                //checkReplaceEmbeds.IsChecked = false;
+                checkReplaceEmbeds.IsChecked = false;
                 checkBttvEmbed.IsEnabled = true;
                 checkFfzEmbed.IsEnabled = true;
                 checkStvEmbed.IsEnabled = true;

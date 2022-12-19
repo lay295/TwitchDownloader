@@ -16,8 +16,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('E', "embed-missing", Default = false, HelpText = "Embeds missing emotes, badges, and cheermotes. Already embedded images will be untouched.")]
         public bool EmbedMissing { get; set; }
 
-        //[Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
-        //public bool ReplaceEmbeds { get; set; }
+        [Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
+        public bool ReplaceEmbeds { get; set; }
 
         [Option('b', "beginning", Default = -1, HelpText = "New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.")]
         public int CropBeginningTime { get; set; }
