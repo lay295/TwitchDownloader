@@ -351,7 +351,7 @@ namespace TwitchDownloaderCore
                     progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Backfilling commenter info" });
                     List<string> userList = chatRoot.comments.DistinctBy(x => x.commenter._id).Select(x => x.commenter._id).ToList();
                     Dictionary<string, User> userInfo = new Dictionary<string, User>();
-                    for (int i = 0; i < (userList.Count / 10) + 1; i++)
+                    for (int i = 0; i < (userList.Count / 100) + 1; i++)
                     {
                         List<string> userSubset = userList.Skip(i * 100).Take(100).ToList();
                         GqlUserInfoResponse userInfoResponse = await TwitchHelper.GetUserInfo(userSubset);
