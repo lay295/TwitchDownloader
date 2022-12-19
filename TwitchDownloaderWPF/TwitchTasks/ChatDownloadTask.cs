@@ -15,14 +15,23 @@ namespace TwitchDownloader.TwitchTasks
         public ChatDownloadOptions DownloadOptions { get; set; }
         public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
         public ITwitchTask DependantTask { get; set; }
-        public string TaskType { get; set; } = "Chat Download";
+        public string TaskType { get; } = "Chat Download";
+        public Exception TaskException { get; private set; }
+        public TwitchTaskException Exception { get; private set; } = new();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Cancel()
         {
-            ChangeStatus(TwitchTaskStatus.Stopping);
             TokenSource.Cancel();
+
+            if (Status == TwitchTaskStatus.Running)
+            {
+                ChangeStatus(TwitchTaskStatus.Stopping);
+                return;
+            }
+
+            ChangeStatus(TwitchTaskStatus.Cancelled);
         }
 
         public bool CanRun()
@@ -55,16 +64,15 @@ namespace TwitchDownloader.TwitchTasks
                     ChangeStatus(TwitchTaskStatus.Finished);
                 }
             }
-            catch
+            catch (OperationCanceledException)
             {
-                if (TokenSource.IsCancellationRequested)
-                {
-                    ChangeStatus(TwitchTaskStatus.Cancelled);
-                }
-                else
-                {
-                    ChangeStatus(TwitchTaskStatus.Failed);
-                }
+                ChangeStatus(TwitchTaskStatus.Cancelled);
+            }
+            catch (Exception ex)
+            {
+                ChangeStatus(TwitchTaskStatus.Failed);
+                Exception = new TwitchTaskException(ex);
+                OnPropertyChanged(nameof(Exception));
             }
             downloader = null;
             GC.Collect();

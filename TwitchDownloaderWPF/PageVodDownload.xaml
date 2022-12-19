@@ -60,7 +60,7 @@
                 <TextBlock Text="Quality:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="Crop Video:" HorizontalAlignment="Right" Margin="0,19,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="Download Threads:" HorizontalAlignment="Right" Margin="0,50,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock HorizontalAlignment="Right" Margin="0,22,0,0"><Run Text="OAuth (optional) " Foreground="{DynamicResource AppText}" /><Hyperlink NavigateUri="https://www.youtube.com/watch?v=1MBsUoFGuls" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Only required for sub only VODs. All 3rd party OAuth tokens will not work. Click to see YouTube video on how to get OAuth token.</Hyperlink.ToolTip><Run Text="(?)"/></Hyperlink><Run Text=":"/></TextBlock>
+                <TextBlock HorizontalAlignment="Right" Margin="0,22,0,0" Foreground="{DynamicResource AppText}">OAuth (optional) <Hyperlink NavigateUri="https://www.youtube.com/watch?v=1MBsUoFGuls" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Only required for sub only VODs. All 3rd party OAuth tokens will not work. Click to see YouTube video on how to get OAuth token.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
             </StackPanel>
             <StackPanel>
                 <TextBlock x:Name="labelLength" Text="0:0:0" Margin="5,0,0,0" Foreground="{DynamicResource AppText}" />

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,7 +23,8 @@ namespace TwitchDownloader.TwitchTasks
         TwitchTaskStatus Status { get; }
         CancellationTokenSource TokenSource { get; set; }
         ITwitchTask DependantTask { get; set; }
-        string TaskType { get; set; }
+        string TaskType { get; }
+        TwitchTaskException Exception { get; }
 
         Task RunAsync();
         void Cancel();

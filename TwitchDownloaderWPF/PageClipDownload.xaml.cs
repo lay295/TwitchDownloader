@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -43,7 +44,7 @@ namespace TwitchDownloaderWPF
                     btnGetInfo.IsEnabled = false;
                     comboQuality.Items.Clear();
                     Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
-                    Task<JArray> taskLinks = TwitchHelper.GetClipLinks(clipId);
+                    Task<List<GqlClipTokenResponse>> taskLinks = TwitchHelper.GetClipLinks(clipId);
                     await Task.WhenAll(taskClipInfo, taskLinks);
 
                     GqlClipResponse clipData = taskClipInfo.Result;
@@ -67,9 +68,9 @@ namespace TwitchDownloaderWPF
                     textTitle.Text = clipData.data.clip.title;
                     labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)clipLength.TotalHours, clipLength.Minutes, clipLength.Seconds);
 
-                    foreach (var quality in taskLinks.Result[0]["data"]["clip"]["videoQualities"])
+                    foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
                     {
-                        comboQuality.Items.Add(new TwitchClip(quality["quality"].ToString(), quality["frameRate"].ToString(), quality["sourceURL"].ToString()));
+                        comboQuality.Items.Add(new TwitchClip(quality.quality, quality.frameRate.ToString(), quality.sourceURL));
                     }
 
                     comboQuality.SelectedIndex = 0;
@@ -109,9 +110,9 @@ namespace TwitchDownloaderWPF
 
         private void AppendLog(string message)
         {
-            textLog.Dispatcher.BeginInvoke((Action)(() =>
+            textLog.Dispatcher.BeginInvoke(() =>
                 textLog.AppendText(message + Environment.NewLine)
-            ));
+            );
         }
 
         private void Page_Initialized(object sender, EventArgs e)
@@ -138,7 +139,7 @@ namespace TwitchDownloaderWPF
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
         }
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)

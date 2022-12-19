@@ -1,7 +1,6 @@
 ﻿using CommandLine;
 using System;
 using System.IO;
-using System.Linq;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -13,6 +12,24 @@ namespace TwitchDownloaderCLI
         static void Main(string[] args)
         {
             string processFileName = Path.GetFileName(Environment.ProcessPath);
+            
+            WriteNoArgHelpText(args, processFileName);
+
+            string[] preParsedArgs = PreParseArgs.Parse(args, processFileName);
+
+            Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs)
+                .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
+                .WithParsed<ClipDownloadArgs>(DownloadClip.Download)
+                .WithParsed<ChatDownloadArgs>(DownloadChat.Download)
+                .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
+                .WithParsed<ChatRenderArgs>(RenderChat.Render)
+                .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
+                .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
+                .WithNotParsed(_ => Environment.Exit(1));
+        }
+
+        static void WriteNoArgHelpText(string[] args, string processFileName)
+        {
             if (args.Length == 0)
             {
                 if (Path.GetExtension(processFileName).Equals(".exe"))
@@ -29,27 +46,6 @@ namespace TwitchDownloaderCLI
                 }
                 Environment.Exit(1);
             }
-
-            string[] preParsedArgs;
-            if (args.Any(x => x is "-m" or "--mode" or "--embed-emotes"))
-            {
-                // A legacy syntax was used, convert to new syntax
-                preParsedArgs = PreParseArgs.Process(PreParseArgs.ConvertFromOldSyntax(args, processFileName));
-            }
-            else
-            {
-                preParsedArgs = PreParseArgs.Process(args);
-            }
-
-            Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs)
-                .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
-                .WithParsed<ClipDownloadArgs>(DownloadClip.Download)
-                .WithParsed<ChatDownloadArgs>(DownloadChat.Download)
-                .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
-                .WithParsed<ChatRenderArgs>(RenderChat.Render)
-                .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
-                .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
-                .WithNotParsed(_ => Environment.Exit(1));
         }
     }
 }

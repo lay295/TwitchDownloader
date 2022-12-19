@@ -49,28 +49,7 @@ namespace TwitchDownloaderCore
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport(ReportType.Status, "Fetching Images"));
-
-            Task<List<ChatBadge>> badgeTask = TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
-            Task<List<TwitchEmote>> emoteTask = TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
-            Task<List<TwitchEmote>> emoteThirdTask = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline, cancellationToken);
-            Task<List<CheerEmote>> cheerTask = TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
-            Task<Dictionary<string, SKBitmap>> emojiTask = TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
-
-            await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
-
-            badgeList = badgeTask.Result;
-            emoteList = emoteTask.Result;
-            emoteThirdList = emoteThirdTask.Result;
-            cheermotesList = cheerTask.Result;
-            emojiCache = emojiTask.Result;
-
-            // Dispose of the tasks to free up the memory now
-            // TODO: move the tasks to a dedicated function so they are disposed by the scope instead
-            badgeTask.Dispose();
-            emoteTask.Dispose();
-            emoteThirdTask.Dispose();
-            cheerTask.Dispose();
-            emojiTask.Dispose();
+            await FetchImages(cancellationToken);
 
             await Task.Run(ScaleImages, cancellationToken);
             FloorCommentOffsets(chatRoot.comments);
@@ -98,23 +77,18 @@ namespace TwitchDownloaderCore
             if (renderOptions.GenerateMask && File.Exists(renderOptions.MaskFile))
                 File.Delete(renderOptions.MaskFile);
 
+            FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false, renderOptions.LogFfmpegOutput ? progress : null);
+            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(0, true, null) : null;
             progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
-            (Process ffmpegProcess, string ffmpegSavePath) = GetFfmpegProcess(0, false, progress);
 
             try
             {
-                if (renderOptions.GenerateMask)
-                {
-                    (Process maskProcess, string maskSavePath) = GetFfmpegProcess(0, true);
-                    await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken));
-                }
-                else
-                {
-                    await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess: null, progress, cancellationToken));
-                }
+                await RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken);
             }
             catch (OperationCanceledException)
             {
+                ffmpegProcess.Process.Dispose();
+                maskProcess?.Process.Dispose();
                 GC.Collect();
                 throw;
             }
@@ -155,13 +129,15 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void RenderVideoSection(int startTick, int endTick, Process ffmpegProcess, Process maskProcess = null, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = new())
+        private async Task RenderVideoSection(int startTick, int endTick, FfmpegProcess ffmpegProcess, FfmpegProcess maskProcess = null, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = new())
         {
             UpdateFrame latestUpdate = null;
-            BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.StandardInput.BaseStream);
+            BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.Process.StandardInput.BaseStream);
             BinaryWriter maskStream = null;
             if (maskProcess != null)
-                maskStream = new BinaryWriter(maskProcess.StandardInput.BaseStream);
+                maskStream = new BinaryWriter(maskProcess.Process.StandardInput.BaseStream);
+
+            DriveInfo outputDrive = DriveHelper.GetOutputDrive(ffmpegProcess);
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -181,10 +157,14 @@ namespace TwitchDownloaderCore
 
                 using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, latestUpdate))
                 {
+                    await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
+
                     ffmpegStream.Write(frame.Bytes);
 
                     if (maskProcess != null)
                     {
+                        await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
+
                         SetFrameMask(frame);
                         maskStream.Write(frame.Bytes);
                     }
@@ -212,8 +192,8 @@ namespace TwitchDownloaderCore
             ffmpegStream.Dispose();
             maskStream?.Dispose();
 
-            ffmpegProcess.WaitForExit();
-            maskProcess?.WaitForExit();
+            ffmpegProcess.Process.WaitForExit(100_000);
+            maskProcess?.Process.WaitForExit(100_000);
         }
 
         private void SetFrameMask(SKBitmap frame)
@@ -238,7 +218,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private (Process process, string savePath) GetFfmpegProcess(int partNumber, bool isMask, IProgress<ProgressReport> progress = null)
+        private FfmpegProcess GetFfmpegProcess(int partNumber, bool isMask, IProgress<ProgressReport> progress = null)
         {
             string savePath;
             if (partNumber == 0)
@@ -280,7 +260,9 @@ namespace TwitchDownloaderCore
                 process.ErrorDataReceived += (s, e) =>
                 {
                     if (e.Data != null)
+                    {
                         progress.Report(new ProgressReport() { ReportType = ReportType.FfmpegLog, Data = e.Data });
+                    }
                 };
             }
 
@@ -288,7 +270,7 @@ namespace TwitchDownloaderCore
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
 
-            return (process, savePath);
+            return new FfmpegProcess(process, savePath);
         }
 
         private SKBitmap GetFrameFromTick(int currentTick, float sampleTextHeight, UpdateFrame currentFrame = null)
@@ -336,7 +318,7 @@ namespace TwitchDownloaderCore
         {
             List<CommentSection> commentList = new List<CommentSection>();
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
-            double currentTimeSeconds = currentTick / renderOptions.Framerate;
+            double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
             int newestCommentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds);
 
             if (newestCommentIndex == lastestUpdate?.CommentIndex)
@@ -787,7 +769,7 @@ namespace TwitchDownloaderCore
             int delimiterIndex = inputText.LastIndexOfAny(delimiters);
             if (delimiterIndex != -1)
             {
-                return inputText.Slice(0, delimiterIndex).ToString();
+                return inputText.Slice(0, delimiterIndex + 1).ToString();
             }
 
             return inputText.ToString();
@@ -959,6 +941,23 @@ namespace TwitchDownloaderCore
             drawPos.X = defaultPos.X;
             drawPos.Y = defaultPos.Y;
             sectionImages.Add(new SKBitmap(renderOptions.ChatWidth, renderOptions.SectionHeight));
+        }
+
+        private async Task FetchImages(CancellationToken cancellationToken)
+        {
+            Task<List<ChatBadge>> badgeTask = TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            Task<List<TwitchEmote>> emoteTask = TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            Task<List<TwitchEmote>> emoteThirdTask = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline, cancellationToken);
+            Task<List<CheerEmote>> cheerTask = TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
+            Task<Dictionary<string, SKBitmap>> emojiTask = TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
+
+            await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
+
+            badgeList = badgeTask.Result;
+            emoteList = emoteTask.Result;
+            emoteThirdList = emoteThirdTask.Result;
+            cheermotesList = cheerTask.Result;
+            emojiCache = emojiTask.Result;
         }
 
         //Precompute scaled images so we don't have to scale every frame

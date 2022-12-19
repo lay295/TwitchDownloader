@@ -343,6 +343,39 @@ namespace TwitchDownloaderCore
                 }
             }
 
+            if (downloadOptions.DownloadFormat is ChatFormat.Json)
+            {
+                //Best effort, but if we fail oh well
+                try
+                {
+                    progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Backfilling commenter info" });
+                    List<string> userList = chatRoot.comments.DistinctBy(x => x.commenter._id).Select(x => x.commenter._id).ToList();
+                    Dictionary<string, User> userInfo = new Dictionary<string, User>();
+                    for (int i = 0; i < (userList.Count / 10) + 1; i++)
+                    {
+                        List<string> userSubset = userList.Skip(i * 100).Take(100).ToList();
+                        GqlUserInfoResponse userInfoResponse = await TwitchHelper.GetUserInfo(userSubset);
+                        foreach (var user in userInfoResponse.data.users)
+                        {
+                            userInfo[user.id] = user;
+                        }
+                    }
+
+                    foreach (var comment in chatRoot.comments)
+                    {
+                        if (userInfo.ContainsKey(comment.commenter._id))
+                        {
+                            User user = userInfo[comment.commenter._id];
+                            comment.commenter.updated_at = user.updatedAt;
+                            comment.commenter.created_at = user.createdAt;
+                            comment.commenter.bio = user.description;
+                            comment.commenter.logo = user.profileImageURL;
+                        }
+                    }
+                }
+                catch { progress.Report(new ProgressReport() { ReportType = ReportType.Log, Data = "Failed to backfill commenter info" }); }
+            }
+
             switch (downloadOptions.DownloadFormat)
             {
                 case ChatFormat.Json:

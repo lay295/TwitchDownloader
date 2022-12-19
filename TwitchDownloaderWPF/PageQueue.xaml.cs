@@ -38,7 +38,7 @@ namespace TwitchDownloader
 
         private void TaskList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            
+
         }
 
         private void TaskManager_DoWork(object sender, DoWorkEventArgs e)
@@ -53,22 +53,30 @@ namespace TwitchDownloader
                 int currentClip = 0;
                 int currentChat = 0;
                 int currentRender = 0;
-                List<ITwitchTask> tasks = taskList.ToList();
+                IEnumerable<ITwitchTask> tasks = taskList.AsEnumerable();
 
                 foreach (var task in tasks)
                 {
                     if (task.Status == TwitchTaskStatus.Running)
                     {
-                        if (task is VodDownloadTask)
-                            currentVod++;
-                        else if (task is ClipDownloadTask)
-                            currentClip++;
-                        else if (task is ChatDownloadTask)
-                            currentChat++;
-                        else if (task is ChatUpdateTask)
-                            currentChat++;
-                        else if (task is ChatRenderTask)
-                            currentRender++;
+                        switch (task)
+                        {
+                            case VodDownloadTask:
+                                currentVod++;
+                                break;
+                            case ClipDownloadTask:
+                                currentClip++;
+                                break;
+                            case ChatDownloadTask:
+                                currentChat++;
+                                break;
+                            case ChatUpdateTask:
+                                currentChat++;
+                                break;
+                            case ChatRenderTask:
+                                currentRender++;
+                                break;
+                        }
                     }
                 }
 
@@ -76,31 +84,30 @@ namespace TwitchDownloader
                 {
                     if (task.CanRun())
                     {
-                        if (task is VodDownloadTask && (currentVod + 1) <= maxVod)
+                        switch (task)
                         {
-                            currentVod++;
-                            task.RunAsync();
+                            case VodDownloadTask when currentVod < maxVod:
+                                currentVod++;
+                                task.RunAsync();
+                                break;
+                            case ClipDownloadTask when currentClip < maxClip:
+                                currentClip++;
+                                task.RunAsync();
+                                break;
+                            case ChatDownloadTask when currentChat < maxChat:
+                                currentChat++;
+                                task.RunAsync();
+                                break;
+                            case ChatUpdateTask when currentChat < maxChat:
+                                currentChat++;
+                                task.RunAsync();
+                                break;
+                            case ChatRenderTask when currentRender < maxRender:
+                                currentRender++;
+                                task.RunAsync();
+                                break;
                         }
-                        if (task is ClipDownloadTask && (currentClip + 1) <= maxClip)
-                        {
-                            currentClip++;
-                            task.RunAsync();
-                        }
-                        if (task is ChatDownloadTask && (currentChat + 1) <= maxChat)
-                        {
-                            currentChat++;
-                            task.RunAsync();
-                        }
-                        if (task is ChatUpdateTask && (currentChat + 1) <= maxChat)
-                        {
-                            currentChat++;
-                            task.RunAsync();
-                        }
-                        if (task is ChatRenderTask && (currentRender + 1) <= maxRender)
-                        {
-                            currentRender++;
-                            task.RunAsync();
-                        }
+                        continue;
                     }
                 }
 
@@ -144,7 +151,7 @@ namespace TwitchDownloader
             }
         }
 
-        private void btnList_Click(object sender, RoutedEventArgs e)
+        private void btnUrlList_Click(object sender, RoutedEventArgs e)
         {
             WindowUrlList window = new WindowUrlList();
             window.ShowDialog();
@@ -165,9 +172,34 @@ namespace TwitchDownloader
         private void btnCancelTask_Click(object sender, RoutedEventArgs e)
         {
             Button cancelButton = (Button)sender;
-
             cancelButton.IsEnabled = false;
-            ((ITwitchTask)cancelButton.DataContext).Cancel();
+
+            ITwitchTask task = (ITwitchTask)cancelButton.DataContext;
+            if (task.Status is TwitchTaskStatus.Failed or TwitchTaskStatus.Cancelled or TwitchTaskStatus.Finished)
+            {
+                return;
+            }
+
+            task.Cancel();
+        }
+
+        private void btnTaskError_Click(object sender, RoutedEventArgs e)
+        {
+            Button errorButton = (Button)sender;
+            TwitchTaskException taskException = ((ITwitchTask)errorButton.DataContext).Exception;
+
+            if (taskException == null || taskException.Exception == null)
+            {
+                return;
+            }
+
+            string errorMessage = taskException.Exception.Message;
+            if (Settings.Default.VerboseErrors)
+            {
+                errorMessage = taskException.Exception.ToString();
+            }
+
+            MessageBox.Show(errorMessage, "Task Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

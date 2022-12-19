@@ -12,6 +12,16 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Download(ChatDownloadArgs inputOptions)
         {
+            ChatDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
+
+            ChatDownloader chatDownloader = new(downloadOptions);
+            Progress<ProgressReport> progress = new();
+            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
+            chatDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
+        }
+
+        private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions)
+        {
             if (string.IsNullOrWhiteSpace(inputOptions.Id))
             {
                 Console.WriteLine("[ERROR] - Invalid ID, unable to parse.");
@@ -41,10 +51,7 @@ namespace TwitchDownloaderCLI.Modes
                 TempFolder = inputOptions.TempFolder
             };
 
-            ChatDownloader chatDownloader = new(downloadOptions);
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            chatDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
+            return downloadOptions;
         }
     }
 }
