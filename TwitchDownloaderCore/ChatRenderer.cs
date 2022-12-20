@@ -552,9 +552,13 @@ namespace TwitchDownloaderCore
                                     {
                                         AddImageSection(sectionImages, ref drawPos, defaultPos);
                                     }
-                                    Point emotePoint = new Point();
-                                    emotePoint.X = drawPos.X;
-                                    emotePoint.Y = (int)((renderOptions.SectionHeight - emojiImage.Height) / 2.0);
+
+                                    Point emotePoint = new Point
+                                    {
+                                        X = drawPos.X + (int)Math.Ceiling(renderOptions.EmoteSpacing / 2d), // emotePoint.X halfway through emote padding
+                                        Y = (int)((renderOptions.SectionHeight - emojiImage.Height) / 2.0)
+                                    };
+
                                     using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
                                     {
                                         canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
