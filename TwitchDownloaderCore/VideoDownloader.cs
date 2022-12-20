@@ -34,6 +34,8 @@ namespace TwitchDownloaderCore
                 downloadOptions.TempFolder,
                 $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 
+            progress.Report(new ProgressReport(ReportType.Status, "Fetching Video Info [1/4]"));
+
             try
             {
                 ServicePointManager.DefaultConnectionLimit = downloadOptions.DownloadThreads;
@@ -122,6 +124,8 @@ namespace TwitchDownloaderCore
                 int partCount = videoParts.Count;
                 int doneCount = 0;
 
+                progress.Report(new ProgressReport(ReportType.StatusInfo, "Downloading 0% [2/4]"));
+
                 using (var throttler = new SemaphoreSlim(downloadOptions.DownloadThreads))
                 {
                     Task[] downloadTasks = videoParts.Select(request => Task.Run(async () =>
@@ -132,50 +136,48 @@ namespace TwitchDownloaderCore
                             bool isDone = false;
                             bool tryUnmute = vodAge < 24;
                             int errorCount = 0;
-                            while (!isDone && errorCount < 10)
+                            while (!isDone)
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
+
+                                // There is a builtin way to do delayed retries with HttpClient but in this
+                                // specific case we need more control than just blindly retrying
                                 try
                                 {
                                     if (tryUnmute && request.Contains("-muted"))
                                     {
-                                        await DownloadFileTaskAsync(baseUrl + request.Replace("-muted", ""), Path.Combine(downloadFolder, RemoveQueryString(request)));
+                                        await DownloadFileTaskAsync(baseUrl + request.Replace("-muted", ""), Path.Combine(downloadFolder, RemoveQueryString(request)), cancellationToken);
                                     }
                                     else
                                     {
-                                        await DownloadFileTaskAsync(baseUrl + request, Path.Combine(downloadFolder, RemoveQueryString(request)));
+                                        await DownloadFileTaskAsync(baseUrl + request, Path.Combine(downloadFolder, RemoveQueryString(request)), cancellationToken);
                                     }
 
                                     isDone = true;
                                 }
-                                catch (WebException ex)
+                                catch (HttpRequestException ex) when (ex.StatusCode is HttpStatusCode.Forbidden && tryUnmute)
                                 {
-                                    errorCount++;
-                                    Debug.WriteLine(ex);
+                                    tryUnmute = false;
+                                }
+                                catch (HttpRequestException)
+                                {
+                                    if (++errorCount > 10)
+                                    {
+                                        throw new HttpRequestException("Video part " + request + " failed after 10 retries");
+                                    }
 
-                                    HttpStatusCode? status = (ex.Response as HttpWebResponse)?.StatusCode;
-                                    if (status != null && status == HttpStatusCode.Forbidden)
-                                    {
-                                        tryUnmute = false;
-                                    }
-                                    else
-                                    {
-                                        await Task.Delay(10000);
-                                    }
+                                    await Task.Delay(10_000);
                                 }
                             }
 
-                            if (!isDone)
-                                throw new Exception("Video part " + request + " failed after 10 retries");
-
                             doneCount++;
-                            int percent = (int)Math.Floor(((double)doneCount / (double)partCount) * 100);
-                            progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = String.Format("Downloading {0}% (1/3)", percent) });
+                            int percent = (int)(doneCount / (double)partCount * 100);
+                            progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = string.Format("Downloading {0}% [2/4]", percent) });
                             progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
 
                             return;
                         }
-                        catch (Exception ex) when (ex is not OperationCanceledException)
+                        catch (Exception ex) when (ex is not OperationCanceledException or TaskCanceledException)
                         {
                             Debug.WriteLine(ex);
                         }
@@ -190,12 +192,12 @@ namespace TwitchDownloaderCore
 
                 CheckCancelation(cancellationToken, downloadFolder);
 
-                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Combining Parts (2/3)" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Combining Parts [3/4]" });
                 progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = 0 });
 
                 await CombineVideoParts(progress, downloadFolder, videoPartsList, cancellationToken);
 
-                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = $"Finalizing Video (3/3)" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = $"Finalizing Video [4/4]" });
 
                 double startOffset = 0.0;
 
@@ -227,7 +229,7 @@ namespace TwitchDownloaderCore
                     };
                     process.Start();
                     process.WaitForExit();
-                });
+                }, cancellationToken);
                 Cleanup(downloadFolder);
             }
             catch
@@ -237,12 +239,20 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadFileTaskAsync(string downloadUrl, string saveFile)
+        /// <summary>
+        /// Downloads the requested <paramref name="Url"/> to the <paramref name="destinationFile"/> without storing it in memory
+        /// </summary>
+        private static async Task DownloadFileTaskAsync(string Url, string destinationFile, CancellationToken cancellationToken = new())
         {
-            var response = await httpClient.GetAsync(downloadUrl);
-            using (var fs = new FileStream(saveFile, FileMode.Create))
+            var request = new HttpRequestMessage(HttpMethod.Get, Url);
+
+            // We must specify HttpCompletionOption.ResponseHeadersRead or it will read the response content into memory
+            using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
             {
-                await response.Content.CopyToAsync(fs);
+                using (var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 
@@ -251,21 +261,23 @@ namespace TwitchDownloaderCore
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(downloadFolder);
 
             string outputFile = Path.Combine(downloadFolder, "output.ts");
-            using (FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+            using (FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 foreach (var part in videoPartsList)
                 {
                     await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
 
-                    string file = Path.Combine(downloadFolder, RemoveQueryString(part));
-                    if (File.Exists(file))
+                    string partFile = Path.Combine(downloadFolder, RemoveQueryString(part));
+                    if (File.Exists(partFile))
                     {
-                        byte[] writeBytes = await File.ReadAllBytesAsync(file);
-                        await outputStream.WriteAsync(writeBytes, 0, writeBytes.Length);
+                        using (var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.None))
+                        {
+                            await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
+                        }
 
                         try
                         {
-                            File.Delete(file);
+                            File.Delete(partFile);
                         }
                         catch { }
                     }

@@ -85,7 +85,7 @@ namespace TwitchDownloaderCore
             {
                 await RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken);
             }
-            catch (OperationCanceledException)
+            catch
             {
                 ffmpegProcess.Process.Dispose();
                 maskProcess?.Process.Dispose();
