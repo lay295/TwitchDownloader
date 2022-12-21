@@ -50,7 +50,7 @@ namespace TwitchDownloaderCore
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport(ReportType.Status, "Fetching Images"));
-            await FetchImages(cancellationToken);
+            await Task.Run(() => FetchImages(cancellationToken));
 
             await Task.Run(ScaleImages, cancellationToken);
             FloorCommentOffsets(chatRoot.comments);
@@ -84,7 +84,8 @@ namespace TwitchDownloaderCore
 
             try
             {
-                await RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken);
+                // We must use Task.Run() or we will block the UI thread. Not everything in the method is async.
+                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken), cancellationToken);
             }
             catch
             {
@@ -575,7 +576,7 @@ namespace TwitchDownloaderCore
                                 fragmentString = fragmentString[1..];
                             }
                         }
-                        else if (new StringInfo(fragmentString).LengthInTextElements < fragmentString.Length || !messageFont.ContainsGlyphs(fragmentString))
+                        else if (!messageFont.ContainsGlyphs(fragmentString) || new StringInfo(fragmentString).LengthInTextElements < fragmentString.Length)
                         {
                             ReadOnlySpan<char> fragmentSpan = fragmentString.AsSpan();
 
@@ -609,13 +610,12 @@ namespace TwitchDownloaderCore
                                         DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                         nonFontBuffer.Clear();
                                     }
-
                                     using SKPaint highSurrogateFallbackFont = GetFallbackFont(char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]), renderOptions).Clone();
                                     highSurrogateFallbackFont.Color = renderOptions.MessageColor;
                                     DrawText(fragmentSpan.Slice(j, 2).ToString(), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                     j++;
                                 }
-                                else if (new StringInfo(fragmentSpan[j].ToString()).LengthInTextElements == 0 || !messageFont.ContainsGlyphs(fragmentSpan[j].ToString()))
+                                else if (!messageFont.ContainsGlyphs(fragmentSpan[j].ToString()) || new StringInfo(fragmentSpan[j].ToString()).LengthInTextElements == 0)
                                 {
                                     if (inFontBuffer.Length > 0)
                                     {
