@@ -588,42 +588,68 @@ namespace TwitchDownloaderCore
                                 }
                             }
 
-                            // The fragment has either surrogate pairs or characters not in the messageFont, draw one at a time
-                            var messageBuffer = new StringBuilder();
+                            // This method is an absolute mess now.
+                            // We cannot draw nonFont chars individually or Arabic script looks improper https://github.com/lay295/TwitchDownloader/issues/484
+                            // The fragment has either surrogate pairs or characters not in the messageFont
+                            var inFontBuffer = new StringBuilder();
+                            var nonFontBuffer = new StringBuilder();
                             for (int j = 0; j < fragmentSpan.Length; j++)
                             {
                                 if (char.IsHighSurrogate(fragmentSpan[j]) && j + 1 < fragmentSpan.Length && char.IsLowSurrogate(fragmentSpan[j + 1]))
                                 {
-                                    if (messageBuffer.Length > 0)
+                                    if (inFontBuffer.Length > 0)
                                     {
-                                        DrawText(messageBuffer.ToString(), messageFont, false, sectionImages, ref drawPos, defaultPos);
-                                        messageBuffer.Clear();
+                                        DrawText(inFontBuffer.ToString(), messageFont, false, sectionImages, ref drawPos, defaultPos);
+                                        inFontBuffer.Clear();
                                     }
-                                    using SKPaint fallbackFont = GetFallbackFont(char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]), renderOptions).Clone();
-                                    fallbackFont.Color = renderOptions.MessageColor;
-                                    DrawText(fragmentSpan.Slice(j, 2).ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos);
+                                    if (nonFontBuffer.Length > 0)
+                                    {
+                                        using SKPaint nonFontFallbackFont = GetFallbackFont(fragmentSpan[j], renderOptions).Clone();
+                                        nonFontFallbackFont.Color = renderOptions.MessageColor;
+                                        DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos);
+                                        nonFontBuffer.Clear();
+                                    }
+
+                                    using SKPaint highSurrogateFallbackFont = GetFallbackFont(char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]), renderOptions).Clone();
+                                    highSurrogateFallbackFont.Color = renderOptions.MessageColor;
+                                    DrawText(fragmentSpan.Slice(j, 2).ToString(), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                     j++;
                                 }
                                 else if (new StringInfo(fragmentSpan[j].ToString()).LengthInTextElements == 0 || !messageFont.ContainsGlyphs(fragmentSpan[j].ToString()))
                                 {
-                                    if (messageBuffer.Length > 0)
+                                    if (inFontBuffer.Length > 0)
                                     {
-                                        DrawText(messageBuffer.ToString(), messageFont, false, sectionImages, ref drawPos, defaultPos);
-                                        messageBuffer.Clear();
+                                        DrawText(inFontBuffer.ToString(), messageFont, false, sectionImages, ref drawPos, defaultPos);
+                                        inFontBuffer.Clear();
                                     }
-                                    using SKPaint fallbackFont = GetFallbackFont(fragmentSpan[j], renderOptions).Clone();
-                                    fallbackFont.Color = renderOptions.MessageColor;
-                                    DrawText(fragmentSpan[j].ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos);
+
+                                    nonFontBuffer.Append(fragmentSpan[j]);
                                 }
                                 else
                                 {
-                                    messageBuffer.Append(fragmentSpan[j]);
+                                    if (nonFontBuffer.Length > 0)
+                                    {
+                                        using SKPaint fallbackFont = GetFallbackFont(fragmentSpan[j], renderOptions).Clone();
+                                        fallbackFont.Color = renderOptions.MessageColor;
+                                        DrawText(nonFontBuffer.ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos);
+                                        nonFontBuffer.Clear();
+                                    }
+
+                                    inFontBuffer.Append(fragmentSpan[j]);
                                 }
                             }
-                            if (messageBuffer.Length > 0)
+                            // Only one or the other should occur
+                            if (nonFontBuffer.Length > 0)
                             {
-                                DrawText(messageBuffer.ToString(), messageFont, true, sectionImages, ref drawPos, defaultPos);
-                                messageBuffer.Clear();
+                                using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
+                                fallbackFont.Color = renderOptions.MessageColor;
+                                DrawText(nonFontBuffer.ToString(), fallbackFont, true, sectionImages, ref drawPos, defaultPos);
+                                nonFontBuffer.Clear();
+                            }
+                            if (inFontBuffer.Length > 0)
+                            {
+                                DrawText(inFontBuffer.ToString(), messageFont, true, sectionImages, ref drawPos, defaultPos);
+                                inFontBuffer.Clear();
                             }
                         }
                         else
