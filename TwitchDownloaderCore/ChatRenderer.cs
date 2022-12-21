@@ -479,6 +479,7 @@ namespace TwitchDownloaderCore
             return emojiKey;
         }
 
+        // This method is an absolute mess now. We direly need to extract each render case.
         private void DrawMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos)
         {
             int bitsCount = comment.message.bits_spent;
@@ -588,7 +589,6 @@ namespace TwitchDownloaderCore
                                 }
                             }
 
-                            // This method is an absolute mess now.
                             // We cannot draw nonFont chars individually or Arabic script looks improper https://github.com/lay295/TwitchDownloader/issues/484
                             // The fragment has either surrogate pairs or characters not in the messageFont
                             var inFontBuffer = new StringBuilder();
@@ -604,7 +604,7 @@ namespace TwitchDownloaderCore
                                     }
                                     if (nonFontBuffer.Length > 0)
                                     {
-                                        using SKPaint nonFontFallbackFont = GetFallbackFont(fragmentSpan[j], renderOptions).Clone();
+                                        using SKPaint nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
                                         nonFontFallbackFont.Color = renderOptions.MessageColor;
                                         DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                         nonFontBuffer.Clear();
@@ -629,7 +629,7 @@ namespace TwitchDownloaderCore
                                 {
                                     if (nonFontBuffer.Length > 0)
                                     {
-                                        using SKPaint fallbackFont = GetFallbackFont(fragmentSpan[j], renderOptions).Clone();
+                                        using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
                                         fallbackFont.Color = renderOptions.MessageColor;
                                         DrawText(nonFontBuffer.ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                         nonFontBuffer.Clear();
