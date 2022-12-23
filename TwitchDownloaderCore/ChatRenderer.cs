@@ -45,7 +45,8 @@ namespace TwitchDownloaderCore
             renderOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : renderOptions.TempFolder,
                 "TwitchDownloader");
-            renderOptions.PreWrapBlockArt = renderOptions.ChatWidth / renderOptions.FontSize > 29.166;
+            renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize;
+            renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
         }
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
@@ -70,6 +71,9 @@ namespace TwitchDownloaderCore
                 nameFont.Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.UsernameFontStyle);
                 messageFont.Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.MessageFontStyle);
             }
+
+            // Rough estimation of the width of a single block art character
+            renderOptions.BlockArtCharWidth = GetFallbackFont('█', renderOptions).MeasureText("█");
 
             (int startTick, int totalTicks) = GetVideoTicks();
 
@@ -583,9 +587,9 @@ namespace TwitchDownloaderCore
 
                             if (blockArtRegex.IsMatch(fragmentString))
                             {
-                                // Very rough estimation of width of text because we don't know the font yet. This is to show block art properly
-                                int textWidth = (int)(fragmentString.Length * messageFont.MeasureText("█"));
-                                if (renderOptions.PreWrapBlockArt && (drawPos.X + textWidth) / renderOptions.FontSize > 29.166)
+                                // Very rough estimation of width of block art
+                                int textWidth = (int)(fragmentString.Length * renderOptions.BlockArtCharWidth);
+                                if (renderOptions.BlockArtPreWrap && drawPos.X + textWidth > renderOptions.BlockArtPreWrapWidth)
                                 {
                                     AddImageSection(sectionImages, ref drawPos, defaultPos);
                                 }
@@ -1055,7 +1059,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions, IProgress<ProgressReport> progress)
+        public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions, IProgress<ProgressReport> progress = null)
         {
             if (fallbackCache.ContainsKey(input))
                 return fallbackCache[input];
