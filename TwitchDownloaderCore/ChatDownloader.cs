@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -41,8 +40,9 @@ namespace TwitchDownloaderCore
 
             while (latestMessage < videoEnd)
             {
-                string response;
+                cancellationToken.ThrowIfCancellationRequested();
 
+                string response;
                 try
                 {
                     var request = new HttpRequestMessage()
@@ -51,6 +51,7 @@ namespace TwitchDownloaderCore
                         Method = HttpMethod.Post
                     };
                     request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+
                     if (isFirst)
                     {
                         request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"contentOffsetSeconds\":" + videoStart + "},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
@@ -59,20 +60,27 @@ namespace TwitchDownloaderCore
                     {
                         request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"cursor\":\"" + cursor + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
                     }
-                    response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
+
+                    using (var httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
+                    {
+                        response = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
+                    }
+
                     errorCount = 0;
                 }
-                catch (WebException ex)
+                catch (HttpRequestException)
                 {
-                    await Task.Delay(1000 * errorCount);
-                    errorCount++;
+                    if (++errorCount > 10)
+                    {
+                        throw;
+                    }
 
-                    if (errorCount >= 10)
-                        throw ex;
-
+                    await Task.Delay(1_000 * errorCount, cancellationToken);
                     continue;
                 }
 
+                // We can technically switch to the System.Text.Json deserializer to deserialize the HttpContent as a stream instead
+                // of a string. https://josef.codes/you-are-probably-still-using-httpclient-wrong-and-it-is-destabilizing-your-software/
                 GqlCommentResponse commentResponse = JsonConvert.DeserializeObject<List<GqlCommentResponse>>(response)[0];
                 List<Comment> convertedComments = ConvertComments(commentResponse.data.video);
 
@@ -93,8 +101,6 @@ namespace TwitchDownloaderCore
 
                 int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
                 progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
-
-                cancellationToken.ThrowIfCancellationRequested();
 
                 if (isFirst)
                     isFirst = false;
@@ -299,7 +305,7 @@ namespace TwitchDownloaderCore
                 List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(comments, downloadOptions.TempFolder);
                 List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, downloadOptions.TempFolder);
                 List<CheerEmote> twitchBits = await TwitchHelper.GetBits(downloadOptions.TempFolder, chatRoot.streamer.id.ToString());
-                
+
                 cancellationToken.ThrowIfCancellationRequested();
 
                 foreach (TwitchEmote emote in thirdPartyEmotes)

@@ -154,10 +154,10 @@ namespace TwitchDownloaderCore
 
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height, latestUpdate);
+                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height, progress, latestUpdate);
                 }
 
-                using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, latestUpdate))
+                using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, progress, latestUpdate))
                 {
                     await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
 
@@ -275,9 +275,9 @@ namespace TwitchDownloaderCore
             return new FfmpegProcess(process, savePath);
         }
 
-        private SKBitmap GetFrameFromTick(int currentTick, float sampleTextHeight, UpdateFrame currentFrame = null)
+        private SKBitmap GetFrameFromTick(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame currentFrame = null)
         {
-            currentFrame ??= GenerateUpdateFrame(currentTick, sampleTextHeight);
+            currentFrame ??= GenerateUpdateFrame(currentTick, sampleTextHeight, progress);
             SKBitmap frame = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
             return frame;
         }
@@ -316,7 +316,7 @@ namespace TwitchDownloaderCore
             return newFrame;
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, UpdateFrame lastestUpdate = null)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame lastestUpdate = null)
         {
             List<CommentSection> commentList = new List<CommentSection>();
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
@@ -346,7 +346,7 @@ namespace TwitchDownloaderCore
                         continue;
                     }
 
-                    CommentSection comment = GenerateCommentSection(commentIndex, sampleTextHeight);
+                    CommentSection comment = GenerateCommentSection(commentIndex, sampleTextHeight, progress);
                     if (comment != null)
                     {
                         commentList.Add(comment);
@@ -370,7 +370,7 @@ namespace TwitchDownloaderCore
             return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
         }
 
-        private CommentSection GenerateCommentSection(int commentIndex, float sampleTextHeight)
+        private CommentSection GenerateCommentSection(int commentIndex, float sampleTextHeight, IProgress<ProgressReport> progress)
         {
             CommentSection newSection = new CommentSection();
             List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
@@ -415,7 +415,7 @@ namespace TwitchDownloaderCore
                 ascentMessage = true;
                 drawPos.X += renderOptions.AscentIndentWidth;
                 defaultPos.X = drawPos.X;
-                DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos);
+                DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos, progress);
             }
             else
             {
@@ -427,8 +427,8 @@ namespace TwitchDownloaderCore
                 {
                     DrawBadges(comment, sectionImages, ref drawPos);
                 }
-                DrawUsername(comment, sectionImages, ref drawPos);
-                DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos);
+                DrawUsername(comment, sectionImages, ref drawPos, progress);
+                DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos, progress);
             }
 
             SKBitmap finalBitmap = CombineImages(sectionImages, ascentMessage);
@@ -481,7 +481,7 @@ namespace TwitchDownloaderCore
         }
 
         // This method is an absolute mess now. We direly need to extract each render case.
-        private void DrawMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos)
+        private void DrawMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress)
         {
             int bitsCount = comment.message.bits_spent;
             foreach (var fragment in comment.message.fragments)
@@ -605,12 +605,12 @@ namespace TwitchDownloaderCore
                                     }
                                     if (nonFontBuffer.Length > 0)
                                     {
-                                        using SKPaint nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
+                                        using SKPaint nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions, progress).Clone();
                                         nonFontFallbackFont.Color = renderOptions.MessageColor;
                                         DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                         nonFontBuffer.Clear();
                                     }
-                                    using SKPaint highSurrogateFallbackFont = GetFallbackFont(char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]), renderOptions).Clone();
+                                    using SKPaint highSurrogateFallbackFont = GetFallbackFont(char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]), renderOptions, progress).Clone();
                                     highSurrogateFallbackFont.Color = renderOptions.MessageColor;
                                     DrawText(fragmentSpan.Slice(j, 2).ToString(), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                     j++;
@@ -629,7 +629,7 @@ namespace TwitchDownloaderCore
                                 {
                                     if (nonFontBuffer.Length > 0)
                                     {
-                                        using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
+                                        using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions, progress).Clone();
                                         fallbackFont.Color = renderOptions.MessageColor;
                                         DrawText(nonFontBuffer.ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos);
                                         nonFontBuffer.Clear();
@@ -641,7 +641,7 @@ namespace TwitchDownloaderCore
                             // Only one or the other should occur
                             if (nonFontBuffer.Length > 0)
                             {
-                                using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
+                                using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions, progress).Clone();
                                 fallbackFont.Color = renderOptions.MessageColor;
                                 DrawText(nonFontBuffer.ToString(), fallbackFont, true, sectionImages, ref drawPos, defaultPos);
                                 nonFontBuffer.Clear();
@@ -835,28 +835,26 @@ namespace TwitchDownloaderCore
             return measure.Width;
         }
 
-        private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos)
+        private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, IProgress<ProgressReport> progress)
         {
             using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
             SKColor userColor = SKColor.Parse(comment.message.user_color ?? defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Length]);
             userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor, renderOptions);
-            SKPaint userPaint = nameFont.Clone();
+
+            SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
+                ? GetFallbackFont(comment.commenter.display_name.Where(IsNotAscii).First(), renderOptions, progress).Clone()
+                : nameFont.Clone();
+
             userPaint.Color = userColor;
-
-            if (comment.commenter.display_name.Any(IsNotAscii))
-            {
-                userPaint = GetFallbackFont(comment.commenter.display_name.Where(IsNotAscii).First(), renderOptions).Clone();
-                userPaint.Color = userColor;
-            }
-
-            int textWidth = (int)userPaint.MeasureText(comment.commenter.display_name + ":");
+            string userName = comment.commenter.display_name + ":";
+            int textWidth = (int)userPaint.MeasureText(userName);
             if (renderOptions.Outline)
             {
-                SKPath outlinePath = userPaint.GetTextPath(comment.commenter.display_name + ":", drawPos.X, drawPos.Y);
+                SKPath outlinePath = userPaint.GetTextPath(userName, drawPos.X, drawPos.Y);
                 sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
             }
             userPaint.Color = userColor;
-            sectionImageCanvas.DrawText(comment.commenter.display_name + ":", drawPos.X, drawPos.Y, userPaint);
+            sectionImageCanvas.DrawText(userName, drawPos.X, drawPos.Y, userPaint);
             drawPos.X += textWidth + renderOptions.WordSpacing;
             userPaint.Dispose();
         }
@@ -902,19 +900,19 @@ namespace TwitchDownloaderCore
         {
             using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
             List<(SKBitmap, ChatBadgeType)> badgeImages = ParseCommentBadges(comment);
-            foreach (var badge in badgeImages)
+            foreach (var (badgeImage, badgeType) in badgeImages)
             {
                 //Don't render filtered out badges
-                if (((ChatBadgeType)renderOptions.ChatBadgeMask).HasFlag(badge.Item2))
+                if (((ChatBadgeType)renderOptions.ChatBadgeMask).HasFlag(badgeType))
                     continue;
 
-                float badgeY = (float)((renderOptions.SectionHeight - badge.Item1.Height) / 2.0);
-                sectionImageCanvas.DrawBitmap(badge.Item1, drawPos.X, badgeY);
-                drawPos.X += badge.Item1.Width + renderOptions.WordSpacing / 2;
+                float badgeY = (float)((renderOptions.SectionHeight - badgeImage.Height) / 2.0);
+                sectionImageCanvas.DrawBitmap(badgeImage, drawPos.X, badgeY);
+                drawPos.X += badgeImage.Width + renderOptions.WordSpacing / 2;
             }
         }
 
-        private List<(SKBitmap, ChatBadgeType)> ParseCommentBadges(Comment comment)
+        private List<(SKBitmap badgeImage, ChatBadgeType badgeType)> ParseCommentBadges(Comment comment)
         {
             List<(SKBitmap, ChatBadgeType)> returnList = new List<(SKBitmap, ChatBadgeType)>();
 
@@ -1056,12 +1054,19 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions)
+        public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions, IProgress<ProgressReport> progress)
         {
             if (fallbackCache.ContainsKey(input))
                 return fallbackCache[input];
 
             SKPaint newPaint = new SKPaint() { Typeface = fontManager.MatchCharacter(input), LcdRenderText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, SubpixelText = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
+            
+            if (newPaint.Typeface == null)
+            {
+                newPaint.Typeface = SKTypeface.Default;
+                progress?.Report(new ProgressReport(ReportType.Log, "No valid typefaces were found for some messages."));
+            }
+
             fallbackCache.TryAdd(input, newPaint);
             return newPaint;
         }

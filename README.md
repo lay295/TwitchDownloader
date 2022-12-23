@@ -88,7 +88,7 @@ TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 
 ## Linux – Getting started
 
-1. Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) which will result in segmentation faults when rendering chats with said languages. If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, just like the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
+1. Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
 2. Ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 3. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for Linux, grab the [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/) for Arch Linux, or [build from source](#building-from-source).
 4. Extract `TwitchDownloaderCLI`.
