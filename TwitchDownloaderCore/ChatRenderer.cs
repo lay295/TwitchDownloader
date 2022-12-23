@@ -636,13 +636,13 @@ namespace TwitchDownloaderCore
 
                     drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
 
-                    // Some emojis are multiple characters while others are just 1 in Substring's eyes
                     try
                     {
-                        fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Length);
+                        fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Trim('\uFE0F').Length);
                     }
                     catch (IndexOutOfRangeException)
                     {
+                        // Once in a blue moon this might happen
                         fragmentSpan = fragmentSpan.Slice(1);
                     }
                 }
