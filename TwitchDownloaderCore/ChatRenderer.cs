@@ -554,39 +554,98 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawRegularMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString)
+        private void DrawThirdPartyEmote(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, string fragmentString)
         {
-            bool bitsPrinted = false;
-            try
+            TwitchEmote twitchEmote = emoteThirdList.First(x => x.Name == fragmentString);
+            Point emotePoint = new Point();
+            if (!twitchEmote.IsZeroWidth)
             {
-                if (bitsCount > 0 && fragmentString.Any(char.IsDigit) && fragmentString.Any(char.IsLetter))
+                if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
                 {
-                    int bitsIndex = fragmentString.IndexOfAny("0123456789".ToCharArray());
-                    string outputPrefix = fragmentString.Substring(0, bitsIndex).ToLower();
-                    if (cheermotesList.Any(x => x.prefix.ToLower() == outputPrefix))
+                    AddImageSection(sectionImages, ref drawPos, defaultPos);
+                }
+
+                emotePoint.X = drawPos.X;
+                drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
+            }
+            else
+            {
+                emotePoint.X = drawPos.X - renderOptions.EmoteSpacing - twitchEmote.Width;
+            }
+            emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
+            emotePositionList.Add((emotePoint, twitchEmote));
+        }
+
+        private void DrawEmojiMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress, int bitsCount, string fragmentString)
+        {
+            ReadOnlySpan<char> fragmentSpan = fragmentString.AsSpan();
+            StringBuilder nonEmojiBuffer = new();
+            while (fragmentSpan.Length > 0)
+            {
+                // Old LINQ method. Leaving this for reference
+                //List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
+
+                List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
+                foreach (var emoji in Emoji.All)
+                {
+                    if (fragmentSpan.StartsWith(emoji.ToString()))
                     {
-                        CheerEmote currentCheerEmote = cheermotesList.First(x => x.prefix.ToLower() == outputPrefix);
-                        int bitsAmount = Int32.Parse(fragmentString.Substring(bitsIndex));
-                        bitsCount -= bitsAmount;
-                        KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
-                        TwitchEmote twitchEmote = tierList.Value;
-                        if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
-                        {
-                            AddImageSection(sectionImages, ref drawPos, defaultPos);
-                        }
-                        Point emotePoint = new Point();
-                        emotePoint.X = drawPos.X;
-                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
-                        emotePositionList.Add((emotePoint, twitchEmote));
-                        drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
-                        bitsPrinted = true;
+                        emojiMatches.Add(emoji);
                     }
                 }
+
+                // Make sure the found emojis actually exist in our cache
+                int emojiMatchesCount = emojiMatches.Count;
+                for (int j = 0; j < emojiMatchesCount; j++)
+                {
+                    if (!emojiCache.ContainsKey(GetKeyName(emojiMatches[j].Sequence.Codepoints)))
+                    {
+                        emojiMatches.RemoveAt(j);
+                        emojiMatchesCount--;
+                        j--;
+                    }
+                }
+
+                if (emojiMatchesCount > 0)
+                {
+                    if (nonEmojiBuffer.Length > 0)
+                    {
+                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, progress, bitsCount, nonEmojiBuffer.ToString());
+                        nonEmojiBuffer.Clear();
+                    }
+
+                    SingleEmoji selectedEmoji = emojiMatches.OrderByDescending(x => x.Sequence.Codepoints.Count()).First();
+                    SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
+
+                    if (drawPos.X + emojiImage.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
+                    {
+                        AddImageSection(sectionImages, ref drawPos, defaultPos);
+                    }
+
+                    Point emotePoint = new Point
+                    {
+                        X = drawPos.X + (int)Math.Ceiling(renderOptions.EmoteSpacing / 2d), // emotePoint.X halfway through emote padding
+                        Y = (int)((renderOptions.SectionHeight - emojiImage.Height) / 2.0)
+                    };
+
+                    using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
+                    {
+                        canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
+                    }
+
+                    drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
+                    fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Length);
+                }
+                else
+                {
+                    nonEmojiBuffer.Append(fragmentSpan[0]);
+                    fragmentSpan = fragmentSpan.Slice(1);
+                }
             }
-            catch { }
-            if (!bitsPrinted)
+            if (nonEmojiBuffer.Length > 0)
             {
-                DrawText(fragmentString, messageFont, true, sectionImages, ref drawPos, defaultPos);
+                DrawText(nonEmojiBuffer.ToString(), messageFont, false, sectionImages, ref drawPos, defaultPos);
+                nonEmojiBuffer.Clear();
             }
         }
 
@@ -667,99 +726,40 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawEmojiMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress, int bitsCount, string fragmentString)
+        private void DrawRegularMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString)
         {
-            ReadOnlySpan<char> fragmentSpan = fragmentString.AsSpan();
-            StringBuilder nonEmojiBuffer = new();
-            while (fragmentSpan.Length > 0)
+            bool bitsPrinted = false;
+            try
             {
-                // Old LINQ method. Leaving this for reference
-                //List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
-
-                List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
-                foreach (var emoji in Emoji.All)
+                if (bitsCount > 0 && fragmentString.Any(char.IsDigit) && fragmentString.Any(char.IsLetter))
                 {
-                    if (fragmentSpan.StartsWith(emoji.ToString()))
+                    int bitsIndex = fragmentString.IndexOfAny("0123456789".ToCharArray());
+                    string outputPrefix = fragmentString.Substring(0, bitsIndex).ToLower();
+                    if (cheermotesList.Any(x => x.prefix.ToLower() == outputPrefix))
                     {
-                        emojiMatches.Add(emoji);
+                        CheerEmote currentCheerEmote = cheermotesList.First(x => x.prefix.ToLower() == outputPrefix);
+                        int bitsAmount = Int32.Parse(fragmentString.Substring(bitsIndex));
+                        bitsCount -= bitsAmount;
+                        KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
+                        TwitchEmote twitchEmote = tierList.Value;
+                        if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
+                        {
+                            AddImageSection(sectionImages, ref drawPos, defaultPos);
+                        }
+                        Point emotePoint = new Point();
+                        emotePoint.X = drawPos.X;
+                        emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
+                        emotePositionList.Add((emotePoint, twitchEmote));
+                        drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
+                        bitsPrinted = true;
                     }
-                }
-
-                // Make sure the found emojis actually exist in our cache
-                int emojiMatchesCount = emojiMatches.Count;
-                for (int j = 0; j < emojiMatchesCount; j++)
-                {
-                    if (!emojiCache.ContainsKey(GetKeyName(emojiMatches[j].Sequence.Codepoints)))
-                    {
-                        emojiMatches.RemoveAt(j);
-                        emojiMatchesCount--;
-                        j--;
-                    }
-                }
-
-                if (emojiMatchesCount > 0)
-                {
-                    if (nonEmojiBuffer.Length > 0)
-                    {
-                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, progress, bitsCount, nonEmojiBuffer.ToString());
-                        nonEmojiBuffer.Clear();
-                    }
-
-                    SingleEmoji selectedEmoji = emojiMatches.OrderByDescending(x => x.Sequence.Codepoints.Count()).First();
-                    SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
-
-                    if (drawPos.X + emojiImage.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
-                    {
-                        AddImageSection(sectionImages, ref drawPos, defaultPos);
-                    }
-
-                    Point emotePoint = new Point
-                    {
-                        X = drawPos.X + (int)Math.Ceiling(renderOptions.EmoteSpacing / 2d), // emotePoint.X halfway through emote padding
-                        Y = (int)((renderOptions.SectionHeight - emojiImage.Height) / 2.0)
-                    };
-
-                    using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
-                    {
-                        canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
-                    }
-
-                    drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
-                    fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Length);
-                }
-                else
-                {
-                    nonEmojiBuffer.Append(fragmentSpan[0]);
-                    fragmentSpan = fragmentSpan.Slice(1);
                 }
             }
-            if (nonEmojiBuffer.Length > 0)
+            catch { }
+            if (!bitsPrinted)
             {
-                DrawText(nonEmojiBuffer.ToString(), messageFont, false, sectionImages, ref drawPos, defaultPos);
-                nonEmojiBuffer.Clear();
+                DrawText(fragmentString, messageFont, true, sectionImages, ref drawPos, defaultPos);
             }
-        }
-
-        private void DrawThirdPartyEmote(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, string fragmentString)
-        {
-            TwitchEmote twitchEmote = emoteThirdList.First(x => x.Name == fragmentString);
-            Point emotePoint = new Point();
-            if (!twitchEmote.IsZeroWidth)
-            {
-                if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
-                {
-                    AddImageSection(sectionImages, ref drawPos, defaultPos);
-                }
-
-                emotePoint.X = drawPos.X;
-                drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
-            }
-            else
-            {
-                emotePoint.X = drawPos.X - renderOptions.EmoteSpacing - twitchEmote.Width;
-            }
-            emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
-            emotePositionList.Add((emotePoint, twitchEmote));
         }
 
         private void DrawFirstPartyEmote(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, Fragment fragment)
