@@ -45,6 +45,7 @@ namespace TwitchDownloaderCore
             renderOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : renderOptions.TempFolder,
                 "TwitchDownloader");
+            renderOptions.PreWrapBlockArt = renderOptions.ChatWidth / renderOptions.FontSize > 29.166;
         }
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
@@ -584,7 +585,7 @@ namespace TwitchDownloaderCore
                             {
                                 // Very rough estimation of width of text because we don't know the font yet. This is to show block art properly
                                 int textWidth = (int)(fragmentString.Length * messageFont.MeasureText("█"));
-                                if (drawPos.X + textWidth > 300) // Twitch chat is 300px on the website
+                                if (renderOptions.PreWrapBlockArt && (drawPos.X + textWidth) / renderOptions.FontSize > 29.166)
                                 {
                                     AddImageSection(sectionImages, ref drawPos, defaultPos);
                                 }

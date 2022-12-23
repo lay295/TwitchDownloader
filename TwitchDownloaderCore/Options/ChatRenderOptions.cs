@@ -70,5 +70,6 @@ namespace TwitchDownloaderCore.Options
         public int AscentIndentWidth => (int)(24 * ReferenceScale);
         public bool Offline { get; set; }
         public bool LogFfmpegOutput { get; set; } = false;
+        public bool PreWrapBlockArt { get; set; } = true;
     }
 }
