@@ -576,6 +576,7 @@ namespace TwitchDownloaderCore
             emotePositionList.Add((emotePoint, twitchEmote));
         }
 
+#pragma warning disable IDE0057
         private void DrawEmojiMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress, int bitsCount, string fragmentString)
         {
             ReadOnlySpan<char> fragmentSpan = fragmentString.AsSpan();
@@ -634,7 +635,16 @@ namespace TwitchDownloaderCore
                     }
 
                     drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
-                    fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Length);
+
+                    // Some emojis are multiple characters while others are just 1 in Substring's eyes
+                    try
+                    {
+                        fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Length);
+                    }
+                    catch (IndexOutOfRangeException)
+                    {
+                        fragmentSpan = fragmentSpan.Slice(1);
+                    }
                 }
                 else
                 {
@@ -648,6 +658,7 @@ namespace TwitchDownloaderCore
                 nonEmojiBuffer.Clear();
             }
         }
+#pragma warning restore IDE0057
 
         private void DrawNonFontMessage(List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress, string fragmentString)
         {
