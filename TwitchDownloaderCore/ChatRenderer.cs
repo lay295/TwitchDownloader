@@ -46,7 +46,7 @@ namespace TwitchDownloaderCore
                 string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : renderOptions.TempFolder,
                 "TwitchDownloader");
             renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize;
-            renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
+            renderOptions.BlockArtPreWrap = renderOptions.ChatWidth - renderOptions.SidePadding * 2 > renderOptions.BlockArtPreWrapWidth;
         }
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
@@ -294,26 +294,26 @@ namespace TwitchDownloaderCore
             int currentTickMs = (int)(currentTick * 1000 * (1.0 / renderOptions.Framerate));
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
             {
-                foreach (var comment in comments)
+                foreach (var comment in comments.Reverse<CommentSection>())
                 {
                     frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
-                    foreach (var emote in comment.Emotes)
+                    foreach ((Point drawPoint, TwitchEmote emote) in comment.Emotes)
                     {
-                        if (emote.Item2.FrameCount > 1)
+                        if (emote.FrameCount > 1)
                         {
-                            int frameIndex = emote.Item2.EmoteFrameDurations.Count - 1;
-                            int imageFrame = currentTickMs % emote.Item2.EmoteFrameDurations.Sum(x => x * 10);
-                            for (int i = 0; i < emote.Item2.EmoteFrameDurations.Count; i++)
+                            int frameIndex = emote.EmoteFrameDurations.Count - 1;
+                            int imageFrame = currentTickMs % emote.EmoteFrameDurations.Sum(x => x * 10);
+                            for (int i = 0; i < emote.EmoteFrameDurations.Count; i++)
                             {
-                                if (imageFrame - emote.Item2.EmoteFrameDurations[i] * 10 <= 0)
+                                if (imageFrame - emote.EmoteFrameDurations[i] * 10 <= 0)
                                 {
                                     frameIndex = i;
                                     break;
                                 }
-                                imageFrame -= emote.Item2.EmoteFrameDurations[i] * 10;
+                                imageFrame -= emote.EmoteFrameDurations[i] * 10;
                             }
 
-                            frameCanvas.DrawBitmap(emote.Item2.EmoteFrames[frameIndex], emote.Item1.X, emote.Item1.Y + frameHeight);
+                            frameCanvas.DrawBitmap(emote.EmoteFrames[frameIndex], drawPoint.X, drawPoint.Y + frameHeight);
                         }
                     }
                 }
@@ -321,55 +321,76 @@ namespace TwitchDownloaderCore
             return newFrame;
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame lastestUpdate = null)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame lastUpdate = null)
         {
-            List<CommentSection> commentList = new List<CommentSection>();
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
             double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
             int newestCommentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds);
 
-            if (newestCommentIndex == lastestUpdate?.CommentIndex)
+            if (newestCommentIndex == lastUpdate?.CommentIndex)
             {
-                return lastestUpdate;
+                return lastUpdate;
             }
-            else
+            lastUpdate?.Image.Dispose();
+
+            List<CommentSection> commentList = lastUpdate?.Comments ?? new List<CommentSection>();
+
+            int oldCommentIndex = -1;
+            if (commentList.Count > 0)
             {
-                lastestUpdate?.Image.Dispose();
+                oldCommentIndex = commentList.Last().CommentIndex;
+            }
+
+            if (newestCommentIndex > oldCommentIndex)
+            {
+                int currentIndex = oldCommentIndex + 1;
+
+                while (newestCommentIndex >= currentIndex)
+                {
+                    // Skip comments from ignored users
+                    if (renderOptions.IgnoreUsersList.Contains(chatRoot.comments[currentIndex].commenter.name))
+                    {
+                        currentIndex++;
+                        continue;
+                    }
+
+                    // Draw the new comments
+                    CommentSection comment = GenerateCommentSection(currentIndex, sampleTextHeight, progress);
+                    if (comment != null)
+                    {
+                        commentList.Add(comment);
+                    }
+                    currentIndex++;
+                }
             }
 
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
             {
-                int commentIndex = newestCommentIndex;
+                int commentsDrawn = 0;
+                int commentListIndex = commentList.Count - 1;
                 int frameHeight = renderOptions.ChatHeight;
                 frameCanvas.Clear(renderOptions.BackgroundColor);
-                while (commentIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
+                while (commentListIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
                 {
-                    // Skip comments from ignored users
-                    if (renderOptions.IgnoreUsersList.Contains(chatRoot.comments[commentIndex].commenter.name))
+                    var comment = commentList[commentListIndex];
+                    frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
+                    frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
+
+                    for (int i = 0; i < comment.Emotes.Count; i++)
                     {
-                        commentIndex--;
-                        continue;
-                    }
+                        (Point drawPoint, TwitchEmote emote) = comment.Emotes[i];
 
-                    CommentSection comment = GenerateCommentSection(commentIndex, sampleTextHeight, progress);
-                    if (comment != null)
-                    {
-                        commentList.Add(comment);
-
-                        frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
-                        frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
-
-                        foreach (var emote in comment.Emotes)
+                        //Only draw static emotes
+                        if (emote.FrameCount == 1)
                         {
-                            //Only draw static emotes
-                            if (emote.Item2.FrameCount == 1)
-                            {
-                                frameCanvas.DrawBitmap(emote.Item2.EmoteFrames[0], emote.Item1.X, emote.Item1.Y + frameHeight);
-                            }
+                            frameCanvas.DrawBitmap(emote.EmoteFrames[0], drawPoint.X, drawPoint.Y + frameHeight);
                         }
                     }
-                    commentIndex--;
+                    commentsDrawn++;
+                    commentListIndex--;
                 }
+
+                commentList.RemoveRange(0, commentList.Count - commentsDrawn);
             }
 
             return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
@@ -439,6 +460,7 @@ namespace TwitchDownloaderCore
             SKBitmap finalBitmap = CombineImages(sectionImages, ascentMessage);
             newSection.Image = finalBitmap;
             newSection.Emotes = emoteSectionList;
+            newSection.CommentIndex = commentIndex;
 
             return newSection;
         }
@@ -1065,7 +1087,7 @@ namespace TwitchDownloaderCore
                 return fallbackCache[input];
 
             SKPaint newPaint = new SKPaint() { Typeface = fontManager.MatchCharacter(input), LcdRenderText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, SubpixelText = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-            
+
             if (newPaint.Typeface == null)
             {
                 newPaint.Typeface = SKTypeface.Default;
