@@ -89,10 +89,16 @@ namespace TwitchDownloaderCLI.Modes
                 }
             }
 
-            if (inputOptions.IgnoreUsersList != "")
+            if (inputOptions.IgnoreUsersString != "")
             {
-                renderOptions.IgnoreUsersList = inputOptions.IgnoreUsersList.ToLower().Split(',',
-                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
+                renderOptions.IgnoreUsersArray = inputOptions.IgnoreUsersString.ToLower().Split(',',
+                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            }
+
+            if (inputOptions.BannedWordsString != "")
+            {
+                renderOptions.BannedWordsArray = inputOptions.BannedWordsString.ToLower().Split(',',
+                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             }
 
             return renderOptions;

@@ -610,5 +610,17 @@ namespace TwitchDownloader.Properties {
                 this["Offline"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BannedWordsList {
+            get {
+                return ((string)(this["BannedWordsList"]));
+            }
+            set {
+                this["BannedWordsList"] = value;
+            }
+        }
     }
 }

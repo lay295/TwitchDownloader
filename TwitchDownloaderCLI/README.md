@@ -204,7 +204,10 @@ File the program will output to.
 (Default: -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}") Output arguments for ffmpeg chat render.
 
 **--ignore-users**
-(Default: ) List of usernames to ignore when rendering, separated by commas.
+(Default: ) List of usernames to ignore when rendering, separated by commas. Not case-sensitive.
+
+**--ban-words**
+(Default: ) List of words or phrases to ignore when rendering, separated by commas. Not case-sensitive.
 
 **--badge-filter**
 (Default: 0) Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, to filter out Moderator and Broadcaster badges only enter the value of 6.

@@ -75,8 +75,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("output-args", Default = "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"", HelpText = "Output arguments for ffmpeg chat render.")]
         public string OutputArgs { get; set; }
 
-        [Option("ignore-users", Default = "", HelpText = "List of usernames to ignore when rendering, separated by commas.")]
-        public string IgnoreUsersList { get; set; }
+        [Option("ignore-users", Default = "", HelpText = "List of usernames to ignore when rendering, separated by commas. Not case-sensitive.")]
+        public string IgnoreUsersString { get; set; }
+
+        [Option("ban-words", Default = "", HelpText = "List of words or phrases to ignore when rendering, separated by commas. Not case-sensitive.")]
+        public string BannedWordsString { get; set; }
 
         [Option("badge-filter", Default = 0, HelpText = "Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, 6 = no broadcaster or moderator badges.\r\nKey: Other = 1, Broadcaster = 2, Moderator = 4, VIP = 8, Subscriber = 16, Predictions = 32, NoAudio/NoVideo = 64, PrimeGaming = 128")]
         public int BadgeFilterMask { get; set; }

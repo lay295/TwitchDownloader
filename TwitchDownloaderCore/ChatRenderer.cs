@@ -348,7 +348,14 @@ namespace TwitchDownloaderCore
                 while (newestCommentIndex >= currentIndex)
                 {
                     // Skip comments from ignored users
-                    if (renderOptions.IgnoreUsersList.Contains(chatRoot.comments[currentIndex].commenter.name))
+                    if (renderOptions.IgnoreUsersArray.Contains(chatRoot.comments[currentIndex].commenter.name))
+                    {
+                        currentIndex++;
+                        continue;
+                    }
+
+                    // Skip comments containing banned words
+                    if (renderOptions.BannedWordsArray.Contains(chatRoot.comments[currentIndex].message.body))
                     {
                         currentIndex++;
                         continue;
