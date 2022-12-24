@@ -89,7 +89,6 @@ namespace TwitchDownloaderCore
 
             try
             {
-                // We must use Task.Run() or we will block the UI thread. Not everything in the method is async.
                 await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken), cancellationToken);
             }
             catch
@@ -136,7 +135,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task RenderVideoSection(int startTick, int endTick, FfmpegProcess ffmpegProcess, FfmpegProcess maskProcess = null, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = new())
+        private void RenderVideoSection(int startTick, int endTick, FfmpegProcess ffmpegProcess, FfmpegProcess maskProcess = null, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = new())
         {
             UpdateFrame latestUpdate = null;
             BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.Process.StandardInput.BaseStream);
@@ -164,13 +163,13 @@ namespace TwitchDownloaderCore
 
                 using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, progress, latestUpdate))
                 {
-                    await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
+                    DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken).Wait(cancellationToken);
 
                     ffmpegStream.Write(frame.Bytes);
 
                     if (maskProcess != null)
                     {
-                        await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
+                        DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken).Wait(cancellationToken);
 
                         SetFrameMask(frame);
                         maskStream.Write(frame.Bytes);
@@ -377,6 +376,7 @@ namespace TwitchDownloaderCore
                 int commentListIndex = commentList.Count - 1;
                 int frameHeight = renderOptions.ChatHeight;
                 frameCanvas.Clear(renderOptions.BackgroundColor);
+
                 while (commentListIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
                 {
                     var comment = commentList[commentListIndex];
@@ -397,7 +397,12 @@ namespace TwitchDownloaderCore
                     commentListIndex--;
                 }
 
-                commentList.RemoveRange(0, commentList.Count - commentsDrawn);
+                int removeCount = commentList.Count - commentsDrawn;
+                for (int i = 0; i < removeCount; i++)
+                {
+                    commentList[i].Image.Dispose();
+                }
+                commentList.RemoveRange(0, removeCount);
             }
 
             return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
@@ -1065,6 +1070,10 @@ namespace TwitchDownloaderCore
             sectionImages.Add(new SKBitmap(renderOptions.ChatWidth, renderOptions.SectionHeight));
         }
 
+        /// <summary>
+        /// Fetches the emotes/badges/bits/emojis needed to render
+        /// </summary>
+        /// <remarks>chatRoot.EmbeddedData will be empty after calling this to save on memory!</remarks>
         private async Task FetchImages(CancellationToken cancellationToken)
         {
             Task<List<ChatBadge>> badgeTask = TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
@@ -1074,6 +1083,9 @@ namespace TwitchDownloaderCore
             Task<Dictionary<string, SKBitmap>> emojiTask = TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
+
+            // Clear chatRoot.embeddedData to save on some memory
+            chatRoot.embeddedData = null;
 
             badgeList = badgeTask.Result;
             emoteList = emoteTask.Result;
