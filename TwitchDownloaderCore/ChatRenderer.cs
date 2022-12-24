@@ -45,14 +45,14 @@ namespace TwitchDownloaderCore
             renderOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : renderOptions.TempFolder,
                 "TwitchDownloader");
-            renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize;
-            renderOptions.BlockArtPreWrap = renderOptions.ChatWidth - renderOptions.SidePadding * 2 > renderOptions.BlockArtPreWrapWidth;
+            renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize - renderOptions.SidePadding * 2;
+            renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
         }
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport(ReportType.Status, "Fetching Images"));
-            await Task.Run(() => FetchImages(cancellationToken));
+            await Task.Run(() => FetchImages(cancellationToken), cancellationToken);
 
             await Task.Run(ScaleImages, cancellationToken);
             FloorCommentOffsets(chatRoot.comments);
@@ -981,7 +981,7 @@ namespace TwitchDownloaderCore
 
 #if DEBUG
         //For debugging, works on Windows only
-        void OpenImage(SKBitmap newBitmap)
+        private static void OpenImage(SKBitmap newBitmap)
         {
             string tempFile = Path.GetFileNameWithoutExtension(Path.GetTempFileName()) + ".png";
             using (FileStream fs = new FileStream(tempFile, FileMode.Create))
@@ -1073,7 +1073,7 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Fetches the emotes/badges/bits/emojis needed to render
         /// </summary>
-        /// <remarks>chatRoot.EmbeddedData will be empty after calling this to save on memory!</remarks>
+        /// <remarks>chatRoot.embeddedData will be empty after calling this to save on memory!</remarks>
         private async Task FetchImages(CancellationToken cancellationToken)
         {
             Task<List<ChatBadge>> badgeTask = TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
