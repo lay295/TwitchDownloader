@@ -88,22 +88,23 @@ TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 
 ## Linux – Getting started
 
-1. Ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
-2. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for Linux, grab the [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/) for Arch Linux, or [build from source](#building-from-source).
-3. Extract `TwitchDownloaderCLI`.
-4. Browse to where you extracted the file and give it executable rights in the terminal:
+1. Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
+2. Ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
+3. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for Linux, grab the [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/) for Arch Linux, or [build from source](#building-from-source).
+4. Extract `TwitchDownloaderCLI`.
+5. Browse to where you extracted the file and give it executable rights in the terminal:
 ```
 sudo chmod +x TwitchDownloaderCLI
 ```
-5. a) If you do not have ffmpeg, you should install it via your distro package manager, however you can also get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+6. a) If you do not have ffmpeg, you should install it via your distro package manager, however you can also get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
-5. b) If downloaded as a standalone file, you must also give it executable rights with:
+6. b) If downloaded as a standalone file, you must also give it executable rights with:
 ```
 sudo chmod +x ffmpeg
 ```
-6. You can now start using the downloader, for example:
+7. You can now start using the downloader, for example:
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```

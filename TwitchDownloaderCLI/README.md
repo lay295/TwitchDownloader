@@ -204,7 +204,10 @@ File the program will output to.
 (Default: -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}") Output arguments for ffmpeg chat render.
 
 **--ignore-users**
-(Default: ) List of usernames to ignore when rendering, separated by commas.
+(Default: ) List of usernames to ignore when rendering, separated by commas. Not case-sensitive.
+
+**--ban-words**
+(Default: ) List of words or phrases to ignore when rendering, separated by commas. Not case-sensitive.
 
 **--badge-filter**
 (Default: 0) Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, to filter out Moderator and Broadcaster badges only enter the value of 6.
@@ -290,3 +293,5 @@ String arguments, such as output file, that contain spaces should be wrapped in 
 Default true boolean flags must be assigned: `--default-true-flag=false`. Default false boolean flags should still be raised normally: `--default-false-flag`
 
 For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
+
+Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.

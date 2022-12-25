@@ -72,7 +72,8 @@ namespace TwitchDownloaderWPF
                 FontSize = numFontSize.Value,
                 UpdateRate = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture),
                 EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture),
-                IgnoreUsersList = textIgnoreUsersList.Text.ToLower().Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList(),
+                IgnoreUsersArray = textIgnoreUsersList.Text.ToLower().Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                BannedWordsArray = textBannedWordsList.Text.ToLower().Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 Timestamp = (bool)checkTimestamp.IsChecked,
                 MessageColor = messageColor,
                 Framerate = int.Parse(textFramerate.Text),
@@ -138,6 +139,7 @@ namespace TwitchDownloaderWPF
                 checkBadge.IsChecked = Settings.Default.ChatBadges;
                 textEmoteScale.Text = Settings.Default.EmoteScale.ToString("0.0#");
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
+                textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
 
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Broadcaster, Name = "Broadcaster" });
@@ -241,6 +243,8 @@ namespace TwitchDownloaderWPF
                 Settings.Default.VideoCodec = ((Codec)comboCodec.SelectedItem).Name;
             }
             Settings.Default.IgnoreUsersList = string.Join(",", textIgnoreUsersList.Text.ToLower()
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            Settings.Default.BannedWordsList = string.Join(",", textBannedWordsList.Text.ToLower()
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             int newMask = 0;
             foreach (var item in comboBadges.SelectedItems)

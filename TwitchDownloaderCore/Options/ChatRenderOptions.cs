@@ -56,7 +56,8 @@ namespace TwitchDownloaderCore.Options
         public string TempFolder { get; set; }
         public bool SubMessages { get; set; }
         public bool ChatBadges { get; set; }
-        public List<string> IgnoreUsersList { get; set; } = new List<string>();
+        public string[] IgnoreUsersArray { get; set; } = Array.Empty<string>();
+        public string[] BannedWordsArray { get; set; } = Array.Empty<string>();
         public double EmoteScale { get; set; } = 1.0;
         public int RenderThreads { get; set; } = 1;
         public int ChatBadgeMask { get; set; } = 0;
@@ -70,5 +71,8 @@ namespace TwitchDownloaderCore.Options
         public int AscentIndentWidth => (int)(24 * ReferenceScale);
         public bool Offline { get; set; }
         public bool LogFfmpegOutput { get; set; } = false;
+        public bool BlockArtPreWrap { get; set; } = false;
+        public double BlockArtPreWrapWidth { get; set; }
+        public float BlockArtCharWidth { get; set; }
     }
 }

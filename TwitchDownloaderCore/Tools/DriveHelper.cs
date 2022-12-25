@@ -35,15 +35,15 @@ namespace TwitchDownloaderCore.Tools
             return outputDrive;
         }
 
-        public static async Task WaitForDrive(DriveInfo outputDrive, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        public static async Task WaitForDrive(DriveInfo drive, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            if (outputDrive.IsReady)
+            if (drive.IsReady)
             {
                 return;
             }
 
             int driveNotReadyCount = 0;
-            while (!outputDrive.IsReady)
+            while (!drive.IsReady)
             {
                 progress.Report(new ProgressReport(ReportType.StatusInfo, $"Waiting for output drive ({(driveNotReadyCount + 1) / 2f:F1}s)"));
                 await Task.Delay(500, cancellationToken);
