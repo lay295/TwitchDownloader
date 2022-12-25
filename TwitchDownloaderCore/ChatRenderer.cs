@@ -533,9 +533,6 @@ namespace TwitchDownloaderCore
                     {
                         string fragmentString = fragmentParts[i];
 
-                        if (fragmentString == "󠀀")
-                            continue;
-
                         DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, progress, bitsCount, fragmentString);
                     }
                 }
@@ -674,7 +671,7 @@ namespace TwitchDownloaderCore
 
         private void DrawNonFontMessage(List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress, string fragmentString)
         {
-            ReadOnlySpan<char> fragmentSpan = fragmentString.AsSpan();
+            ReadOnlySpan<char> fragmentSpan = fragmentString.Trim('\uFE0F').AsSpan();
 
             if (blockArtRegex.IsMatch(fragmentString))
             {
@@ -706,9 +703,14 @@ namespace TwitchDownloaderCore
                         DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos);
                         nonFontBuffer.Clear();
                     }
-                    using SKPaint highSurrogateFallbackFont = GetFallbackFont(char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]), renderOptions, progress).Clone();
-                    highSurrogateFallbackFont.Color = renderOptions.MessageColor;
-                    DrawText(fragmentSpan.Slice(j, 2).ToString(), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos);
+                    int utf32Char = char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]);
+                    //Don't attempt to draw U+E0000
+                    if (utf32Char != 917504)
+                    {
+                        using SKPaint highSurrogateFallbackFont = GetFallbackFont(utf32Char, renderOptions, progress).Clone();
+                        highSurrogateFallbackFont.Color = renderOptions.MessageColor;
+                        DrawText(fragmentSpan.Slice(j, 2).ToString(), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos);
+                    }
                     j++;
                 }
                 else if (!messageFont.ContainsGlyphs(fragmentSpan.Slice(j, 1)) || new StringInfo(fragmentSpan[j].ToString()).LengthInTextElements == 0)
