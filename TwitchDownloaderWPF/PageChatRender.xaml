@@ -63,7 +63,7 @@
                         <TextBlock Text="Sub Messages:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="Chat Badges:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="Update Time:" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Emote Scale:" HorizontalAlignment="Right" Margin="0,22,0,0" Foreground="{DynamicResource AppText}"/>
+                        
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,0,5">
                         <CheckBox x:Name="checkOutline" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
@@ -71,13 +71,13 @@
                         <CheckBox x:Name="checkSub" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                         <CheckBox x:Name="checkBadge" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                         <TextBox x:Name="textUpdateTime" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                        <TextBox x:Name="textEmoteScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="15,10,5,2">
                         <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,0,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="7TV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}">Offline <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Render the chat using only resources embedded in the chat json file.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                        
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,0,2">
                         <CheckBox x:Name="checkBTTV" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
@@ -92,6 +92,38 @@
                         <TextBox x:Name="textIgnoreUsersList" Margin="0,4,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource AppText}">Banned words list <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>List of banned words or phrases - comma separated, spaces around commas ignored, NOT case-sensitive.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                         <TextBox x:Name="textBannedWordsList" Margin="0,4,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    </StackPanel>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Scaling" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
+                <DockPanel Background="{DynamicResource AppBackground}">
+                    <StackPanel Orientation="Vertical" Margin="5,10,5,5">
+                        <TextBlock Text="Emote Scale:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="Badge Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="Emoji Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="Vertical Spacing Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="Left Spacing Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="Section Height Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="0,10,5,5">
+                        <TextBox x:Name="textEmoteScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textBadgeScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textEmojiScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textVerticalScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textLeftScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textSectionHeightScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="5,10,5,5">
+                        <TextBlock Text="Word Spacing Scale:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="Emote Spacing Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="Accent Stroke Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="Accent Indent Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="0,10,5,5">
+                        <TextBox x:Name="textWordSpaceScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textEmoteSpaceScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textAccentStrokeScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textAccentIndentScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                 </DockPanel>
             </TabItem>

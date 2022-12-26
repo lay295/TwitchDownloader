@@ -68,7 +68,17 @@ namespace TwitchDownloaderCLI.Modes
                 ChatBadges = (bool)inputOptions.ChatBadges,
                 Timestamp = inputOptions.Timestamp,
                 Offline = inputOptions.Offline,
-                LogFfmpegOutput = inputOptions.LogFfmpegOutput
+                LogFfmpegOutput = inputOptions.LogFfmpegOutput,
+                EmoteScale = inputOptions.ScaleEmote,
+                BadgeScale = inputOptions.ScaleBadge,
+                EmojiScale = inputOptions.ScaleEmoji,
+                VerticalSpacingScale = inputOptions.ScaleVertical,
+                LeftSpacingScale = inputOptions.ScaleLeft,
+                SectionHeightScale = inputOptions.ScaleSectionHeight,
+                WordSpacingScale = inputOptions.ScaleWordSpace,
+                EmoteSpacingScale = inputOptions.ScaleEmoteSpace,
+                AccentIndentScale = inputOptions.ScaleAccentIndent,
+                AccentStrokeScale = inputOptions.ScaleAccentStroke,
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)

@@ -622,5 +622,113 @@ namespace TwitchDownloader.Properties {
                 this["BannedWordsList"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double BadgeScale {
+            get {
+                return ((double)(this["BadgeScale"]));
+            }
+            set {
+                this["BadgeScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double VerticalSpacingScale {
+            get {
+                return ((double)(this["VerticalSpacingScale"]));
+            }
+            set {
+                this["VerticalSpacingScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double EmojiScale {
+            get {
+                return ((double)(this["EmojiScale"]));
+            }
+            set {
+                this["EmojiScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double LeftSpacingScale {
+            get {
+                return ((double)(this["LeftSpacingScale"]));
+            }
+            set {
+                this["LeftSpacingScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double SectionHeightScale {
+            get {
+                return ((double)(this["SectionHeightScale"]));
+            }
+            set {
+                this["SectionHeightScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double WordSpacingScale {
+            get {
+                return ((double)(this["WordSpacingScale"]));
+            }
+            set {
+                this["WordSpacingScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double EmoteSpacingScale {
+            get {
+                return ((double)(this["EmoteSpacingScale"]));
+            }
+            set {
+                this["EmoteSpacingScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double AccentStrokeScale {
+            get {
+                return ((double)(this["AccentStrokeScale"]));
+            }
+            set {
+                this["AccentStrokeScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double AccentIndentScale {
+            get {
+                return ((double)(this["AccentIndentScale"]));
+            }
+            set {
+                this["AccentIndentScale"] = value;
+            }
+        }
     }
 }

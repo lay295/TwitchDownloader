@@ -226,6 +226,35 @@ Path to temporary folder for cache.
 **--verbose-ffmpeg**
 Prints every message from ffmpeg.
 
+**--scale-emote**
+(Default: 1.0) Number to scale emote images.
+
+**--scale-badge**
+(Default: 1.0) Number to scale badge images.
+
+**--scale-emoji**
+(Default: 1.0) Number to scale emoji images.
+
+**--scale-vertical**
+(Default: 1.0) Number to scale vertical padding.
+
+**--scale-left**
+(Default: 1.0) Number to scale left indent padding.
+
+**--scale-sectionheight**
+(Default: 1.0) Number to scale section height of comments.
+
+**--scale-wordspace**
+(Default: 1.0) Number to scale spacing between words.
+
+**--scale-emotespace**
+(Default: 1.0) Number to scale spacing between emotes.
+
+**--scale-accentstroke**
+(Default: 1.0) Number to scale accent stroke size (sub messages).
+
+**--scale-accentindent**
+(Default: 1.0) Number to scale accent indent size (sub messages).
 
 ## Arguments for mode ffmpeg
 <sup>Manage standalone ffmpeg</sup>

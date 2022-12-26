@@ -452,7 +452,7 @@ namespace TwitchDownloaderCore
             if ((comment.message.user_notice_params != null && (comment.message.user_notice_params.msg_id is "sub" or "resub" or "subgift")) || IsSubMessage(comment))
             {
                 ascentMessage = true;
-                drawPos.X += renderOptions.AscentIndentWidth;
+                drawPos.X += renderOptions.AccentIndentWidth;
                 defaultPos.X = drawPos.X;
                 DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos, progress);
             }
@@ -499,7 +499,7 @@ namespace TwitchDownloaderCore
                 }
 
                 if (ascent)
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AscentStrokeWidth, finalBitmap.Height, new SKPaint() { Color = SKColor.Parse("#7b2cf2") });
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmap.Height, new SKPaint() { Color = SKColor.Parse("#7b2cf2") });
             }
             sectionImages.Clear();
             return finalBitmap;
@@ -1110,18 +1110,18 @@ namespace TwitchDownloaderCore
             {
                 //Assume badges are always 2x scale, not 1x or 4x
                 if (renderOptions.ReferenceScale != 1.0)
-                    badge.Resize(renderOptions.ReferenceScale);
+                    badge.Resize(renderOptions.ReferenceScale * renderOptions.BadgeScale);
             }
 
             foreach (var cheer in cheermotesList)
             {
                 //Assume cheermotes are always 2x scale, not 1x or 4x
                 if (renderOptions.ReferenceScale != 1.0)
-                    cheer.Resize(renderOptions.ReferenceScale);
+                    cheer.Resize(renderOptions.ReferenceScale * renderOptions.EmoteScale);
             }
 
             //Assume emojis are 4x (they're 72x72)
-            double emojiScale = 0.5 * renderOptions.ReferenceScale;
+            double emojiScale = 0.5 * renderOptions.ReferenceScale * renderOptions.EmojiScale;
             List<string> emojiKeys = new List<string>(emojiCache.Keys);
             foreach (var emojiKey in emojiKeys)
             {

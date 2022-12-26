@@ -72,6 +72,15 @@ namespace TwitchDownloaderWPF
                 FontSize = numFontSize.Value,
                 UpdateRate = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture),
                 EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture),
+                BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture),
+                EmojiScale = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture),
+                LeftSpacingScale = double.Parse(textLeftScale.Text, CultureInfo.CurrentCulture),
+                SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture),
+                WordSpacingScale = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture),
+                EmoteSpacingScale = double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture),
+                AccentIndentScale = double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture),
+                AccentStrokeScale = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture),
+                VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture),
                 IgnoreUsersArray = textIgnoreUsersList.Text.ToLower().Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 BannedWordsArray = textBannedWordsList.Text.ToLower().Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 Timestamp = (bool)checkTimestamp.IsChecked,
@@ -138,6 +147,15 @@ namespace TwitchDownloaderWPF
                 checkSub.IsChecked = Settings.Default.SubMessages;
                 checkBadge.IsChecked = Settings.Default.ChatBadges;
                 textEmoteScale.Text = Settings.Default.EmoteScale.ToString("0.0#");
+                textEmojiScale.Text = Settings.Default.EmojiScale.ToString("0.0#");
+                textBadgeScale.Text = Settings.Default.BadgeScale.ToString("0.0#");
+                textVerticalScale.Text = Settings.Default.VerticalSpacingScale.ToString("0.0#");
+                textLeftScale.Text = Settings.Default.LeftSpacingScale.ToString("0.0#");
+                textSectionHeightScale.Text = Settings.Default.SectionHeightScale.ToString("0.0#");
+                textWordSpaceScale.Text = Settings.Default.WordSpacingScale.ToString("0.0#");
+                textEmoteSpaceScale.Text = Settings.Default.EmoteSpacingScale.ToString("0.0#");
+                textAccentStrokeScale.Text = Settings.Default.AccentStrokeScale.ToString("0.0#");
+                textAccentIndentScale.Text = Settings.Default.AccentIndentScale.ToString("0.0#");
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
@@ -261,6 +279,15 @@ namespace TwitchDownloaderWPF
                 Settings.Default.UpdateTime = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture);
                 Settings.Default.Framerate = int.Parse(textFramerate.Text);
                 Settings.Default.EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.EmojiScale = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.LeftSpacingScale = double.Parse(textLeftScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.WordSpacingScale = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.EmoteSpacingScale = double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.AccentStrokeScale = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.AccentIndentScale = double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture);
             }
             catch { }
             Settings.Default.Save();
@@ -281,6 +308,15 @@ namespace TwitchDownloaderWPF
                 double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture);
                 int.Parse(textFramerate.Text);
                 double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textLeftScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture);
             }
             catch (Exception ex)
             {
