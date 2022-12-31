@@ -18,7 +18,7 @@ namespace TwitchDownloaderCore
     public sealed class VideoDownloader
     {
         private readonly VideoDownloadOptions downloadOptions;
-        private static HttpClient httpClient = new HttpClient();
+        private static readonly HttpClient httpClient = new HttpClient();
 
         public VideoDownloader(VideoDownloadOptions DownloadOptions)
         {
@@ -68,20 +68,13 @@ namespace TwitchDownloaderCore
                             progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = string.Format("Downloading {0}% [2/4]", percent) });
                             progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
                         }
-                        catch (Exception ex) when (ex is not OperationCanceledException or TaskCanceledException)
-                        {
-                            Debug.WriteLine(ex);
-                        }
                         finally
                         {
                             throttler.Release();
-                            CheckCancelation(cancellationToken, downloadFolder);
                         }
                     })).ToArray();
                     await Task.WhenAll(downloadTasks);
                 }
-
-                CheckCancelation(cancellationToken, downloadFolder);
 
                 progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Combining Parts [3/4]" });
                 progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = 0 });
@@ -285,7 +278,8 @@ namespace TwitchDownloaderCore
                     }
                     catch { }
                 }
-                CheckCancelation(cancellationToken, downloadFolder);
+
+                cancellationToken.ThrowIfCancellationRequested();
             }
         }
 
@@ -312,15 +306,6 @@ namespace TwitchDownloaderCore
                 }
             }
             catch (IOException) { } // Directory is probably being used by another process
-        }
-
-        private static void CheckCancelation(CancellationToken cancellationToken, string downloadFolder)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                Cleanup(downloadFolder);
-                cancellationToken.ThrowIfCancellationRequested();
-            }
         }
 
         private static List<KeyValuePair<string, double>> GenerateCroppedVideoList(List<KeyValuePair<string, double>> videoList, VideoDownloadOptions downloadOptions)
