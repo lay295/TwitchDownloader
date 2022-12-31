@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TwitchDownloaderCore.Options
+﻿namespace TwitchDownloaderCore.Options
 {
     public class VideoDownloadOptions
     {
         public int Id { get; set; }
-        public string PlaylistUrl { get; set; }
         public string Quality { get; set; }
         public string Filename { get; set; }
         public bool CropBeginning { get; set; }

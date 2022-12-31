@@ -75,17 +75,17 @@ namespace TwitchDownloaderWPF
                     Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
                     Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, textOauth.Text);
                     await Task.WhenAll(taskVideoInfo, taskAccessToken);
-                    string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
-                    Task<BitmapImage> thumbImage = InfoHelper.GetThumb(thumbUrl);
                     Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
                     await taskPlaylist;
                     try
                     {
-                        await thumbImage;
+                        string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
+                        imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
                     }
                     catch
                     {
                         AppendLog("ERROR: Unable to find thumbnail");
+                        imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                     }
 
                     comboQuality.Items.Clear();
@@ -107,8 +107,6 @@ namespace TwitchDownloaderWPF
                     }
                     comboQuality.SelectedIndex = 0;
 
-                    if (!thumbImage.IsFaulted)
-                        imgThumbnail.Source = thumbImage.Result;
                     TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                     textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
                     textTitle.Text = taskVideoInfo.Result.data.video.title;

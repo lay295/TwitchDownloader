@@ -79,20 +79,22 @@ namespace TwitchDownloaderWPF
                         if (videoInfo.data.video == null)
                         {
                             AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
+                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         else
                         {
                             videoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                             labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds);
 
-                            Task<BitmapImage> taskThumb = InfoHelper.GetThumb(videoInfo.data.video.thumbnailURLs.FirstOrDefault());
                             try
                             {
-                                imgThumbnail.Source = await taskThumb;
+                                string thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
+                                imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
                             }
                             catch
                             {
                                 AppendLog("ERROR: Unable to find thumbnail");
+                                imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                             }
                         }
                     }
@@ -102,20 +104,22 @@ namespace TwitchDownloaderWPF
                         if (videoInfo.data.clip.video == null)
                         {
                             AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
+                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         else
                         {
                             videoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
                             labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds);
 
-                            Task<BitmapImage> taskThumb = InfoHelper.GetThumb(videoInfo.data.clip.thumbnailURL);
                             try
                             {
-                                imgThumbnail.Source = await taskThumb;
+                                string thumbUrl = videoInfo.data.clip.thumbnailURL;
+                                imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
                             }
                             catch
                             {
                                 AppendLog("ERROR: Unable to find thumbnail");
+                                imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                             }
                         }
                     }
