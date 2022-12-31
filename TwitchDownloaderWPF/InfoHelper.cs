@@ -6,6 +6,8 @@ namespace TwitchDownloader
 {
     class InfoHelper
     {
+        public const string thumbnailMissingUrl = @"https://vod-secure.twitch.tv/_404/404_processing_320x180.png";
+
         public static async Task<BitmapImage> GetThumb(string thumbUrl)
         {
             using (HttpClient client = new HttpClient())

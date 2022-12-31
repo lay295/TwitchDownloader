@@ -48,19 +48,17 @@ namespace TwitchDownloaderWPF
                     await Task.WhenAll(taskClipInfo, taskLinks);
 
                     GqlClipResponse clipData = taskClipInfo.Result;
-                    string thumbUrl = clipData.data.clip.thumbnailURL;
-                    Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
 
                     try
                     {
-                        await taskThumb;
+                        string thumbUrl = clipData.data.clip.thumbnailURL;
+                        imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
                     }
                     catch
                     {
                         AppendLog("ERROR: Unable to find thumbnail");
+                        imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                     }
-                    if (!taskThumb.IsFaulted)
-                        imgThumbnail.Source = taskThumb.Result;
                     TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                     textStreamer.Text = clipData.data.clip.broadcaster.displayName;
                     textCreatedAt.Text = clipData.data.clip.createdAt.ToString();
