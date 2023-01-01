@@ -317,7 +317,7 @@ Render a chat with custom ffmpeg arguments
 
 ## Additional Notes
 
-String arguments, such as output file, that contain spaces should be wrapped in double quotes <kbd>"</kbd> .
+String arguments, such as output file, that contain spaces should be wrapped in either single <kbd>'</kbd> or double quotes <kbd>"</kbd> .
 
 Default true boolean flags must be assigned: `--default-true-flag=false`. Default false boolean flags should still be raised normally: `--default-false-flag`
 
