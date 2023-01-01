@@ -18,11 +18,11 @@ using WpfAnimatedGif;
 namespace TwitchDownloaderWPF
 {
     public enum DownloadType { Clip, Video }
-	/// <summary>
-	/// Interaction logic for PageChatDownload.xaml
-	/// </summary>
-	public partial class PageChatDownload : Page
-	{
+    /// <summary>
+    /// Interaction logic for PageChatDownload.xaml
+    /// </summary>
+    public partial class PageChatDownload : Page
+    {
 
         public DownloadType downloadType;
         public string downloadId;
@@ -102,19 +102,17 @@ namespace TwitchDownloaderWPF
                     {
                         Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(int.Parse(downloadId));
                         await Task.WhenAll(taskVideoInfo);
-                        string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
-                        Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
 
                         try
                         {
-                            await taskThumb;
+                            string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
+                            imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
                         }
                         catch
                         {
                             AppendLog("ERROR: Unable to find thumbnail");
+                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
-                        if (!taskThumb.IsFaulted)
-                            imgThumbnail.Source = taskThumb.Result;
                         TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                         textTitle.Text = taskVideoInfo.Result.data.video.title;
                         textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
@@ -141,19 +139,17 @@ namespace TwitchDownloaderWPF
                         string clipId = downloadId;
                         Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
                         await Task.WhenAll(taskClipInfo);
-                        string thumbUrl = taskClipInfo.Result.data.clip.thumbnailURL;
-                        Task<BitmapImage> taskThumb = InfoHelper.GetThumb(thumbUrl);
 
                         try
                         {
-                            await taskThumb;
+                            string thumbUrl = taskClipInfo.Result.data.clip.thumbnailURL;
+                            imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
                         }
                         catch
                         {
                             AppendLog("ERROR: Unable to find thumbnail");
+                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
-                        if (!taskThumb.IsFaulted)
-                            imgThumbnail.Source = taskThumb.Result;
                         TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                         textStreamer.Text = taskClipInfo.Result.data.clip.broadcaster.displayName;
                         textCreatedAt.Text = taskClipInfo.Result.data.clip.createdAt.ToString();
@@ -225,7 +221,7 @@ namespace TwitchDownloaderWPF
                 options.DownloadFormat = ChatFormat.Html;
             else if (radioText.IsChecked == true)
                 options.DownloadFormat = ChatFormat.Text;
-            
+
             options.EmbedData = (bool)checkEmbed.IsChecked;
             options.BttvEmotes = (bool)checkBttvEmbed.IsChecked;
             options.FfzEmotes = (bool)checkFfzEmbed.IsChecked;

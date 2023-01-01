@@ -22,7 +22,11 @@ namespace TwitchDownloader.TwitchTasks
 
         public void Cancel()
         {
-            TokenSource.Cancel();
+            try
+            {
+                TokenSource.Cancel();
+            }
+            catch (ObjectDisposedException) { }
 
             if (Status == TwitchTaskStatus.Running)
             {
@@ -95,6 +99,7 @@ namespace TwitchDownloader.TwitchTasks
                 OnPropertyChanged(nameof(Exception));
             }
             renderer = null;
+            TokenSource.Dispose();
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }

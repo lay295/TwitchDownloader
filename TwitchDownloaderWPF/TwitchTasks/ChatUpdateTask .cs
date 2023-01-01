@@ -16,14 +16,17 @@ namespace TwitchDownloader.TwitchTasks
         public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
         public ITwitchTask DependantTask { get; set; }
         public string TaskType { get; } = "Chat Update";
-        public Exception TaskException { get; private set; }
         public TwitchTaskException Exception { get; private set; } = new();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Cancel()
         {
-            TokenSource.Cancel();
+            try
+            {
+                TokenSource.Cancel();
+            }
+            catch (ObjectDisposedException) { }
 
             if (Status == TwitchTaskStatus.Running)
             {
@@ -77,6 +80,7 @@ namespace TwitchDownloader.TwitchTasks
                 OnPropertyChanged(nameof(Exception));
             }
             updater = null;
+            TokenSource.Dispose();
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
