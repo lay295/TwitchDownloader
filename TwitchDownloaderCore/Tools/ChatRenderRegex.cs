@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace TwitchDownloaderCore
+namespace TwitchDownloaderCore.Tools
 {
     internal sealed partial class ChatRenderRegex
     {
