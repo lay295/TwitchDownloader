@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
@@ -78,12 +79,11 @@ namespace TwitchDownloaderCore
                     await Task.WhenAll(downloadTasks);
                 }
 
-                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Combining Parts [3/4]" });
-                progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = 0 });
+                progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = "Combining Parts 0% [3/4]" });
 
                 await CombineVideoParts(downloadFolder, videoPartsList, progress, cancellationToken);
 
-                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = $"Finalizing Video [4/4]" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = $"Finalizing Video 0% [4/4]" });
 
                 double startOffset = 0.0;
 
@@ -105,22 +105,72 @@ namespace TwitchDownloaderCore
                         StartInfo =
                             {
                                 FileName = downloadOptions.FfmpegPath,
-                                Arguments = String.Format("-hide_banner -loglevel error -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {1} " : "") + "-i \"{0}\" -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), Int32.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
+                                Arguments = String.Format("-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {1} " : "") + "-i \"{0}\" -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), Int32.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
                                 UseShellExecute = false,
                                 CreateNoWindow = true,
                                 RedirectStandardInput = false,
-                                RedirectStandardOutput = false,
-                                RedirectStandardError = false
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true
                             }
                     };
+
+                    TimeSpan videoLength = TimeSpan.FromMilliseconds(0);
+                    var videoLengthRegex = new Regex(@"^\s?\s?Duration: (\d\d:\d\d:\d\d.\d\d)", RegexOptions.Multiline);
+                    var encodingTimeRegex = new Regex(@"time=(\d\d:\d\d:\d\d.\d\d)", RegexOptions.Compiled);
+                    process.ErrorDataReceived += (s, e) =>
+                    {
+                        if (e.Data is null)
+                        {
+                            return;
+                        }
+
+                        if (videoLength.TotalMilliseconds < 1)
+                        {
+                            var videoLengthMatch = videoLengthRegex.Match(e.Data);
+                            if (!videoLengthMatch.Success)
+                            {
+                                return;
+                            }
+                            videoLength = TimeSpan.Parse(videoLengthMatch.Groups[1].ToString());
+                        }
+
+                        HandleFfmpegProgress(e.Data, encodingTimeRegex, videoLength, progress);
+                    };
+
                     process.Start();
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
                     process.WaitForExit();
+
+                    progress.Report(new ProgressReport(0));
                 }, cancellationToken);
             }
             finally
             {
                 Cleanup(downloadFolder);
             }
+        }
+
+        private static void HandleFfmpegProgress(string output, Regex encodingTimeRegex, TimeSpan videoLength, IProgress<ProgressReport> progress)
+        {
+            double videoLengthMillis = videoLength.TotalMilliseconds;
+            if (videoLengthMillis < 1)
+            {
+                return;
+            }
+
+            var encodingTimeMatch = encodingTimeRegex.Match(output);
+            if (!encodingTimeMatch.Success)
+            {
+                return;
+            }
+
+            var encodingTime = TimeSpan.Parse(encodingTimeMatch.Groups[1].ToString());
+            double encodingTimeMillis = encodingTime.TotalMilliseconds;
+            int percent = (int)(encodingTimeMillis / videoLengthMillis * 100.0);
+
+            progress.Report(new ProgressReport(ReportType.StatusInfo, $"Finalizing Video {percent}% [4/4]"));
+            progress.Report(new ProgressReport(percent));
         }
 
         private static async Task DownloadVideoPart(string baseUrl, string videoPartName, string downloadFolder, double vodAge, CancellationToken cancellationToken)
@@ -260,8 +310,11 @@ namespace TwitchDownloaderCore
         {
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(downloadFolder);
             string outputFile = Path.Combine(downloadFolder, "output.ts");
-            using FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None);
 
+            int partCount = videoParts.Count;
+            int doneCount = 0;
+
+            using FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None);
             foreach (var part in videoParts)
             {
                 await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
@@ -280,6 +333,11 @@ namespace TwitchDownloaderCore
                     }
                     catch { }
                 }
+
+                doneCount++;
+                int percent = (int)(doneCount / (double)partCount * 100);
+                progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = string.Format("Combining Parts {0}% [3/4]", percent) });
+                progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
 
                 cancellationToken.ThrowIfCancellationRequested();
             }
