@@ -30,6 +30,8 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
+            TwitchHelper.CleanupUnmanagedCacheFiles(downloadOptions.TempFolder);
+
             string downloadFolder = Path.Combine(
                 downloadOptions.TempFolder,
                 $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
@@ -296,7 +298,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static void Cleanup(string downloadFolder)
+        private void Cleanup(string downloadFolder)
         {
             try
             {
@@ -306,6 +308,8 @@ namespace TwitchDownloaderCore
                 }
             }
             catch (IOException) { } // Directory is probably being used by another process
+
+            TwitchHelper.CleanupUnmanagedCacheFiles(downloadOptions.TempFolder);
         }
 
         private static List<KeyValuePair<string, double>> GenerateCroppedVideoList(List<KeyValuePair<string, double>> videoList, VideoDownloadOptions downloadOptions)
