@@ -281,7 +281,7 @@ namespace TwitchDownloaderCore
                         }
                         percent /= connectionCount;
 
-                        progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = $"Downloading {percent}%" });
+                        progress.Report(new ProgressReport() { ReportType = ReportType.SameLineStatus, Data = $"Downloading {percent}%" });
                         progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
                     }
                 });
@@ -296,7 +296,7 @@ namespace TwitchDownloaderCore
 
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
-                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Downloading + Embedding Images" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Downloading + Embedding Images" });
                 chatRoot.embeddedData = new EmbeddedData();
 
                 // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
@@ -359,7 +359,7 @@ namespace TwitchDownloaderCore
             if (downloadOptions.DownloadFormat is ChatFormat.Json)
             {
                 //Best effort, but if we fail oh well
-                progress.Report(new ProgressReport() { ReportType = ReportType.Status, Data = "Backfilling commenter info" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Backfilling commenter info" });
                 List<string> userList = chatRoot.comments.DistinctBy(x => x.commenter._id).Select(x => x.commenter._id).ToList();
                 Dictionary<string, User> userInfo = new Dictionary<string, User>();
                 int batchSize = 100;

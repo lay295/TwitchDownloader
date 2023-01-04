@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -37,7 +36,7 @@ namespace TwitchDownloaderCore
                 downloadOptions.TempFolder,
                 $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 
-            progress.Report(new ProgressReport(ReportType.Status, "Fetching Video Info [1/4]"));
+            progress.Report(new ProgressReport(ReportType.SameLineStatus, "Fetching Video Info [1/4]"));
 
             try
             {
@@ -55,7 +54,7 @@ namespace TwitchDownloaderCore
                 int partCount = videoPartsList.Count;
                 int doneCount = 0;
 
-                progress.Report(new ProgressReport(ReportType.StatusInfo, "Downloading 0% [2/4]"));
+                progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading 0% [2/4]"));
 
                 using (var throttler = new SemaphoreSlim(downloadOptions.DownloadThreads))
                 {
@@ -68,8 +67,8 @@ namespace TwitchDownloaderCore
 
                             doneCount++;
                             int percent = (int)(doneCount / (double)partCount * 100);
-                            progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = string.Format("Downloading {0}% [2/4]", percent) });
-                            progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
+                            progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading {percent}% [2/4]"));
+                            progress.Report(new ProgressReport(percent));
                         }
                         finally
                         {
@@ -79,11 +78,11 @@ namespace TwitchDownloaderCore
                     await Task.WhenAll(downloadTasks);
                 }
 
-                progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = "Combining Parts 0% [3/4]" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Combining Parts 0% [3/4]" });
 
                 await CombineVideoParts(downloadFolder, videoPartsList, progress, cancellationToken);
 
-                progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = $"Finalizing Video 0% [4/4]" });
+                progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = $"Finalizing Video 0% [4/4]" });
 
                 double startOffset = 0.0;
 
@@ -169,7 +168,7 @@ namespace TwitchDownloaderCore
             double encodingTimeMillis = encodingTime.TotalMilliseconds;
             int percent = (int)(encodingTimeMillis / videoLengthMillis * 100.0);
 
-            progress.Report(new ProgressReport(ReportType.StatusInfo, $"Finalizing Video {percent}% [4/4]"));
+            progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [4/4]"));
             progress.Report(new ProgressReport(percent));
         }
 
@@ -336,8 +335,8 @@ namespace TwitchDownloaderCore
 
                 doneCount++;
                 int percent = (int)(doneCount / (double)partCount * 100);
-                progress.Report(new ProgressReport() { ReportType = ReportType.StatusInfo, Data = string.Format("Combining Parts {0}% [3/4]", percent) });
-                progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Combining Parts {percent}% [3/4]"));
+                progress.Report(new ProgressReport(percent));
 
                 cancellationToken.ThrowIfCancellationRequested();
             }
