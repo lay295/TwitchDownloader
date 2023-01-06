@@ -63,6 +63,7 @@ namespace TwitchDownloaderCore
 
                     using (var httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
                     {
+                        httpResponse.EnsureSuccessStatusCode();
                         response = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
                     }
 

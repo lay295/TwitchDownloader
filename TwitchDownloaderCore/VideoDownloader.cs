@@ -298,6 +298,8 @@ namespace TwitchDownloaderCore
             // We must specify HttpCompletionOption.ResponseHeadersRead or it will read the response content into memory
             using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
             {
+                response.EnsureSuccessStatusCode();
+                
                 using (var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);

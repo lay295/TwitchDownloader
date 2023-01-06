@@ -46,6 +46,8 @@ namespace TwitchDownloaderCore
             var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
             using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
             {
+                response.EnsureSuccessStatusCode();
+
                 using (var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
