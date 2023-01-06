@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace TwitchDownloaderCore.TwitchObjects
@@ -79,6 +80,21 @@ namespace TwitchDownloaderCore.TwitchObjects
         public bool more_replies { get; set; }
     }
 
+    public class VideoChapter
+    {
+        public string id { get; set; }
+        public int startMilliseconds { get; set; }
+        public int lengthMilliseconds { get; set; }
+        [JsonProperty("type")]
+        public string _type { get; set; }
+        public string description { get; set; }
+        public string subDescription { get; set; }
+        public string thumbnailUrl { get; set; }
+        public string gameId { get; set; }
+        public string gameDisplayName { get; set; }
+        public string gameBoxArtUrl { get; set; }
+    }
+
     public class Video
     {
         public string title { get; set; }
@@ -87,6 +103,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public double start { get; set; }
         public double end { get; set; }
         public double length { get; set; } = -1;
+        public List<VideoChapter> chapters { get; set; } = new();
     }
 
     public class EmbedEmoteData
