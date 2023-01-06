@@ -38,7 +38,8 @@ namespace TwitchDownloaderCore.Tools
             builder.AppendLine(";FFMETADATA1");
             builder.AppendLine("title=" + SanatizeString(videoTitle + $" ({videoId})"));
             builder.AppendLine("artist=" + SanatizeString(streamerName));
-            builder.AppendLine("date=" + SanatizeString(videoCreation.ToString("u")));
+            builder.AppendLine("date=" + SanatizeString(videoCreation.ToString("yyyy"))); // The 'date' key becomes 'year' in most formats
+            builder.AppendLine("comment=" + "Originally aired " + SanatizeString(videoCreation.ToString("u")));
             builder.AppendLine();
             return builder.ToString();
         }
