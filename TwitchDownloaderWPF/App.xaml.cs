@@ -27,8 +27,8 @@ namespace TwitchDownloaderWPF
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            MainWindow mainWindow = new();
-            mainWindow.Show();
+            MainWindow = new MainWindow();
+            MainWindow.Show();
         }
 
         private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
