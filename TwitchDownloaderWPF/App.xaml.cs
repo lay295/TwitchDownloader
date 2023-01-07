@@ -18,8 +18,9 @@ namespace TwitchDownloaderWPF
             AppSingleton = this;
         }
 
-        private void Application_Startup(object sender, StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
+            base.OnStartup(e);
             WindowsThemeService windowsThemeService = new();
 
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
