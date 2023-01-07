@@ -106,10 +106,13 @@ namespace TwitchDownloaderCore
         }
 
         /* Due to Twitch changing the API to return only whole number offsets, renders have become less readable.
-         * To get around this we will disperse the offsets of comments on whole seconds across the second.
-         * For example, before any randomization:
+         * To get around this we will disperse the offsets of comments on a given whole second across the second.
+         * For example, before any jittering:
          *   the input a=1.0 b=2.0 c=2.0  d=2.0 e=2.0  f=3.0
-         *     becomes a=1.0 b=2.0 c=2.25 d=2.5 e=2.75 f=3.0 */
+         *     becomes a=1.0 b=2.0 c=2.25 d=2.5 e=2.75 f=3.0
+         *     
+         * The only drawback to this method is there will _never_ be multiple comments drawn on the same tick
+         * like in a real chat. The overall improved chat flow is still worth it regardless. */
         public static void DisperseCommentOffsets(List<Comment> comments)
         {
             Random rnd = new Random(comments.Count);
@@ -150,10 +153,11 @@ namespace TwitchDownloaderCore
                 }
 
                 int commentsToUpdate = i - startIndex;
-                for (int j = 1; j <= commentsToUpdate; j++)
+                for (int j = 1; j <= commentsToUpdate; j++) // Start at 1 so we don't offset the first comment on the second
                 {
-                    double jitter = rnd.NextDouble() * 0.8 - 0.4; // Randomize the distributed comment offset slightly between 0.6-1.4x
-                    comments[startIndex + j].content_offset_seconds += (j + jitter) / (commentsToUpdate + 1) * scaleFactor;
+                    double jitter = rnd.NextDouble() * 0.8 - 0.4; // Jitter the distributed comment offset slightly between 0.6-1.4x
+                    double distributedOffset = (j + jitter) / (commentsToUpdate + 1); // Jitter must be addition to retain comment order
+                    comments[startIndex + j].content_offset_seconds += distributedOffset * scaleFactor;
                 }
             }
         }
