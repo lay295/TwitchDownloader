@@ -84,6 +84,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("badge-filter", Default = 0, HelpText = "Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, 6 = no broadcaster or moderator badges.\r\nKey: Other = 1, Broadcaster = 2, Moderator = 4, VIP = 8, Subscriber = 16, Predictions = 32, NoAudio/NoVideo = 64, PrimeGaming = 128")]
         public int BadgeFilterMask { get; set; }
 
+        [Option("disperse-comments", Default = true, HelpText = "In December 2022 a Twitch API change made chat messages download only in whole seconds. This option distributes them over a second for improved readability.")]
+        public bool? DisperseCommentOffsets { get; set; }
+
         [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, and bits from the input json.")]
         public bool Offline { get; set; }
 
@@ -95,24 +98,34 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from ffmpeg.")]
         public bool LogFfmpegOutput { get; set; }
+
         [Option("scale-emote", Default = 1.0, HelpText = "Number to scale emote images.")]
         public double ScaleEmote { get; set; }
+
         [Option("scale-badge", Default = 1.0, HelpText = "Number to scale badge images.")]
         public double ScaleBadge { get; set; }
+
         [Option("scale-emoji", Default = 1.0, HelpText = "Number to scale emoji images.")]
         public double ScaleEmoji { get; set; }
+
         [Option("scale-vertical", Default = 1.0, HelpText = "Number to scale vertical padding.")]
         public double ScaleVertical { get; set; }
+
         [Option("scale-left", Default = 1.0, HelpText = "Number to scale left indent padding.")]
         public double ScaleLeft { get; set; }
+
         [Option("scale-sectionheight", Default = 1.0, HelpText = "Number to scale section height of comments.")]
         public double ScaleSectionHeight { get; set; }
+
         [Option("scale-wordspace", Default = 1.0, HelpText = "Number to scale spacing between words.")]
         public double ScaleWordSpace { get; set; }
+
         [Option("scale-emotespace", Default = 1.0, HelpText = "Number to scale spacing between emotes.")]
         public double ScaleEmoteSpace { get; set; }
+
         [Option("scale-accentstroke", Default = 1.0, HelpText = "Number to scale accent stroke size (sub messages).")]
         public double ScaleAccentStroke { get; set; }
+
         [Option("scale-accentindent", Default = 1.0, HelpText = "Number to scale accent indent size (sub messages).")]
         public double ScaleAccentIndent { get; set; }
     }

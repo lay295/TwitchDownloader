@@ -214,6 +214,9 @@ File the program will output to.
 
 Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, Predictions = `32`, NoAudioVisual = `64`, PrimeGaming = `128`
 
+**--disperse-comments**
+(Default: true) In December 2022 a Twitch API change made chat messages download only in whole seconds. This option distributes them over a second for improved readability.
+
 **--offline**
 Render completely offline using only embedded emotes, badges, and bits from the input json.
 
