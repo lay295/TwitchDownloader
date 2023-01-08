@@ -2,18 +2,23 @@
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
-    public class ChatRootInfo
+    public struct ChatRootInfo
     {
         public ChatRootVersion Version { get; set; } = new ChatRootVersion();
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.FromBinary(0);
+        public DateTime UpdatedAt { get; set; } = DateTime.FromBinary(0);
+        
+        public ChatRootInfo() { }
     }
 
-    public class ChatRootVersion
+    public struct ChatRootVersion
     {
         // Fields
         public int Major { get; set; } = 1;
         public int Minor { get; set; } = 0;
         public int Patch { get; set; } = 0;
+
+        public static readonly ChatRootVersion CurrentVersion = new(1, 2, 1);
 
         // Constructors
         /// <summary>
@@ -40,9 +45,6 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(this, obj))
-                return true;
-
             if (!(obj is ChatRootVersion crv))
                 return false;
 
