@@ -934,7 +934,15 @@ namespace TwitchDownloaderCore
         private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, IProgress<ProgressReport> progress)
         {
             using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
-            SKColor userColor = SKColor.Parse(comment.message.user_color ?? defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Length]);
+            SKColor userColor;
+            if (!string.IsNullOrWhiteSpace(comment.message.user_color))
+            {
+                userColor = SKColor.Parse(comment.message.user_color);
+            }
+            else
+            {
+                userColor = SKColor.Parse(defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Length]);
+            }
             userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor, renderOptions);
 
             SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
