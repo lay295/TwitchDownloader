@@ -51,6 +51,23 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
+            // Check comments list corruption, repair if possible
+            var corruptionStatus = chatRoot.comments.VerifyIntegrity(out string integrityMessage);
+            if ((corruptionStatus & CommentListVerification.CorruptionStatus.NotCorrupt) == 0)
+            {
+                if ((corruptionStatus & CommentListVerification.CorruptionStatus.PartiallyRepaired) != 0)
+                {
+                    integrityMessage += "Repairs NOT written to file!";
+                }
+
+                if ((corruptionStatus & CommentListVerification.CorruptionStatus.HasCorruption) != 0)
+                {
+                    throw new Exception(integrityMessage);
+                }
+
+                progress.Report(new ProgressReport(ReportType.Log, integrityMessage));
+            }
+
             progress.Report(new ProgressReport(ReportType.Status, "Fetching Images"));
             await Task.Run(() => FetchImages(cancellationToken), cancellationToken);
 
@@ -408,7 +425,7 @@ namespace TwitchDownloaderCore
             return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
         }
 
-        // I would prefer if this and its sub-methods were in the CommentSection class ~ScrubN
+        // I would prefer if this method was in the CommentSection class and its sub-methods were somewhere else. 3 medium-small files > 1 very large file in my opinion ~ScrubN
         private CommentSection GenerateCommentSection(int commentIndex, float sampleTextHeight, IProgress<ProgressReport> progress)
         {
             CommentSection newSection = new CommentSection();

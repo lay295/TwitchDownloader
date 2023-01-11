@@ -36,6 +36,13 @@ namespace TwitchDownloaderCore
                 throw new NotImplementedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
             }
 
+            // Check comments list corruption, repair if possible
+            var corruptionStatus = chatRoot.comments.VerifyIntegrity(out string integrityMessage);
+            if ((corruptionStatus & CommentListVerification.CorruptionStatus.NotCorrupt) == 0)
+            {
+                progress.Report(new ProgressReport(ReportType.Log, integrityMessage));
+            }
+
             // Dynamic step count setup
             int currentStep = 0;
             int totalSteps = 1;
