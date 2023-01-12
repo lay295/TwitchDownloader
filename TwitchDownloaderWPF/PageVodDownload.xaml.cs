@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,11 +13,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Properties;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -84,7 +82,7 @@ namespace TwitchDownloaderWPF
                     }
                     catch
                     {
-                        AppendLog("ERROR: Unable to find thumbnail");
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
                         imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                     }
 
@@ -131,17 +129,17 @@ namespace TwitchDownloaderWPF
                 catch (Exception ex)
                 {
                     btnGetInfo.IsEnabled = true;
-                    AppendLog("ERROR: " + ex.Message);
-                    MessageBox.Show("Unable to get the video information." + Environment.NewLine + "Please make sure the video ID is correct and try again.", "Unable To Fetch Video Info", MessageBoxButton.OK, MessageBoxImage.Error);
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                    MessageBox.Show(Translations.Strings.UnableToGetVideoInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
                     if (Settings.Default.VerboseErrors)
                     {
-                        MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
             else
             {
-                MessageBox.Show("Please enter a valid video ID/URL" + Environment.NewLine + "Examples:" + Environment.NewLine + "https://www.twitch.tv/videos/470741744" + Environment.NewLine + "470741744", "Invalid Video ID/URL", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Translations.Strings.InvalidVideoLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidVideoLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -378,30 +376,29 @@ namespace TwitchDownloaderWPF
                         Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
 
                         SetImage("Images/ppOverheat.gif", true);
-                        statusMessage.Text = "Downloading";
+                        statusMessage.Text = Translations.Strings.StatusDownloading;
 
                         try
                         {
                             await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
-                            statusMessage.Text = "Done";
+                            statusMessage.Text = Translations.Strings.StatusDone;
                             SetImage("Images/ppHop.gif", true);
                         }
                         catch (Exception ex)
                         {
-                            statusMessage.Text = "ERROR";
+                            statusMessage.Text = Translations.Strings.StatusError;
                             SetImage("Images/peepoSad.png", false);
-                            AppendLog("ERROR: " + ex.Message);
+                            AppendLog(Translations.Strings.ErrorLog + ex.Message);
                         }
                         btnGetInfo.IsEnabled = true;
 
                         currentDownload = null;
                         GC.Collect();
-                        GC.WaitForPendingFinalizers();
                     }
                 }
                 else
                 {
-                    AppendLog("ERROR: Invalid Crop Inputs");
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidCropInputs);
                 }
             }
         }
@@ -417,7 +414,7 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                AppendLog("ERROR: Invalid Crop Inputs");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidCropInputs);
             }
         }
     }

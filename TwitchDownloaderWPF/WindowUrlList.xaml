@@ -1,14 +1,18 @@
-﻿<Window x:Class="TwitchDownloader.WindowUrlList"
+﻿<Window x:Class="TwitchDownloaderWPF.WindowUrlList"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TwitchDownloader"
+        xmlns:local="clr-namespace:TwitchDownloaderWPF"
+        xmlns:lex="http://wpflocalizeextension.codeplex.com"
+        lex:LocalizeDictionary.DesignCulture=""
+        lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
+        lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
         Title="Mass Download URL List" Height="600" Width="500" Loaded="Window_Loaded">
 	<Grid Background="{DynamicResource AppBackground}">
-		<Button x:Name="btnQueue" Content="Add To Queue" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="110" Height="45" Margin="0,0,0,10" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-		<Label Content="List of VODs/Clips (One per line)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+		<Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="110" Height="45" Margin="0,0,0,10" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+		<Label Content="{lex:Loc ListOfVodsClips}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 		<TextBox x:Name="textList" HorizontalAlignment="Left" AcceptsReturn="True" Height="454" Margin="10,41,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="466" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 
     </Grid>

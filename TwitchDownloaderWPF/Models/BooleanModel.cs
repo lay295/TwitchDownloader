@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace TwitchDownloader.Models
+namespace TwitchDownloaderWPF.Models
 {
 	[XmlRoot(ElementName = "Boolean", Namespace = "clr-namespace:System;assembly=mscorlib")]
 	public class BooleanModel

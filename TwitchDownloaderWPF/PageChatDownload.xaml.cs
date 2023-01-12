@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
+using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects.Gql;
@@ -110,7 +109,7 @@ namespace TwitchDownloaderWPF
                         }
                         catch
                         {
-                            AppendLog("ERROR: Unable to find thumbnail");
+                            AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
                             imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
@@ -147,7 +146,7 @@ namespace TwitchDownloaderWPF
                         }
                         catch
                         {
-                            AppendLog("ERROR: Unable to find thumbnail");
+                            AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
                             imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
@@ -166,14 +165,14 @@ namespace TwitchDownloaderWPF
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Unable to get Clip/Video information. Please double check your link and try again", "Unable to get info", MessageBoxButton.OK, MessageBoxImage.Error);
-                    AppendLog("ERROR: " + ex.Message);
+                    MessageBox.Show(Translations.Strings.UnableToGetInfoMessage, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     btnGetInfo.IsEnabled = true;
                 }
             }
             else
             {
-                MessageBox.Show("Please double check the VOD/Clip link", "Unable to parse input", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Translations.Strings.UnableToParseLinkMessage, Translations.Strings.UnableToParseLink, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -475,24 +474,24 @@ namespace TwitchDownloaderWPF
                         btnGetInfo.IsEnabled = false;
                         SetEnabled(false, false);
                         SetImage("Images/ppOverheat.gif", true);
-                        statusMessage.Text = "Downloading";
+                        statusMessage.Text = Translations.Strings.StatusDone;
 
                         Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
 
                         try
                         {
                             await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
-                            statusMessage.Text = "Done";
+                            statusMessage.Text = Translations.Strings.StatusDone;
                             SetImage("Images/ppHop.gif", true);
                         }
                         catch (Exception ex)
                         {
-                            statusMessage.Text = "ERROR";
+                            statusMessage.Text = Translations.Strings.StatusError;
                             SetImage("Images/peepoSad.png", false);
-                            AppendLog("ERROR: " + ex.Message);
+                            AppendLog(Translations.Strings.ErrorLog + ex.Message);
                             if (Settings.Default.VerboseErrors)
                             {
-                                MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                             }
                         }
                         btnGetInfo.IsEnabled = true;
@@ -500,11 +499,10 @@ namespace TwitchDownloaderWPF
 
                         currentDownload = null;
                         GC.Collect();
-                        GC.WaitForPendingFinalizers();
                     }
                     catch (Exception ex)
                     {
-                        AppendLog("ERROR: " + ex.Message);
+                        AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     }
                 }
             }

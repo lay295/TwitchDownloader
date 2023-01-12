@@ -5,11 +5,10 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using TwitchDownloader.Properties;
-using TwitchDownloader.TwitchTasks;
-using TwitchDownloaderWPF;
+using TwitchDownloaderWPF.TwitchTasks;
+using TwitchDownloaderWPF.Properties;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     /// <summary>
     /// Interaction logic for PageQueue.xaml
@@ -199,7 +198,7 @@ namespace TwitchDownloader
                 errorMessage = taskException.Exception.ToString();
             }
 
-            MessageBox.Show(errorMessage, "Task Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(errorMessage, Translations.Strings.TaskError, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

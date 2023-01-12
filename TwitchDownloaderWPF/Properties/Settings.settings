@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TwitchDownloader.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TwitchDownloaderWPF.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="VodDownloadThreads" Type="System.Int32" Scope="User">
@@ -178,6 +178,9 @@
     </Setting>
     <Setting Name="AccentIndentScale" Type="System.Double" Scope="User">
       <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="GuiLanguage" Type="System.String" Scope="User">
+      <Value Profile="(Default)">en-US</Value>
     </Setting>
   </Settings>
 </SettingsFile>

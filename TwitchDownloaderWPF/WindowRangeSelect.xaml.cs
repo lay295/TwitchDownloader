@@ -3,8 +3,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloaderCore;
+using static TwitchDownloaderWPF.App;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     /// <summary>
     /// Interaction logic for WindowRangeSelect.xaml
@@ -89,6 +90,11 @@ namespace TwitchDownloader
                 rangeTime.ValueEnd = int.Parse(numEnd.Text);
             }
             catch { }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            AppSingleton.RequestTitleBarChange();
         }
     }
 }

@@ -2,14 +2,14 @@
 using System.Linq;
 using System.Reflection;
 
-namespace TwitchDownloader.Tools
+namespace TwitchDownloaderWPF.Services
 {
     public class DefaultThemeService
     {
         public static void WriteIncludedThemes()
         {
             var resourceNames = GetResourceNames();
-            var themePaths = resourceNames.Where((i) => i.StartsWith($"{nameof(TwitchDownloader)}.Themes."));
+            var themePaths = resourceNames.Where((i) => i.StartsWith($"{nameof(TwitchDownloaderWPF)}.Themes."));
 
             foreach (var themePath in themePaths)
             {

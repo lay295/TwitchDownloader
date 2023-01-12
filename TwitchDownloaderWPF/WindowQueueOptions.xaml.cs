@@ -4,13 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using TwitchDownloader.Properties;
-using TwitchDownloader.TwitchTasks;
+using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderCore.Options;
-using TwitchDownloaderWPF;
+using TwitchDownloaderWPF.Properties;
 using static TwitchDownloaderWPF.App;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     /// <summary>
     /// Interaction logic for QueueOptions.xaml

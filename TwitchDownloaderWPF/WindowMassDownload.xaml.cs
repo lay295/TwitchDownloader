@@ -8,13 +8,12 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using TwitchDownloader.TwitchTasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects.Gql;
-using TwitchDownloaderWPF;
+using TwitchDownloaderWPF.TwitchTasks;
 using static TwitchDownloaderWPF.App;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     /// <summary>
     /// Interaction logic for WindowMassDownload.xaml
@@ -26,7 +25,7 @@ namespace TwitchDownloader
         public List<TaskData> selectedItems = new List<TaskData>();
         public List<string> cursorList = new List<string>();
         public int cursorIndex = -1;
-        public string currnetChannel = "";
+        public string currentChannel = "";
         public string period = "";
 
         public WindowMassDownload(DownloadType Type)
@@ -45,7 +44,7 @@ namespace TwitchDownloader
 
         private async void btnChannel_Click(object sender, RoutedEventArgs e)
         {
-            currnetChannel = textChannel.Text;
+            currentChannel = textChannel.Text;
             videoList.Clear();
             cursorList.Clear();
             cursorIndex = -1;
@@ -61,7 +60,7 @@ namespace TwitchDownloader
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currnetChannel, currentCursor, 100);
+                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, 100);
                 videoList.Clear();
                 if (res.data.user != null)
                 {
@@ -73,7 +72,7 @@ namespace TwitchDownloader
                         data.Id = video.node.id;
                         data.Time = video.node.createdAt;
                         data.Views = video.node.viewCount;
-                        data.Streamer = currnetChannel;
+                        data.Streamer = currentChannel;
                         try
                         {
                             var bitmapImage = new BitmapImage();
@@ -109,7 +108,7 @@ namespace TwitchDownloader
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlClipSearchResponse res = await TwitchHelper.GetGqlClips(currnetChannel, period, currentCursor, 50);
+                GqlClipSearchResponse res = await TwitchHelper.GetGqlClips(currentChannel, period, currentCursor, 50);
                 videoList.Clear();
                 if (res.data.user != null)
                 {
@@ -121,7 +120,7 @@ namespace TwitchDownloader
                         data.Id = clip.node.slug;
                         data.Time = clip.node.createdAt;
                         data.Views = clip.node.viewCount;
-                        data.Streamer = currnetChannel;
+                        data.Streamer = currentChannel;
                         try
                         {
                             var bitmapImage = new BitmapImage();
@@ -165,7 +164,7 @@ namespace TwitchDownloader
                 border.Background = Brushes.LightBlue;
                 selectedItems.Add((TaskData)border.DataContext);
             }
-            textCount.Content = "Selected Items: " + selectedItems.Count;
+            textCount.Text = selectedItems.Count.ToString();
         }
 
         private async void btnNext_Click(object sender, RoutedEventArgs e)
@@ -233,7 +232,7 @@ namespace TwitchDownloader
             {
                 videoList.Add(item);
             }
-            textCount.Content = "Selected Items: " + selectedItems.Count;
+            textCount.Text = selectedItems.Count.ToString();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

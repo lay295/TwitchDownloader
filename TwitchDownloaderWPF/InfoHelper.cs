@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     class InfoHelper
     {

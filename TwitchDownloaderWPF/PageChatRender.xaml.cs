@@ -6,21 +6,18 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderWPF.Properties;
 using WpfAnimatedGif;
 using MessageBox = System.Windows.MessageBox;
 
@@ -503,87 +500,87 @@ namespace TwitchDownloaderWPF
             if (sender == null || !((SplitButton)sender).IsDropDownOpen)
             {
                 bool validInputs = ValidateInputs();
-                if (validInputs)
+                if (!validInputs)
                 {
-                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    MessageBox.Show(Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
 
-                    string fileFormat = comboFormat.SelectedItem.ToString();
-                    saveFileDialog.Filter = $"{fileFormat} Files | *.{fileFormat.ToLower()}";
-                    saveFileDialog.RestoreDirectory = true;
-                    saveFileDialog.FileName = Path.GetFileNameWithoutExtension(textJson.Text) + "." + fileFormat.ToLower();
+                string fileFormat = comboFormat.SelectedItem.ToString();
+                saveFileDialog.Filter = $"{fileFormat} Files | *.{fileFormat.ToLower()}";
+                saveFileDialog.RestoreDirectory = true;
+                saveFileDialog.FileName = Path.GetFileNameWithoutExtension(textJson.Text) + "." + fileFormat.ToLower();
 
-                    if (saveFileDialog.ShowDialog() == true)
+                if (saveFileDialog.ShowDialog() != true)
+                {
+                    return;
+                }
+
+                SKColor backgroundColor = new SKColor(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
+                SKColor messageColor = new SKColor(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
+                SaveSettings();
+
+                ChatRenderOptions options = GetOptions(saveFileDialog.FileName);
+
+                ChatRenderer currentRender = new ChatRenderer(options);
+                await currentRender.ParseJsonAsync(new CancellationToken());
+
+                if (sender == null)
+                {
+                    //We're just gonna assume a caller with a null sender is the partial render button
+                    WindowRangeSelect window = new WindowRangeSelect(currentRender);
+                    window.ShowDialog();
+
+                    if (window.OK)
                     {
-                        SKColor backgroundColor = new SKColor(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
-                        SKColor messageColor = new SKColor(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
-                        SaveSettings();
-
-                        ChatRenderOptions options = GetOptions(saveFileDialog.FileName);
-
-                        SetImage("Images/ppOverheat.gif", true);
-                        btnRender.IsEnabled = false;
-
-                        ChatRenderer currentRender = new ChatRenderer(options);
-                        await currentRender.ParseJsonAsync(new CancellationToken());
-
-                        if (sender == null)
-                        {
-                            //We're just gonna assume a caller with a null sender is the partial render button
-                            WindowRangeSelect window = new WindowRangeSelect(currentRender);
-                            window.ShowDialog();
-
-                            if (window.OK)
-                            {
-                                options.StartOverride = window.startSeconds;
-                                options.EndOverride = window.endSeconds;
-                            }
-                            else
-                            {
-                                if (window.Invalid)
-                                    AppendLog("Invalid start or end time");
-                                return;
-                            }
-                        }
-
-                        Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
-
-                        try
-                        {
-                            ffmpegLog.Clear();
-                            await currentRender.RenderVideoAsync(renderProgress, new CancellationToken());
-                            statusMessage.Text = "Done";
-                            SetImage("Images/ppHop.gif", true);
-                        }
-                        catch (Exception ex)
-                        {
-                            statusMessage.Text = "ERROR";
-                            SetImage("Images/peepoSad.png", false);
-                            AppendLog("ERROR: " + ex.Message);
-                            if (Settings.Default.VerboseErrors)
-                            {
-                                if (ex.Message.Contains("The pipe has been ended"))
-                                {
-                                    string errorLog = String.Join('\n', ffmpegLog.TakeLast(20).ToArray());
-                                    MessageBox.Show(errorLog, "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
-                                }
-                                else
-                                {
-                                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
-                                }
-                            }
-                        }
-                        statusProgressBar.Value = 0;
-                        btnRender.IsEnabled = true;
-
-                        currentRender = null;
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
+                        options.StartOverride = window.startSeconds;
+                        options.EndOverride = window.endSeconds;
+                    }
+                    else
+                    {
+                        if (window.Invalid)
+                            AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidStartEndTime);
+                        return;
                     }
                 }
-                else
+
+                Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
+
+                SetImage("Images/ppOverheat.gif", true);
+                statusMessage.Text = Translations.Strings.StatusRendering;
+                btnRender.IsEnabled = false;
+
+                try
                 {
-                    MessageBox.Show("Please double check your inputs are valid", "Unable to parse inputs", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ffmpegLog.Clear();
+                    await currentRender.RenderVideoAsync(renderProgress, new CancellationToken());
+                    statusMessage.Text = Translations.Strings.StatusDone;
+                    SetImage("Images/ppHop.gif", true);
                 }
+                catch (Exception ex)
+                {
+                    statusMessage.Text = Translations.Strings.StatusError;
+                    SetImage("Images/peepoSad.png", false);
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        if (ex.Message.Contains("The pipe has been ended"))
+                        {
+                            string errorLog = String.Join('\n', ffmpegLog.TakeLast(20).ToArray());
+                            MessageBox.Show(errorLog, Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                        else
+                        {
+                            MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                }
+                statusProgressBar.Value = 0;
+                btnRender.IsEnabled = true;
+
+                currentRender = null;
+                GC.Collect();
             }
         }
 

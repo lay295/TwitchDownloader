@@ -6,8 +6,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
+using TwitchDownloaderWPF.Properties;
 using Xabe.FFmpeg.Downloader;
 using static TwitchDownloaderWPF.App;
 
@@ -87,12 +86,6 @@ namespace TwitchDownloaderWPF
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             pageChatRender.SaveSettings();
-            string tempFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader", "Chat Render");
-            try
-            {
-                DeleteDirectory(tempFolder);
-            }
-            catch { }
         }
 
         public static void DeleteDirectory(string target_dir)

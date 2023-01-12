@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 
-namespace TwitchDownloader.TwitchTasks
+namespace TwitchDownloaderWPF.TwitchTasks
 {
     class ChatRenderTask : ITwitchTask
     {
@@ -15,7 +15,7 @@ namespace TwitchDownloader.TwitchTasks
         public ChatRenderOptions DownloadOptions { get; set; }
         public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
         public ITwitchTask DependantTask { get; set; }
-        public string TaskType { get; } = "Chat Render";
+        public string TaskType { get; } = Translations.Strings.ChatRender;
         public TwitchTaskException Exception { get; private set; } = new();
 
         public event PropertyChangedEventHandler PropertyChanged;

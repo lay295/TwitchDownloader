@@ -1,4 +1,4 @@
-﻿namespace TwitchDownloader.Properties
+﻿namespace TwitchDownloaderWPF.Properties
 {
     public class CustomFfmpegArgs
     {

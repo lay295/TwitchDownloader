@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,11 +8,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Properties;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -35,7 +33,7 @@ namespace TwitchDownloaderWPF
             clipId = ValidateUrl(textUrl.Text);
             if (string.IsNullOrWhiteSpace(clipId))
             {
-                MessageBox.Show("Please enter a valid clip ID/URL" + Environment.NewLine + "Examples:" + Environment.NewLine + "https://clips.twitch.tv/ImportantPlausibleMetalOSsloth" + Environment.NewLine + "ImportantPlausibleMetalOSsloth", "Invalid Video ID/URL", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Translations.Strings.InvalidClipLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidClipLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
             }
             else
             {
@@ -56,7 +54,7 @@ namespace TwitchDownloaderWPF
                     }
                     catch
                     {
-                        AppendLog("ERROR: Unable to find thumbnail");
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
                         imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                     }
                     TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
@@ -79,11 +77,11 @@ namespace TwitchDownloaderWPF
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Unable to get Clip information. Please double check Clip Slug and try again", "Unable to get info", MessageBoxButton.OK, MessageBoxImage.Error);
-                    AppendLog("ERROR: " + ex);
+                    MessageBox.Show(Translations.Strings.UnableToGetClipInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                    AppendLog(Translations.Strings.ErrorLog + ex);
                     if (Settings.Default.VerboseErrors)
                     {
-                        MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     btnGetInfo.IsEnabled = true;
                 }
@@ -169,7 +167,7 @@ namespace TwitchDownloaderWPF
                     btnDownload.IsEnabled = false;
                     btnQueue.IsEnabled = false;
                     SetImage("Images/ppOverheat.gif", true);
-                    statusMessage.Text = "Downloading";
+                    statusMessage.Text = Translations.Strings.StatusDownloading;
                     try
                     {
                         ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
@@ -178,17 +176,17 @@ namespace TwitchDownloaderWPF
                         downloadOptions.Quality = comboQuality.Text;
                         await new ClipDownloader(downloadOptions).DownloadAsync();
 
-                        statusMessage.Text = "Done";
+                        statusMessage.Text = Translations.Strings.StatusDone;
                         SetImage("Images/ppHop.gif", true);
                     }
                     catch (Exception ex)
                     {
-                        statusMessage.Text = "ERROR";
+                        statusMessage.Text = Translations.Strings.StatusError;
                         SetImage("Images/peepoSad.png", false);
-                        AppendLog("ERROR: " + ex.Message);
+                        AppendLog(Translations.Strings.ErrorLog + ex.Message);
                         if (Settings.Default.VerboseErrors)
                         {
-                            MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                     btnGetInfo.IsEnabled = true;

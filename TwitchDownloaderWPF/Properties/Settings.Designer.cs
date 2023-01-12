@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TwitchDownloader.Properties {
+namespace TwitchDownloaderWPF.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -728,6 +728,18 @@ namespace TwitchDownloader.Properties {
             }
             set {
                 this["AccentIndentScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("en-US")]
+        public string GuiLanguage {
+            get {
+                return ((string)(this["GuiLanguage"]));
+            }
+            set {
+                this["GuiLanguage"] = value;
             }
         }
     }

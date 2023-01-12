@@ -76,6 +76,7 @@
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
     <PackageReference Include="System.Management" Version="7.0.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
+    <PackageReference Include="WPFLocalizeExtension" Version="3.9.4" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.0" />
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.252501">
       <PrivateAssets>all</PrivateAssets>
@@ -90,6 +91,17 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Update="Translations\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Translations\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Update="Properties\Settings.settings">

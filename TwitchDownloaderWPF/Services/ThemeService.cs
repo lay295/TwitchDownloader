@@ -5,11 +5,10 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
-using TwitchDownloader.Models;
-using TwitchDownloader.Properties;
-using TwitchDownloaderWPF;
+using TwitchDownloaderWPF.Models;
+using TwitchDownloaderWPF.Properties;
 
-namespace TwitchDownloader.Tools
+namespace TwitchDownloaderWPF.Services
 {
     public partial class ThemeService
     {

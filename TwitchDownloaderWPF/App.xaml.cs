@@ -1,5 +1,6 @@
 ﻿using System.Windows;
-using TwitchDownloader.Tools;
+using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 
 namespace TwitchDownloaderWPF
 {
@@ -18,8 +19,9 @@ namespace TwitchDownloaderWPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            WindowsThemeService windowsThemeService = new();
+            CultureService.SetUiCulture(Settings.Default.GuiLanguage);
 
+            WindowsThemeService windowsThemeService = new();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
             MainWindow wnd = new();

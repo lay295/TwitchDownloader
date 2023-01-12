@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Properties;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -52,7 +51,7 @@ namespace TwitchDownloaderWPF
                     ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getComments: false, getEmbeds: false);
                     textStreamer.Text = ChatJsonInfo.streamer.name;
                     textCreatedAt.Text = ChatJsonInfo.video.created_at.ToShortDateString();
-                    textTitle.Text = ChatJsonInfo.video.title ?? "Unknown";
+                    textTitle.Text = ChatJsonInfo.video.title ?? Translations.Strings.Unknown;
 
                     VideoCreatedAt = ChatJsonInfo.video.created_at;
 
@@ -69,7 +68,7 @@ namespace TwitchDownloaderWPF
                     TimeSpan videoLength = TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.length) ? 0.0 : ChatJsonInfo.video.length);
                     labelLength.Text = videoLength.Seconds > 0
                         ? string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds)
-                        : "Unknown";
+                        : Translations.Strings.Unknown;
 
                     VideoId = ChatJsonInfo.video.id ?? "-1";
 
@@ -78,7 +77,7 @@ namespace TwitchDownloaderWPF
                         GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(VideoId));
                         if (videoInfo.data.video == null)
                         {
-                            AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
+                            AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
                             imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         else
@@ -93,7 +92,7 @@ namespace TwitchDownloaderWPF
                             }
                             catch
                             {
-                                AppendLog("ERROR: Unable to find thumbnail");
+                                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
                                 imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                             }
                         }
@@ -103,7 +102,7 @@ namespace TwitchDownloaderWPF
                         GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
                         if (videoInfo.data.clip.video == null)
                         {
-                            AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
+                            AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
                             imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         else
@@ -118,7 +117,7 @@ namespace TwitchDownloaderWPF
                             }
                             catch
                             {
-                                AppendLog("ERROR: Unable to find thumbnail");
+                                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
                                 imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                             }
                         }
@@ -416,7 +415,7 @@ namespace TwitchDownloaderWPF
                         btnBrowse.IsEnabled = false;
                         SetEnabled(false);
                         SetImage("Images/ppOverheat.gif", true);
-                        statusMessage.Text = "Downloading";
+                        statusMessage.Text = Translations.Strings.StatusUpdating;
 
                         Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
 
@@ -425,17 +424,17 @@ namespace TwitchDownloaderWPF
                             await currentUpdate.UpdateAsync(downloadProgress, new CancellationToken());
                             await Task.Delay(300); // we need to wait a bit incase the "writing to output file" report comes late
                             textJson.Text = "";
-                            statusMessage.Text = "Done";
+                            statusMessage.Text = Translations.Strings.StatusDone;
                             SetImage("Images/ppHop.gif", true);
                         }
                         catch (Exception ex)
                         {
-                            statusMessage.Text = "ERROR";
+                            statusMessage.Text = Translations.Strings.StatusError;
                             SetImage("Images/peepoSad.png", false);
-                            AppendLog("ERROR: " + ex.Message);
+                            AppendLog(Translations.Strings.ErrorLog + ex.Message);
                             if (Settings.Default.VerboseErrors)
                             {
-                                MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                             }
                         }
                         btnBrowse.IsEnabled = true;
@@ -443,11 +442,10 @@ namespace TwitchDownloaderWPF
 
                         currentUpdate = null;
                         GC.Collect();
-                        GC.WaitForPendingFinalizers();
                     }
                     catch (Exception ex)
                     {
-                        AppendLog("ERROR: " + ex.Message);
+                        AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     }
                 }
             }

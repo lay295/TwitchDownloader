@@ -1,58 +1,67 @@
-﻿<Window x:Class="TwitchDownloader.WindowMassDownload"
+﻿<Window x:Class="TwitchDownloaderWPF.WindowMassDownload"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TwitchDownloader"
+        xmlns:local="clr-namespace:TwitchDownloaderWPF"
+        xmlns:lex="http://wpflocalizeextension.codeplex.com"
+        lex:LocalizeDictionary.DesignCulture=""
+        lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
+        lex:ResxLocalizationProvider.DefaultDictionary="Strings"
 		xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
         mc:Ignorable="d"
         Title="Mass Downloader" Height="700" Width="1100" Loaded="Window_Loaded">
-	<Grid Background="{DynamicResource AppBackground}">
-		<Label x:Name="labelSort" Content="Sort:" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<ComboBox SelectedIndex="2" x:Name="comboSort" HorizontalAlignment="Left" Margin="61,6,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboSort_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
-			<ComboBoxItem Content="Top 24 Hours" Tag="LAST_DAY"/>
-			<ComboBoxItem Content="Top 7 Days" Tag="LAST_WEEK"/>
-			<ComboBoxItem Content="Top 30 Days" Tag="LAST_MONTH"/>
-			<ComboBoxItem Content="Top All Time" Tag="ALL_TIME"/>
-		</ComboBox>
+    <Grid Background="{DynamicResource AppBackground}">
+        <Label x:Name="labelSort" Content="{lex:Loc Sort}" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+        <ComboBox SelectedIndex="2" x:Name="comboSort" HorizontalAlignment="Left" Margin="61,6,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboSort_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+            <ComboBoxItem Content="{lex:Loc TopTwentyFourHours}" Tag="LAST_DAY"/>
+            <ComboBoxItem Content="{lex:Loc TopSevenDays}" Tag="LAST_WEEK"/>
+            <ComboBoxItem Content="{lex:Loc TopThirtyDays}" Tag="LAST_MONTH"/>
+            <ComboBoxItem Content="{lex:Loc TopAllTime}" Tag="ALL_TIME"/>
+        </ComboBox>
 
-		<TextBox x:Name="textChannel" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="194" Margin="0,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-		<Button x:Name="btnChannel" Content="Set Channel" HorizontalAlignment="Left" Margin="653,6,0,0" VerticalAlignment="Top" Width="84" Height="30" Click="btnChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-		<WrapPanel HorizontalAlignment="Left" Height="329" Margin="10,54,0,0" VerticalAlignment="Top" Width="772"/>
-		<Button x:Name="btnPrev" Content="&lt;-" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="0,0,80,4" Click="btnPrev_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-		<Button x:Name="btnNext" Content="->" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="80,0,0,4" Click="btnNext_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-		<ScrollViewer x:Name="scrollDownload" VerticalScrollBarVisibility="Auto" Margin="10,41,10,45">
-			<ItemsControl x:Name="itemList" ItemsSource="{Binding videoList}">
-				<ItemsControl.ItemsPanel>
-					<ItemsPanelTemplate>
-						<WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<Border BorderThickness="1" CornerRadius="8" Margin="0,0,8,8" Padding="4" MouseUp="Border_MouseUp" Initialized="Border_Initialized" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
-							<StackPanel Orientation="Vertical" Width="220" Background="{DynamicResource AppElementBackground}">
-								<Image Source="{Binding Thumbnail}" MaxHeight="90"></Image>
-								<emoji:TextBlock TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppText}">
-									<emoji:TextBlock.Text>
-										<MultiBinding StringFormat="{}[{0:d}] - {1}">
-											<Binding Path="Time" />
-											<Binding Path="Title" />
-										</MultiBinding>
-									</emoji:TextBlock.Text>
-								</emoji:TextBlock>
-								<DockPanel>
-									<TextBlock Text="{Binding LengthFormatted, StringFormat=Duration: {0}}" HorizontalAlignment="Left" Foreground="{DynamicResource AppText}"></TextBlock>
-									<TextBlock Text="{Binding Views, StringFormat=Views: {0}}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}"></TextBlock>
-								</DockPanel>
-							</StackPanel>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</ScrollViewer>
-		<Button x:Name="btnQueue" Content="Add To Queue" HorizontalAlignment="Left" Margin="956,0,0,4" VerticalAlignment="Bottom" Width="102" Height="36" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-		<Label x:Name="textCount" Content="Selected Items: 0" HorizontalAlignment="Left" Margin="10,0,0,3" VerticalAlignment="Bottom" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<Button x:Name="btnSelectAll" Content="Select All" HorizontalAlignment="Left" Margin="132,0,0,3" VerticalAlignment="Bottom" Width="88" Height="30" Click="btnSelectAll_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-	</Grid>
+        <TextBox x:Name="textChannel" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="194" Margin="0,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+        <Button x:Name="btnChannel" Content="{lex:Loc SetChannel}" HorizontalAlignment="Left" Margin="653,6,0,0" VerticalAlignment="Top" Width="84" Height="30" Click="btnChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <WrapPanel HorizontalAlignment="Left" Height="329" Margin="10,54,0,0" VerticalAlignment="Top" Width="772"/>
+        <Button x:Name="btnPrev" Content="&lt;-" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="0,0,80,4" Click="btnPrev_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <Button x:Name="btnNext" Content="->" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="80,0,0,4" Click="btnNext_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <ScrollViewer x:Name="scrollDownload" VerticalScrollBarVisibility="Auto" Margin="10,41,10,45">
+            <ItemsControl x:Name="itemList" ItemsSource="{Binding videoList}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1" CornerRadius="8" Margin="0,0,8,8" Padding="4" MouseUp="Border_MouseUp" Initialized="Border_Initialized" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+                            <StackPanel Orientation="Vertical" Width="220" Background="{DynamicResource AppElementBackground}">
+                                <Image Source="{Binding Thumbnail}" MaxHeight="90"></Image>
+                                <emoji:TextBlock TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppText}">
+                                    <emoji:TextBlock.Text>
+                                        <MultiBinding StringFormat="{}[{0:d}] - {1}">
+                                            <Binding Path="Time" />
+                                            <Binding Path="Title" />
+                                        </MultiBinding>
+                                    </emoji:TextBlock.Text>
+                                </emoji:TextBlock>
+                                <DockPanel>
+                                    <TextBlock Text="{Binding LengthFormatted, StringFormat=Duration: {0}}" HorizontalAlignment="Left" Foreground="{DynamicResource AppText}"></TextBlock>
+                                    <TextBlock Text="{Binding Views, StringFormat=Views: {0}}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}"></TextBlock>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Left" Margin="956,0,0,4" VerticalAlignment="Bottom" Width="102" Height="36" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <Label HorizontalAlignment="Left" Margin="10,0,0,3" VerticalAlignment="Bottom" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+            <TextBlock>
+                <Run Text="{lex:Loc SelectedItems}"/>
+                <Run x:Name="textCount" Text="0"/>
+            </TextBlock>
+        </Label>
+        <Button x:Name="btnSelectAll" Content="{lex:Loc SelectAll}" HorizontalAlignment="Left" Margin="132,0,0,3" VerticalAlignment="Bottom" Width="88" Height="30" Click="btnSelectAll_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+    </Grid>
 </Window>

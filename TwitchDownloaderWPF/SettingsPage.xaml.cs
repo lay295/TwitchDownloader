@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using TwitchDownloader.Properties;
-using MessageBox = System.Windows.MessageBox;
+using TwitchDownloaderWPF.Properties;
 using static TwitchDownloaderWPF.App;
+using MessageBox = System.Windows.MessageBox;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     /// <summary>
     /// Interaction logic for SettingsPage.xaml
@@ -45,7 +45,7 @@ namespace TwitchDownloader
             checkDonation.IsChecked = Settings.Default.HideDonation;
             checkVerboseErrors.IsChecked = Settings.Default.VerboseErrors;
 
-            comboTheme.Items.Add("System");
+            comboTheme.Items.Add(Translations.Strings.SystemTheme);
             string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
             foreach (string themeFile in themeFiles)
             {
@@ -56,7 +56,7 @@ namespace TwitchDownloader
 
         private void btnClearCache_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to clear your cache?\nYou should only really do this if the program isn't working correctly", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
+            MessageBoxResult messageBoxResult = MessageBox.Show(Translations.Strings.ClearCacheConfirmation.Replace(@"\n", Environment.NewLine), Translations.Strings.DeleteConfirmation, MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
                 //Let's clear the user selected temp folder and the default one
