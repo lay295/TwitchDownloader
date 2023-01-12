@@ -6,6 +6,7 @@ using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using System.Text.RegularExpressions;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -14,9 +15,7 @@ namespace TwitchDownloaderCLI.Modes
         internal static void Download(VideoDownloadArgs inputOptions)
         {
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
-
             VideoDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
-
             VideoDownloader videoDownloader = new(downloadOptions);
             Progress<ProgressReport> progress = new();
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
@@ -25,16 +24,23 @@ namespace TwitchDownloaderCLI.Modes
 
         private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions)
         {
-            if (string.IsNullOrWhiteSpace(inputOptions.Id) || !inputOptions.Id.All(char.IsDigit))
+            string pattern = @"\/(\d+)";
+            var match = Regex.Match(inputOptions.Id, pattern);
+            if (!match.Success)
             {
-                Console.WriteLine("[ERROR] - Invalid VOD ID, unable to parse. Must be only numbers.");
+                Console.WriteLine("[ERROR] - Invalid VOD URL, unable to parse the video ID from it.");
                 Environment.Exit(1);
             }
-
+            var videoId = match.Groups[1].Value;
+            if (!int.TryParse(videoId, out int videoIdInt))
+            {
+                Console.WriteLine("[ERROR] - Invalid VOD Id, unable to parse. Must be only numbers.");
+                Environment.Exit(1);
+            }
             VideoDownloadOptions downloadOptions = new()
             {
+                Id = videoIdInt,
                 DownloadThreads = inputOptions.DownloadThreads,
-                Id = int.Parse(inputOptions.Id),
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,
@@ -45,8 +51,8 @@ namespace TwitchDownloaderCLI.Modes
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder
             };
-
             return downloadOptions;
         }
     }
 }
+
