@@ -1,13 +1,25 @@
 ﻿using CommandLine;
+using System;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-
     [Verb("videodownload", HelpText = "Downloads a stream VOD from Twitch")]
     public class VideoDownloadArgs
     {
+        private string _id;
+
         [Option('u', "id", Required = true, HelpText = "The ID of the VOD to download.")]
-        public string Id { get; set; }
+        public string Id {
+            get { return _id; }
+            set {
+                _id = value;
+                if (_id.Contains("http")) {
+                    Uri uri = new Uri(_id);
+                    string[] segments = uri.Segments;
+                    _id = segments[segments.Length - 1];
+                }
+            }
+        }
 
         [Option('o', "output", Required = true, HelpText = "Path to output file.")]
         public string OutputFile { get; set; }
