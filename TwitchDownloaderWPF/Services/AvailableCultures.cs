@@ -7,11 +7,15 @@
         // <PublishSingleFile>True</PublishSingleFile>
         public enum Culture
         {
-            English
+            English,
+            French
         }
 
         private const string ENGLISH_NAME = "en";
         private const string ENGLISH_NATIVE_NAME = "English";
+
+        private const string FRENCH_NAME = "fr-FR";
+        private const string FRENCH_NATIVE_NAME = "Français";
 
         private const string INVARIANT_NAME = "";
         private const string INVARIANT_NATIVE_NAME = "Invariant";
@@ -21,6 +25,7 @@
             return translation switch
             {
                 Culture.English => ENGLISH_NAME,
+                Culture.French => FRENCH_NAME,
                 _ => INVARIANT_NAME
             };
         }
@@ -30,6 +35,7 @@
             return translation switch
             {
                 Culture.English => ENGLISH_NATIVE_NAME,
+                Culture.French => FRENCH_NATIVE_NAME,
                 _ => INVARIANT_NATIVE_NAME
             };
         }
