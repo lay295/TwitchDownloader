@@ -158,8 +158,8 @@
   <data name="CacheFolder" xml:space="preserve">
     <value>Cache Folder:</value>
   </data>
-  <data name="Chat" xml:space="preserve">
-    <value>Chat:</value>
+  <data name="TemplateChats" xml:space="preserve">
+    <value>Chats:</value>
   </data>
   <data name="ChatBadgeFilter" xml:space="preserve">
     <value>Chat Badge Filter:</value>
@@ -215,7 +215,7 @@
   <data name="ClipLinkId" xml:space="preserve">
     <value>Clip Link/ID:</value>
   </data>
-  <data name="Clips" xml:space="preserve">
+  <data name="TemplateClips" xml:space="preserve">
     <value>Clips:</value>
   </data>
   <data name="CropEnd" xml:space="preserve">
@@ -556,7 +556,7 @@
     <value>Verbose Error Output</value>
   </data>
   <data name="VerboseErrors" xml:space="preserve">
-    <value>VerboseErrors:</value>
+    <value>Verbose Errors:</value>
   </data>
   <data name="VideoCreatedAt" xml:space="preserve">
     <value>Created:</value>
@@ -579,7 +579,7 @@
   <data name="VodLinkId" xml:space="preserve">
     <value>VOD Link/ID:</value>
   </data>
-  <data name="Vods" xml:space="preserve">
+  <data name="TemplateVods" xml:space="preserve">
     <value>VODs:</value>
   </data>
   <data name="DownloadChat" xml:space="preserve">

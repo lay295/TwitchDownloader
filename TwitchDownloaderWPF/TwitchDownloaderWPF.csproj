@@ -110,19 +110,7 @@
     </None>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>RMDIR "$(TargetDir)de/" /S /Q
-RMDIR "$(TargetDir)es/" /S /Q 
-RMDIR "$(TargetDir)fr/" /S /Q
-RMDIR "$(TargetDir)it/" /S /Q
-RMDIR "$(TargetDir)ja/" /S /Q
-RMDIR "$(TargetDir)ko/" /S /Q
-RMDIR "$(TargetDir)ru/" /S /Q
-RMDIR "$(TargetDir)ro/" /S /Q
-RMDIR "$(TargetDir)sv/" /S /Q
-RMDIR "$(TargetDir)hu/" /S /Q
-RMDIR "$(TargetDir)pt-BR/" /S /Q
-RMDIR "$(TargetDir)zh-Hans/" /S /Q
-RMDIR "$(TargetDir)zh-Hant/" /S /Q</PostBuildEvent>
+    <PostBuildEvent></PostBuildEvent>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
   </PropertyGroup>

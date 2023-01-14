@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using static TwitchDownloaderWPF.App;
 using MessageBox = System.Windows.MessageBox;
 
@@ -14,6 +17,8 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class SettingsPage : Window
     {
+        private List<(string name, string nativeName)> cultureList = new();
+
         public SettingsPage()
         {
             InitializeComponent();
@@ -45,13 +50,32 @@ namespace TwitchDownloaderWPF
             checkDonation.IsChecked = Settings.Default.HideDonation;
             checkVerboseErrors.IsChecked = Settings.Default.VerboseErrors;
 
-            comboTheme.Items.Add("System");
+            // Setup theme dropdown
+            comboTheme.Items.Add("System"); // Cannot be localized
             string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
             foreach (string themeFile in themeFiles)
             {
                 comboTheme.Items.Add(Path.GetFileNameWithoutExtension(themeFile));
             }
             comboTheme.SelectedItem = Settings.Default.GuiTheme;
+
+            // Setup culture dropdown
+            foreach (var culture in (AvailableCultures.Culture[])Enum.GetValues(typeof(AvailableCultures.Culture)))
+            {
+                cultureList.Add((culture.ToName(), culture.ToNativeName()));
+                comboLocale.Items.Add(culture.ToNativeName());
+            }
+            var currentCulture = Settings.Default.GuiCulture;
+            var selectedIndex = cultureList.Select((item, index) => new { item, index })
+                .Where(x => x.item.name == currentCulture)
+                .Select(x => x.index)
+                .DefaultIfEmpty(-1)
+                .First();
+
+            if (selectedIndex > -1)
+            {
+                comboLocale.SelectedIndex = selectedIndex;
+            }
         }
 
         private void btnClearCache_Click(object sender, RoutedEventArgs e)
@@ -81,10 +105,10 @@ namespace TwitchDownloaderWPF
             }
         }
 
-		private void Window_Loaded(object sender, RoutedEventArgs e)
-		{
-			AppSingleton.RequestTitleBarChange();
-		}
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            AppSingleton.RequestTitleBarChange();
+        }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -110,13 +134,31 @@ namespace TwitchDownloaderWPF
             e.Handled = true;
         }
 
-		private void comboTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
-		{
-			if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
-			{
-				Settings.Default.GuiTheme = comboTheme.SelectedItem.ToString();
-				AppSingleton.RequestAppThemeChange();
-			}
-		}
-	}
+        private void comboTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
+            {
+                Settings.Default.GuiTheme = comboTheme.SelectedItem.ToString();
+                AppSingleton.RequestAppThemeChange();
+            }
+        }
+
+        private void comboLocale_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (comboLocale.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            if (cultureList[comboLocale.SelectedIndex].name != Settings.Default.GuiCulture)
+            {
+                Settings.Default.GuiCulture = cultureList[comboLocale.SelectedIndex].name;
+#if DEBUG
+                MessageBox.Show("Translations do not load in debug mode.", "Debug Message", MessageBoxButton.OK, MessageBoxImage.Warning);
+#else
+                MessageBox.Show("An application restart is required to apply.", "Restart required", MessageBoxButton.OK, MessageBoxImage.Information); // Translating this is pointless
+#endif
+            }
+        }
+    }
 }

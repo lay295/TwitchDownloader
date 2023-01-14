@@ -205,15 +205,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Chat:.
-        /// </summary>
-        public static string Chat {
-            get {
-                return ResourceManager.GetString("Chat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Chat Badge Filter:.
         /// </summary>
         public static string ChatBadgeFilter {
@@ -372,15 +363,6 @@ namespace TwitchDownloaderWPF.Translations {
         public static string ClipLinkId {
             get {
                 return ResourceManager.GetString("ClipLinkId", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Clips:.
-        /// </summary>
-        public static string Clips {
-            get {
-                return ResourceManager.GetString("Clips", resourceCulture);
             }
         }
         
@@ -1231,6 +1213,33 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Chats:.
+        /// </summary>
+        public static string TemplateChats {
+            get {
+                return ResourceManager.GetString("TemplateChats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clips:.
+        /// </summary>
+        public static string TemplateClips {
+            get {
+                return ResourceManager.GetString("TemplateClips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VODs:.
+        /// </summary>
+        public static string TemplateVods {
+            get {
+                return ResourceManager.GetString("TemplateVods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 3rd Party Emotes .
         /// </summary>
         public static string ThirdPartyEmotes {
@@ -1456,7 +1465,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to VerboseErrors:.
+        ///   Looks up a localized string similar to Verbose Errors:.
         /// </summary>
         public static string VerboseErrors {
             get {
@@ -1533,15 +1542,6 @@ namespace TwitchDownloaderWPF.Translations {
         public static string VodLinkId {
             get {
                 return ResourceManager.GetString("VodLinkId", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to VODs:.
-        /// </summary>
-        public static string Vods {
-            get {
-                return ResourceManager.GetString("Vods", resourceCulture);
             }
         }
         
