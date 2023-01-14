@@ -9,9 +9,9 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="Mass Download URL List" Height="600" Width="500" Loaded="Window_Loaded">
+        Title="Mass Download URL List" MinHeight="590" Height="600" MinWidth="485" Width="500" Loaded="Window_Loaded">
 	<Grid Background="{DynamicResource AppBackground}">
-		<Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="110" Height="45" Margin="0,0,0,10" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+		<Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Center" VerticalAlignment="Bottom" MinWidth="110" Height="45" Margin="0,0,0,10" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
 		<Label Content="{lex:Loc ListOfVodsClips}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 		<TextBox x:Name="textList" HorizontalAlignment="Left" AcceptsReturn="True" Height="454" Margin="10,41,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="466" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
 

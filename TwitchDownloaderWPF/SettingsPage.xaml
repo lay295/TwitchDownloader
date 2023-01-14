@@ -29,7 +29,7 @@
                 <TextBlock Margin="3,9,3,3" Text="{lex:Loc CacheFolder}" Foreground="{DynamicResource AppText}"/>
                 <Button x:Name="btnClearCache" Margin="2" MinWidth="50" Content="{lex:Loc ClearCache}" Click="btnClearCache_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}"/>
                 <Button x:Name="btnTempBrowse" Margin="2" MinWidth="50" Content="{lex:Loc Browse}" Click="btnTempBrowse_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
-                <TextBox x:Name="textTempPath" Margin="2" MinWidth="260" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <TextBox x:Name="textTempPath" Margin="2" MinWidth="250" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,4,3,3" Text="{lex:Loc HideDonationButton}" Foreground="{DynamicResource AppText}" />
