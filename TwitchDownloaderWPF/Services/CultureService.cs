@@ -4,9 +4,9 @@ using WPFLocalizeExtension.Engine;
 
 namespace TwitchDownloaderWPF.Services
 {
-    internal static class CultureService
+    public static class CultureService
     {
-        internal static void SetUiCulture(string culture)
+        public static void SetApplicationCulture(string culture)
         {
             try
             {

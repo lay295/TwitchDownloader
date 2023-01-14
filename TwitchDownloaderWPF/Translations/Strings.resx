@@ -131,6 +131,7 @@
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Theme </value>
+    <comment>Leave a trailing space</comment>
   </data>
   <data name="ApplicationThemeTooltip" xml:space="preserve">
     <value>Click to learn how to make your own theme!</value>
@@ -275,10 +276,10 @@
   </data>
   <data name="EnqueueUpdate" xml:space="preserve">
     <value>Enqueue Update</value>
-    <comment>Leave a trailing space</comment>
   </data>
   <data name="ErrorLog" xml:space="preserve">
     <value>ERROR: </value>
+    <comment>Leave a trailing space</comment>
   </data>
   <data name="FfmpegInputArguments" xml:space="preserve">
     <value>Input Arguments:</value>
@@ -364,13 +365,13 @@
   </data>
   <data name="Offline" xml:space="preserve">
     <value>Offline </value>
+    <comment>Leave a trailing space</comment>
   </data>
   <data name="OfflineTooltip" xml:space="preserve">
     <value>Render the chat using only resources embedded in the chat json file.</value>
   </data>
   <data name="Outline" xml:space="preserve">
     <value>Outline:</value>
-    <comment>Leave a trailing space</comment>
   </data>
   <data name="ParallelTaskLimits" xml:space="preserve">
     <value>Parallel Task Limits</value>
@@ -468,9 +469,6 @@
   </data>
   <data name="SubMessages" xml:space="preserve">
     <value>Sub Messages:</value>
-  </data>
-  <data name="SystemTheme" xml:space="preserve">
-    <value>System</value>
   </data>
   <data name="TaskCancel" xml:space="preserve">
     <value>Cancel</value>
@@ -583,5 +581,50 @@
   </data>
   <data name="Vods" xml:space="preserve">
     <value>VODs:</value>
+  </data>
+  <data name="DownloadChat" xml:space="preserve">
+    <value>Download Chat</value>
+  </data>
+  <data name="DownloadFolder" xml:space="preserve">
+    <value>Download Folder:</value>
+  </data>
+  <data name="DownloadVideo" xml:space="preserve">
+    <value>Download Video</value>
+  </data>
+  <data name="LanguageLabel" xml:space="preserve">
+    <value>Language:</value>
+  </data>
+  <data name="RenderChat" xml:space="preserve">
+    <value>Render Chat</value>
+  </data>
+  <data name="AccentIndentScale" xml:space="preserve">
+    <value>Accent Indent Scale:</value>
+  </data>
+  <data name="AccentStrokeScale" xml:space="preserve">
+    <value>Accent Stoke Scale:</value>
+  </data>
+  <data name="BadgeScale" xml:space="preserve">
+    <value>Badge Scale:</value>
+  </data>
+  <data name="EmojiScale" xml:space="preserve">
+    <value>Emoji Scale:</value>
+  </data>
+  <data name="EmoteScale" xml:space="preserve">
+    <value>Emote Scale:</value>
+  </data>
+  <data name="EmoteSpacingScale" xml:space="preserve">
+    <value>Emote Spacing Scale:</value>
+  </data>
+  <data name="LeftSpacingScale" xml:space="preserve">
+    <value>Left Spacing Scale:</value>
+  </data>
+  <data name="SectionHeightScale" xml:space="preserve">
+    <value>Section Height Scale:</value>
+  </data>
+  <data name="VerticalSpacingScale" xml:space="preserve">
+    <value>Vertical Spacing Scale:</value>
+  </data>
+  <data name="WordSpacingScale" xml:space="preserve">
+    <value>Word Spacing Scale:</value>
   </data>
 </root>

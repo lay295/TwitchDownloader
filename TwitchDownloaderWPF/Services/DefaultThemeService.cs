@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -20,7 +21,13 @@ namespace TwitchDownloaderWPF.Services
                 var themeExtension = themePathSplit[^1];
                 var themeFullName = $"{themeName}.{themeExtension}";
 
-                File.WriteAllText(Path.Combine("Themes", themeFullName), themeData);
+                try
+                {
+                    File.WriteAllText(Path.Combine("Themes", themeFullName), themeData);
+                }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
+                catch (System.Security.SecurityException) { }
             }
         }
 

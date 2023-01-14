@@ -45,7 +45,7 @@ namespace TwitchDownloaderWPF
             checkDonation.IsChecked = Settings.Default.HideDonation;
             checkVerboseErrors.IsChecked = Settings.Default.VerboseErrors;
 
-            comboTheme.Items.Add(Translations.Strings.SystemTheme);
+            comboTheme.Items.Add("System");
             string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
             foreach (string themeFile in themeFiles)
             {

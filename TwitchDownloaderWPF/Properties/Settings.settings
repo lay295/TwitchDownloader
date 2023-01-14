@@ -179,8 +179,8 @@
     <Setting Name="AccentIndentScale" Type="System.Double" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
-    <Setting Name="GuiLanguage" Type="System.String" Scope="User">
-      <Value Profile="(Default)">en-US</Value>
+    <Setting Name="GuiCulture" Type="System.String" Scope="User">
+      <Value Profile="(Default)">en</Value>
     </Setting>
   </Settings>
 </SettingsFile>

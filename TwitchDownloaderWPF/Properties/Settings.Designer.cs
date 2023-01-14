@@ -733,13 +733,13 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("en-US")]
-        public string GuiLanguage {
+        [global::System.Configuration.DefaultSettingValueAttribute("en")]
+        public string GuiCulture {
             get {
-                return ((string)(this["GuiLanguage"]));
+                return ((string)(this["GuiCulture"]));
             }
             set {
-                this["GuiLanguage"] = value;
+                this["GuiCulture"] = value;
             }
         }
     }

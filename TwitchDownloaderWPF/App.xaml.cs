@@ -19,11 +19,14 @@ namespace TwitchDownloaderWPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            CultureService.SetUiCulture(Settings.Default.GuiLanguage);
+            // Set the current culture
+            CultureService.SetApplicationCulture(Settings.Default.GuiCulture);
 
+            // Setup theme service
             WindowsThemeService windowsThemeService = new();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
+            // Create and show the main window
             MainWindow wnd = new();
             wnd.Show();
         }
