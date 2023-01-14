@@ -294,7 +294,7 @@ namespace TwitchDownloaderWPF
         {
             if (!File.Exists(textJson.Text))
             {
-                AppendLog("ERROR: JSON File Not Found");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.FileNotFound + textJson.Text);
                 return false;
             }
 
@@ -317,10 +317,10 @@ namespace TwitchDownloaderWPF
             }
             catch (Exception ex)
             {
-                AppendLog("ERROR: " + ex.Message);
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 return false;
             }
@@ -334,15 +334,14 @@ namespace TwitchDownloaderWPF
                 }
                 else
                 {
-                    AppendLog("ERROR: You've selected an alpha channel (transparency) for a container/codec that does not support it.");
-                    AppendLog("Remove transparency or encode with MOV and RLE/PRORES (file size will be large)");
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.AlphaNotSupportedByCodec);
                     return false;
                 }
             }
 
             if (int.Parse(textHeight.Text) % 2 != 0 || int.Parse(textWidth.Text) % 2 != 0)
             {
-                AppendLog("ERROR: Height and Width must be even");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.RenderWidthHeightMustBeEven);
                 return false;
             }
 

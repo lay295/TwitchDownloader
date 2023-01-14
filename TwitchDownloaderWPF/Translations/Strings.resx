@@ -627,4 +627,8 @@
   <data name="WordSpacingScale" xml:space="preserve">
     <value>Word Spacing Scale:</value>
   </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>File Not Found: </value>
+    <comment>Leave a trailing space</comment>
+  </data>
 </root>

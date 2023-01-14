@@ -664,6 +664,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Not Found: .
+        /// </summary>
+        public static string FileNotFound {
+            get {
+                return ResourceManager.GetString("FileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Font Color:.
         /// </summary>
         public static string FontColor {
