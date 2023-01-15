@@ -18,7 +18,7 @@ A cross platform command line tool that can do the main functions of the GUI pro
 <sup>Downloads a stream VOD or highlight from Twitch</sup>
 
 **-u / --id (REQUIRED)**
-The ID of the VOD to download, currently only accepts Integer IDs and will accept URLs in the future.
+The ID or URL of the VOD to download.
 
 **-o / --output (REQUIRED)**
 File the program will output to.
@@ -51,7 +51,7 @@ Path to temporary folder for cache.
 <sup>Downloads a clip from Twitch</sup>
 
 **-u / --id (REQUIRED)**
-The ID of the Clip to download, currently only accepts the string identifier and will accept URLs in the future.
+The ID or URL of the Clip to download.
 
 **-o / --output (REQUIRED)**
 File the program will output to.
@@ -64,7 +64,7 @@ The quality the program will attempt to download, for example "1080p60", if not 
 <sup>Downloads the chat of a VOD, highlight, or clip</sup>
 
 **-u / --id (REQUIRED)**
-The ID of the VOD or clip to download. Does not currently accept URLs.
+The ID or URL of the VOD or clip to download.
 
 **-o / --output (REQUIRED)**
 File the program will output to. File extension will be used to determine download type. Valid extensions are: `json`, `html`, and `txt`.
