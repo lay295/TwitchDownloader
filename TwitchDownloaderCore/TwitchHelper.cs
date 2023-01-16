@@ -127,7 +127,7 @@ namespace TwitchDownloaderCore
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             if (getFfz)
             {
                 await GetFfzEmoteData(streamerId, emoteReponse.FFZ);
@@ -206,7 +206,7 @@ namespace TwitchDownloaderCore
                 {
                     STVChannelEmoteResponse streamerEmoteObject = JsonConvert.DeserializeObject<STVChannelEmoteResponse>(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
                     // Channel might not have emotes setup
-                    if (streamerEmoteObject.emote_set?.emotes != null) 
+                    if (streamerEmoteObject.emote_set?.emotes != null)
                     {
                         stvEmotes.AddRange(streamerEmoteObject.emote_set.emotes);
                     }
@@ -237,7 +237,7 @@ namespace TwitchDownloaderCore
                 }
                 string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost.url, "[scale]x", emoteFormat);
                 StvEmoteFlags emoteFlags = emoteData.flags;
-                bool emoteIsListed = emoteData.listed;
+                //bool emoteIsListed = emoteData.listed;
 
                 EmoteResponseItem emoteResponse = new() { Id = emoteId, Code = emoteName, ImageType = emoteFormat, ImageUrl = emoteUrl };
                 if ((emoteFlags & StvEmoteFlags.ZeroWidth) == StvEmoteFlags.ZeroWidth)
@@ -248,10 +248,10 @@ namespace TwitchDownloaderCore
                 {
                     continue;
                 }
-                if (emoteIsListed)
-                {
-                    stvResponse.Add(emoteResponse);
-                }
+                //if (emoteIsListed)
+                //{
+                stvResponse.Add(emoteResponse);
+                //}
             }
         }
 
