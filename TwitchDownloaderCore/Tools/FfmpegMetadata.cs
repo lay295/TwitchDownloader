@@ -10,7 +10,7 @@ namespace TwitchDownloaderCore.Tools
 {
     public class FfmpegMetadata
     {
-        public static async Task SerializeAsync(string filePath, string streamerName, int videoId, string videoTitle, DateTime videoCreation, List<VideoMomentEdge> videoMomentEdges = default, CancellationToken cancellationToken = default)
+        public static async Task SerializeAsync(string filePath, string streamerName, double startOffsetSeconds, int videoId, string videoTitle, DateTime videoCreation, List<VideoMomentEdge> videoMomentEdges = default, CancellationToken cancellationToken = default)
         {
             using var fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
             using var sw = new StreamWriter(fs)
@@ -21,7 +21,7 @@ namespace TwitchDownloaderCore.Tools
             await SerializeGlobalMetadata(sw, streamerName, videoId, videoTitle, videoCreation);
             await fs.FlushAsync(cancellationToken);
 
-            await SerializeChapter(sw, videoMomentEdges);
+            await SerializeChapters(sw, videoMomentEdges, startOffsetSeconds);
             await fs.FlushAsync(cancellationToken);
         }
 
@@ -44,7 +44,7 @@ namespace TwitchDownloaderCore.Tools
             return builder.ToString();
         }
 
-        private static async Task SerializeChapter(StreamWriter sw, List<VideoMomentEdge> videoMomentEdges)
+        private static async Task SerializeChapters(StreamWriter sw, List<VideoMomentEdge> videoMomentEdges, double startOffsetSeconds)
         {
             foreach (var momentEdge in videoMomentEdges)
             {
@@ -53,7 +53,7 @@ namespace TwitchDownloaderCore.Tools
                     continue;
                 }
 
-                int startMillis = momentEdge.node.positionMilliseconds;
+                int startMillis = momentEdge.node.positionMilliseconds - (int)(startOffsetSeconds * 1000);
                 int lengthMillis = momentEdge.node.durationMilliseconds;
                 string gameName = momentEdge.node.details.game.displayName;
 
