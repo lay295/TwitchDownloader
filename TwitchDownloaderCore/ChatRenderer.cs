@@ -149,7 +149,7 @@ namespace TwitchDownloaderCore
             BannedWordRegexes = new Regex[renderOptions.BannedWordsArray.Length];
             for (int i = 0; i < renderOptions.BannedWordsArray.Length; i++)
             {
-                BannedWordRegexes[i] = new Regex(@$"(?:^|\s|\p{{P}}){renderOptions.BannedWordsArray[i]}(?:$|\s|\p{{P}})", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                BannedWordRegexes[i] = new Regex(@$"(?:^|\s|\d|\p{{P}}|\p{{S}}){renderOptions.BannedWordsArray[i]}(?:$|\s|\d|\p{{P}}|\p{{S}})", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             }
 
             Stopwatch stopwatch = new Stopwatch();
