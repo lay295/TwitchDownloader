@@ -1,7 +1,6 @@
 ﻿using SkiaSharp;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -38,6 +37,7 @@ namespace TwitchDownloaderCLI.Modes
                 BttvEmotes = (bool)inputOptions.BttvEmotes,
                 FfzEmotes = (bool)inputOptions.FfzEmotes,
                 StvEmotes = (bool)inputOptions.StvEmotes,
+                AllowUnlistedEmotes = (bool)inputOptions.AllowUnlistedEmotes,
                 Outline = inputOptions.Outline,
                 OutlineSize = inputOptions.OutlineSize,
                 Font = inputOptions.Font,

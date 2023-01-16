@@ -117,9 +117,11 @@ namespace TwitchDownloaderCore
             return JsonConvert.DeserializeObject<GqlClipSearchResponse>(response);
         }
 
-        public static async Task<EmoteResponse> GetThirdPartyEmoteData(string streamerId, bool getBttv, bool getFfz, bool getStv, CancellationToken cancellationToken = new())
+        public static async Task<EmoteResponse> GetThirdPartyEmoteData(string streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = new())
         {
             EmoteResponse emoteReponse = new EmoteResponse();
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (getBttv)
             {
@@ -137,7 +139,7 @@ namespace TwitchDownloaderCore
 
             if (getStv)
             {
-                await GetStvEmoteData(streamerId, emoteReponse.STV);
+                await GetStvEmoteData(streamerId, emoteReponse.STV, allowUnlistedEmotes);
             }
 
             return emoteReponse;
@@ -194,7 +196,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static async Task GetStvEmoteData(string streamerId, List<EmoteResponseItem> stvResponse)
+        private static async Task GetStvEmoteData(string streamerId, List<EmoteResponseItem> stvResponse, bool allowUnlistedEmotes)
         {
             STVGlobalEmoteResponse globalEmoteObject = JsonConvert.DeserializeObject<STVGlobalEmoteResponse>(await httpClient.GetStringAsync("https://7tv.io/v3/emote-sets/global"));
             List<STVEmote> stvEmotes = globalEmoteObject.emotes;
@@ -237,7 +239,7 @@ namespace TwitchDownloaderCore
                 }
                 string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost.url, "[scale]x", emoteFormat);
                 StvEmoteFlags emoteFlags = emoteData.flags;
-                //bool emoteIsListed = emoteData.listed;
+                bool emoteIsListed = emoteData.listed;
 
                 EmoteResponseItem emoteResponse = new() { Id = emoteId, Code = emoteName, ImageType = emoteFormat, ImageUrl = emoteUrl };
                 if ((emoteFlags & StvEmoteFlags.ZeroWidth) == StvEmoteFlags.ZeroWidth)
@@ -248,14 +250,14 @@ namespace TwitchDownloaderCore
                 {
                     continue;
                 }
-                //if (emoteIsListed)
-                //{
-                stvResponse.Add(emoteResponse);
-                //}
+                if (allowUnlistedEmotes || emoteIsListed)
+                {
+                    stvResponse.Add(emoteResponse);
+                }
             }
         }
 
-        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool offline = false, CancellationToken cancellationToken = new())
+        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = new())
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -291,7 +293,7 @@ namespace TwitchDownloaderCore
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
             string stvFolder = Path.Combine(cacheFolder, "stv");
 
-            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId.ToString(), bttv, ffz, stv, cancellationToken);
+            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId.ToString(), bttv, ffz, stv, allowUnlistedEmotes, cancellationToken);
 
             if (bttv)
             {

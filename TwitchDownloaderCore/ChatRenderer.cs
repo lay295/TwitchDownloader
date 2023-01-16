@@ -149,7 +149,7 @@ namespace TwitchDownloaderCore
             BannedWordRegexes = new Regex[renderOptions.BannedWordsArray.Length];
             for (int i = 0; i < renderOptions.BannedWordsArray.Length; i++)
             {
-                BannedWordRegexes[i] = new Regex(@$"(?:^|\s|\d|\p{{P}}|\p{{S}}){renderOptions.BannedWordsArray[i]}(?:$|\s|\d|\p{{P}}|\p{{S}})", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                BannedWordRegexes[i] = new Regex(@$"(?:^|\s|\d|\p{{P}}|\p{{S}}){renderOptions.BannedWordsArray[i]}(?:$|\s|\d|\p{{P}}|\p{{S}})", RegexOptions.Compiled | RegexOptions.CultureInvariant);
             }
 
             Stopwatch stopwatch = new Stopwatch();
@@ -354,7 +354,7 @@ namespace TwitchDownloaderCore
                 while (newestCommentIndex >= currentIndex)
                 {
                     // Skip comments from ignored users
-                    if (renderOptions.IgnoreUsersArray.Contains(chatRoot.comments[currentIndex].commenter.name))
+                    if (renderOptions.IgnoreUsersArray.Contains(chatRoot.comments[currentIndex].commenter.name.ToLower()))
                     {
                         currentIndex++;
                         continue;
@@ -363,7 +363,7 @@ namespace TwitchDownloaderCore
                     // Skip comments containing banned words
                     foreach (var bannedWordRegex in BannedWordRegexes)
                     {
-                        if (bannedWordRegex.IsMatch(chatRoot.comments[currentIndex].message.body))
+                        if (bannedWordRegex.IsMatch(chatRoot.comments[currentIndex].message.body.ToLower()))
                         {
                             currentIndex++;
                             continue;
@@ -1090,7 +1090,7 @@ namespace TwitchDownloaderCore
         {
             Task<List<ChatBadge>> badgeTask = TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
             Task<List<TwitchEmote>> emoteTask = TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
-            Task<List<TwitchEmote>> emoteThirdTask = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline, cancellationToken);
+            Task<List<TwitchEmote>> emoteThirdTask = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.Offline, renderOptions.AllowUnlistedEmotes, cancellationToken);
             Task<List<CheerEmote>> cheerTask = TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
             Task<Dictionary<string, SKBitmap>> emojiTask = TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
 

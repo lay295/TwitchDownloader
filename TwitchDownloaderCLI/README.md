@@ -161,6 +161,9 @@ File the program will output to.
 **--stv**
 (Default: true) Enable 7TV emotes.
 
+**--allow-unlisted-emotes**
+(Default: true) Allow unlisted 7tv emotes in the render.
+
 **--sub-messages**
 (Default: true) Enable sub / re-sub messages.
 

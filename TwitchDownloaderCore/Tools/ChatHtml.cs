@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.TwitchObjects;
@@ -18,20 +19,20 @@ namespace TwitchDownloaderCore.Tools
         /// <summary>
         /// Serializes a chat Html file.
         /// </summary>
-        public async Task SerializeAsync(ChatRoot chatRoot, bool embedData = true)
-            => await SerializeAsync(FilePath, chatRoot, embedData);
+        public async Task SerializeAsync(ChatRoot chatRoot, bool embedData = true, CancellationToken cancellationToken = new())
+            => await SerializeAsync(FilePath, chatRoot, embedData, cancellationToken);
 
         // TODO: Add support for embedding Twitch bits and Twitch badges in HTML chats
         /// <summary>
         /// Serializes a chat Html file.
         /// </summary>
-        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, bool embedData = true)
+        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, bool embedData = true, CancellationToken cancellationToken = new())
         {
             if (filePath is null)
                 throw new ArgumentNullException(nameof(filePath));
 
             Dictionary<string, EmbedEmoteData> thirdEmoteData = new Dictionary<string, EmbedEmoteData>();
-            EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmoteData(chatRoot.streamer.id.ToString(), true, true, true);
+            EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmoteData(chatRoot.streamer.id.ToString(), true, true, true, true, cancellationToken);
             List<EmoteResponseItem> itemList = new List<EmoteResponseItem>();
             itemList.AddRange(emotes.BTTV);
             itemList.AddRange(emotes.FFZ);
@@ -58,6 +59,8 @@ namespace TwitchDownloaderCore.Tools
                     }
                 }
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             List<string> templateStrings = new List<string>(Properties.Resources.template.Split('\n'));
             StringBuilder finalString = new StringBuilder();

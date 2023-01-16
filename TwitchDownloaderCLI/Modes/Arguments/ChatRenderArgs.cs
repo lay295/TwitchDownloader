@@ -33,6 +33,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("stv", Default = true, HelpText = "Enable 7tv emotes.")]
         public bool? StvEmotes { get; set; }
 
+        [Option("allow-unlisted-emotes", Default = true, HelpText = "Allow unlisted 7tv emotes in the render.")]
+        public bool? AllowUnlistedEmotes { get; set; }
+
         [Option("sub-messages", Default = true, HelpText = "Enable sub/re-sub messages.")]
         public bool? SubMessages { get; set; }
 
