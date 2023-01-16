@@ -30,10 +30,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("ffz", Default = true, HelpText = "Enable FFZ emotes.")]
         public bool? FfzEmotes { get; set; }
 
-        [Option("stv", Default = true, HelpText = "Enable 7tv emotes.")]
+        [Option("stv", Default = true, HelpText = "Enable 7TV emotes.")]
         public bool? StvEmotes { get; set; }
 
-        [Option("allow-unlisted-emotes", Default = true, HelpText = "Allow unlisted 7tv emotes in the render.")]
+        [Option("allow-unlisted-emotes", Default = true, HelpText = "Allow unlisted 7TV emotes in the render.")]
         public bool? AllowUnlistedEmotes { get; set; }
 
         [Option("sub-messages", Default = true, HelpText = "Enable sub/re-sub messages.")]
