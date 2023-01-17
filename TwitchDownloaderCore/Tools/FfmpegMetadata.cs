@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore.Tools
 {
-    public class FfmpegMetadata
+    // https://ffmpeg.org/ffmpeg-formats.html#Metadata-1
+    public static class FfmpegMetadata
     {
+        private const string LINE_FEED = "\u000A";
+
         public static async Task SerializeAsync(string filePath, string streamerName, double startOffsetSeconds, int videoId, string videoTitle, DateTime videoCreation, List<VideoMomentEdge> videoMomentEdges = default, CancellationToken cancellationToken = default)
         {
             using var fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
             using var sw = new StreamWriter(fs)
             {
-                AutoFlush = true
+                AutoFlush = true,
+                NewLine = LINE_FEED
             };
 
             await SerializeGlobalMetadata(sw, streamerName, videoId, videoTitle, videoCreation);
@@ -27,25 +30,18 @@ namespace TwitchDownloaderCore.Tools
 
         private static async Task SerializeGlobalMetadata(StreamWriter sw, string streamerName, int videoId, string videoTitle, DateTime videoCreation)
         {
-            await sw.WriteAsync(
-                GenerateSerializedGlobalMetadata(streamerName, videoId, videoTitle, videoCreation)
-                );
-        }
-
-        private static string GenerateSerializedGlobalMetadata(string streamerName, int videoId, string videoTitle, DateTime videoCreation)
-        {
-            StringBuilder builder = new();
-            builder.AppendLine(";FFMETADATA1");
-            builder.AppendLine("title=" + SanatizeString(videoTitle + $" ({videoId})"));
-            builder.AppendLine("artist=" + SanatizeString(streamerName));
-            builder.AppendLine("date=" + SanatizeString(videoCreation.ToString("yyyy"))); // The 'date' key becomes 'year' in most formats
-            builder.AppendLine("comment=" + "Originally aired " + SanatizeString(videoCreation.ToString("u")));
-            builder.AppendLine();
-            return builder.ToString();
+            await sw.WriteLineAsync(";FFMETADATA1");
+            await sw.WriteLineAsync("title=" + SanatizeKeyValue(videoTitle + $" ({videoId})"));
+            await sw.WriteLineAsync("artist=" + SanatizeKeyValue(streamerName));
+            await sw.WriteLineAsync("date=" + SanatizeKeyValue(videoCreation.ToString("yyyy"))); // The 'date' key becomes 'year' in most formats
+            await sw.WriteLineAsync("comment=" + "Originally aired: " + SanatizeKeyValue(videoCreation.ToString("u")) + @"\");
+            await sw.WriteLineAsync("Video id: " + SanatizeKeyValue(videoId.ToString()));
         }
 
         private static async Task SerializeChapters(StreamWriter sw, List<VideoMomentEdge> videoMomentEdges, double startOffsetSeconds)
         {
+            // Note: Ffmpeg automatically handles out of range chapters for us
+            int startOffsetMillis = (int)(startOffsetSeconds * 1000);
             foreach (var momentEdge in videoMomentEdges)
             {
                 if (momentEdge.node._type != "GAME_CHANGE")
@@ -53,29 +49,19 @@ namespace TwitchDownloaderCore.Tools
                     continue;
                 }
 
-                int startMillis = momentEdge.node.positionMilliseconds - (int)(startOffsetSeconds * 1000);
+                int startMillis = momentEdge.node.positionMilliseconds - startOffsetMillis;
                 int lengthMillis = momentEdge.node.durationMilliseconds;
                 string gameName = momentEdge.node.details.game.displayName;
 
-                await sw.WriteAsync(
-                    GenerateSerializedChapter(startMillis, lengthMillis, gameName)
-                    );
+                await sw.WriteLineAsync("[CHAPTER]");
+                await sw.WriteLineAsync("TIMEBASE=1/1000");
+                await sw.WriteLineAsync("START=" + startMillis.ToString());
+                await sw.WriteLineAsync("END=" + (startMillis + lengthMillis).ToString());
+                await sw.WriteLineAsync("title=" + SanatizeKeyValue(gameName));
             }
         }
 
-        private static string GenerateSerializedChapter(int startMillies, int lengthMillis, string gameName)
-        {
-            StringBuilder builder = new();
-            builder.AppendLine("[CHAPTER]");
-            builder.AppendLine("TIMEBASE=1/1000");
-            builder.AppendLine("START=" + startMillies.ToString());
-            builder.AppendLine("END=" + (startMillies + lengthMillis - 1).ToString());
-            builder.AppendLine("title=" + SanatizeString(gameName));
-            builder.AppendLine();
-            return builder.ToString();
-        }
-
-        private static string SanatizeString(string str)
+        private static string SanatizeKeyValue(string str)
         {
             return str
                 .Replace("=", @"\=")
