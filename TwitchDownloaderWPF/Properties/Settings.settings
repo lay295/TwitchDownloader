@@ -180,7 +180,7 @@
       <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="GuiCulture" Type="System.String" Scope="User">
-      <Value Profile="(Default)">en</Value>
+      <Value Profile="(Default)">en-US</Value>
     </Setting>
   </Settings>
 </SettingsFile>

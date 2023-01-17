@@ -20,7 +20,7 @@ namespace TwitchDownloaderWPF
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             // Set the current culture
-            CultureService.SetApplicationCulture(Settings.Default.GuiCulture);
+            RequestCultureChange();
 
             // Setup theme service
             WindowsThemeService windowsThemeService = new();
@@ -36,5 +36,8 @@ namespace TwitchDownloaderWPF
 
         public void RequestTitleBarChange()
             => ThemeServiceSingleton.SetTitleBarTheme(Windows);
+
+        public void RequestCultureChange()
+            => CultureService.SetApplicationCulture(Settings.Default.GuiCulture);
     }
 }

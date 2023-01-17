@@ -153,11 +153,7 @@ namespace TwitchDownloaderWPF
             if (cultureList[comboLocale.SelectedIndex].name != Settings.Default.GuiCulture)
             {
                 Settings.Default.GuiCulture = cultureList[comboLocale.SelectedIndex].name;
-#if DEBUG
-                MessageBox.Show("Translations do not load in debug mode.", "Debug Message", MessageBoxButton.OK, MessageBoxImage.Warning);
-#else
-                MessageBox.Show("An application restart is required to apply.", "Restart required", MessageBoxButton.OK, MessageBoxImage.Information); // Translating this is pointless
-#endif
+                AppSingleton.RequestCultureChange();
             }
         }
     }
