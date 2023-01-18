@@ -61,6 +61,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 InputFile = inputOptions.InputFile,
                 OutputFile = inputOptions.OutputFile,
+                Compression = inputOptions.Compression,
                 OutputFormat = outFormat,
                 EmbedMissing = inputOptions.EmbedMissing,
                 ReplaceEmbeds = inputOptions.ReplaceEmbeds,
