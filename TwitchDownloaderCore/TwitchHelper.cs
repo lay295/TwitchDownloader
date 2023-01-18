@@ -669,7 +669,7 @@ namespace TwitchDownloaderCore
         {
             // Let's delete any video download cache folders older than 24 hours
             // Or that have been inactive for 2 hours
-            var videoFolderRegex = new Regex(@"\d+_(\d+)\z", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
+            var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
             var directories = Directory.GetDirectories(cacheFolder);
             foreach (var directory in directories)
             {
@@ -706,10 +706,11 @@ namespace TwitchDownloaderCore
 
         private static bool DeleteColdDirectory(string directory)
         {
-            var directoryWriteTimeMillis = Directory.GetLastWriteTimeUtc(directory).Ticks / 10_000;
-            var currentTimeMillis = DateTimeOffset.UtcNow.Ticks / 10_000;
+            // Directory.GetLastWriteTimeUtc() works as expected on both Windows and MacOS. Assuming it does on Linux too
+            var directoryWriteTimeMillis = Directory.GetLastWriteTimeUtc(directory).Ticks / TimeSpan.TicksPerMillisecond;
+            var currentTimeMillis = DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
 
-            if (currentTimeMillis - directoryWriteTimeMillis > 7_200_000) // 2 hours in millis
+            if (currentTimeMillis - directoryWriteTimeMillis > 14_400_000) // 4 hours in millis
             {
                 try
                 {

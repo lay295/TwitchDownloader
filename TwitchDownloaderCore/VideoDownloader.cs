@@ -113,7 +113,7 @@ namespace TwitchDownloaderCore
                             }
                     };
 
-                    TimeSpan videoLength = TimeSpan.FromMilliseconds(0);
+                    TimeSpan videoLength = TimeSpan.FromTicks(0);
                     var videoLengthRegex = new Regex(@"^\s?\s?Duration: (\d\d:\d\d:\d\d.\d\d)", RegexOptions.Multiline);
                     var encodingTimeRegex = new Regex(@"time=(\d\d:\d\d:\d\d.\d\d)", RegexOptions.Compiled);
                     process.ErrorDataReceived += (s, e) =>
@@ -123,7 +123,7 @@ namespace TwitchDownloaderCore
                             return;
                         }
 
-                        if (videoLength.TotalMilliseconds < 1)
+                        if (videoLength.Ticks == 0)
                         {
                             var videoLengthMatch = videoLengthRegex.Match(e.Data);
                             if (!videoLengthMatch.Success)
@@ -152,8 +152,7 @@ namespace TwitchDownloaderCore
 
         private static void HandleFfmpegProgress(string output, Regex encodingTimeRegex, TimeSpan videoLength, IProgress<ProgressReport> progress)
         {
-            double videoLengthMillis = videoLength.TotalMilliseconds;
-            if (videoLengthMillis < 1)
+            if (videoLength.Ticks == 0)
             {
                 return;
             }
@@ -165,8 +164,7 @@ namespace TwitchDownloaderCore
             }
 
             var encodingTime = TimeSpan.Parse(encodingTimeMatch.Groups[1].ToString());
-            double encodingTimeMillis = encodingTime.TotalMilliseconds;
-            int percent = (int)(encodingTimeMillis / videoLengthMillis * 100.0);
+            int percent = (int)(encodingTime.TotalMilliseconds / videoLength.TotalMilliseconds * 100);
 
             progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [4/4]"));
             progress.Report(new ProgressReport(percent));
@@ -299,7 +297,7 @@ namespace TwitchDownloaderCore
             using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
             {
                 response.EnsureSuccessStatusCode();
-                
+
                 using (var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
