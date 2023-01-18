@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloader.Properties;
 using TwitchDownloader.TwitchTasks;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderWPF;
 using static TwitchDownloaderWPF.App;

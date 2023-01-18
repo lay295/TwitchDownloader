@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
@@ -111,7 +112,7 @@ namespace TwitchDownloaderCore
             switch (_updateOptions.OutputFormat)
             {
                 case ChatFormat.Json:
-                    ChatJson.Serialize(_updateOptions.OutputFile, chatRoot);
+                    await ChatJson.SerializeAsync(_updateOptions.OutputFile, chatRoot, cancellationToken);
                     break;
                 case ChatFormat.Html:
                     await ChatHtml.SerializeAsync(_updateOptions.OutputFile, chatRoot, chatRoot.embeddedData != null);

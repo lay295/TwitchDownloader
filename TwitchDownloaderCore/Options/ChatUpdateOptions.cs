@@ -1,4 +1,6 @@
-﻿namespace TwitchDownloaderCore.Options
+﻿using TwitchDownloaderCore.Chat;
+
+namespace TwitchDownloaderCore.Options
 {
     public class ChatUpdateOptions
     {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.TwitchObjects;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Chat
 {
     public class ChatHtml
     {
@@ -27,12 +27,54 @@ namespace TwitchDownloaderCore.Tools
         /// </summary>
         public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, bool embedData = true)
         {
-            if (filePath is null)
-                throw new ArgumentNullException(nameof(filePath));
+            ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
 
-            Dictionary<string, EmbedEmoteData> thirdEmoteData = new Dictionary<string, EmbedEmoteData>();
+            Dictionary<string, EmbedEmoteData> thirdEmoteData = new();
+            await BuildThirdPartyDictionary(chatRoot, embedData, thirdEmoteData);
+
+            string[] templateStrings = Properties.Resources.template.Split('\n');
+            using var fs = File.Create(filePath);
+            using var sw = new StreamWriter(fs, Encoding.Unicode);
+
+            for (int i = 0; i < templateStrings.Length; i++)
+            {
+                switch (templateStrings[i].TrimEnd('\r', '\n'))
+                {
+                    case "<!-- TITLE -->":
+                        await sw.WriteLineAsync(HttpUtility.HtmlEncode(Path.GetFileNameWithoutExtension(filePath)));
+                        break;
+                    case "/* [CUSTOM CSS] */":
+                        if (embedData)
+                        {
+                            foreach (var emote in chatRoot.embeddedData.firstParty)
+                            {
+                                await sw.WriteLineAsync(".first-" + emote.id + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(emote.data) + "\"); }");
+                            }
+                            foreach (var emote in chatRoot.embeddedData.thirdParty)
+                            {
+                                await sw.WriteLineAsync(".third-" + emote.id + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(emote.data) + "\"); }");
+                            }
+                        }
+                        break;
+                    case "<!-- CUSTOM HTML -->":
+                        foreach (Comment comment in chatRoot.comments)
+                        {
+                            var relativeTime = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
+                            string timestamp = relativeTime.ToString(@"h\:mm\:ss");
+                            await sw.WriteAsync($"<pre class=\"comment-root\">[{timestamp}] <a href=\"https://www.twitch.tv/{comment.commenter.name}\" target=\"_blank\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>\n");
+                        }
+                        break;
+                    default:
+                        await sw.WriteLineAsync(templateStrings[i].TrimEnd('\r', '\n'));
+                        break;
+                }
+            }
+        }
+
+        private static async Task BuildThirdPartyDictionary(ChatRoot chatRoot, bool embedData, Dictionary<string, EmbedEmoteData> thirdEmoteData)
+        {
             EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmoteData(chatRoot.streamer.id.ToString(), true, true, true);
-            List<EmoteResponseItem> itemList = new List<EmoteResponseItem>();
+            List<EmoteResponseItem> itemList = new();
             itemList.AddRange(emotes.BTTV);
             itemList.AddRange(emotes.FFZ);
             itemList.AddRange(emotes.STV);
@@ -52,58 +94,17 @@ namespace TwitchDownloaderCore.Tools
                     }
                     else
                     {
-                        EmbedEmoteData embedEmoteData = new EmbedEmoteData();
+                        EmbedEmoteData embedEmoteData = new();
                         embedEmoteData.url = item.ImageUrl.Replace("[scale]", "1");
                         thirdEmoteData[item.Code] = embedEmoteData;
                     }
                 }
             }
-
-            List<string> templateStrings = new List<string>(Properties.Resources.template.Split('\n'));
-            StringBuilder finalString = new StringBuilder();
-
-            for (int i = 0; i < templateStrings.Count; i++)
-            {
-                switch (templateStrings[i].TrimEnd('\r', '\n'))
-                {
-                    case "<!-- TITLE -->":
-                        finalString.AppendLine(HttpUtility.HtmlEncode(Path.GetFileNameWithoutExtension(filePath)));
-                        break;
-                    case "/* [CUSTOM CSS] */":
-                        if (embedData)
-                        {
-                            foreach (var emote in chatRoot.embeddedData.firstParty)
-                            {
-                                finalString.AppendLine(".first-" + emote.id + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(emote.data) + "\"); }");
-                            }
-                            foreach (var emote in chatRoot.embeddedData.thirdParty)
-                            {
-                                finalString.AppendLine(".third-" + emote.id + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(emote.data) + "\"); }");
-                            }
-                        }
-                        break;
-                    case "<!-- CUSTOM HTML -->":
-                        foreach (Comment comment in chatRoot.comments)
-                        {
-                            TimeSpan time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
-                            string timestamp = time.ToString(@"h\:mm\:ss");
-                            finalString.Append($"<pre class=\"comment-root\">[{timestamp}] <a href=\"https://www.twitch.tv/{comment.commenter.name}\" target=\"_blank\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? ($"{comment.commenter.display_name} ({comment.commenter.name})") : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>\n");
-                        }
-                        break;
-                    default:
-                        finalString.AppendLine(templateStrings[i].TrimEnd('\r', '\n'));
-                        break;
-                }
-            }
-            templateStrings.Clear();
-
-            File.WriteAllText(filePath, finalString.ToString(), Encoding.Unicode);
-            GC.Collect();
         }
 
-        internal static string GetMessageHtml(bool embedEmotes, Dictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
+        private static string GetMessageHtml(bool embedEmotes, Dictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
         {
-            StringBuilder message = new StringBuilder();
+            StringBuilder message = new();
 
             comment.message.fragments ??= new List<Fragment> { new Fragment() { text = comment.message.body } };
 

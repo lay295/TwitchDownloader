@@ -1,21 +1,7 @@
-﻿namespace TwitchDownloaderCore.Options
+﻿using TwitchDownloaderCore.Chat;
+
+namespace TwitchDownloaderCore.Options
 {
-    // TODO: Move TimestampFormat to dedicated file
-    public enum TimestampFormat
-    {
-        Utc,
-        Relative,
-        None
-    }
-
-    // TODO: Move ChatFormat to dedicated file
-    public enum ChatFormat
-    {
-        Json,
-        Text,
-        Html
-    }
-
     public class ChatDownloadOptions
     {
         public ChatFormat DownloadFormat { get; set; } = ChatFormat.Json;

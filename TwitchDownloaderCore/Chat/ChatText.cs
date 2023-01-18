@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Chat
 {
     public class ChatText
     {
@@ -22,8 +21,7 @@ namespace TwitchDownloaderCore.Tools
         /// </summary>
         public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, TimestampFormat timeFormat)
         {
-            if (filePath is null)
-                throw new ArgumentNullException(nameof(filePath));
+            ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
 
             using var sw = new StreamWriter(filePath);
             foreach (var comment in chatRoot.comments)
@@ -37,7 +35,7 @@ namespace TwitchDownloaderCore.Tools
                 }
                 else if (timeFormat == TimestampFormat.Relative)
                 {
-                    TimeSpan time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
+                    var time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
                     string timestamp = time.ToString(@"h\:mm\:ss");
                     await sw.WriteLineAsync(string.Format("[{0}] {1}: {2}", timestamp, username, message));
                 }

@@ -11,6 +11,7 @@ using System.Windows.Media.Imaging;
 using TwitchDownloader;
 using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using WpfAnimatedGif;

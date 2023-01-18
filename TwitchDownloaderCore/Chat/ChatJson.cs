@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.TwitchObjects;
-using Newtonsoft = Newtonsoft.Json;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Chat
 {
     public class ChatJson
     {
@@ -16,20 +16,19 @@ namespace TwitchDownloaderCore.Tools
         public ChatJson() { }
 
         /// <summary>
-        /// Deserializes a chat json file.
+        /// Asynchronously deserializes a chat json file.
         /// </summary>
         /// <returns>A <see cref="ChatRoot"/> representation the deserialized chat json file.</returns>
         public async Task<ChatRoot> DeserializeAsync(bool getComments = true, bool getEmbeds = true, CancellationToken cancellationToken = new())
             => await DeserializeAsync(FilePath, getComments, getEmbeds, cancellationToken);
 
         /// <summary>
-        /// Deserializes a chat json file.
+        /// Asynchronously deserializes a chat json file.
         /// </summary>
         /// <returns>A <see cref="ChatRoot"/> representation the deserialized chat json file.</returns>
         public static async Task<ChatRoot> DeserializeAsync(string filePath, bool getComments = true, bool getEmbeds = true, CancellationToken cancellationToken = new())
         {
-            if (filePath is null)
-                throw new ArgumentNullException(nameof(filePath));
+            ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
 
             if (!File.Exists(filePath))
                 throw new IOException("Json file does not exist");
@@ -72,22 +71,20 @@ namespace TwitchDownloaderCore.Tools
         }
 
         /// <summary>
-        /// Serializes a chat json file.
+        /// Asynchronously serializes a chat json file.
         /// </summary>
-        public void Serialize(ChatRoot chatRoot)
-            => Serialize(FilePath, chatRoot);
+        public async Task SerializeAsync(ChatRoot chatRoot, CancellationToken cancellationToken)
+            => await SerializeAsync(FilePath, chatRoot, cancellationToken);
 
         /// <summary>
-        /// Serializes a chat json file.
+        /// Asynchronously serializes a chat json file.
         /// </summary>
-        public static void Serialize(string filePath, ChatRoot chatRoot)
+        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, CancellationToken cancellationToken)
         {
-            if (chatRoot is null)
-                throw new ArgumentNullException(nameof(chatRoot));
+            ArgumentNullException.ThrowIfNull(chatRoot, nameof(chatRoot));
 
-            using TextWriter writer = File.CreateText(filePath);
-            Newtonsoft::JsonSerializer serializer = new();
-            serializer.Serialize(writer, chatRoot);
+            using var fs = File.Create(filePath);
+            await JsonSerializer.SerializeAsync(fs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
         }
     }
 }
