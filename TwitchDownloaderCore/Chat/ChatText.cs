@@ -5,17 +5,8 @@ using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Chat
 {
-    public class ChatText
+    public static class ChatText
     {
-        public string FilePath { get; set; }
-        public ChatText() { }
-
-        /// <summary>
-        /// Serializes a chat plain text file.
-        /// </summary>
-        public async Task SerializeAsync(ChatRoot chatRoot, TimestampFormat timeFormat)
-            => await SerializeAsync(FilePath, chatRoot, timeFormat);
-
         /// <summary>
         /// Serializes a chat plain text file.
         /// </summary>

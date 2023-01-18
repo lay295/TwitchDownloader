@@ -9,19 +9,8 @@ using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Chat
 {
-    public class ChatJson
+    public static class ChatJson
     {
-        public string FilePath { get; set; }
-
-        public ChatJson() { }
-
-        /// <summary>
-        /// Asynchronously deserializes a chat json file.
-        /// </summary>
-        /// <returns>A <see cref="ChatRoot"/> representation the deserialized chat json file.</returns>
-        public async Task<ChatRoot> DeserializeAsync(bool getComments = true, bool getEmbeds = true, CancellationToken cancellationToken = new())
-            => await DeserializeAsync(FilePath, getComments, getEmbeds, cancellationToken);
-
         /// <summary>
         /// Asynchronously deserializes a chat json file.
         /// </summary>
@@ -69,12 +58,6 @@ namespace TwitchDownloaderCore.Chat
 
             return returnChatRoot;
         }
-
-        /// <summary>
-        /// Asynchronously serializes a chat json file.
-        /// </summary>
-        public async Task SerializeAsync(ChatRoot chatRoot, CancellationToken cancellationToken)
-            => await SerializeAsync(FilePath, chatRoot, cancellationToken);
 
         /// <summary>
         /// Asynchronously serializes a chat json file.

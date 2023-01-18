@@ -9,18 +9,8 @@ using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Chat
 {
-    public class ChatHtml
+    public static class ChatHtml
     {
-        public string FilePath { get; set; }
-
-        public ChatHtml() { }
-
-        /// <summary>
-        /// Serializes a chat Html file.
-        /// </summary>
-        public async Task SerializeAsync(ChatRoot chatRoot, bool embedData = true)
-            => await SerializeAsync(FilePath, chatRoot, embedData);
-
         // TODO: Add support for embedding Twitch bits and Twitch badges in HTML chats
         /// <summary>
         /// Serializes a chat Html file.
