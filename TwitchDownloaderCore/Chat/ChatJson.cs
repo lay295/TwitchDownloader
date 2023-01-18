@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
@@ -24,7 +25,21 @@ namespace TwitchDownloaderCore.Chat
 
             ChatRoot returnChatRoot = new ChatRoot();
             using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            using var jsonDocument = await JsonDocument.ParseAsync(fs, cancellationToken: cancellationToken);
+            JsonDocument jsonDocument;
+            switch (Path.GetExtension(filePath))
+            {
+                case ".gz":
+                    using (var gs = new GZipStream(fs, CompressionMode.Decompress))
+                    {
+                        jsonDocument = await JsonDocument.ParseAsync(gs, cancellationToken: cancellationToken);
+                    }
+                    break;
+                case ".json":
+                    jsonDocument = await JsonDocument.ParseAsync(fs, cancellationToken: cancellationToken);
+                    break;
+                default:
+                    throw new NotImplementedException(Path.GetFileName(filePath) + " is not a valid chat format");
+            }
 
             if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerElement))
             {
@@ -62,12 +77,25 @@ namespace TwitchDownloaderCore.Chat
         /// <summary>
         /// Asynchronously serializes a chat json file.
         /// </summary>
-        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, CancellationToken cancellationToken)
+        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, ChatCompression compression, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(chatRoot, nameof(chatRoot));
 
             using var fs = File.Create(filePath);
-            await JsonSerializer.SerializeAsync(fs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
+            switch (compression)
+            {
+                case ChatCompression.None:
+                    await JsonSerializer.SerializeAsync(fs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
+                    break;
+                case ChatCompression.Gzip:
+                    using (var gs = new GZipStream(fs, CompressionLevel.SmallestSize))
+                    {
+                        await JsonSerializer.SerializeAsync(gs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException("The requested chat format is not implemented");
+            }
         }
     }
 }

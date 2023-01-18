@@ -33,6 +33,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 ".html" or ".htm" => ChatFormat.Html,
                 ".json" => ChatFormat.Json,
+                ".gz" => ChatFormat.Json,
                 _ => ChatFormat.Text
             };
             ChatFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch

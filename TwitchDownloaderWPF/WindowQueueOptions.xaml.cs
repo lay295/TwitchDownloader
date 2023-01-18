@@ -152,11 +152,11 @@ namespace TwitchDownloader
                             if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == ChatFormat.Json)
                             {
                                 ChatRenderTask renderTask = new ChatRenderTask();
-                                ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename, ".mp4"));
+                                ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), ".mp4"));
                                 if (renderOptions.OutputFile.Trim() == downloadOptions.Filename.Trim())
                                 {
                                     //Just in case VOD and chat paths are the same. Like the previous defaults
-                                    renderOptions.OutputFile = Path.ChangeExtension(chatOptions.Filename, " - CHAT.mp4");
+                                    renderOptions.OutputFile = Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), " - CHAT.mp4");
                                 }
                                 renderOptions.InputFile = chatOptions.Filename;
                                 renderTask.DownloadOptions = renderOptions;
@@ -229,11 +229,11 @@ namespace TwitchDownloader
                             if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == ChatFormat.Json)
                             {
                                 ChatRenderTask renderTask = new ChatRenderTask();
-                                ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename, ".mp4"));
+                                ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), ".mp4"));
                                 if (renderOptions.OutputFile.Trim() == downloadOptions.Filename.Trim())
                                 {
                                     //Just in case VOD and chat paths are the same. Like the previous defaults
-                                    renderOptions.OutputFile = Path.ChangeExtension(chatOptions.Filename, " - CHAT.mp4");
+                                    renderOptions.OutputFile = Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), " - CHAT.mp4");
                                 }
                                 renderOptions.InputFile = chatOptions.Filename;
                                 renderTask.DownloadOptions = renderOptions;
@@ -281,7 +281,7 @@ namespace TwitchDownloader
                         if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == ChatFormat.Json)
                         {
                             ChatRenderTask renderTask = new ChatRenderTask();
-                            ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename, ".mp4"));
+                            ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), ".mp4"));
                             renderOptions.InputFile = chatOptions.Filename;
                             renderTask.DownloadOptions = renderOptions;
                             renderTask.Info.Title = chatPage.textTitle.Text;
@@ -440,11 +440,11 @@ namespace TwitchDownloader
                                 if ((bool)checkRender.IsChecked && downloadOptions.DownloadFormat == ChatFormat.Json)
                                 {
                                     ChatRenderTask renderTask = new ChatRenderTask();
-                                    ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(downloadOptions.Filename, ".mp4"));
+                                    ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(downloadOptions.Filename.Replace(".gz", ""), ".mp4"));
                                     if (renderOptions.OutputFile.Trim() == downloadOptions.Filename.Trim())
                                     {
                                         //Just in case VOD and chat paths are the same. Like the previous defaults
-                                        renderOptions.OutputFile = Path.ChangeExtension(downloadOptions.Filename, " - CHAT.mp4");
+                                        renderOptions.OutputFile = Path.ChangeExtension(downloadOptions.Filename.Replace(".gz", ""), " - CHAT.mp4");
                                     }
                                     renderOptions.InputFile = downloadOptions.Filename;
                                     renderTask.DownloadOptions = renderOptions;

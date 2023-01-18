@@ -112,7 +112,7 @@ namespace TwitchDownloaderCore
             switch (_updateOptions.OutputFormat)
             {
                 case ChatFormat.Json:
-                    await ChatJson.SerializeAsync(_updateOptions.OutputFile, chatRoot, cancellationToken);
+                    await ChatJson.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.Compression, cancellationToken);
                     break;
                 case ChatFormat.Html:
                     await ChatHtml.SerializeAsync(_updateOptions.OutputFile, chatRoot, chatRoot.embeddedData != null);

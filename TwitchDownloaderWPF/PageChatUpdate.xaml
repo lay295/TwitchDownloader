@@ -57,10 +57,11 @@
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock Text="Length:" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="Download Format:" HorizontalAlignment="Right" Margin="0,13,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock Visibility="Visible" x:Name="compressionText" Text="Compression:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock Visibility="Collapsed" x:Name="timeText" Text="Timestamp Format:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock x:Name="textCrop" Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,17,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock x:Name="textCrop" Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,12,0,36" Foreground="{DynamicResource AppText}" />
                 <StackPanel x:Name="stackEmbedText" Visibility="Visible">
-                    <TextBlock HorizontalAlignment="Right" Margin="0,45,0,0" Foreground="{DynamicResource AppText}" >Embed Missing <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Embeds missing emotes, badges, and cheermotes. Already embedded images will be untouched.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                    <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" >Embed Missing <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Embeds missing emotes, badges, and cheermotes. Already embedded images will be untouched.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                     <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" >Replace Embeds <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                     <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" >3rd Party Emotes <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Also embed third party emotes into the file. File size will be much larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 </StackPanel>
@@ -72,10 +73,14 @@
                     <RadioButton x:Name="radioText" Checked="radioText_Checked" Content="Text" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     <RadioButton x:Name="radioHTML" Content="HTML" Checked="radioHTML_Checked" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </hc:ButtonGroup>
+                <StackPanel Visibility="Visible" x:Name="compressionOptions" Margin="5,8,0,0" Orientation="Horizontal">
+                    <RadioButton x:Name="radioCompressionNone" IsChecked="True" Content="None" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioCompressionGzip" Content="Gzip" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                </StackPanel>
                 <StackPanel Visibility="Collapsed" x:Name="timeOptions" Margin="5,8,0,0" Orientation="Horizontal">
-                    <RadioButton x:Name="radioUTC" IsChecked="True" Content="UTC" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <RadioButton x:Name="radioRelative" Content="Relative" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <RadioButton x:Name="radioNone" Content="None" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioTimestampUTC" IsChecked="True" Content="UTC" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioTimestampRelative" Content="Relative" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioTimestampNone" Content="None" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
                 <StackPanel Margin="5,5,0,0">
                     <StackPanel Orientation="Horizontal">
@@ -91,7 +96,6 @@
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndHour" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndMinute" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Value="0" x:Name="numEndSecond" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-
                     </StackPanel>
                 </StackPanel>
                 <StackPanel x:Name="stackEmbedChecks" Visibility="Visible">

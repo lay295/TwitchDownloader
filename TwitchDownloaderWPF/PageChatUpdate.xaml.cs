@@ -51,10 +51,10 @@ namespace TwitchDownloaderWPF
                 {
                     ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getComments: false, getEmbeds: false);
                     textStreamer.Text = ChatJsonInfo.streamer.name;
-                    textCreatedAt.Text = ChatJsonInfo.video.created_at.ToShortDateString();
+                    textCreatedAt.Text = ChatJsonInfo.video.created_at.ToLocalTime().ToShortDateString();
                     textTitle.Text = ChatJsonInfo.video.title ?? "Unknown";
 
-                    VideoCreatedAt = ChatJsonInfo.video.created_at;
+                    VideoCreatedAt = ChatJsonInfo.video.created_at.ToLocalTime();
 
                     TimeSpan chatStart = TimeSpan.FromSeconds(ChatJsonInfo.video.start);
                     numStartHour.Value = (int)chatStart.TotalHours;
@@ -71,7 +71,7 @@ namespace TwitchDownloaderWPF
                         ? string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds)
                         : "Unknown";
 
-                    VideoId = ChatJsonInfo.video.id ?? "-1";
+                    VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments.First()?.content_id;
 
                     if (VideoId.All(char.IsDigit))
                     {
@@ -153,9 +153,9 @@ namespace TwitchDownloaderWPF
             checkReplaceEmbeds.IsEnabled = isEnabled;
             btnDownload.IsEnabled = isEnabled;
             btnQueue.IsEnabled = isEnabled;
-            radioRelative.IsEnabled = isEnabled;
-            radioUTC.IsEnabled = isEnabled;
-            radioNone.IsEnabled = isEnabled;
+            radioTimestampRelative.IsEnabled = isEnabled;
+            radioTimestampUTC.IsEnabled = isEnabled;
+            radioTimestampNone.IsEnabled = isEnabled;
             radioJson.IsEnabled = isEnabled;
             radioText.IsEnabled = isEnabled;
             radioHTML.IsEnabled = isEnabled;
@@ -211,6 +211,11 @@ namespace TwitchDownloaderWPF
             else if ((bool)radioText.IsChecked)
                 options.OutputFormat = ChatFormat.Text;
 
+            if (radioCompressionNone.IsChecked == true)
+                options.Compression = ChatCompression.None;
+            else if (radioCompressionGzip.IsChecked == true)
+                options.Compression = ChatCompression.Gzip;
+
             if (checkStart.IsChecked == true)
             {
                 options.CropBeginning = true;
@@ -224,11 +229,11 @@ namespace TwitchDownloaderWPF
                 options.CropEndingTime = (int)Math.Round(end.TotalSeconds);
             }
 
-            if ((bool)radioUTC.IsChecked)
+            if ((bool)radioTimestampUTC.IsChecked)
                 options.TextTimestampFormat = TimestampFormat.Utc;
-            else if ((bool)radioRelative.IsChecked)
+            else if ((bool)radioTimestampRelative.IsChecked)
                 options.TextTimestampFormat = TimestampFormat.Relative;
-            else if ((bool)radioNone.IsChecked)
+            else if ((bool)radioTimestampNone.IsChecked)
                 options.TextTimestampFormat = TimestampFormat.None;
 
             return options;
@@ -394,11 +399,17 @@ namespace TwitchDownloaderWPF
             {
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
 
-                if ((bool)radioJson.IsChecked)
-                    saveFileDialog.Filter = "JSON Files | *.json";
-                if ((bool)radioHTML.IsChecked)
+
+                if (radioJson.IsChecked == true)
+                {
+                    if (radioCompressionNone.IsChecked == true)
+                        saveFileDialog.Filter = "JSON Files | *.json";
+                    else if (radioCompressionGzip.IsChecked == true)
+                        saveFileDialog.Filter = "GZip JSON Files | *.json.gz";
+                }
+                else if (radioHTML.IsChecked == true)
                     saveFileDialog.Filter = "HTML Files | *.html;*.htm";
-                if ((bool)radioText.IsChecked)
+                else if (radioText.IsChecked == true)
                     saveFileDialog.Filter = "TXT Files | *.txt";
 
                 saveFileDialog.RestoreDirectory = true;
@@ -461,7 +472,9 @@ namespace TwitchDownloaderWPF
                 timeOptions.Visibility = Visibility.Collapsed;
                 stackEmbedText.Visibility = Visibility.Visible;
                 stackEmbedChecks.Visibility = Visibility.Visible;
-                textCrop.Margin = new Thickness(0, 15, 0, 0);
+                compressionText.Visibility = Visibility.Visible;
+                compressionOptions.Visibility = Visibility.Visible;
+                textCrop.Margin = new Thickness(0, 12, 0, 36);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Json;
                 Settings.Default.Save();
@@ -476,7 +489,9 @@ namespace TwitchDownloaderWPF
                 timeOptions.Visibility = Visibility.Collapsed;
                 stackEmbedText.Visibility = Visibility.Visible;
                 stackEmbedChecks.Visibility = Visibility.Visible;
-                textCrop.Margin = new Thickness(0, 15, 0, 0);
+                compressionText.Visibility = Visibility.Collapsed;
+                compressionOptions.Visibility = Visibility.Collapsed;
+                textCrop.Margin = new Thickness(0, 17, 0, 36);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Html;
                 Settings.Default.Save();
@@ -491,7 +506,9 @@ namespace TwitchDownloaderWPF
                 timeOptions.Visibility = Visibility.Visible;
                 stackEmbedText.Visibility = Visibility.Collapsed;
                 stackEmbedChecks.Visibility = Visibility.Collapsed;
-                textCrop.Margin = new Thickness(0, 10, 0, 0);
+                compressionText.Visibility = Visibility.Collapsed;
+                compressionOptions.Visibility = Visibility.Collapsed;
+                textCrop.Margin = new Thickness(0, 12, 0, 0);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
                 Settings.Default.Save();

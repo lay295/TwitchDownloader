@@ -397,11 +397,11 @@ namespace TwitchDownloaderCore
                 }
             }
 
+            progress.Report(new ProgressReport(ReportType.Status, "Writing output file"));
             switch (downloadOptions.DownloadFormat)
             {
                 case ChatFormat.Json:
-                    await ChatJson.SerializeAsync(downloadOptions.Filename, chatRoot, cancellationToken);
-                    break;
+                    await ChatJson.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.Compression, cancellationToken);
                     break;
                 case ChatFormat.Html:
                     await ChatHtml.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.EmbedData);

@@ -7,6 +7,7 @@ namespace TwitchDownloaderCore.Options
         public ChatFormat DownloadFormat { get; set; } = ChatFormat.Json;
         public string Id { get; set; }
         public string Filename { get; set; }
+        public ChatCompression Compression { get; set; } = ChatCompression.None;
         public bool CropBeginning { get; set; }
         public double CropBeginningTime { get; set; }
         public bool CropEnding { get; set; }
@@ -23,7 +24,8 @@ namespace TwitchDownloaderCore.Options
             {
                 return DownloadFormat switch
                 {
-                    ChatFormat.Json => "json",
+                    ChatFormat.Json when Compression is ChatCompression.None => "json",
+                    ChatFormat.Json when Compression is ChatCompression.Gzip => "json.gz",
                     ChatFormat.Html => "html",
                     ChatFormat.Text => "txt",
                     _ => ""

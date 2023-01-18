@@ -6,6 +6,7 @@ namespace TwitchDownloaderCore.Options
     {
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
+        public ChatCompression Compression { get; set; } = ChatCompression.None;
         public ChatFormat OutputFormat { get; set; } = ChatFormat.Json;
         public bool EmbedMissing { get; set; }
         public bool ReplaceEmbeds { get; set; }
@@ -23,7 +24,8 @@ namespace TwitchDownloaderCore.Options
             {
                 return OutputFormat switch
                 {
-                    ChatFormat.Json => "json",
+                    ChatFormat.Json when Compression is ChatCompression.None => "json",
+                    ChatFormat.Json when Compression is ChatCompression.Gzip => "json.gz",
                     ChatFormat.Html => "html",
                     ChatFormat.Text => "txt",
                     _ => ""

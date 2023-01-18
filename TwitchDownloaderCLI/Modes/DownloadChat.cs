@@ -43,7 +43,7 @@ namespace TwitchDownloaderCLI.Modes
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
                 EmbedData = inputOptions.EmbedData,
-                Filename = inputOptions.OutputFile,
+                Filename = inputOptions.Compression != ChatCompression.None ? inputOptions.OutputFile + ".gz" : inputOptions.OutputFile,
                 TimeFormat = inputOptions.TimeFormat,
                 ConnectionCount = inputOptions.ChatConnections,
                 BttvEmotes = (bool)inputOptions.BttvEmotes,

@@ -69,6 +69,9 @@ The ID of the VOD or clip to download. Does not currently accept URLs.
 **-o / --output (REQUIRED)**
 File the program will output to. File extension will be used to determine download type. Valid extensions are: `.json`, `.html`, and `.txt`.
 
+**-c / --compression**
+(Default: None) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
+
 **-b / --beginning**
 Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
@@ -102,6 +105,9 @@ Path to input file. Valid extensions are: `.json`.
 
 **-o / --output (REQUIRED)**
 Path to output file. File extension will be used to determine new chat type. Valid extensions are: `.json`, `.html`, and `.txt`.
+
+**-c / --compression**
+(Default: None) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-E / --embed-missing**
 (Default: false) Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.
