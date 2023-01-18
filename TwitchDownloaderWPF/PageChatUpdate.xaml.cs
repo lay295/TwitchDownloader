@@ -156,6 +156,8 @@ namespace TwitchDownloaderWPF
             radioTimestampRelative.IsEnabled = isEnabled;
             radioTimestampUTC.IsEnabled = isEnabled;
             radioTimestampNone.IsEnabled = isEnabled;
+            radioCompressionNone.IsEnabled = isEnabled;
+            radioCompressionGzip.IsEnabled = isEnabled;
             radioJson.IsEnabled = isEnabled;
             radioText.IsEnabled = isEnabled;
             radioHTML.IsEnabled = isEnabled;
