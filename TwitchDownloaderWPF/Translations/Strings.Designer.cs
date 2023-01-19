@@ -601,6 +601,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Fatal Error.
+        /// </summary>
+        public static string FatalError {
+            get {
+                return ResourceManager.GetString("FatalError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Input Arguments:.
         /// </summary>
         public static string FfmpegInputArguments {
@@ -1245,6 +1254,24 @@ namespace TwitchDownloaderWPF.Translations {
         public static string TemplateVods {
             get {
                 return ResourceManager.GetString("TemplateVods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Theme not found.
+        /// </summary>
+        public static string ThemeNotFound {
+            get {
+                return ResourceManager.GetString("ThemeNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {theme} was not found. Reverting theme to System.
+        /// </summary>
+        public static string ThemeNotFoundMessage {
+            get {
+                return ResourceManager.GetString("ThemeNotFoundMessage", resourceCulture);
             }
         }
         

@@ -631,4 +631,14 @@
     <value>File Not Found: </value>
     <comment>Leave a trailing space</comment>
   </data>
+  <data name="FatalError" xml:space="preserve">
+    <value>Fatal Error</value>
+  </data>
+  <data name="ThemeNotFound" xml:space="preserve">
+    <value>Theme not found</value>
+  </data>
+  <data name="ThemeNotFoundMessage" xml:space="preserve">
+    <value>{theme} was not found. Reverting theme to System</value>
+    <comment>Do not translate {theme}</comment>
+  </data>
 </root>

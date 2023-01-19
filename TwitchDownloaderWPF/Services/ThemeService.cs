@@ -33,11 +33,11 @@ namespace TwitchDownloaderWPF.Services
             _windowsThemeService.ThemeChanged += WindowsThemeChanged;
 
             // If the current theme is not system and the old theme file is not found
-            if (!Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && !File.Exists($"{Path.Combine("Themes", Settings.Default.GuiTheme)}.xaml"))
+            if (!Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && !File.Exists(Path.Combine("Themes", $"{Settings.Default.GuiTheme}.xaml")))
             {
                 MessageBox.Show(
-                    $"{Settings.Default.GuiTheme}.xaml was not found. Reverting theme to System",
-                    "Theme not found",
+                    Translations.Strings.ThemeNotFoundMessage.Replace("{theme}", Settings.Default.GuiTheme + ".xaml"),
+                    Translations.Strings.ThemeNotFound,
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
 

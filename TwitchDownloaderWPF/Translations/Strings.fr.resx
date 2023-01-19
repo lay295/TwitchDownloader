@@ -130,7 +130,7 @@
     <value>Language:</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
-    <value>Thème </value>
+    <value>Le Thème </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ApplicationThemeTooltip" xml:space="preserve">
@@ -630,5 +630,15 @@
   <data name="FileNotFound" xml:space="preserve">
     <value>File Not Found: </value>
     <comment>Leave a trailing space</comment>
+  </data>
+  <data name="FatalError" xml:space="preserve">
+    <value>Erreur Fatale</value>
+  </data>
+  <data name="ThemeNotFound" xml:space="preserve">
+    <value>Le thème n'a pas été trouvé</value>
+  </data>
+  <data name="ThemeNotFoundMessage" xml:space="preserve">
+    <value>{theme} was not found. Reverting theme to System</value>
+    <comment>Do not translate {theme}</comment>
   </data>
 </root>
