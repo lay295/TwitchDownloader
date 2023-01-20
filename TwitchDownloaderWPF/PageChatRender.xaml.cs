@@ -523,7 +523,8 @@ namespace TwitchDownloaderWPF
                         SetImage("Images/ppOverheat.gif", true);
                         btnRender.IsEnabled = false;
 
-                        ChatRenderer currentRender = new ChatRenderer(options);
+                        Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
+                        ChatRenderer currentRender = new ChatRenderer(options, renderProgress);
                         await currentRender.ParseJsonAsync(new CancellationToken());
 
                         if (sender == null)
@@ -545,12 +546,10 @@ namespace TwitchDownloaderWPF
                             }
                         }
 
-                        Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
-
                         try
                         {
                             ffmpegLog.Clear();
-                            await currentRender.RenderVideoAsync(renderProgress, new CancellationToken());
+                            await currentRender.RenderVideoAsync(new CancellationToken());
                             statusMessage.Text = "Done";
                             SetImage("Images/ppHop.gif", true);
                         }

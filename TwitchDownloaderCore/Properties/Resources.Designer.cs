@@ -63,6 +63,16 @@ namespace TwitchDownloaderCore.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] gift_illustration {
+            get {
+                object obj = ResourceManager.GetObject("gift_illustration", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Inter {
             get {
                 object obj = ResourceManager.GetObject("Inter", resourceCulture);
