@@ -557,6 +557,8 @@ namespace TwitchDownloaderCore
             defaultPos.X = drawPos.X;
             DrawUsername(comment, sectionImages, ref drawPos, false, PURPLE);
             AddImageSection(sectionImages, ref drawPos, defaultPos);
+            comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 1)..];
+            comment.message.fragments.First().text = comment.message.fragments.First().text[(comment.commenter.display_name.Length + 1)..];
             DrawMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos);
         }
 
