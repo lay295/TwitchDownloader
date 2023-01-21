@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -86,6 +87,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int startMilliseconds { get; set; }
         public int lengthMilliseconds { get; set; }
         [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string _type { get; set; }
         public string description { get; set; }
         public string subDescription { get; set; }

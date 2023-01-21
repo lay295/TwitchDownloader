@@ -1,6 +1,7 @@
 ﻿#pragma warning disable IDE1006
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
@@ -29,6 +30,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public int durationMilliseconds { get; set; }
         public int positionMilliseconds { get; set; }
         [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string _type { get; set; }
         public string description { get; set; }
         public string subDescription { get; set; }
