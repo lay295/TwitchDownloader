@@ -563,7 +563,7 @@ namespace TwitchDownloaderCore
 
             comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 1)..];
             comment.message.fragments.First().text = comment.message.fragments.First().text[(comment.commenter.display_name.Length + 1)..];
-            
+
             var (subMessage, customMessage) = SpecialMessage.SplitSubComment(comment);
             DrawMessage(subMessage, sectionImages, emotePositionList, ref drawPos, defaultPos);
 
