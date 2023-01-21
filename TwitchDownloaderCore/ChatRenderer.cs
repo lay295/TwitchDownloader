@@ -460,16 +460,7 @@ namespace TwitchDownloaderCore
             }
             else
             {
-                if (renderOptions.Timestamp)
-                {
-                    DrawTimestamp(comment, sectionImages, ref drawPos, ref defaultPos);
-                }
-                if (renderOptions.ChatBadges)
-                {
-                    DrawBadges(comment, sectionImages, ref drawPos);
-                }
-                DrawUsername(comment, sectionImages, ref drawPos);
-                DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos);
+                DrawNonAccentedMessage(emoteSectionList, comment, sectionImages, ref drawPos, ref defaultPos);
             }
 
             SKBitmap finalBitmap = CombineImages(sectionImages, accentMessage);
@@ -517,6 +508,20 @@ namespace TwitchDownloaderCore
             return emojiKey;
         }
 
+        private void DrawNonAccentedMessage(List<(Point, TwitchEmote)> emoteSectionList, Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, ref Point defaultPos)
+        {
+            if (renderOptions.Timestamp)
+            {
+                DrawTimestamp(comment, sectionImages, ref drawPos, ref defaultPos);
+            }
+            if (renderOptions.ChatBadges)
+            {
+                DrawBadges(comment, sectionImages, ref drawPos);
+            }
+            DrawUsername(comment, sectionImages, ref drawPos);
+            DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos);
+        }
+
         private void DrawAccentedMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos)
         {
             drawPos.X += renderOptions.AccentIndentWidth;
@@ -550,7 +555,6 @@ namespace TwitchDownloaderCore
 
         private void DrawSubscribeMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
         {
-
             using SKCanvas canvas = new(sectionImages.Last());
             canvas.DrawBitmap(highlightIcon, iconPoint.X, iconPoint.Y);
 
@@ -561,13 +565,15 @@ namespace TwitchDownloaderCore
             DrawUsername(comment, sectionImages, ref drawPos, false, PURPLE);
             AddImageSection(sectionImages, ref drawPos, defaultPos);
 
+            // Remove the commenter's name from the resub message
             comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 1)..];
-            comment.message.fragments.First().text = comment.message.fragments.First().text[(comment.commenter.display_name.Length + 1)..];
+            comment.message.fragments[0].text = comment.message.fragments[0].text[(comment.commenter.display_name.Length + 1)..];
 
-            var (subMessage, customMessage) = SpecialMessage.SplitSubComment(comment);
-            DrawMessage(subMessage, sectionImages, emotePositionList, ref drawPos, defaultPos);
+            var (resubMessage, customResubMessage) = SpecialMessage.SplitSubComment(comment);
+            DrawMessage(resubMessage, sectionImages, emotePositionList, ref drawPos, defaultPos);
 
-            if (customMessage is null)
+            // Return if there is no custom resub message to draw
+            if (customResubMessage is null)
             {
                 return;
             }
@@ -575,16 +581,7 @@ namespace TwitchDownloaderCore
             AddImageSection(sectionImages, ref drawPos, defaultPos);
             drawPos = customMessagePos;
             defaultPos = customMessagePos;
-            if (renderOptions.Timestamp)
-            {
-                DrawTimestamp(customMessage, sectionImages, ref drawPos, ref defaultPos);
-            }
-            if (renderOptions.ChatBadges)
-            {
-                DrawBadges(customMessage, sectionImages, ref drawPos);
-            }
-            DrawUsername(customMessage, sectionImages, ref drawPos);
-            DrawMessage(customMessage, sectionImages, emotePositionList, ref drawPos, defaultPos);
+            DrawNonAccentedMessage(emotePositionList, customResubMessage, sectionImages, ref drawPos, ref defaultPos);
         }
 
         private void DrawGiftMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
