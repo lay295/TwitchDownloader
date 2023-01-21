@@ -550,16 +550,41 @@ namespace TwitchDownloaderCore
 
         private void DrawSubscribeMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
         {
-            using SKCanvas canvas = new(sectionImages.Last());
 
+            using SKCanvas canvas = new(sectionImages.Last());
             canvas.DrawBitmap(highlightIcon, iconPoint.X, iconPoint.Y);
+
+            Point customMessagePos = drawPos;
             drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
             defaultPos.X = drawPos.X;
+
             DrawUsername(comment, sectionImages, ref drawPos, false, PURPLE);
             AddImageSection(sectionImages, ref drawPos, defaultPos);
+
             comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 1)..];
             comment.message.fragments.First().text = comment.message.fragments.First().text[(comment.commenter.display_name.Length + 1)..];
-            DrawMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos);
+            
+            var (subMessage, customMessage) = SpecialMessage.SplitSubComment(comment);
+            DrawMessage(subMessage, sectionImages, emotePositionList, ref drawPos, defaultPos);
+
+            if (customMessage is null)
+            {
+                return;
+            }
+
+            AddImageSection(sectionImages, ref drawPos, defaultPos);
+            drawPos = customMessagePos;
+            defaultPos = customMessagePos;
+            if (renderOptions.Timestamp)
+            {
+                DrawTimestamp(customMessage, sectionImages, ref drawPos, ref defaultPos);
+            }
+            if (renderOptions.ChatBadges)
+            {
+                DrawBadges(customMessage, sectionImages, ref drawPos);
+            }
+            DrawUsername(customMessage, sectionImages, ref drawPos);
+            DrawMessage(customMessage, sectionImages, emotePositionList, ref drawPos, defaultPos);
         }
 
         private void DrawGiftMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
@@ -583,9 +608,9 @@ namespace TwitchDownloaderCore
                     string[] fragmentParts = SwapRightToLeft(fragment.text.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
                     for (int i = 0; i < fragmentParts.Length; i++)
                     {
-                        string fragmentString = fragmentParts[i];
+                        string fragmentPartString = fragmentParts[i];
 
-                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentString);
+                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPartString);
                     }
                 }
                 else
@@ -595,23 +620,23 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawFragmentPart(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString)
+        private void DrawFragmentPart(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentPart)
         {
-            if (emoteThirdList.Any(x => x.Name == fragmentString))
+            if (emoteThirdList.Any(x => x.Name == fragmentPart))
             {
-                DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, fragmentString);
+                DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, fragmentPart);
             }
-            else if (emojiRegex.IsMatch(fragmentString))
+            else if (emojiRegex.IsMatch(fragmentPart))
             {
-                DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentString);
+                DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart);
             }
-            else if (!messageFont.ContainsGlyphs(fragmentString) || new StringInfo(fragmentString).LengthInTextElements < fragmentString.Length)
+            else if (!messageFont.ContainsGlyphs(fragmentPart) || new StringInfo(fragmentPart).LengthInTextElements < fragmentPart.Length)
             {
-                DrawNonFontMessage(sectionImages, ref drawPos, defaultPos, fragmentString);
+                DrawNonFontMessage(sectionImages, ref drawPos, defaultPos, fragmentPart);
             }
             else
             {
-                DrawRegularMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentString);
+                DrawRegularMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart);
             }
         }
 

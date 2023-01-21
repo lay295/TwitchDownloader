@@ -1,6 +1,8 @@
 ﻿using SkiaSharp;
 using System;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Tools
@@ -25,6 +27,7 @@ namespace TwitchDownloaderCore.Tools
         private static SKBitmap _subscribedPrimeIcon = null;
         private static SKBitmap _giftSingleIcon = null;
         private static SKBitmap _giftManyIcon = null;
+        private static Regex _subMessageRegex = new(@"^(subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d?\d?\d months(?:, currently on a \d?\d?\d month streak)?! )(.+)$", RegexOptions.Compiled);
 
         // If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
         public static bool IsSubMessage(Comment comment)
@@ -150,6 +153,61 @@ namespace TwitchDownloaderCore.Tools
 
             // Return the generated icon
             return returnBitmap;
+        }
+
+        public static (Comment subMessage, Comment customMessage) SplitSubComment(Comment comment)
+        {
+            var (subMessage, customMessage) = SplitSubMessage(comment.message.body);
+            // Return the original comment + null if there is no custom sub message
+            if (customMessage is null)
+            {
+                return (comment, null);
+            }
+
+            // If we don't clone then both new comments reference the original commenter object, message object, fragment list, etc.
+            Comment subMessageComment = comment.Clone();
+            subMessageComment.message.body = subMessage;
+            subMessageComment.message.fragments[0].text = subMessage;
+            Comment customMessageComment = comment.Clone();
+            customMessageComment.message.body = customMessage;
+
+            // If only one fragment we are done
+            if (comment.message.fragments.Count == 1)
+            {
+                customMessageComment.message.fragments[0].text = customMessage;
+                return (subMessageComment, customMessageComment);
+            }
+
+            // The next fragment MUST be an emote
+            if (comment.message.fragments[1].emoticon is not null)
+            {
+                subMessageComment.message.fragments.RemoveRange(1, comment.message.fragments.Count - 1);
+                
+                // Check to see if there is a custom message before the emote
+                // i.e. Foobar subscribed with Prime. They've subscribed for 45 months! Hey PogChamp
+                if (!customMessage.StartsWith(comment.message.fragments[1].text)) // If yes
+                {
+                    customMessageComment.message.fragments[0].text = customMessage[..(customMessage.IndexOf(comment.message.fragments[1].text) - 1)];
+                    return (subMessageComment, customMessageComment);
+                }
+
+                customMessageComment.message.fragments.RemoveAt(0);
+                return (subMessageComment, customMessageComment);
+            }
+
+            throw new NotImplementedException("This should not be possible.");
+        }
+
+        /// <returns>The split sub message and user custom message if there is one, else the sub message and null</returns>
+        public static (string subMessage, string customMessage) SplitSubMessage(string commentMessage)
+        {
+            var subMessageMatch = _subMessageRegex.Match(commentMessage);
+            if (!subMessageMatch.Success)
+            {
+                return (commentMessage, null);
+            }
+
+            return (subMessageMatch.Groups[1].ToString(), subMessageMatch.Groups[2].ToString());
         }
     }
 }
