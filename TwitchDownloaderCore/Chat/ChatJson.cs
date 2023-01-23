@@ -23,19 +23,26 @@ namespace TwitchDownloaderCore.Chat
             if (!File.Exists(filePath))
                 throw new IOException("Json file does not exist");
 
-            ChatRoot returnChatRoot = new ChatRoot();
-            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            ChatRoot returnChatRoot = new();
+
             JsonDocument jsonDocument;
+            JsonDocumentOptions deserializationOptions = new()
+            {
+                CommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true
+            };
+
+            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             switch (Path.GetExtension(filePath))
             {
                 case ".gz":
                     using (var gs = new GZipStream(fs, CompressionMode.Decompress))
                     {
-                        jsonDocument = await JsonDocument.ParseAsync(gs, cancellationToken: cancellationToken);
+                        jsonDocument = await JsonDocument.ParseAsync(gs, deserializationOptions, cancellationToken);
                     }
                     break;
                 case ".json":
-                    jsonDocument = await JsonDocument.ParseAsync(fs, cancellationToken: cancellationToken);
+                    jsonDocument = await JsonDocument.ParseAsync(fs, deserializationOptions, cancellationToken);
                     break;
                 default:
                     throw new NotImplementedException(Path.GetFileName(filePath) + " is not a valid chat format");
