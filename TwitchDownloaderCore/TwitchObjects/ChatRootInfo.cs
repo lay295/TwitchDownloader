@@ -2,23 +2,23 @@
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
-    public struct ChatRootInfo
+    public class ChatRootInfo
     {
-        public ChatRootVersion Version { get; set; } = new ChatRootVersion();
-        public DateTime CreatedAt { get; set; } = DateTime.FromBinary(0);
-        public DateTime UpdatedAt { get; set; } = DateTime.FromBinary(0);
-        
+        public ChatRootVersion Version { get; init; } = new ChatRootVersion();
+        public DateTime CreatedAt { get; init; } = DateTime.FromBinary(0);
+        public DateTime UpdatedAt { get; init; } = DateTime.FromBinary(0);
+
         public ChatRootInfo() { }
     }
 
-    public struct ChatRootVersion
+    public class ChatRootVersion
     {
         // Fields
         public int Major { get; set; } = 1;
         public int Minor { get; set; } = 0;
         public int Patch { get; set; } = 0;
 
-        public static readonly ChatRootVersion CurrentVersion = new(1, 2, 1);
+        public static ChatRootVersion CurrentVersion { get; } = new(1, 2, 1);
 
         // Constructors
         /// <summary>
@@ -43,8 +43,12 @@ namespace TwitchDownloaderCore.TwitchObjects
         public override int GetHashCode()
             => ToString().GetHashCode();
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0083:Use pattern matching")]
         public override bool Equals(object obj)
         {
+            if (ReferenceEquals(this, obj))
+                return true;
+
             if (!(obj is ChatRootVersion crv))
                 return false;
 
