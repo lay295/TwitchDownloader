@@ -455,6 +455,11 @@ namespace TwitchDownloaderCore
 
             if ((comment.message.user_notice_params != null && (comment.message.user_notice_params.msg_id is "sub" or "resub" or "subgift")) || SpecialMessage.IsSubMessage(comment))
             {
+                if (!renderOptions.SubMessages)
+                {
+                    return null;
+                }
+
                 DrawAccentedMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos);
                 accentMessage = true;
             }
