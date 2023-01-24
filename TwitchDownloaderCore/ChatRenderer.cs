@@ -2,12 +2,12 @@
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore
         private List<TwitchEmote> emoteThirdList = new List<TwitchEmote>();
         private List<CheerEmote> cheermotesList = new List<CheerEmote>();
         private Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
-        private ConcurrentDictionary<int, SKPaint> fallbackCache = new ConcurrentDictionary<int, SKPaint>();
+        private Dictionary<int, SKPaint> fallbackFontCache = new Dictionary<int, SKPaint>();
         private SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont = new SKPaint();
         private SKPaint nameFont = new SKPaint();
@@ -1135,7 +1135,8 @@ namespace TwitchDownloaderCore
             List<string> emojiKeys = new List<string>(emojiCache.Keys);
             foreach (var emojiKey in emojiKeys)
             {
-                SKImageInfo imageInfo = new SKImageInfo((int)(emojiCache[emojiKey].Width * emojiScale), (int)(emojiCache[emojiKey].Height * emojiScale));
+                SKImageInfo oldEmojiInfo = emojiCache[emojiKey].Info;
+                SKImageInfo imageInfo = new SKImageInfo((int)(oldEmojiInfo.Width * emojiScale), (int)(oldEmojiInfo.Height * emojiScale));
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
                 emojiCache[emojiKey].ScalePixels(newBitmap, SKFilterQuality.High);
                 emojiCache[emojiKey].Dispose();
@@ -1169,18 +1170,20 @@ namespace TwitchDownloaderCore
 
         public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions, IProgress<ProgressReport> progress = null)
         {
-            if (fallbackCache.ContainsKey(input))
-                return fallbackCache[input];
+            ref var fallbackPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(fallbackFontCache, input, out bool alreadyExists);
+            if (alreadyExists)
+            {
+                return fallbackPaint;
+            }
 
             SKPaint newPaint = new SKPaint() { Typeface = fontManager.MatchCharacter(input), LcdRenderText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, SubpixelText = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-
             if (newPaint.Typeface == null)
             {
                 newPaint.Typeface = SKTypeface.Default;
                 progress?.Report(new ProgressReport(ReportType.Log, "No valid typefaces were found for some messages."));
             }
 
-            fallbackCache.TryAdd(input, newPaint);
+            fallbackPaint = newPaint;
             return newPaint;
         }
 
@@ -1251,7 +1254,7 @@ namespace TwitchDownloaderCore
             emoteThirdList = null;
             cheermotesList = null;
             emojiCache = null;
-            fallbackCache = null;
+            fallbackFontCache = null;
             fontManager.Dispose();
             outlinePaint.Dispose();
             nameFont.Dispose();
