@@ -154,7 +154,8 @@ namespace TwitchDownloaderCore
 
             // Measure some sample text to determine the text height, cannot assume it is font size
             SKRect sampleTextBounds = new SKRect();
-            messageFont.MeasureText("abc123", ref sampleTextBounds);
+            messageFont.MeasureText("ABC123", ref sampleTextBounds);
+            int sectionDefaultYPos = (int)(((renderOptions.SectionHeight - sampleTextBounds.Height) / 2.0) + sampleTextBounds.Height);
 
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
@@ -162,10 +163,10 @@ namespace TwitchDownloaderCore
 
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height, latestUpdate);
+                    latestUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, latestUpdate);
                 }
 
-                using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, latestUpdate))
+                using (SKBitmap frame = GetFrameFromTick(currentTick, sectionDefaultYPos, latestUpdate))
                 {
                     DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
 
@@ -283,9 +284,9 @@ namespace TwitchDownloaderCore
             return new FfmpegProcess(process, savePath);
         }
 
-        private SKBitmap GetFrameFromTick(int currentTick, float sampleTextHeight, UpdateFrame currentFrame = null)
+        private SKBitmap GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
         {
-            currentFrame ??= GenerateUpdateFrame(currentTick, sampleTextHeight);
+            currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos);
             SKBitmap frame = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
             return frame;
         }
@@ -324,7 +325,7 @@ namespace TwitchDownloaderCore
             return newFrame;
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, UpdateFrame lastUpdate = null)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
         {
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
             double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
@@ -365,7 +366,7 @@ namespace TwitchDownloaderCore
                     }
 
                     // Draw the new comments
-                    CommentSection comment = GenerateCommentSection(currentIndex, sampleTextHeight);
+                    CommentSection comment = GenerateCommentSection(currentIndex, sectionDefaultYPos);
                     if (comment != null)
                     {
                         commentList.Add(comment);
@@ -413,7 +414,7 @@ namespace TwitchDownloaderCore
         }
 
         // I would prefer if this and its sub-methods were in the CommentSection class ~ScrubN
-        private CommentSection GenerateCommentSection(int commentIndex, float sampleTextHeight)
+        private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos)
         {
             CommentSection newSection = new CommentSection();
             List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
@@ -428,13 +429,9 @@ namespace TwitchDownloaderCore
             {
                 return null;
             }
-            if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
+            if (comment.message.user_notice_params?.msg_id != null)
             {
                 if (comment.message.user_notice_params.msg_id is not "highlighted-message" and not "sub" and not "resub" and not "subgift" and not "")
-                {
-                    return null;
-                }
-                if (!renderOptions.SubMessages && (comment.message.user_notice_params.msg_id is "sub" or "resub" or "subgift"))
                 {
                     return null;
                 }
@@ -450,10 +447,10 @@ namespace TwitchDownloaderCore
             }
 
             AddImageSection(sectionImages, ref drawPos, defaultPos);
-            defaultPos.Y = (int)(((renderOptions.SectionHeight - sampleTextHeight) / 2.0) + sampleTextHeight);
+            defaultPos.Y = sectionDefaultYPos;
             drawPos.Y = defaultPos.Y;
 
-            if ((comment.message.user_notice_params != null && (comment.message.user_notice_params.msg_id is "sub" or "resub" or "subgift")) || SpecialMessage.IsSubMessage(comment))
+            if (comment.message.user_notice_params?.msg_id is "sub" or "resub" or "subgift" || SpecialMessage.IsSubMessage(comment))
             {
                 if (!renderOptions.SubMessages)
                 {
