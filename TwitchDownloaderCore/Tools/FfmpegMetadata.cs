@@ -15,11 +15,7 @@ namespace TwitchDownloaderCore.Tools
         public static async Task SerializeAsync(string filePath, string streamerName, double startOffsetSeconds, int videoId, string videoTitle, DateTime videoCreation, List<VideoMomentEdge> videoMomentEdges = default, CancellationToken cancellationToken = default)
         {
             using var fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
-            using var sw = new StreamWriter(fs)
-            {
-                AutoFlush = true,
-                NewLine = LINE_FEED
-            };
+            using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
             await SerializeGlobalMetadata(sw, streamerName, videoId, videoTitle, videoCreation);
             await fs.FlushAsync(cancellationToken);
@@ -31,11 +27,11 @@ namespace TwitchDownloaderCore.Tools
         private static async Task SerializeGlobalMetadata(StreamWriter sw, string streamerName, int videoId, string videoTitle, DateTime videoCreation)
         {
             await sw.WriteLineAsync(";FFMETADATA1");
-            await sw.WriteLineAsync("title=" + SanatizeKeyValue(videoTitle + $" ({videoId})"));
-            await sw.WriteLineAsync("artist=" + SanatizeKeyValue(streamerName));
-            await sw.WriteLineAsync("date=" + SanatizeKeyValue(videoCreation.ToString("yyyy"))); // The 'date' key becomes 'year' in most formats
-            await sw.WriteLineAsync("comment=" + "Originally aired: " + SanatizeKeyValue(videoCreation.ToString("u")) + @"\");
-            await sw.WriteLineAsync("Video id: " + SanatizeKeyValue(videoId.ToString()));
+            await sw.WriteLineAsync($"title={SanatizeKeyValue(videoTitle)} ({videoId})");
+            await sw.WriteLineAsync($"artist={SanatizeKeyValue(streamerName)}");
+            await sw.WriteLineAsync($"date={videoCreation:yyyy}"); // The 'date' key becomes 'year' in most formats
+            await sw.WriteLineAsync(@$"comment=Originally aired: {SanatizeKeyValue(videoCreation.ToString("u"))}\");
+            await sw.WriteLineAsync($"Video id: {videoId}");
         }
 
         private static async Task SerializeChapters(StreamWriter sw, List<VideoMomentEdge> videoMomentEdges, double startOffsetSeconds)
@@ -55,9 +51,9 @@ namespace TwitchDownloaderCore.Tools
 
                 await sw.WriteLineAsync("[CHAPTER]");
                 await sw.WriteLineAsync("TIMEBASE=1/1000");
-                await sw.WriteLineAsync("START=" + startMillis.ToString());
-                await sw.WriteLineAsync("END=" + (startMillis + lengthMillis).ToString());
-                await sw.WriteLineAsync("title=" + SanatizeKeyValue(gameName));
+                await sw.WriteLineAsync($"START={startMillis}");
+                await sw.WriteLineAsync($"END={startMillis + lengthMillis}");
+                await sw.WriteLineAsync($"title={SanatizeKeyValue(gameName)}");
             }
         }
 
