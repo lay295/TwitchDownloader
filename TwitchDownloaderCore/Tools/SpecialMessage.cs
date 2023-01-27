@@ -31,6 +31,7 @@ namespace TwitchDownloaderCore.Tools
         private static SKBitmap _giftAnonymousIcon = null;
 
         private static readonly Regex _subMessageRegex = new(@"^(subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d?\d?\d months(?:, currently on a \d?\d?\d month streak)?! )(.+)$", RegexOptions.Compiled);
+        private static readonly Regex _giftAnonymousRegex = new(@"^An anonymous user (?:gifted a|is gifting \d\d?\d?) Tier \d", RegexOptions.Compiled);
 
         // If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
         public static bool IsSubMessage(Comment comment)
@@ -64,7 +65,7 @@ namespace TwitchDownloaderCore.Tools
             {
                 return HighlightType.ContinuingGift;
             }
-            if (comment.message.body.StartsWith("An anonymous user gifted a Tier"))
+            if (comment.commenter._id is "274598607" && _giftAnonymousRegex.IsMatch(comment.message.body)) // '274598607' is the id of the anonymous gift message account, display name 'AnAnonymousGifter'
             {
                 return HighlightType.GiftedAnonymous;
             }
