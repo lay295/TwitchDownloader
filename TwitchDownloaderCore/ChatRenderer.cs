@@ -167,8 +167,12 @@ namespace TwitchDownloaderCore
                     latestUpdate = GenerateUpdateFrame(currentTick, startTick, sampleTextBounds.Height, progress, latestUpdate);
                 }
 
-                using (SKBitmap frame = GetFrameFromTick(currentTick, startTick, sampleTextBounds.Height, progress, latestUpdate))
+                SKBitmap frame = null;
+                bool isCopyFrame = false;
+                try
                 {
+                    (frame, isCopyFrame) = GetFrameFromTick(currentTick, startTick, sampleTextBounds.Height, progress, latestUpdate);
+
                     DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken).Wait(cancellationToken);
 
                     ffmpegStream.Write(frame.Bytes);
@@ -179,6 +183,13 @@ namespace TwitchDownloaderCore
 
                         SetFrameMask(frame);
                         maskStream.Write(frame.Bytes);
+                    }
+                }
+                finally
+                {
+                    if (isCopyFrame && frame is not null)
+                    {
+                        frame.Dispose();
                     }
                 }
 
@@ -285,15 +296,30 @@ namespace TwitchDownloaderCore
             return new FfmpegProcess(process, savePath);
         }
 
-        private SKBitmap GetFrameFromTick(int currentTick, int startTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame currentFrame = null)
+        private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int startTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame currentFrame = null)
         {
             currentFrame ??= GenerateUpdateFrame(currentTick, startTick, sampleTextHeight, progress);
-            SKBitmap frame = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
-            return frame;
+            var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
+            return (frame, isCopyFrame);
         }
 
-        private SKBitmap DrawAnimatedEmotes(SKBitmap updateFrame, List<CommentSection> comments, int currentTick)
+        private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(SKBitmap updateFrame, List<CommentSection> comments, int currentTick)
         {
+            bool hasAnimatedEmotes = false;
+            foreach (var comment in comments)
+            {
+                if (comment.Emotes.Count > 0)
+                {
+                    hasAnimatedEmotes = true;
+                    break;
+                }
+            }
+            if (!hasAnimatedEmotes)
+            {
+                // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
+                return (updateFrame, false);
+            }
+
             SKBitmap newFrame = updateFrame.Copy();
             int frameHeight = renderOptions.ChatHeight;
             int currentTickMs = (int)(currentTick * 1000 * (1.0 / renderOptions.Framerate));
@@ -323,7 +349,7 @@ namespace TwitchDownloaderCore
                     }
                 }
             }
-            return newFrame;
+            return (newFrame, true);
         }
 
         private UpdateFrame GenerateUpdateFrame(int currentTick, int startTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame lastUpdate = null)
