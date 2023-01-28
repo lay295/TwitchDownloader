@@ -76,6 +76,12 @@ namespace TwitchDownloaderCore
             // Rough estimation of the width of a single block art character
             renderOptions.BlockArtCharWidth = GetFallbackFont('█', renderOptions).MeasureText("█");
 
+            BannedWordRegexes = new Regex[renderOptions.BannedWordsArray.Length];
+            for (int i = 0; i < renderOptions.BannedWordsArray.Length; i++)
+            {
+                BannedWordRegexes[i] = new Regex(@$"(?:^|\s|\d|\p{{P}}|\p{{S}}){renderOptions.BannedWordsArray[i]}(?:$|\s|\d|\p{{P}}|\p{{S}})", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+            }
+
             (int startTick, int totalTicks) = GetVideoTicks();
 
             if (File.Exists(renderOptions.OutputFile))
@@ -146,14 +152,7 @@ namespace TwitchDownloaderCore
 
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(ffmpegProcess);
 
-            BannedWordRegexes = new Regex[renderOptions.BannedWordsArray.Length];
-            for (int i = 0; i < renderOptions.BannedWordsArray.Length; i++)
-            {
-                BannedWordRegexes[i] = new Regex(@$"(?:^|\s|\d|\p{{P}}|\p{{S}}){renderOptions.BannedWordsArray[i]}(?:$|\s|\d|\p{{P}}|\p{{S}})", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-            }
-
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
             // Measure some sample text to determine the text height, cannot assume it is font size
             SKRect sampleTextBounds = new SKRect();
@@ -165,10 +164,10 @@ namespace TwitchDownloaderCore
 
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height, progress, latestUpdate);
+                    latestUpdate = GenerateUpdateFrame(currentTick, startTick, sampleTextBounds.Height, progress, latestUpdate);
                 }
 
-                using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, progress, latestUpdate))
+                using (SKBitmap frame = GetFrameFromTick(currentTick, startTick, sampleTextBounds.Height, progress, latestUpdate))
                 {
                     DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken).Wait(cancellationToken);
 
@@ -286,9 +285,9 @@ namespace TwitchDownloaderCore
             return new FfmpegProcess(process, savePath);
         }
 
-        private SKBitmap GetFrameFromTick(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame currentFrame = null)
+        private SKBitmap GetFrameFromTick(int currentTick, int startTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame currentFrame = null)
         {
-            currentFrame ??= GenerateUpdateFrame(currentTick, sampleTextHeight, progress);
+            currentFrame ??= GenerateUpdateFrame(currentTick, startTick, sampleTextHeight, progress);
             SKBitmap frame = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
             return frame;
         }
@@ -327,7 +326,7 @@ namespace TwitchDownloaderCore
             return newFrame;
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame lastUpdate = null)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, int startTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame lastUpdate = null)
         {
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
             double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
@@ -341,15 +340,15 @@ namespace TwitchDownloaderCore
 
             List<CommentSection> commentList = lastUpdate?.Comments ?? new List<CommentSection>();
 
-            int oldCommentIndex = -1;
+            int oldCommentIndex = startTick;
             if (commentList.Count > 0)
             {
-                oldCommentIndex = commentList.Last().CommentIndex;
+                oldCommentIndex = commentList.Last().CommentIndex + 1;
             }
 
             if (newestCommentIndex > oldCommentIndex)
             {
-                int currentIndex = oldCommentIndex + 1;
+                int currentIndex = oldCommentIndex;
 
                 while (newestCommentIndex >= currentIndex)
                 {
@@ -538,11 +537,9 @@ namespace TwitchDownloaderCore
                 if (fragment.emoticon == null)
                 {
                     // Either text or third party emote
-                    string[] fragmentParts = SwapRightToLeft(fragment.text.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-                    for (int i = 0; i < fragmentParts.Length; i++)
+                    var fragmentParts = SwapRightToLeft(fragment.text.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+                    foreach (var fragmentString in fragmentParts)
                     {
-                        string fragmentString = fragmentParts[i];
-
                         DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, progress, bitsCount, fragmentString);
                     }
                 }
@@ -683,10 +680,11 @@ namespace TwitchDownloaderCore
         {
             ReadOnlySpan<char> fragmentSpan = fragmentString.Trim('\uFE0F').AsSpan();
 
+            // TODO: use fragmentSpan instead of fragmentString once upgraded to .NET 7
             if (blockArtRegex.IsMatch(fragmentString))
             {
                 // Very rough estimation of width of block art
-                int textWidth = (int)(fragmentString.Length * renderOptions.BlockArtCharWidth);
+                int textWidth = (int)(fragmentSpan.Length * renderOptions.BlockArtCharWidth);
                 if (renderOptions.BlockArtPreWrap && drawPos.X + textWidth > renderOptions.BlockArtPreWrapWidth)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
@@ -770,10 +768,10 @@ namespace TwitchDownloaderCore
                 {
                     int bitsIndex = fragmentString.IndexOfAny("0123456789".ToCharArray());
                     string outputPrefix = fragmentString.Substring(0, bitsIndex).ToLower();
-                    if (cheermotesList.Any(x => x.prefix.ToLower() == outputPrefix))
+                    var currentCheerEmote = cheermotesList.FirstOrDefault(x => x.prefix.ToLower() == outputPrefix, null);
+                    if (currentCheerEmote is not null)
                     {
-                        CheerEmote currentCheerEmote = cheermotesList.First(x => x.prefix.ToLower() == outputPrefix);
-                        int bitsAmount = Int32.Parse(fragmentString.Substring(bitsIndex));
+                        int bitsAmount = int.Parse(fragmentString.AsSpan()[bitsIndex..]);
                         bitsCount -= bitsAmount;
                         KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
                         TwitchEmote twitchEmote = tierList.Value;
@@ -850,7 +848,9 @@ namespace TwitchDownloaderCore
                     if (isRtl)
                     {
                         // There is currently an issue with SKPath.GetTextPath where RTL is not respected so we need to reverse the drawText
-                        string reversedText = new string(drawText.Reverse().ToArray());
+                        var reversedText = drawText.ToCharArray();
+                        new Span<char>(reversedText).Reverse();
+
                         outlinePath = textFont.GetTextPath(reversedText, drawPos.X, drawPos.Y);
                     }
                     else
@@ -1192,7 +1192,7 @@ namespace TwitchDownloaderCore
             return input > 127;
         }
 
-        private static string[] SwapRightToLeft(string[] words)
+        private static IEnumerable<string> SwapRightToLeft(string[] words)
         {
             List<string> finalWords = new List<string>();
             Stack<string> rtlStack = new Stack<string>();
@@ -1215,7 +1215,7 @@ namespace TwitchDownloaderCore
             {
                 finalWords.Add(rtlStack.Pop());
             }
-            return finalWords.ToArray();
+            return finalWords.AsEnumerable();
         }
 
         private static bool IsRightToLeft(string message)
