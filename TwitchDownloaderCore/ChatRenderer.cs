@@ -164,14 +164,14 @@ namespace TwitchDownloaderCore
 
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    latestUpdate = GenerateUpdateFrame(currentTick, startTick, sampleTextBounds.Height, progress, latestUpdate);
+                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height, progress, latestUpdate);
                 }
 
                 SKBitmap frame = null;
                 bool isCopyFrame = false;
                 try
                 {
-                    (frame, isCopyFrame) = GetFrameFromTick(currentTick, startTick, sampleTextBounds.Height, progress, latestUpdate);
+                    (frame, isCopyFrame) = GetFrameFromTick(currentTick, sampleTextBounds.Height, progress, latestUpdate);
 
                     DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken).Wait(cancellationToken);
 
@@ -296,9 +296,9 @@ namespace TwitchDownloaderCore
             return new FfmpegProcess(process, savePath);
         }
 
-        private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int startTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame currentFrame = null)
+        private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame currentFrame = null)
         {
-            currentFrame ??= GenerateUpdateFrame(currentTick, startTick, sampleTextHeight, progress);
+            currentFrame ??= GenerateUpdateFrame(currentTick, sampleTextHeight, progress);
             var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
             return (frame, isCopyFrame);
         }
@@ -356,7 +356,7 @@ namespace TwitchDownloaderCore
             return (newFrame, true);
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, int startTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame lastUpdate = null)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame lastUpdate = null)
         {
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
             double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
@@ -370,15 +370,15 @@ namespace TwitchDownloaderCore
 
             List<CommentSection> commentList = lastUpdate?.Comments ?? new List<CommentSection>();
 
-            int oldCommentIndex = startTick;
+            int oldCommentIndex = -1;
             if (commentList.Count > 0)
             {
-                oldCommentIndex = commentList.Last().CommentIndex + 1;
+                oldCommentIndex = commentList.Last().CommentIndex;
             }
 
             if (newestCommentIndex > oldCommentIndex)
             {
-                int currentIndex = oldCommentIndex;
+                int currentIndex = oldCommentIndex + 1;
 
                 while (newestCommentIndex >= currentIndex)
                 {
