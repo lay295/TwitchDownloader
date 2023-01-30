@@ -305,19 +305,23 @@ namespace TwitchDownloaderCore
 
         private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(SKBitmap updateFrame, List<CommentSection> comments, int currentTick)
         {
-            bool hasAnimatedEmotes = false;
-            foreach (var comment in comments)
+            // If we are generating a mask then we need to produce a copy
+            if (!renderOptions.GenerateMask)
             {
-                if (comment.Emotes.Count > 0)
+                bool hasAnimatedEmotes = false;
+                foreach (var comment in comments)
                 {
-                    hasAnimatedEmotes = true;
-                    break;
+                    if (comment.Emotes.Count > 0)
+                    {
+                        hasAnimatedEmotes = true;
+                        break;
+                    }
                 }
-            }
-            if (!hasAnimatedEmotes)
-            {
-                // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
-                return (updateFrame, false);
+                if (!hasAnimatedEmotes)
+                {
+                    // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
+                    return (updateFrame, false);
+                }
             }
 
             SKBitmap newFrame = updateFrame.Copy();
