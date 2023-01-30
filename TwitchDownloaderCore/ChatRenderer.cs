@@ -326,7 +326,7 @@ namespace TwitchDownloaderCore
 
             SKBitmap newFrame = updateFrame.Copy();
             int frameHeight = renderOptions.ChatHeight;
-            int currentTickMs = (int)(currentTick / (double)renderOptions.Framerate * 1000); // We must divide before multiplying to avoid an int32 overlfow
+            long currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
             {
                 foreach (var comment in comments.Reverse<CommentSection>())
@@ -337,7 +337,7 @@ namespace TwitchDownloaderCore
                         if (emote.FrameCount > 1)
                         {
                             int frameIndex = emote.EmoteFrameDurations.Count - 1;
-                            int imageFrame = currentTickMs % emote.EmoteFrameDurations.Sum(x => x * 10);
+                            long imageFrame = currentTickMs % (emote.EmoteFrameDurations.Sum() * 10);
                             for (int i = 0; i < emote.EmoteFrameDurations.Count; i++)
                             {
                                 if (imageFrame - emote.EmoteFrameDurations[i] * 10 <= 0)
