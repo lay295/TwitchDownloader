@@ -326,7 +326,7 @@ namespace TwitchDownloaderCore
 
             SKBitmap newFrame = updateFrame.Copy();
             int frameHeight = renderOptions.ChatHeight;
-            int currentTickMs = (int)(currentTick * 1000 * (1.0 / renderOptions.Framerate));
+            int currentTickMs = (int)(currentTick / (double)renderOptions.Framerate * 1000); // We must divide before multiplying to avoid an int32 overlfow
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
             {
                 foreach (var comment in comments.Reverse<CommentSection>())
