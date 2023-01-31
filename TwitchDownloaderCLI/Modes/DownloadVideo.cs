@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -25,16 +25,24 @@ namespace TwitchDownloaderCLI.Modes
 
         private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions)
         {
-            if (string.IsNullOrWhiteSpace(inputOptions.Id) || !inputOptions.Id.All(char.IsDigit))
+            if (inputOptions.Id is null)
             {
-                Console.WriteLine("[ERROR] - Invalid VOD ID, unable to parse. Must be only numbers.");
+                Console.WriteLine("[ERROR] - Vod ID/URL cannot be null!");
+                Environment.Exit(1);
+            }
+
+            var vodIdRegex = new Regex(@"(?:^|(?:twitch.tv\/videos\/))(\d+)(?:$|\?)");
+            var vodIdMatch = vodIdRegex.Match(inputOptions.Id);
+            if (!vodIdMatch.Success)
+            {
+                Console.WriteLine("[ERROR] - Unable to parse Vod ID/URL.");
                 Environment.Exit(1);
             }
 
             VideoDownloadOptions downloadOptions = new()
             {
                 DownloadThreads = inputOptions.DownloadThreads,
-                Id = int.Parse(inputOptions.Id),
+                Id = int.Parse(vodIdMatch.Groups[1].ToString()),
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,

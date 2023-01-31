@@ -7,7 +7,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
     [Verb("chatdownload", HelpText = "Downloads the chat from a VOD or clip")]
     public class ChatDownloadArgs
     {
-        [Option('u', "id", Required = true, HelpText = "The ID of the VOD or clip to download that chat of.")]
+        [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD or clip to download that chat of.")]
         public string Id { get; set; }
 
         [Option('o', "output", Required = true, HelpText = "Path to output file. File extension will be used to determine download type. Valid extensions are: json, html, and txt.")]
