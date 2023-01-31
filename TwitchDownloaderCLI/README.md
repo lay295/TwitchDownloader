@@ -214,7 +214,7 @@ File the program will output to.
 
 Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, Predictions = `32`, NoAudioVisual = `64`, PrimeGaming = `128`
 
-**--disperse-comments**
+**--comment-dispersion**
 (Default: true) In December 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow.
 
 **--offline**
