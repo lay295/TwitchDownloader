@@ -209,9 +209,14 @@ namespace TwitchDownloaderCore
 
         private async Task<string> GetPlaylistUrl()
         {
-            GqlVideoTokenResponse taskAccessToken = await TwitchHelper.GetVideoToken(downloadOptions.Id, downloadOptions.Oauth);
+            GqlVideoTokenResponse accessToken = await TwitchHelper.GetVideoToken(downloadOptions.Id, downloadOptions.Oauth);
 
-            string[] videoPlaylist = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, taskAccessToken.data.videoPlaybackAccessToken.value, taskAccessToken.data.videoPlaybackAccessToken.signature);
+            if (accessToken.data.videoPlaybackAccessToken is null)
+            {
+                throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+            }
+
+            string[] videoPlaylist = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, accessToken.data.videoPlaybackAccessToken.value, accessToken.data.videoPlaybackAccessToken.signature);
             List<KeyValuePair<string, string>> videoQualities = new List<KeyValuePair<string, string>>();
 
             for (int i = 0; i < videoPlaylist.Length; i++)
