@@ -343,7 +343,11 @@ namespace TwitchDownloader
                         ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(filePath);
                         renderTask.DownloadOptions = renderOptions;
                         renderTask.Info.Title = Path.GetFileNameWithoutExtension(filePath);
-                        renderTask.Info.Thumbnail = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
+                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                        if (success)
+                        {
+                            renderTask.Info.Thumbnail = image;
+                        }
                         renderTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)

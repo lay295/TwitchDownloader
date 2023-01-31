@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <Version>1.51.1</Version>
     <Platforms>AnyCPU;x64</Platforms>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 
