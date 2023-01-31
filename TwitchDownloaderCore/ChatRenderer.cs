@@ -153,11 +153,11 @@ namespace TwitchDownloaderCore
                 }
 
                 int commentsToUpdate = i - startIndex;
-                for (int j = 1; j <= commentsToUpdate; j++) // Start at 1 so we don't offset the first comment on the second
+                for (int c = 1; c <= commentsToUpdate; c++) // Start at 1 so we don't offset the first comment on the second
                 {
                     double jitter = rnd.NextDouble() * 0.8 - 0.4; // Jitter the distributed comment offset slightly between 0.6-1.4x
-                    double distributedOffset = (j + jitter) / (commentsToUpdate + 1); // Jitter must be addition to retain comment order
-                    comments[startIndex + j].content_offset_seconds += distributedOffset * scaleFactor;
+                    double distributedOffset = (c + jitter) / (commentsToUpdate + 1); // Jitter must be addition to retain comment order
+                    comments[startIndex + c].content_offset_seconds += distributedOffset * scaleFactor;
                 }
             }
         }
