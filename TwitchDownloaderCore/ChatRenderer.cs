@@ -113,9 +113,9 @@ namespace TwitchDownloaderCore
          *     
          * The only drawback to this method is there will _never_ be multiple comments drawn on the same tick
          * like in a real chat. The overall improved chat flow is still worth it regardless. */
-        public static void DisperseCommentOffsets(List<Comment> comments)
+        private static void DisperseCommentOffsets(List<Comment> comments)
         {
-            Random rnd = new Random(comments.Count);
+            var rnd = new Random(comments.Count);
 
             for (int i = 0; i < comments.Count; i++)
             {
