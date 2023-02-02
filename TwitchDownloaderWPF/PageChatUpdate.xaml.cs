@@ -79,11 +79,7 @@ namespace TwitchDownloaderWPF
                         if (videoInfo.data.video == null)
                         {
                             AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
-                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                            if (success)
-                            {
-                                imgThumbnail.Source = image;
-                            }
+                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         else
                         {
@@ -98,11 +94,7 @@ namespace TwitchDownloaderWPF
                             catch
                             {
                                 AppendLog("ERROR: Unable to find thumbnail");
-                                var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                                if (success)
-                                {
-                                    imgThumbnail.Source = image;
-                                }
+                                imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                             }
                         }
                     }
@@ -112,11 +104,7 @@ namespace TwitchDownloaderWPF
                         if (videoInfo.data.clip.video == null)
                         {
                             AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
-                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                            if (success)
-                            {
-                                imgThumbnail.Source = image;
-                            }
+                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         else
                         {
@@ -131,11 +119,7 @@ namespace TwitchDownloaderWPF
                             catch
                             {
                                 AppendLog("ERROR: Unable to find thumbnail");
-                                var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                                if (success)
-                                {
-                                    imgThumbnail.Source = image;
-                                }
+                                imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                             }
                         }
                     }
