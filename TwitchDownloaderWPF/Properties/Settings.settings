@@ -114,7 +114,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ChatDownloadThreads" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">4</Value>
+      <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="ChatDownloadType" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>

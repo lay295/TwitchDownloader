@@ -133,7 +133,7 @@ chmod +x ffmpeg
 
 ## Requirements
 
-- [.NET 7.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+- [.NET 6.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 
 ## Build Instructions
 

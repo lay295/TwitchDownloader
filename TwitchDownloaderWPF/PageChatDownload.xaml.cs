@@ -111,12 +111,7 @@ namespace TwitchDownloaderWPF
                         catch
                         {
                             AppendLog("ERROR: Unable to find thumbnail");
-                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                            if (success)
-                            {
-                                imgThumbnail.Source = image;
-                            }
-
+                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                         textTitle.Text = taskVideoInfo.Result.data.video.title;
@@ -153,11 +148,7 @@ namespace TwitchDownloaderWPF
                         catch
                         {
                             AppendLog("ERROR: Unable to find thumbnail");
-                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                            if (success)
-                            {
-                                imgThumbnail.Source = image;
-                            }
+                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                         }
                         TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                         textStreamer.Text = taskClipInfo.Result.data.clip.broadcaster.displayName;

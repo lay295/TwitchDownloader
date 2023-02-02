@@ -85,11 +85,7 @@ namespace TwitchDownloaderWPF
                     catch
                     {
                         AppendLog("ERROR: Unable to find thumbnail");
-                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                        if (success)
-                        {
-                            imgThumbnail.Source = image;
-                        }
+                        imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
                     }
 
                     comboQuality.Items.Clear();
