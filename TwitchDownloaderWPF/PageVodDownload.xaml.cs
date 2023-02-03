@@ -91,6 +91,30 @@ namespace TwitchDownloaderWPF
                         }
                     }
 
+                    comboQuality.Items.Clear();
+                    videoQualties.Clear();
+                    string[] playlist = await taskPlaylist;
+                    for (int i = 0; i < playlist.Length; i++)
+                    {
+                        if (playlist[i].Contains("#EXT-X-MEDIA"))
+                        {
+                            string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"") + 6);
+                            string stringQuality = lastPart.Substring(0, lastPart.IndexOf("\""));
+
+                            var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=") + 10;
+                            var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
+                            int bandwidth = 0; // Cannot be inlined if we want default value of 0
+                            int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out bandwidth);
+
+                            if (!videoQualties.ContainsKey(stringQuality))
+                            {
+                                videoQualties.Add(stringQuality, (playlist[i + 2], bandwidth));
+                                comboQuality.Items.Add(stringQuality);
+                            }
+                        }
+                    }
+                    comboQuality.SelectedIndex = 0;
+
                     TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                     textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
                     textTitle.Text = taskVideoInfo.Result.data.video.title;
@@ -118,30 +142,6 @@ namespace TwitchDownloaderWPF
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
                     labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
-
-                    comboQuality.Items.Clear();
-                    videoQualties.Clear();
-                    string[] playlist = await taskPlaylist;
-                    for (int i = 0; i < playlist.Length; i++)
-                    {
-                        if (playlist[i].Contains("#EXT-X-MEDIA"))
-                        {
-                            string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"") + 6);
-                            string stringQuality = lastPart.Substring(0, lastPart.IndexOf("\""));
-
-                            var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=") + 10;
-                            var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
-                            int bandwidth = 0; // Cannot be inlined if we want default value of 0
-                            int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out bandwidth);
-
-                            if (!videoQualties.ContainsKey(stringQuality))
-                            {
-                                videoQualties.Add(stringQuality, (playlist[i + 2], bandwidth));
-                                comboQuality.Items.Add(stringQuality);
-                            }
-                        }
-                    }
-                    comboQuality.SelectedIndex = 0;
 
                     UpdateVideoSizeEstimates();
 
