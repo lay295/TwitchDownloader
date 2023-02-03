@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -40,9 +39,13 @@ namespace TwitchDownloaderCore
             {
                 ServicePointManager.DefaultConnectionLimit = downloadOptions.DownloadThreads;
 
-                if (Directory.Exists(downloadFolder))
-                    Directory.Delete(downloadFolder, true);
-                TwitchHelper.CreateDirectory(downloadFolder);
+                GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(downloadOptions.Id);
+                if (videoInfoResponse.data.video == null)
+                {
+                    throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                }
+
+                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(downloadOptions.Id);
 
                 string playlistUrl = await GetPlaylistUrl();
                 string baseUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf("/") + 1);
@@ -51,6 +54,10 @@ namespace TwitchDownloaderCore
                 (List<string> videoPartsList, double vodAge) = await GetVideoPartsList(playlistUrl, videoList, cancellationToken);
                 int partCount = videoPartsList.Count;
                 int doneCount = 0;
+
+                if (Directory.Exists(downloadFolder))
+                    Directory.Delete(downloadFolder, true);
+                TwitchHelper.CreateDirectory(downloadFolder);
 
                 progress.Report(new ProgressReport(ReportType.StatusInfo, "Downloading 0% [2/4]"));
 
@@ -96,6 +103,9 @@ namespace TwitchDownloaderCore
                 double seekTime = downloadOptions.CropBeginningTime;
                 double seekDuration = Math.Round(downloadOptions.CropEndingTime - seekTime);
 
+                string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
+                await FfmpegMetadata.SerializeAsync(metadataPath, videoInfoResponse.data.video.owner.displayName, startOffset, downloadOptions.Id, videoInfoResponse.data.video.title, videoInfoResponse.data.video.createdAt, videoChapterResponse.data.video.moments.edges, cancellationToken);
+
                 await Task.Run(() =>
                 {
                     var process = new Process
@@ -103,7 +113,7 @@ namespace TwitchDownloaderCore
                         StartInfo =
                             {
                                 FileName = downloadOptions.FfmpegPath,
-                                Arguments = String.Format("-hide_banner -loglevel error -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {1} " : "") + "-i \"{0}\" -analyzeduration {2} -probesize {2} " + (downloadOptions.CropEnding ? "-t {3} " : "") + "-c:v copy \"{4}\"", Path.Combine(downloadFolder, "output.ts"), (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), Int32.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
+                                Arguments = String.Format("-hide_banner -loglevel error -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i {1} -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.CropEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"", Path.Combine(downloadFolder, "output.ts"), metadataPath, (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), Int32.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
                                 UseShellExecute = false,
                                 CreateNoWindow = true,
                                 RedirectStandardInput = false,
