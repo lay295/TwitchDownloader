@@ -22,9 +22,11 @@ body:
     label: Edition
     description: Which edition of the program are you using?
     options:
+      - Select an Option
       - Windows GUI Application
       - Command Line Interface
       - Both
+      - Unsure
   validations:
     required: true
 - type: textarea
