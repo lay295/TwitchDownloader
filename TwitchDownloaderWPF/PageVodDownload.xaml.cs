@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,7 +27,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageVodDownload : Page
     {
-        public Dictionary<string, string> videoQualties = new Dictionary<string, string>();
+        public Dictionary<string, (string url, int bandwidth)> videoQualties = new();
         public int currentVideoId;
         public DateTime currentVideoTime;
 
@@ -64,6 +63,7 @@ namespace TwitchDownloaderWPF
             e.Handled = true;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0018:Inline variable declaration")]
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
             int videoId = ValidateUrl(textUrl.Text);
@@ -76,7 +76,6 @@ namespace TwitchDownloaderWPF
                     Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, textOauth.Text);
                     await Task.WhenAll(taskVideoInfo, taskAccessToken);
                     Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
-                    await taskPlaylist;
                     try
                     {
                         string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
@@ -91,25 +90,6 @@ namespace TwitchDownloaderWPF
                             imgThumbnail.Source = image;
                         }
                     }
-
-                    comboQuality.Items.Clear();
-                    videoQualties.Clear();
-                    string[] playlist = taskPlaylist.Result;
-                    for (int i = 0; i < playlist.Length; i++)
-                    {
-                        if (playlist[i].Contains("#EXT-X-MEDIA"))
-                        {
-                            string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"") + 6);
-                            string stringQuality = lastPart.Substring(0, lastPart.IndexOf("\""));
-
-                            if (!videoQualties.ContainsKey(stringQuality))
-                            {
-                                videoQualties.Add(stringQuality, playlist[i + 2]);
-                                comboQuality.Items.Add(stringQuality);
-                            }
-                        }
-                    }
-                    comboQuality.SelectedIndex = 0;
 
                     TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                     textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
@@ -138,6 +118,32 @@ namespace TwitchDownloaderWPF
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
                     labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
+
+                    comboQuality.Items.Clear();
+                    videoQualties.Clear();
+                    string[] playlist = await taskPlaylist;
+                    for (int i = 0; i < playlist.Length; i++)
+                    {
+                        if (playlist[i].Contains("#EXT-X-MEDIA"))
+                        {
+                            string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"") + 6);
+                            string stringQuality = lastPart.Substring(0, lastPart.IndexOf("\""));
+
+                            var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=") + 10;
+                            var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
+                            int bandwidth = 0; // Cannot be inlined if we want default value of 0
+                            int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out bandwidth);
+
+                            if (!videoQualties.ContainsKey(stringQuality))
+                            {
+                                videoQualties.Add(stringQuality, (playlist[i + 2], bandwidth));
+                                comboQuality.Items.Add(stringQuality);
+                            }
+                        }
+                    }
+                    comboQuality.SelectedIndex = 0;
+
+                    UpdateVideoSizeEstimates();
 
                     SetEnabled(true);
                 }
@@ -172,7 +178,7 @@ namespace TwitchDownloaderWPF
                 options.Filename = Path.Combine(folder, MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text) + ".mp4");
             }
             options.Oauth = textOauth.Text;
-            options.Quality = comboQuality.Text;
+            options.Quality = GetQualityWithoutSize(comboQuality.Text).ToString();
             options.Id = currentVideoId;
             options.CropBeginning = (bool)checkStart.IsChecked;
             options.CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds);
@@ -181,6 +187,66 @@ namespace TwitchDownloaderWPF
             options.FfmpegPath = "ffmpeg";
             options.TempFolder = Settings.Default.TempPath;
             return options;
+        }
+
+        private void UpdateVideoSizeEstimates()
+        {
+            int selectedIndex = comboQuality.SelectedIndex;
+
+            var cropStart = checkStart.IsChecked == true
+                ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value)
+                : TimeSpan.FromTicks(0);
+            var cropEnd = checkEnd.IsChecked == true
+                ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value)
+                : TimeSpan.Parse(labelLength.Text);
+            for (int i = 0; i < comboQuality.Items.Count; i++)
+            {
+                var qualityWithSize = (string)comboQuality.Items[i];
+                var quality = GetQualityWithoutSize(qualityWithSize).ToString();
+                int bandwidth = videoQualties[quality].bandwidth;
+
+                var newVideoSize = EstimateVideoSize(bandwidth, cropStart, cropEnd);
+                comboQuality.Items[i] = $"{quality}{newVideoSize}";
+            }
+
+            comboQuality.SelectedIndex = selectedIndex;
+        }
+
+        private ReadOnlySpan<char> GetQualityWithoutSize(string qualityWithSize)
+        {
+            int qualityIndex = qualityWithSize.LastIndexOf(" - ");
+            return qualityIndex == -1
+                ? qualityWithSize.AsSpan()
+                : qualityWithSize.AsSpan(0, qualityIndex);
+        }
+
+        private string EstimateVideoSize(int bandwidth, TimeSpan startTime, TimeSpan endTime)
+        {
+            var sizeInBytes = EstimateVideoSizeBytes(bandwidth, startTime, endTime);
+
+            const long ONE_KILOBYTE = 1024;
+            const long ONE_MEGABYTE = 1_048_576;
+            const long ONE_GIGABYTE = 1_073_741_824;
+
+            return sizeInBytes switch
+            {
+                long when sizeInBytes < 1 => "",
+                long when sizeInBytes < ONE_KILOBYTE => $" - {sizeInBytes}B",
+                long when sizeInBytes < ONE_MEGABYTE => $" - {(float)sizeInBytes / ONE_KILOBYTE:F1}KB",
+                long when sizeInBytes < ONE_GIGABYTE => $" - {(float)sizeInBytes / ONE_MEGABYTE:F1}MB",
+                _ => $" - {(float)sizeInBytes / ONE_GIGABYTE:F1}GB",
+            };
+        }
+
+        private long EstimateVideoSizeBytes(int bandwidth, TimeSpan startTime, TimeSpan endTime)
+        {
+            if (bandwidth == 0)
+            {
+                return 0;
+            }
+
+            var totalTime = endTime - startTime;
+            return bandwidth / 8 * (long)totalTime.TotalSeconds;
         }
 
         private void OnProgressChanged(ProgressReport progress)
@@ -350,6 +416,8 @@ namespace TwitchDownloaderWPF
             {
                 SetEnabledCropStart(false);
             }
+
+            UpdateVideoSizeEstimates();
         }
 
         private void checkEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
@@ -364,6 +432,8 @@ namespace TwitchDownloaderWPF
             {
                 SetEnabledCropEnd(false);
             }
+
+            UpdateVideoSizeEstimates();
         }
 
         private async void SplitButton_Click(object sender, RoutedEventArgs e)
@@ -432,6 +502,36 @@ namespace TwitchDownloaderWPF
             {
                 AppendLog("ERROR: Invalid Crop Inputs");
             }
+        }
+
+        private void numEndHour_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        {
+            UpdateVideoSizeEstimates();
+        }
+
+        private void numEndMinute_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        {
+            UpdateVideoSizeEstimates();
+        }
+
+        private void numEndSecond_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        {
+            UpdateVideoSizeEstimates();
+        }
+
+        private void numStartHour_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        {
+            UpdateVideoSizeEstimates();
+        }
+
+        private void numStartMinute_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        {
+            UpdateVideoSizeEstimates();
+        }
+
+        private void numStartSecond_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        {
+            UpdateVideoSizeEstimates();
         }
     }
 }
