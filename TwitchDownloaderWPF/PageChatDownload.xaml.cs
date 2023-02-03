@@ -110,7 +110,11 @@ namespace TwitchDownloaderWPF
                         catch
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
+                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                            if (success)
+                            {
+                                imgThumbnail.Source = image;
+                            }
                         }
                         TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                         textTitle.Text = taskVideoInfo.Result.data.video.title;
@@ -127,7 +131,16 @@ namespace TwitchDownloaderWPF
                             numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
                             numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
                         }
+                        else
+                        {
+                            numStartHour.Value = 0;
+                            numStartMinute.Value = 0;
+                            numStartSecond.Value = 0;
+                        }
+                        numStartHour.Maximum = (int)vodLength.TotalHours;
+
                         numEndHour.Value = (int)vodLength.TotalHours;
+                        numEndHour.Maximum = (int)vodLength.TotalHours;
                         numEndMinute.Value = vodLength.Minutes;
                         numEndSecond.Value = vodLength.Seconds;
                         labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
@@ -147,7 +160,11 @@ namespace TwitchDownloaderWPF
                         catch
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
+                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                            if (success)
+                            {
+                                imgThumbnail.Source = image;
+                            }
                         }
                         TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                         textStreamer.Text = taskClipInfo.Result.data.clip.broadcaster.displayName;
@@ -237,7 +254,7 @@ namespace TwitchDownloaderWPF
                 case ReportType.Percent:
                     statusProgressBar.Value = (int)progress.Data;
                     break;
-                case ReportType.Status or ReportType.StatusInfo:
+                case ReportType.NewLineStatus or ReportType.SameLineStatus:
                     statusMessage.Text = (string)progress.Data;
                     break;
                 case ReportType.Log:

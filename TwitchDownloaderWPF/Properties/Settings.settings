@@ -179,6 +179,9 @@
     <Setting Name="AccentIndentScale" Type="System.Double" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
+    <Setting Name="DisperseCommentOffsets" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
     <Setting Name="GuiCulture" Type="System.String" Scope="User">
       <Value Profile="(Default)">en-US</Value>
     </Setting>

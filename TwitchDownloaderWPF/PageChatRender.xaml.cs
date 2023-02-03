@@ -94,6 +94,7 @@ namespace TwitchDownloaderWPF
                 SubMessages = (bool)checkSub.IsChecked,
                 ChatBadges = (bool)checkBadge.IsChecked,
                 Offline = (bool)checkOffline.IsChecked,
+                DisperseCommentOffsets = (bool)checkDispersion.IsChecked,
                 LogFfmpegOutput = true
             };
             foreach (var item in comboBadges.SelectedItems)
@@ -111,7 +112,7 @@ namespace TwitchDownloaderWPF
                 case ReportType.Percent:
                     statusProgressBar.Value = (int)progress.Data;
                     break;
-                case ReportType.Status or ReportType.StatusInfo:
+                case ReportType.NewLineStatus or ReportType.SameLineStatus:
                     statusMessage.Text = (string)progress.Data;
                     break;
                 case ReportType.Log:
@@ -156,6 +157,7 @@ namespace TwitchDownloaderWPF
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
+                checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
 
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Broadcaster, Name = "Broadcaster" });
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Moderator, Name = "Mods" });
@@ -249,6 +251,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.SubMessages = (bool)checkSub.IsChecked;
             Settings.Default.ChatBadges = (bool)checkBadge.IsChecked;
             Settings.Default.Offline = (bool)checkOffline.IsChecked;
+            Settings.Default.DisperseCommentOffsets = (bool)checkDispersion.IsChecked;
             if (comboFormat.SelectedItem != null)
             {
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
@@ -385,17 +388,18 @@ namespace TwitchDownloaderWPF
             }
             comboFont.SelectedItem = "Inter Embedded";
 
-            Codec h264Codec = new Codec() { Name = "H264", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h264NvencCodec = new Codec() { Name = "H264 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_nvenc -preset fast -cq 20 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h265Codec = new Codec() { Name = "H265", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx265 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h264Codec = new Codec() { Name = "H264", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx264 -preset:v veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h264NvencCodec = new Codec() { Name = "H264 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_nvenc -preset:v p4 -cq 20 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h265Codec = new Codec() { Name = "H265", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx265 -preset:v veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h265NvencCodec = new Codec() { Name = "H265 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v hevc_nvenc -preset:v p4 -cq 21 -pix_fmt yuv420p \"{save_path}\"" };
             Codec vp8Codec = new Codec() { Name = "VP8", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx -crf 18 -b:v 2M -pix_fmt yuva420p -auto-alt-ref 0 \"{save_path}\"" };
-            Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 18 -b:v 2M -pix_fmt yuva420p \"{save_path}\"" };
+            Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 18 -b:v 2M -deadline realtime -quality realtime -speed 3 -pix_fmt yuva420p \"{save_path}\"" };
             Codec rleCodec = new Codec() { Name = "RLE", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v qtrle -pix_fmt argb \"{save_path}\"" };
             Codec proresCodec = new Codec() { Name = "ProRes", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v prores_ks -qscale:v 62 -pix_fmt argb \"{save_path}\"" };
-            VideoContainer mp4Container = new VideoContainer() { Name = "MP4", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, h264NvencCodec } };
-            VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, rleCodec, proresCodec } };
+            VideoContainer mp4Container = new VideoContainer() { Name = "MP4", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, h264NvencCodec, h265NvencCodec } };
+            VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, rleCodec, proresCodec, h264NvencCodec, h265NvencCodec } };
             VideoContainer webmContainer = new VideoContainer() { Name = "WEBM", SupportedCodecs = new List<Codec>() { vp8Codec, vp9Codec } };
-            VideoContainer mkvContainer = new VideoContainer() { Name = "MKV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, vp8Codec, vp9Codec } };
+            VideoContainer mkvContainer = new VideoContainer() { Name = "MKV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, vp8Codec, vp9Codec, h264NvencCodec, h265NvencCodec } };
             comboFormat.Items.Add(mp4Container);
             comboFormat.Items.Add(movContainer);
             comboFormat.Items.Add(webmContainer);
@@ -522,7 +526,8 @@ namespace TwitchDownloaderWPF
 
                 ChatRenderOptions options = GetOptions(saveFileDialog.FileName);
 
-                ChatRenderer currentRender = new ChatRenderer(options);
+                Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
+                ChatRenderer currentRender = new ChatRenderer(options, renderProgress);
                 await currentRender.ParseJsonAsync(new CancellationToken());
 
                 if (sender == null)
@@ -544,8 +549,6 @@ namespace TwitchDownloaderWPF
                     }
                 }
 
-                Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
-
                 SetImage("Images/ppOverheat.gif", true);
                 statusMessage.Text = Translations.Strings.StatusRendering;
                 btnRender.IsEnabled = false;
@@ -553,7 +556,7 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     ffmpegLog.Clear();
-                    await currentRender.RenderVideoAsync(renderProgress, new CancellationToken());
+                    await currentRender.RenderVideoAsync(new CancellationToken());
                     statusMessage.Text = Translations.Strings.StatusDone;
                     SetImage("Images/ppHop.gif", true);
                 }
@@ -577,13 +580,12 @@ namespace TwitchDownloaderWPF
                 }
                 statusProgressBar.Value = 0;
                 btnRender.IsEnabled = true;
-
-                currentRender = null;
+                
                 GC.Collect();
             }
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void menuItemEnqueue_Click(object sender, RoutedEventArgs e)
         {
             if (ValidateInputs())
             {
@@ -592,7 +594,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        private void menuItemPartialRender_Click(object sender, RoutedEventArgs e)
         {
             SplitButton_Click(null, null);
         }

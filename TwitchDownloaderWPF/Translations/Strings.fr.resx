@@ -158,9 +158,6 @@
   <data name="CacheFolder" xml:space="preserve">
     <value>Dossier de Cache:</value>
   </data>
-  <data name="TemplateChat" xml:space="preserve">
-    <value>Chat:</value>
-  </data>
   <data name="ChatBadgeFilter" xml:space="preserve">
     <value>Chat Badge Filter:</value>
   </data>
@@ -640,5 +637,8 @@
   <data name="ThemeNotFoundMessage" xml:space="preserve">
     <value>{theme} was not found. Reverting theme to System</value>
     <comment>Do not translate {theme}</comment>
+  </data>
+  <data name="TemplateChats" xml:space="preserve">
+    <value>Chat:</value>
   </data>
 </root>

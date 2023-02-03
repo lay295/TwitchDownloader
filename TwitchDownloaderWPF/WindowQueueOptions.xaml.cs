@@ -89,7 +89,7 @@ namespace TwitchDownloaderWPF
                 textFolder.Text = queueFolder;
         }
 
-        private void btnQueue_Click(object sender, RoutedEventArgs e)
+        private async void btnQueue_Click(object sender, RoutedEventArgs e)
         {
             if (parentPage != null)
             {
@@ -342,7 +342,11 @@ namespace TwitchDownloaderWPF
                         ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(filePath);
                         renderTask.DownloadOptions = renderOptions;
                         renderTask.Info.Title = Path.GetFileNameWithoutExtension(filePath);
-                        renderTask.Info.Thumbnail = InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl).Result;
+                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                        if (success)
+                        {
+                            renderTask.Info.Thumbnail = image;
+                        }
                         renderTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)

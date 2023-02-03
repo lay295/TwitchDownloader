@@ -78,12 +78,18 @@ namespace TwitchDownloaderWPF
                         if (videoInfo.data.video == null)
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
-                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
+                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                            if (success)
+                            {
+                                imgThumbnail.Source = image;
+                            }
                         }
                         else
                         {
                             videoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                             labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds);
+                            numStartHour.Maximum = (int)videoLength.TotalHours;
+                            numEndHour.Maximum = (int)videoLength.TotalHours;
 
                             try
                             {
@@ -93,7 +99,11 @@ namespace TwitchDownloaderWPF
                             catch
                             {
                                 AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                                imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
+                                var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                                if (success)
+                                {
+                                    imgThumbnail.Source = image;
+                                }
                             }
                         }
                     }
@@ -103,7 +113,11 @@ namespace TwitchDownloaderWPF
                         if (videoInfo.data.clip.video == null)
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
-                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
+                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                            if (success)
+                            {
+                                imgThumbnail.Source = image;
+                            }
                         }
                         else
                         {
@@ -118,7 +132,11 @@ namespace TwitchDownloaderWPF
                             catch
                             {
                                 AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                                imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
+                                var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                                if (success)
+                                {
+                                    imgThumbnail.Source = image;
+                                }
                             }
                         }
                     }
@@ -240,7 +258,7 @@ namespace TwitchDownloaderWPF
                 case ReportType.Percent:
                     statusProgressBar.Value = (int)progress.Data;
                     break;
-                case ReportType.Status or ReportType.StatusInfo:
+                case ReportType.NewLineStatus or ReportType.SameLineStatus:
                     statusMessage.Text = (string)progress.Data;
                     break;
                 case ReportType.Log:

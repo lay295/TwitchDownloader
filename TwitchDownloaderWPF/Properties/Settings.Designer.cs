@@ -733,6 +733,18 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DisperseCommentOffsets {
+            get {
+                return ((bool)(this["DisperseCommentOffsets"]));
+            }
+            set {
+                this["DisperseCommentOffsets"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("en-US")]
         public string GuiCulture {
             get {

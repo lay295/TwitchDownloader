@@ -69,14 +69,14 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public async Task RunAsync()
         {
-            ChatRenderer renderer = new ChatRenderer(DownloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
+            ChatRenderer renderer = new ChatRenderer(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {
                 await renderer.ParseJsonAsync(TokenSource.Token);
-                await renderer.RenderVideoAsync(progress, TokenSource.Token);
+                await renderer.RenderVideoAsync(TokenSource.Token);
                 if (TokenSource.IsCancellationRequested)
                 {
                     ChangeStatus(TwitchTaskStatus.Cancelled);

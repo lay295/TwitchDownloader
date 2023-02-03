@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -22,11 +23,21 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken = new())
         {
-            List<GqlClipTokenResponse> taskLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
+            List<GqlClipTokenResponse> listLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
+
+            if (listLinks[0].data.clip.playbackAccessToken is null)
+            {
+                throw new NullReferenceException("Invalid Clip, deleted possibly?");
+            }
+
+            if (listLinks[0].data.clip.videoQualities is null || listLinks[0].data.clip.videoQualities.Count == 0)
+            {
+                throw new NullReferenceException("Clip has no video qualities, deleted possibly?");
+            }
 
             string downloadUrl = "";
 
-            foreach (var quality in taskLinks[0].data.clip.videoQualities)
+            foreach (var quality in listLinks[0].data.clip.videoQualities)
             {
                 if (quality.quality + "p" + (quality.frameRate.ToString() == "30" ? "" : quality.frameRate.ToString()) == downloadOptions.Quality)
                 {
@@ -36,16 +47,18 @@ namespace TwitchDownloaderCore
 
             if (downloadUrl == "")
             {
-                downloadUrl = taskLinks[0].data.clip.videoQualities.First().sourceURL;
+                downloadUrl = listLinks[0].data.clip.videoQualities.First().sourceURL;
             }
 
-            downloadUrl += "?sig=" + taskLinks[0].data.clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(taskLinks[0].data.clip.playbackAccessToken.value);
+            downloadUrl += "?sig=" + listLinks[0].data.clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(listLinks[0].data.clip.playbackAccessToken.value);
 
             cancellationToken.ThrowIfCancellationRequested();
 
             var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
             using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
             {
+                response.EnsureSuccessStatusCode();
+
                 using (var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);

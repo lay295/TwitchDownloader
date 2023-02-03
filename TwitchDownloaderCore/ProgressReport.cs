@@ -4,8 +4,8 @@
     {
         Log,
         Percent,
-        Status,
-        StatusInfo,
+        NewLineStatus,
+        SameLineStatus,
         FfmpegLog
     }
 
@@ -26,11 +26,6 @@
         {
             ReportType = reportType;
             Data = message;
-        }
-
-        ~ProgressReport()
-        {
-            Data = null;
         }
     }
 }

@@ -38,6 +38,11 @@ namespace TwitchDownloaderCore.Tools
             using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             using var jsonDocument = await JsonDocument.ParseAsync(fs, cancellationToken: cancellationToken);
 
+            if (jsonDocument.RootElement.TryGetProperty("FileInfo", out JsonElement fileInfoElement))
+            {
+                returnChatRoot.FileInfo = fileInfoElement.Deserialize<ChatRootInfo>();
+            }
+
             if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerElement))
             {
                 returnChatRoot.streamer = streamerElement.Deserialize<Streamer>();

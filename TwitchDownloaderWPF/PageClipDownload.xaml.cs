@@ -55,7 +55,11 @@ namespace TwitchDownloaderWPF
                     catch
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
+                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                        if (success)
+                        {
+                            imgThumbnail.Source = image;
+                        }
                     }
                     TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                     textStreamer.Text = clipData.data.clip.broadcaster.displayName;
