@@ -853,6 +853,24 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dispersion .
+        /// </summary>
+        public static string MessageDispersion {
+            get {
+                return ResourceManager.GetString("MessageDispersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow..
+        /// </summary>
+        public static string MessageDispersionTooltip {
+            get {
+                return ResourceManager.GetString("MessageDispersionTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to OAuth (optional) .
         /// </summary>
         public static string Oauth {

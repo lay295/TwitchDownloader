@@ -67,7 +67,7 @@
                         <TextBlock Text="{lex:Loc SubMessages}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="{lex:Loc ChatBadges}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="{lex:Loc UpdateTime}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}">Dispersion <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                        <TextBlock HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MessageDispersion}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MessageDispersionTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,0,5">
                         <CheckBox x:Name="checkOutline" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>

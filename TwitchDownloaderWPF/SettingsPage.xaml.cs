@@ -17,7 +17,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class SettingsPage : Window
     {
-        private List<(string name, string nativeName)> cultureList = new();
+        private readonly List<(string name, string nativeName)> _cultureList = new();
 
         public SettingsPage()
         {
@@ -62,11 +62,13 @@ namespace TwitchDownloaderWPF
             // Setup culture dropdown
             foreach (var culture in (AvailableCultures.Culture[])Enum.GetValues(typeof(AvailableCultures.Culture)))
             {
-                cultureList.Add((culture.ToName(), culture.ToNativeName()));
-                comboLocale.Items.Add(culture.ToNativeName());
+                string name = culture.ToName();
+                string nativeName = culture.ToNativeName();
+                _cultureList.Add((name, nativeName));
+                comboLocale.Items.Add(nativeName);
             }
             var currentCulture = Settings.Default.GuiCulture;
-            var selectedIndex = cultureList.Select((item, index) => new { item, index })
+            var selectedIndex = _cultureList.Select((item, index) => new { item, index })
                 .Where(x => x.item.name == currentCulture)
                 .Select(x => x.index)
                 .DefaultIfEmpty(-1)
@@ -150,9 +152,9 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            if (cultureList[comboLocale.SelectedIndex].name != Settings.Default.GuiCulture)
+            if (_cultureList[comboLocale.SelectedIndex].name != Settings.Default.GuiCulture)
             {
-                Settings.Default.GuiCulture = cultureList[comboLocale.SelectedIndex].name;
+                Settings.Default.GuiCulture = _cultureList[comboLocale.SelectedIndex].name;
                 AppSingleton.RequestCultureChange();
             }
         }

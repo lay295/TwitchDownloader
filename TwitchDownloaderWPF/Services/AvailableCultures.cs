@@ -7,13 +7,16 @@
 
         // Notes for translators:
         //
-        // Please place your culture in the enum in English aplhabetical order by the 'name'
+        // Please place your culture in the enum in English alphabetical order by the 'name' code
         //
-        // If you do not know the 'name' for your culture, you can probably find it here:
+        // If you do not know the 'name' for your culture, you can find it using the Visual Studio ResX Resource Manager extension
+        // https://marketplace.visualstudio.com/items?itemName=TomEnglert.ResXManager
+        // Or alternatively it can probably be found it here:
         // http://www.codedigest.com/CodeDigest/207-Get-All-Language-Country-Code-List-for-all-Culture-in-C---ASP-Net.aspx
-        // Or can be found by combining the ISO 639-3 language name with the ISO 3166-1 alpha-2 country name.
+        // Or it can be found by combining the ISO 639-3 language name with the ISO 3166-1 alpha-2 country name.
         // ISO 639-3: https://en.wikipedia.org/wiki/IETF_language_tag#List_of_common_primary_language_subtags
         // ISO 3166-1 alpha-2: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
+
         public enum Culture
         {
             English,

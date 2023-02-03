@@ -641,4 +641,11 @@
     <value>{theme} was not found. Reverting theme to System</value>
     <comment>Do not translate {theme}</comment>
   </data>
+  <data name="MessageDispersion" xml:space="preserve">
+    <value>Dispersion </value>
+    <comment>leave a trailing space</comment>
+  </data>
+  <data name="MessageDispersionTooltip" xml:space="preserve">
+    <value>In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow.</value>
+  </data>
 </root>

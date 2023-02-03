@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Threading;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Translations;
 
 namespace TwitchDownloaderWPF
 {
@@ -41,7 +42,7 @@ namespace TwitchDownloaderWPF
         private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             Exception ex = e.Exception;
-            MessageBox.Show(ex.ToString(), "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.ToString(), Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
 
             Current?.Shutdown();
         }
@@ -49,7 +50,7 @@ namespace TwitchDownloaderWPF
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
-            MessageBox.Show(ex.ToString(), "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.ToString(), Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
 
             Current?.Shutdown();
         }
