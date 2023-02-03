@@ -1,12 +1,8 @@
-﻿using NeoSmart.Unicode;
-using Newtonsoft.Json.Linq;
-using SkiaSharp;
+﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -45,34 +41,17 @@ namespace TwitchDownloaderCore.TwitchObjects
                 Versions.Add(version.Key, badgeImage);
             }
 
-            switch (name)
+            Type = name switch
             {
-                case "broadcaster":
-                    Type = ChatBadgeType.Broadcaster;
-                    break;
-                case "moderator":
-                    Type = ChatBadgeType.Moderator;
-                    break;
-                case "vip":
-                    Type = ChatBadgeType.VIP;
-                    break;
-                case "subscriber":
-                    Type = ChatBadgeType.Subscriber;
-                    break;
-                case "predictions":
-                    Type = ChatBadgeType.Predictions;
-                    break;
-                case "no_video":
-                case "no_audio":
-                    Type = ChatBadgeType.NoAudioVisual;
-                    break;
-                case "premium":
-                    Type = ChatBadgeType.PrimeGaming;
-                    break;
-                default:
-                    Type = ChatBadgeType.Other;
-                    break;
-            }
+                "broadcaster" => ChatBadgeType.Broadcaster,
+                "moderator" => ChatBadgeType.Moderator,
+                "vip" => ChatBadgeType.VIP,
+                "subscriber" => ChatBadgeType.Subscriber,
+                "predictions" => ChatBadgeType.Predictions,
+                "no_video" or "no_audio" => ChatBadgeType.NoAudioVisual,
+                "premium" => ChatBadgeType.PrimeGaming,
+                _ => ChatBadgeType.Other,
+            };
         }
 
         public void Resize(double newScale)

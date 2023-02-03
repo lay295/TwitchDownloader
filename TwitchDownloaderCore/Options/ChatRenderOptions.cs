@@ -1,6 +1,5 @@
 ﻿using SkiaSharp;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace TwitchDownloaderCore.Options
@@ -76,12 +75,13 @@ namespace TwitchDownloaderCore.Options
         public int VerticalPadding => (int)(24 * ReferenceScale * VerticalSpacingScale);
         public int WordSpacing => (int)(6 * ReferenceScale * WordSpacingScale);
         public int EmoteSpacing => (int)(6 * ReferenceScale * EmoteSpacingScale);
-        public int AccentStrokeWidth => (int)(12 * ReferenceScale * AccentStrokeScale);
-        public int AccentIndentWidth => (int)(24 * ReferenceScale * AccentIndentScale);
+        public int AccentStrokeWidth => (int)(8 * ReferenceScale * AccentStrokeScale);
+        public int AccentIndentWidth => (int)(32 * ReferenceScale * AccentIndentScale);
         public bool Offline { get; set; }
         public bool LogFfmpegOutput { get; set; } = false;
         public bool BlockArtPreWrap { get; set; } = false;
         public double BlockArtPreWrapWidth { get; set; }
         public float BlockArtCharWidth { get; set; }
+        public bool DisperseCommentOffsets { get; set; } = true;
     }
 }

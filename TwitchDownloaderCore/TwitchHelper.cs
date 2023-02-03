@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -724,15 +723,9 @@ namespace TwitchDownloaderCore
 
         public static int TimestampToSeconds(string input)
         {
-            //There might be a better way to do this, gets string 0h0m0s and returns timespan
-            TimeSpan returnSpan = new TimeSpan(0);
-            string[] inputArray = input.Remove(input.Length - 1).Replace('h', ':').Replace('m', ':').Split(':');
-
-            returnSpan = returnSpan.Add(TimeSpan.FromSeconds(Int32.Parse(inputArray[inputArray.Length - 1])));
-            if (inputArray.Length > 1)
-                returnSpan = returnSpan.Add(TimeSpan.FromMinutes(Int32.Parse(inputArray[inputArray.Length - 2])));
-            if (inputArray.Length > 2)
-                returnSpan = returnSpan.Add(TimeSpan.FromHours(Int32.Parse(inputArray[inputArray.Length - 3])));
+            // Gets total seconds from timestamp in the format of 0h0m0s
+            input = input.Replace('h', ':').Replace('m', ':').Replace("s", "");
+            TimeSpan returnSpan = TimeSpan.Parse(input);
 
             return (int)returnSpan.TotalSeconds;
         }
@@ -817,6 +810,19 @@ namespace TwitchDownloaderCore
             catch { }
 
             return imageBytes;
+        }
+
+        public static async Task<GqlVideoChapterResponse> GetVideoChapters(int videoId)
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"extensions\":{\"persistedQuery\":{\"sha256Hash\":\"8d2793384aac3773beab5e59bd5d6f585aedb923d292800119e03d40cd0f9b41\",\"version\":1}},\"operationName\":\"VideoPlayer_ChapterSelectButtonVideo\",\"variables\":{\"videoID\":\""+ videoId + "\"}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<GqlVideoChapterResponse>(response);
         }
     }
 }
