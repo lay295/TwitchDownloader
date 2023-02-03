@@ -31,6 +31,7 @@ namespace TwitchDownloaderCore
 
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
+            chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (Path.GetExtension(_updateOptions.InputFile).ToLower() != ".json")
             {
                 throw new NotImplementedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
@@ -334,11 +335,6 @@ namespace TwitchDownloaderCore
             };
 
             return chatRoot;
-        }
-
-        ~ChatUpdater()
-        {
-            chatRoot = null;
         }
     }
 }

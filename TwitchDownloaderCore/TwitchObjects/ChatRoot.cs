@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -79,6 +81,22 @@ namespace TwitchDownloaderCore.TwitchObjects
         public bool more_replies { get; set; }
     }
 
+    public class VideoChapter
+    {
+        public string id { get; set; }
+        public int startMilliseconds { get; set; }
+        public int lengthMilliseconds { get; set; }
+        [JsonProperty("type")]
+        [JsonPropertyName("type")]
+        public string _type { get; set; }
+        public string description { get; set; }
+        public string subDescription { get; set; }
+        public string thumbnailUrl { get; set; }
+        public string gameId { get; set; }
+        public string gameDisplayName { get; set; }
+        public string gameBoxArtUrl { get; set; }
+    }
+
     public class Video
     {
         public string title { get; set; }
@@ -87,6 +105,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public double start { get; set; }
         public double end { get; set; }
         public double length { get; set; } = -1;
+        public List<VideoChapter> chapters { get; set; } = new();
     }
 
     public class EmbedEmoteData
@@ -118,14 +137,6 @@ namespace TwitchDownloaderCore.TwitchObjects
         public List<EmbedEmoteData> firstParty { get; set; } = new();
         public List<EmbedChatBadge> twitchBadges { get; set; } = new();
         public List<EmbedCheerEmote> twitchBits { get; set; } = new();
-
-        ~EmbeddedData()
-        {
-            thirdParty = null;
-            firstParty = null;
-            twitchBadges = null;
-            twitchBits = null;
-        }
     }
 
     public class CommentResponse
@@ -136,19 +147,10 @@ namespace TwitchDownloaderCore.TwitchObjects
 
     public class ChatRoot
     {
-        public ChatRootInfo FileInfo { get; set; } = new ChatRootInfo();
+        public ChatRootInfo FileInfo { get; set; } = new();
         public Streamer streamer { get; set; }
         public Video video { get; set; }
         public List<Comment> comments { get; set; }
         public EmbeddedData embeddedData { get; set; }
-
-        ~ChatRoot()
-        {
-            FileInfo = null;
-            streamer = null;
-            video = null;
-            comments = null;
-            embeddedData = null;
-        }
     }
 }
