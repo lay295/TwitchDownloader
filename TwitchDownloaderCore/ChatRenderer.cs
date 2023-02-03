@@ -20,13 +20,16 @@ namespace TwitchDownloaderCore
 {
     public sealed class ChatRenderer
     {
-        static readonly string[] defaultColors = new string[] { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
+        public ChatRoot chatRoot { get; set; } = new ChatRoot();
+
+        private static readonly string[] defaultColors = new string[] { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
+        private const string PURPLE = "#7b2cf2";
+        private const string HIGHLIGHT_BACKGROUND = "#1A6B6B6E";
         static readonly Regex rtlRegex = new("[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]", RegexOptions.Compiled);
         static readonly Regex blockArtRegex = new("[\u2500-\u257F\u2580-\u259F\u2800-\u28FF]", RegexOptions.Compiled);
         static readonly Regex emojiRegex = new(@"(?:[#*0-9]\uFE0F?\u20E3|©\uFE0F?|[®\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23ED-\u23EF\u23F1\u23F2\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB\u25FC\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692\u2694-\u2697\u2699\u269B\u269C\u26A0\u26A7\u26AA\u26B0\u26B1\u26BD\u26BE\u26C4\u26C8\u26CF\u26D1\u26D3\u26E9\u26F0-\u26F5\u26F7\u26F8\u26FA\u2702\u2708\u2709\u270F\u2712\u2714\u2716\u271D\u2721\u2733\u2734\u2744\u2747\u2757\u2763\u27A1\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B55\u3030\u303D\u3297\u3299]\uFE0F?|[\u261D\u270C\u270D](?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?|[\u270A\u270B](?:\uD83C[\uDFFB-\uDFFF])?|[\u23E9-\u23EC\u23F0\u23F3\u25FD\u2693\u26A1\u26AB\u26C5\u26CE\u26D4\u26EA\u26FD\u2705\u2728\u274C\u274E\u2753-\u2755\u2795-\u2797\u27B0\u27BF\u2B50]|\u26F9(?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|\u2764\uFE0F?(?:\u200D(?:\uD83D\uDD25|\uD83E\uDE79))?|\uD83C(?:[\uDC04\uDD70\uDD71\uDD7E\uDD7F\uDE02\uDE37\uDF21\uDF24-\uDF2C\uDF36\uDF7D\uDF96\uDF97\uDF99-\uDF9B\uDF9E\uDF9F\uDFCD\uDFCE\uDFD4-\uDFDF\uDFF5\uDFF7]\uFE0F?|[\uDF85\uDFC2\uDFC7](?:\uD83C[\uDFFB-\uDFFF])?|[\uDFC3\uDFC4\uDFCA](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDFCB\uDFCC](?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDCCF\uDD8E\uDD91-\uDD9A\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF84\uDF86-\uDF93\uDFA0-\uDFC1\uDFC5\uDFC6\uDFC8\uDFC9\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF8-\uDFFF]|\uDDE6\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF]|\uDDE7\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF]|\uDDE8\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF]|\uDDE9\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF]|\uDDEA\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA]|\uDDEB\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7]|\uDDEC\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE]|\uDDED\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA]|\uDDEE\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9]|\uDDEF\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5]|\uDDF0\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF]|\uDDF1\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE]|\uDDF2\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF]|\uDDF3\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF]|\uDDF4\uD83C\uDDF2|\uDDF5\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE]|\uDDF6\uD83C\uDDE6|\uDDF7\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC]|\uDDF8\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF]|\uDDF9\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF]|\uDDFA\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF]|\uDDFB\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA]|\uDDFC\uD83C[\uDDEB\uDDF8]|\uDDFD\uD83C\uDDF0|\uDDFE\uD83C[\uDDEA\uDDF9]|\uDDFF\uD83C[\uDDE6\uDDF2\uDDFC]|\uDFF3\uFE0F?(?:\u200D(?:\u26A7\uFE0F?|\uD83C\uDF08))?|\uDFF4(?:\u200D\u2620\uFE0F?|\uDB40\uDC67\uDB40\uDC62\uDB40(?:\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDC73\uDB40\uDC63\uDB40\uDC74|\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F)?)|\uD83D(?:[\uDC3F\uDCFD\uDD49\uDD4A\uDD6F\uDD70\uDD73\uDD76-\uDD79\uDD87\uDD8A-\uDD8D\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA\uDECB\uDECD-\uDECF\uDEE0-\uDEE5\uDEE9\uDEF0\uDEF3]\uFE0F?|[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDC8F\uDC91\uDCAA\uDD7A\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC](?:\uD83C[\uDFFB-\uDFFF])?|[\uDC6E\uDC70\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD74\uDD90](?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?|[\uDC00-\uDC07\uDC09-\uDC14\uDC16-\uDC3A\uDC3C-\uDC3E\uDC40\uDC44\uDC45\uDC51-\uDC65\uDC6A\uDC79-\uDC7B\uDC7D-\uDC80\uDC84\uDC88-\uDC8E\uDC90\uDC92-\uDCA9\uDCAB-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDDA4\uDDFB-\uDE2D\uDE2F-\uDE34\uDE37-\uDE44\uDE48-\uDE4A\uDE80-\uDEA2\uDEA4-\uDEB3\uDEB7-\uDEBF\uDEC1-\uDEC5\uDED0-\uDED2\uDED5-\uDED7\uDEDD-\uDEDF\uDEEB\uDEEC\uDEF4-\uDEFC\uDFE0-\uDFEB\uDFF0]|\uDC08(?:\u200D\u2B1B)?|\uDC15(?:\u200D\uD83E\uDDBA)?|\uDC3B(?:\u200D\u2744\uFE0F?)?|\uDC41\uFE0F?(?:\u200D\uD83D\uDDE8\uFE0F?)?|\uDC68(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDC68\uDC69]\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFE])))?))?|\uDC69(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?[\uDC68\uDC69]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?|\uDC69\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?))|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFE])))?))?|\uDC6F(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDD75(?:\uFE0F|\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDE2E(?:\u200D\uD83D\uDCA8)?|\uDE35(?:\u200D\uD83D\uDCAB)?|\uDE36(?:\u200D\uD83C\uDF2B\uFE0F?)?)|\uD83E(?:[\uDD0C\uDD0F\uDD18-\uDD1F\uDD30-\uDD34\uDD36\uDD77\uDDB5\uDDB6\uDDBB\uDDD2\uDDD3\uDDD5\uDEC3-\uDEC5\uDEF0\uDEF2-\uDEF6](?:\uD83C[\uDFFB-\uDFFF])?|[\uDD26\uDD35\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD4\uDDD6-\uDDDD](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDDDE\uDDDF](?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD0D\uDD0E\uDD10-\uDD17\uDD20-\uDD25\uDD27-\uDD2F\uDD3A\uDD3F-\uDD45\uDD47-\uDD76\uDD78-\uDDB4\uDDB7\uDDBA\uDDBC-\uDDCC\uDDD0\uDDE0-\uDDFF\uDE70-\uDE74\uDE78-\uDE7C\uDE80-\uDE86\uDE90-\uDEAC\uDEB0-\uDEBA\uDEC0-\uDEC2\uDED0-\uDED9\uDEE0-\uDEE7]|\uDD3C(?:\u200D[\u2640\u2642]\uFE0F?|\uD83C[\uDFFB-\uDFFF])?|\uDDD1(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFC-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFD-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFD\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFE]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF-\uDDB3\uDDBC\uDDBD]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?))?|\uDEF1(?:\uD83C(?:\uDFFB(?:\u200D\uD83E\uDEF2\uD83C[\uDFFC-\uDFFF])?|\uDFFC(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFD-\uDFFF])?|\uDFFD(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])?|\uDFFE(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFD\uDFFF])?|\uDFFF(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFE])?))?))",
             RegexOptions.Compiled);
-        public ChatRoot chatRoot { get; set; } = new ChatRoot();
-
+        private readonly IProgress<ProgressReport> _progress = null;
         private readonly ChatRenderOptions renderOptions;
         private List<ChatBadge> badgeList = new List<ChatBadge>();
         private List<TwitchEmote> emoteList = new List<TwitchEmote>();
@@ -39,7 +42,7 @@ namespace TwitchDownloaderCore
         private SKPaint nameFont = new SKPaint();
         private SKPaint outlinePaint = new SKPaint();
 
-        public ChatRenderer(ChatRenderOptions chatRenderOptions)
+        public ChatRenderer(ChatRenderOptions chatRenderOptions, IProgress<ProgressReport> progress)
         {
             renderOptions = chatRenderOptions;
             renderOptions.TempFolder = Path.Combine(
@@ -47,11 +50,12 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
             renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize - renderOptions.SidePadding * 2;
             renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
+            _progress = progress;
         }
 
-        public async Task RenderVideoAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        public async Task RenderVideoAsync(CancellationToken cancellationToken)
         {
-            progress.Report(new ProgressReport(ReportType.Status, "Fetching Images"));
+            _progress.Report(new ProgressReport(ReportType.Status, "Fetching Images"));
             await Task.Run(() => FetchImages(cancellationToken), cancellationToken);
 
             await Task.Run(ScaleImages, cancellationToken);
@@ -83,13 +87,13 @@ namespace TwitchDownloaderCore
             if (renderOptions.GenerateMask && File.Exists(renderOptions.MaskFile))
                 File.Delete(renderOptions.MaskFile);
 
-            FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false, progress);
+            FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false);
             FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(0, true) : null;
-            progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
+            _progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
 
             try
             {
-                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, progress, cancellationToken), cancellationToken);
+                await Task.Run(() => RenderVideoSection(startTick, startTick + totalTicks, ffmpegProcess, maskProcess, cancellationToken), cancellationToken);
             }
             catch
             {
@@ -135,7 +139,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void RenderVideoSection(int startTick, int endTick, FfmpegProcess ffmpegProcess, FfmpegProcess maskProcess = null, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = new())
+        private void RenderVideoSection(int startTick, int endTick, FfmpegProcess ffmpegProcess, FfmpegProcess maskProcess = null, CancellationToken cancellationToken = new())
         {
             UpdateFrame latestUpdate = null;
             BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.Process.StandardInput.BaseStream);
@@ -145,12 +149,14 @@ namespace TwitchDownloaderCore
 
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(ffmpegProcess);
 
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
             // Measure some sample text to determine the text height, cannot assume it is font size
             SKRect sampleTextBounds = new SKRect();
-            messageFont.MeasureText("abc123", ref sampleTextBounds);
+            messageFont.MeasureText("ABC123", ref sampleTextBounds);
+            int sectionDefaultYPos = (int)(((renderOptions.SectionHeight - sampleTextBounds.Height) / 2.0) + sampleTextBounds.Height);
+
+            using var highlightIcons = new HighlightMessage();
 
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
@@ -158,40 +164,40 @@ namespace TwitchDownloaderCore
 
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    latestUpdate = GenerateUpdateFrame(currentTick, sampleTextBounds.Height, progress, latestUpdate);
+                    latestUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, highlightIcons, latestUpdate);
                 }
 
-                using (SKBitmap frame = GetFrameFromTick(currentTick, sampleTextBounds.Height, progress, latestUpdate))
+                using (SKBitmap frame = GetFrameFromTick(currentTick, sectionDefaultYPos, highlightIcons, latestUpdate))
                 {
-                    DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken).Wait(cancellationToken);
+                    DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
 
                     ffmpegStream.Write(frame.Bytes);
 
                     if (maskProcess != null)
                     {
-                        DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken).Wait(cancellationToken);
+                        DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
 
                         SetFrameMask(frame);
                         maskStream.Write(frame.Bytes);
                     }
                 }
 
-                if (progress != null)
+                if (_progress != null)
                 {
                     double percentDouble = (currentTick - startTick) / (double)(endTick - startTick) * 100.0;
                     int percentInt = (int)percentDouble;
-                    progress.Report(new ProgressReport(percentInt));
+                    _progress.Report(new ProgressReport(percentInt));
 
                     int timeLeftInt = (int)(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
                     TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
                     TimeSpan timeElapsed = new TimeSpan(0, 0, (int)stopwatch.Elapsed.TotalSeconds);
-                    progress.Report(new ProgressReport(ReportType.StatusInfo, $"Rendering Video: {percentInt}% ({timeElapsed.ToString(@"h\hm\ms\s")} Elapsed | {timeLeft.ToString(@"h\hm\ms\s")} Remaining)"));
+                    _progress.Report(new ProgressReport(ReportType.StatusInfo, $"Rendering Video: {percentInt}% ({timeElapsed.ToString(@"h\hm\ms\s")} Elapsed | {timeLeft.ToString(@"h\hm\ms\s")} Remaining)"));
                 }
             }
 
             stopwatch.Stop();
-            progress?.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 100%"));
-            progress?.Report(new ProgressReport(ReportType.Log, $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x"));
+            _progress?.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 100%"));
+            _progress?.Report(new ProgressReport(ReportType.Log, $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x"));
 
             latestUpdate?.Image.Dispose();
 
@@ -224,7 +230,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private FfmpegProcess GetFfmpegProcess(int partNumber, bool isMask, IProgress<ProgressReport> progress = null)
+        private FfmpegProcess GetFfmpegProcess(int partNumber, bool isMask)
         {
             string savePath;
             if (partNumber == 0)
@@ -261,13 +267,13 @@ namespace TwitchDownloaderCore
                 }
             };
 
-            if (renderOptions.LogFfmpegOutput && progress != null)
+            if (renderOptions.LogFfmpegOutput && _progress != null)
             {
                 process.ErrorDataReceived += (s, e) =>
                 {
                     if (e.Data != null)
                     {
-                        progress.Report(new ProgressReport() { ReportType = ReportType.FfmpegLog, Data = e.Data });
+                        _progress.Report(new ProgressReport() { ReportType = ReportType.FfmpegLog, Data = e.Data });
                     }
                 };
             }
@@ -279,9 +285,9 @@ namespace TwitchDownloaderCore
             return new FfmpegProcess(process, savePath);
         }
 
-        private SKBitmap GetFrameFromTick(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame currentFrame = null)
+        private SKBitmap GetFrameFromTick(int currentTick, int sectionDefaultYPos, HighlightMessage highlightIcons, UpdateFrame currentFrame = null)
         {
-            currentFrame ??= GenerateUpdateFrame(currentTick, sampleTextHeight, progress);
+            currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos, highlightIcons);
             SKBitmap frame = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
             return frame;
         }
@@ -320,7 +326,7 @@ namespace TwitchDownloaderCore
             return newFrame;
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, float sampleTextHeight, IProgress<ProgressReport> progress, UpdateFrame lastUpdate = null)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, HighlightMessage highlightIcons, UpdateFrame lastUpdate = null)
         {
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
             double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
@@ -361,7 +367,7 @@ namespace TwitchDownloaderCore
                     }
 
                     // Draw the new comments
-                    CommentSection comment = GenerateCommentSection(currentIndex, sampleTextHeight, progress);
+                    CommentSection comment = GenerateCommentSection(currentIndex, sectionDefaultYPos, highlightIcons);
                     if (comment != null)
                     {
                         commentList.Add(comment);
@@ -409,7 +415,7 @@ namespace TwitchDownloaderCore
         }
 
         // I would prefer if this and its sub-methods were in the CommentSection class ~ScrubN
-        private CommentSection GenerateCommentSection(int commentIndex, float sampleTextHeight, IProgress<ProgressReport> progress)
+        private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos, HighlightMessage highlightIcons)
         {
             CommentSection newSection = new CommentSection();
             List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
@@ -417,20 +423,16 @@ namespace TwitchDownloaderCore
             List<SKBitmap> sectionImages = new List<SKBitmap>();
             Point drawPos = new Point();
             Point defaultPos = new Point();
-            bool ascentMessage = false;
+            bool accentMessage = false;
             defaultPos.X = renderOptions.SidePadding;
 
             if (comment.source != "chat")
             {
                 return null;
             }
-            if (comment.message.user_notice_params != null && comment.message.user_notice_params.msg_id != null)
+            if (comment.message.user_notice_params?.msg_id != null)
             {
                 if (comment.message.user_notice_params.msg_id is not "highlighted-message" and not "sub" and not "resub" and not "subgift" and not "")
-                {
-                    return null;
-                }
-                if (!renderOptions.SubMessages && (comment.message.user_notice_params.msg_id is "sub" or "resub" or "subgift"))
                 {
                     return null;
                 }
@@ -446,31 +448,25 @@ namespace TwitchDownloaderCore
             }
 
             AddImageSection(sectionImages, ref drawPos, defaultPos);
-            defaultPos.Y = (int)(((renderOptions.SectionHeight - sampleTextHeight) / 2.0) + sampleTextHeight);
+            defaultPos.Y = sectionDefaultYPos;
             drawPos.Y = defaultPos.Y;
 
-            if ((comment.message.user_notice_params != null && (comment.message.user_notice_params.msg_id is "sub" or "resub" or "subgift")) || IsSubMessage(comment))
+            if (comment.message.user_notice_params?.msg_id is "sub" or "resub" or "subgift" || HighlightMessage.IsSubMessage(comment))
             {
-                ascentMessage = true;
-                drawPos.X += renderOptions.AccentIndentWidth;
-                defaultPos.X = drawPos.X;
-                DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos, progress);
+                if (!renderOptions.SubMessages)
+                {
+                    return null;
+                }
+
+                DrawAccentedMessage(comment, sectionImages, emoteSectionList, highlightIcons, ref drawPos, defaultPos);
+                accentMessage = true;
             }
             else
             {
-                if (renderOptions.Timestamp)
-                {
-                    DrawTimestamp(comment, sectionImages, ref drawPos, ref defaultPos);
-                }
-                if (renderOptions.ChatBadges)
-                {
-                    DrawBadges(comment, sectionImages, ref drawPos);
-                }
-                DrawUsername(comment, sectionImages, ref drawPos, progress);
-                DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos, progress);
+                DrawNonAccentedMessage(emoteSectionList, comment, sectionImages, ref drawPos, ref defaultPos);
             }
 
-            SKBitmap finalBitmap = CombineImages(sectionImages, ascentMessage);
+            SKBitmap finalBitmap = CombineImages(sectionImages, accentMessage);
             newSection.Image = finalBitmap;
             newSection.Emotes = emoteSectionList;
             newSection.CommentIndex = commentIndex;
@@ -478,28 +474,23 @@ namespace TwitchDownloaderCore
             return newSection;
         }
 
-        private static bool IsSubMessage(Comment comment)
-        {
-            //If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " subscribed at Tier") || comment.message.body.StartsWith(comment.commenter.display_name + " subscribed with Prime") || comment.message.body.StartsWith(comment.commenter.display_name + " is gifting") || comment.message.body.StartsWith(comment.commenter.display_name + " gifted a Tier"))
-                return true;
-
-            return false;
-        }
-
-        private SKBitmap CombineImages(List<SKBitmap> sectionImages, bool ascent)
+        private SKBitmap CombineImages(List<SKBitmap> sectionImages, bool accent)
         {
             SKBitmap finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.Height));
             using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
             {
+                if (accent)
+                {
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmap.Width - renderOptions.SidePadding * 2, finalBitmap.Height, new SKPaint() { Color = SKColor.Parse(HIGHLIGHT_BACKGROUND) });
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmap.Height, new SKPaint() { Color = SKColor.Parse(PURPLE) });
+                }
+
                 for (int i = 0; i < sectionImages.Count; i++)
                 {
                     finalCanvas.DrawBitmap(sectionImages[i], 0, i * renderOptions.SectionHeight);
                     sectionImages[i].Dispose();
                 }
 
-                if (ascent)
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmap.Height, new SKPaint() { Color = SKColor.Parse("#7b2cf2") });
             }
             sectionImages.Clear();
             return finalBitmap;
@@ -520,7 +511,94 @@ namespace TwitchDownloaderCore
             return emojiKey;
         }
 
-        private void DrawMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress)
+        private void DrawNonAccentedMessage(List<(Point, TwitchEmote)> emoteSectionList, Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, ref Point defaultPos)
+        {
+            if (renderOptions.Timestamp)
+            {
+                DrawTimestamp(comment, sectionImages, ref drawPos, ref defaultPos);
+            }
+            if (renderOptions.ChatBadges)
+            {
+                DrawBadges(comment, sectionImages, ref drawPos);
+            }
+            DrawUsername(comment, sectionImages, ref drawPos);
+            DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos);
+        }
+
+        private void DrawAccentedMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightMessage highlightIcons, ref Point drawPos, Point defaultPos)
+        {
+            drawPos.X += renderOptions.AccentIndentWidth;
+            defaultPos.X = drawPos.X;
+
+            var highlightType = HighlightMessage.IsHighlightedMessage(comment);
+            using var highlightIcon = highlightIcons.GetHighlightIcon(highlightType, PURPLE, messageFont.Color, renderOptions.FontSize);
+
+            Point iconPoint = new()
+            {
+                X = drawPos.X,
+                Y = (int)((renderOptions.SectionHeight - (highlightIcon?.Height ?? 0)) / 2.0)
+            };
+
+            switch (highlightType)
+            {
+                case HighlightType.SubscribedTier:
+                case HighlightType.SubscribedPrime:
+                    DrawSubscribeMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    break;
+                case HighlightType.GiftedMany:
+                case HighlightType.GiftedSingle:
+                case HighlightType.GiftedAnonymous:
+                    DrawGiftMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    break;
+                case HighlightType.ContinuingGift:
+                default:
+                    DrawMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos);
+                    break;
+            }
+        }
+
+        private void DrawSubscribeMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
+        {
+            using SKCanvas canvas = new(sectionImages.Last());
+            canvas.DrawBitmap(highlightIcon, iconPoint.X, iconPoint.Y);
+
+            Point customMessagePos = drawPos;
+            drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
+            defaultPos.X = drawPos.X;
+
+            DrawUsername(comment, sectionImages, ref drawPos, false, PURPLE);
+            AddImageSection(sectionImages, ref drawPos, defaultPos);
+
+            // Remove the commenter's name from the resub message
+            comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 1)..];
+            comment.message.fragments[0].text = comment.message.fragments[0].text[(comment.commenter.display_name.Length + 1)..];
+
+            var (resubMessage, customResubMessage) = HighlightMessage.SplitSubComment(comment);
+            DrawMessage(resubMessage, sectionImages, emotePositionList, ref drawPos, defaultPos);
+
+            // Return if there is no custom resub message to draw
+            if (customResubMessage is null)
+            {
+                return;
+            }
+
+            AddImageSection(sectionImages, ref drawPos, defaultPos);
+            drawPos = customMessagePos;
+            defaultPos = customMessagePos;
+            DrawNonAccentedMessage(emotePositionList, customResubMessage, sectionImages, ref drawPos, ref defaultPos);
+        }
+
+        private void DrawGiftMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
+        {
+            using SKCanvas canvas = new(sectionImages.Last());
+
+            canvas.DrawBitmap(highlightIcon, iconPoint.X, iconPoint.Y);
+            drawPos.X += highlightIcon.Width + renderOptions.AccentIndentWidth - renderOptions.AccentStrokeWidth;
+            defaultPos.X = drawPos.X;
+            DrawMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos);
+        }
+
+        private void DrawMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos)
         {
             int bitsCount = comment.message.bits_spent;
             foreach (var fragment in comment.message.fragments)
@@ -531,9 +609,9 @@ namespace TwitchDownloaderCore
                     string[] fragmentParts = SwapRightToLeft(fragment.text.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
                     for (int i = 0; i < fragmentParts.Length; i++)
                     {
-                        string fragmentString = fragmentParts[i];
+                        string fragmentPartString = fragmentParts[i];
 
-                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, progress, bitsCount, fragmentString);
+                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPartString);
                     }
                 }
                 else
@@ -543,23 +621,23 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawFragmentPart(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress, int bitsCount, string fragmentString)
+        private void DrawFragmentPart(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentPart)
         {
-            if (emoteThirdList.Any(x => x.Name == fragmentString))
+            if (emoteThirdList.Any(x => x.Name == fragmentPart))
             {
-                DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, fragmentString);
+                DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, fragmentPart);
             }
-            else if (emojiRegex.IsMatch(fragmentString))
+            else if (emojiRegex.IsMatch(fragmentPart))
             {
-                DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, progress, bitsCount, fragmentString);
+                DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart);
             }
-            else if (!messageFont.ContainsGlyphs(fragmentString) || new StringInfo(fragmentString).LengthInTextElements < fragmentString.Length)
+            else if (!messageFont.ContainsGlyphs(fragmentPart) || new StringInfo(fragmentPart).LengthInTextElements < fragmentPart.Length)
             {
-                DrawNonFontMessage(sectionImages, ref drawPos, defaultPos, progress, fragmentString);
+                DrawNonFontMessage(sectionImages, ref drawPos, defaultPos, fragmentPart);
             }
             else
             {
-                DrawRegularMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentString);
+                DrawRegularMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart);
             }
         }
 
@@ -586,7 +664,7 @@ namespace TwitchDownloaderCore
         }
 
 #pragma warning disable IDE0057
-        private void DrawEmojiMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress, int bitsCount, string fragmentString)
+        private void DrawEmojiMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString)
         {
             ReadOnlySpan<char> fragmentSpan = fragmentString.AsSpan();
             StringBuilder nonEmojiBuffer = new();
@@ -620,7 +698,7 @@ namespace TwitchDownloaderCore
                 {
                     if (nonEmojiBuffer.Length > 0)
                     {
-                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, progress, bitsCount, nonEmojiBuffer.ToString());
+                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString());
                         nonEmojiBuffer.Clear();
                     }
 
@@ -669,7 +747,7 @@ namespace TwitchDownloaderCore
         }
 #pragma warning restore IDE0057
 
-        private void DrawNonFontMessage(List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, IProgress<ProgressReport> progress, string fragmentString)
+        private void DrawNonFontMessage(List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, string fragmentString)
         {
             ReadOnlySpan<char> fragmentSpan = fragmentString.Trim('\uFE0F').AsSpan();
 
@@ -698,7 +776,7 @@ namespace TwitchDownloaderCore
                     }
                     if (nonFontBuffer.Length > 0)
                     {
-                        using SKPaint nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions, progress).Clone();
+                        using SKPaint nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
                         nonFontFallbackFont.Color = renderOptions.MessageColor;
                         DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos);
                         nonFontBuffer.Clear();
@@ -707,7 +785,7 @@ namespace TwitchDownloaderCore
                     //Don't attempt to draw U+E0000
                     if (utf32Char != 917504)
                     {
-                        using SKPaint highSurrogateFallbackFont = GetFallbackFont(utf32Char, renderOptions, progress).Clone();
+                        using SKPaint highSurrogateFallbackFont = GetFallbackFont(utf32Char, renderOptions).Clone();
                         highSurrogateFallbackFont.Color = renderOptions.MessageColor;
                         DrawText(fragmentSpan.Slice(j, 2).ToString(), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos);
                     }
@@ -727,7 +805,7 @@ namespace TwitchDownloaderCore
                 {
                     if (nonFontBuffer.Length > 0)
                     {
-                        using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions, progress).Clone();
+                        using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
                         fallbackFont.Color = renderOptions.MessageColor;
                         DrawText(nonFontBuffer.ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos);
                         nonFontBuffer.Clear();
@@ -739,7 +817,7 @@ namespace TwitchDownloaderCore
             // Only one or the other should occur
             if (nonFontBuffer.Length > 0)
             {
-                using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions, progress).Clone();
+                using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
                 fallbackFont.Color = renderOptions.MessageColor;
                 DrawText(nonFontBuffer.ToString(), fallbackFont, true, sectionImages, ref drawPos, defaultPos);
                 nonFontBuffer.Clear();
@@ -931,18 +1009,19 @@ namespace TwitchDownloaderCore
             return measure.Width;
         }
 
-        private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, IProgress<ProgressReport> progress)
+        private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, bool appendColon = true, string colorOverride = null)
         {
             using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
-            SKColor userColor = SKColor.Parse(comment.message.user_color ?? defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Length]);
-            userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor, renderOptions);
+            SKColor userColor = SKColor.Parse(colorOverride ?? comment.message.user_color ?? defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Length]);
+            if (colorOverride is null)
+                userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor, renderOptions);
 
             SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
-                ? GetFallbackFont(comment.commenter.display_name.Where(IsNotAscii).First(), renderOptions, progress).Clone()
+                ? GetFallbackFont(comment.commenter.display_name.Where(IsNotAscii).First(), renderOptions).Clone()
                 : nameFont.Clone();
 
             userPaint.Color = userColor;
-            string userName = comment.commenter.display_name + ":";
+            string userName = comment.commenter.display_name + (appendColon ? ":" : "");
             int textWidth = (int)userPaint.MeasureText(userName);
             if (renderOptions.Outline)
             {
@@ -1157,7 +1236,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions, IProgress<ProgressReport> progress = null)
+        public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions)
         {
             if (fallbackCache.ContainsKey(input))
                 return fallbackCache[input];
@@ -1167,7 +1246,7 @@ namespace TwitchDownloaderCore
             if (newPaint.Typeface == null)
             {
                 newPaint.Typeface = SKTypeface.Default;
-                progress?.Report(new ProgressReport(ReportType.Log, "No valid typefaces were found for some messages."));
+                _progress?.Report(new ProgressReport(ReportType.Log, "No valid typefaces were found for some messages."));
             }
 
             fallbackCache.TryAdd(input, newPaint);
