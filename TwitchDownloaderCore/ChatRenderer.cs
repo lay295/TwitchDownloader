@@ -149,13 +149,14 @@ namespace TwitchDownloaderCore
 
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(ffmpegProcess);
 
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
             // Measure some sample text to determine the text height, cannot assume it is font size
             SKRect sampleTextBounds = new SKRect();
             messageFont.MeasureText("ABC123", ref sampleTextBounds);
             int sectionDefaultYPos = (int)(((renderOptions.SectionHeight - sampleTextBounds.Height) / 2.0) + sampleTextBounds.Height);
+
+            using var highlightIcons = new HighlightMessage();
 
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
@@ -163,10 +164,10 @@ namespace TwitchDownloaderCore
 
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    latestUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, latestUpdate);
+                    latestUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, highlightIcons, latestUpdate);
                 }
 
-                using (SKBitmap frame = GetFrameFromTick(currentTick, sectionDefaultYPos, latestUpdate))
+                using (SKBitmap frame = GetFrameFromTick(currentTick, sectionDefaultYPos, highlightIcons, latestUpdate))
                 {
                     DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
 
@@ -284,9 +285,9 @@ namespace TwitchDownloaderCore
             return new FfmpegProcess(process, savePath);
         }
 
-        private SKBitmap GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
+        private SKBitmap GetFrameFromTick(int currentTick, int sectionDefaultYPos, HighlightMessage highlightIcons, UpdateFrame currentFrame = null)
         {
-            currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos);
+            currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos, highlightIcons);
             SKBitmap frame = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
             return frame;
         }
@@ -325,7 +326,7 @@ namespace TwitchDownloaderCore
             return newFrame;
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, HighlightMessage highlightIcons, UpdateFrame lastUpdate = null)
         {
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
             double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
@@ -366,7 +367,7 @@ namespace TwitchDownloaderCore
                     }
 
                     // Draw the new comments
-                    CommentSection comment = GenerateCommentSection(currentIndex, sectionDefaultYPos);
+                    CommentSection comment = GenerateCommentSection(currentIndex, sectionDefaultYPos, highlightIcons);
                     if (comment != null)
                     {
                         commentList.Add(comment);
@@ -414,7 +415,7 @@ namespace TwitchDownloaderCore
         }
 
         // I would prefer if this and its sub-methods were in the CommentSection class ~ScrubN
-        private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos)
+        private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos, HighlightMessage highlightIcons)
         {
             CommentSection newSection = new CommentSection();
             List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
@@ -450,14 +451,14 @@ namespace TwitchDownloaderCore
             defaultPos.Y = sectionDefaultYPos;
             drawPos.Y = defaultPos.Y;
 
-            if (comment.message.user_notice_params?.msg_id is "sub" or "resub" or "subgift" || SpecialMessage.IsSubMessage(comment))
+            if (comment.message.user_notice_params?.msg_id is "sub" or "resub" or "subgift" || HighlightMessage.IsSubMessage(comment))
             {
                 if (!renderOptions.SubMessages)
                 {
                     return null;
                 }
 
-                DrawAccentedMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos);
+                DrawAccentedMessage(comment, sectionImages, emoteSectionList, highlightIcons, ref drawPos, defaultPos);
                 accentMessage = true;
             }
             else
@@ -524,13 +525,13 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emoteSectionList, ref drawPos, defaultPos);
         }
 
-        private void DrawAccentedMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos)
+        private void DrawAccentedMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightMessage highlightIcons, ref Point drawPos, Point defaultPos)
         {
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
 
-            var highlightType = SpecialMessage.IsHighlightedMessage(comment);
-            using var highlightIcon = SpecialMessage.GetHighlightIcon(highlightType, PURPLE, messageFont.Color, renderOptions.FontSize);
+            var highlightType = HighlightMessage.IsHighlightedMessage(comment);
+            using var highlightIcon = highlightIcons.GetHighlightIcon(highlightType, PURPLE, messageFont.Color, renderOptions.FontSize);
 
             Point iconPoint = new()
             {
@@ -572,7 +573,7 @@ namespace TwitchDownloaderCore
             comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 1)..];
             comment.message.fragments[0].text = comment.message.fragments[0].text[(comment.commenter.display_name.Length + 1)..];
 
-            var (resubMessage, customResubMessage) = SpecialMessage.SplitSubComment(comment);
+            var (resubMessage, customResubMessage) = HighlightMessage.SplitSubComment(comment);
             DrawMessage(resubMessage, sectionImages, emotePositionList, ref drawPos, defaultPos);
 
             // Return if there is no custom resub message to draw
