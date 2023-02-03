@@ -220,7 +220,8 @@ namespace TwitchDownloaderWPF
                 : qualityWithSize.AsSpan(0, qualityIndex);
         }
 
-        private string EstimateVideoSize(int bandwidth, TimeSpan startTime, TimeSpan endTime)
+        // TODO: Move to Core to add support in CLI
+        private static string EstimateVideoSize(int bandwidth, TimeSpan startTime, TimeSpan endTime)
         {
             var sizeInBytes = EstimateVideoSizeBytes(bandwidth, startTime, endTime);
 
@@ -238,7 +239,7 @@ namespace TwitchDownloaderWPF
             };
         }
 
-        private long EstimateVideoSizeBytes(int bandwidth, TimeSpan startTime, TimeSpan endTime)
+        private static long EstimateVideoSizeBytes(int bandwidth, TimeSpan startTime, TimeSpan endTime)
         {
             if (bandwidth == 0)
             {
