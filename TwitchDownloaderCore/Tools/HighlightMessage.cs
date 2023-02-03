@@ -246,11 +246,11 @@ namespace TwitchDownloaderCore.Tools
 
                 if (isDisposing)
                 {
-                    _subscribedTierIcon.Dispose();
-                    _subscribedPrimeIcon.Dispose();
-                    _giftSingleIcon.Dispose();
-                    _giftManyIcon.Dispose();
-                    _giftAnonymousIcon.Dispose();
+                    _subscribedTierIcon?.Dispose();
+                    _subscribedPrimeIcon?.Dispose();
+                    _giftSingleIcon?.Dispose();
+                    _giftManyIcon?.Dispose();
+                    _giftAnonymousIcon?.Dispose();
 
                     // Set the root references to null to explicitly tell the garbage collector that the resources have been disposed
                     _subscribedTierIcon = null;

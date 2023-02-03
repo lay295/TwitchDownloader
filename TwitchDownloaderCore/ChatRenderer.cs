@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
         {
-            _progress.Report(new ProgressReport(ReportType.Status, "Fetching Images"));
+            _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Fetching Images [1/2]"));
             await Task.Run(() => FetchImages(cancellationToken), cancellationToken);
 
             await Task.Run(ScaleImages, cancellationToken);
@@ -94,7 +94,7 @@ namespace TwitchDownloaderCore
 
             FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false);
             FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(0, true) : null;
-            _progress.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 0%"));
+            _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Rendering Video: 0% [2/2]"));
 
             try
             {
@@ -253,12 +253,12 @@ namespace TwitchDownloaderCore
                     int timeLeftInt = (int)(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
                     TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
                     TimeSpan timeElapsed = new TimeSpan(0, 0, (int)stopwatch.Elapsed.TotalSeconds);
-                    _progress.Report(new ProgressReport(ReportType.StatusInfo, $"Rendering Video: {percentInt}% ({timeElapsed.ToString(@"h\hm\ms\s")} Elapsed | {timeLeft.ToString(@"h\hm\ms\s")} Remaining)"));
+                    _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Rendering Video: {percentInt}% ({timeElapsed.ToString(@"h\hm\ms\s")} Elapsed | {timeLeft.ToString(@"h\hm\ms\s")} Remaining)"));
                 }
             }
 
             stopwatch.Stop();
-            _progress?.Report(new ProgressReport(ReportType.StatusInfo, "Rendering Video: 100%"));
+            _progress?.Report(new ProgressReport(ReportType.SameLineStatus, "Rendering Video: 100%"));
             _progress?.Report(new ProgressReport(ReportType.Log, $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x"));
 
             latestUpdate?.Image.Dispose();

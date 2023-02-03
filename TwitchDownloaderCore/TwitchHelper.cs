@@ -21,7 +21,7 @@ namespace TwitchDownloaderCore
 {
     public static class TwitchHelper
     {
-        private static HttpClient httpClient = new HttpClient();
+        private static readonly HttpClient httpClient = new HttpClient();
         private static readonly string[] bttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
 
         public static async Task<GqlVideoResponse> GetVideoInfo(int videoId)
@@ -126,7 +126,7 @@ namespace TwitchDownloaderCore
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             if (getFfz)
             {
                 await GetFfzEmoteData(streamerId, emoteReponse.FFZ);
@@ -205,7 +205,7 @@ namespace TwitchDownloaderCore
                 {
                     STVChannelEmoteResponse streamerEmoteObject = JsonConvert.DeserializeObject<STVChannelEmoteResponse>(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
                     // Channel might not have emotes setup
-                    if (streamerEmoteObject.emote_set?.emotes != null) 
+                    if (streamerEmoteObject.emote_set?.emotes != null)
                     {
                         stvEmotes.AddRange(streamerEmoteObject.emote_set.emotes);
                     }
@@ -303,7 +303,7 @@ namespace TwitchDownloaderCore
                         continue;
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        TwitchEmote newEmote = new TwitchEmote(await GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
                         if (emote.IsZeroWidth)
                             newEmote.IsZeroWidth = true;
                         returnList.Add(newEmote);
@@ -326,7 +326,7 @@ namespace TwitchDownloaderCore
                         continue;
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        TwitchEmote newEmote = new TwitchEmote(await GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emote.Code);
                     }
@@ -347,7 +347,7 @@ namespace TwitchDownloaderCore
                         continue;
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
                         if (emote.IsZeroWidth)
                             newEmote.IsZeroWidth = true;
                         returnList.Add(newEmote);
@@ -498,21 +498,23 @@ namespace TwitchDownloaderCore
             Dictionary<string, SKBitmap> returnCache = new Dictionary<string, SKBitmap>();
 
             string emojiFolder = Path.Combine(cacheFolder, "emojis");
-            Regex emojiExtensions = new Regex(@"\.(png|PNG)"); // Extensions are case sensitive on Linux and Mac
+            Regex emojiExtensions = new Regex(@"\.(?:png|PNG)\z", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
 
             if (!Directory.Exists(emojiFolder))
                 TwitchHelper.CreateDirectory(emojiFolder);
 
             string[] emojiFiles = Directory.GetFiles(emojiFolder).Where(i => emojiExtensions.IsMatch(i)).ToArray();
 
-            //Twemoji 14 has 3689 emoji images
+            // Twemoji 14 has 3689 emoji images
             if (emojiFiles.Length < 3689)
             {
                 string emojiZipPath = Path.Combine(emojiFolder, Path.GetRandomFileName());
-                byte[] emojiZipData = Resources.twemoji_14_0_0;
-                await File.WriteAllBytesAsync(emojiZipPath, emojiZipData);
-                using (ZipArchive archive = ZipFile.OpenRead(emojiZipPath))
+                try
                 {
+                    byte[] emojiZipData = Resources.twemoji_14_0_0;
+                    await File.WriteAllBytesAsync(emojiZipPath, emojiZipData);
+
+                    using ZipArchive archive = ZipFile.OpenRead(emojiZipPath);
                     var emojiAssetsPath = Path.Combine("twemoji-14.0.0", "assets", "72x72");
                     var emojis = archive.Entries.Where(x => !string.IsNullOrWhiteSpace(x.Name) && Path.GetDirectoryName(x.FullName) == emojiAssetsPath);
                     foreach (var emoji in emojis)
@@ -528,10 +530,12 @@ namespace TwitchDownloaderCore
                         }
                     }
                 }
-
-                if (File.Exists(emojiZipPath))
+                finally
                 {
-                    File.Delete(emojiZipPath);
+                    if (File.Exists(emojiZipPath))
+                    {
+                        File.Delete(emojiZipPath);
+                    }
                 }
             }
 
@@ -655,6 +659,66 @@ namespace TwitchDownloaderCore
             var folderInfo = new Mono.Unix.UnixFileInfo(path);
             folderInfo.FileAccessPermissions = Mono.Unix.FileAccessPermissions.AllPermissions;
             folderInfo.Refresh();
+        }
+
+        /// <summary>
+        /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
+        /// </summary>
+        public static void CleanupUnmanagedCacheFiles(string cacheFolder)
+        {
+            // Let's delete any video download cache folders older than 24 hours
+            // Or that have been inactive for 2 hours
+            var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
+            var directories = Directory.GetDirectories(cacheFolder);
+            foreach (var directory in directories)
+            {
+                var videoFolderMatch = videoFolderRegex.Match(directory);
+                if (videoFolderMatch.Success)
+                {
+                    bool wasDeleted = DeleteOldDirectory(directory, videoFolderMatch.Groups[1].ToString());
+
+                    if (wasDeleted) continue;
+
+                    wasDeleted = DeleteColdDirectory(directory);
+
+                    if (wasDeleted) continue;
+                }
+            }
+        }
+
+        private static bool DeleteOldDirectory(string directory, string directoryCreationMillis)
+        {
+            var downloadTime = long.Parse(directoryCreationMillis);
+            var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            if (currentTime - downloadTime > 86_400_000) // 24 hours in millis
+            {
+                try
+                {
+                    Directory.Delete(directory, true);
+                    return true;
+                }
+                catch { }
+            }
+            return false;
+        }
+
+        private static bool DeleteColdDirectory(string directory)
+        {
+            // Directory.GetLastWriteTimeUtc() works as expected on both Windows and MacOS. Assuming it does on Linux too
+            var directoryWriteTimeMillis = Directory.GetLastWriteTimeUtc(directory).Ticks / TimeSpan.TicksPerMillisecond;
+            var currentTimeMillis = DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
+
+            if (currentTimeMillis - directoryWriteTimeMillis > 14_400_000) // 4 hours in millis
+            {
+                try
+                {
+                    Directory.Delete(directory, true);
+                    return true;
+                }
+                catch { }
+            }
+            return false;
         }
 
         public static int TimestampToSeconds(string input)

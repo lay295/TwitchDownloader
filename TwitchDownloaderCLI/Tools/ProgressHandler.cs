@@ -6,7 +6,6 @@ namespace TwitchDownloaderCLI.Tools
     internal class ProgressHandler
     {
         private static string previousMessage = "";
-        private static bool previousMessageWasStatusInfo = false;
 
         internal static void Progress_ProgressChanged(object sender, ProgressReport e)
         {
@@ -15,11 +14,11 @@ namespace TwitchDownloaderCLI.Tools
                 case ReportType.Log:
                     ReportLog(e);
                     break;
-                case ReportType.Status:
-                    ReportStatus(e);
+                case ReportType.NewLineStatus:
+                    ReportNewLineStatus(e);
                     break;
-                case ReportType.StatusInfo:
-                    ReportStatusInfo(e);
+                case ReportType.SameLineStatus:
+                    ReportSameLineStatus(e);
                     break;
                 case ReportType.FfmpegLog:
                     ReportFfmpegLog(e);
@@ -29,32 +28,26 @@ namespace TwitchDownloaderCLI.Tools
 
         private static void ReportLog(ProgressReport e)
         {
-            WasLastMessageStatusInfo();
-
-            string currentStatus = "[LOG] - " + e.Data;
+            string currentStatus = Environment.NewLine + "[LOG] - " + e.Data;
             previousMessage = currentStatus;
-            Console.WriteLine(currentStatus);
+            Console.Write(currentStatus);
         }
 
-        private static void ReportStatus(ProgressReport e)
+        private static void ReportNewLineStatus(ProgressReport e)
         {
-            WasLastMessageStatusInfo();
-
-            string currentStatus = "[STATUS] - " + e.Data;
+            string currentStatus = Environment.NewLine + "[STATUS] - " + e.Data;
             if (currentStatus != previousMessage)
             {
                 previousMessage = currentStatus;
-                Console.WriteLine(currentStatus);
+                Console.Write(currentStatus);
             }
         }
 
-        private static void ReportStatusInfo(ProgressReport e)
+        private static void ReportSameLineStatus(ProgressReport e)
         {
             string currentStatus = "\r[STATUS] - " + e.Data;
             if (currentStatus != previousMessage)
             {
-                previousMessageWasStatusInfo = true;
-
                 // This ensures the previous message is fully overwritten
                 currentStatus = currentStatus.PadRight(previousMessage.Length);
 
@@ -65,20 +58,9 @@ namespace TwitchDownloaderCLI.Tools
 
         private static void ReportFfmpegLog(ProgressReport e)
         {
-            WasLastMessageStatusInfo();
-
-            string currentStatus = "<FFMEPG LOG> " + e.Data;
+            string currentStatus = Environment.NewLine + "<FFMEPG LOG> " + e.Data;
             previousMessage = currentStatus;
-            Console.WriteLine(currentStatus);
-        }
-
-        private static void WasLastMessageStatusInfo()
-        {
-            if (previousMessageWasStatusInfo)
-            {
-                previousMessageWasStatusInfo = false;
-                Console.WriteLine();
-            }
+            Console.Write(currentStatus);
         }
     }
 }
