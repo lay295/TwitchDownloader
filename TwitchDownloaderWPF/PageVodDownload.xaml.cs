@@ -247,7 +247,7 @@ namespace TwitchDownloaderWPF
             }
 
             var totalTime = endTime - startTime;
-            return bandwidth / 8 * (long)totalTime.TotalSeconds;
+            return (long)(bandwidth / 8d * totalTime.TotalSeconds);
         }
 
         private void OnProgressChanged(ProgressReport progress)
