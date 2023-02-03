@@ -59,6 +59,11 @@ namespace TwitchDownloaderCore
             await Task.Run(() => FetchImages(cancellationToken), cancellationToken);
 
             await Task.Run(ScaleImages, cancellationToken);
+
+            if (renderOptions.DisperseCommentOffsets)
+            {
+                DisperseCommentOffsets(chatRoot.comments);
+            }
             FloorCommentOffsets(chatRoot.comments);
 
             outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
@@ -101,6 +106,63 @@ namespace TwitchDownloaderCore
                 maskProcess?.Process.Dispose();
                 GC.Collect();
                 throw;
+            }
+        }
+
+        /* Due to Twitch changing the API to return only whole number offsets, renders have become less readable.
+         * To get around this we will disperse the offsets of comments on a given whole second across the second.
+         * For example, before any jittering:
+         *   the input a=1.0 b=2.0 c=2.0  d=2.0 e=2.0  f=3.0
+         *     becomes a=1.0 b=2.0 c=2.25 d=2.5 e=2.75 f=3.0
+         *     
+         * The only drawback to this method is there will _never_ be multiple comments drawn on the same tick
+         * like in a real chat. The overall improved chat flow is still worth it regardless. */
+        private static void DisperseCommentOffsets(List<Comment> comments)
+        {
+            var rnd = new Random(comments.Count);
+
+            for (int i = 0; i < comments.Count; i++)
+            {
+                if (i == comments.Count - 1)
+                {
+                    break;
+                }
+                if (comments[i + 1].content_offset_seconds != comments[i].content_offset_seconds)
+                {
+                    continue;
+                }
+                if (comments[i].content_offset_seconds % 1 != 0)
+                {
+                    continue;
+                }
+
+                int startIndex = i;
+                do
+                {
+                    i++;
+                    if (i == comments.Count - 1)
+                    {
+                        break;
+                    }
+                }
+                while (comments[i + 1].content_offset_seconds == comments[i].content_offset_seconds);
+
+                double scaleFactor = 1;
+                if (i < comments.Count - 1 &&
+                    comments[i + 1].content_offset_seconds - comments[i].content_offset_seconds < 1)
+                {
+                    // If there happens to be 2+ comments on a whole second in a chat with decimal comment offsets
+                    // we don't want to inadvertently rearrange the comment order
+                    scaleFactor = comments[i + 1].content_offset_seconds - comments[i].content_offset_seconds;
+                }
+
+                int commentsToUpdate = i - startIndex;
+                for (int c = 1; c <= commentsToUpdate; c++) // Start at 1 so we don't offset the first comment on the second
+                {
+                    double jitter = rnd.NextDouble() * 0.98 - 0.49; // Jitter the distributed comment offset between 0.51-1.49x
+                    double distributedOffset = (c + jitter) / (commentsToUpdate + 1); // Jitter must be addition to retain comment order
+                    comments[startIndex + c].content_offset_seconds += distributedOffset * scaleFactor;
+                }
             }
         }
 

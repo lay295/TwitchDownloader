@@ -6,14 +6,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using TwitchDownloader;
@@ -97,6 +95,7 @@ namespace TwitchDownloaderWPF
                 SubMessages = (bool)checkSub.IsChecked,
                 ChatBadges = (bool)checkBadge.IsChecked,
                 Offline = (bool)checkOffline.IsChecked,
+                DisperseCommentOffsets = (bool)checkDispersion.IsChecked,
                 LogFfmpegOutput = true
             };
             foreach (var item in comboBadges.SelectedItems)
@@ -159,6 +158,7 @@ namespace TwitchDownloaderWPF
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
+                checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
 
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Broadcaster, Name = "Broadcaster" });
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Moderator, Name = "Mods" });
@@ -252,6 +252,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.SubMessages = (bool)checkSub.IsChecked;
             Settings.Default.ChatBadges = (bool)checkBadge.IsChecked;
             Settings.Default.Offline = (bool)checkOffline.IsChecked;
+            Settings.Default.DisperseCommentOffsets = (bool)checkDispersion.IsChecked;
             if (comboFormat.SelectedItem != null)
             {
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
