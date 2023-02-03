@@ -132,7 +132,16 @@ namespace TwitchDownloaderWPF
                             numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
                             numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
                         }
+                        else
+                        {
+                            numStartHour.Value = 0;
+                            numStartMinute.Value = 0;
+                            numStartSecond.Value = 0;
+                        }
+                        numStartHour.Maximum = (int)vodLength.TotalHours;
+
                         numEndHour.Value = (int)vodLength.TotalHours;
+                        numEndHour.Maximum = (int)vodLength.TotalHours;
                         numEndMinute.Value = vodLength.Minutes;
                         numEndSecond.Value = vodLength.Seconds;
                         labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);

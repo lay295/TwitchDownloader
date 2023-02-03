@@ -43,6 +43,8 @@ namespace TwitchDownloaderWPF
             checkEnd.IsEnabled = isEnabled;
             btnDownload.IsEnabled = isEnabled;
             btnQueue.IsEnabled = isEnabled;
+            SetEnabledCropStart(isEnabled & (bool)checkStart.IsChecked);
+            SetEnabledCropEnd(isEnabled & (bool)checkEnd.IsChecked);
         }
 
         private void SetEnabledCropStart(bool isEnabled)
@@ -407,32 +409,14 @@ namespace TwitchDownloaderWPF
 
         private void checkStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            bool isStart = (bool)checkStart.IsChecked;
-
-            if (isStart)
-            {
-                SetEnabledCropStart(true);
-            }
-            else
-            {
-                SetEnabledCropStart(false);
-            }
+            SetEnabledCropStart((bool)checkStart.IsChecked);
 
             UpdateVideoSizeEstimates();
         }
 
         private void checkEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            bool isEnd = (bool)checkEnd.IsChecked;
-
-            if (isEnd)
-            {
-                SetEnabledCropEnd(true);
-            }
-            else
-            {
-                SetEnabledCropEnd(false);
-            }
+            SetEnabledCropEnd((bool)checkEnd.IsChecked);
 
             UpdateVideoSizeEstimates();
         }

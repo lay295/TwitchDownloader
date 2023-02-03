@@ -89,6 +89,8 @@ namespace TwitchDownloaderWPF
                         {
                             videoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                             labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds);
+                            numStartHour.Maximum = (int)videoLength.TotalHours;
+                            numEndHour.Maximum = (int)videoLength.TotalHours;
 
                             try
                             {
