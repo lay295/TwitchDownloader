@@ -68,8 +68,6 @@ namespace TwitchDownloaderCore
             }
             FloorCommentOffsets(chatRoot.comments);
 
-            RemoveRestrictedComments(chatRoot.comments);
-
             outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             nameFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             messageFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
@@ -91,8 +89,11 @@ namespace TwitchDownloaderCore
             BannedWordRegexes = new Regex[renderOptions.BannedWordsArray.Length];
             for (int i = 0; i < renderOptions.BannedWordsArray.Length; i++)
             {
-                BannedWordRegexes[i] = new Regex(@$"(?:^|\s|\d|\p{{P}}|\p{{S}}){renderOptions.BannedWordsArray[i]}(?:$|\s|\d|\p{{P}}|\p{{S}})", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+                BannedWordRegexes[i] = new Regex(@$"(?<=^|[\s\d\p{{P}}\p{{S}}]){renderOptions.BannedWordsArray[i]}(?=$|[\s\d\p{{P}}\p{{S}}])",
+                    RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             }
+
+            RemoveRestrictedComments(chatRoot.comments);
 
             (int startTick, int totalTicks) = GetVideoTicks();
 
@@ -210,11 +211,11 @@ namespace TwitchDownloaderCore
 
                 foreach (var bannedWordRegex in BannedWordRegexes)
                 {
-                    if (bannedWordRegex.IsMatch(comments[i].message.body.ToLower()))
+                    if (bannedWordRegex.IsMatch(comments[i].message.body))
                     {
                         comments.RemoveAt(i);
                         i--;
-                        continue;
+                        break;
                     }
                 }
             }

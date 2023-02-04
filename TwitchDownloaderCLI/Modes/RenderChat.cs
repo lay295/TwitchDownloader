@@ -108,7 +108,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (inputOptions.BannedWordsString != "")
             {
-                renderOptions.BannedWordsArray = inputOptions.BannedWordsString.ToLower().Split(',',
+                renderOptions.BannedWordsArray = inputOptions.BannedWordsString.Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             }
 
