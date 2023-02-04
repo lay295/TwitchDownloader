@@ -31,6 +31,7 @@ namespace TwitchDownloaderCore
 
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
+            chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (Path.GetExtension(_updateOptions.InputFile).ToLower() != ".json")
             {
                 throw new NotImplementedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
@@ -45,7 +46,7 @@ namespace TwitchDownloaderCore
             // If we are editing the chat crop
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding)
             {
-                progress.Report(new ProgressReport(ReportType.Status, string.Format("Updating Chat Crop [{0}/{1}]", ++currentStep, totalSteps)));
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, string.Format("Updating Chat Crop [{0}/{1}]", ++currentStep, totalSteps)));
                 progress.Report(new ProgressReport(totalSteps / currentStep));
 
                 chatRoot.video ??= new Video();
@@ -86,7 +87,7 @@ namespace TwitchDownloaderCore
             // If we are updating/replacing embeds
             if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)
             {
-                progress.Report(new ProgressReport(ReportType.Status, string.Format("Updating Embeds [{0}/{1}]", ++currentStep, totalSteps)));
+                progress.Report(new ProgressReport(ReportType.NewLineStatus, string.Format("Updating Embeds [{0}/{1}]", ++currentStep, totalSteps)));
                 progress.Report(new ProgressReport(totalSteps / currentStep));
 
                 chatRoot.embeddedData ??= new EmbeddedData();
@@ -105,7 +106,7 @@ namespace TwitchDownloaderCore
             }
 
             // Finally save the output to file!
-            progress.Report(new ProgressReport(ReportType.Status, string.Format("Writing Output File [{0}/{1}]", ++currentStep, totalSteps)));
+            progress.Report(new ProgressReport(ReportType.NewLineStatus, string.Format("Writing Output File [{0}/{1}]", ++currentStep, totalSteps)));
             progress.Report(new ProgressReport(totalSteps / currentStep));
 
             switch (_updateOptions.OutputFormat)
@@ -334,11 +335,6 @@ namespace TwitchDownloaderCore
             };
 
             return chatRoot;
-        }
-
-        ~ChatUpdater()
-        {
-            chatRoot = null;
         }
     }
 }

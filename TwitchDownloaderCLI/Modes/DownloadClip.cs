@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Text.RegularExpressions;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
@@ -18,15 +18,23 @@ namespace TwitchDownloaderCLI.Modes
 
         private static ClipDownloadOptions GetDownloadOptions(ClipDownloadArgs inputOptions)
         {
-            if (string.IsNullOrWhiteSpace(inputOptions.Id) || inputOptions.Id.All(char.IsDigit))
+            if (inputOptions.Id is null)
             {
-                Console.WriteLine("[ERROR] - Invalid Clip ID, unable to parse.");
+                Console.WriteLine("[ERROR] - Clip ID/URL cannot be null!");
+                Environment.Exit(1);
+            }
+
+            var clipIdRegex = new Regex(@"(?:^|(?:twitch.tv\/\w+\/clip\/))(\D\w+(?:-\w+)?)(?:$|\?)");
+            var clipIdMatch = clipIdRegex.Match(inputOptions.Id);
+            if (!clipIdMatch.Success)
+            {
+                Console.WriteLine("[ERROR] - Unable to parse Clip ID/URL.");
                 Environment.Exit(1);
             }
 
             ClipDownloadOptions downloadOptions = new()
             {
-                Id = inputOptions.Id,
+                Id = clipIdMatch.Groups[1].ToString(),
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality
             };
