@@ -68,6 +68,8 @@ namespace TwitchDownloaderCore
             }
             FloorCommentOffsets(chatRoot.comments);
 
+            RemoveRestrictedComments(chatRoot.comments);
+
             outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             nameFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             messageFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
@@ -191,6 +193,29 @@ namespace TwitchDownloaderCore
                 else
                 {
                     comment.content_offset_seconds = Math.Floor(comment.content_offset_seconds / renderOptions.UpdateRate) * renderOptions.UpdateRate;
+                }
+            }
+        }
+
+        private void RemoveRestrictedComments(List<Comment> comments)
+        {
+            for (int i = 0; i < comments.Count; i++)
+            {
+                if (renderOptions.IgnoreUsersArray.Contains(comments[i].commenter.name.ToLower()))
+                {
+                    comments.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+
+                foreach (var bannedWordRegex in BannedWordRegexes)
+                {
+                    if (bannedWordRegex.IsMatch(comments[i].message.body.ToLower()))
+                    {
+                        comments.RemoveAt(i);
+                        i--;
+                        continue;
+                    }
                 }
             }
         }
@@ -450,26 +475,8 @@ namespace TwitchDownloaderCore
             {
                 int currentIndex = oldCommentIndex + 1;
 
-                while (newestCommentIndex >= currentIndex)
+                do
                 {
-                    // Skip comments from ignored users
-                    if (renderOptions.IgnoreUsersArray.Contains(chatRoot.comments[currentIndex].commenter.name.ToLower()))
-                    {
-                        currentIndex++;
-                        continue;
-                    }
-
-                    // Skip comments containing banned words
-                    foreach (var bannedWordRegex in BannedWordRegexes)
-                    {
-                        if (bannedWordRegex.IsMatch(chatRoot.comments[currentIndex].message.body.ToLower()))
-                        {
-                            currentIndex++;
-                            continue;
-                        }
-                    }
-
-                    // Draw the new comments
                     CommentSection comment = GenerateCommentSection(currentIndex, sectionDefaultYPos, highlightIcons);
                     if (comment != null)
                     {
@@ -477,6 +484,7 @@ namespace TwitchDownloaderCore
                     }
                     currentIndex++;
                 }
+                while (newestCommentIndex >= currentIndex);
             }
 
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
