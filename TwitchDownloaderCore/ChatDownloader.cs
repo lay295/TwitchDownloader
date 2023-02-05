@@ -417,7 +417,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            progress.Report(new ProgressReport(ReportType.Status, "Writing output file"));
+            progress.Report(new ProgressReport(ReportType.NewLineStatus, "Writing output file"));
             switch (downloadOptions.DownloadFormat)
             {
                 case ChatFormat.Json:
