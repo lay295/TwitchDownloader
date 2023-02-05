@@ -69,7 +69,7 @@ The ID or URL of the VOD or clip to download.
 **-o / --output (REQUIRED)**
 File the program will output to. File extension will be used to determine download type. Valid extensions are: `.json`, `.html`, and `.txt`.
 
-**-c / --compression**
+**--compression**
 (Default: None) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-b / --beginning**
@@ -247,23 +247,23 @@ Prints every message from ffmpeg.
 **--scale-vertical**
 (Default: 1.0) Number to scale vertical padding.
 
-**--scale-left**
-(Default: 1.0) Number to scale left indent padding.
+**--scale-side-padding**
+(Default: 1.0) Number to scale side padding.
 
-**--scale-sectionheight**
+**--scale-section-height**
 (Default: 1.0) Number to scale section height of comments.
 
-**--scale-wordspace**
+**--scale-word-space**
 (Default: 1.0) Number to scale spacing between words.
 
-**--scale-emotespace**
+**--scale-emote-space**
 (Default: 1.0) Number to scale spacing between emotes.
 
-**--scale-accentstroke**
-(Default: 1.0) Number to scale accent stroke size (sub messages).
+**--scale-highlight-stroke**
+(Default: 1.0) Number to scale highlight stroke size (sub messages).
 
-**--scale-accentindent**
-(Default: 1.0) Number to scale accent indent size (sub messages).
+**--scale-highlight-indent**
+(Default: 1.0) Number to scale highlight indent size (sub messages).
 
 ## Arguments for mode ffmpeg
 <sup>Manage standalone ffmpeg</sup>

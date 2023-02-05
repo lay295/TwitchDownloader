@@ -111,22 +111,22 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("scale-vertical", Default = 1.0, HelpText = "Number to scale vertical padding.")]
         public double ScaleVertical { get; set; }
 
-        [Option("scale-left", Default = 1.0, HelpText = "Number to scale left indent padding.")]
+        [Option("scale-side-padding", Default = 1.0, HelpText = "Number to scale side padding.")]
         public double ScaleLeft { get; set; }
 
-        [Option("scale-sectionheight", Default = 1.0, HelpText = "Number to scale section height of comments.")]
+        [Option("scale-section-height", Default = 1.0, HelpText = "Number to scale section height of comments.")]
         public double ScaleSectionHeight { get; set; }
 
-        [Option("scale-wordspace", Default = 1.0, HelpText = "Number to scale spacing between words.")]
+        [Option("scale-word-space", Default = 1.0, HelpText = "Number to scale spacing between words.")]
         public double ScaleWordSpace { get; set; }
 
-        [Option("scale-emotespace", Default = 1.0, HelpText = "Number to scale spacing between emotes.")]
+        [Option("scale-emote-space", Default = 1.0, HelpText = "Number to scale spacing between emotes.")]
         public double ScaleEmoteSpace { get; set; }
 
-        [Option("scale-accentstroke", Default = 1.0, HelpText = "Number to scale accent stroke size (sub messages).")]
+        [Option("scale-highlight-stroke", Default = 1.0, HelpText = "Number to scale highlight stroke size (sub messages).")]
         public double ScaleAccentStroke { get; set; }
 
-        [Option("scale-accentindent", Default = 1.0, HelpText = "Number to scale accent indent size (sub messages).")]
+        [Option("scale-highlight-indent", Default = 1.0, HelpText = "Number to scale highlight indent size (sub messages).")]
         public double ScaleAccentIndent { get; set; }
     }
 }

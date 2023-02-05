@@ -73,7 +73,7 @@ namespace TwitchDownloaderCLI.Modes
                 BadgeScale = inputOptions.ScaleBadge,
                 EmojiScale = inputOptions.ScaleEmoji,
                 VerticalSpacingScale = inputOptions.ScaleVertical,
-                LeftSpacingScale = inputOptions.ScaleLeft,
+                SidePaddingScale = inputOptions.ScaleLeft,
                 SectionHeightScale = inputOptions.ScaleSectionHeight,
                 WordSpacingScale = inputOptions.ScaleWordSpace,
                 EmoteSpacingScale = inputOptions.ScaleEmoteSpace,

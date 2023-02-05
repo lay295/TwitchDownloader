@@ -72,7 +72,7 @@ namespace TwitchDownloaderWPF
                 EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture),
                 BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture),
                 EmojiScale = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture),
-                LeftSpacingScale = double.Parse(textLeftScale.Text, CultureInfo.CurrentCulture),
+                SidePaddingScale = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture),
                 SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture),
                 WordSpacingScale = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture),
                 EmoteSpacingScale = double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture),
@@ -149,7 +149,7 @@ namespace TwitchDownloaderWPF
                 textEmojiScale.Text = Settings.Default.EmojiScale.ToString("0.0#");
                 textBadgeScale.Text = Settings.Default.BadgeScale.ToString("0.0#");
                 textVerticalScale.Text = Settings.Default.VerticalSpacingScale.ToString("0.0#");
-                textLeftScale.Text = Settings.Default.LeftSpacingScale.ToString("0.0#");
+                textSidePaddingScale.Text = Settings.Default.LeftSpacingScale.ToString("0.0#");
                 textSectionHeightScale.Text = Settings.Default.SectionHeightScale.ToString("0.0#");
                 textWordSpaceScale.Text = Settings.Default.WordSpacingScale.ToString("0.0#");
                 textEmoteSpaceScale.Text = Settings.Default.EmoteSpacingScale.ToString("0.0#");
@@ -283,7 +283,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.EmojiScale = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
-                Settings.Default.LeftSpacingScale = double.Parse(textLeftScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.LeftSpacingScale = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.WordSpacingScale = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.EmoteSpacingScale = double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture);
@@ -312,7 +312,7 @@ namespace TwitchDownloaderWPF
                 double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
                 double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
                 double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textLeftScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
                 double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
                 double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture);
