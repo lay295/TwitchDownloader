@@ -48,6 +48,11 @@ namespace TwitchDownloaderCore.Chat
                     throw new NotImplementedException(Path.GetFileName(filePath) + " is not a valid chat format");
             }
 
+            if (jsonDocument.RootElement.TryGetProperty("FileInfo", out JsonElement fileInfoElement))
+            {
+                returnChatRoot.FileInfo = fileInfoElement.Deserialize<ChatRootInfo>();
+            }
+
             if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerElement))
             {
                 returnChatRoot.streamer = streamerElement.Deserialize<Streamer>();

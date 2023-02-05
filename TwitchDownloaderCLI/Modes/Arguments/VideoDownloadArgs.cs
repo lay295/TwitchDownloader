@@ -6,7 +6,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
     [Verb("videodownload", HelpText = "Downloads a stream VOD from Twitch")]
     public class VideoDownloadArgs
     {
-        [Option('u', "id", Required = true, HelpText = "The ID of the VOD to download.")]
+        [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD to download.")]
         public string Id { get; set; }
 
         [Option('o', "output", Required = true, HelpText = "Path to output file.")]

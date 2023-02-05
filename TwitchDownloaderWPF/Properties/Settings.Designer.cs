@@ -730,5 +730,17 @@ namespace TwitchDownloader.Properties {
                 this["AccentIndentScale"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DisperseCommentOffsets {
+            get {
+                return ((bool)(this["DisperseCommentOffsets"]));
+            }
+            set {
+                this["DisperseCommentOffsets"] = value;
+            }
+        }
     }
 }

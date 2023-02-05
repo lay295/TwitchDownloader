@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using System.Windows.Threading;
 using TwitchDownloader.Tools;
 
 namespace TwitchDownloaderWPF
@@ -16,14 +18,34 @@ namespace TwitchDownloaderWPF
             AppSingleton = this;
         }
 
-        private void Application_Startup(object sender, StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
+            base.OnStartup(e);
             WindowsThemeService windowsThemeService = new();
 
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
-            MainWindow wnd = new();
-            wnd.Show();
+            Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
+            MainWindow = new MainWindow();
+            MainWindow.Show();
+        }
+
+        private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            Exception ex = e.Exception;
+            MessageBox.Show(ex.ToString(), "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            Current?.Shutdown();
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Exception ex = (Exception)e.ExceptionObject;
+            MessageBox.Show(ex.ToString(), "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            Current?.Shutdown();
         }
 
         public void RequestAppThemeChange()
