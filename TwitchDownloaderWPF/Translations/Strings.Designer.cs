@@ -223,6 +223,33 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Compression:.
+        /// </summary>
+        public static string ChatCompression {
+            get {
+                return ResourceManager.GetString("ChatCompression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gzip.
+        /// </summary>
+        public static string ChatCompressionGzip {
+            get {
+                return ResourceManager.GetString("ChatCompressionGzip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        public static string ChatCompressionNone {
+            get {
+                return ResourceManager.GetString("ChatCompressionNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Crop:.
         /// </summary>
         public static string ChatCrop {

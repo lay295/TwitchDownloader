@@ -643,9 +643,19 @@
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Dispersion </value>
-    <comment>leave a trailing space</comment>
+    <comment>Leave a trailing space</comment>
   </data>
   <data name="MessageDispersionTooltip" xml:space="preserve">
     <value>In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow.</value>
+  </data>
+  <data name="ChatCompression" xml:space="preserve">
+    <value>Compression:</value>
+  </data>
+  <data name="ChatCompressionNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="ChatCompressionGzip" xml:space="preserve">
+    <value>Gzip</value>
+    <comment>Do not translate</comment>
   </data>
 </root>
