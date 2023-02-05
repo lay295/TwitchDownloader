@@ -108,6 +108,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from ffmpeg.")]
         public bool LogFfmpegOutput { get; set; }
 
+        [Option("skip-drive-waiting", Default = false, HelpText = "Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives.")]
+        public bool SkipDriveWaiting { get; set; }
+
         [Option("scale-emote", Default = 1.0, HelpText = "Number to scale emote images.")]
         public double ScaleEmote { get; set; }
 

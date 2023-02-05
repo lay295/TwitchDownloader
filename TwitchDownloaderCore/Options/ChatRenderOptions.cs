@@ -84,5 +84,6 @@ namespace TwitchDownloaderCore.Options
         public float BlockArtCharWidth { get; set; }
         public bool AllowUnlistedEmotes { get; set; } = true;
         public bool DisperseCommentOffsets { get; set; } = true;
+        public bool SkipDriveWaiting { get; set; } = false;
     }
 }

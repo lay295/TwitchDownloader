@@ -71,6 +71,7 @@ namespace TwitchDownloaderCLI.Modes
                 Timestamp = inputOptions.Timestamp,
                 Offline = inputOptions.Offline,
                 LogFfmpegOutput = inputOptions.LogFfmpegOutput,
+                SkipDriveWaiting = inputOptions.SkipDriveWaiting,
                 EmoteScale = inputOptions.ScaleEmote,
                 BadgeScale = inputOptions.ScaleBadge,
                 EmojiScale = inputOptions.ScaleEmoji,
