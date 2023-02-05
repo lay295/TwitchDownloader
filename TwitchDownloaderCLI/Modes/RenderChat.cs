@@ -35,6 +35,8 @@ namespace TwitchDownloaderCLI.Modes
                 MessageColor = SKColor.Parse(inputOptions.MessageColor),
                 ChatHeight = inputOptions.ChatHeight,
                 ChatWidth = inputOptions.ChatWidth,
+                StartOverride = inputOptions.CropBeginningTime,
+                EndOverride = inputOptions.CropEndingTime,
                 BttvEmotes = (bool)inputOptions.BttvEmotes,
                 FfzEmotes = (bool)inputOptions.FfzEmotes,
                 StvEmotes = (bool)inputOptions.StvEmotes,
