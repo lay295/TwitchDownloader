@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using WpfAnimatedGif;
@@ -55,9 +56,11 @@ namespace TwitchDownloaderWPF
         {
             checkCropStart.IsEnabled = isEnabled & !isClip;
             checkCropEnd.IsEnabled = isEnabled & !isClip;
-            radioRelative.IsEnabled = isEnabled;
-            radioUTC.IsEnabled = isEnabled;
-            radioNone.IsEnabled = isEnabled;
+            radioTimestampRelative.IsEnabled = isEnabled;
+            radioTimestampUTC.IsEnabled = isEnabled;
+            radioTimestampNone.IsEnabled = isEnabled;
+            radioCompressionNone.IsEnabled = isEnabled;
+            radioCompressionGzip.IsEnabled = isEnabled;
             checkEmbed.IsEnabled = isEnabled;
             checkBttvEmbed.IsEnabled = isEnabled;
             checkFfzEmbed.IsEnabled = isEnabled;
@@ -238,6 +241,11 @@ namespace TwitchDownloaderWPF
             else if (radioText.IsChecked == true)
                 options.DownloadFormat = ChatFormat.Text;
 
+            if (radioCompressionNone.IsChecked == true)
+                options.Compression = ChatCompression.None;
+            else if (radioCompressionGzip.IsChecked == true)
+                options.Compression = ChatCompression.Gzip;
+
             options.EmbedData = (bool)checkEmbed.IsChecked;
             options.BttvEmotes = (bool)checkBttvEmbed.IsChecked;
             options.FfzEmotes = (bool)checkFfzEmbed.IsChecked;
@@ -295,21 +303,6 @@ namespace TwitchDownloaderWPF
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        private void radioText_Checked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                timeText.Visibility = Visibility.Visible;
-                timeOptions.Visibility = Visibility.Visible;
-                stackEmbedText.Visibility = Visibility.Collapsed;
-                stackEmbedChecks.Visibility = Visibility.Collapsed;
-                textCrop.Margin = new Thickness(0, 14, 0, 0);
-
-                Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
-                Settings.Default.Save();
-            }
         }
 
         private void numChatDownloadConnections_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
@@ -408,7 +401,9 @@ namespace TwitchDownloaderWPF
                 timeOptions.Visibility = Visibility.Collapsed;
                 stackEmbedText.Visibility = Visibility.Visible;
                 stackEmbedChecks.Visibility = Visibility.Visible;
-                textCrop.Margin = new Thickness(0, 17, 0, 37);
+                compressionText.Visibility = Visibility.Visible;
+                compressionOptions.Visibility = Visibility.Visible;
+                textCrop.Margin = new Thickness(0, 12, 0, 36);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Json;
                 Settings.Default.Save();
@@ -423,9 +418,28 @@ namespace TwitchDownloaderWPF
                 timeOptions.Visibility = Visibility.Collapsed;
                 stackEmbedText.Visibility = Visibility.Visible;
                 stackEmbedChecks.Visibility = Visibility.Visible;
-                textCrop.Margin = new Thickness(0, 17, 0, 37);
+                compressionText.Visibility = Visibility.Collapsed;
+                compressionOptions.Visibility = Visibility.Collapsed;
+                textCrop.Margin = new Thickness(0, 17, 0, 36);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Html;
+                Settings.Default.Save();
+            }
+        }
+
+        private void radioText_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                timeText.Visibility = Visibility.Visible;
+                timeOptions.Visibility = Visibility.Visible;
+                stackEmbedText.Visibility = Visibility.Collapsed;
+                stackEmbedChecks.Visibility = Visibility.Collapsed;
+                compressionText.Visibility = Visibility.Collapsed;
+                compressionOptions.Visibility = Visibility.Collapsed;
+                textCrop.Margin = new Thickness(0, 12, 0, 41);
+
+                Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
                 Settings.Default.Save();
             }
         }
@@ -437,7 +451,12 @@ namespace TwitchDownloaderWPF
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
 
                 if (radioJson.IsChecked == true)
-                    saveFileDialog.Filter = "JSON Files | *.json";
+                {
+                    if (radioCompressionNone.IsChecked == true)
+                        saveFileDialog.Filter = "JSON Files | *.json";
+                    else if (radioCompressionGzip.IsChecked == true)
+                        saveFileDialog.Filter = "GZip JSON Files | *.json.gz";
+                }
                 else if (radioHTML.IsChecked == true)
                     saveFileDialog.Filter = "HTML Files | *.html;*.htm";
                 else if (radioText.IsChecked == true)
@@ -479,11 +498,11 @@ namespace TwitchDownloaderWPF
                             downloadOptions.Id = downloadId;
                         }
 
-                        if (radioUTC.IsChecked == true)
+                        if (radioTimestampUTC.IsChecked == true)
                             downloadOptions.TimeFormat = TimestampFormat.Utc;
-                        else if (radioRelative.IsChecked == true)
+                        else if (radioTimestampRelative.IsChecked == true)
                             downloadOptions.TimeFormat = TimestampFormat.Relative;
-                        else if (radioNone.IsChecked == true)
+                        else if (radioTimestampNone.IsChecked == true)
                             downloadOptions.TimeFormat = TimestampFormat.None;
 
                         ChatDownloader currentDownload = new ChatDownloader(downloadOptions);

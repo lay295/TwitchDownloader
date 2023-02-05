@@ -41,7 +41,7 @@ namespace TwitchDownloaderWPF
         private void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "JSON Files | *.json";
+            openFileDialog.Filter = "JSON Files | *.json;*.json.gz";
             openFileDialog.RestoreDirectory = true;
 
             if (openFileDialog.ShowDialog() == true)
@@ -513,7 +513,7 @@ namespace TwitchDownloaderWPF
                 string fileFormat = comboFormat.SelectedItem.ToString();
                 saveFileDialog.Filter = $"{fileFormat} Files | *.{fileFormat.ToLower()}";
                 saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.FileName = Path.GetFileNameWithoutExtension(textJson.Text) + "." + fileFormat.ToLower();
+                saveFileDialog.FileName = Path.GetFileNameWithoutExtension(textJson.Text.Replace(".gz", "")) + "." + fileFormat.ToLower();
 
                 if (saveFileDialog.ShowDialog() != true)
                 {
@@ -580,7 +580,7 @@ namespace TwitchDownloaderWPF
                 }
                 statusProgressBar.Value = 0;
                 btnRender.IsEnabled = true;
-                
+
                 GC.Collect();
             }
         }

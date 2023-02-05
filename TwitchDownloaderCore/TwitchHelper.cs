@@ -215,8 +215,6 @@ namespace TwitchDownloaderCore
 
             foreach (var stvEmote in stvEmotes)
             {
-                string emoteId = stvEmote.id;
-                string emoteName = stvEmote.name;
                 STVData emoteData = stvEmote.data;
                 STVHost emoteHost = emoteData.host;
                 List<STVFile> emoteFiles = emoteHost.files;
@@ -224,21 +222,25 @@ namespace TwitchDownloaderCore
                 {
                     continue;
                 }
-                string emoteFormat = "avif";
+                // TODO: Allow and prefer avif when SkiaSharp properly supports it
+                string emoteFormat = "";
                 foreach (var fileItem in emoteFiles)
                 {
-                    // prefer webp
-                    if (fileItem.format.ToLower().Equals("webp"))
+                    if (fileItem.format.ToLower() == "webp") // Is the emote offered in webp?
                     {
                         emoteFormat = "webp";
                         break;
                     }
                 }
+                if (emoteFormat is "") // SkiaSharp does not yet properly support avif, only allow webp - see issue lay295#426
+                {
+                    continue;
+                }
                 string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost.url, "[scale]x", emoteFormat);
                 StvEmoteFlags emoteFlags = emoteData.flags;
                 bool emoteIsListed = emoteData.listed;
 
-                EmoteResponseItem emoteResponse = new() { Id = emoteId, Code = emoteName, ImageType = emoteFormat, ImageUrl = emoteUrl };
+                EmoteResponseItem emoteResponse = new() { Id = stvEmote.id, Code = stvEmote.name, ImageType = emoteFormat, ImageUrl = emoteUrl };
                 if ((emoteFlags & StvEmoteFlags.ZeroWidth) == StvEmoteFlags.ZeroWidth)
                 {
                     emoteResponse.IsZeroWidth = true;
