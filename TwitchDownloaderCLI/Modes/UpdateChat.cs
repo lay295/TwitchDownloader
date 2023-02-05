@@ -4,6 +4,7 @@ using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
@@ -32,6 +33,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 ".html" or ".htm" => ChatFormat.Html,
                 ".json" => ChatFormat.Json,
+                ".gz" => ChatFormat.Json,
                 _ => ChatFormat.Text
             };
             ChatFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
@@ -59,6 +61,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 InputFile = inputOptions.InputFile,
                 OutputFile = inputOptions.OutputFile,
+                Compression = inputOptions.Compression,
                 OutputFormat = outFormat,
                 EmbedMissing = inputOptions.EmbedMissing,
                 ReplaceEmbeds = inputOptions.ReplaceEmbeds,

@@ -67,7 +67,10 @@ The quality the program will attempt to download, for example "1080p60", if not 
 The ID or URL of the VOD or clip to download.
 
 **-o / --output (REQUIRED)**
-File the program will output to. File extension will be used to determine download type. Valid extensions are: `json`, `html`, and `txt`.
+File the program will output to. File extension will be used to determine download type. Valid extensions are: `.json`, `.html`, and `.txt`.
+
+**--compression**
+(Default: None) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-b / --beginning**
 Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
@@ -98,10 +101,13 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 <sup>Updates the embeded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format</sup>
 
 **-i / --input (REQUIRED)**
-Path to input file. Valid extensions are: `json`.
+Path to input file. Valid extensions are: `.json`.
 
 **-o / --output (REQUIRED)**
-Path to output file. File extension will be used to determine new chat type. Valid extensions are: `json`, `html`, and `txt`.
+Path to output file. File extension will be used to determine new chat type. Valid extensions are: `.json`, `.html`, and `.txt`.
+
+**-c / --compression**
+(Default: None) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-E / --embed-missing**
 (Default: false) Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.
@@ -151,6 +157,12 @@ File the program will output to.
 
 **-h / --chat-height**
 (Default: 600) Height of chat render.
+
+**-b / --beginning**
+(Default: -1) Time in seconds to crop the beginning of the render.
+
+**-e / --ending**
+(Default: -1) Time in seconds to crop the ending of the render.
 
 **--bttv**
 (Default: true) Enable BTTV emotes.
@@ -244,23 +256,23 @@ Prints every message from ffmpeg.
 **--scale-vertical**
 (Default: 1.0) Number to scale vertical padding.
 
-**--scale-left**
-(Default: 1.0) Number to scale left indent padding.
+**--scale-side-padding**
+(Default: 1.0) Number to scale side padding.
 
-**--scale-sectionheight**
+**--scale-section-height**
 (Default: 1.0) Number to scale section height of comments.
 
-**--scale-wordspace**
+**--scale-word-space**
 (Default: 1.0) Number to scale spacing between words.
 
-**--scale-emotespace**
+**--scale-emote-space**
 (Default: 1.0) Number to scale spacing between emotes.
 
-**--scale-accentstroke**
-(Default: 1.0) Number to scale accent stroke size (sub messages).
+**--scale-highlight-stroke**
+(Default: 1.0) Number to scale highlight stroke size (sub messages).
 
-**--scale-accentindent**
-(Default: 1.0) Number to scale accent indent size (sub messages).
+**--scale-highlight-indent**
+(Default: 1.0) Number to scale highlight indent size (sub messages).
 
 ## Arguments for mode ffmpeg
 <sup>Manage standalone ffmpeg</sup>
