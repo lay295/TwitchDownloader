@@ -731,17 +731,17 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawFragmentPart(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentPart)
+        private void DrawFragmentPart(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentPart, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
         {
-            if (emoteThirdList.Any(x => x.Name == fragmentPart))
+            if (!skipThird && emoteThirdList.Any(x => x.Name == fragmentPart))
             {
                 DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, fragmentPart);
             }
-            else if (emojiRegex.IsMatch(fragmentPart))
+            else if (!skipEmoji && emojiRegex.IsMatch(fragmentPart))
             {
                 DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart);
             }
-            else if (!messageFont.ContainsGlyphs(fragmentPart) || new StringInfo(fragmentPart).LengthInTextElements < fragmentPart.Length)
+            else if (!skipNonFont && (!messageFont.ContainsGlyphs(fragmentPart) || new StringInfo(fragmentPart).LengthInTextElements < fragmentPart.Length))
             {
                 DrawNonFontMessage(sectionImages, ref drawPos, defaultPos, fragmentPart);
             }
@@ -808,7 +808,7 @@ namespace TwitchDownloaderCore
                 {
                     if (nonEmojiBuffer.Length > 0)
                     {
-                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString());
+                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), true, true);
                         nonEmojiBuffer.Clear();
                     }
 
