@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="VodDownloadThreads" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10</Value>
+      <Value Profile="(Default)">4</Value>
     </Setting>
     <Setting Name="Font" Type="System.String" Scope="User">
       <Value Profile="(Default)">Arial</Value>

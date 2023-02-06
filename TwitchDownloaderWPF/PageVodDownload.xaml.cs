@@ -459,6 +459,10 @@ namespace TwitchDownloaderWPF
                             statusMessage.Text = "ERROR";
                             SetImage("Images/peepoSad.png", false);
                             AppendLog("ERROR: " + ex.Message);
+                            if (Settings.Default.VerboseErrors)
+                            {
+                                MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
                         }
                         btnGetInfo.IsEnabled = true;
 
