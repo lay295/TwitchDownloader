@@ -84,6 +84,8 @@ namespace TwitchDownloaderWPF
                             {
                                 imgThumbnail.Source = image;
                             }
+                            numStartHour.Maximum = 48;
+                            numEndHour.Maximum = 48;
                         }
                         else
                         {
@@ -110,6 +112,8 @@ namespace TwitchDownloaderWPF
                     }
                     else
                     {
+                        numStartHour.Maximum = 0;
+                        numEndHour.Maximum = 0;
                         GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
                         if (videoInfo.data.clip.video == null)
                         {
