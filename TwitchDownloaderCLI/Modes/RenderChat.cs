@@ -1,7 +1,6 @@
 ﻿using SkiaSharp;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -40,6 +39,7 @@ namespace TwitchDownloaderCLI.Modes
                 BttvEmotes = (bool)inputOptions.BttvEmotes,
                 FfzEmotes = (bool)inputOptions.FfzEmotes,
                 StvEmotes = (bool)inputOptions.StvEmotes,
+                AllowUnlistedEmotes = (bool)inputOptions.AllowUnlistedEmotes,
                 Outline = inputOptions.Outline,
                 OutlineSize = inputOptions.OutlineSize,
                 Font = inputOptions.Font,
@@ -71,6 +71,7 @@ namespace TwitchDownloaderCLI.Modes
                 Timestamp = inputOptions.Timestamp,
                 Offline = inputOptions.Offline,
                 LogFfmpegOutput = inputOptions.LogFfmpegOutput,
+                SkipDriveWaiting = inputOptions.SkipDriveWaiting,
                 EmoteScale = inputOptions.ScaleEmote,
                 BadgeScale = inputOptions.ScaleBadge,
                 EmojiScale = inputOptions.ScaleEmoji,
@@ -110,7 +111,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (inputOptions.BannedWordsString != "")
             {
-                renderOptions.BannedWordsArray = inputOptions.BannedWordsString.ToLower().Split(',',
+                renderOptions.BannedWordsArray = inputOptions.BannedWordsString.Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             }
 

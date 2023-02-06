@@ -36,8 +36,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("ffz", Default = true, HelpText = "Enable FFZ emotes.")]
         public bool? FfzEmotes { get; set; }
 
-        [Option("stv", Default = true, HelpText = "Enable 7tv emotes.")]
+        [Option("stv", Default = true, HelpText = "Enable 7TV emotes.")]
         public bool? StvEmotes { get; set; }
+
+        [Option("allow-unlisted-emotes", Default = true, HelpText = "Allow unlisted 7TV emotes in the render.")]
+        public bool? AllowUnlistedEmotes { get; set; }
 
         [Option("sub-messages", Default = true, HelpText = "Enable sub/re-sub messages.")]
         public bool? SubMessages { get; set; }
@@ -90,7 +93,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("badge-filter", Default = 0, HelpText = "Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, 6 = no broadcaster or moderator badges.\r\nKey: Other = 1, Broadcaster = 2, Moderator = 4, VIP = 8, Subscriber = 16, Predictions = 32, NoAudio/NoVideo = 64, PrimeGaming = 128")]
         public int BadgeFilterMask { get; set; }
 
-        [Option("dispersion", Default = true, HelpText = "In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow.")]
+        [Option("dispersion", Default = false, HelpText = "In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.")]
         public bool? DisperseCommentOffsets { get; set; }
 
         [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, and bits from the input json.")]
@@ -104,6 +107,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from ffmpeg.")]
         public bool LogFfmpegOutput { get; set; }
+
+        [Option("skip-drive-waiting", Default = false, HelpText = "Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives.")]
+        public bool SkipDriveWaiting { get; set; }
 
         [Option("scale-emote", Default = 1.0, HelpText = "Number to scale emote images.")]
         public double ScaleEmote { get; set; }

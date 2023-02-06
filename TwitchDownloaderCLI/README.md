@@ -173,6 +173,9 @@ File the program will output to.
 **--stv**
 (Default: true) Enable 7TV emotes.
 
+**--allow-unlisted-emotes**
+(Default: true) Allow unlisted 7TV emotes in the render.
+
 **--sub-messages**
 (Default: true) Enable sub / re-sub messages.
 
@@ -227,19 +230,22 @@ File the program will output to.
 Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, Predictions = `32`, NoAudioVisual = `64`, PrimeGaming = `128`
 
 **--dispersion**
-(Default: true) In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow.
+(Default: false) In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.
 
 **--offline**
-Render completely offline using only embedded emotes, badges, and bits from the input json.
+(Default: false) Render completely offline using only embedded emotes, badges, and bits from the input json.
 
 **--ffmpeg-path**
-Path to ffmpeg executable.
+(Default: ) Path to ffmpeg executable.
 
 **--temp-path**
-Path to temporary folder for cache.
+(Default: ) Path to temporary folder for cache.
 
 **--verbose-ffmpeg**
-Prints every message from ffmpeg.
+(Default: false) Prints every message from ffmpeg.
+
+**--skip-drive-waiting**
+(Default: false) Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives. Skipping can result in 1-5% render speed increases.
 
 **--scale-emote**
 (Default: 1.0) Number to scale emote images.
@@ -332,7 +338,7 @@ Render a chat with custom ffmpeg arguments
 
 ## Additional Notes
 
-String arguments, such as output file, that contain spaces should be wrapped in double quotes <kbd>"</kbd> .
+String arguments, such as output file, that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd> .
 
 Default true boolean flags must be assigned: `--default-true-flag=false`. Default false boolean flags should still be raised normally: `--default-false-flag`
 

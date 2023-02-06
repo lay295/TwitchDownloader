@@ -80,7 +80,7 @@ namespace TwitchDownloaderWPF
                 AccentStrokeScale = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture),
                 VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture),
                 IgnoreUsersArray = textIgnoreUsersList.Text.ToLower().Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
-                BannedWordsArray = textBannedWordsList.Text.ToLower().Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                BannedWordsArray = textBannedWordsList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 Timestamp = (bool)checkTimestamp.IsChecked,
                 MessageColor = messageColor,
                 Framerate = int.Parse(textFramerate.Text),

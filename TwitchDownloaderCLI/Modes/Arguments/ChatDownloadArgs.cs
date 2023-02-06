@@ -31,7 +31,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("ffz", Default = true, HelpText = "Enable FFZ embedding in chat download. Requires -E / --embed-images!")]
         public bool? FfzEmotes { get; set; }
         
-        [Option("stv", Default = true, HelpText = "Enable 7tv embedding in chat download. Requires -E / --embed-images!")]
+        [Option("stv", Default = true, HelpText = "Enable 7TV embedding in chat download. Requires -E / --embed-images!")]
         public bool? StvEmotes { get; set; }
 
         [Option("timestamp-format", Default = TimestampFormat.Relative, HelpText = "Sets the timestamp format for .txt chat logs. Valid values are: Utc, Relative, and None")]
