@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
@@ -19,6 +20,7 @@ namespace TwitchDownloaderCore
     {
         private readonly ChatDownloadOptions downloadOptions;
         private static HttpClient httpClient = new HttpClient();
+        private static readonly Regex _bitsRegex = new(@"(?:Cheer|BibleThump|cheerwhal|Corgo|Scoops|uni|ShowLove|Party|SeemsGood|Pride|Kappa|FrankerZ|HeyGuys|DansGame|EleGiggle|TriHard|Kreygasm|4Head|SwiftRage|NotLikeThis|FailFish|VoHiYo|PJSalt|MrDestructoid|bday|RIPCheer|Shamrock|DoodleCheer|BitBoss|Streamlabs|Muxy|HolidayCheer|Goal|Anon|Charity)(\d+)(?:\s|$)", RegexOptions.Compiled);
         private enum DownloadType { Clip, Video }
 
         public ChatDownloader(ChatDownloadOptions DownloadOptions)
@@ -175,6 +177,11 @@ namespace TwitchDownloaderCore
                 message.user_badges = badges;
                 message.user_color = oldComment.message.userColor;
                 message.emoticons = emoticons;
+                var bitMatch = _bitsRegex.Match(message.body);
+                if (bitMatch.Success)
+                {
+                    message.bits_spent = int.Parse(bitMatch.Groups[1].Value);
+                }
                 newComment.message = message;
 
                 returnList.Add(newComment);
