@@ -546,8 +546,8 @@
   <data name="Update" xml:space="preserve">
     <value>Update</value>
   </data>
-  <data name="UpdateTime" xml:space="preserve">
-    <value>Update Time:</value>
+  <data name="UpdateRate" xml:space="preserve">
+    <value>Update Rate:</value>
   </data>
   <data name="UrlList" xml:space="preserve">
     <value>URL List</value>
@@ -597,11 +597,11 @@
   <data name="RenderChat" xml:space="preserve">
     <value>Render Chat</value>
   </data>
-  <data name="AccentIndentScale" xml:space="preserve">
-    <value>Accent Indent Scale:</value>
+  <data name="HighlightIndentScale" xml:space="preserve">
+    <value>Highlight Indent Scale:</value>
   </data>
-  <data name="AccentStrokeScale" xml:space="preserve">
-    <value>Accent Stoke Scale:</value>
+  <data name="HighlightStrokeScale" xml:space="preserve">
+    <value>Highlight Stoke Scale:</value>
   </data>
   <data name="BadgeScale" xml:space="preserve">
     <value>Badge Scale:</value>
@@ -615,8 +615,8 @@
   <data name="EmoteSpacingScale" xml:space="preserve">
     <value>Emote Spacing Scale:</value>
   </data>
-  <data name="LeftSpacingScale" xml:space="preserve">
-    <value>Left Spacing Scale:</value>
+  <data name="SidePaddingScale" xml:space="preserve">
+    <value>Side Padding Scale:</value>
   </data>
   <data name="SectionHeightScale" xml:space="preserve">
     <value>Section Height Scale:</value>

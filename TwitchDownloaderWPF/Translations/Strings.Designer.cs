@@ -61,24 +61,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Accent Indent Scale:.
-        /// </summary>
-        public static string AccentIndentScale {
-            get {
-                return ResourceManager.GetString("AccentIndentScale", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Accent Stoke Scale:.
-        /// </summary>
-        public static string AccentStrokeScale {
-            get {
-                return ResourceManager.GetString("AccentStrokeScale", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Accept.
         /// </summary>
         public static string Accept {
@@ -745,6 +727,24 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Highlight Indent Scale:.
+        /// </summary>
+        public static string HighlightIndentScale {
+            get {
+                return ResourceManager.GetString("HighlightIndentScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highlight Stoke Scale:.
+        /// </summary>
+        public static string HighlightStrokeScale {
+            get {
+                return ResourceManager.GetString("HighlightStrokeScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ignore Users List .
         /// </summary>
         public static string IgnoreUsersList {
@@ -831,15 +831,6 @@ namespace TwitchDownloaderWPF.Translations {
         public static string LanguageLabel {
             get {
                 return ResourceManager.GetString("LanguageLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Left Spacing Scale:.
-        /// </summary>
-        public static string LeftSpacingScale {
-            get {
-                return ResourceManager.GetString("LeftSpacingScale", resourceCulture);
             }
         }
         
@@ -1155,6 +1146,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string SetChannel {
             get {
                 return ResourceManager.GetString("SetChannel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Side Padding Scale:.
+        /// </summary>
+        public static string SidePaddingScale {
+            get {
+                return ResourceManager.GetString("SidePaddingScale", resourceCulture);
             }
         }
         
@@ -1519,11 +1519,11 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update Time:.
+        ///   Looks up a localized string similar to Update Rate:.
         /// </summary>
-        public static string UpdateTime {
+        public static string UpdateRate {
             get {
-                return ResourceManager.GetString("UpdateTime", resourceCulture);
+                return ResourceManager.GetString("UpdateRate", resourceCulture);
             }
         }
         
