@@ -75,7 +75,7 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
-                    Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, textOauth.Text);
+                    Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, passwordOauth.Password);
                     await Task.WhenAll(taskVideoInfo, taskAccessToken);
                     Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
                     try
@@ -179,7 +179,7 @@ namespace TwitchDownloaderWPF
             {
                 options.Filename = Path.Combine(folder, MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text) + ".mp4");
             }
-            options.Oauth = textOauth.Text;
+            options.Oauth = passwordOauth.Password;
             options.Quality = GetQualityWithoutSize(comboQuality.Text).ToString();
             options.Id = currentVideoId;
             options.CropBeginning = (bool)checkStart.IsChecked;
@@ -368,7 +368,7 @@ namespace TwitchDownloaderWPF
             SetEnabledCropEnd(false);
             WebRequest.DefaultWebProxy = null;
             numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
-            textOauth.Text = Settings.Default.OAuth;
+            passwordOauth.Password = Settings.Default.OAuth;
         }
 
         private void numDownloadThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
@@ -381,11 +381,11 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void textOauth_TextChanged(object sender, TextChangedEventArgs e)
+        private void passwordOauth_PasswordChanged(object sender, RoutedEventArgs e)
         {
             if (this.IsInitialized)
             {
-                Settings.Default.OAuth = textOauth.Text;
+                Settings.Default.OAuth = passwordOauth.Password;
                 Settings.Default.Save();
             }
         }
