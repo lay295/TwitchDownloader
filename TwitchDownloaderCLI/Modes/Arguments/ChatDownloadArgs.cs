@@ -17,10 +17,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public ChatCompression Compression { get; set; }
 
         [Option('b', "beginning", HelpText = "Time in seconds to crop beginning.")]
-        public int CropBeginningTime { get; set; }
+        public double CropBeginningTime { get; set; }
 
         [Option('e', "ending", HelpText = "Time in seconds to crop ending.")]
-        public int CropEndingTime { get; set; }
+        public double CropEndingTime { get; set; }
         
         [Option('E', "embed-images", Default = false, HelpText = "Embed first party emotes, badges, and cheermotes into the chat download for offline rendering.")]
         public bool EmbedData { get; set; }
@@ -31,7 +31,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("ffz", Default = true, HelpText = "Enable FFZ embedding in chat download. Requires -E / --embed-images!")]
         public bool? FfzEmotes { get; set; }
         
-        [Option("stv", Default = true, HelpText = "Enable 7tv embedding in chat download. Requires -E / --embed-images!")]
+        [Option("stv", Default = true, HelpText = "Enable 7TV embedding in chat download. Requires -E / --embed-images!")]
         public bool? StvEmotes { get; set; }
 
         [Option("timestamp-format", Default = TimestampFormat.Relative, HelpText = "Sets the timestamp format for .txt chat logs. Valid values are: Utc, Relative, and None")]

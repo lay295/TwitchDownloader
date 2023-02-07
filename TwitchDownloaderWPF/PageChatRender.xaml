@@ -13,7 +13,7 @@
       lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
       lex:ResxLocalizationProvider.DefaultDictionary="Strings"
       mc:Ignorable="d" 
-      d:DesignHeight="370" d:DesignWidth="800"
+      d:DesignHeight="400" d:DesignWidth="800"
       Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded" Loaded="Page_Loaded"
       >
 
@@ -114,7 +114,7 @@
                         <TextBox x:Name="textBadgeScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <TextBox x:Name="textEmojiScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <TextBox x:Name="textVerticalScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                        <TextBox x:Name="textLeftScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textSidePaddingScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <TextBox x:Name="textSectionHeightScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="5,10,5,5">
@@ -207,13 +207,13 @@
 
         <!--STATUS BAR-->
         <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
-            <StatusBarItem>
+            <StatusBarItem Padding="10,0,10,0">
                 <Image x:Name="statusImage" gif:ImageBehavior.AnimatedSource="Images/ppHop.gif"/>
             </StatusBarItem>
-            <StatusBarItem>
+            <StatusBarItem Padding="10,0,10,0">
                 <TextBlock Text="{lex:Loc StatusIdle}" x:Name="statusMessage" FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
             </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right">
+            <StatusBarItem Padding="10,0,10,0" HorizontalAlignment="Right">
                 <ProgressBar Width="200" Height="14" x:Name="statusProgressBar" Background="{DynamicResource StatusBarElement}" Foreground="{DynamicResource ProgressBarForeground}"/>
             </StatusBarItem>
         </StatusBar>

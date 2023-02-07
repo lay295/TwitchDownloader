@@ -13,7 +13,7 @@
       xmlns:fa="http://schemas.fontawesome.com/icons/"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
       mc:Ignorable="d" 
-      d:DesignHeight="370" d:DesignWidth="800"
+      d:DesignHeight="400" d:DesignWidth="800"
       Title="PageClipDownload" Initialized="Page_Initialized" Loaded="Page_Loaded">
 
     <Grid Background="{DynamicResource AppBackground}">
@@ -95,13 +95,13 @@
 
         <!--STATUS BAR-->
         <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
-            <StatusBarItem>
+            <StatusBarItem Padding="10,0,10,0">
                 <Image x:Name="statusImage" gif:ImageBehavior.AnimatedSource="Images/ppHop.gif"/>
             </StatusBarItem>
-            <StatusBarItem>
+            <StatusBarItem Padding="10,0,10,0">
                 <TextBlock Text="{lex:Loc StatusIdle}" x:Name="statusMessage" FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
             </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right">
+            <StatusBarItem Padding="10,0,10,0" HorizontalAlignment="Right">
                 <ProgressBar Width="200" Height="14" x:Name="statusProgressBar" Background="{DynamicResource StatusBarElement}" Foreground="{DynamicResource ProgressBarForeground}"/>
             </StatusBarItem>
         </StatusBar>

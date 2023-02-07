@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="VodDownloadThreads" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10</Value>
+      <Value Profile="(Default)">4</Value>
     </Setting>
     <Setting Name="Font" Type="System.String" Scope="User">
       <Value Profile="(Default)">Arial</Value>
@@ -180,7 +180,7 @@
       <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="DisperseCommentOffsets" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="GuiCulture" Type="System.String" Scope="User">
       <Value Profile="(Default)">en-US</Value>

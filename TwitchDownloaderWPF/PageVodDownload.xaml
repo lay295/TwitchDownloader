@@ -15,7 +15,7 @@
       xmlns:hc="https://handyorg.github.io/handycontrol"
       x:Class="TwitchDownloaderWPF.PageVodDownload"
       mc:Ignorable="d" 
-      d:DesignHeight="370" d:DesignWidth="800"
+      d:DesignHeight="400" d:DesignWidth="800"
       Title="PageVodDownload" Initialized="Page_Initialized" Loaded="Page_Loaded">
 
     <Grid Background="{DynamicResource AppBackground}">
@@ -84,8 +84,8 @@
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndMinute" ValueChanged="numEndMinute_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndSecond" ValueChanged="numEndSecond_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
-                    <hc:NumericUpDown Margin="2,5,0,0" Minimum="1" Value="10" Width="60" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <TextBox x:Name="textOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" TextChanged="textOauth_TextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <hc:NumericUpDown Margin="2,5,0,0" Minimum="1" Value="4" Maximum="20" Width="60" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <PasswordBox x:Name="passwordOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" PasswordChanged="passwordOauth_PasswordChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
             </StackPanel>
         </StackPanel>
@@ -118,13 +118,13 @@
 
         <!--STATUS BAR-->
         <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
-            <StatusBarItem>
+            <StatusBarItem Padding="10,0,10,0">
                 <Image x:Name="statusImage" gif:ImageBehavior.AnimatedSource="Images/ppHop.gif"/>
             </StatusBarItem>
-            <StatusBarItem>
+            <StatusBarItem Padding="10,0,10,0">
                 <TextBlock Text="{lex:Loc StatusIdle}" x:Name="statusMessage" FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
             </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right">
+            <StatusBarItem Padding="10,0,10,0" HorizontalAlignment="Right">
                 <ProgressBar Width="200" Height="14" x:Name="statusProgressBar" Background="{DynamicResource StatusBarElement}" Foreground="{DynamicResource ProgressBarForeground}"/>
             </StatusBarItem>
         </StatusBar>

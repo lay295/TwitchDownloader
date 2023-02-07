@@ -18,7 +18,7 @@ namespace TwitchDownloaderCore
     public sealed class VideoDownloader
     {
         private readonly VideoDownloadOptions downloadOptions;
-        private static readonly HttpClient httpClient = new HttpClient();
+        private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
 
         public VideoDownloader(VideoDownloadOptions DownloadOptions)
         {
@@ -181,12 +181,12 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport(percent));
         }
 
-        private static async Task DownloadVideoPart(string baseUrl, string videoPartName, string downloadFolder, double vodAge, CancellationToken cancellationToken)
+        private async Task DownloadVideoPart(string baseUrl, string videoPartName, string downloadFolder, double vodAge, CancellationToken cancellationToken)
         {
-            bool isDone = false;
             bool tryUnmute = vodAge < 24;
             int errorCount = 0;
-            while (!isDone)
+            int timeoutCount = 0;
+            while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -203,9 +203,9 @@ namespace TwitchDownloaderCore
                         await DownloadFileTaskAsync(baseUrl + videoPartName, Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), cancellationToken);
                     }
 
-                    isDone = true;
+                    return;
                 }
-                catch (HttpRequestException ex) when (ex.StatusCode is HttpStatusCode.Forbidden && tryUnmute)
+                catch (HttpRequestException ex) when (tryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
                 {
                     tryUnmute = false;
                 }
@@ -213,17 +213,26 @@ namespace TwitchDownloaderCore
                 {
                     if (++errorCount > 10)
                     {
-                        throw new HttpRequestException("Video part " + videoPartName + " failed after 10 retries");
+                        throw new HttpRequestException($"Video part {videoPartName} failed after 10 retries");
                     }
 
                     await Task.Delay(1_000 * errorCount, cancellationToken);
+                }
+                catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
+                {
+                    if (++timeoutCount > 3)
+                    {
+                        throw new HttpRequestException($"Video part {videoPartName} timed out 3 times");
+                    }
+
+                    await Task.Delay(5_000 * timeoutCount, cancellationToken);
                 }
             }
         }
 
         private async Task<(List<string> videoParts, double vodAge)> GetVideoPartsList(string playlistUrl, List<KeyValuePair<string, double>> videoList, CancellationToken cancellationToken)
         {
-            string[] videoChunks = (await httpClient.GetStringAsync(playlistUrl, cancellationToken)).Split('\n');
+            string[] videoChunks = (await _httpClient.GetStringAsync(playlistUrl, cancellationToken)).Split('\n');
 
             double vodAge = 25;
 
@@ -305,12 +314,12 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Downloads the requested <paramref name="Url"/> to the <paramref name="destinationFile"/> without storing it in memory
         /// </summary>
-        private static async Task DownloadFileTaskAsync(string Url, string destinationFile, CancellationToken cancellationToken = new())
+        private async Task DownloadFileTaskAsync(string Url, string destinationFile, CancellationToken cancellationToken = new())
         {
             var request = new HttpRequestMessage(HttpMethod.Get, Url);
 
             // We must specify HttpCompletionOption.ResponseHeadersRead or it will read the response content into memory
-            using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
+            using (var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
             {
                 response.EnsureSuccessStatusCode();
 
@@ -381,8 +390,6 @@ namespace TwitchDownloaderCore
                 }
             }
             catch (IOException) { } // Directory is probably being used by another process
-
-            TwitchHelper.CleanupUnmanagedCacheFiles(downloadOptions.TempFolder);
         }
 
         private static List<KeyValuePair<string, double>> GenerateCroppedVideoList(List<KeyValuePair<string, double>> videoList, VideoDownloadOptions downloadOptions)
