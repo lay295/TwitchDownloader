@@ -14,6 +14,7 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -78,7 +79,7 @@ namespace TwitchDownloaderWPF
                         if (videoInfo.data.video == null)
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
-                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                            var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                             if (success)
                             {
                                 imgThumbnail.Source = image;
@@ -96,12 +97,12 @@ namespace TwitchDownloaderWPF
                             try
                             {
                                 string thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
-                                imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
+                                imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
                             }
                             catch
                             {
                                 AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                                var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                                var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                                 if (success)
                                 {
                                     imgThumbnail.Source = image;
@@ -117,7 +118,7 @@ namespace TwitchDownloaderWPF
                         if (videoInfo.data.clip.video == null)
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
-                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                            var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                             if (success)
                             {
                                 imgThumbnail.Source = image;
@@ -131,12 +132,12 @@ namespace TwitchDownloaderWPF
                             try
                             {
                                 string thumbUrl = videoInfo.data.clip.thumbnailURL;
-                                imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
+                                imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
                             }
                             catch
                             {
                                 AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                                var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                                var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                                 if (success)
                                 {
                                     imgThumbnail.Source = image;

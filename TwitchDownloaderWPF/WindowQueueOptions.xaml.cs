@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.TwitchTasks;
 using static TwitchDownloaderWPF.App;
 
@@ -343,7 +344,7 @@ namespace TwitchDownloaderWPF
                         ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(filePath);
                         renderTask.DownloadOptions = renderOptions;
                         renderTask.Info.Title = Path.GetFileNameWithoutExtension(filePath);
-                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                         if (success)
                         {
                             renderTask.Info.Thumbnail = image;
