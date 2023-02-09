@@ -661,6 +661,11 @@ namespace TwitchDownloaderCore
         /// </summary>
         public static void CleanupUnmanagedCacheFiles(string cacheFolder)
         {
+            if (!Directory.Exists(cacheFolder))
+            {
+                return;
+            }
+
             // Let's delete any video download cache folders older than 24 hours
             // Or that have been inactive for 2 hours
             var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
