@@ -33,7 +33,7 @@ namespace TwitchDownloaderCore.Chat
             };
 
             using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            switch (Path.GetExtension(filePath))
+            switch (Path.GetExtension(filePath).ToLower())
             {
                 case ".gz":
                     using (var gs = new GZipStream(fs, CompressionMode.Decompress))
