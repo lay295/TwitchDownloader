@@ -321,17 +321,12 @@ namespace TwitchDownloaderWPF
             catch (Exception ex)
             {
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
-                if (Settings.Default.VerboseErrors)
-                {
-                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
-                }
                 return false;
             }
 
             if (colorBackground.SelectedColor.Value.A < 255)
             {
-                if (((VideoContainer)comboFormat.SelectedItem).Name == "MOV" && ((Codec)comboCodec.SelectedItem).Name == "RLE" ||
-                    ((Codec)comboCodec.SelectedItem).Name == "ProRes" || ((VideoContainer)comboFormat.SelectedItem).Name == "WEBM" || (bool)checkMask.IsChecked)
+                if (((VideoContainer)comboFormat.SelectedItem).Name == "MOV" && (((Codec)comboCodec.SelectedItem).Name == "RLE" || ((Codec)comboCodec.SelectedItem).Name == "ProRes") || ((VideoContainer)comboFormat.SelectedItem).Name == "WEBM" || (bool)checkMask.IsChecked)
                 {
                     return true;
                 }
@@ -502,8 +497,7 @@ namespace TwitchDownloaderWPF
         {
             if (sender == null || !((SplitButton)sender).IsDropDownOpen)
             {
-                bool validInputs = ValidateInputs();
-                if (!validInputs)
+                if (!ValidateInputs())
                 {
                     MessageBox.Show(Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
                     return;

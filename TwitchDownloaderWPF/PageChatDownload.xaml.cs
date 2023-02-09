@@ -123,7 +123,7 @@ namespace TwitchDownloaderWPF
                         TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                         textTitle.Text = taskVideoInfo.Result.data.video.title;
                         textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
-                        textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToString();
+                        textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToLocalTime().ToString();
                         currentVideoTime = taskVideoInfo.Result.data.video.createdAt.ToLocalTime();
                         streamerId = int.Parse(taskVideoInfo.Result.data.video.owner.id);
                         Regex urlTimecodeRegex = new Regex(@"\?t=(\d?\dh)(\d?\dm)(\d?\ds)"); // ?t=##h##m##s
@@ -172,7 +172,7 @@ namespace TwitchDownloaderWPF
                         }
                         TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                         textStreamer.Text = taskClipInfo.Result.data.clip.broadcaster.displayName;
-                        textCreatedAt.Text = taskClipInfo.Result.data.clip.createdAt.ToString();
+                        textCreatedAt.Text = taskClipInfo.Result.data.clip.createdAt.ToLocalTime().ToString();
                         currentVideoTime = taskClipInfo.Result.data.clip.createdAt.ToLocalTime();
                         textTitle.Text = taskClipInfo.Result.data.clip.title;
                         streamerId = int.Parse(taskClipInfo.Result.data.clip.broadcaster.id);
