@@ -115,7 +115,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Available parameteres are:.
+        ///   Looks up a localized string similar to Available parameters are:.
         /// </summary>
         public static string AvailableParameters {
             get {
@@ -637,7 +637,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to OutputArguments:.
+        ///   Looks up a localized string similar to Output Arguments:.
         /// </summary>
         public static string FfmpegOutputArguments {
             get {

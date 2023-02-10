@@ -137,7 +137,7 @@
     <value>Click to learn how to make your own theme!</value>
   </data>
   <data name="AvailableParameters" xml:space="preserve">
-    <value>Available parameteres are:</value>
+    <value>Available parameters are:</value>
   </data>
   <data name="BackgroundColor" xml:space="preserve">
     <value>Couleur de Fond:</value>
@@ -285,7 +285,7 @@
     <value>Click here to learn about Ffmpeg options</value>
   </data>
   <data name="FfmpegOutputArguments" xml:space="preserve">
-    <value>OutputArguments:</value>
+    <value>Output Arguments:</value>
   </data>
   <data name="FfmpegParameters" xml:space="preserve">
     <value>{fps} {height} {width} {max_int} {save_path}</value>
