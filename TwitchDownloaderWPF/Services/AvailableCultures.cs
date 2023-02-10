@@ -20,8 +20,8 @@ namespace TwitchDownloaderWPF.Services
         public enum Culture
         {
             English,
-            Turkish,
-            French
+            French,
+            Turkish
         }
 
         private const string ENGLISH_NAME = "en-US";
@@ -38,8 +38,8 @@ namespace TwitchDownloaderWPF.Services
             return translation switch
             {
                 Culture.English => ENGLISH_NAME,
-                Culture.Turkish => TURKISH_NAME,
                 Culture.French => FRENCH_NAME,
+                Culture.Turkish => TURKISH_NAME,
                 _ => INVARIANT_NAME
             };
         }
@@ -49,8 +49,8 @@ namespace TwitchDownloaderWPF.Services
             return translation switch
             {
                 Culture.English => ENGLISH_NATIVE_NAME,
-                Culture.Turkish => TURKISH_NATIVE_NAME,
                 Culture.French => FRENCH_NATIVE_NAME,
+                Culture.Turkish => TURKISH_NATIVE_NAME,
                 _ => INVARIANT_NATIVE_NAME
             };
         }

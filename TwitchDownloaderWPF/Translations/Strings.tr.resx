@@ -779,6 +779,7 @@
   </data>
   <data name="FileNotFound" xml:space="preserve">
     <value>Dosya bulunamadı: </value>
+    <comment>Leave a trailing space</comment>
   </data>
   <data name="FatalError" xml:space="preserve">
     <value>Önemli hata</value>
@@ -788,9 +789,11 @@
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
     <value>{theme} bulunamadı. Sistem temasına geri döndürülüyor</value>
+    <comment>Do not translate {theme}</comment>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Dağıtma </value>
+    <comment>Leave a trailing space</comment>
   </data>
   <data name="MessageDispersionTooltip" xml:space="preserve">
     <value>Kasım 2022'de bir Twitch API değişikliği ile, sohbet mesajlarının yalnızca tam saniyeler içinde indirilmesini sağladı. Saniyede birden fazla mesaj varsa, sohbet akışını iyileştirmek için akıllı bir şekilde mesajlar saniyeye dağıtılacaktır.</value>
@@ -800,6 +803,7 @@
   </data>
   <data name="ChatCompressionGzip" xml:space="preserve">
     <value>Gzip</value>
+    <comment>Do not translate</comment>
   </data>
   <data name="ChatCompression" xml:space="preserve">
     <value>Sıkıştırma:</value>
