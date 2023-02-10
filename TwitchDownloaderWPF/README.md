@@ -30,9 +30,10 @@ A Windows WPF desktop application that implements the core functionality wrapped
 Most of the pages contain an information area on the left side of window, showing the thumbnail (if available), streamer, creation date, and title of the VOD/clip, the center of the window contains the settings for the job, and the right side of the window contains an area for logging events.
 
 ### VOD Download
-<sup>Downloads a stream VOD or highlight from Twitch</sup>
+Downloads a stream VOD or highlight from Twitch.
 
 ![Figure 1.1](Images/vodExample.png)
+
 <sup>*Figure 1.1*</sup>
 
 To get started, input a valid link or ID to a VOD or highlight. If the VOD or highlight is private or sub-only, then an OAuth token from an account with access to the video is required. From there the download options will unlock, allowing you to customize the job.
@@ -48,23 +49,27 @@ To get started, input a valid link or ID to a VOD or highlight. If the VOD or hi
 **Download**: Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
 
 ### Clip Download
-<sup>Downloads a clip from Twitch</sup>
+Downloads a clip from Twitch.
 
 ![Figure 2.1](Images/clipExample.png)
+
 <sup>*Figure 2.1*</sup>
 
 To get started, input a valid link or ID to a clip. From there the the download options will unlock, allowing you to customize the job.
 
 **Quality**: Selects the quality of the clip before downloading.
 
-**Download** Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
+**Download**: Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
 
 ### Chat Download
-<sup>Downloads the chat of a VOD, highlight, or clip</sup>
+Downloads the chat of a VOD, highlight, or clip.
 
 ![Figure 3.1](Images/chatdownload1Example.png)
+
 <sup>*Figure 3.1*</sup>
+
 ![Figure 3.2](Images/chatdownload2Example.png)
+
 <sup>*Figure 3.2*</sup>
 
 To get started, input a valid link or ID to a VOD, highlight, or clip. From there the download options will unlock, allowing you to customize the job. If the VOD or highlight is sub-only or private, then it cannot have the chat downloaded. This is a limitation of the Twitch API, not TwitchDownloader.
@@ -89,9 +94,10 @@ To get started, input a valid link or ID to a VOD, highlight, or clip. From ther
 **Download**: Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
 
 ### Chat Updater
-<sup>Updates the embedded emotes, badges, bits, and crops of a JSON chat download and/or converts a JSON chat to another format</sup>
+Updates the embedded emotes, badges, bits, and crops of a JSON chat download and/or converts a JSON chat to another format.
 
 ![Figure 4.1](Images/chatupdateExample.png)
+
 <sup>*Figure 4.1*</sup>
 
 To get started, click the **Browse** button and navigate to a previously downloaded JSON chat. From there the update options will unlock, allowing you to customize the job. If the source video of the chat still exists, its information will be loaded in the information section.
@@ -116,19 +122,30 @@ To get started, click the **Browse** button and navigate to a previously downloa
 **Update**: Starts the update job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current update settings will be used in both scenarios.
 
 ### Chat Render
-<sup>Renders a chat JSON as a video</sup>
+Renders a chat JSON as a video.
 
 ![Figure 5.1](Images/chatrender1Example.png)
+
 <sup>*Figure 5.1*</sup>
+
 ![Figure 5.2](Images/chatrender2Example.png)
+
 <sup>*Figure 5.2*</sup>
+
 ![Figure 5.3](Images/chatrender3Example.png)
+
 <sup>*Figure 5.3*</sup>
+
 ![Figure 5.4](Images/chatrender4Example.png)
+
 <sup>*Figure 5.4*</sup>
+
 ![Figure 5.5](Images/chatrender5Example.png)
+
 <sup>*Figure 5.5*</sup>
+
 ![Figure 5.6](Images/rangeExample.png)
+
 <sup>*Figure 5.6*</sup>
 
 To get started, click the **Browse** button and navigate to a previously downloaded JSON chat. From there you may edit the render options to customize the job.
@@ -232,17 +249,26 @@ If render speeds feel like they are too slow, try any of the following:
 - Disable BTTV, FFZ, 7TV emotes - animated emotes are expensive to render
 
 ### Task Queue
-<sup>Create and manage multiple jobs</sup>
+Create and manage multiple jobs.
 
 ![Figure 6.1](Images/taskqueueExample.png)
+
 <sup>*Figure 6.1*</sup>
+
 ![Figure 6.2](Images/massurlExample.png)
+
 <sup>*Figure 6.2*</sup>
+
 ![Figure 6.3](Images/massvodExample.png)
+
 <sup>*Figure 6.3*</sup>
+
 ![Figure 6.4](Images/massclipExample.png)
+
 <sup>*Figure 6.4*</sup>
+
 ![Figure 6.5](Images/enqueueExample.png)
+
 <sup>*Figure 6.5*</sup>
 
 The Task Queue allows for many jobs to work sequentially or in parallel. Any job from the other 5 pages can be sent to the Task Queue via their respective *Enqueue* buttons, see Figure 6.5.
@@ -266,8 +292,10 @@ The Task Queue also features 3 types of mass downloading:
 **Search Clips**: A window to search all clips from a streamer that will all be processed with the same enqueue settings. See Figure 6.3 and Figure 6.5.
 
 ### Settings
+Manage the application's behavior.
 
 ![Figure 7.1](images/settingsExample.png)
+
 <sup>*Figure 7.1*</sup>
 
 **Cache Folder**: The directory where temporary working files are stored. This includes VOD downloads, emotes, badges, and cheermotes.
