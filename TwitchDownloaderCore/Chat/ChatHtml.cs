@@ -66,7 +66,7 @@ namespace TwitchDownloaderCore.Chat
 
         private static async Task BuildThirdPartyDictionary(ChatRoot chatRoot, bool embedData, Dictionary<string, EmbedEmoteData> thirdEmoteData, CancellationToken cancellationToken)
         {
-            EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmoteData(chatRoot.streamer.id.ToString(), true, true, true, true, cancellationToken);
+            EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmoteData(chatRoot.streamer.id, true, true, true, true, cancellationToken);
             List<EmoteResponseItem> itemList = new();
             itemList.AddRange(emotes.BTTV);
             itemList.AddRange(emotes.FFZ);

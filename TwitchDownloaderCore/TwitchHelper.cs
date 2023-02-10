@@ -116,11 +116,11 @@ namespace TwitchDownloaderCore
             return JsonConvert.DeserializeObject<GqlClipSearchResponse>(response);
         }
 
-        public static async Task<EmoteResponse> GetThirdPartyEmoteData(string streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = new())
+        public static async Task<EmoteResponse> GetThirdPartyEmoteData(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = new())
         {
-            EmoteResponse emoteReponse = new EmoteResponse();
-
             cancellationToken.ThrowIfCancellationRequested();
+
+            EmoteResponse emoteReponse = new();
 
             if (getBttv)
             {
@@ -144,76 +144,67 @@ namespace TwitchDownloaderCore
             return emoteReponse;
         }
 
-        private static async Task GetBttvEmoteData(string streamerId, List<EmoteResponseItem> bttvResponse)
+        private static async Task GetBttvEmoteData(int streamerId, List<EmoteResponseItem> bttvResponse)
         {
             List<BTTVEmote> BTTV = JsonConvert.DeserializeObject<List<BTTVEmote>>(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/emotes/global"));
 
-            if (streamerId != null)
+            //Channel might not have BTTV emotes
+            try
             {
-                //Channel might not have BTTV emotes
-                try
-                {
-                    BTTVChannelEmoteResponse bttvChannel = JsonConvert.DeserializeObject<BTTVChannelEmoteResponse>(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/users/twitch/" + streamerId));
-                    BTTV.AddRange(bttvChannel.channelEmotes);
-                    BTTV.AddRange(bttvChannel.sharedEmotes);
-                }
-                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
+                BTTVChannelEmoteResponse bttvChannel = JsonConvert.DeserializeObject<BTTVChannelEmoteResponse>(await httpClient.GetStringAsync($"https://api.betterttv.net/3/cached/users/twitch/{streamerId}"));
+                BTTV.AddRange(bttvChannel.channelEmotes);
+                BTTV.AddRange(bttvChannel.sharedEmotes);
             }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 
             foreach (var emote in BTTV)
             {
                 string id = emote.id;
                 string name = emote.code;
                 string mime = emote.imageType;
-                string url = String.Format("https://cdn.betterttv.net/emote/{0}/[scale]x", id);
+                string url = $"https://cdn.betterttv.net/emote/{id}/[scale]x";
                 bttvResponse.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = bttvZeroWidth.Contains(name) });
             }
         }
 
-        private static async Task GetFfzEmoteData(string streamerId, List<EmoteResponseItem> ffzResponse)
+        private static async Task GetFfzEmoteData(int streamerId, List<EmoteResponseItem> ffzResponse)
         {
             List<FFZEmote> FFZ = JsonConvert.DeserializeObject<List<FFZEmote>>(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/emotes/global"));
 
-            if (streamerId != null)
+            //Channel might not have FFZ emotes
+            try
             {
-                //Channel might not have FFZ emotes
-                try
-                {
-                    List<FFZEmote> channelEmotes = JsonConvert.DeserializeObject<List<FFZEmote>>(await httpClient.GetStringAsync("https://api.betterttv.net/3/cached/frankerfacez/users/twitch/" + streamerId));
-                    FFZ.AddRange(channelEmotes);
-                }
-                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
+                List<FFZEmote> channelEmotes = JsonConvert.DeserializeObject<List<FFZEmote>>(await httpClient.GetStringAsync($"https://api.betterttv.net/3/cached/frankerfacez/users/twitch/{streamerId}"));
+                FFZ.AddRange(channelEmotes);
             }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 
             foreach (var emote in FFZ)
             {
                 string id = emote.id.ToString();
                 string name = emote.code;
                 string mime = emote.imageType;
-                string url = String.Format("https://cdn.betterttv.net/frankerfacez_emote/{0}/[scale]", id);
+                string url = $"https://cdn.betterttv.net/frankerfacez_emote/{id}/[scale]";
                 ffzResponse.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url });
             }
         }
 
-        private static async Task GetStvEmoteData(string streamerId, List<EmoteResponseItem> stvResponse, bool allowUnlistedEmotes)
+        private static async Task GetStvEmoteData(int streamerId, List<EmoteResponseItem> stvResponse, bool allowUnlistedEmotes)
         {
             STVGlobalEmoteResponse globalEmoteObject = JsonConvert.DeserializeObject<STVGlobalEmoteResponse>(await httpClient.GetStringAsync("https://7tv.io/v3/emote-sets/global"));
             List<STVEmote> stvEmotes = globalEmoteObject.emotes;
 
-            if (streamerId != null)
+            // Channel might not be registered on 7tv
+            try
             {
-                // Channel might not be registered on 7tv
-                try
+                STVChannelEmoteResponse streamerEmoteObject = JsonConvert.DeserializeObject<STVChannelEmoteResponse>(await httpClient.GetStringAsync($"https://7tv.io/v3/users/twitch/{streamerId}"));
+                // Channel might not have emotes setup
+                if (streamerEmoteObject.emote_set?.emotes != null)
                 {
-                    STVChannelEmoteResponse streamerEmoteObject = JsonConvert.DeserializeObject<STVChannelEmoteResponse>(await httpClient.GetStringAsync(string.Format("https://7tv.io/v3/users/twitch/{0}", streamerId)));
-                    // Channel might not have emotes setup
-                    if (streamerEmoteObject.emote_set?.emotes != null)
-                    {
-                        stvEmotes.AddRange(streamerEmoteObject.emote_set.emotes);
-                    }
+                    stvEmotes.AddRange(streamerEmoteObject.emote_set.emotes);
                 }
-                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
             }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 
             foreach (var stvEmote in stvEmotes)
             {
@@ -238,7 +229,7 @@ namespace TwitchDownloaderCore
                 {
                     continue;
                 }
-                string emoteUrl = string.Format("https:{0}/{1}.{2}", emoteHost.url, "[scale]x", emoteFormat);
+                string emoteUrl = $"https:{emoteHost.url}/[scale]x.{emoteFormat}";
                 StvEmoteFlags emoteFlags = emoteData.flags;
                 bool emoteIsListed = emoteData.listed;
 
@@ -294,7 +285,7 @@ namespace TwitchDownloaderCore
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
             string stvFolder = Path.Combine(cacheFolder, "stv");
 
-            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId.ToString(), bttv, ffz, stv, allowUnlistedEmotes, cancellationToken);
+            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId, bttv, ffz, stv, allowUnlistedEmotes, cancellationToken);
 
             if (bttv)
             {
@@ -409,7 +400,7 @@ namespace TwitchDownloaderCore
                         {
                             try
                             {
-                                byte[] bytes = await GetImage(emoteFolder, String.Format("https://static-cdn.jtvnw.net/emoticons/v2/{0}/default/dark/2.0", id), id, "2", "png");
+                                byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png");
                                 TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
                                 alreadyAdded.Add(id);
                                 returnList.Add(newEmote);
@@ -670,6 +661,11 @@ namespace TwitchDownloaderCore
         /// </summary>
         public static void CleanupUnmanagedCacheFiles(string cacheFolder)
         {
+            if (!Directory.Exists(cacheFolder))
+            {
+                return;
+            }
+
             // Let's delete any video download cache folders older than 24 hours
             // Or that have been inactive for 2 hours
             var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
@@ -822,7 +818,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"extensions\":{\"persistedQuery\":{\"sha256Hash\":\"8d2793384aac3773beab5e59bd5d6f585aedb923d292800119e03d40cd0f9b41\",\"version\":1}},\"operationName\":\"VideoPlayer_ChapterSelectButtonVideo\",\"variables\":{\"videoID\":\""+ videoId + "\"}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"extensions\":{\"persistedQuery\":{\"sha256Hash\":\"8d2793384aac3773beab5e59bd5d6f585aedb923d292800119e03d40cd0f9b41\",\"version\":1}},\"operationName\":\"VideoPlayer_ChapterSelectButtonVideo\",\"variables\":{\"videoID\":\"" + videoId + "\"}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
