@@ -14,8 +14,8 @@ namespace TwitchDownloaderWPF.Services
     {
         private const int TITLEBAR_THEME_ATTRIBUTE = 20;
 
-        private bool AppDarkTitleBar = false;
-        private bool AppElementDarkTheme = false;
+        private bool _darkAppTitleBar = false;
+        private bool _darkHandyControl = false;
 
         private readonly WindowsThemeService _windowsThemeService;
         private readonly App _wpfApplication;
@@ -66,7 +66,7 @@ namespace TwitchDownloaderWPF.Services
             }
             ChangeThemePath(_wpfApplication, newTheme);
 
-            SkinType newSkin = AppElementDarkTheme ? SkinType.Dark : SkinType.Default;
+            SkinType newSkin = _darkHandyControl ? SkinType.Dark : SkinType.Default;
             SetHandyControlTheme(newSkin, _wpfApplication);
 
             if (_wpfApplication.Windows.Count > 0)
@@ -86,7 +86,7 @@ namespace TwitchDownloaderWPF.Services
             foreach (Window window in windows)
             {
                 var windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
-                NativeFunctions.SetWindowAttribute(windowHandle, TITLEBAR_THEME_ATTRIBUTE, ref AppDarkTitleBar, Marshal.SizeOf(AppDarkTitleBar));
+                NativeFunctions.SetWindowAttribute(windowHandle, TITLEBAR_THEME_ATTRIBUTE, ref _darkAppTitleBar, Marshal.SizeOf(_darkAppTitleBar));
             }
 
             Window _wnd = new()
@@ -120,8 +120,8 @@ namespace TwitchDownloaderWPF.Services
                     {
                         switch (boolean.Key)
                         {
-                            case "DarkTitleBar": AppDarkTitleBar = boolean.Value; break;
-                            case "DarkModeElements": AppElementDarkTheme = boolean.Value; break;
+                            case "DarkTitleBar": _darkAppTitleBar = boolean.Value; break;
+                            case "DarkHandyControl": _darkHandyControl = boolean.Value; break;
                             default: break;
                         }
                     }

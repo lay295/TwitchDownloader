@@ -5,7 +5,7 @@
 
     <!--Boolean values MUST be lower-case-->
     <system:Boolean x:Key="DarkTitleBar">false</system:Boolean>
-    <system:Boolean x:Key="DarkModeElements">false</system:Boolean>
+    <system:Boolean x:Key="DarkHandyControl">false</system:Boolean>
 
     <!--Standard app and app element colors-->
     <SolidColorBrush x:Key="AppBackground" Color="#FFFFFF"/>
