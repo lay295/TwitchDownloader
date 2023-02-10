@@ -294,7 +294,7 @@ The Task Queue also features 3 types of mass downloading:
 ### Settings
 Manage the application's behavior.
 
-![Figure 7.1](images/settingsExample.png)
+![Figure 7.1](Images/settingsExample.png)
 
 <sup>*Figure 7.1*</sup>
 
