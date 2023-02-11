@@ -126,9 +126,6 @@
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
     <value>You've selected an alpha channel (transparency) for a container/codec that does not support it.\nRemove transparency or encode with MOV and RLE/PRORES (file size will be large)</value>
   </data>
-  <data name="ApplicationLanguage" xml:space="preserve">
-    <value>Language:</value>
-  </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Theme </value>
     <comment>Leave a trailing space</comment>
@@ -517,7 +514,7 @@
     <value>Unable To Find Thumbnail</value>
   </data>
   <data name="UnableToGetClipInfo" xml:space="preserve">
-    <value>Unable to get Clip information. Please double check Clip Slug and try again</value>
+    <value>Unable to get Clip information. Please double check Clip ID and try again.</value>
   </data>
   <data name="UnableToGetInfo" xml:space="preserve">
     <value>Unable to get info</value>

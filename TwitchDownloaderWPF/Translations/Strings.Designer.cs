@@ -88,15 +88,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Language:.
-        /// </summary>
-        public static string ApplicationLanguage {
-            get {
-                return ResourceManager.GetString("ApplicationLanguage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Theme .
         /// </summary>
         public static string ApplicationTheme {
@@ -1429,7 +1420,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to get Clip information. Please double check Clip Slug and try again.
+        ///   Looks up a localized string similar to Unable to get Clip information. Please double check Clip ID and try again..
         /// </summary>
         public static string UnableToGetClipInfo {
             get {

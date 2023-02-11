@@ -126,24 +126,21 @@
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
     <value>You've selected an alpha channel (transparency) for a container/codec that does not support it.\nRemove transparency or encode with MOV and RLE/PRORES (file size will be large)</value>
   </data>
-  <data name="ApplicationLanguage" xml:space="preserve">
-    <value>Language:</value>
-  </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Le Thème </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ApplicationThemeTooltip" xml:space="preserve">
-    <value>Click to learn how to make your own theme!</value>
+    <value>Cliquez pour apprendre comment créer votre propre thème !</value>
   </data>
   <data name="AvailableParameters" xml:space="preserve">
-    <value>Available parameters are:</value>
+    <value>Les paramètres disponibles sont les suivants :</value>
   </data>
   <data name="BackgroundColor" xml:space="preserve">
     <value>Couleur de Fond:</value>
   </data>
   <data name="BannedWordsList" xml:space="preserve">
-    <value>Banned Words List </value>
+    <value>Liste des mots interdits </value>
     <comment>Leaving a trailing space</comment>
   </data>
   <data name="BannedWordsListTooltip" xml:space="preserve">
@@ -153,16 +150,16 @@
     <value>Naviguer</value>
   </data>
   <data name="BttvEmotes" xml:space="preserve">
-    <value>BTTV Emotes:</value>
+    <value>Emoticônes BTTV:</value>
   </data>
   <data name="CacheFolder" xml:space="preserve">
     <value>Dossier de Cache:</value>
   </data>
   <data name="ChatBadgeFilter" xml:space="preserve">
-    <value>Chat Badge Filter:</value>
+    <value>Filtre de badge de chat:</value>
   </data>
   <data name="ChatBadges" xml:space="preserve">
-    <value>Chat Badges:</value>
+    <value>Badges de chat:</value>
   </data>
   <data name="ChatCrop" xml:space="preserve">
     <value>Coupe Chat:</value>
@@ -171,7 +168,7 @@
     <value>Télécharger du Chat</value>
   </data>
   <data name="ChatDownloads" xml:space="preserve">
-    <value>Chats</value>
+    <value>Téléchargements de Chats</value>
   </data>
   <data name="ChatFont" xml:space="preserve">
     <value>Police:</value>
@@ -201,13 +198,13 @@
     <value>Effacer</value>
   </data>
   <data name="ClearCacheConfirmation" xml:space="preserve">
-    <value>Are you sure you want to clear your cache?\nYou should only really do this if the program isn't working correctly</value>
+    <value>Vous êtes sûr de vouloir vider le cache ?\nYou should only really do this if the program isn't working correctly</value>
   </data>
   <data name="ClipDownload" xml:space="preserve">
     <value>Télécharger du Clip</value>
   </data>
   <data name="ClipDownloads" xml:space="preserve">
-    <value>Clips</value>
+    <value>Téléchargements de clips</value>
   </data>
   <data name="ClipLinkId" xml:space="preserve">
     <value>Lien/ID Clip:</value>
@@ -234,7 +231,7 @@
     <value>Confirmation de la Suppression</value>
   </data>
   <data name="DonateTooltip" xml:space="preserve">
-    <value>Use the program often and want to support me? Buy me a coffee :)</value>
+    <value>Vous utilisez souvent le programme et vous voulez me soutenir ? Achetez-moi un café :)</value>
   </data>
   <data name="Download" xml:space="preserve">
     <value>Télécharger</value>
@@ -252,18 +249,18 @@
     <value>Connexions:</value>
   </data>
   <data name="EmbedImages" xml:space="preserve">
-    <value>Embed Images </value>
+    <value>Intégrer des images </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedImagesTooltip" xml:space="preserve">
-    <value>Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.</value>
+    <value>Incorporez des émoticônes Twitch, des badges et des émoticônes d'encouragement dans le fichier pour un rendu hors ligne. La taille du fichier sera plus importante.</value>
   </data>
   <data name="EmbedMissing" xml:space="preserve">
-    <value>Embed Missing </value>
+    <value>Intégrer les images manquantes </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedMissingTooltip" xml:space="preserve">
-    <value>Embeds missing emotes, badges, and cheermotes. Already embedded images will be untouched.</value>
+    <value>Intègre les émoticônes, les badges et les émoticônes d'encouragement manquants. Les images déjà intégrées ne seront pas modifiées.</value>
   </data>
   <data name="EnqueueDownload" xml:space="preserve">
     <value>Mettre en File d'Attente</value>
@@ -295,7 +292,7 @@
     <value>Réinitialiser</value>
   </data>
   <data name="FfzEmotes" xml:space="preserve">
-    <value>FFZ Emotes:</value>
+    <value>Emoticônes FFZ:</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
     <value>{title} {id} {date} {channel} {date_custom=""} {random_string}</value>
@@ -314,7 +311,7 @@
     <value>Cacher le bouton de don:</value>
   </data>
   <data name="IgnoreUsersList" xml:space="preserve">
-    <value>Ignore Users List </value>
+    <value>Liste des utilisateurs bannis </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
@@ -327,10 +324,10 @@
     <value>Entrez un lien/ID Clip valide SVP\nExemples:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
   </data>
   <data name="InvalidCropInputs" xml:space="preserve">
-    <value>Invalid Crop Inputs</value>
+    <value>Temps de début ou de fin invalides</value>
   </data>
   <data name="InvalidStartEndTime" xml:space="preserve">
-    <value>Invalid start or end time</value>
+    <value>Temps de début ou de fin invalides</value>
   </data>
   <data name="InvalidVideoLinkId" xml:space="preserve">
     <value>Lien/ID Vidéo Invalide</value>
@@ -365,7 +362,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="OfflineTooltip" xml:space="preserve">
-    <value>Render the chat using only resources embedded in the chat json file.</value>
+    <value>Rendre le chat en utilisant uniquement les images intégrées.</value>
   </data>
   <data name="Outline" xml:space="preserve">
     <value>Countour:</value>
@@ -383,13 +380,13 @@
     <value>Rendu</value>
   </data>
   <data name="RenderFfmpegWarning" xml:space="preserve">
-    <value>This is for advanced users only. If you get a pipe ended error this is probably why.</value>
+    <value>Ceci est réservé aux utilisateurs avancés. Si vous obtenez une erreur de type "pipe ended", c'est probablement la raison.</value>
   </data>
   <data name="RenderFileFormat" xml:space="preserve">
     <value>Format de la vidéo:</value>
   </data>
   <data name="RenderFramerate" xml:space="preserve">
-    <value>Framerate:</value>
+    <value>Fréquence de trame:</value>
   </data>
   <data name="RenderCodec" xml:space="preserve">
     <value>Codec:</value>
@@ -413,14 +410,14 @@
     <value>Échelle</value>
   </data>
   <data name="RenderWidthHeightMustBeEven" xml:space="preserve">
-    <value>Width and Height must be even</value>
+    <value>La largeur et la hauteur doivent être des nombres pairs</value>
   </data>
   <data name="ReplaceEmbeds" xml:space="preserve">
-    <value>Replace Embeds </value>
+    <value>Remplacer les images intégrées </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ReplaceEmbedsTooltip" xml:space="preserve">
-    <value>Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!</value>
+    <value>Remplacez tous les émoticônes, badges et émoticônes d'encouragement intégrés dans le fichier. Toutes les images incorporées seront écrasées !</value>
   </data>
   <data name="SearchClips" xml:space="preserve">
     <value>Rechercher des Clips</value>
@@ -459,10 +456,10 @@
     <value>Mise à jour de</value>
   </data>
   <data name="Streamer" xml:space="preserve">
-    <value>Streamer:</value>
+    <value>Streameur:</value>
   </data>
   <data name="StvEmotes" xml:space="preserve">
-    <value>7TV Emotes:</value>
+    <value>Emoticônes 7TV:</value>
   </data>
   <data name="SubMessages" xml:space="preserve">
     <value>Messages des abonnés:</value>
@@ -477,11 +474,11 @@
     <value>Queue de travaux</value>
   </data>
   <data name="ThirdPartyEmotes" xml:space="preserve">
-    <value>3rd Party Emotes </value>
+    <value>Emoticônes de tiers </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
-    <value>Also embed third party emotes into the file. File size will be much larger.</value>
+    <value>Incluez également les émoticônes de tiers dans le fichier. La taille du fichier sera beaucoup plus importante.</value>
   </data>
   <data name="TimestampFormat" xml:space="preserve">
     <value>Type d'horodatage:</value>
@@ -511,31 +508,31 @@
     <value>24 Premières Heures</value>
   </data>
   <data name="UnableToFindThumbnail" xml:space="preserve">
-    <value>Unable To Find Thumbnail</value>
+    <value>Nous n'avons pas pu trouver de vignettes</value>
   </data>
   <data name="UnableToGetClipInfo" xml:space="preserve">
-    <value>Unable to get Clip information. Please double check Clip Slug and try again</value>
+    <value>Nous n'avons pas pu obtenir d'informations sur le clip. Veuillez vérifier l'ID du clip et réessayer.</value>
   </data>
   <data name="UnableToGetInfo" xml:space="preserve">
-    <value>Unable to get info</value>
+    <value>Nous n'avons pas pu obtenir l'information</value>
   </data>
   <data name="UnableToGetInfoMessage" xml:space="preserve">
-    <value>Unable to get Video/Clip information. Please double check your link and try again</value>
+    <value>Nous n'avons pas pu obtenir l'information VOD/clip. Veuillez vérifier votre lien et réessayer</value>
   </data>
   <data name="UnableToGetVideoInfo" xml:space="preserve">
-    <value>Unable to get video information. Please make sure the Link/ID is correct and try again.</value>
+    <value>Nous n'avons pas pu obtenir l'information vidéo. Veuillez vérifier votre lien et réessayer.</value>
   </data>
   <data name="UnableToParseInputs" xml:space="preserve">
-    <value>Unable to parse inputs</value>
+    <value>Nous n'avons pas pu analyser les entrées</value>
   </data>
   <data name="UnableToParseInputsMessage" xml:space="preserve">
-    <value>Please double check your inputs are valid</value>
+    <value>Veuillez vous assurer que vos entrées sont valides</value>
   </data>
   <data name="UnableToParseLink" xml:space="preserve">
-    <value>Unable to parse link</value>
+    <value>Nous n'avons pas pu analyser le lien</value>
   </data>
   <data name="UnableToParseLinkMessage" xml:space="preserve">
-    <value>Please double check the VOD/Clip link</value>
+    <value>Veuillez vérifier le lien VOD/clip</value>
   </data>
   <data name="Unknown" xml:space="preserve">
     <value>Inconnu</value>
@@ -550,7 +547,7 @@
     <value>Liste de Liens</value>
   </data>
   <data name="VerboseErrorOutput" xml:space="preserve">
-    <value>Verbose Error Output</value>
+    <value>Sortie d'erreur verbeuse</value>
   </data>
   <data name="VerboseErrors" xml:space="preserve">
     <value>Erreurs Verbeuses:</value>
@@ -568,10 +565,10 @@
     <value>Télécharger du vidéos</value>
   </data>
   <data name="VodDownloads" xml:space="preserve">
-    <value>Vidéos</value>
+    <value>Téléchargements de vidéos</value>
   </data>
   <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
-    <value>Video is expired or embedded ID is corrupt</value>
+    <value>La vidéo a expiré ou l'identifiant incorporé est corrompu</value>
   </data>
   <data name="VodLinkId" xml:space="preserve">
     <value>Lien/ID Vidéo:</value>
@@ -595,37 +592,37 @@
     <value>Rendu le Chat</value>
   </data>
   <data name="HighlightIndentScale" xml:space="preserve">
-    <value>Highlight Indent Scale:</value>
+    <value>Échelle de l'indentation de l'abonnement:</value>
   </data>
   <data name="HighlightStrokeScale" xml:space="preserve">
-    <value>Highlight Stoke Scale:</value>
+    <value>Échelle des accents d'abonnement:</value>
   </data>
   <data name="BadgeScale" xml:space="preserve">
-    <value>Badge Scale:</value>
+    <value>Échelle des badges:</value>
   </data>
   <data name="EmojiScale" xml:space="preserve">
-    <value>Emoji Scale:</value>
+    <value>Échelle des emoji:</value>
   </data>
   <data name="EmoteScale" xml:space="preserve">
-    <value>Emote Scale:</value>
+    <value>Échelle des émoticônes:</value>
   </data>
   <data name="EmoteSpacingScale" xml:space="preserve">
-    <value>Emote Spacing Scale:</value>
+    <value>Échelle d'espacement des émoticônes:</value>
   </data>
   <data name="SidePaddingScale" xml:space="preserve">
-    <value>Side Padding Scale:</value>
+    <value>Échelle de marge latérale:</value>
   </data>
   <data name="SectionHeightScale" xml:space="preserve">
-    <value>Section Height Scale:</value>
+    <value>Échelle de hauteur de ligne:</value>
   </data>
   <data name="VerticalSpacingScale" xml:space="preserve">
-    <value>Vertical Spacing Scale:</value>
+    <value>L'échelle de l'espace entre les messages:</value>
   </data>
   <data name="WordSpacingScale" xml:space="preserve">
-    <value>Word Spacing Scale:</value>
+    <value>Échelle d'espacement des mots:</value>
   </data>
   <data name="FileNotFound" xml:space="preserve">
-    <value>File Not Found: </value>
+    <value>Fichier non trouvé: </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="FatalError" xml:space="preserve">
@@ -635,7 +632,7 @@
     <value>Le thème n'a pas été trouvé</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>{theme} was not found. Reverting theme to System</value>
+    <value>{theme} n'a pas été trouvé. Passage au thème système</value>
     <comment>Do not translate {theme}</comment>
   </data>
   <data name="TemplateChats" xml:space="preserve">

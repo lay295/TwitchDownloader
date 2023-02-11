@@ -129,10 +129,6 @@
     <value>Bir bir alfa kanalı (şeffaflık) desteklemeyen bir container/codec seçtiniz.\nSaydamlığı kaldırın veya MOV ve RLE/PRORES ile kodlayın. (dosya boyutu büyük olacaktır.)</value>
     <comment />
   </data>
-  <data name="ApplicationLanguage" xml:space="preserve">
-    <value>Dil:</value>
-    <comment />
-  </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Tema </value>
     <comment>Leave a trailing space</comment>
@@ -634,8 +630,7 @@
     <comment />
   </data>
   <data name="UnableToGetClipInfo" xml:space="preserve">
-    <value>Klip bilgisi alınamıyor. Lütfen Clip Slug'u tekrar kontrol edin ve tekrar deneyin</value>
-    <comment />
+    <value>Klip bilgisi alınamıyor. Lütfen Clip Slug'u tekrar kontrol edin ve tekrar deneyin.</value>
   </data>
   <data name="UnableToGetInfo" xml:space="preserve">
     <value>Bilgi alınamıyor</value>
