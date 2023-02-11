@@ -70,7 +70,7 @@ namespace TwitchDownloaderWPF
                         data.Title = video.node.title;
                         data.Length = video.node.lengthSeconds;
                         data.Id = video.node.id;
-                        data.Time = video.node.createdAt;
+                        data.Time = video.node.createdAt.ToLocalTime();
                         data.Views = video.node.viewCount;
                         data.Streamer = currentChannel;
                         try
@@ -118,7 +118,7 @@ namespace TwitchDownloaderWPF
                         data.Title = clip.node.title;
                         data.Length = clip.node.durationSeconds;
                         data.Id = clip.node.slug;
-                        data.Time = clip.node.createdAt;
+                        data.Time = clip.node.createdAt.ToLocalTime();
                         data.Views = clip.node.viewCount;
                         data.Streamer = currentChannel;
                         try

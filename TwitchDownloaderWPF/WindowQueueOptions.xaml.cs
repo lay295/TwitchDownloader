@@ -125,7 +125,7 @@ namespace TwitchDownloaderWPF
                             else
                                 chatOptions.DownloadFormat = ChatFormat.Text;
                             chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
-                            chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, vodPage.currentVideoTime, vodPage.textStreamer.Text) + "." + chatOptions.DownloadFormat);
+                            chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, vodPage.currentVideoTime.ToLocalTime(), vodPage.textStreamer.Text) + "." + chatOptions.DownloadFormat);
 
                             if (downloadOptions.CropBeginning)
                             {
@@ -188,7 +188,7 @@ namespace TwitchDownloaderWPF
                     {
                         ClipDownloadTask downloadTask = new ClipDownloadTask();
                         ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
-                        downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateClip, clipPage.textTitle.Text, clipPage.clipId, clipPage.currentVideoTime, clipPage.textStreamer.Text) + ".mp4");
+                        downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateClip, clipPage.textTitle.Text, clipPage.clipId, clipPage.currentVideoTime.ToLocalTime(), clipPage.textStreamer.Text) + ".mp4");
                         downloadOptions.Id = clipPage.clipId;
                         downloadOptions.Quality = clipPage.comboQuality.Text;
                         downloadTask.DownloadOptions = downloadOptions;
@@ -214,7 +214,7 @@ namespace TwitchDownloaderWPF
                                 chatOptions.DownloadFormat = ChatFormat.Text;
                             chatOptions.TimeFormat = TimestampFormat.Relative;
                             chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
-                            chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text) + "." + chatOptions.FileExtension);
+                            chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime.ToLocalTime(), clipPage.textStreamer.Text) + "." + chatOptions.FileExtension);
 
                             chatTask.DownloadOptions = chatOptions;
                             chatTask.Info.Title = clipPage.textTitle.Text;
@@ -266,7 +266,7 @@ namespace TwitchDownloaderWPF
                         ChatDownloadTask chatTask = new ChatDownloadTask();
                         ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
                         chatOptions.Id = chatPage.downloadId;
-                        chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatOptions.Id, chatPage.currentVideoTime, chatPage.textStreamer.Text) + "." + chatOptions.FileExtension);
+                        chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatOptions.Id, chatPage.currentVideoTime.ToLocalTime(), chatPage.textStreamer.Text) + "." + chatOptions.FileExtension);
 
                         chatTask.DownloadOptions = chatOptions;
                         chatTask.Info.Title = chatPage.textTitle.Text;
