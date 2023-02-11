@@ -25,12 +25,12 @@
             <RowDefinition Height="5"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Loaded="Window_Loaded">
-            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+            <WrapPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,9,3,3" Text="{lex:Loc CacheFolder}" Foreground="{DynamicResource AppText}"/>
                 <Button x:Name="btnClearCache" Margin="2" MinWidth="50" Content="{lex:Loc ClearCache}" Click="btnClearCache_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}"/>
                 <Button x:Name="btnTempBrowse" Margin="2" MinWidth="50" Content="{lex:Loc Browse}" Click="btnTempBrowse_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
                 <TextBox x:Name="textTempPath" Margin="2" MinWidth="250" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-            </StackPanel>
+            </WrapPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,4,3,3" Text="{lex:Loc HideDonationButton}" Foreground="{DynamicResource AppText}" />
                 <CheckBox x:Name="checkDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}" />

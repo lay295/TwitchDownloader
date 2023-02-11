@@ -21,11 +21,11 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1">
-            <StackPanel Orientation="Horizontal">
+            <WrapPanel Orientation="Horizontal">
                 <TextBlock Text="{lex:Loc DownloadFolder}" HorizontalAlignment="Left" Margin="0,6,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}"/>
                 <TextBox x:Name="textFolder" HorizontalAlignment="Left" Height="23" Margin="3,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" MinWidth="300" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 <Button x:Name="btnFolder" Content="{lex:Loc Browse}" HorizontalAlignment="Left" Margin="3,0,0,0" VerticalAlignment="Top" MinWidth="60" Click="btnFolder_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-            </StackPanel>
+            </WrapPanel>
             <CheckBox x:Name="checkVideo" Content="{lex:Loc DownloadVideo}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             <CheckBox x:Name="checkChat" Content="{lex:Loc DownloadChat}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Checked="checkChat_Checked" Unchecked="checkChat_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             <StackPanel>
@@ -37,7 +37,7 @@
                 <CheckBox x:Name="checkEmbed" IsEnabled="False" Content="{lex:Loc EmbedImages}" HorizontalAlignment="Left" Margin="25,5,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             </StackPanel>
             <CheckBox x:Name="checkRender" IsEnabled="False" Content="{lex:Loc RenderChat}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-            <Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Left" Margin="182,-28,0,0" VerticalAlignment="Top" MinWidth="105" Height="45" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Left" Margin="182,-18,0,0" VerticalAlignment="Top" MinWidth="105" Height="45" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -19,6 +19,5 @@
             </DockPanel>
             <Button Content="{lex:Loc Accept}" Click="Button_Click" Foreground="{DynamicResource ActionButtonText}" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" />
         </StackPanel>
-        
     </Grid>
 </Window>
