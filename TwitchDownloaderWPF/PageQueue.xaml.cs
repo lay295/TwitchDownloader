@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderWPF.Properties;
+using System.Diagnostics;
 
 namespace TwitchDownloaderWPF
 {
@@ -112,6 +113,18 @@ namespace TwitchDownloaderWPF
 
                 Thread.Sleep(1000);
             }
+        }
+
+        private void btnDonate_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsPage settings = new SettingsPage();
+            settings.ShowDialog();
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void numVod_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)

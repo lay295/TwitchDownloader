@@ -11,6 +11,7 @@
       xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
       xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       xmlns:hc="https://handyorg.github.io/handycontrol"
+      xmlns:fa="http://schemas.fontawesome.com/icons/"
       mc:Ignorable="d" 
       d:DesignHeight="400" d:DesignWidth="800"
       Title="PageQueue">
@@ -22,10 +23,15 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="15"/>
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
 
-        <Border Grid.Column="1" Grid.ColumnSpan="3" BorderThickness="1" BorderBrush="{DynamicResource AppElementBorder}" Margin="0,0,0,10">
+        <Border Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" Grid.RowSpan="2" BorderThickness="1" BorderBrush="{DynamicResource AppElementBorder}" Margin="0,0,0,10">
             <ScrollViewer  VerticalScrollBarVisibility="Auto">
                 <ItemsControl x:Name="queueList" ItemsSource="{Binding taskList}" Margin="0,10">
                     <ItemsControl.ItemTemplate>
@@ -50,18 +56,34 @@
                 </ItemsControl>
             </ScrollViewer>
         </Border>
-        <hc:Divider Content="{lex:Loc ParallelTaskLimits}" Grid.Column="4" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="170" LineStroke="{DynamicResource AppDivider}" Foreground="{DynamicResource AppDividerText}"/>
-        <TextBlock Text="{lex:Loc VodDownloads}" Grid.Column="4" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}"/>
-        <TextBlock Text="{lex:Loc ClipDownloads}" Grid.Column="4" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}"/>
-        <TextBlock Text="{lex:Loc ChatDownloads}" Grid.Column="4" HorizontalAlignment="Left" Margin="10,99,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}"/>
-        <TextBlock Text="{lex:Loc ChatRenders}" Grid.Column="4" HorizontalAlignment="Left" Margin="10,131,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}"/>
-        <hc:NumericUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,30,0,0" Value="1" Minimum="1" Name="numVod" Width="70" ValueChanged="numVod_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-        <hc:NumericUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,62,0,0" Value="1" Minimum="1" x:Name="numClip" Width="70" ValueChanged="numClip_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-        <hc:NumericUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,94,0,0" Value="1" Minimum="1" x:Name="numChat" Width="70" ValueChanged="numChat_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-        <hc:NumericUpDown Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,126,0,0" Value="1" Minimum="1" x:Name="numRender" Width="70" ValueChanged="numRender_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-        <hc:Divider Content="{lex:Loc MassDownloads}" Grid.Column="4" HorizontalAlignment="Center" Margin="10,160,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="180" LineStroke="{DynamicResource AppDivider}" Foreground="{DynamicResource AppDividerText}"/>
-        <Button x:Name="btnUrlList" Content="{lex:Loc UrlList}" Grid.Column="4" HorizontalAlignment="Left" Margin="15,187,0,0" VerticalAlignment="Top" Width="158" Click="btnUrlList_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-        <Button x:Name="btnVods" Content="{lex:Loc SearchVods}" Grid.Column="4" HorizontalAlignment="Left" Margin="15,227,0,0" VerticalAlignment="Top" Width="158" Click="btnVods_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-        <Button x:Name="btnClips" Content="{lex:Loc SearchClips}" Grid.Column="4" HorizontalAlignment="Left" Margin="15,267,0,0" VerticalAlignment="Top" Width="158" Click="btnClips_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <StackPanel Grid.Column="4" Grid.Row="1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,5,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center">
+                <hc:Divider Content="{lex:Loc ParallelTaskLimits}" HorizontalAlignment="Center" Margin="0,10,0,0" FontWeight="Bold" Width="180" LineStroke="{DynamicResource AppDivider}" Foreground="{DynamicResource AppDividerText}"/>
+                <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="{lex:Loc VodDownloads}" Margin="0,7,0,0" Foreground="{DynamicResource AppText}" TextWrapping="Wrap" />
+                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" Name="numVod" Width="70" ValueChanged="numVod_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                </WrapPanel>
+                <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,2,0,0">
+                    <TextBlock Text="{lex:Loc ClipDownloads}" Margin="0,7,0,0" Foreground="{DynamicResource AppText}" TextWrapping="Wrap" />
+                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" x:Name="numClip" Width="70" ValueChanged="numClip_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                </WrapPanel>
+                <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,2,0,0">
+                    <TextBlock Text="{lex:Loc ChatDownloads}" Margin="0,7,0,0" Foreground="{DynamicResource AppText}" TextWrapping="Wrap" />
+                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" x:Name="numChat" Width="70" ValueChanged="numChat_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                </WrapPanel>
+                <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,2,0,0">
+                    <TextBlock Text="{lex:Loc ChatRenders}" Margin="0,7,0,0" Foreground="{DynamicResource AppText}" TextWrapping="Wrap" />
+                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" x:Name="numRender" Width="70" ValueChanged="numRender_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                </WrapPanel>
+                <hc:Divider Content="{lex:Loc MassDownloads}" HorizontalAlignment="Center" Margin="0,10,0,0" FontWeight="Bold" Width="180" LineStroke="{DynamicResource AppDivider}" Foreground="{DynamicResource AppDividerText}"/>
+                <Button x:Name="btnUrlList" Content="{lex:Loc UrlList}" Margin="0,11,0,0" Width="165" Click="btnUrlList_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <Button x:Name="btnVods" Content="{lex:Loc SearchVods}" Margin="0,8,0,0" Width="165" Click="btnVods_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <Button x:Name="btnClips" Content="{lex:Loc SearchClips}" Margin="0,8,0,0" Width="165" Click="btnClips_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Page>

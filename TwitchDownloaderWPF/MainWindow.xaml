@@ -26,12 +26,24 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="5"/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="btnVodDownload" Margin="4" Grid.Row="1" Grid.Column="1" Content="{lex:Loc VodDownload}" MinWidth="122" Height="52" Click="btnVodDownload_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" />
-        <Button x:Name="btnClipDownload" Margin="4" Grid.Row="1" Grid.Column="2" Content="{lex:Loc ClipDownload}" MinWidth="122" Height="52" Click="btnClipDownload_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" />
-        <Button x:Name="btnChatDownload" Margin="4" Grid.Row="1" Grid.Column="3" Content="{lex:Loc ChatDownload}" MinWidth="122" Height="52" Click="btnChatDownload_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" />
-        <Button x:Name="btnChatUpdate" Margin="4" Grid.Row="1" Grid.Column="4" Content="{lex:Loc ChatUpdater}" MinWidth="122" Height="52" Click="btnChatUpdate_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" />
-        <Button x:Name="btnChatRender" Margin="4" Grid.Row="1" Grid.Column="5" Content="{lex:Loc ChatRender}" MinWidth="122" Height="52" Click="btnChatRender_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" />
-        <Button x:Name="btnQueue" Margin="4" Grid.Row="1" Grid.Column="6" Content="{lex:Loc TaskQueue}" MinWidth="122" Height="52" Click="btnQueue_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" />
+        <Button x:Name="btnVodDownload" Margin="4" Grid.Row="1" Grid.Column="1" MinWidth="122" Height="52" Click="btnVodDownload_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" >
+            <TextBlock Text="{lex:Loc VodDownload}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="{Binding ActualWidth, ElementName=btnVodDownload, Mode=OneWay}" Padding="10,0,10,0" />
+        </Button>
+        <Button x:Name="btnClipDownload" Margin="4" Grid.Row="1" Grid.Column="2" MinWidth="122" Height="52" Click="btnClipDownload_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" >
+            <TextBlock Text="{lex:Loc ClipDownload}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="{Binding ActualWidth, ElementName=btnClipDownload, Mode=OneWay}" Padding="10,0,10,0" />
+        </Button>
+        <Button x:Name="btnChatDownload" Margin="4" Grid.Row="1" Grid.Column="3" MinWidth="122" Height="52" Click="btnChatDownload_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" >
+            <TextBlock Text="{lex:Loc ChatDownload}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="{Binding ActualWidth, ElementName=btnChatDownload, Mode=OneWay}" Padding="10,0,10,0" />
+        </Button>
+        <Button x:Name="btnChatUpdate" Margin="4" Grid.Row="1" Grid.Column="4" MinWidth="122" Height="52" Click="btnChatUpdate_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" >
+            <TextBlock Text="{lex:Loc ChatUpdater}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="{Binding ActualWidth, ElementName=btnChatUpdate, Mode=OneWay}" Padding="10,0,10,0" />
+        </Button>
+        <Button x:Name="btnChatRender" Margin="4" Grid.Row="1" Grid.Column="5" MinWidth="122" Height="52" Click="btnChatRender_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" >
+            <TextBlock Text="{lex:Loc ChatRender}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="{Binding ActualWidth, ElementName=btnChatRender, Mode=OneWay}" Padding="10,0,10,0" />
+        </Button>
+        <Button x:Name="btnQueue" Margin="4" Grid.Row="1" Grid.Column="6" MinWidth="122" Height="52" Click="btnQueue_Click" FontWeight="Bold" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" >
+            <TextBlock Text="{lex:Loc TaskQueue}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="{Binding ActualWidth, ElementName=btnQueue, Mode=OneWay}" Padding="10,0,10,0" />
+        </Button>
         <Frame Focusable="False" x:Name="Main" Grid.Column="0" Grid.ColumnSpan="8" Grid.Row="2" NavigationUIVisibility="Hidden" Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBackground}"/>
     </Grid>
 </Window>
