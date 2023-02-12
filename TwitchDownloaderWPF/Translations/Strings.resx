@@ -655,4 +655,7 @@
     <value>Gzip</value>
     <comment>Do not translate</comment>
   </data>
+  <data name="ThemesFailedToWrite" xml:space="preserve">
+    <value>Some included themes failed to write.</value>
+  </data>
 </root>

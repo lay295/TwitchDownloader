@@ -655,4 +655,7 @@
   <data name="ChatCompression" xml:space="preserve">
     <value>Compression:</value>
   </data>
+  <data name="ThemesFailedToWrite" xml:space="preserve">
+    <value>Certains thèmes inclus n'ont pas été écrits.</value>
+  </data>
 </root>

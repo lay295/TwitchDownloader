@@ -26,7 +26,10 @@ namespace TwitchDownloaderWPF.Services
             {
                 Directory.CreateDirectory("Themes");
             }
-            DefaultThemeService.WriteIncludedThemes();
+            if (!DefaultThemeService.WriteIncludedThemes())
+            {
+                MessageBox.Show(Translations.Strings.ThemesFailedToWrite, Translations.Strings.ThemesFailedToWrite, MessageBoxButton.OK, MessageBoxImage.Information);
+            }
 
             _windowsThemeService = windowsThemeService;
             _wpfApplication = app;

@@ -1312,6 +1312,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Some included themes failed to write..
+        /// </summary>
+        public static string ThemesFailedToWrite {
+            get {
+                return ResourceManager.GetString("ThemesFailedToWrite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 3rd Party Emotes .
         /// </summary>
         public static string ThirdPartyEmotes {
