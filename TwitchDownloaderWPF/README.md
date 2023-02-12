@@ -193,7 +193,7 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Ignore Users List**: A comma-separated, case-insensitive list of users to be removed from the render. For example, in Figure 5.2 Streamlabs, StreamElements, and Nightbot will be removed from the render.
 
-**Banned Words List**: A comma-separated, case-insensitive list of words that will cause messages to be removed from the render. For example, in Figure 5.2 any message that contains `' pog '`, `'[pOg+'`, `'/POg9'` will be removed from the render. Any message that contains `' poggers '` will not be removed.
+**Banned Words List**: A comma-separated, case-insensitive list of words that will cause messages to be removed from the render. For example, in Figure 5.2 any message that contains `" pog "`, `"[pOg+"`, `"/POg9"` will be removed from the render. Any message that contains `" poggers "` will not be removed.
 
 #### <ins>Scaling</ins>
 

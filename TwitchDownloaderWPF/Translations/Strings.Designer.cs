@@ -727,7 +727,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Highlight Stoke Scale:.
+        ///   Looks up a localized string similar to Highlight Stroke Scale:.
         /// </summary>
         public static string HighlightStrokeScale {
             get {
