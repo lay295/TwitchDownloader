@@ -150,7 +150,7 @@
     <comment>Leaving a trailing space</comment>
   </data>
   <data name="BannedWordsListTooltip" xml:space="preserve">
-    <value>List of banned words or phrases - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+    <value>Yasaklı kelimelerin veya kelime öbeklerinin listesi - virgülle ayrılmış, virgüllerin etrafındaki boşluklar yok sayılır, büyük/küçük harfe duyarlı DEĞİLDİR.</value>
     <comment />
   </data>
   <data name="Browse" xml:space="preserve">
