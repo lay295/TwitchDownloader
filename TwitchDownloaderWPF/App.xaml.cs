@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using TwitchDownloaderWPF.Properties;
@@ -24,17 +25,21 @@ namespace TwitchDownloaderWPF
         {
             base.OnStartup(e);
 
-            // Set the current culture
+            // Set the working dir to the process dir if run from sys32/syswow64
+            var processDir = Directory.GetParent(Environment.ProcessPath).FullName;
+            if (Environment.CurrentDirectory != processDir)
+            {
+                Environment.CurrentDirectory = processDir;
+            }
+
             RequestCultureChange();
 
-            // Setup theme service
             WindowsThemeService windowsThemeService = new();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            // Create and show the main window
             MainWindow = new MainWindow();
             MainWindow.Show();
         }
