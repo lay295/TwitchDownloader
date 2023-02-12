@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using TwitchDownloader.Tools;
@@ -21,8 +22,15 @@ namespace TwitchDownloaderWPF
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            WindowsThemeService windowsThemeService = new();
 
+            // Set the working dir to the process dir if run from start menu
+            var processDir = Directory.GetParent(Environment.ProcessPath).FullName;
+            if (Environment.CurrentDirectory != processDir)
+            {
+                Environment.CurrentDirectory = processDir;
+            }
+
+            WindowsThemeService windowsThemeService = new();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
