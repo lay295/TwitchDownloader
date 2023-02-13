@@ -25,6 +25,9 @@ namespace TwitchDownloaderWPF
         {
             base.OnStartup(e);
 
+            Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
             // Set the working dir to the process dir if run from sys32/syswow64
             var processDir = Directory.GetParent(Environment.ProcessPath).FullName;
             if (Environment.CurrentDirectory != processDir)
@@ -36,9 +39,6 @@ namespace TwitchDownloaderWPF
 
             WindowsThemeService windowsThemeService = new();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
-
-            Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             MainWindow = new MainWindow();
             MainWindow.Show();
