@@ -15,11 +15,11 @@ namespace TwitchDownloaderWPF
     /// <summary>
     /// Interaction logic for SettingsPage.xaml
     /// </summary>
-    public partial class SettingsPage : Window
+    public partial class WindowSettings : Window
     {
         private readonly List<(string name, string nativeName)> _cultureList = new();
 
-        public SettingsPage()
+        public WindowSettings()
         {
             InitializeComponent();
         }
