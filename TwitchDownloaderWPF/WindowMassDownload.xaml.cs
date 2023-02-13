@@ -20,7 +20,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class WindowMassDownload : Window
     {
-        public DownloadType type { get; set; }
+        public DownloadType downloaderType { get; set; }
         public ObservableCollection<TaskData> videoList { get; set; } = new ObservableCollection<TaskData>();
         public List<TaskData> selectedItems = new List<TaskData>();
         public List<string> cursorList = new List<string>();
@@ -30,10 +30,10 @@ namespace TwitchDownloaderWPF
 
         public WindowMassDownload(DownloadType Type)
         {
-            type = Type;
+            downloaderType = Type;
             InitializeComponent();
             itemList.ItemsSource = videoList;
-            if (type == DownloadType.Video)
+            if (downloaderType == DownloadType.Video)
             {
                 comboSort.Visibility = Visibility.Hidden;
                 labelSort.Visibility = Visibility.Hidden;
@@ -53,7 +53,7 @@ namespace TwitchDownloaderWPF
 
         private async Task UpdateList()
         {
-            if (type == DownloadType.Video)
+            if (downloaderType == DownloadType.Video)
             {
                 string currentCursor = "";
                 if (cursorList.Count > 0 && cursorIndex >= 0)
@@ -237,6 +237,9 @@ namespace TwitchDownloaderWPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            Title = downloaderType == DownloadType.Video
+                ? Translations.Strings.TitleVideoMassDownloader
+                : Translations.Strings.TitleClipMassDownloader;
 			AppSingleton.RequestTitleBarChange();
 		}
     }

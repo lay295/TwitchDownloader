@@ -658,4 +658,22 @@
   <data name="ThemesFailedToWrite" xml:space="preserve">
     <value>Certains thèmes inclus n'ont pas été écrits.</value>
   </data>
+  <data name="TitleGlobalSettings" xml:space="preserve">
+    <value>Paramètres de l'application</value>
+  </data>
+  <data name="TitleEnqueueOptions" xml:space="preserve">
+    <value>Options de mise en file d'attente</value>
+  </data>
+  <data name="TitleClipMassDownloader" xml:space="preserve">
+    <value>Téléchargeur de masse de clips</value>
+  </data>
+  <data name="TitleVideoMassDownloader" xml:space="preserve">
+    <value>Téléchargeur de vidéos en masse</value>
+  </data>
+  <data name="TitleRenderRange" xml:space="preserve">
+    <value>Sélectionnez la plage de rendu (Secondes)</value>
+  </data>
+  <data name="TitleUrlList" xml:space="preserve">
+    <value>Mass Download URL List</value>
+  </data>
 </root>

@@ -1384,6 +1384,60 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Clip Mass Downloader.
+        /// </summary>
+        public static string TitleClipMassDownloader {
+            get {
+                return ResourceManager.GetString("TitleClipMassDownloader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enqueue Options.
+        /// </summary>
+        public static string TitleEnqueueOptions {
+            get {
+                return ResourceManager.GetString("TitleEnqueueOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Global Settings.
+        /// </summary>
+        public static string TitleGlobalSettings {
+            get {
+                return ResourceManager.GetString("TitleGlobalSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select Render Rage (Seconds).
+        /// </summary>
+        public static string TitleRenderRange {
+            get {
+                return ResourceManager.GetString("TitleRenderRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mass Download URL List.
+        /// </summary>
+        public static string TitleUrlList {
+            get {
+                return ResourceManager.GetString("TitleUrlList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Video Mass Downloader.
+        /// </summary>
+        public static string TitleVideoMassDownloader {
+            get {
+                return ResourceManager.GetString("TitleVideoMassDownloader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Top All Time.
         /// </summary>
         public static string TopAllTime {

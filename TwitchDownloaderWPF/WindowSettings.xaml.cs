@@ -109,6 +109,7 @@ namespace TwitchDownloaderWPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            Title = Translations.Strings.TitleGlobalSettings;
             AppSingleton.RequestTitleBarChange();
         }
 
@@ -156,6 +157,7 @@ namespace TwitchDownloaderWPF
             {
                 Settings.Default.GuiCulture = _cultureList[comboLocale.SelectedIndex].name;
                 AppSingleton.RequestCultureChange();
+                Title = Translations.Strings.TitleGlobalSettings;
             }
         }
     }

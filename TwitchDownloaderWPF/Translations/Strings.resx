@@ -658,4 +658,22 @@
   <data name="ThemesFailedToWrite" xml:space="preserve">
     <value>Some included themes failed to write.</value>
   </data>
+  <data name="TitleGlobalSettings" xml:space="preserve">
+    <value>Global Settings</value>
+  </data>
+  <data name="TitleEnqueueOptions" xml:space="preserve">
+    <value>Enqueue Options</value>
+  </data>
+  <data name="TitleRenderRange" xml:space="preserve">
+    <value>Select Render Rage (Seconds)</value>
+  </data>
+  <data name="TitleUrlList" xml:space="preserve">
+    <value>Mass Download URL List</value>
+  </data>
+  <data name="TitleVideoMassDownloader" xml:space="preserve">
+    <value>Video Mass Downloader</value>
+  </data>
+  <data name="TitleClipMassDownloader" xml:space="preserve">
+    <value>Clip Mass Downloader</value>
+  </data>
 </root>
