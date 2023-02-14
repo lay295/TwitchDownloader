@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -69,100 +68,99 @@ namespace TwitchDownloaderWPF
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
             int videoId = ValidateUrl(textUrl.Text);
-            if (videoId > 0)
-            {
-                currentVideoId = videoId;
-                try
-                {
-                    Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
-                    Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, passwordOauth.Password);
-                    await Task.WhenAll(taskVideoInfo, taskAccessToken);
-                    Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
-                    try
-                    {
-                        string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
-                        imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
-                    }
-                    catch
-                    {
-                        AppendLog("ERROR: Unable to find thumbnail");
-                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                        if (success)
-                        {
-                            imgThumbnail.Source = image;
-                        }
-                    }
-
-                    comboQuality.Items.Clear();
-                    videoQualties.Clear();
-                    string[] playlist = await taskPlaylist;
-                    for (int i = 0; i < playlist.Length; i++)
-                    {
-                        if (playlist[i].Contains("#EXT-X-MEDIA"))
-                        {
-                            string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"") + 6);
-                            string stringQuality = lastPart.Substring(0, lastPart.IndexOf("\""));
-
-                            var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=") + 10;
-                            var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
-                            int bandwidth = 0; // Cannot be inlined if we want default value of 0
-                            int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out bandwidth);
-
-                            if (!videoQualties.ContainsKey(stringQuality))
-                            {
-                                videoQualties.Add(stringQuality, (playlist[i + 2], bandwidth));
-                                comboQuality.Items.Add(stringQuality);
-                            }
-                        }
-                    }
-                    comboQuality.SelectedIndex = 0;
-
-                    TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
-                    textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
-                    textTitle.Text = taskVideoInfo.Result.data.video.title;
-                    textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToString();
-                    currentVideoTime = taskVideoInfo.Result.data.video.createdAt.ToLocalTime();
-                    Regex urlTimecodeRegex = new Regex(@"\?t=(\d?\dh)(\d?\dm)(\d?\ds)"); // ?t=##h##m##s
-                    Match urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
-                    if (urlTimecodeMatch.Success)
-                    {
-                        checkStart.IsChecked = true;
-                        numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].Value[..urlTimecodeMatch.Groups[1].ToString().IndexOf('h')]);
-                        numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
-                        numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
-                    }
-                    else
-                    {
-                        numStartHour.Value = 0;
-                        numStartMinute.Value = 0;
-                        numStartSecond.Value = 0;
-                    }
-                    numStartHour.Maximum = (int)vodLength.TotalHours;
-
-                    numEndHour.Value = (int)vodLength.TotalHours;
-                    numEndHour.Maximum = (int)vodLength.TotalHours;
-                    numEndMinute.Value = vodLength.Minutes;
-                    numEndSecond.Value = vodLength.Seconds;
-                    labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)vodLength.TotalHours, vodLength.Minutes, vodLength.Seconds);
-
-                    UpdateVideoSizeEstimates();
-
-                    SetEnabled(true);
-                }
-                catch (Exception ex)
-                {
-                    btnGetInfo.IsEnabled = true;
-                    AppendLog("ERROR: " + ex.Message);
-                    MessageBox.Show("Unable to get the video information." + Environment.NewLine + "Please make sure the video ID is correct and try again.", "Unable To Fetch Video Info", MessageBoxButton.OK, MessageBoxImage.Error);
-                    if (Settings.Default.VerboseErrors)
-                    {
-                        MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-            else
+            if (videoId <= 0)
             {
                 MessageBox.Show("Please enter a valid video ID/URL" + Environment.NewLine + "Examples:" + Environment.NewLine + "https://www.twitch.tv/videos/470741744" + Environment.NewLine + "470741744", "Invalid Video ID/URL", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            currentVideoId = videoId;
+            try
+            {
+                Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
+                Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, passwordOauth.Password);
+                await Task.WhenAll(taskVideoInfo, taskAccessToken);
+                Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
+                try
+                {
+                    string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
+                    imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
+                }
+                catch
+                {
+                    AppendLog("ERROR: Unable to find thumbnail");
+                    var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                    if (success)
+                    {
+                        imgThumbnail.Source = image;
+                    }
+                }
+
+                comboQuality.Items.Clear();
+                videoQualties.Clear();
+                string[] playlist = await taskPlaylist;
+                for (int i = 0; i < playlist.Length; i++)
+                {
+                    if (playlist[i].Contains("#EXT-X-MEDIA"))
+                    {
+                        string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"") + 6);
+                        string stringQuality = lastPart.Substring(0, lastPart.IndexOf('"'));
+
+                        var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=") + 10;
+                        var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
+                        int bandwidth = 0; // Cannot be inlined if we want default value of 0
+                        int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out bandwidth);
+
+                        if (!videoQualties.ContainsKey(stringQuality))
+                        {
+                            videoQualties.Add(stringQuality, (playlist[i + 2], bandwidth));
+                            comboQuality.Items.Add(stringQuality);
+                        }
+                    }
+                }
+                comboQuality.SelectedIndex = 0;
+
+                TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
+                textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
+                textTitle.Text = taskVideoInfo.Result.data.video.title;
+                textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToString();
+                currentVideoTime = taskVideoInfo.Result.data.video.createdAt.ToLocalTime();
+                Regex urlTimecodeRegex = new Regex(@"\?t=(\d?\dh)(\d?\dm)(\d?\ds)"); // ?t=##h##m##s
+                Match urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
+                if (urlTimecodeMatch.Success)
+                {
+                    checkStart.IsChecked = true;
+                    numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].Value[..urlTimecodeMatch.Groups[1].ToString().IndexOf('h')]);
+                    numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
+                    numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
+                }
+                else
+                {
+                    numStartHour.Value = 0;
+                    numStartMinute.Value = 0;
+                    numStartSecond.Value = 0;
+                }
+                numStartHour.Maximum = (int)vodLength.TotalHours;
+
+                numEndHour.Value = (int)vodLength.TotalHours;
+                numEndHour.Maximum = (int)vodLength.TotalHours;
+                numEndMinute.Value = vodLength.Minutes;
+                numEndSecond.Value = vodLength.Seconds;
+                labelLength.Text = vodLength.ToString("c");
+
+                UpdateVideoSizeEstimates();
+
+                SetEnabled(true);
+            }
+            catch (Exception ex)
+            {
+                btnGetInfo.IsEnabled = true;
+                AppendLog("ERROR: " + ex.Message);
+                MessageBox.Show("Unable to get the video information." + Environment.NewLine + "Please make sure the video ID is correct and try again.", "Unable To Fetch Video Info", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -197,7 +195,7 @@ namespace TwitchDownloaderWPF
 
             var cropStart = checkStart.IsChecked == true
                 ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value)
-                : TimeSpan.FromTicks(0);
+                : TimeSpan.Zero;
             var cropEnd = checkEnd.IsChecked == true
                 ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value)
                 : TimeSpan.Parse(labelLength.Text);
@@ -233,10 +231,10 @@ namespace TwitchDownloaderWPF
 
             return sizeInBytes switch
             {
-                long when sizeInBytes < 1 => "",
-                long when sizeInBytes < ONE_KILOBYTE => $" - {sizeInBytes}B",
-                long when sizeInBytes < ONE_MEGABYTE => $" - {(float)sizeInBytes / ONE_KILOBYTE:F1}KB",
-                long when sizeInBytes < ONE_GIGABYTE => $" - {(float)sizeInBytes / ONE_MEGABYTE:F1}MB",
+                < 1 => "",
+                < ONE_KILOBYTE => $" - {sizeInBytes}B",
+                < ONE_MEGABYTE => $" - {(float)sizeInBytes / ONE_KILOBYTE:F1}KB",
+                < ONE_GIGABYTE => $" - {(float)sizeInBytes / ONE_MEGABYTE:F1}MB",
                 _ => $" - {(float)sizeInBytes / ONE_GIGABYTE:F1}GB",
             };
         }
@@ -308,50 +306,28 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        public bool ValidateInput()
+        public bool ValidateInputs()
         {
-            string fixedString = FormatString(labelLength.Text.ToString(CultureInfo.InvariantCulture));
-            TimeSpan videoLength = TimeSpan.Parse(fixedString);
-            TimeSpan beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-            TimeSpan endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-
-            if ((int)numDownloadThreads.Value < 1)
-                numDownloadThreads.Value = 1;
-
             if ((bool)checkStart.IsChecked)
             {
-                if (beginTime.TotalSeconds >= videoLength.TotalSeconds || beginTime.TotalSeconds < 0)
+                var videoLength = TimeSpan.Parse(labelLength.Text);
+                var beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
+                if (beginTime.TotalSeconds >= videoLength.TotalSeconds)
+                {
                     return false;
+                }
 
                 if ((bool)checkEnd.IsChecked)
                 {
-                    if (endTime.TotalSeconds - beginTime.TotalSeconds < 0)
+                    var endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
+                    if (endTime.TotalSeconds < beginTime.TotalSeconds)
+                    {
                         return false;
+                    }
                 }
             }
 
             return true;
-        }
-
-        private string FormatString(string oldString)
-        {
-            List<int> returnParts = new List<int>();
-            List<string> stringParts = new List<string>(oldString.Split(':'));
-
-            int hours = Int32.Parse(stringParts[0]);
-            if (hours > 23)
-            {
-                returnParts.Add(hours / 24);
-                returnParts.Add(hours % 24);
-                returnParts.Add(Int32.Parse(stringParts[1]));
-                returnParts.Add(Int32.Parse(stringParts[2]));
-
-                return String.Join(":", returnParts.ToArray());
-            }
-            else
-            {
-                return oldString;
-            }
         }
 
         private void AppendLog(string message)
@@ -392,7 +368,7 @@ namespace TwitchDownloaderWPF
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
         }
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
@@ -423,66 +399,63 @@ namespace TwitchDownloaderWPF
 
         private async void SplitButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
+            if (((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
             {
-                bool isValid = ValidateInput();
+                return;
+            }
 
-                if (isValid)
+            if (!ValidateInputs())
+            {
+                AppendLog("ERROR: Invalid Crop Inputs");
+                return;
+            }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "MP4 Files | *.mp4",
+                RestoreDirectory = true,
+                FileName = MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text)
+            };
+            if (saveFileDialog.ShowDialog() == false)
+            {
+                return;
+            }
+
+            SetEnabled(false);
+            btnGetInfo.IsEnabled = false;
+
+            VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
+
+            VideoDownloader currentDownload = new VideoDownloader(options);
+            Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
+
+            SetImage("Images/ppOverheat.gif", true);
+            statusMessage.Text = "Downloading";
+
+            try
+            {
+                await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
+                statusMessage.Text = "Done";
+                SetImage("Images/ppHop.gif", true);
+            }
+            catch (Exception ex)
+            {
+                statusMessage.Text = "ERROR";
+                SetImage("Images/peepoSad.png", false);
+                AppendLog("ERROR: " + ex.Message);
+                if (Settings.Default.VerboseErrors)
                 {
-                    SaveFileDialog saveFileDialog = new SaveFileDialog();
-
-                    saveFileDialog.Filter = "MP4 Files | *.mp4";
-                    saveFileDialog.RestoreDirectory = true;
-                    saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text);
-
-                    if (saveFileDialog.ShowDialog() == true)
-                    {
-                        SetEnabled(false);
-                        btnGetInfo.IsEnabled = false;
-
-                        VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
-
-                        VideoDownloader currentDownload = new VideoDownloader(options);
-                        Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-
-                        SetImage("Images/ppOverheat.gif", true);
-                        statusMessage.Text = "Downloading";
-
-                        try
-                        {
-                            await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
-                            statusMessage.Text = "Done";
-                            SetImage("Images/ppHop.gif", true);
-                        }
-                        catch (Exception ex)
-                        {
-                            statusMessage.Text = "ERROR";
-                            SetImage("Images/peepoSad.png", false);
-                            AppendLog("ERROR: " + ex.Message);
-                            if (Settings.Default.VerboseErrors)
-                            {
-                                MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                        }
-                        btnGetInfo.IsEnabled = true;
-
-                        currentDownload = null;
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                    }
-                }
-                else
-                {
-                    AppendLog("ERROR: Invalid Crop Inputs");
+                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+            btnGetInfo.IsEnabled = true;
+            currentDownload = null;
+            GC.Collect();
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            bool isValid = ValidateInput();
-
-            if (isValid)
+            if (ValidateInputs())
             {
                 WindowQueueOptions queueOptions = new WindowQueueOptions(this);
                 queueOptions.ShowDialog();
