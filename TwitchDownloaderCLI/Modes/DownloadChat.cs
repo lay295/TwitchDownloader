@@ -30,7 +30,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var vodClipIdRegex = new Regex(@"(?:^|(?:twitch.tv\/(?:videos|\w+\/clip)\/))(\w+(?:-\w+)?)(?:$|\?)");
+            var vodClipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:videos|\S+\/clip)?\/?)\w+(?:-\S+)?(?=$|\?)");
             var vodClipIdMatch = vodClipIdRegex.Match(inputOptions.Id);
             if (!vodClipIdMatch.Success)
             {
@@ -46,7 +46,7 @@ namespace TwitchDownloaderCLI.Modes
                     ".json" => ChatFormat.Json,
                     _ => ChatFormat.Text
                 },
-                Id = vodClipIdMatch.Groups[1].ToString(),
+                Id = vodClipIdMatch.Value,
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,

@@ -35,61 +35,60 @@ namespace TwitchDownloaderWPF
             if (string.IsNullOrWhiteSpace(clipId))
             {
                 MessageBox.Show(Translations.Strings.InvalidClipLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidClipLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            else
+
+            try
             {
+                btnGetInfo.IsEnabled = false;
+                comboQuality.Items.Clear();
+                Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
+                Task<List<GqlClipTokenResponse>> taskLinks = TwitchHelper.GetClipLinks(clipId);
+                await Task.WhenAll(taskClipInfo, taskLinks);
+
+                GqlClipResponse clipData = taskClipInfo.Result;
+
                 try
                 {
-                    btnGetInfo.IsEnabled = false;
-                    comboQuality.Items.Clear();
-                    Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
-                    Task<List<GqlClipTokenResponse>> taskLinks = TwitchHelper.GetClipLinks(clipId);
-                    await Task.WhenAll(taskClipInfo, taskLinks);
-
-                    GqlClipResponse clipData = taskClipInfo.Result;
-
-                    try
-                    {
-                        string thumbUrl = clipData.data.clip.thumbnailURL;
-                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                    }
-                    catch
-                    {
-                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                        if (success)
-                        {
-                            imgThumbnail.Source = image;
-                        }
-                    }
-                    TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
-                    textStreamer.Text = clipData.data.clip.broadcaster.displayName;
-                    textCreatedAt.Text = clipData.data.clip.createdAt.ToString();
-                    currentVideoTime = clipData.data.clip.createdAt.ToLocalTime();
-                    textTitle.Text = clipData.data.clip.title;
-                    labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)clipLength.TotalHours, clipLength.Minutes, clipLength.Seconds);
-
-                    foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
-                    {
-                        comboQuality.Items.Add(new TwitchClip(quality.quality, quality.frameRate.ToString(), quality.sourceURL));
-                    }
-
-                    comboQuality.SelectedIndex = 0;
-                    comboQuality.IsEnabled = true;
-                    btnDownload.IsEnabled = true;
-                    btnQueue.IsEnabled = true;
-                    btnGetInfo.IsEnabled = true;
+                    string thumbUrl = clipData.data.clip.thumbnailURL;
+                    imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
                 }
-                catch (Exception ex)
+                catch
                 {
-                    MessageBox.Show(Translations.Strings.UnableToGetClipInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
-                    AppendLog(Translations.Strings.ErrorLog + ex);
-                    if (Settings.Default.VerboseErrors)
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                    if (success)
                     {
-                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                        imgThumbnail.Source = image;
                     }
-                    btnGetInfo.IsEnabled = true;
                 }
+                TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
+                textStreamer.Text = clipData.data.clip.broadcaster.displayName;
+                textCreatedAt.Text = clipData.data.clip.createdAt.ToString();
+                currentVideoTime = clipData.data.clip.createdAt.ToLocalTime();
+                textTitle.Text = clipData.data.clip.title;
+                labelLength.Text = clipLength.ToString("c");
+
+                foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
+                {
+                    comboQuality.Items.Add(new TwitchClip(quality.quality, quality.frameRate.ToString(), quality.sourceURL));
+                }
+
+                comboQuality.SelectedIndex = 0;
+                comboQuality.IsEnabled = true;
+                btnDownload.IsEnabled = true;
+                btnQueue.IsEnabled = true;
+                btnGetInfo.IsEnabled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(Translations.Strings.UnableToGetClipInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                AppendLog(Translations.Strings.ErrorLog + ex);
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                btnGetInfo.IsEnabled = true;
             }
         }
 
@@ -130,7 +129,9 @@ namespace TwitchDownloaderWPF
             image.UriSource = new Uri(imageUri, UriKind.Relative);
             image.EndInit();
             if (isGif)
+            {
                 ImageBehavior.SetAnimatedSource(statusImage, image);
+            }
             else
             {
                 ImageBehavior.SetAnimatedSource(statusImage, null);
@@ -157,49 +158,52 @@ namespace TwitchDownloaderWPF
 
         private async void SplitButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
+            if (((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                return;
+            }
 
-                saveFileDialog.Filter = "MP4 Files | *.mp4";
-                saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text);
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "MP4 Files | *.mp4",
+                FileName = MainWindow.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text)
+            };
+            if (saveFileDialog.ShowDialog() != true)
+            {
+                return;
+            }
 
-                if (saveFileDialog.ShowDialog() == true)
+            comboQuality.IsEnabled = false;
+            btnGetInfo.IsEnabled = false;
+            btnDownload.IsEnabled = false;
+            btnQueue.IsEnabled = false;
+            SetImage("Images/ppOverheat.gif", true);
+            statusMessage.Text = Translations.Strings.StatusDownloading;
+            try
+            {
+                ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
+                downloadOptions.Filename = saveFileDialog.FileName;
+                downloadOptions.Id = clipId;
+                downloadOptions.Quality = comboQuality.Text;
+                await new ClipDownloader(downloadOptions).DownloadAsync();
+
+                statusMessage.Text = Translations.Strings.StatusDone;
+                SetImage("Images/ppHop.gif", true);
+            }
+            catch (Exception ex)
+            {
+                statusMessage.Text = Translations.Strings.StatusError;
+                SetImage("Images/peepoSad.png", false);
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                if (Settings.Default.VerboseErrors)
                 {
-                    comboQuality.IsEnabled = false;
-                    btnGetInfo.IsEnabled = false;
-                    btnDownload.IsEnabled = false;
-                    btnQueue.IsEnabled = false;
-                    SetImage("Images/ppOverheat.gif", true);
-                    statusMessage.Text = Translations.Strings.StatusDownloading;
-                    try
-                    {
-                        ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
-                        downloadOptions.Filename = saveFileDialog.FileName;
-                        downloadOptions.Id = clipId;
-                        downloadOptions.Quality = comboQuality.Text;
-                        await new ClipDownloader(downloadOptions).DownloadAsync();
-
-                        statusMessage.Text = Translations.Strings.StatusDone;
-                        SetImage("Images/ppHop.gif", true);
-                    }
-                    catch (Exception ex)
-                    {
-                        statusMessage.Text = Translations.Strings.StatusError;
-                        SetImage("Images/peepoSad.png", false);
-                        AppendLog(Translations.Strings.ErrorLog + ex.Message);
-                        if (Settings.Default.VerboseErrors)
-                        {
-                            MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                    btnGetInfo.IsEnabled = true;
-                    btnDownload.IsEnabled = true;
-                    btnQueue.IsEnabled = true;
-                    statusProgressBar.Value = 0;
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+            btnGetInfo.IsEnabled = true;
+            btnDownload.IsEnabled = true;
+            btnQueue.IsEnabled = true;
+            statusProgressBar.Value = 0;
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)

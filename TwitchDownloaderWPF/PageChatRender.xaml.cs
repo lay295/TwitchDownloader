@@ -42,7 +42,6 @@ namespace TwitchDownloaderWPF
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "JSON Files | *.json;*.json.gz";
-            openFileDialog.RestoreDirectory = true;
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -330,11 +329,8 @@ namespace TwitchDownloaderWPF
                 {
                     return true;
                 }
-                else
-                {
-                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.AlphaNotSupportedByCodec);
-                    return false;
-                }
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.AlphaNotSupportedByCodec);
+                return false;
             }
 
             if (int.Parse(textHeight.Text) % 2 != 0 || int.Parse(textWidth.Text) % 2 != 0)
@@ -374,7 +370,9 @@ namespace TwitchDownloaderWPF
         {
             List<string> fonts = new List<string>();
             foreach (var fontFamily in fontManager.FontFamilies)
+            {
                 fonts.Add(fontFamily);
+            }
             fonts.Add("Inter Embedded");
             fonts.Sort();
             foreach (var font in fonts)
@@ -410,7 +408,7 @@ namespace TwitchDownloaderWPF
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
         }
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
@@ -502,20 +500,18 @@ namespace TwitchDownloaderWPF
                     MessageBox.Show(Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
 
                 string fileFormat = comboFormat.SelectedItem.ToString();
-                saveFileDialog.Filter = $"{fileFormat} Files | *.{fileFormat.ToLower()}";
-                saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.FileName = Path.GetFileNameWithoutExtension(textJson.Text.Replace(".gz", "")) + "." + fileFormat.ToLower();
-
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = $"{fileFormat} Files | *.{fileFormat.ToLower()}",
+                    FileName = Path.GetFileNameWithoutExtension(textJson.Text.Replace(".gz", "")) + "." + fileFormat.ToLower()
+                };
                 if (saveFileDialog.ShowDialog() != true)
                 {
                     return;
                 }
 
-                SKColor backgroundColor = new SKColor(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
-                SKColor messageColor = new SKColor(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
                 SaveSettings();
 
                 ChatRenderOptions options = GetOptions(saveFileDialog.FileName);
@@ -538,7 +534,9 @@ namespace TwitchDownloaderWPF
                     else
                     {
                         if (window.Invalid)
+                        {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidStartEndTime);
+                        }
                         return;
                     }
                 }
@@ -546,10 +544,9 @@ namespace TwitchDownloaderWPF
                 SetImage("Images/ppOverheat.gif", true);
                 statusMessage.Text = Translations.Strings.StatusRendering;
                 btnRender.IsEnabled = false;
-
+                ffmpegLog.Clear();
                 try
                 {
-                    ffmpegLog.Clear();
                     await currentRender.RenderVideoAsync(new CancellationToken());
                     statusMessage.Text = Translations.Strings.StatusDone;
                     SetImage("Images/ppHop.gif", true);
@@ -575,7 +572,9 @@ namespace TwitchDownloaderWPF
                 statusProgressBar.Value = 0;
                 btnRender.IsEnabled = true;
 
+                currentRender = null;
                 GC.Collect();
+                GC.WaitForPendingFinalizers();
             }
         }
 

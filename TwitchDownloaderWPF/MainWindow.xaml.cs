@@ -17,12 +17,12 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        static public PageVodDownload pageVodDownload = new PageVodDownload();
-        static public PageClipDownload pageClipDownload = new PageClipDownload();
-        static public PageChatDownload pageChatDownload = new PageChatDownload();
-        static public PageChatUpdate pageChatUpdate = new PageChatUpdate();
-        static public PageChatRender pageChatRender = new PageChatRender();
-        static public PageQueue pageQueue = new PageQueue();
+        public static PageVodDownload pageVodDownload = new PageVodDownload();
+        public static PageClipDownload pageClipDownload = new PageClipDownload();
+        public static PageChatDownload pageChatDownload = new PageChatDownload();
+        public static PageChatUpdate pageChatUpdate = new PageChatUpdate();
+        public static PageChatRender pageChatRender = new PageChatRender();
+        public static PageQueue pageQueue = new PageQueue();
 
         public MainWindow()
         {
@@ -76,35 +76,12 @@ namespace TwitchDownloaderWPF
                 await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
 
             Version currentVersion = new Version("1.51.2");
-            Title = string.Format("Twitch Downloader v{0}", currentVersion);
+            Title = $"Twitch Downloader v{currentVersion}";
             AutoUpdater.InstalledVersion = currentVersion;
 #if !DEBUG
+            AutoUpdater.RunUpdateAsAdmin = false;
             AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
 #endif
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            pageChatRender.SaveSettings();
-        }
-
-        public static void DeleteDirectory(string target_dir)
-        {
-            string[] files = Directory.GetFiles(target_dir);
-            string[] dirs = Directory.GetDirectories(target_dir);
-
-            foreach (string file in files)
-            {
-                File.SetAttributes(file, FileAttributes.Normal);
-                File.Delete(file);
-            }
-
-            foreach (string dir in dirs)
-            {
-                DeleteDirectory(dir);
-            }
-
-            Directory.Delete(target_dir, false);
         }
 
         internal static string GetFilename(string template, string title, string id, DateTime date, string channel)
