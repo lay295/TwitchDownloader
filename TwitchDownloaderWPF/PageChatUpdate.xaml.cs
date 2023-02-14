@@ -39,8 +39,7 @@ namespace TwitchDownloaderWPF
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                Filter = "JSON Files | *.json;*.json.gz",
-                RestoreDirectory = false
+                Filter = "JSON Files | *.json;*.json.gz"
             };
             if (openFileDialog.ShowDialog() != true)
             {
@@ -445,7 +444,6 @@ namespace TwitchDownloaderWPF
             else if (radioText.IsChecked == true)
                 saveFileDialog.Filter = "TXT Files | *.txt";
 
-            saveFileDialog.RestoreDirectory = false;
             saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, ChatJsonInfo.video.id ?? "-1", VideoCreatedAt, textStreamer.Text);
 
             if (saveFileDialog.ShowDialog() != true)
