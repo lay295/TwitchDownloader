@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchDownloaderWPF"
         mc:Ignorable="d"
-        Title="Twitch Downloader" MinHeight="440" Height="500" MinWidth="700" Width="850" Loaded="Window_Loaded" Closing="Window_Closing">
+        Title="Twitch Downloader" MinHeight="440" Height="500" MinWidth="700" Width="850" Loaded="Window_Loaded">
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="2" />

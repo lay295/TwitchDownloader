@@ -85,36 +85,6 @@ namespace TwitchDownloaderWPF
 #endif
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            pageChatRender.SaveSettings();
-            string tempFolder = Path.Combine(Path.GetTempPath(), "TwitchDownloader", "Chat Render");
-            try
-            {
-                DeleteDirectory(tempFolder);
-            }
-            catch { }
-        }
-
-        public static void DeleteDirectory(string target_dir)
-        {
-            string[] files = Directory.GetFiles(target_dir);
-            string[] dirs = Directory.GetDirectories(target_dir);
-
-            foreach (string file in files)
-            {
-                File.SetAttributes(file, FileAttributes.Normal);
-                File.Delete(file);
-            }
-
-            foreach (string dir in dirs)
-            {
-                DeleteDirectory(dir);
-            }
-
-            Directory.Delete(target_dir, false);
-        }
-
         internal static string GetFilename(string template, string title, string id, DateTime date, string channel)
         {
             StringBuilder returnString = new StringBuilder(template.Replace("{title}", title).Replace("{id}", id).Replace("{channel}", channel).Replace("{date}", date.ToString("Mdyy")).Replace("{random_string}", Path.GetRandomFileName().Split('.').First()));
