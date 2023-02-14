@@ -36,61 +36,60 @@ namespace TwitchDownloaderWPF
             if (string.IsNullOrWhiteSpace(clipId))
             {
                 MessageBox.Show("Please enter a valid clip ID/URL" + Environment.NewLine + "Examples:" + Environment.NewLine + "https://clips.twitch.tv/ImportantPlausibleMetalOSsloth" + Environment.NewLine + "ImportantPlausibleMetalOSsloth", "Invalid Video ID/URL", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            else
+
+            try
             {
+                btnGetInfo.IsEnabled = false;
+                comboQuality.Items.Clear();
+                Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
+                Task<List<GqlClipTokenResponse>> taskLinks = TwitchHelper.GetClipLinks(clipId);
+                await Task.WhenAll(taskClipInfo, taskLinks);
+
+                GqlClipResponse clipData = taskClipInfo.Result;
+
                 try
                 {
-                    btnGetInfo.IsEnabled = false;
-                    comboQuality.Items.Clear();
-                    Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
-                    Task<List<GqlClipTokenResponse>> taskLinks = TwitchHelper.GetClipLinks(clipId);
-                    await Task.WhenAll(taskClipInfo, taskLinks);
-
-                    GqlClipResponse clipData = taskClipInfo.Result;
-
-                    try
-                    {
-                        string thumbUrl = clipData.data.clip.thumbnailURL;
-                        imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
-                    }
-                    catch
-                    {
-                        AppendLog("ERROR: Unable to find thumbnail");
-                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                        if (success)
-                        {
-                            imgThumbnail.Source = image;
-                        }
-                    }
-                    TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
-                    textStreamer.Text = clipData.data.clip.broadcaster.displayName;
-                    textCreatedAt.Text = clipData.data.clip.createdAt.ToString();
-                    currentVideoTime = clipData.data.clip.createdAt.ToLocalTime();
-                    textTitle.Text = clipData.data.clip.title;
-                    labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)clipLength.TotalHours, clipLength.Minutes, clipLength.Seconds);
-
-                    foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
-                    {
-                        comboQuality.Items.Add(new TwitchClip(quality.quality, quality.frameRate.ToString(), quality.sourceURL));
-                    }
-
-                    comboQuality.SelectedIndex = 0;
-                    comboQuality.IsEnabled = true;
-                    btnDownload.IsEnabled = true;
-                    btnQueue.IsEnabled = true;
-                    btnGetInfo.IsEnabled = true;
+                    string thumbUrl = clipData.data.clip.thumbnailURL;
+                    imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
                 }
-                catch (Exception ex)
+                catch
                 {
-                    MessageBox.Show("Unable to get Clip information. Please double check Clip Slug and try again", "Unable to get info", MessageBoxButton.OK, MessageBoxImage.Error);
-                    AppendLog("ERROR: " + ex);
-                    if (Settings.Default.VerboseErrors)
+                    AppendLog("ERROR: Unable to find thumbnail");
+                    var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                    if (success)
                     {
-                        MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                        imgThumbnail.Source = image;
                     }
-                    btnGetInfo.IsEnabled = true;
                 }
+                TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
+                textStreamer.Text = clipData.data.clip.broadcaster.displayName;
+                textCreatedAt.Text = clipData.data.clip.createdAt.ToString();
+                currentVideoTime = clipData.data.clip.createdAt.ToLocalTime();
+                textTitle.Text = clipData.data.clip.title;
+                labelLength.Text = clipLength.ToString("c");
+
+                foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
+                {
+                    comboQuality.Items.Add(new TwitchClip(quality.quality, quality.frameRate.ToString(), quality.sourceURL));
+                }
+
+                comboQuality.SelectedIndex = 0;
+                comboQuality.IsEnabled = true;
+                btnDownload.IsEnabled = true;
+                btnQueue.IsEnabled = true;
+                btnGetInfo.IsEnabled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to get Clip information. Please double check Clip Slug and try again", "Unable to get info", MessageBoxButton.OK, MessageBoxImage.Error);
+                AppendLog("ERROR: " + ex);
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                btnGetInfo.IsEnabled = true;
             }
         }
 
