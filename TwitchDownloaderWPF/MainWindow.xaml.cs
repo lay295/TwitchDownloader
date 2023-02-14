@@ -80,6 +80,7 @@ namespace TwitchDownloaderWPF
             Title = string.Format("Twitch Downloader v{0}", currentVersion);
             AutoUpdater.InstalledVersion = currentVersion;
 #if !DEBUG
+            AutoUpdater.RunUpdateAsAdmin = false;
             AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
 #endif
         }
