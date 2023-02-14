@@ -31,7 +31,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var vodIdRegex = new Regex(@"(?:^|(?:twitch.tv\/videos\/))(\d+)(?:$|\?)");
+            var vodIdRegex = new Regex(@"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?)");
             var vodIdMatch = vodIdRegex.Match(inputOptions.Id);
             if (!vodIdMatch.Success)
             {
@@ -42,7 +42,7 @@ namespace TwitchDownloaderCLI.Modes
             VideoDownloadOptions downloadOptions = new()
             {
                 DownloadThreads = inputOptions.DownloadThreads,
-                Id = int.Parse(vodIdMatch.Groups[1].ToString()),
+                Id = int.Parse(vodIdMatch.ValueSpan),
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,
