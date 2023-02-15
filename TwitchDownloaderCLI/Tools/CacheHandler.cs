@@ -18,33 +18,33 @@ namespace TwitchDownloaderCLI.Tools
             }
         }
 
-        internal static void PromptClearCache()
+        private static void PromptClearCache()
         {
             Console.WriteLine("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly.");
-            PromptUser();
+            while (true)
+            {
+                Console.Write("[Y]es / [N]o: ");
+                var userInput = Console.ReadLine()!.Trim().ToLower();
+                switch (userInput)
+                {
+                    case "y":
+                    case "ye":
+                    case "yes":
+                        ClearTempCache();
+                        return;
+                    case "n":
+                    case "no":
+                        return;
+                    default:
+                        Console.Write("Invalid input. ");
+                        continue;
+                }
+            }
         }
 
-        private static void PromptUser()
+        private static void ClearTempCache()
         {
-            Console.Write("[Y]es / [N]o: ");
-            string userInput = Console.ReadLine().Trim().ToLower();
-            if (userInput.Equals("y") || userInput.Equals("yes"))
-            {
-                ClearTempCache();
-                return;
-            }
-            else if (userInput.Equals("n") || userInput.Equals("no"))
-            {
-                return;
-            }
-
-            Console.Write("Invalid input. ");
-            PromptUser();
-        }
-
-        internal static void ClearTempCache()
-        {
-            string defaultCacheDirectory = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
+            var defaultCacheDirectory = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
             if (Directory.Exists(defaultCacheDirectory))
             {
                 Console.WriteLine("Clearing cache...");
@@ -57,11 +57,10 @@ namespace TwitchDownloaderCLI.Tools
                 {
                     Console.WriteLine("Insufficient access to clear cache folder.");
                 }
+                return;
             }
-            else
-            {
-                Console.WriteLine("No cache to clear.");
-            }
+
+            Console.WriteLine("No cache to clear.");
         }
     }
 }

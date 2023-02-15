@@ -38,7 +38,7 @@ Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b
 (Default: 10) Number of download threads.
 
 **--oauth**
-OAuth access token to download subscriber only VODs. <u>**DO NOT SHARE YOUR OUATH WITH ANYONE.**</u>
+OAuth access token to download subscriber only VODs. <u>**DO NOT SHARE YOUR OAUTH WITH ANYONE.**</u>
 
 **--ffmpeg-path**
 Path to ffmpeg executable.
@@ -98,7 +98,7 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 
 
 ## Arguments for mode chatupdate
-<sup>Updates the embeded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format</sup>
+<sup>Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format</sup>
 
 **-i / --input (REQUIRED)**
 Path to input file. Valid extensions are: `.json`.
@@ -306,7 +306,7 @@ Download a Clip with defaults
 
     TwitchDownloaderCLI clipdownload --id NurturingCalmHamburgerVoHiYo -o clip.mp4
 
-Download a Chat JSON with embeded emotes/badges from Twitch and emotes from Bttv
+Download a Chat JSON with embedded emotes/badges from Twitch and emotes from Bttv
 
     TwitchDownloaderCLI chatdownload --id 612942303 --embed-images --bttv=true --ffz=false --stv=false -o chat.json
 

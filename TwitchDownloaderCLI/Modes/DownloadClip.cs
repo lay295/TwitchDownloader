@@ -6,11 +6,11 @@ using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal class DownloadClip
+    internal static class DownloadClip
     {
         internal static void Download(ClipDownloadArgs inputOptions)
         {
-            ClipDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions);
 
             ClipDownloader clipDownloader = new(downloadOptions);
             clipDownloader.DownloadAsync().Wait();

@@ -15,7 +15,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
 
-            VideoDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions);
 
             VideoDownloader videoDownloader = new(downloadOptions);
             Progress<ProgressReport> progress = new();
@@ -50,7 +50,7 @@ namespace TwitchDownloaderCLI.Modes
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
-                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
+                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder
             };
 

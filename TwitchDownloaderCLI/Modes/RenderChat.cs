@@ -9,7 +9,7 @@ using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal class RenderChat
+    internal static class RenderChat
     {
         internal static void Render(ChatRenderArgs inputOptions)
         {
@@ -18,7 +18,7 @@ namespace TwitchDownloaderCLI.Modes
             Progress<ProgressReport> progress = new();
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
 
-            ChatRenderOptions renderOptions = GetRenderOptions(inputOptions);
+            var renderOptions = GetRenderOptions(inputOptions);
             ChatRenderer chatRenderer = new(renderOptions, progress);
             chatRenderer.ParseJsonAsync().Wait();
             chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
@@ -36,10 +36,10 @@ namespace TwitchDownloaderCLI.Modes
                 ChatWidth = inputOptions.ChatWidth,
                 StartOverride = inputOptions.CropBeginningTime,
                 EndOverride = inputOptions.CropEndingTime,
-                BttvEmotes = (bool)inputOptions.BttvEmotes,
-                FfzEmotes = (bool)inputOptions.FfzEmotes,
-                StvEmotes = (bool)inputOptions.StvEmotes,
-                AllowUnlistedEmotes = (bool)inputOptions.AllowUnlistedEmotes,
+                BttvEmotes = (bool)inputOptions.BttvEmotes!,
+                FfzEmotes = (bool)inputOptions.FfzEmotes!,
+                StvEmotes = (bool)inputOptions.StvEmotes!,
+                AllowUnlistedEmotes = (bool)inputOptions.AllowUnlistedEmotes!,
                 Outline = inputOptions.Outline,
                 OutlineSize = inputOptions.OutlineSize,
                 Font = inputOptions.Font,
@@ -64,10 +64,10 @@ namespace TwitchDownloaderCLI.Modes
                 GenerateMask = inputOptions.GenerateMask,
                 InputArgs = inputOptions.InputArgs,
                 OutputArgs = inputOptions.OutputArgs,
-                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
+                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder,
-                SubMessages = (bool)inputOptions.SubMessages,
-                ChatBadges = (bool)inputOptions.ChatBadges,
+                SubMessages = (bool)inputOptions.SubMessages!,
+                ChatBadges = (bool)inputOptions.ChatBadges!,
                 Timestamp = inputOptions.Timestamp,
                 Offline = inputOptions.Offline,
                 LogFfmpegOutput = inputOptions.LogFfmpegOutput,

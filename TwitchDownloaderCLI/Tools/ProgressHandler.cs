@@ -3,9 +3,9 @@ using TwitchDownloaderCore;
 
 namespace TwitchDownloaderCLI.Tools
 {
-    internal class ProgressHandler
+    internal static class ProgressHandler
     {
-        private static string previousMessage = "";
+        private static string _previousMessage = "";
 
         internal static void Progress_ProgressChanged(object sender, ProgressReport e)
         {
@@ -28,38 +28,38 @@ namespace TwitchDownloaderCLI.Tools
 
         private static void ReportLog(ProgressReport e)
         {
-            string currentStatus = Environment.NewLine + "[LOG] - " + e.Data;
-            previousMessage = currentStatus;
+            var currentStatus = Environment.NewLine + "[LOG] - " + e.Data + Environment.NewLine;
+            _previousMessage = currentStatus;
             Console.Write(currentStatus);
         }
 
         private static void ReportNewLineStatus(ProgressReport e)
         {
-            string currentStatus = Environment.NewLine + "[STATUS] - " + e.Data;
-            if (currentStatus != previousMessage)
+            var currentStatus = Environment.NewLine + "[STATUS] - " + e.Data;
+            if (currentStatus != _previousMessage)
             {
-                previousMessage = currentStatus;
+                _previousMessage = currentStatus;
                 Console.Write(currentStatus);
             }
         }
 
         private static void ReportSameLineStatus(ProgressReport e)
         {
-            string currentStatus = "\r[STATUS] - " + e.Data;
-            if (currentStatus != previousMessage)
+            var currentStatus = "\r[STATUS] - " + e.Data;
+            if (currentStatus != _previousMessage)
             {
                 // This ensures the previous message is fully overwritten
-                currentStatus = currentStatus.PadRight(previousMessage.Length);
+                currentStatus = currentStatus.PadRight(_previousMessage.Length);
 
-                previousMessage = currentStatus.TrimEnd();
+                _previousMessage = currentStatus.TrimEnd();
                 Console.Write(currentStatus);
             }
         }
 
         private static void ReportFfmpegLog(ProgressReport e)
         {
-            string currentStatus = Environment.NewLine + "<FFMEPG LOG> " + e.Data;
-            previousMessage = currentStatus;
+            var currentStatus = Environment.NewLine + "<FFMPEG LOG> " + e.Data;
+            _previousMessage = currentStatus;
             Console.Write(currentStatus);
         }
     }
