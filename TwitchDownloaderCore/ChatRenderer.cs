@@ -99,6 +99,12 @@ namespace TwitchDownloaderCore
 
             (int startTick, int totalTicks) = GetVideoTicks();
 
+            var renderFileDirectory = Directory.GetParent(Path.GetFullPath(renderOptions.OutputFile))!;
+            if (!renderFileDirectory.Exists)
+            {
+                TwitchHelper.CreateDirectory(renderFileDirectory.FullName);
+            }
+
             if (File.Exists(renderOptions.OutputFile))
                 File.Delete(renderOptions.OutputFile);
 
