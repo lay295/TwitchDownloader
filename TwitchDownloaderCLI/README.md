@@ -306,7 +306,7 @@ Download a Clip with defaults
 
     TwitchDownloaderCLI clipdownload --id NurturingCalmHamburgerVoHiYo -o clip.mp4
 
-Download a Chat JSON with embeded emotes/badges from Twitch and emotes from Bttv
+Download a Chat JSON with embedded emotes/badges from Twitch and emotes from Bttv
 
     TwitchDownloaderCLI chatdownload --id 612942303 --embed-images --bttv=true --ffz=false --stv=false -o chat.json
 

@@ -26,8 +26,15 @@ namespace TwitchDownloaderCore.Chat
             cancellationToken.ThrowIfCancellationRequested();
 
             string[] templateStrings = Properties.Resources.template.Split('\n');
-            using var fs = File.Create(filePath);
-            using var sw = new StreamWriter(fs, Encoding.Unicode);
+
+            var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
+            if (!outputDirectory.Exists)
+            {
+                TwitchHelper.CreateDirectory(outputDirectory.FullName);
+            }
+
+            await using var fs = File.Create(filePath);
+            await using var sw = new StreamWriter(fs, Encoding.Unicode);
 
             for (int i = 0; i < templateStrings.Length; i++)
             {

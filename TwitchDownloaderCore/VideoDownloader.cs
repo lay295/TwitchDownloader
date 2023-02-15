@@ -108,6 +108,12 @@ namespace TwitchDownloaderCore
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfoResponse.data.video.owner.displayName, startOffset, downloadOptions.Id, videoInfoResponse.data.video.title, videoInfoResponse.data.video.createdAt, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
+                var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
+                if (!finalizedFileDirectory.Exists)
+                {
+                    TwitchHelper.CreateDirectory(finalizedFileDirectory.FullName);
+                }
+
                 await Task.Run(() =>
                 {
                     var process = new Process
@@ -152,7 +158,8 @@ namespace TwitchDownloaderCore
                     process.BeginErrorReadLine();
                     process.WaitForExit();
 
-                    progress.Report(new ProgressReport(0));
+                    progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video 100% [4/4]"));
+                    progress.Report(new ProgressReport(100));
                 }, cancellationToken);
             }
             finally

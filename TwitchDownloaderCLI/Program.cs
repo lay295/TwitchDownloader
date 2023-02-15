@@ -9,13 +9,13 @@ namespace TwitchDownloaderCLI
 {
     class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            string processFileName = Path.GetFileName(Environment.ProcessPath);
+            var processFileName = Path.GetFileName(Environment.ProcessPath);
             
             WriteNoArgHelpText(args, processFileName);
 
-            string[] preParsedArgs = PreParseArgs.Parse(args, processFileName);
+            var preParsedArgs = PreParseArgs.Parse(args, processFileName);
 
             Parser.Default.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs)
                 .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
@@ -28,24 +28,26 @@ namespace TwitchDownloaderCLI
                 .WithNotParsed(_ => Environment.Exit(1));
         }
 
-        static void WriteNoArgHelpText(string[] args, string processFileName)
+        private static void WriteNoArgHelpText(string[] args, string processFileName)
         {
-            if (args.Length == 0)
+            if (args.Length != 0)
             {
-                if (Path.GetExtension(processFileName).Equals(".exe"))
-                {
-                    // Some Windows users try to double click the executable
-                    Console.WriteLine("This is a command line tool. Please open a terminal and run \"{0} help\" from there for more information.{1}Press any key to close...",
-                        processFileName, Environment.NewLine);
-                    Console.ReadKey();
-                }
-                else
-                {
-                    Console.WriteLine("Usage: {0} [VERB] [OPTIONS]{1}Try \'{2} help\' for more information.",
-                        processFileName, Environment.NewLine, processFileName);
-                }
-                Environment.Exit(1);
+                return;
             }
+
+            if (Path.GetExtension(processFileName).Equals(".exe"))
+            {
+                // Some Windows users try to double click the executable
+                Console.WriteLine("This is a command line tool. Please open a terminal and run \"{0} help\" from there for more information.{1}Press any key to close...",
+                    processFileName, Environment.NewLine);
+                Console.ReadKey();
+            }
+            else
+            {
+                Console.WriteLine("Usage: {0} [VERB] [OPTIONS]{1}Try \'{2} help\' for more information.",
+                    processFileName, Environment.NewLine, processFileName);
+            }
+            Environment.Exit(1);
         }
     }
 }
