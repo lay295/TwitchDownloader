@@ -155,6 +155,9 @@
   <data name="CacheFolder" xml:space="preserve">
     <value>Dossier de Cache:</value>
   </data>
+  <data name="TemplateChats" xml:space="preserve">
+    <value>Chat:</value>
+  </data>
   <data name="ChatBadgeFilter" xml:space="preserve">
     <value>Filtre de badge de chat:</value>
   </data>
@@ -635,9 +638,6 @@
     <value>{theme} n'a pas été trouvé. Passage au thème système</value>
     <comment>Do not translate {theme}</comment>
   </data>
-  <data name="TemplateChats" xml:space="preserve">
-    <value>Chat:</value>
-  </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Dispersion </value>
     <comment>Leave a trailing space</comment>
@@ -645,15 +645,15 @@
   <data name="MessageDispersionTooltip" xml:space="preserve">
     <value>In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow.</value>
   </data>
+  <data name="ChatCompression" xml:space="preserve">
+    <value>Compression:</value>
+  </data>
   <data name="ChatCompressionNone" xml:space="preserve">
     <value>Non</value>
   </data>
   <data name="ChatCompressionGzip" xml:space="preserve">
     <value>Gzip</value>
     <comment>Do not translate</comment>
-  </data>
-  <data name="ChatCompression" xml:space="preserve">
-    <value>Compression:</value>
   </data>
   <data name="ThemesFailedToWrite" xml:space="preserve">
     <value>Certains thèmes inclus n'ont pas été écrits.</value>
@@ -664,16 +664,16 @@
   <data name="TitleEnqueueOptions" xml:space="preserve">
     <value>Options de mise en file d'attente</value>
   </data>
-  <data name="TitleClipMassDownloader" xml:space="preserve">
-    <value>Téléchargeur de masse de clips</value>
-  </data>
-  <data name="TitleVideoMassDownloader" xml:space="preserve">
-    <value>Téléchargeur de vidéos en masse</value>
-  </data>
   <data name="TitleRenderRange" xml:space="preserve">
     <value>Sélectionnez la plage de rendu (Secondes)</value>
   </data>
   <data name="TitleUrlList" xml:space="preserve">
     <value>Mass Download URL List</value>
+  </data>
+  <data name="TitleVideoMassDownloader" xml:space="preserve">
+    <value>Téléchargeur de vidéos en masse</value>
+  </data>
+  <data name="TitleClipMassDownloader" xml:space="preserve">
+    <value>Téléchargeur de masse de clips</value>
   </data>
 </root>
