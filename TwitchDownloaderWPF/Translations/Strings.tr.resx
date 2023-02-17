@@ -678,9 +678,6 @@
   <data name="TitleClipMassDownloader" xml:space="preserve">
     <value>Toplu Klip İndirici</value>
   </data>
-  <data name="ApplicationLanguageTooltip" xml:space="preserve">
-    <value>Is TwitchDownloaderWPF not available in your native language? Click to learn how to help translate!</value>
-  </data>
 <data name="ApplicationLanguageTooltip" xml:space="preserve">
     <value>TwitchDownloaderWPF ana dilinizde mevcut değil mi?  Çeviriye nasıl yardım edeceğinizi öğrenmek için tıklayın!</value>
   </data>
