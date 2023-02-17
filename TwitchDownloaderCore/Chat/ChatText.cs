@@ -14,7 +14,13 @@ namespace TwitchDownloaderCore.Chat
         {
             ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
 
-            using var sw = new StreamWriter(filePath);
+            var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
+            if (!outputDirectory.Exists)
+            {
+                TwitchHelper.CreateDirectory(outputDirectory.FullName);
+            }
+
+            await using var sw = new StreamWriter(filePath);
             foreach (var comment in chatRoot.comments)
             {
                 string username = comment.commenter.display_name;

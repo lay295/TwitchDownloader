@@ -10,11 +10,11 @@ using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal class DownloadChat
+    internal static class DownloadChat
     {
         internal static void Download(ChatDownloadArgs inputOptions)
         {
-            ChatDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions);
 
             ChatDownloader chatDownloader = new(downloadOptions);
             Progress<ProgressReport> progress = new();
@@ -55,9 +55,9 @@ namespace TwitchDownloaderCLI.Modes
                 Filename = inputOptions.Compression != ChatCompression.None ? inputOptions.OutputFile + ".gz" : inputOptions.OutputFile,
                 TimeFormat = inputOptions.TimeFormat,
                 ConnectionCount = inputOptions.ChatConnections,
-                BttvEmotes = (bool)inputOptions.BttvEmotes,
-                FfzEmotes = (bool)inputOptions.FfzEmotes,
-                StvEmotes = (bool)inputOptions.StvEmotes,
+                BttvEmotes = (bool)inputOptions.BttvEmotes!,
+                FfzEmotes = (bool)inputOptions.FfzEmotes!,
+                StvEmotes = (bool)inputOptions.StvEmotes!,
                 TempFolder = inputOptions.TempFolder
             };
 

@@ -54,6 +54,12 @@ namespace TwitchDownloaderCore
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            var clipDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
+            if (!clipDirectory.Exists)
+            {
+                TwitchHelper.CreateDirectory(clipDirectory.FullName);
+            }
+
             var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
             using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
             {

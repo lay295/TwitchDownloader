@@ -18,10 +18,10 @@ namespace TwitchDownloaderCLI.Tools
                 return Path.GetFullPath(fileName);
             }
 
-            var environmentPath = Environment.GetEnvironmentVariable("PATH"); // environment variable is case sensitive on Linux
+            var environmentPath = Environment.GetEnvironmentVariable("PATH")!; // environment variable is case sensitive on Linux
             foreach (var path in environmentPath.Split(Path.PathSeparator))
             {
-                var fullPath = Path.Combine(path, fileName);
+                var fullPath = Path.Combine(path, fileName!);
                 if (File.Exists(fullPath))
                 {
                     return fullPath;

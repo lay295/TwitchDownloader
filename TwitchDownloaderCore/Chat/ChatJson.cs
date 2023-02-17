@@ -32,11 +32,11 @@ namespace TwitchDownloaderCore.Chat
                 AllowTrailingCommas = true
             };
 
-            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             switch (Path.GetExtension(filePath).ToLower())
             {
                 case ".gz":
-                    using (var gs = new GZipStream(fs, CompressionMode.Decompress))
+                    await using (var gs = new GZipStream(fs, CompressionMode.Decompress))
                     {
                         jsonDocument = await JsonDocument.ParseAsync(gs, deserializationOptions, cancellationToken);
                     }
@@ -93,14 +93,20 @@ namespace TwitchDownloaderCore.Chat
         {
             ArgumentNullException.ThrowIfNull(chatRoot, nameof(chatRoot));
 
-            using var fs = File.Create(filePath);
+            var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
+            if (!outputDirectory.Exists)
+            {
+                TwitchHelper.CreateDirectory(outputDirectory.FullName);
+            }
+
+            await using var fs = File.Create(filePath);
             switch (compression)
             {
                 case ChatCompression.None:
                     await JsonSerializer.SerializeAsync(fs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
                     break;
                 case ChatCompression.Gzip:
-                    using (var gs = new GZipStream(fs, CompressionLevel.SmallestSize))
+                    await using (var gs = new GZipStream(fs, CompressionLevel.SmallestSize))
                     {
                         await JsonSerializer.SerializeAsync(gs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
                     }

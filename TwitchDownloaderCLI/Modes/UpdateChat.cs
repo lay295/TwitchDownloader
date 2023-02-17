@@ -9,11 +9,11 @@ using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal class UpdateChat
+    internal static class UpdateChat
     {
         internal static void Update(ChatUpdateArgs inputOptions)
         {
-            ChatUpdateOptions updateOptions = GetUpdateOptions(inputOptions);
+            var updateOptions = GetUpdateOptions(inputOptions);
 
             ChatUpdater chatUpdater = new(updateOptions);
             Progress<ProgressReport> progress = new();
@@ -29,14 +29,14 @@ namespace TwitchDownloaderCLI.Modes
                 Console.WriteLine("[ERROR] - Input file does not exist!");
                 Environment.Exit(1);
             }
-            ChatFormat inFormat = Path.GetExtension(inputOptions.InputFile)!.ToLower() switch
+            var inFormat = Path.GetExtension(inputOptions.InputFile)!.ToLower() switch
             {
                 ".html" or ".htm" => ChatFormat.Html,
                 ".json" => ChatFormat.Json,
                 ".gz" => ChatFormat.Json,
                 _ => ChatFormat.Text
             };
-            ChatFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
+            var outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
             {
                 ".html" or ".htm" => ChatFormat.Html,
                 ".json" => ChatFormat.Json,
@@ -69,9 +69,9 @@ namespace TwitchDownloaderCLI.Modes
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = !double.IsNegative(inputOptions.CropEndingTime),
                 CropEndingTime = inputOptions.CropEndingTime,
-                BttvEmotes = (bool)inputOptions.BttvEmotes,
-                FfzEmotes = (bool)inputOptions.FfzEmotes,
-                StvEmotes = (bool)inputOptions.StvEmotes,
+                BttvEmotes = (bool)inputOptions.BttvEmotes!,
+                FfzEmotes = (bool)inputOptions.FfzEmotes!,
+                StvEmotes = (bool)inputOptions.StvEmotes!,
                 TextTimestampFormat = inputOptions.TimeFormat,
                 TempFolder = inputOptions.TempFolder
             };
