@@ -588,8 +588,9 @@
   <data name="DownloadVideo" xml:space="preserve">
     <value>Download Video</value>
   </data>
-  <data name="LanguageLabel" xml:space="preserve">
-    <value>Language:</value>
+  <data name="ApplicationLanguage" xml:space="preserve">
+    <value>Language </value>
+    <comment>Leave a trailing space</comment>
   </data>
   <data name="RenderChat" xml:space="preserve">
     <value>Render Chat</value>
@@ -675,5 +676,8 @@
   </data>
   <data name="TitleClipMassDownloader" xml:space="preserve">
     <value>Clip Mass Downloader</value>
+  </data>
+  <data name="ApplicationLanguageTooltip" xml:space="preserve">
+    <value>Is TwitchDownloaderWPF not available in your native language? Click to learn how to help translate!</value>
   </data>
 </root>

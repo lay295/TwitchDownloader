@@ -124,7 +124,7 @@
     <value>Mettre en File d'Attente</value>
   </data>
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
-    <value>You've selected an alpha channel (transparency) for a container/codec that does not support it.\nRemove transparency or encode with MOV and RLE/PRORES (file size will be large)</value>
+    <value>Le conteneur/codec sélectionné ne supporte pas l'alpha (transparence). Supprimez la transparence ou encodez avec MOV et RLE/PRORES (la taille du fichier sera importante).</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Le Thème </value>
@@ -243,7 +243,7 @@
     <value>Connexions:</value>
   </data>
   <data name="DownloadFilenameTemplates" xml:space="preserve">
-    <value>Download Filename Templates:</value>
+    <value>Modèles de noms pour les téléchargements</value>
   </data>
   <data name="DownloadFormat" xml:space="preserve">
     <value>Format de téléchargement:</value>
@@ -282,7 +282,7 @@
     <value>Input Arguments:</value>
   </data>
   <data name="FfmpegOptionsHyperlink" xml:space="preserve">
-    <value>Click here to learn about Ffmpeg options</value>
+    <value>Cliquez pour en savoir plus sur les arguments de Ffmpeg</value>
   </data>
   <data name="FfmpegOutputArguments" xml:space="preserve">
     <value>Output Arguments:</value>
@@ -351,7 +351,7 @@
     <value>Journal de bord:</value>
   </data>
   <data name="MassDownloads" xml:space="preserve">
-    <value>Mass Downloads</value>
+    <value>Téléchargements en masse</value>
   </data>
   <data name="Oauth" xml:space="preserve">
     <value>OAuth (optionnel) </value>
@@ -588,8 +588,9 @@
   <data name="DownloadVideo" xml:space="preserve">
     <value>Télécharger la Vidéo</value>
   </data>
-  <data name="LanguageLabel" xml:space="preserve">
-    <value>Langue:</value>
+  <data name="ApplicationLanguage" xml:space="preserve">
+    <value>Langue </value>
+    <comment>Leave a trailing space</comment>
   </data>
   <data name="RenderChat" xml:space="preserve">
     <value>Rendu le Chat</value>
@@ -675,5 +676,8 @@
   </data>
   <data name="TitleClipMassDownloader" xml:space="preserve">
     <value>Téléchargeur de masse de clips</value>
+  </data>
+  <data name="ApplicationLanguageTooltip" xml:space="preserve">
+    <value>TwitchDownloaderWPF n'est pas disponible dans votre langue maternelle ? Cliquez pour apprendre comment aider à traduire !</value>
   </data>
 </root>

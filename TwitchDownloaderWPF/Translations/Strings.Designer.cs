@@ -88,6 +88,24 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Language .
+        /// </summary>
+        public static string ApplicationLanguage {
+            get {
+                return ResourceManager.GetString("ApplicationLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Is TwitchDownloaderWPF not available in your native language? Click to learn how to help translate!.
+        /// </summary>
+        public static string ApplicationLanguageTooltip {
+            get {
+                return ResourceManager.GetString("ApplicationLanguageTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Theme .
         /// </summary>
         public static string ApplicationTheme {
@@ -813,15 +831,6 @@ namespace TwitchDownloaderWPF.Translations {
         public static string JsonFile {
             get {
                 return ResourceManager.GetString("JsonFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Language:.
-        /// </summary>
-        public static string LanguageLabel {
-            get {
-                return ResourceManager.GetString("LanguageLabel", resourceCulture);
             }
         }
         
