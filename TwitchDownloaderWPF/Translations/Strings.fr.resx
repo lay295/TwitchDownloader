@@ -243,7 +243,7 @@
     <value>Connexions:</value>
   </data>
   <data name="DownloadFilenameTemplates" xml:space="preserve">
-    <value>Modèles de noms pour les téléchargements</value>
+    <value>Modèles de noms pour les téléchargements:</value>
   </data>
   <data name="DownloadFormat" xml:space="preserve">
     <value>Format de téléchargement:</value>
