@@ -1298,6 +1298,12 @@ namespace TwitchDownloaderCore
 
         private async Task<List<ChatBadge>> GetScaledBadges()
         {
+            // Do not fetch if badges are disabled
+            if (!renderOptions.ChatBadges)
+            {
+                return new List<ChatBadge>();
+            }
+
             var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
 
             foreach (var badge in badgeTask)
