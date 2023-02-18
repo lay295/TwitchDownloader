@@ -260,7 +260,7 @@ namespace TwitchDownloaderCore
             messageFont.MeasureText("ABC123", ref sampleTextBounds);
             int sectionDefaultYPos = (int)(((renderOptions.SectionHeight - sampleTextBounds.Height) / 2.0) + sampleTextBounds.Height);
 
-            using var highlightIcons = new HighlightMessage();
+            using var highlightIcons = new HighlightMessage(renderOptions.TempFolder);
 
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {

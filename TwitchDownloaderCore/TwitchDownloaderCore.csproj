@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\gift-illustration.png" />
     <EmbeddedResource Include="Resources\interbold.otf" />
     <EmbeddedResource Include="Resources\interregular.otf" />
     <EmbeddedResource Include="Resources\template.html" />
