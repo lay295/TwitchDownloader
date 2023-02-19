@@ -804,15 +804,13 @@ namespace TwitchDownloaderCore
                 // If no valid emojis were found retry with a less accurate approach
                 if (emojiMatches.Count == 0 && fragmentSpan.Length > 1 && char.IsSurrogatePair(fragmentSpan[0], fragmentSpan[1]))
                 {
+                    var surrogateSequence = char.ConvertToUtf32(fragmentSpan[0], fragmentSpan[1]);
                     foreach (var emoji in Emoji.All)
                     {
                         if (emoji.Group == "country-flag")
                             continue;
-                        if (emoji.Sequence.Codepoints.Count() != 2)
-                            continue;
 
-                        var utf32EmojiSequence = emoji.Sequence.AsUtf32().FirstOrDefault(defaultValue:(uint)0);
-                        var surrogateSequence = char.ConvertToUtf32(fragmentSpan[0], fragmentSpan[1]);
+                        var utf32EmojiSequence = emoji.Sequence.AsUtf32().FirstOrDefault(defaultValue: (uint)0);
                         if (surrogateSequence == utf32EmojiSequence)
                         {
                             emojiMatches.Add(emoji);
