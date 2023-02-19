@@ -41,6 +41,7 @@ namespace TwitchDownloaderCore
         private List<CheerEmote> cheermotesList = new List<CheerEmote>();
         private Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
         private Dictionary<int, SKPaint> fallbackFontCache = new Dictionary<int, SKPaint>();
+        private bool noFallbackFontFound = false;
         private SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont = new SKPaint();
         private SKPaint nameFont = new SKPaint();
@@ -1434,7 +1435,11 @@ namespace TwitchDownloaderCore
             if (newPaint.Typeface == null)
             {
                 newPaint.Typeface = SKTypeface.Default;
-                _progress?.Report(new ProgressReport(ReportType.Log, "No valid typefaces were found for some messages."));
+                if (!noFallbackFontFound)
+                {
+                    noFallbackFontFound = true;
+                    _progress?.Report(new ProgressReport(ReportType.Log, "No valid typefaces were found for some messages."));
+                }
             }
 
             fallbackPaint = newPaint;
