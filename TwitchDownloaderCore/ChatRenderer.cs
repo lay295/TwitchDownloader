@@ -795,9 +795,28 @@ namespace TwitchDownloaderCore
                 List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
                 foreach (var emoji in Emoji.All)
                 {
-                    if (fragmentSpan.StartsWith(emoji.ToString()))
+                    if (fragmentSpan.StartsWith(emoji.Sequence.AsString))
                     {
                         emojiMatches.Add(emoji);
+                    }
+                }
+
+                // If no valid emojis were found retry with a less accurate approach
+                if (emojiMatches.Count == 0 && fragmentSpan.Length > 1 && char.IsSurrogatePair(fragmentSpan[0], fragmentSpan[1]))
+                {
+                    foreach (var emoji in Emoji.All)
+                    {
+                        if (emoji.Group == "country-flag")
+                            continue;
+                        if (emoji.Sequence.Codepoints.Count() != 2)
+                            continue;
+
+                        var utf32EmojiSequence = emoji.Sequence.AsUtf32().FirstOrDefault(defaultValue:(uint)0);
+                        var surrogateSequence = char.ConvertToUtf32(fragmentSpan[0], fragmentSpan[1]);
+                        if (surrogateSequence == utf32EmojiSequence)
+                        {
+                            emojiMatches.Add(emoji);
+                        }
                     }
                 }
 
@@ -846,9 +865,9 @@ namespace TwitchDownloaderCore
                     {
                         fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Trim('\uFE0F').Length);
                     }
-                    catch (IndexOutOfRangeException)
+                    catch (ArgumentOutOfRangeException)
                     {
-                        // Once in a blue moon this might happen
+                        // This tends to happen when specific emojis are at the end of a fragment
                         fragmentSpan = fragmentSpan.Slice(1);
                     }
                 }
