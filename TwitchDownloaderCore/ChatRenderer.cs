@@ -1286,8 +1286,11 @@ namespace TwitchDownloaderCore
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
 
-            // Clear chatRoot.embeddedData to save on some memory
+            // Clear chatRoot.embeddedData and manually call GC to save some memory
             chatRoot.embeddedData = null;
+            GC.Collect();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 
             badgeList = badgeTask.Result;
             emoteList = emoteTask.Result;
