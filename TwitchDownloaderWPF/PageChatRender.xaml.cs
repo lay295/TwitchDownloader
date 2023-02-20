@@ -34,6 +34,7 @@ namespace TwitchDownloaderWPF
         public List<string> ffmpegLog = new List<string>();
         public SKFontManager fontManager = SKFontManager.CreateDefault();
         public ConcurrentDictionary<char, SKPaint> fallbackCache = new ConcurrentDictionary<char, SKPaint>();
+        public string[] fileNames = { };
         public PageChatRender()
         {
             InitializeComponent();
@@ -43,10 +44,12 @@ namespace TwitchDownloaderWPF
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "JSON Files | *.json;*.json.gz";
+            openFileDialog.Multiselect = true;
 
             if (openFileDialog.ShowDialog() == true)
             {
-                textJson.Text = openFileDialog.FileName;
+                fileNames = openFileDialog.FileNames;
+                textJson.Text = String.Join(",", fileNames);
             }
         }
 
@@ -295,10 +298,18 @@ namespace TwitchDownloaderWPF
 
         private bool ValidateInputs()
         {
-            if (!File.Exists(textJson.Text))
+            if (fileNames.Length == 0)
             {
-                AppendLog("ERROR: JSON File Not Found");
+                AppendLog("ERROR: no JSON Files selected");
                 return false;
+            }
+            foreach (string fileName in fileNames)
+            {
+                if (!File.Exists(fileName))
+                {
+                    AppendLog("ERROR: JSON File Not Found");
+                    return false;
+                }
             }
 
             try
@@ -508,6 +519,13 @@ namespace TwitchDownloaderWPF
                 if (!ValidateInputs())
                 {
                     MessageBox.Show("Please double check your inputs are valid", "Unable to parse inputs", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Force "enqueue render" if multiple files are selected
+                if (fileNames.Length > 1)
+                {
+                    MenuItem_Click(sender, e);
                     return;
                 }
 

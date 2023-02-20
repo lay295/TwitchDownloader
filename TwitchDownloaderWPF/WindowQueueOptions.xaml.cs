@@ -336,31 +336,35 @@ namespace TwitchDownloader
                 {
                     PageChatRender renderPage = (PageChatRender)parentPage;
                     string folderPath = textFolder.Text;
-                    if (!String.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
+                    foreach (string fileName in renderPage.fileNames)
                     {
-                        ChatRenderTask renderTask = new ChatRenderTask();
-                        string fileFormat = renderPage.comboFormat.SelectedItem.ToString();
-                        string filePath = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(renderPage.textJson.Text) + "." + fileFormat.ToLower());
-                        ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(filePath);
-                        renderTask.DownloadOptions = renderOptions;
-                        renderTask.Info.Title = Path.GetFileNameWithoutExtension(filePath);
-                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
-                        if (success)
+                        if (!String.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
                         {
-                            renderTask.Info.Thumbnail = image;
-                        }
-                        renderTask.ChangeStatus(TwitchTaskStatus.Ready);
+                            ChatRenderTask renderTask = new ChatRenderTask();
+                            string fileFormat = renderPage.comboFormat.SelectedItem.ToString();
+                            string filePath = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(fileName) + "." + fileFormat.ToLower());
+                            ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(filePath);
+                            renderOptions.InputFile = fileName;
+                            renderTask.DownloadOptions = renderOptions;
+                            renderTask.Info.Title = Path.GetFileNameWithoutExtension(filePath);
+                            var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                            if (success)
+                            {
+                                renderTask.Info.Thumbnail = image;
+                            }
+                            renderTask.ChangeStatus(TwitchTaskStatus.Ready);
 
-                        lock (PageQueue.taskLock)
+                            lock (PageQueue.taskLock)
+                            {
+                                PageQueue.taskList.Add(renderTask);
+                            }
+
+                            this.Close();
+                        }
+                        else
                         {
-                            PageQueue.taskList.Add(renderTask);
+                            MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
-
-                        this.Close();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
