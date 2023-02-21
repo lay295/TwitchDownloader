@@ -25,7 +25,7 @@ https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-8
 - Download Twitch Clips
 - Download chat for VODS and Clips, in either a [JSON with all the original information](https://pastebin.com/raw/YDgRe6X4), a browser HTML file, or a [plain text file](https://pastebin.com/raw/016azeQX)
 - Update the contents of a previously generated JSON chat file with an option to save as another format
-- Use a previously generated JSON chat file to render the chat with FFZ, BTTV and 7TV support (including GIFS)
+- Use a previously generated JSON chat file to render the chat with Twemoji emojis and BTTV, FFZ, 7TV static and animated emotes
 
 # GUI
 
