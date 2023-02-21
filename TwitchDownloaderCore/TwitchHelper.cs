@@ -758,6 +758,9 @@ namespace TwitchDownloaderCore
         {
             byte[] imageBytes = null;
 
+            if (!Directory.Exists(cachePath))
+                CreateDirectory(cachePath);
+
             string filePath = Path.Combine(cachePath, imageId + "_" + imageScale + "." + imageType);
             if (File.Exists(filePath))
             {

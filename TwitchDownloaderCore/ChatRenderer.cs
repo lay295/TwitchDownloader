@@ -41,6 +41,7 @@ namespace TwitchDownloaderCore
         private List<CheerEmote> cheermotesList = new List<CheerEmote>();
         private Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
         private Dictionary<int, SKPaint> fallbackFontCache = new Dictionary<int, SKPaint>();
+        private bool noFallbackFontFound = false;
         private SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont = new SKPaint();
         private SKPaint nameFont = new SKPaint();
@@ -60,9 +61,7 @@ namespace TwitchDownloaderCore
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
         {
             _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Fetching Images [1/2]"));
-            await Task.Run(() => FetchImages(cancellationToken), cancellationToken);
-
-            await Task.Run(ScaleImages, cancellationToken);
+            await Task.Run(() => FetchScaledImages(cancellationToken), cancellationToken);
 
             if (renderOptions.DisperseCommentOffsets)
             {
@@ -260,7 +259,7 @@ namespace TwitchDownloaderCore
             messageFont.MeasureText("ABC123", ref sampleTextBounds);
             int sectionDefaultYPos = (int)(((renderOptions.SectionHeight - sampleTextBounds.Height) / 2.0) + sampleTextBounds.Height);
 
-            using var highlightIcons = new HighlightMessage();
+            using var highlightIcons = new HighlightMessage(renderOptions.TempFolder);
 
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
@@ -796,9 +795,26 @@ namespace TwitchDownloaderCore
                 List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
                 foreach (var emoji in Emoji.All)
                 {
-                    if (fragmentSpan.StartsWith(emoji.ToString()))
+                    if (fragmentSpan.StartsWith(emoji.Sequence.AsString))
                     {
                         emojiMatches.Add(emoji);
+                    }
+                }
+
+                // If no valid emojis were found retry with a less accurate approach
+                if (emojiMatches.Count == 0 && fragmentSpan.Length > 1 && char.IsSurrogatePair(fragmentSpan[0], fragmentSpan[1]))
+                {
+                    var surrogateSequence = char.ConvertToUtf32(fragmentSpan[0], fragmentSpan[1]);
+                    foreach (var emoji in Emoji.All)
+                    {
+                        if (emoji.Group == "country-flag")
+                            continue;
+
+                        var utf32EmojiSequence = emoji.Sequence.AsUtf32().FirstOrDefault(defaultValue: (uint)0);
+                        if (surrogateSequence == utf32EmojiSequence)
+                        {
+                            emojiMatches.Add(emoji);
+                        }
                     }
                 }
 
@@ -847,9 +863,9 @@ namespace TwitchDownloaderCore
                     {
                         fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Trim('\uFE0F').Length);
                     }
-                    catch (IndexOutOfRangeException)
+                    catch (ArgumentOutOfRangeException)
                     {
-                        // Once in a blue moon this might happen
+                        // This tends to happen when specific emojis are at the end of a fragment
                         fragmentSpan = fragmentSpan.Slice(1);
                     }
                 }
@@ -1275,21 +1291,24 @@ namespace TwitchDownloaderCore
         }
 
         /// <summary>
-        /// Fetches the emotes/badges/bits/emojis needed to render
+        /// Fetches the emotes/badges/bits/emojis needed to render scaled to 2x
         /// </summary>
         /// <remarks>chatRoot.embeddedData will be empty after calling this to save on memory!</remarks>
-        private async Task FetchImages(CancellationToken cancellationToken)
+        private async Task FetchScaledImages(CancellationToken cancellationToken)
         {
-            Task<List<ChatBadge>> badgeTask = TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
-            Task<List<TwitchEmote>> emoteTask = TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
-            Task<List<TwitchEmote>> emoteThirdTask = TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes, renderOptions.StvEmotes, renderOptions.AllowUnlistedEmotes, renderOptions.Offline, cancellationToken);
-            Task<List<CheerEmote>> cheerTask = TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
-            Task<Dictionary<string, SKBitmap>> emojiTask = TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
+            var badgeTask = GetScaledBadges();
+            var emoteTask = GetScaledEmotes();
+            var emoteThirdTask = GetScaledThirdEmotes(cancellationToken);
+            var cheerTask = GetScaledBits();
+            var emojiTask = GetScaledEmojis();
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
 
-            // Clear chatRoot.embeddedData to save on some memory
+            // Clear chatRoot.embeddedData and manually call GC to save some memory
             chatRoot.embeddedData = null;
+            GC.Collect();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 
             badgeList = badgeTask.Result;
             emoteList = emoteTask.Result;
@@ -1298,42 +1317,103 @@ namespace TwitchDownloaderCore
             emojiCache = emojiTask.Result;
         }
 
-        //Precompute scaled images so we don't have to scale every frame
-        private void ScaleImages()
+        private async Task<List<ChatBadge>> GetScaledBadges()
         {
-            foreach (var emote in emoteList.Union(emoteThirdList))
+            // Do not fetch if badges are disabled
+            if (!renderOptions.ChatBadges)
+            {
+                return new List<ChatBadge>();
+            }
+
+            var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+
+            foreach (var badge in badgeTask)
+            {
+                // Assume badges are always 2x scale, not 1x or 4x
+                if (Math.Abs(renderOptions.ReferenceScale - 1.0) > 0.01)
+                {
+                    badge.Resize(renderOptions.ReferenceScale * renderOptions.BadgeScale);
+                }
+                badge.VersionsData.Clear(); // Clear the image byte[]s as we aren't embedding to an output file
+            }
+
+            return badgeTask;
+        }
+
+        private async Task<List<TwitchEmote>> GetScaledEmotes()
+        {
+            var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+
+            foreach (var emote in emoteTask)
             {
                 double newScale = (2.0 / emote.ImageScale) * renderOptions.ReferenceScale * renderOptions.EmoteScale;
-                if (newScale != 1.0)
+                if (Math.Abs(newScale - 1.0) > 0.01)
+                {
                     emote.Resize(newScale);
+                }
+                emote.ImageData = Array.Empty<byte>(); // Clear the image byte[] as we aren't embedding to an output file
             }
 
-            foreach (var badge in badgeList)
+            return emoteTask;
+        }
+
+        private async Task<List<TwitchEmote>> GetScaledThirdEmotes(CancellationToken cancellationToken)
+        {
+            var emoteThirdTask = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes,
+                renderOptions.StvEmotes, renderOptions.AllowUnlistedEmotes, renderOptions.Offline, cancellationToken);
+
+            foreach (var emote in emoteThirdTask)
             {
-                //Assume badges are always 2x scale, not 1x or 4x
-                if (renderOptions.ReferenceScale != 1.0)
-                    badge.Resize(renderOptions.ReferenceScale * renderOptions.BadgeScale);
+                double newScale = (2.0 / emote.ImageScale) * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                if (Math.Abs(newScale - 1.0) > 0.01)
+                {
+                    emote.Resize(newScale);
+                }
+                emote.ImageData = Array.Empty<byte>(); // Clear the image byte[] as we aren't embedding to an output file
             }
 
-            foreach (var cheer in cheermotesList)
+            return emoteThirdTask;
+        }
+
+        private async Task<List<CheerEmote>> GetScaledBits()
+        {
+            var cheerTask = await TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
+
+            foreach (var cheer in cheerTask)
             {
                 //Assume cheermotes are always 2x scale, not 1x or 4x
-                if (renderOptions.ReferenceScale != 1.0)
+                if (Math.Abs(renderOptions.ReferenceScale - 1.0) > 0.01)
+                {
                     cheer.Resize(renderOptions.ReferenceScale * renderOptions.EmoteScale);
+                }
+
+                foreach (var tier in cheer.tierList)
+                {
+                    tier.Value.ImageData = Array.Empty<byte>(); // Clear the image byte[]s as we aren't embedding to an output file
+                }
             }
+
+            return cheerTask;
+        }
+
+        private async Task<Dictionary<string, SKBitmap>> GetScaledEmojis()
+        {
+            var emojiTask = await TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
 
             //Assume emojis are 4x (they're 72x72)
             double emojiScale = 0.5 * renderOptions.ReferenceScale * renderOptions.EmojiScale;
-            List<string> emojiKeys = new List<string>(emojiCache.Keys);
+            List<string> emojiKeys = new List<string>(emojiTask.Keys);
             foreach (var emojiKey in emojiKeys)
             {
-                SKImageInfo oldEmojiInfo = emojiCache[emojiKey].Info;
+                SKImageInfo oldEmojiInfo = emojiTask[emojiKey].Info;
                 SKImageInfo imageInfo = new SKImageInfo((int)(oldEmojiInfo.Width * emojiScale), (int)(oldEmojiInfo.Height * emojiScale));
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
-                emojiCache[emojiKey].ScalePixels(newBitmap, SKFilterQuality.High);
-                emojiCache[emojiKey].Dispose();
-                emojiCache[emojiKey] = newBitmap;
+                emojiTask[emojiKey].ScalePixels(newBitmap, SKFilterQuality.High);
+                emojiTask[emojiKey].Dispose();
+                emojiTask[emojiKey] = newBitmap;
             }
+
+            return emojiTask;
         }
 
         private (int startTick, int totalTicks) GetVideoTicks()
@@ -1372,7 +1452,11 @@ namespace TwitchDownloaderCore
             if (newPaint.Typeface == null)
             {
                 newPaint.Typeface = SKTypeface.Default;
-                _progress?.Report(new ProgressReport(ReportType.Log, "No valid typefaces were found for some messages."));
+                if (!noFallbackFontFound)
+                {
+                    noFallbackFontFound = true;
+                    _progress?.Report(new ProgressReport(ReportType.Log, "No valid typefaces were found for some messages."));
+                }
             }
 
             fallbackPaint = newPaint;
