@@ -34,7 +34,7 @@ namespace TwitchDownloaderWPF
         public List<string> ffmpegLog = new List<string>();
         public SKFontManager fontManager = SKFontManager.CreateDefault();
         public ConcurrentDictionary<char, SKPaint> fallbackCache = new ConcurrentDictionary<char, SKPaint>();
-        public string[] FileNames;
+        public string[] FileNames = Array.Empty<string>();
         public PageChatRender()
         {
             InitializeComponent();
@@ -53,7 +53,6 @@ namespace TwitchDownloaderWPF
 
             FileNames = openFileDialog.FileNames;
             textJson.Text = string.Join("&&", FileNames);
-
             UpdateRenderButtonOptions();
         }
 
@@ -319,7 +318,7 @@ namespace TwitchDownloaderWPF
         {
             if (FileNames.Length == 0)
             {
-                AppendLog("ERROR: No JSON Files Were Selected");
+                AppendLog("ERROR: No JSON Files Are Selected");
                 return false;
             }
             foreach (string fileName in FileNames)
