@@ -525,7 +525,7 @@ namespace TwitchDownloaderWPF
                 // Force "enqueue render" if multiple files are selected
                 if (fileNames.Length > 1)
                 {
-                    MenuItem_Click(sender, e);
+                    MenuItemEnqueueRender_Click(sender, e);
                     return;
                 }
 
@@ -606,7 +606,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void MenuItemEnqueueRender_Click(object sender, RoutedEventArgs e)
         {
             if (ValidateInputs())
             {
@@ -615,7 +615,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        private void MenuItemPartialRender_Click(object sender, RoutedEventArgs e)
         {
             SplitButton_Click(null, null);
         }

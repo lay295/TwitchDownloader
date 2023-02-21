@@ -181,8 +181,8 @@
             <hc:SplitButton x:Name="btnRender" Height="40" Width="120" Margin="0,6,0,0" Content="Render Chat" Click="SplitButton_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
-                        <MenuItem Header="Partial Render" Click="MenuItem_Click_1"/>
-                        <MenuItem Header="Enqueue Render" Click="MenuItem_Click"/>
+                        <MenuItem Name="MenuItemPartialRender" Header="Partial Render" Click="MenuItemPartialRender_Click"/>
+                        <MenuItem Name="MenuItemEnqueueRender" Header="Enqueue Render" Click="MenuItemEnqueueRender_Click"/>
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
