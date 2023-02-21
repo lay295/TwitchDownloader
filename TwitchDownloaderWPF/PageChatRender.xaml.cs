@@ -14,7 +14,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using HandyControl.Data.Enum;
 using TwitchDownloader;
 using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
@@ -35,7 +34,7 @@ namespace TwitchDownloaderWPF
         public List<string> ffmpegLog = new List<string>();
         public SKFontManager fontManager = SKFontManager.CreateDefault();
         public ConcurrentDictionary<char, SKPaint> fallbackCache = new ConcurrentDictionary<char, SKPaint>();
-        public string[] fileNames = { };
+        public string[] FileNames;
         public PageChatRender()
         {
             InitializeComponent();
@@ -52,15 +51,15 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            fileNames = openFileDialog.FileNames;
-            textJson.Text = string.Join("&&", fileNames);
+            FileNames = openFileDialog.FileNames;
+            textJson.Text = string.Join("&&", FileNames);
 
             UpdateRenderButtonOptions();
         }
 
         private void UpdateRenderButtonOptions()
         {
-            if (fileNames.Length > 1)
+            if (FileNames.Length > 1)
             {
                 SplitBtnRender.Content = "Enqueue Render";
                 SplitBtnRender.MaxDropDownHeight = 0;
@@ -318,12 +317,12 @@ namespace TwitchDownloaderWPF
 
         private bool ValidateInputs()
         {
-            if (fileNames.Length == 0)
+            if (FileNames.Length == 0)
             {
                 AppendLog("ERROR: No JSON Files Were Selected");
                 return false;
             }
-            foreach (string fileName in fileNames)
+            foreach (string fileName in FileNames)
             {
                 if (!File.Exists(fileName))
                 {
@@ -543,7 +542,7 @@ namespace TwitchDownloaderWPF
                 }
 
                 // Force "enqueue render" if multiple files are selected
-                if (fileNames.Length > 1)
+                if (FileNames.Length > 1)
                 {
                     MenuItemEnqueueRender_Click(sender, e);
                     return;
@@ -641,7 +640,7 @@ namespace TwitchDownloaderWPF
 
         private void TextJson_TextChanged(object sender, TextChangedEventArgs e)
         {
-            fileNames = textJson.Text.Split("&&", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            FileNames = textJson.Text.Split("&&", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             UpdateRenderButtonOptions();
         }
     }

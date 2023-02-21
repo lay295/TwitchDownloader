@@ -332,7 +332,7 @@ namespace TwitchDownloader
                 {
                     PageChatRender renderPage = (PageChatRender)parentPage;
                     string folderPath = textFolder.Text;
-                    foreach (string fileName in renderPage.fileNames)
+                    foreach (string fileName in renderPage.FileNames)
                     {
                         if (!Directory.Exists(folderPath))
                         {
