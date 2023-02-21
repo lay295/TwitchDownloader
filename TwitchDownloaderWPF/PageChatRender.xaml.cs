@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using HandyControl.Data.Enum;
 using TwitchDownloader;
 using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
@@ -46,11 +47,30 @@ namespace TwitchDownloaderWPF
             openFileDialog.Filter = "JSON Files | *.json;*.json.gz";
             openFileDialog.Multiselect = true;
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == false)
             {
-                fileNames = openFileDialog.FileNames;
-                textJson.Text = String.Join(",", fileNames);
+                return;
             }
+
+            fileNames = openFileDialog.FileNames;
+            textJson.Text = string.Join("&&", fileNames);
+
+            UpdateRenderButtonOptions();
+        }
+
+        private void UpdateRenderButtonOptions()
+        {
+            if (fileNames.Length > 1)
+            {
+                SplitBtnRender.Content = "Enqueue Render";
+                SplitBtnRender.MaxDropDownHeight = 0;
+                MenuItemPartialRender.IsEnabled = false;
+                return;
+            }
+
+            SplitBtnRender.Content = "Render Chat";
+            SplitBtnRender.MaxDropDownHeight = 360; // Default value is 360
+            MenuItemPartialRender.IsEnabled = true;
         }
 
         public ChatRenderOptions GetOptions(string filename)
@@ -300,14 +320,14 @@ namespace TwitchDownloaderWPF
         {
             if (fileNames.Length == 0)
             {
-                AppendLog("ERROR: no JSON Files selected");
+                AppendLog("ERROR: No JSON Files Were Selected");
                 return false;
             }
             foreach (string fileName in fileNames)
             {
                 if (!File.Exists(fileName))
                 {
-                    AppendLog("ERROR: JSON File Not Found");
+                    AppendLog("ERROR: JSON File Not Found: " + Path.GetFileName(fileName));
                     return false;
                 }
             }
@@ -512,9 +532,9 @@ namespace TwitchDownloaderWPF
             SaveArguments();
         }
 
-        private async void SplitButton_Click(object sender, RoutedEventArgs e)
+        private async void SplitBtnRender_Click(object sender, RoutedEventArgs e)
         {
-            if (sender == null || !((SplitButton)sender).IsDropDownOpen)
+            if (ReferenceEquals(sender, MenuItemPartialRender) || !((SplitButton)sender).IsDropDownOpen)
             {
                 if (!ValidateInputs())
                 {
@@ -549,9 +569,8 @@ namespace TwitchDownloaderWPF
                 ChatRenderer currentRender = new ChatRenderer(options, renderProgress);
                 await currentRender.ParseJsonAsync(new CancellationToken());
 
-                if (sender == null)
+                if (ReferenceEquals(sender, MenuItemPartialRender))
                 {
-                    //We're just gonna assume a caller with a null sender is the partial render button
                     WindowRangeSelect window = new WindowRangeSelect(currentRender);
                     window.ShowDialog();
 
@@ -571,7 +590,7 @@ namespace TwitchDownloaderWPF
                 }
 
                 SetImage("Images/ppOverheat.gif", true);
-                btnRender.IsEnabled = false;
+                SplitBtnRender.IsEnabled = false;
                 ffmpegLog.Clear();
                 try
                 {
@@ -598,7 +617,7 @@ namespace TwitchDownloaderWPF
                     }
                 }
                 statusProgressBar.Value = 0;
-                btnRender.IsEnabled = true;
+                SplitBtnRender.IsEnabled = true;
 
                 currentRender = null;
                 GC.Collect();
@@ -608,7 +627,7 @@ namespace TwitchDownloaderWPF
 
         private void MenuItemEnqueueRender_Click(object sender, RoutedEventArgs e)
         {
-            if (ValidateInputs())
+            if (SplitBtnRender.IsDropDownOpen && ValidateInputs() || ReferenceEquals(sender, SplitBtnRender))
             {
                 WindowQueueOptions queueOptions = new WindowQueueOptions(this);
                 queueOptions.ShowDialog();
@@ -617,7 +636,13 @@ namespace TwitchDownloaderWPF
 
         private void MenuItemPartialRender_Click(object sender, RoutedEventArgs e)
         {
-            SplitButton_Click(null, null);
+            SplitBtnRender_Click(sender, e);
+        }
+
+        private void TextJson_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            fileNames = textJson.Text.Split("&&", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            UpdateRenderButtonOptions();
         }
     }
 
