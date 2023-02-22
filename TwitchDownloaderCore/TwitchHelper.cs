@@ -500,21 +500,21 @@ namespace TwitchDownloaderCore
 
             string[] emojiFiles = Directory.GetFiles(emojiFolder).Where(i => emojiExtensions.IsMatch(i)).ToArray();
 
-            // Twemoji 14 has 3689 emoji images
-            if (emojiFiles.Length < 3689)
+            // Google Noto Color Emoji 15 has 3680 emoji images
+            if (emojiFiles.Length < 3680)
             {
                 string emojiZipPath = Path.Combine(emojiFolder, Path.GetRandomFileName());
                 try
                 {
-                    byte[] emojiZipData = Resources.twemoji_14_0_0;
+                    byte[] emojiZipData = Resources.noto_emoji_2_038;
                     await File.WriteAllBytesAsync(emojiZipPath, emojiZipData);
 
                     using ZipArchive archive = ZipFile.OpenRead(emojiZipPath);
-                    var emojiAssetsPath = Path.Combine("twemoji-14.0.0", "assets", "72x72");
+                    var emojiAssetsPath = Path.Combine("noto-emoji-2.038", "png", "72");
                     var emojis = archive.Entries.Where(x => !string.IsNullOrWhiteSpace(x.Name) && Path.GetDirectoryName(x.FullName) == emojiAssetsPath);
                     foreach (var emoji in emojis)
                     {
-                        string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace("-", " "));
+                        string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace("_", " "));
                         if (!File.Exists(filePath))
                         {
                             try
