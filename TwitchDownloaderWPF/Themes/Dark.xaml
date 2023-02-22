@@ -12,9 +12,11 @@
     <SolidColorBrush x:Key="AppElementBackground" Color="#252526"/>
     <SolidColorBrush x:Key="AppElementBorder" Color="#38383A"/>
     <SolidColorBrush x:Key="AppText" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="AppTextDisabled" Color="#7D7D7E"/>
     <SolidColorBrush x:Key="AppElementInnerBackground" Color="#454547"/>
     <SolidColorBrush x:Key="AppElementInnerBorder" Color="#525254"/>
     <SolidColorBrush x:Key="AppInnerText" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="AppInnerTextDisabled" Color="#999999"/>
     <SolidColorBrush x:Key="AppHyperlink" Color="#F224B7"/>
     <SolidColorBrush x:Key="AppCheckBox" Color="#B5005D"/>
     <SolidColorBrush x:Key="AppRadio" Color="#B5005D"/>
