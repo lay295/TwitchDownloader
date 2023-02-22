@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderWPF.Properties;
@@ -42,9 +43,13 @@ namespace TwitchDownloaderWPF
                 checkVideo.Visibility = Visibility.Collapsed;
                 checkChat.IsChecked = true;
                 checkChat.IsEnabled = false;
+                TextDownloadFormat.Visibility = Visibility.Collapsed;
                 radioJson.Visibility = Visibility.Collapsed;
                 radioTxt.Visibility = Visibility.Collapsed;
                 radioHTML.Visibility = Visibility.Collapsed;
+                TextCompression.Visibility = Visibility.Collapsed;
+                RadioCompressionNone.Visibility = Visibility.Collapsed;
+                RadioCompressionGzip.Visibility = Visibility.Collapsed;
                 checkEmbed.Visibility = Visibility.Collapsed;
                 var chatPage = page as PageChatDownload;
                 if (chatPage.radioJson.IsChecked != true)
@@ -52,18 +57,18 @@ namespace TwitchDownloaderWPF
                     checkRender.IsChecked = false;
                     checkRender.IsEnabled = false;
                 }
-                else
-                {
-                    checkRender.Margin = new Thickness(10, 85, 0, 0);
-                }
             }
             if (page is PageChatUpdate)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
                 checkChat.Visibility = Visibility.Collapsed;
+                TextDownloadFormat.Visibility = Visibility.Collapsed;
                 radioJson.Visibility = Visibility.Collapsed;
                 radioTxt.Visibility = Visibility.Collapsed;
                 radioHTML.Visibility = Visibility.Collapsed;
+                TextCompression.Visibility = Visibility.Collapsed;
+                RadioCompressionNone.Visibility = Visibility.Collapsed;
+                RadioCompressionGzip.Visibility = Visibility.Collapsed;
                 checkEmbed.Visibility = Visibility.Collapsed;
                 checkRender.Visibility = Visibility.Collapsed;
             }
@@ -71,13 +76,16 @@ namespace TwitchDownloaderWPF
             {
                 checkVideo.Visibility = Visibility.Collapsed;
                 checkChat.Visibility = Visibility.Collapsed;
+                TextDownloadFormat.Visibility = Visibility.Collapsed;
                 radioJson.Visibility = Visibility.Collapsed;
                 radioTxt.Visibility = Visibility.Collapsed;
                 radioHTML.Visibility = Visibility.Collapsed;
+                TextCompression.Visibility = Visibility.Collapsed;
+                RadioCompressionNone.Visibility = Visibility.Collapsed;
+                RadioCompressionGzip.Visibility = Visibility.Collapsed;
                 checkEmbed.Visibility = Visibility.Collapsed;
                 checkRender.IsChecked = true;
                 checkRender.IsEnabled = false;
-                checkRender.Margin = new Thickness(10, 65, 0, 0);
             }
         }
 
@@ -428,6 +436,7 @@ namespace TwitchDownloaderWPF
                                 downloadOptions.DownloadFormat = ChatFormat.Html;
                             else
                                 downloadOptions.DownloadFormat = ChatFormat.Text;
+                            downloadOptions.Compression = RadioCompressionNone.IsChecked == true ? ChatCompression.None : ChatCompression.Gzip;
                             downloadOptions.EmbedData = (bool)checkEmbed.IsChecked;
                             downloadOptions.TimeFormat = TimestampFormat.Relative;
                             downloadOptions.Id = dataList[i].Id;
@@ -494,6 +503,15 @@ namespace TwitchDownloaderWPF
             radioTxt.IsEnabled = true;
             radioHTML.IsEnabled = true;
             checkEmbed.IsEnabled = true;
+            RadioCompressionNone.IsEnabled = true;
+            RadioCompressionGzip.IsEnabled = true;
+            try
+            {
+                var appTextBrush = (Brush)Application.Current.Resources["AppText"];
+                TextDownloadFormat.Foreground = appTextBrush;
+                TextCompression.Foreground = appTextBrush;
+            }
+            catch { /* Ignored */ }
         }
 
         private void checkChat_Unchecked(object sender, RoutedEventArgs e)
@@ -504,6 +522,15 @@ namespace TwitchDownloaderWPF
             radioTxt.IsEnabled = false;
             radioHTML.IsEnabled = false;
             checkEmbed.IsEnabled = false;
+            RadioCompressionNone.IsEnabled = false;
+            RadioCompressionGzip.IsEnabled = false;
+            try
+            {
+                var appTextDisabledBrush = (Brush)Application.Current.Resources["AppTextDisabled"];
+                TextDownloadFormat.Foreground = appTextDisabledBrush;
+                TextCompression.Foreground = appTextDisabledBrush;
+            }
+            catch { /* Ignored */ }
         }
 
         private void radioJson_Checked(object sender, RoutedEventArgs e)
@@ -512,6 +539,7 @@ namespace TwitchDownloaderWPF
             {
                 checkEmbed.IsEnabled = true;
                 checkRender.IsEnabled = true;
+                StackChatCompression.Visibility = Visibility.Visible;
             }
 
         }
@@ -522,6 +550,7 @@ namespace TwitchDownloaderWPF
             {
                 checkEmbed.IsEnabled = false;
                 checkRender.IsEnabled = false;
+                StackChatCompression.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -531,6 +560,7 @@ namespace TwitchDownloaderWPF
             {
                 checkEmbed.IsEnabled = true;
                 checkRender.IsEnabled = false;
+                StackChatCompression.Visibility = Visibility.Collapsed;
             }
         }
 
