@@ -9,6 +9,7 @@ using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Translations;
 using TwitchDownloaderWPF.TwitchTasks;
 using static TwitchDownloaderWPF.App;
 
@@ -109,7 +110,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -193,7 +194,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -269,7 +270,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -314,7 +315,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -344,7 +345,7 @@ namespace TwitchDownloaderWPF
                     {
                         if (!Directory.Exists(folderPath))
                         {
-                            MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                             return;
                         }
 
@@ -378,7 +379,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show("Invalid folder path (doesn't exist?)", "Invalid Folder Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
