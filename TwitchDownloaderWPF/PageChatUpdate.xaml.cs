@@ -55,7 +55,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getComments: false, getEmbeds: false);
+            ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getEmbeds: false);
             textStreamer.Text = ChatJsonInfo.streamer.name;
             textCreatedAt.Text = ChatJsonInfo.video.created_at.ToLocalTime().ToShortDateString();
             textTitle.Text = ChatJsonInfo.video.title ?? "Unknown";
@@ -77,7 +77,7 @@ namespace TwitchDownloaderWPF
                 ? videoLength.ToString("c")
                 : "Unknown";
 
-            VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments.First()?.content_id;
+            VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments?.FirstOrDefault(defaultValue:null)?.content_id;
 
             if (VideoId.All(char.IsDigit))
             {
