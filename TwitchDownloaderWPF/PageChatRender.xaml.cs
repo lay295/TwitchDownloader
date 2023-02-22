@@ -59,13 +59,13 @@ namespace TwitchDownloaderWPF
         {
             if (FileNames.Length > 1)
             {
-                SplitBtnRender.Content = "Enqueue Render";
+                SplitBtnRender.Content = Translations.Strings.EnqueueRender;
                 SplitBtnRender.MaxDropDownHeight = 0;
                 MenuItemPartialRender.IsEnabled = false;
                 return;
             }
 
-            SplitBtnRender.Content = "Render Chat";
+            SplitBtnRender.Content = Translations.Strings.RenderChat;
             SplitBtnRender.MaxDropDownHeight = 360; // Default value is 360
             MenuItemPartialRender.IsEnabled = true;
         }
