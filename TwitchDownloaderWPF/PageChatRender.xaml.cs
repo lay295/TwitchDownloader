@@ -359,17 +359,20 @@ namespace TwitchDownloaderWPF
 
             if (colorBackground.SelectedColor.Value.A < 255)
             {
-                if (((VideoContainer)comboFormat.SelectedItem).Name == "MOV" && ((Codec)comboCodec.SelectedItem).Name == "RLE" ||
-                    ((Codec)comboCodec.SelectedItem).Name == "ProRes" || ((VideoContainer)comboFormat.SelectedItem).Name == "WEBM" || (bool)checkMask.IsChecked)
-                {
-                    return true;
-                }
-                else
+                if ((((VideoContainer)comboFormat.SelectedItem).Name != "MOV" ||
+                     (((Codec)comboCodec.SelectedItem).Name != "RLE" && ((Codec)comboCodec.SelectedItem).Name != "ProRes")) &&
+                    ((VideoContainer)comboFormat.SelectedItem).Name != "WEBM" && !(bool)checkMask.IsChecked!)
                 {
                     AppendLog("ERROR: You've selected an alpha channel (transparency) for a container/codec that does not support it.");
                     AppendLog("Remove transparency or encode with MOV and RLE/PRORES (file size will be large)");
                     return false;
                 }
+            }
+
+            if (checkMask.IsChecked == true && colorBackground.SelectedColor.Value.A == 255)
+            {
+                AppendLog("ERROR: You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.");
+                return false;
             }
 
             if (int.Parse(textHeight.Text) % 2 != 0 || int.Parse(textWidth.Text) % 2 != 0)
