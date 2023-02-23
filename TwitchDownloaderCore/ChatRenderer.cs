@@ -132,7 +132,7 @@ namespace TwitchDownloaderCore
          * For example, before any jittering:
          *   the input a=1.0 b=2.0 c=2.0  d=2.0 e=2.0  f=3.0
          *     becomes a=1.0 b=2.0 c=2.25 d=2.5 e=2.75 f=3.0
-         *     
+         *
          * The only drawback to this method is there will _never_ be multiple comments drawn on the same tick
          * like in a real chat. The overall improved chat flow is still worth it regardless. */
         private static void DisperseCommentOffsets(List<Comment> comments)
@@ -185,7 +185,7 @@ namespace TwitchDownloaderCore
         }
 
         /* Why are we doing this? The question is when to display a 0.5 second offset comment with an update rate of 1.
-         * At the update frame at 0 seconds, or 1 second? We're choosing at 0 seconds here. Flooring to either the 
+         * At the update frame at 0 seconds, or 1 second? We're choosing at 0 seconds here. Flooring to either the
          * update rate, or if the update rate is greater than 1 just to the next whole number */
         private void FloorCommentOffsets(List<Comment> comments)
         {
@@ -785,9 +785,9 @@ namespace TwitchDownloaderCore
 #pragma warning disable IDE0057
         private void DrawEmojiMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString)
         {
-            ReadOnlySpan<char> fragmentSpan = fragmentString.AsSpan();
+            var enumerator = StringInfo.GetTextElementEnumerator(fragmentString);
             StringBuilder nonEmojiBuffer = new();
-            while (fragmentSpan.Length > 0)
+            while (enumerator.MoveNext())
             {
                 // Old LINQ method. Leaving this for reference
                 //List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
@@ -795,26 +795,9 @@ namespace TwitchDownloaderCore
                 List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
                 foreach (var emoji in Emoji.All)
                 {
-                    if (fragmentSpan.StartsWith(emoji.Sequence.AsString))
+                    if (((string)enumerator.Current).StartsWith(emoji.Sequence.AsString))
                     {
                         emojiMatches.Add(emoji);
-                    }
-                }
-
-                // If no valid emojis were found retry with a less accurate approach
-                if (emojiMatches.Count == 0 && fragmentSpan.Length > 1 && char.IsSurrogatePair(fragmentSpan[0], fragmentSpan[1]))
-                {
-                    var surrogateSequence = char.ConvertToUtf32(fragmentSpan[0], fragmentSpan[1]);
-                    foreach (var emoji in Emoji.All)
-                    {
-                        if (emoji.Group == "country-flag")
-                            continue;
-
-                        var utf32EmojiSequence = emoji.Sequence.AsUtf32().FirstOrDefault(defaultValue: (uint)0);
-                        if (surrogateSequence == utf32EmojiSequence)
-                        {
-                            emojiMatches.Add(emoji);
-                        }
                     }
                 }
 
@@ -858,26 +841,15 @@ namespace TwitchDownloaderCore
                     }
 
                     drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
-
-                    try
-                    {
-                        fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Trim('\uFE0F').Length);
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        // This tends to happen when specific emojis are at the end of a fragment
-                        fragmentSpan = fragmentSpan.Slice(1);
-                    }
                 }
                 else
                 {
-                    nonEmojiBuffer.Append(fragmentSpan[0]);
-                    fragmentSpan = fragmentSpan.Slice(1);
+                    nonEmojiBuffer.Append((string)enumerator.Current);
                 }
             }
             if (nonEmojiBuffer.Length > 0)
             {
-                DrawText(nonEmojiBuffer.ToString(), messageFont, false, sectionImages, ref drawPos, defaultPos);
+                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), true, true);
                 nonEmojiBuffer.Clear();
             }
         }
