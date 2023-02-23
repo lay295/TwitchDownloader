@@ -844,7 +844,7 @@ namespace TwitchDownloaderCore
                 }
                 else
                 {
-                    nonEmojiBuffer.Append(enumerator.Current);
+                    nonEmojiBuffer.Append((string)enumerator.Current);
                 }
             }
             if (nonEmojiBuffer.Length > 0)
