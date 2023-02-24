@@ -821,7 +821,7 @@ namespace TwitchDownloaderCore
                         nonEmojiBuffer.Clear();
                     }
 
-                    SingleEmoji selectedEmoji = emojiMatches.OrderByDescending(x => x.Sequence.Codepoints.Count()).First();
+                    SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
                     SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
 
                     if (drawPos.X + emojiImage.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
