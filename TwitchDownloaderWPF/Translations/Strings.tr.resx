@@ -688,9 +688,9 @@
     <value>Klasör mevcut değil</value>
   </data>
   <data name="StatusCanceled" xml:space="preserve">
-    <value>Canceled</value>
+    <value>İptal edildi</value>
   </data>
   <data name="StatusCanceling" xml:space="preserve">
-    <value>Canceling</value>
+    <value>İptal Ediliyor</value>
   </data>
 </root>
