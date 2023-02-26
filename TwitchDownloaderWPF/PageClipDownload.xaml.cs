@@ -1,10 +1,10 @@
 ﻿using Microsoft.Win32;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,6 +25,7 @@ namespace TwitchDownloaderWPF
     {
         public string clipId = "";
         public DateTime currentVideoTime;
+        private CancellationTokenSource _cancellationTokenSource;
         public PageClipDownload()
         {
             InitializeComponent();
@@ -77,8 +78,7 @@ namespace TwitchDownloaderWPF
 
                 comboQuality.SelectedIndex = 0;
                 comboQuality.IsEnabled = true;
-                btnDownload.IsEnabled = true;
-                btnQueue.IsEnabled = true;
+                SplitBtnDownload.IsEnabled = true;
                 btnGetInfo.IsEnabled = true;
             }
             catch (Exception ex)
@@ -91,6 +91,18 @@ namespace TwitchDownloaderWPF
                 }
                 btnGetInfo.IsEnabled = true;
             }
+        }
+
+        private void UpdateActionButtons(bool isDownloading)
+        {
+            if (isDownloading)
+            {
+                SplitBtnDownload.Visibility = Visibility.Collapsed;
+                BtnCancel.Visibility = Visibility.Visible;
+                return;
+            }
+            SplitBtnDownload.Visibility = Visibility.Visible;
+            BtnCancel.Visibility = Visibility.Collapsed;
         }
 
         private string ValidateUrl(string text)
@@ -119,8 +131,7 @@ namespace TwitchDownloaderWPF
         private void Page_Initialized(object sender, EventArgs e)
         {
             comboQuality.IsEnabled = false;
-            btnDownload.IsEnabled = false;
-            btnQueue.IsEnabled = false;
+            SplitBtnDownload.IsEnabled = false;
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -157,7 +168,7 @@ namespace TwitchDownloaderWPF
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private async void SplitButton_Click(object sender, RoutedEventArgs e)
+        private async void SplitBtnDownload_Click(object sender, RoutedEventArgs e)
         {
             if (((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
             {
@@ -176,22 +187,21 @@ namespace TwitchDownloaderWPF
 
             comboQuality.IsEnabled = false;
             btnGetInfo.IsEnabled = false;
-            btnDownload.IsEnabled = false;
-            btnQueue.IsEnabled = false;
+
+            ClipDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
+            _cancellationTokenSource = new CancellationTokenSource();
+
             SetImage("Images/ppOverheat.gif", true);
             statusMessage.Text = "Downloading";
+            UpdateActionButtons(true);
             try
             {
-                ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
-                downloadOptions.Filename = saveFileDialog.FileName;
-                downloadOptions.Id = clipId;
-                downloadOptions.Quality = comboQuality.Text;
-                await new ClipDownloader(downloadOptions).DownloadAsync();
+                await new ClipDownloader(downloadOptions).DownloadAsync(_cancellationTokenSource.Token);
 
                 statusMessage.Text = "Done";
                 SetImage("Images/ppHop.gif", true);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException and not TaskCanceledException)
             {
                 statusMessage.Text = "ERROR";
                 SetImage("Images/peepoSad.png", false);
@@ -201,13 +211,38 @@ namespace TwitchDownloaderWPF
                     MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+            catch
+            {
+                statusMessage.Text = "Canceled";
+                SetImage("Images/ppHop.gif", true);
+            }
             btnGetInfo.IsEnabled = true;
-            btnDownload.IsEnabled = true;
-            btnQueue.IsEnabled = true;
             statusProgressBar.Value = 0;
+            _cancellationTokenSource.Dispose();
+            UpdateActionButtons(false);
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private ClipDownloadOptions GetOptions(string fileName)
+        {
+            return new ClipDownloadOptions
+            {
+                Filename = fileName,
+                Id = clipId,
+                Quality = comboQuality.Text
+            };
+        }
+
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            statusMessage.Text = "Canceling";
+            try
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            catch (ObjectDisposedException) { }
+        }
+
+        private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e)
         {
             WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();
@@ -229,7 +264,7 @@ public class TwitchClip
     }
 
     override
-    public string ToString()
+        public string ToString()
     {
         //Only show framerate if it's not 30fps
         return String.Format("{0}p{1}", quality, framerate == "30" ? "" : framerate);

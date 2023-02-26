@@ -29,6 +29,7 @@ namespace TwitchDownloaderWPF
         public Dictionary<string, (string url, int bandwidth)> videoQualties = new();
         public int currentVideoId;
         public DateTime currentVideoTime;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public PageVodDownload()
         {
@@ -40,8 +41,8 @@ namespace TwitchDownloaderWPF
             comboQuality.IsEnabled = isEnabled;
             checkStart.IsEnabled = isEnabled;
             checkEnd.IsEnabled = isEnabled;
-            btnDownload.IsEnabled = isEnabled;
-            btnQueue.IsEnabled = isEnabled;
+            SplitBtnDownload.IsEnabled = isEnabled;
+            MenuItemEnqueue.IsEnabled = isEnabled;
             SetEnabledCropStart(isEnabled & (bool)checkStart.IsChecked);
             SetEnabledCropEnd(isEnabled & (bool)checkEnd.IsChecked);
         }
@@ -162,6 +163,18 @@ namespace TwitchDownloaderWPF
                     MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        private void UpdateActionButtons(bool isDownloading)
+        {
+            if (isDownloading)
+            {
+                SplitBtnDownload.Visibility = Visibility.Collapsed;
+                BtnCancel.Visibility = Visibility.Visible;
+                return;
+            }
+            SplitBtnDownload.Visibility = Visibility.Visible;
+            BtnCancel.Visibility = Visibility.Collapsed;
         }
 
         public VideoDownloadOptions GetOptions(string filename, string folder)
@@ -397,7 +410,7 @@ namespace TwitchDownloaderWPF
             UpdateVideoSizeEstimates();
         }
 
-        private async void SplitButton_Click(object sender, RoutedEventArgs e)
+        private async void SplitBtnDownloader_Click(object sender, RoutedEventArgs e)
         {
             if (((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
             {
@@ -428,17 +441,18 @@ namespace TwitchDownloaderWPF
 
             VideoDownloader currentDownload = new VideoDownloader(options);
             Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
+            _cancellationTokenSource = new CancellationTokenSource();
 
             SetImage("Images/ppOverheat.gif", true);
             statusMessage.Text = "Downloading";
-
+            UpdateActionButtons(true);
             try
             {
-                await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
+                await currentDownload.DownloadAsync(downloadProgress, _cancellationTokenSource.Token);
                 statusMessage.Text = "Done";
                 SetImage("Images/ppHop.gif", true);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException and not TaskCanceledException)
             {
                 statusMessage.Text = "ERROR";
                 SetImage("Images/peepoSad.png", false);
@@ -448,13 +462,37 @@ namespace TwitchDownloaderWPF
                     MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+            catch
+            {
+                statusMessage.Text = "Canceled";
+                SetImage("Images/ppHop.gif", true);
+            }
             btnGetInfo.IsEnabled = true;
+            statusProgressBar.Value = 0;
+            _cancellationTokenSource.Dispose();
+            UpdateActionButtons(false);
+
             currentDownload = null;
             GC.Collect();
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
+            statusMessage.Text = "Canceling";
+            try
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            catch (ObjectDisposedException) { }
+        }
+
+        private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e)
+        {
+            if (!SplitBtnDownload.IsDropDownOpen)
+            {
+                return;
+            }
+
             if (ValidateInputs())
             {
                 WindowQueueOptions queueOptions = new WindowQueueOptions(this);

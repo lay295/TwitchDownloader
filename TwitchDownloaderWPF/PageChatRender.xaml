@@ -1,14 +1,14 @@
 ﻿<Page x:Class="TwitchDownloaderWPF.PageChatRender"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       xmlns:gif="http://wpfanimatedgif.codeplex.com"
       xmlns:hc="https://handyorg.github.io/handycontrol"
       xmlns:fa="http://schemas.fontawesome.com/icons/"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
-      mc:Ignorable="d" 
+      mc:Ignorable="d"
       d:DesignHeight="400" d:DesignWidth="800"
       Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded" Loaded="Page_Loaded"
       >
@@ -181,11 +181,13 @@
             <hc:SplitButton x:Name="SplitBtnRender" Height="40" MinWidth="120" Margin="0,6,0,0" Content="Render Chat" Click="SplitBtnRender_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
-                        <MenuItem Name="MenuItemPartialRender" Header="Partial Render" Click="MenuItemPartialRender_Click"/>
-                        <MenuItem Name="MenuItemEnqueueRender" Header="Enqueue Render" Click="MenuItemEnqueueRender_Click"/>
+                        <MenuItem x:Name="MenuItemPartialRender" Header="Partial Render" Click="MenuItemPartialRender_Click"/>
+                        <MenuItem x:Name="MenuItemEnqueue" Header="Enqueue Render" Click="MenuItemEnqueue_Click"/>
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
+            <Button x:Name="BtnEnqueue" Height="40" MinWidth="120" Margin="0,6,0,0" Content="Enqueue Render" Click="BtnEnqueue_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="Cancel" Click="BtnCancel_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
