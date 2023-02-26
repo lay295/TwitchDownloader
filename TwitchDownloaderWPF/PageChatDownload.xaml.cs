@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -28,6 +29,7 @@ namespace TwitchDownloaderWPF
         public string downloadId;
         public int streamerId;
         public DateTime currentVideoTime;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public PageChatDownload()
         {
@@ -65,8 +67,8 @@ namespace TwitchDownloaderWPF
             checkBttvEmbed.IsEnabled = isEnabled;
             checkFfzEmbed.IsEnabled = isEnabled;
             checkStvEmbed.IsEnabled = isEnabled;
-            btnDownload.IsEnabled = isEnabled;
-            btnQueue.IsEnabled = isEnabled;
+            SplitBtnDownload.IsEnabled = isEnabled;
+            MenuItemEnqueue.IsEnabled = isEnabled;
             radioJson.IsEnabled = isEnabled;
             radioText.IsEnabled = isEnabled;
             radioHTML.IsEnabled = isEnabled;
@@ -190,6 +192,18 @@ namespace TwitchDownloaderWPF
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 btnGetInfo.IsEnabled = true;
             }
+        }
+
+        private void UpdateActionButtons(bool isDownloading)
+        {
+            if (isDownloading)
+            {
+                SplitBtnDownload.Visibility = Visibility.Collapsed;
+                BtnCancel.Visibility = Visibility.Visible;
+                return;
+            }
+            SplitBtnDownload.Visibility = Visibility.Visible;
+            BtnCancel.Visibility = Visibility.Collapsed;
         }
 
         public static string ValidateUrl(string text)
@@ -439,7 +453,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private async void SplitButton_Click(object sender, RoutedEventArgs e)
+        private async void SplitBtnDownload_Click(object sender, RoutedEventArgs e)
         {
             if (((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
             {
@@ -503,18 +517,21 @@ namespace TwitchDownloaderWPF
 
                 btnGetInfo.IsEnabled = false;
                 SetEnabled(false, false);
+
                 SetImage("Images/ppOverheat.gif", true);
                 statusMessage.Text = Translations.Strings.StatusDone;
+                _cancellationTokenSource = new CancellationTokenSource();
+                UpdateActionButtons(true);
 
                 Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
 
                 try
                 {
-                    await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
+                    await currentDownload.DownloadAsync(downloadProgress, _cancellationTokenSource.Token);
                     statusMessage.Text = Translations.Strings.StatusDone;
                     SetImage("Images/ppHop.gif", true);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OperationCanceledException and not TaskCanceledException)
                 {
                     statusMessage.Text = Translations.Strings.StatusError;
                     SetImage("Images/peepoSad.png", false);
@@ -524,8 +541,15 @@ namespace TwitchDownloaderWPF
                         MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
+                catch
+                {
+                    statusMessage.Text = "Canceled";
+                    SetImage("Images/ppHop.gif", true);
+                }
                 btnGetInfo.IsEnabled = true;
                 statusProgressBar.Value = 0;
+                _cancellationTokenSource.Dispose();
+                UpdateActionButtons(false);
 
                 currentDownload = null;
                 GC.Collect();
@@ -534,6 +558,16 @@ namespace TwitchDownloaderWPF
             {
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
             }
+        }
+
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            statusMessage.Text = "Canceling";
+            try
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            catch (ObjectDisposedException) { }
         }
 
         private void checkCropStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
@@ -546,7 +580,8 @@ namespace TwitchDownloaderWPF
             SetEnabledCropEnd((bool)checkCropEnd.IsChecked);
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+
+        private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e)
         {
             WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();

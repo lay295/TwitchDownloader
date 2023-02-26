@@ -181,11 +181,13 @@
             <hc:SplitButton x:Name="SplitBtnRender" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc Render}" Click="SplitBtnRender_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
-                        <MenuItem Name="MenuItemPartialRender" Header="{lex:Loc PartialRender}" Click="MenuItemPartialRender_Click"/>
-                        <MenuItem Name="MenuItemEnqueueRender" Header="{lex:Loc EnqueueRender}" Click="MenuItemEnqueueRender_Click"/>
+                        <MenuItem x:Name="MenuItemPartialRender" Header="{lex:Loc PartialRender}" Click="MenuItemPartialRender_Click"/>
+                        <MenuItem x:Name="MenuItemEnqueue" Header="{lex:Loc EnqueueRender}" Click="MenuItemEnqueue_Click"/>
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
+            <Button x:Name="BtnEnqueue" Height="40" MinWidth="120" Margin="0,6,0,0" Content="Enqueue Render" Click="BtnEnqueue_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="Cancel" Click="BtnCancel_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">

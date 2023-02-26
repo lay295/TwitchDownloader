@@ -57,7 +57,7 @@ namespace TwitchDownloaderCore
                 {
                     if (report.Data.ToString().ToLower().Contains("vod is expired"))
                     {
-                        // If the user is moving both crops in one command, we only want to propagate a 'vod expired/id corrupt' report once 
+                        // If the user is moving both crops in one command, we only want to propagate a 'vod expired/id corrupt' report once
                         if (cropTaskVodExpired)
                         {
                             return;
@@ -93,17 +93,15 @@ namespace TwitchDownloaderCore
 
                 chatRoot.embeddedData ??= new EmbeddedData();
 
-                List<Task> embedTasks = new List<Task>
+                var embedTasks = new[]
                 {
-                    FirstPartyEmoteTask(progress),
-                    ThirdPartyEmoteTask(progress),
-                    ChatBadgeTask(progress),
-                    BitTask(progress)
+                    Task.Run(() => FirstPartyEmoteTask(progress, cancellationToken), cancellationToken),
+                    Task.Run(() => ThirdPartyEmoteTask(progress, cancellationToken), cancellationToken),
+                    Task.Run(() => ChatBadgeTask(progress, cancellationToken), cancellationToken),
+                    Task.Run(() => BitTask(progress, cancellationToken), cancellationToken),
                 };
 
                 await Task.WhenAll(embedTasks);
-                cancellationToken.ThrowIfCancellationRequested();
-
             }
 
             // Finally save the output to file!
@@ -126,9 +124,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task FirstPartyEmoteTask(IProgress<ProgressReport> progress = null)
+        private async Task FirstPartyEmoteTask(IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
         {
-            List<TwitchEmote> firstPartyEmoteList = await TwitchHelper.GetEmotes(chatRoot.comments, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData);
+            List<TwitchEmote> firstPartyEmoteList = await TwitchHelper.GetEmotes(chatRoot.comments, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
             int inputCount = chatRoot.embeddedData.firstParty.Count;
             chatRoot.embeddedData.firstParty = new List<EmbedEmoteData>();
@@ -145,9 +143,9 @@ namespace TwitchDownloaderCore
             progress?.Report(new ProgressReport(ReportType.Log, string.Format("Input 1st party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.firstParty.Count)));
         }
 
-        private async Task ThirdPartyEmoteTask(IProgress<ProgressReport> progress = null)
+        private async Task ThirdPartyEmoteTask(IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
         {
-            List<TwitchEmote> thirdPartyEmoteList = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, _updateOptions.BttvEmotes, _updateOptions.FfzEmotes, _updateOptions.StvEmotes);
+            List<TwitchEmote> thirdPartyEmoteList = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, _updateOptions.BttvEmotes, _updateOptions.FfzEmotes, _updateOptions.StvEmotes, cancellationToken: cancellationToken);
 
             int inputCount = chatRoot.embeddedData.thirdParty.Count;
             chatRoot.embeddedData.thirdParty = new List<EmbedEmoteData>();
@@ -165,9 +163,9 @@ namespace TwitchDownloaderCore
             progress?.Report(new ProgressReport(ReportType.Log, string.Format("Input 3rd party emote count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.thirdParty.Count)));
         }
 
-        private async Task ChatBadgeTask(IProgress<ProgressReport> progress = null)
+        private async Task ChatBadgeTask(IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
         {
-            List<ChatBadge> badgeList = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData);
+            List<ChatBadge> badgeList = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
             int inputCount = chatRoot.embeddedData.twitchBadges.Count;
             chatRoot.embeddedData.twitchBadges = new List<EmbedChatBadge>();
@@ -181,9 +179,9 @@ namespace TwitchDownloaderCore
             progress?.Report(new ProgressReport(ReportType.Log, string.Format("Input badge count: {0}. Output count: {1}", inputCount, chatRoot.embeddedData.twitchBadges.Count)));
         }
 
-        private async Task BitTask(IProgress<ProgressReport> progress = null)
+        private async Task BitTask(IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
         {
-            List<CheerEmote> bitList = await TwitchHelper.GetBits(_updateOptions.TempFolder, chatRoot.streamer.id.ToString(), _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData);
+            List<CheerEmote> bitList = await TwitchHelper.GetBits(_updateOptions.TempFolder, chatRoot.streamer.id.ToString(), _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
             int inputCount = chatRoot.embeddedData.twitchBits.Count;
             chatRoot.embeddedData.twitchBits = new List<EmbedCheerEmote>();

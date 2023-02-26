@@ -1,8 +1,8 @@
 ﻿<Page x:Class="TwitchDownloaderWPF.PageClipDownload"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
       xmlns:gif="http://wpfanimatedgif.codeplex.com"
       xmlns:lex="http://wpflocalizeextension.codeplex.com"
@@ -12,7 +12,7 @@
       xmlns:hc="https://handyorg.github.io/handycontrol"
       xmlns:fa="http://schemas.fontawesome.com/icons/"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
-      mc:Ignorable="d" 
+      mc:Ignorable="d"
       d:DesignHeight="400" d:DesignWidth="800"
       Title="PageClipDownload" Initialized="Page_Initialized" Loaded="Page_Loaded">
 
@@ -67,13 +67,14 @@
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom">
-            <hc:SplitButton x:Name="btnDownload" Height="40" Width="120" Content="{lex:Loc Download}" Click="SplitButton_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
+            <hc:SplitButton x:Name="SplitBtnDownload" Height="40" Width="120" Content="{lex:Loc Download}" Click="SplitBtnDownload_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
-                        <MenuItem x:Name="btnQueue" Header="{lex:Loc EnqueueDownload}" Click="MenuItem_Click"/>
+                        <MenuItem x:Name="MenuItemEnqueue" Header="{lex:Loc EnqueueDownload}" Click="MenuItemEnqueue_Click"/>
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
+            <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="Cancel" Click="BtnCancel_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
