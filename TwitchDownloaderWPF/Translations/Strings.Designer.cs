@@ -1185,6 +1185,24 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Canceled.
+        /// </summary>
+        public static string StatusCanceled {
+            get {
+                return ResourceManager.GetString("StatusCanceled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Canceling.
+        /// </summary>
+        public static string StatusCanceling {
+            get {
+                return ResourceManager.GetString("StatusCanceling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Done.
         /// </summary>
         public static string StatusDone {

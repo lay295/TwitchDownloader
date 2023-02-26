@@ -97,7 +97,7 @@
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
-            <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="Cancel" Click="BtnCancel_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc TaskCancel}" Click="BtnCancel_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">

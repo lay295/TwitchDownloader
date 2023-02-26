@@ -617,7 +617,7 @@ namespace TwitchDownloaderWPF
                 }
                 catch
                 {
-                    statusMessage.Text = "Canceled";
+                    statusMessage.Text = Translations.Strings.StatusCanceled;
                     SetImage("Images/ppHop.gif", true);
                 }
                 statusProgressBar.Value = 0;
@@ -637,7 +637,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
-            statusMessage.Text = "Canceling";
+            statusMessage.Text = Translations.Strings.StatusCanceling;
             try
             {
                 _cancellationTokenSource.Cancel();

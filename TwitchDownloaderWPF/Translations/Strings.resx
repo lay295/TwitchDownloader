@@ -686,4 +686,10 @@
   <data name="InvaliFolderPathMessage" xml:space="preserve">
     <value>The folder does not exist</value>
   </data>
+  <data name="StatusCanceled" xml:space="preserve">
+    <value>Canceled</value>
+  </data>
+  <data name="StatusCanceling" xml:space="preserve">
+    <value>Canceling</value>
+  </data>
 </root>

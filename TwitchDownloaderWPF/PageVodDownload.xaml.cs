@@ -17,6 +17,7 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Translations;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -464,7 +465,7 @@ namespace TwitchDownloaderWPF
             }
             catch
             {
-                statusMessage.Text = "Canceled";
+                statusMessage.Text = Strings.StatusCanceled;
                 SetImage("Images/ppHop.gif", true);
             }
             btnGetInfo.IsEnabled = true;
@@ -478,7 +479,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
-            statusMessage.Text = "Canceling";
+            statusMessage.Text = Strings.StatusCanceling;
             try
             {
                 _cancellationTokenSource.Cancel();
