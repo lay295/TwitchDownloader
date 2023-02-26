@@ -355,7 +355,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false)
+        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -388,6 +388,8 @@ namespace TwitchDownloaderCore
 
             foreach (var comment in comments)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (comment.message.fragments == null)
                     continue;
 
@@ -400,7 +402,7 @@ namespace TwitchDownloaderCore
                         {
                             try
                             {
-                                byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png");
+                                byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png", cancellationToken);
                                 TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
                                 alreadyAdded.Add(id);
                                 returnList.Add(newEmote);
@@ -417,7 +419,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false)
+        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
             List<string> alreadyAdded = new List<string>();
@@ -441,8 +443,8 @@ namespace TwitchDownloaderCore
 
             // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
             // TODO: would want to make this configurable as we do for emotes though...
-            TwitchBadgeResponse globalBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display"));
-            TwitchBadgeResponse subBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display"));
+            TwitchBadgeResponse globalBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display", cancellationToken));
+            TwitchBadgeResponse subBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display", cancellationToken));
 
             string badgeFolder = Path.Combine(cacheFolder, "badges");
             if (!Directory.Exists(badgeFolder))
@@ -462,7 +464,7 @@ namespace TwitchDownloaderCore
                         string downloadUrl = version.Value.image_url_2x;
                         string[] id_parts = downloadUrl.Split('/');
                         string id = id_parts[id_parts.Length - 2];
-                        byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
+                        byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png", cancellationToken);
                         versions.Add(version.Key, bytes);
                     }
 
@@ -474,7 +476,7 @@ namespace TwitchDownloaderCore
                             string downloadUrl = version.Value.image_url_2x;
                             string[] id_parts = downloadUrl.Split('/');
                             string id = id_parts[id_parts.Length - 2];
-                            byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
+                            byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png", cancellationToken);
                             versions[version.Key] = bytes;
                         }
                     }
@@ -544,7 +546,7 @@ namespace TwitchDownloaderCore
             return returnCache;
         }
 
-        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "", EmbeddedData embeddedData = null, bool offline = false)
+        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "", EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<CheerEmote> returnList = new List<CheerEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -579,7 +581,7 @@ namespace TwitchDownloaderCore
                 Content = new StringContent("{\"query\":\"query{cheerConfig{groups{nodes{id, prefix, tiers{bits}}, templateURL}},user(id:\\\"" + channel_id + "\\\"){cheer{cheerGroups{nodes{id,prefix,tiers{bits}},templateURL}}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-            string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
+            string response = await (await httpClient.SendAsync(request, cancellationToken)).Content.ReadAsStringAsync(cancellationToken);
             GqlCheerResponse cheerResponse = JsonConvert.DeserializeObject<GqlCheerResponse>(response);
 
             string bitFolder = Path.Combine(cacheFolder, "bits");
@@ -620,7 +622,7 @@ namespace TwitchDownloaderCore
                             {
                                 int minBits = tier.bits;
                                 string url = templateURL.Replace("PREFIX", node.prefix.ToLower()).Replace("BACKGROUND", "dark").Replace("ANIMATION", "animated").Replace("TIER", tier.bits.ToString()).Replace("SCALE.EXTENSION", "2.gif");
-                                TwitchEmote emote = new TwitchEmote(await GetImage(bitFolder, url, node.id + tier.bits, "2", "gif"), EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
+                                TwitchEmote emote = new TwitchEmote(await GetImage(bitFolder, url, node.id + tier.bits, "2", "gif", cancellationToken), EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
                                 tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
                             }
                             returnList.Add(newEmote);
@@ -756,6 +758,8 @@ namespace TwitchDownloaderCore
 
         public static async Task<byte[]> GetImage(string cachePath, string imageUrl, string imageId, string imageScale, string imageType, CancellationToken cancellationToken = new())
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             byte[] imageBytes = null;
 
             if (!Directory.Exists(cachePath))
