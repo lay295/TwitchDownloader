@@ -411,6 +411,56 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
+        public static async Task<BadgeResponse> GetChatBadgesData(int streamerId, CancellationToken cancellationToken = new())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            TwitchBadgeResponse globalBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display", cancellationToken));
+            TwitchBadgeResponse subBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display", cancellationToken));
+
+            BadgeResponse badges = new BadgeResponse();
+            badges.BadgeSets = new Dictionary<string, BadgeSet>();
+
+            foreach (var (name, badgeSet) in subBadges.badge_sets)
+            {
+                BadgeSet newBadgeSet = new BadgeSet();
+                newBadgeSet.Versions = new Dictionary<string, ChatBadgeItem>();
+
+                foreach (var (version, chatBadge) in badgeSet.versions)
+                {
+                    string image_url = chatBadge.image_url_2x;
+                    string description = chatBadge.description;
+                    string title = chatBadge.title;
+
+                    newBadgeSet.Versions.Add(version, new ChatBadgeItem() { ImageUrl = image_url, Description = description, Title = title });
+                }
+
+                badges.BadgeSets.Add(name, newBadgeSet);
+            }
+            foreach (var (name, badgeSet) in globalBadges.badge_sets)
+            {
+                // Prefer channel specific badges over global ones
+                if (!subBadges.badge_sets.ContainsKey(name))
+                {
+                    BadgeSet newBadgeSet = new BadgeSet();
+                    newBadgeSet.Versions = new Dictionary<string, ChatBadgeItem>();
+
+                    foreach (var (version, chatBadge) in badgeSet.versions)
+                    {
+                        string image_url = chatBadge.image_url_2x;
+                        string description = chatBadge.description;
+                        string title = chatBadge.title;
+
+                        newBadgeSet.Versions.Add(version, new ChatBadgeItem() { ImageUrl = image_url, Description = description, Title = title });
+                    }
+
+                    badges.BadgeSets.Add(name, newBadgeSet);
+                }
+            }
+
+            return badges;
+        }
+
         public static async Task<List<ChatBadge>> GetChatBadges(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
