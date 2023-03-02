@@ -216,6 +216,8 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Generate Mask**: Generates a secondary output file containing a black and white mask of the text and images in the render. The alpha channel of the background color MUST be less than 255.
 
+**Sharpening**: Applies a sharpening filter to the rendered video. Slightly increases render time and file size. Works best with _Font Size_ 24 or larger.
+
 #### <ins>Ffmpeg</ins>
 
 **Warning: modifying Ffmpeg arguments may cause pipe errors!**
@@ -235,7 +237,8 @@ If render speeds feel like they are too slow, try any of the following:
 - Disable dispersion if update rate is less than 1.0
 - Reduce framerate
 - Disable generate mask
-- Disable BTTV, FFZ, 7TV emotes - animated emotes are expensive to render
+- Disable image sharpening
+- Disable BTTV, FFZ, 7TV emotes
 
 ### Task Queue
 Create and manage multiple jobs.
@@ -282,8 +285,8 @@ Manage the application's behavior.
 <br><sup>*Figure 7.1*</sup>
 
 **Cache Folder**: The directory where temporary working files are stored. This includes VOD downloads, emotes, badges, and cheermotes.
-- Clear: Deletes all TwitchDownloader related cache files. Not recommended unless the application isn't behaving correctly.
-- Browse: Select a new folder to hold the temporary cache. Existing cache files will not be transferred.
+- **Clear**: Deletes all TwitchDownloader related cache files. Not recommended unless the application isn't behaving correctly.
+- **Browse**: Select a new folder to hold the temporary cache. Existing cache files will not be transferred.
 
 **Hide Donation Button**: Hides the donation button.
 
@@ -292,6 +295,8 @@ Manage the application's behavior.
 **Theme**: The application theme. See [Theming](#theming) for more details.
 
 **Language**: The application language. See [Localization](#localization) for more details.
+
+**Maximum Thread Bandwidth**: The maximum bandwidth that new download threads will be allowed to use, in kilobytes per second (KB/s).
 
 **Download Filename Templates**: The templates used to generate the default file names when downloading.
 
@@ -343,7 +348,7 @@ Both a light and a dark theme are included with the application, along with an o
 
 To get started creating your own theme, simply duplicate one of the included themes and open it with your favorite text editor.
 
-The WPF application uses some elements from a package called *HandyControl*, which do not provide full theming support. Most HandyControl elements only support text and border recoloring, meaning the backgrounds must be either white or dark. To control this, set the `DarkHandyControl` boolean key to true or false.
+The WPF application uses some elements from a package called _HandyControl_, which do not provide full theming support. Most HandyControl elements only support text and border recoloring, meaning the backgrounds must be either white or dark. To control this, set the `DarkHandyControl` boolean key to true or false.
 
 To enable dark title bars with your theme, set the `DarkTitleBar` boolean key to true.
 
@@ -371,6 +376,6 @@ In this case `AppElementBackground` is being used by a frame, while `AppInnerEle
 - `Dark.xaml` and `Light.xaml` will always be overwritten on application launch.
 - File names are read in case-insensitive manner, meaning `Dark.xaml` and `dark.xaml` cannot be differentiated.
 - Don't forget to edit the author comment at the top of the theme file!
-- You can have your theme included with the program! Upload it to your own fork of TwitchDownloader and create a pull request https://github.com/lay295/TwitchDownloader/pulls.
+- You can have your theme included with the program! Upload it to your own fork of TwitchDownloader and [create a pull request](https://github.com/lay295/TwitchDownloader/pulls).
 
 For offline instructions on creating custom themes see [`Themes/README.txt`](Themes/README.txt), which is regenerated on every run.
