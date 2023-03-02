@@ -37,6 +37,9 @@ Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b
 **-t / --threads**
 (Default: 10) Number of download threads.
 
+**--bandwidth**
+(Default: 2048) The maximum bandwidth a thread will be allowed to use in kilobytes per second (KB/s).
+
 **--oauth**
 OAuth access token to download subscriber only VODs. <u>**DO NOT SHARE YOUR OAUTH WITH ANYONE.**</u>
 
@@ -59,6 +62,8 @@ File the program will output to.
 **-q / --quality**
 The quality the program will attempt to download, for example "1080p60", if not found will download highest quality video.
 
+**--bandwidth**
+(Default: 8192) The maximum bandwidth the clip downloader is allowed to use in kilobytes per second (KB/s).
 
 ## Arguments for mode chatdownload
 <sup>Downloads the chat of a VOD, highlight, or clip</sup>
@@ -216,16 +221,16 @@ File the program will output to.
 (Default: 0.2) Time in seconds to update chat render output.
 
 **--input-args**
-(Default: -framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -) Input arguments for ffmpeg chat render.
+(Default: `-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -`) Input arguments for ffmpeg chat render.
 
 **--output-args**
-(Default: -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}") Output arguments for ffmpeg chat render.
+(Default: `-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"`) Output arguments for ffmpeg chat render.
 
 **--ignore-users**
-(Default: ) List of usernames to ignore when rendering, separated by commas. Not case-sensitive.
+(Default: ` `) List of usernames to ignore when rendering, separated by commas. Not case-sensitive.
 
 **--ban-words**
-(Default: ) List of words or phrases to ignore when rendering, separated by commas. Not case-sensitive.
+(Default: ` `) List of words or phrases to ignore when rendering, separated by commas. Not case-sensitive.
 
 **--badge-filter**
 (Default: 0) Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, to filter out Moderator and Broadcaster badges only enter the value of 6.
@@ -239,10 +244,10 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 (Default: false) Render completely offline using only embedded emotes, badges, and bits from the input json.
 
 **--ffmpeg-path**
-(Default: ) Path to ffmpeg executable.
+(Default: ` `) Path to ffmpeg executable.
 
 **--temp-path**
-(Default: ) Path to temporary folder for cache.
+(Default: ` `) Path to temporary folder for cache.
 
 **--verbose-ffmpeg**
 (Default: false) Prints every message from ffmpeg.
