@@ -753,5 +753,17 @@ namespace TwitchDownloader.Properties {
                 this["MaximumBandwidthKb"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ChatRenderSharpening {
+            get {
+                return ((bool)(this["ChatRenderSharpening"]));
+            }
+            set {
+                this["ChatRenderSharpening"] = value;
+            }
+        }
     }
 }

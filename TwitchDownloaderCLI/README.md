@@ -206,6 +206,9 @@ File the program will output to.
 **--generate-mask**
 (Default: false) Generates a mask file of the chat in addition to the rendered chat.
 
+**--sharpening**
+(Default: false) Appends `-filter_complex "smartblur=lr=1:ls=-1.0"` to the `input-args`. Works best with `font-size` 24 or larger.
+
 **--framerate**
 (Default: 30) Framerate of the render.
 

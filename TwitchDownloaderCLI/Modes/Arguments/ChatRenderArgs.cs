@@ -72,6 +72,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("generate-mask", Default = false, HelpText = "Generates a mask file of the chat in addition to the rendered chat.")]
         public bool GenerateMask { get; set; }
 
+        [Option("sharpening", Default = false, HelpText = "Appends a smartblur sharpening filter to the input-args. Works best with font-size 24 or larger.")]
+        public bool Sharpening { get; set; }
+
         [Option("framerate", Default = 30, HelpText = "Framerate of the render.")]
         public int Framerate { get; set; }
 
