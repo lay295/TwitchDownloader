@@ -185,5 +185,8 @@
     <Setting Name="MaximumBandwidthKb" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2048</Value>
     </Setting>
+    <Setting Name="ChatRenderSharpening" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
