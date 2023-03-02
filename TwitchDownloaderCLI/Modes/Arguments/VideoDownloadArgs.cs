@@ -17,13 +17,16 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option('b', "beginning", HelpText = "Time in seconds to crop beginning.")]
         public int CropBeginningTime { get; set; }
-        
+
         [Option('e', "ending", HelpText = "Time in seconds to crop ending.")]
         public int CropEndingTime { get; set; }
-        
-        [Option('t', "threads", Default = 10, HelpText = "Number of download threads.")]
+
+        [Option('t', "threads", Default = 4, HelpText = "Number of download threads.")]
         public int DownloadThreads { get; set; }
-        
+
+        [Option("bandwidth", Default = 2048, HelpText = "The maximum bandwidth a thread will be allowed to use in kilobytes per second (KB/s).")]
+        public int ThrottleKb { get; set; }
+
         [Option("oauth", HelpText = "OAuth access token to download subscriber only VODs. DO NOT SHARE THIS WITH ANYONE.")]
         public string Oauth { get; set; }
 

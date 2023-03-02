@@ -42,6 +42,7 @@ namespace TwitchDownloaderCLI.Modes
             VideoDownloadOptions downloadOptions = new()
             {
                 DownloadThreads = inputOptions.DownloadThreads,
+                ThrottleKb = inputOptions.ThrottleKb,
                 Id = int.Parse(vodIdMatch.ValueSpan),
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,

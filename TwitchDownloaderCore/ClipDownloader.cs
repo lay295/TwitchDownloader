@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
@@ -65,9 +66,10 @@ namespace TwitchDownloaderCore
             {
                 response.EnsureSuccessStatusCode();
 
-                using (var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.None))
+                var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), downloadOptions.ThrottleKb);
+                await using (var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                    await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
