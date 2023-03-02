@@ -10,6 +10,7 @@
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
+        xmlns:translations="clr-namespace:TwitchDownloaderWPF.Translations"
         mc:Ignorable="d"
         Title="Global Settings" MinWidth="400" MinHeight="444" Width="500" Height="480" Initialized="Window_Initialized" Closing="Window_Closing">
     <Grid Background="{DynamicResource AppBackground}">
@@ -51,7 +52,7 @@
                 <ComboBox x:Name="comboLocale" MinWidth="100" MaxWidth="330" HorizontalAlignment="Left" SelectionChanged="comboLocale_SelectionChanged" Margin="3,0,3,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,7,3,3" Foreground="{DynamicResource AppText}"><Run Text="Maximum Thread Bandwidth " /><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="The maximum bandwidth that new download threads will be allowed to use, in kilobytes per second." /></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock Margin="3,7,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MaximumThreadBandwidth}" /><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MaximumThreadBandwidthTooltip}" /></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 <hc:NumericUpDown x:Name="NumMaximumBandwidth" Value="2048" Minimum="1" Maximum="40960" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 <TextBlock Margin="3,7,0,0" Text="KB/s" Foreground="{DynamicResource AppText}" />
             </StackPanel>

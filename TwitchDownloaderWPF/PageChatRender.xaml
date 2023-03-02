@@ -9,6 +9,7 @@
       xmlns:fa="http://schemas.fontawesome.com/icons/"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
       xmlns:lex="http://wpflocalizeextension.codeplex.com"
+      xmlns:translations="clr-namespace:TwitchDownloaderWPF.Translations"
       lex:LocalizeDictionary.DesignCulture=""
       lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
       lex:ResxLocalizationProvider.DefaultDictionary="Strings"
@@ -138,7 +139,7 @@
                         <TextBlock Text="{lex:Loc RenderCodec}" HorizontalAlignment="Right" Margin="0,22,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="{lex:Loc RenderFramerate}" HorizontalAlignment="Right" Margin="0,20,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="{lex:Loc GenerateMask}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Sharpening:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc RenderImageSharpening}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,5,5">
                         <ComboBox x:Name="comboFormat" MinWidth="120" MaxWidth="300" HorizontalAlignment="Left" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>

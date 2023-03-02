@@ -888,6 +888,24 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Maximum Thread Bandwidth .
+        /// </summary>
+        public static string MaximumThreadBandwidth {
+            get {
+                return ResourceManager.GetString("MaximumThreadBandwidth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The maximum bandwidth that new download threads will be allowed to use, in kilobytes per second..
+        /// </summary>
+        public static string MaximumThreadBandwidthTooltip {
+            get {
+                return ResourceManager.GetString("MaximumThreadBandwidthTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dispersion .
         /// </summary>
         public static string MessageDispersion {
@@ -1028,6 +1046,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string RenderFramerate {
             get {
                 return ResourceManager.GetString("RenderFramerate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sharpening:.
+        /// </summary>
+        public static string RenderImageSharpening {
+            get {
+                return ResourceManager.GetString("RenderImageSharpening", resourceCulture);
             }
         }
         
