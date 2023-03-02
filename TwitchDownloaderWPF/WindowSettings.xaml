@@ -10,7 +10,6 @@
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
-        xmlns:translations="clr-namespace:TwitchDownloaderWPF.Translations"
         mc:Ignorable="d"
         Title="Global Settings" MinWidth="400" MinHeight="444" Width="500" Height="480" Initialized="Window_Initialized" Closing="Window_Closing">
     <Grid Background="{DynamicResource AppBackground}">

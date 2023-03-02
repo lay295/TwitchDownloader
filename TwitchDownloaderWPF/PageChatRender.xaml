@@ -9,7 +9,6 @@
       xmlns:fa="http://schemas.fontawesome.com/icons/"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
       xmlns:lex="http://wpflocalizeextension.codeplex.com"
-      xmlns:translations="clr-namespace:TwitchDownloaderWPF.Translations"
       lex:LocalizeDictionary.DesignCulture=""
       lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
       lex:ResxLocalizationProvider.DefaultDictionary="Strings"
