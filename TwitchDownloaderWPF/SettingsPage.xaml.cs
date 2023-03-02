@@ -44,6 +44,7 @@ namespace TwitchDownloader
             textChatTemplate.Text = Settings.Default.TemplateChat;
             checkDonation.IsChecked = Settings.Default.HideDonation;
             checkVerboseErrors.IsChecked = Settings.Default.VerboseErrors;
+            NumMaximumBandwidth.Value = Settings.Default.MaximumBandwidthKb;
 
             comboTheme.Items.Add("System");
             string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
@@ -94,6 +95,7 @@ namespace TwitchDownloader
             Settings.Default.TempPath = textTempPath.Text;
             Settings.Default.HideDonation = (bool)checkDonation.IsChecked;
             Settings.Default.VerboseErrors = (bool)checkVerboseErrors.IsChecked;
+            Settings.Default.MaximumBandwidthKb = (int)NumMaximumBandwidth.Value;
             Settings.Default.Save();
         }
 

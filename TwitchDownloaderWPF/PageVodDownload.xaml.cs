@@ -179,26 +179,21 @@ namespace TwitchDownloaderWPF
 
         public VideoDownloadOptions GetOptions(string filename, string folder)
         {
-            VideoDownloadOptions options = new VideoDownloadOptions();
-            options.DownloadThreads = (int)numDownloadThreads.Value;
-            //If filename is provided, use that if not use template for queue system
-            if (filename != null)
+            VideoDownloadOptions options = new VideoDownloadOptions
             {
-                options.Filename = filename;
-            }
-            else
-            {
-                options.Filename = Path.Combine(folder, MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text) + ".mp4");
-            }
-            options.Oauth = passwordOauth.Password;
-            options.Quality = GetQualityWithoutSize(comboQuality.Text).ToString();
-            options.Id = currentVideoId;
-            options.CropBeginning = (bool)checkStart.IsChecked;
-            options.CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds);
-            options.CropEnding = (bool)checkEnd.IsChecked;
-            options.CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds);
-            options.FfmpegPath = "ffmpeg";
-            options.TempFolder = Settings.Default.TempPath;
+                DownloadThreads = (int)numDownloadThreads.Value,
+                ThrottleKb = Settings.Default.MaximumBandwidthKb,
+                Filename = filename ?? Path.Combine(folder, MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text) + ".mp4"),
+                Oauth = passwordOauth.Password,
+                Quality = GetQualityWithoutSize(comboQuality.Text).ToString(),
+                Id = currentVideoId,
+                CropBeginning = (bool)checkStart.IsChecked,
+                CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds),
+                CropEnding = (bool)checkEnd.IsChecked,
+                CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds),
+                FfmpegPath = "ffmpeg",
+                TempFolder = Settings.Default.TempPath
+            };
             return options;
         }
 
@@ -364,7 +359,6 @@ namespace TwitchDownloaderWPF
         {
             if (this.IsInitialized && numDownloadThreads.IsEnabled)
             {
-                numDownloadThreads.Value = Math.Clamp((int)numDownloadThreads.Value, 1, 50);
                 Settings.Default.VodDownloadThreads = (int)numDownloadThreads.Value;
                 Settings.Default.Save();
             }
