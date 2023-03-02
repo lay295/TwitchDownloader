@@ -62,7 +62,7 @@ namespace TwitchDownloaderCLI.Modes
                 UpdateRate = inputOptions.UpdateRate,
                 Framerate = inputOptions.Framerate,
                 GenerateMask = inputOptions.GenerateMask,
-                InputArgs = inputOptions.InputArgs,
+                InputArgs = inputOptions.Sharpening ? inputOptions.InputArgs + " -filter_complex \"smartblur=lr=1:ls=-1.0\"" : inputOptions.InputArgs,
                 OutputArgs = inputOptions.OutputArgs,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder,

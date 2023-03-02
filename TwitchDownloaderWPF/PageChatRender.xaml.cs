@@ -112,7 +112,7 @@ namespace TwitchDownloaderWPF
                 Timestamp = (bool)checkTimestamp.IsChecked,
                 MessageColor = messageColor,
                 Framerate = int.Parse(textFramerate.Text),
-                InputArgs = textFfmpegInput.Text,
+                InputArgs = CheckRenderSharpening.IsChecked == true ? textFfmpegInput.Text + " -filter_complex \"smartblur=lr=1:ls=-1.0\"" : textFfmpegInput.Text,
                 OutputArgs = textFfmpegOutput.Text,
                 MessageFontStyle = SKFontStyle.Normal,
                 UsernameFontStyle = SKFontStyle.Bold,
@@ -171,6 +171,7 @@ namespace TwitchDownloaderWPF
                 colorFont.SelectedColor = System.Windows.Media.Color.FromRgb((byte)Settings.Default.FontColorR, (byte)Settings.Default.FontColorG, (byte)Settings.Default.FontColorB);
                 textFramerate.Text = Settings.Default.Framerate.ToString();
                 checkMask.IsChecked = Settings.Default.GenerateMask;
+                CheckRenderSharpening.IsChecked = Settings.Default.ChatRenderSharpening;
                 checkSub.IsChecked = Settings.Default.SubMessages;
                 checkBadge.IsChecked = Settings.Default.ChatBadges;
                 textEmoteScale.Text = Settings.Default.EmoteScale.ToString("0.0#");
@@ -277,6 +278,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.FontColorG = colorFont.SelectedColor.Value.G;
             Settings.Default.FontColorB = colorFont.SelectedColor.Value.B;
             Settings.Default.GenerateMask = (bool)checkMask.IsChecked;
+            Settings.Default.ChatRenderSharpening = (bool)CheckRenderSharpening.IsChecked;
             Settings.Default.SubMessages = (bool)checkSub.IsChecked;
             Settings.Default.ChatBadges = (bool)checkBadge.IsChecked;
             Settings.Default.Offline = (bool)checkOffline.IsChecked;

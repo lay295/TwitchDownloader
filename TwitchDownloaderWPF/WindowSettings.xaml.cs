@@ -49,6 +49,7 @@ namespace TwitchDownloaderWPF
             textChatTemplate.Text = Settings.Default.TemplateChat;
             checkDonation.IsChecked = Settings.Default.HideDonation;
             checkVerboseErrors.IsChecked = Settings.Default.VerboseErrors;
+            NumMaximumBandwidth.Value = Settings.Default.MaximumBandwidthKb;
 
             // Setup theme dropdown
             comboTheme.Items.Add("System"); // Cannot be localized
@@ -121,6 +122,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.TempPath = textTempPath.Text;
             Settings.Default.HideDonation = (bool)checkDonation.IsChecked;
             Settings.Default.VerboseErrors = (bool)checkVerboseErrors.IsChecked;
+            Settings.Default.MaximumBandwidthKb = (int)NumMaximumBandwidth.Value;
             Settings.Default.Save();
         }
 

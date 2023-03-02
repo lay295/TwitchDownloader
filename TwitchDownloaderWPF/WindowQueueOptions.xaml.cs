@@ -398,6 +398,7 @@ namespace TwitchDownloaderWPF
                                 downloadOptions.CropBeginning = false;
                                 downloadOptions.CropEnding = false;
                                 downloadOptions.DownloadThreads = Settings.Default.VodDownloadThreads;
+                                downloadOptions.ThrottleKb = Settings.Default.MaximumBandwidthKb;
                                 downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateVod, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + ".mp4");
                                 downloadTask.DownloadOptions = downloadOptions;
                                 downloadTask.Info.Title = dataList[i].Title;
@@ -542,7 +543,6 @@ namespace TwitchDownloaderWPF
                 checkRender.IsEnabled = true;
                 StackChatCompression.Visibility = Visibility.Visible;
             }
-
         }
 
         private void radioTxt_Checked(object sender, RoutedEventArgs e)

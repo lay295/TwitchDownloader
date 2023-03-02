@@ -8,9 +8,10 @@
         lex:LocalizeDictionary.DesignCulture=""
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
-        Title="Global Settings" MinWidth="400" MinHeight="444" Width="500" Height="450" Initialized="Window_Initialized" Closing="Window_Closing">
+        Title="Global Settings" MinWidth="400" MinHeight="444" Width="500" Height="480" Initialized="Window_Initialized" Closing="Window_Closing">
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="8"/>
@@ -49,6 +50,11 @@
                 <TextBlock Margin="3,8,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc ApplicationLanguage}"/><Hyperlink ToolTipService.ShowDuration="30000" NavigateUri="https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderWPF/README.md#localization" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ApplicationLanguageTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 <ComboBox x:Name="comboLocale" MinWidth="100" MaxWidth="330" HorizontalAlignment="Left" SelectionChanged="comboLocale_SelectionChanged" Margin="3,0,3,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
+            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                <TextBlock Margin="3,7,3,3" Foreground="{DynamicResource AppText}"><Run Text="Maximum Thread Bandwidth " /><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="The maximum bandwidth that new download threads will be allowed to use, in kilobytes per second." /></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <hc:NumericUpDown x:Name="NumMaximumBandwidth" Value="2048" Minimum="1" Maximum="40960" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3,7,0,0" Text="KB/s" Foreground="{DynamicResource AppText}" />
+            </StackPanel>
             <TextBlock Margin="3,5,3,3" Text="{lex:Loc DownloadFilenameTemplates}" Foreground="{DynamicResource AppText}" />
             <StackPanel Margin="0" Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
@@ -70,6 +76,5 @@
                 <Hyperlink NavigateUri="https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc DateCustomFormattingHyperlink}" /></Hyperlink>
             </TextBlock>
         </StackPanel>
-
     </Grid>
 </Window>

@@ -547,10 +547,6 @@ namespace TwitchDownloaderCore
             bool accentMessage = false;
             defaultPos.X = renderOptions.SidePadding;
 
-            if (comment.source != "chat")
-            {
-                return null;
-            }
             if (comment.message.user_notice_params?.msg_id != null)
             {
                 if (comment.message.user_notice_params.msg_id is not "highlighted-message" and not "sub" and not "resub" and not "subgift" and not "")
