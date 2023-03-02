@@ -126,7 +126,6 @@ namespace TwitchDownloaderCore
                 var oldComment = comment.node;
                 newComment._id = oldComment.id;
                 newComment.created_at = oldComment.createdAt;
-                newComment.updated_at = oldComment.createdAt;
                 newComment.channel_id = video.creator.id;
                 newComment.content_type = "video";
                 newComment.content_id = video.id;
@@ -135,10 +134,7 @@ namespace TwitchDownloaderCore
                 commenter.display_name = oldComment.commenter.displayName;
                 commenter._id = oldComment.commenter.id;
                 commenter.name = oldComment.commenter.login;
-                commenter.type = "user";
                 newComment.commenter = commenter;
-                newComment.source = "chat";
-                newComment.state = "published";
                 Message message = new Message();
                 message.body = "";
                 List<Fragment> fragments = new List<Fragment>();
@@ -165,7 +161,6 @@ namespace TwitchDownloaderCore
                     fragments.Add(newFragment);
                 }
                 message.fragments = fragments;
-                message.is_action = false;
                 List<UserBadge> badges = new List<UserBadge>();
                 foreach (var badge in oldComment.message.userBadges)
                 {

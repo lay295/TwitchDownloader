@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Newtonsoft = Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json.Serialization;
+using SystemText = System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -18,7 +18,6 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string display_name { get; set; }
         public string _id { get; set; }
         public string name { get; set; }
-        public string type { get; set; }
         public string bio { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
@@ -31,7 +30,6 @@ namespace TwitchDownloaderCore.TwitchObjects
                 display_name = display_name,
                 _id = _id,
                 name = name,
-                type = type,
                 bio = bio,
                 created_at = created_at,
                 updated_at = updated_at,
@@ -43,7 +41,6 @@ namespace TwitchDownloaderCore.TwitchObjects
     public class Emoticon
     {
         public string emoticon_id { get; set; }
-        public string emoticon_set_id { get; set; }
     }
 
     public class Fragment
@@ -99,9 +96,9 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string body { get; set; }
         public int bits_spent { get; set; }
         public List<Fragment> fragments { get; set; }
-        public bool is_action { get; set; }
         public List<UserBadge> user_badges { get; set; }
         public string user_color { get; set; }
+        [SystemText::JsonIgnore(Condition = SystemText.JsonIgnoreCondition.WhenWritingNull)]
         public UserNoticeParams user_notice_params { get; set; }
         public List<Emoticon2> emoticons { get; set; }
 
@@ -112,7 +109,6 @@ namespace TwitchDownloaderCore.TwitchObjects
                 body = body,
                 bits_spent = bits_spent,
                 fragments = new List<Fragment>(fragments.Capacity),
-                is_action = is_action,
                 user_badges = new List<UserBadge>(user_badges.Capacity),
                 user_color = user_color,
                 user_notice_params = user_notice_params?.Clone(),
@@ -151,16 +147,12 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public string _id { get; set; }
         public DateTime created_at { get; set; }
-        public DateTime updated_at { get; set; }
         public string channel_id { get; set; }
         public string content_type { get; set; }
         public string content_id { get; set; }
         public double content_offset_seconds { get; set; }
         public Commenter commenter { get; set; }
-        public string source { get; set; }
-        public string state { get; set; }
         public Message message { get; set; }
-        public bool more_replies { get; set; }
 
         public Comment Clone()
         {
@@ -168,16 +160,12 @@ namespace TwitchDownloaderCore.TwitchObjects
             {
                 _id = _id,
                 created_at = created_at,
-                updated_at = updated_at,
                 channel_id = channel_id,
                 content_type = content_type,
                 content_id = content_id,
                 content_offset_seconds = content_offset_seconds,
                 commenter = commenter.Clone(),
-                source = source,
-                state = state,
-                message = message.Clone(),
-                more_replies = more_replies
+                message = message.Clone()
             };
         }
     }
@@ -187,8 +175,8 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string id { get; set; }
         public int startMilliseconds { get; set; }
         public int lengthMilliseconds { get; set; }
-        [JsonProperty("type")]
-        [JsonPropertyName("type")]
+        [Newtonsoft::JsonProperty("type")]
+        [SystemText::JsonPropertyName("type")]
         public string _type { get; set; }
         public string description { get; set; }
         public string subDescription { get; set; }
@@ -238,12 +226,6 @@ namespace TwitchDownloaderCore.TwitchObjects
         public List<EmbedEmoteData> firstParty { get; set; } = new();
         public List<EmbedChatBadge> twitchBadges { get; set; } = new();
         public List<EmbedCheerEmote> twitchBits { get; set; } = new();
-    }
-
-    public class CommentResponse
-    {
-        public List<Comment> comments { get; set; }
-        public string _next { get; set; }
     }
 
     public class ChatRoot
