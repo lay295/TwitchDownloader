@@ -249,7 +249,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = new())
+        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = new())
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -261,7 +261,7 @@ namespace TwitchDownloaderCore
             }
 
             // Load our embedded data from file
-            if (embeddedData != null && embeddedData.thirdParty != null)
+            if (embeddedData?.thirdParty != null)
             {
                 foreach (EmbedEmoteData emoteData in embeddedData.thirdParty)
                 {
@@ -296,6 +296,10 @@ namespace TwitchDownloaderCore
                 {
                     if (alreadyAdded.Contains(emote.Code))
                         continue;
+
+                    if (comments.All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )")))
+                        continue;
+
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(await GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
@@ -319,6 +323,10 @@ namespace TwitchDownloaderCore
                 {
                     if (alreadyAdded.Contains(emote.Code))
                         continue;
+
+                    if (comments.All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )")))
+                        continue;
+
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(await GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
@@ -340,6 +348,10 @@ namespace TwitchDownloaderCore
                 {
                     if (alreadyAdded.Contains(emote.Code))
                         continue;
+
+                    if (comments.All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )")))
+                        continue;
+
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
@@ -393,25 +405,18 @@ namespace TwitchDownloaderCore
                 if (comment.message.fragments == null)
                     continue;
 
-                foreach (var fragment in comment.message.fragments)
+                foreach (var id in comment.message.fragments.Select(f => f.emoticon?.emoticon_id).Where(id => !alreadyAdded.Contains(id) && !failedEmotes.Contains(id)))
                 {
-                    if (fragment.emoticon != null)
+                    try
                     {
-                        string id = fragment.emoticon.emoticon_id;
-                        if (!alreadyAdded.Contains(id) && !failedEmotes.Contains(id))
-                        {
-                            try
-                            {
-                                byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png", cancellationToken);
-                                TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
-                                alreadyAdded.Add(id);
-                                returnList.Add(newEmote);
-                            }
-                            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-                            {
-                                failedEmotes.Add(id);
-                            }
-                        }
+                        byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png", cancellationToken);
+                        TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
+                        alreadyAdded.Add(id);
+                        returnList.Add(newEmote);
+                    }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        failedEmotes.Add(id);
                     }
                 }
             }
@@ -419,7 +424,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
+        public static async Task<List<ChatBadge>> GetChatBadges(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
             List<string> alreadyAdded = new List<string>();
@@ -454,6 +459,9 @@ namespace TwitchDownloaderCore
             {
                 string name = badge.Key;
                 if (alreadyAdded.Contains(name))
+                    continue;
+
+                if (comments.All(c => c.message.user_badges.All(b => b._id != name)))
                     continue;
 
                 try
@@ -546,13 +554,13 @@ namespace TwitchDownloaderCore
             return returnCache;
         }
 
-        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "", EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
+        public static async Task<List<CheerEmote>> GetBits(List<Comment> comments, string cacheFolder, string channel_id = "", EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<CheerEmote> returnList = new List<CheerEmote>();
             List<string> alreadyAdded = new List<string>();
 
             // Load our embedded data from file
-            if (embeddedData != null && embeddedData.twitchBits != null)
+            if (embeddedData?.twitchBits != null)
             {
                 foreach (EmbedCheerEmote data in embeddedData.twitchBits)
                 {
@@ -614,6 +622,10 @@ namespace TwitchDownloaderCore
                         string prefix = node.prefix;
                         if (alreadyAdded.Contains(prefix))
                             continue;
+
+                        if (comments.Where(c => c.message.bits_spent > 0).All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){node.prefix}\d")))
+                            continue;
+
                         try
                         {
                             List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
