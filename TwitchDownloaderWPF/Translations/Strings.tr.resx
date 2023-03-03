@@ -694,13 +694,13 @@
     <value>İptal Ediliyor</value>
   </data>
   <data name="MaximumThreadBandwidth" xml:space="preserve">
-    <value>Maximum Thread Bandwidth </value>
+    <value>Maksimum İşlem Bant Genişliği </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
-    <value>The maximum bandwidth that new download threads will be allowed to use, in kilobytes per second.</value>
+    <value>Yeni indirme iş parçacıklarına izin verilecek maksimum bant genişliği, saniye/kilobayt cinsinden ifade edilir.</value>
   </data>
   <data name="RenderImageSharpening" xml:space="preserve">
-    <value>Sharpening:</value>
+    <value>Keskinlik:</value>
   </data>
 </root>
