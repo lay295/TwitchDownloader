@@ -391,7 +391,7 @@ namespace TwitchDownloaderCore
                 cancellationToken.ThrowIfCancellationRequested();
 
                 foreach (var id in comment.message.fragments
-                             .Select(f => f.emoticon.emoticon_id)
+                             .Select(f => f.emoticon?.emoticon_id)
                              .Where(id => !alreadyAdded.Contains(id) && !failedEmotes.Contains(id)))
                 {
                     try
