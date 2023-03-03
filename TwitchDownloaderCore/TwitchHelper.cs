@@ -292,14 +292,10 @@ namespace TwitchDownloaderCore
                 if (!Directory.Exists(bttvFolder))
                     TwitchHelper.CreateDirectory(bttvFolder);
 
-                foreach (var emote in emoteDataResponse.BTTV)
+                foreach (var emote in emoteDataResponse.BTTV
+                             .Where(emote => !alreadyAdded.Contains(emote.Code))
+                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )"))))
                 {
-                    if (alreadyAdded.Contains(emote.Code))
-                        continue;
-
-                    if (comments.All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )")))
-                        continue;
-
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(await GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
@@ -319,14 +315,10 @@ namespace TwitchDownloaderCore
                 if (!Directory.Exists(ffzFolder))
                     TwitchHelper.CreateDirectory(ffzFolder);
 
-                foreach (var emote in emoteDataResponse.FFZ)
+                foreach (var emote in emoteDataResponse.FFZ
+                             .Where(emote => !alreadyAdded.Contains(emote.Code))
+                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )"))))
                 {
-                    if (alreadyAdded.Contains(emote.Code))
-                        continue;
-
-                    if (comments.All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )")))
-                        continue;
-
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(await GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
@@ -344,14 +336,10 @@ namespace TwitchDownloaderCore
                 if (!Directory.Exists(stvFolder))
                     TwitchHelper.CreateDirectory(stvFolder);
 
-                foreach (var emote in emoteDataResponse.STV)
+                foreach (var emote in emoteDataResponse.STV
+                             .Where(emote => !alreadyAdded.Contains(emote.Code))
+                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )"))))
                 {
-                    if (alreadyAdded.Contains(emote.Code))
-                        continue;
-
-                    if (comments.All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )")))
-                        continue;
-
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
@@ -378,7 +366,7 @@ namespace TwitchDownloaderCore
                 TwitchHelper.CreateDirectory(emoteFolder);
 
             // Load our embedded emotes
-            if (embeddedData != null && embeddedData.firstParty != null)
+            if (embeddedData?.firstParty != null)
             {
                 foreach (EmbedEmoteData emoteData in embeddedData.firstParty)
                 {
@@ -398,14 +386,13 @@ namespace TwitchDownloaderCore
                 return returnList;
             }
 
-            foreach (var comment in comments)
+            foreach (var comment in comments.Where(c => c.message.fragments != null))
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (comment.message.fragments == null)
-                    continue;
-
-                foreach (var id in comment.message.fragments.Select(f => f.emoticon?.emoticon_id).Where(id => !alreadyAdded.Contains(id) && !failedEmotes.Contains(id)))
+                foreach (var id in comment.message.fragments
+                             .Select(f => f.emoticon.emoticon_id)
+                             .Where(id => !alreadyAdded.Contains(id) && !failedEmotes.Contains(id)))
                 {
                     try
                     {
@@ -430,7 +417,7 @@ namespace TwitchDownloaderCore
             List<string> alreadyAdded = new List<string>();
 
             // Load our embedded data from file
-            if (embeddedData != null && embeddedData.twitchBadges != null)
+            if (embeddedData?.twitchBadges != null)
             {
                 foreach (EmbedChatBadge data in embeddedData.twitchBadges)
                 {
@@ -455,19 +442,14 @@ namespace TwitchDownloaderCore
             if (!Directory.Exists(badgeFolder))
                 TwitchHelper.CreateDirectory(badgeFolder);
 
-            foreach (var badge in globalBadges.badge_sets.Union(subBadges.badge_sets))
+            foreach (var (name, badgeSet) in globalBadges.badge_sets.Union(subBadges.badge_sets)
+                         .Where(b => !alreadyAdded.Contains(b.Key))
+                         .Where(b => comments.Any(c => c.message.user_badges.Any(ub => ub._id == b.Key))))
             {
-                string name = badge.Key;
-                if (alreadyAdded.Contains(name))
-                    continue;
-
-                if (comments.All(c => c.message.user_badges.All(b => b._id != name)))
-                    continue;
-
                 try
                 {
                     Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
-                    foreach (var version in badge.Value.versions)
+                    foreach (var version in badgeSet.versions)
                     {
                         string downloadUrl = version.Value.image_url_2x;
                         string[] id_parts = downloadUrl.Split('/');
@@ -477,9 +459,9 @@ namespace TwitchDownloaderCore
                     }
 
                     //Prefer channel specific badges over global ones
-                    if (subBadges.badge_sets.ContainsKey(name))
+                    if (subBadges.badge_sets.TryGetValue(name, out var subBadge))
                     {
-                        foreach (var version in subBadges.badge_sets[name].versions)
+                        foreach (var version in subBadge.versions)
                         {
                             string downloadUrl = version.Value.image_url_2x;
                             string[] id_parts = downloadUrl.Split('/');
