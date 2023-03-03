@@ -442,14 +442,14 @@ namespace TwitchDownloaderCore
             if (!Directory.Exists(badgeFolder))
                 TwitchHelper.CreateDirectory(badgeFolder);
 
-            foreach (var (name, badgeSet) in globalBadges.badge_sets.Union(subBadges.badge_sets)
+            foreach (var (name, badge) in globalBadges.badge_sets.Union(subBadges.badge_sets)
                          .Where(b => !alreadyAdded.Contains(b.Key))
                          .Where(b => comments.Any(c => c.message.user_badges.Any(ub => ub._id == b.Key))))
             {
                 try
                 {
                     Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
-                    foreach (var version in badgeSet.versions)
+                    foreach (var version in badge.versions)
                     {
                         string downloadUrl = version.Value.image_url_2x;
                         string[] id_parts = downloadUrl.Split('/');
