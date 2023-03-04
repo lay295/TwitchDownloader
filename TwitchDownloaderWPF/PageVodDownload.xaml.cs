@@ -71,7 +71,7 @@ namespace TwitchDownloaderWPF
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0018:Inline variable declaration")]
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
-            int videoId = ValidateUrl(textUrl.Text);
+            int videoId = ValidateUrl(textUrl.Text.Trim());
             if (videoId <= 0)
             {
                 MessageBox.Show(Translations.Strings.InvalidVideoLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidVideoLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -294,26 +294,12 @@ namespace TwitchDownloaderWPF
 
         private static int ValidateUrl(string text)
         {
-            if (text.All(Char.IsDigit))
+            var vodIdRegex = new Regex(@"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?)");
+            var vodIdMatch = vodIdRegex.Match(text);
+            if (vodIdMatch.Success)
             {
-                if (int.TryParse(text, out int number))
-                {
-                    return number;
-                }
-                return -1;
+                return int.Parse(vodIdMatch.ValueSpan);
             }
-            if (text.Contains("twitch.tv/videos/"))
-            {
-                //Extract just the numbers from the URL, also remove query string
-                Uri url = new UriBuilder(text).Uri;
-                string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
-                if (int.TryParse(Regex.Match(path, @"\d+").Value, out int number))
-                {
-                    return number;
-                }
-                return -1;
-            }
-            return -1;
         }
 
         public bool ValidateInputs()

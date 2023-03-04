@@ -90,7 +90,7 @@ namespace TwitchDownloaderWPF
 
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
-            string id = ValidateUrl(textUrl.Text);
+            string id = ValidateUrl(textUrl.Text.Trim());
             if (id == "")
             {
                 MessageBox.Show(Translations.Strings.UnableToParseLinkMessage, Translations.Strings.UnableToParseLink, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -208,28 +208,11 @@ namespace TwitchDownloaderWPF
 
         public static string ValidateUrl(string text)
         {
-            Regex clipRegex = new Regex(@"twitch.tv\/(\S+)\/clip\/");
-            if (text.All(Char.IsLetter) || text.All(Char.IsDigit))
-            {
-                return text;
-            }
-            if (text.Contains("twitch.tv/videos/"))
-            {
-                Uri url = new UriBuilder(text).Uri;
-                string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
-                if (int.TryParse(Regex.Match(path, @"\d+").Value, out var number))
-                {
-                    return number.ToString();
-                }
-                return "";
-            }
-            if (text.Contains("clips.twitch.tv/") || clipRegex.IsMatch(text))
-            {
-                Uri url = new UriBuilder(text).Uri;
-                string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
-                return path.Split('/').Last();
-            }
-            return "";
+            var vodClipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:videos|\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
+            var vodClipIdMatch = vodClipIdRegex.Match(text);
+            return vodClipIdMatch.Success
+                ? vodClipIdMatch.Value
+                : null;
         }
 
         private void AppendLog(string message)

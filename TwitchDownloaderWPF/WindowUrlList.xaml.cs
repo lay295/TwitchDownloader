@@ -25,7 +25,7 @@ namespace TwitchDownloaderWPF
         {
             btnQueue.IsEnabled = false;
             List<string> idList = new List<string>();
-            List<string> urlList = new List<string>(textList.Text.Split('\n').Where(x => x.Trim() != ""));
+            List<string> urlList = new List<string>(textList.Text.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             List<string> invalidList = new List<string>();
             List<string> errorList = new List<string>();
             List<TaskData> dataList = new List<TaskData>();

@@ -293,6 +293,11 @@ namespace TwitchDownloaderCore
             }
 
             string[] videoPlaylist = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, accessToken.data.videoPlaybackAccessToken.value, accessToken.data.videoPlaybackAccessToken.signature);
+            if (videoPlaylist[0] == "Forbidden")
+            {
+                throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
+            }
+
             List<KeyValuePair<string, string>> videoQualities = new List<KeyValuePair<string, string>>();
 
             for (int i = 0; i < videoPlaylist.Length; i++)
@@ -311,7 +316,7 @@ namespace TwitchDownloaderCore
 
             if (downloadOptions.Quality != null && videoQualities.Any(x => x.Key.StartsWith(downloadOptions.Quality)))
             {
-                return videoQualities.Where(x => x.Key.StartsWith(downloadOptions.Quality)).First().Value;
+                return videoQualities.First(x => x.Key.StartsWith(downloadOptions.Quality)).Value;
             }
 
             // Unable to find specified quality, defaulting to highest quality
