@@ -129,14 +129,14 @@ namespace TwitchDownloaderWPF
                 textTitle.Text = taskVideoInfo.Result.data.video.title;
                 textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToString();
                 currentVideoTime = taskVideoInfo.Result.data.video.createdAt.ToLocalTime();
-                Regex urlTimecodeRegex = new Regex(@"\?t=(\d?\dh)(\d?\dm)(\d?\ds)"); // ?t=##h##m##s
-                Match urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
+                var urlTimecodeRegex = new Regex(@"\?t=(\d+)h(\d+)m(\d+)s");
+                var urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
                 if (urlTimecodeMatch.Success)
                 {
                     checkStart.IsChecked = true;
-                    numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].Value[..urlTimecodeMatch.Groups[1].ToString().IndexOf('h')]);
-                    numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
-                    numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
+                    numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].ValueSpan);
+                    numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].ValueSpan);
+                    numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].ValueSpan);
                 }
                 else
                 {
@@ -300,6 +300,8 @@ namespace TwitchDownloaderWPF
             {
                 return int.Parse(vodIdMatch.ValueSpan);
             }
+
+            return -1;
         }
 
         public bool ValidateInputs()

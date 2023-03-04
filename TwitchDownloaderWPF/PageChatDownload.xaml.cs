@@ -129,14 +129,14 @@ namespace TwitchDownloaderWPF
                     textCreatedAt.Text = videoInfo.data.video.createdAt.ToLocalTime().ToString();
                     currentVideoTime = videoInfo.data.video.createdAt.ToLocalTime();
                     streamerId = int.Parse(videoInfo.data.video.owner.id);
-                    Regex urlTimecodeRegex = new Regex(@"\?t=(\d?\dh)(\d?\dm)(\d?\ds)"); // ?t=##h##m##s
-                    Match urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
+                    var urlTimecodeRegex = new Regex(@"\?t=(\d+)h(\d+)m(\d+)s");
+                    var urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
                     if (urlTimecodeMatch.Success)
                     {
                         checkCropStart.IsChecked = true;
-                        numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].Value[..urlTimecodeMatch.Groups[1].ToString().IndexOf('h')]);
-                        numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
-                        numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
+                        numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].ValueSpan);
+                        numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].ValueSpan);
+                        numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].ValueSpan);
                     }
                     else
                     {
