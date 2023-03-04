@@ -93,10 +93,9 @@
                 </RichTextBox.Resources>
             </RichTextBox>
         </StackPanel>
-
         <!--STATUS BAR-->
         <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
-            <StatusBarItem Padding="10,1,0,1">
+            <StatusBarItem Padding="10,5,0,5">
                 <Image x:Name="statusImage" gif:ImageBehavior.AnimatedSource="Images/ppHop.gif"/>
             </StatusBarItem>
             <StatusBarItem Padding="10,1,0,1">
