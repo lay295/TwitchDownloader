@@ -30,7 +30,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var vodClipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:videos|\S+\/clip)?\/?)\w+(?:-\S+)?(?=$|\?)");
+            var vodClipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:videos|\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
             var vodClipIdMatch = vodClipIdRegex.Match(inputOptions.Id);
             if (!vodClipIdMatch.Success)
             {

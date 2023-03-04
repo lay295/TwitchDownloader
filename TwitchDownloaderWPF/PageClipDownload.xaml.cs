@@ -33,7 +33,7 @@ namespace TwitchDownloaderWPF
 
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
-            clipId = ValidateUrl(textUrl.Text);
+            clipId = ValidateUrl(textUrl.Text.Trim());
             if (string.IsNullOrWhiteSpace(clipId))
             {
                 MessageBox.Show("Please enter a valid clip ID/URL" + Environment.NewLine + "Examples:" + Environment.NewLine + "https://clips.twitch.tv/ImportantPlausibleMetalOSsloth" + Environment.NewLine + "ImportantPlausibleMetalOSsloth", "Invalid Video ID/URL", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -105,20 +105,13 @@ namespace TwitchDownloaderWPF
             BtnCancel.Visibility = Visibility.Collapsed;
         }
 
-        private string ValidateUrl(string text)
+        private static string ValidateUrl(string text)
         {
-            Regex clipRegex = new Regex(@"twitch.tv\/(\S+)\/clip\/");
-            if (text.All(Char.IsLetter))
-            {
-                return text;
-            }
-            else if (text.Contains("clips.twitch.tv/") || clipRegex.IsMatch(text))
-            {
-                Uri url = new UriBuilder(text).Uri;
-                string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
-                return path.Split('/').Last();
-            }
-            return null;
+            var clipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
+            var clipIdMatch = clipIdRegex.Match(text);
+            return clipIdMatch.Success
+                ? clipIdMatch.Value
+                : null;
         }
 
         private void AppendLog(string message)
