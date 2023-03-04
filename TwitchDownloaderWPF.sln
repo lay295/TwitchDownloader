@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchDownloader", "TwitchDownloaderWPF\TwitchDownloader.csproj", "{A5940F4D-027D-4F9E-9F65-C0D842807BE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchDownloaderWPF", "TwitchDownloaderWPF\TwitchDownloaderWPF.csproj", "{A5940F4D-027D-4F9E-9F65-C0D842807BE1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchDownloaderCore", "TwitchDownloaderCore\TwitchDownloaderCore.csproj", "{3984E19D-EAA0-4D85-95CF-88DCD0D9316B}"
 EndProject

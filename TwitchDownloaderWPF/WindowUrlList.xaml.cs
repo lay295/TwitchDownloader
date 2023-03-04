@@ -4,13 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using TwitchDownloader.TwitchTasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects.Gql;
-using TwitchDownloaderWPF;
+using TwitchDownloaderWPF.TwitchTasks;
 using static TwitchDownloaderWPF.App;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     /// <summary>
     /// Interaction logic for WindowUrlList.xaml
@@ -49,7 +48,7 @@ namespace TwitchDownloader
 
             if (invalidList.Count > 0)
             {
-                MessageBox.Show("Please double check the VOD/Clip link", "Unable to parse inputs\n" + String.Join("\n", invalidList.ToArray()), MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Translations.Strings.UnableToParseInputsMessage + Environment.NewLine + string.Join(Environment.NewLine, invalidList.ToArray()), Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -150,7 +149,7 @@ namespace TwitchDownloader
 
             if (errorList.Count > 0)
             {
-                MessageBox.Show("Error getting VOD/Clip information", "Unable to get info for these VODs/Clips\n" + String.Join("\n", errorList.ToArray()), MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Translations.Strings.UnableToGetInfoMessage + Environment.NewLine + string.Join(Environment.NewLine, errorList.ToArray()), Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -164,6 +163,7 @@ namespace TwitchDownloader
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+            Title = Translations.Strings.TitleUrlList;
 			AppSingleton.RequestTitleBarChange();
 		}
     }

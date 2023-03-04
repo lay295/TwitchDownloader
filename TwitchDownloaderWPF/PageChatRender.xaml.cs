@@ -15,11 +15,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderWPF.Properties;
 using WpfAnimatedGif;
 using MessageBox = System.Windows.MessageBox;
 
@@ -70,7 +69,6 @@ namespace TwitchDownloaderWPF
             }
             if (FileNames.Length > 1)
             {
-                // Force enqueue if multiple files are selected
                 SplitBtnRender.Visibility = Visibility.Collapsed;
                 BtnEnqueue.Visibility = Visibility.Visible;
                 BtnCancel.Visibility = Visibility.Collapsed;
@@ -337,7 +335,7 @@ namespace TwitchDownloaderWPF
             {
                 if (!File.Exists(fileName))
                 {
-                    AppendLog("ERROR: JSON File Not Found: " + Path.GetFileName(fileName));
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.FileNotFound + Path.GetFileName(fileName));
                     return false;
                 }
             }
@@ -361,11 +359,7 @@ namespace TwitchDownloaderWPF
             }
             catch (Exception ex)
             {
-                AppendLog("ERROR: " + ex.Message);
-                if (Settings.Default.VerboseErrors)
-                {
-                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 return false;
             }
 
@@ -375,8 +369,7 @@ namespace TwitchDownloaderWPF
                      (((Codec)comboCodec.SelectedItem).Name != "RLE" && ((Codec)comboCodec.SelectedItem).Name != "ProRes")) &&
                     ((VideoContainer)comboFormat.SelectedItem).Name != "WEBM" && !(bool)checkMask.IsChecked!)
                 {
-                    AppendLog("ERROR: You've selected an alpha channel (transparency) for a container/codec that does not support it.");
-                    AppendLog("Remove transparency or encode with MOV and RLE/PRORES (file size will be large)");
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.AlphaNotSupportedByCodec);
                     return false;
                 }
             }
@@ -389,7 +382,7 @@ namespace TwitchDownloaderWPF
 
             if (int.Parse(textHeight.Text) % 2 != 0 || int.Parse(textWidth.Text) % 2 != 0)
             {
-                AppendLog("ERROR: Height and Width must be even");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.RenderWidthHeightMustBeEven);
                 return false;
             }
 
@@ -467,7 +460,7 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            SettingsPage settings = new SettingsPage();
+            WindowSettings settings = new WindowSettings();
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -551,7 +544,7 @@ namespace TwitchDownloaderWPF
             {
                 if (!ValidateInputs())
                 {
-                    MessageBox.Show("Please double check your inputs are valid", "Unable to parse inputs", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -569,7 +562,6 @@ namespace TwitchDownloaderWPF
                 SaveSettings();
 
                 ChatRenderOptions options = GetOptions(saveFileDialog.FileName);
-
 
                 Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
                 ChatRenderer currentRender = new ChatRenderer(options, renderProgress);
@@ -590,42 +582,44 @@ namespace TwitchDownloaderWPF
                     {
                         if (window.Invalid)
                         {
-                            AppendLog("Invalid start or end time");
+                            AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidStartEndTime);
                         }
                         return;
                     }
                 }
 
                 SetImage("Images/ppOverheat.gif", true);
+                statusMessage.Text = Translations.Strings.StatusRendering;
+                SplitBtnRender.IsEnabled = false;
                 ffmpegLog.Clear();
                 UpdateActionButtons(true);
                 try
                 {
                     await currentRender.RenderVideoAsync(_cancellationTokenSource.Token);
-                    statusMessage.Text = "Done";
+                    statusMessage.Text = Translations.Strings.StatusDone;
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException and not TaskCanceledException)
                 {
-                    statusMessage.Text = "ERROR";
+                    statusMessage.Text = Translations.Strings.StatusError;
                     SetImage("Images/peepoSad.png", false);
-                    AppendLog("ERROR: " + ex.Message);
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
                     {
                         if (ex.Message.Contains("The pipe has been ended"))
                         {
                             string errorLog = String.Join('\n', ffmpegLog.TakeLast(20).ToArray());
-                            MessageBox.Show(errorLog, "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(errorLog, Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                         else
                         {
-                            MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                 }
                 catch
                 {
-                    statusMessage.Text = "Canceled";
+                    statusMessage.Text = Translations.Strings.StatusCanceled;
                     SetImage("Images/ppHop.gif", true);
                 }
                 statusProgressBar.Value = 0;
@@ -645,7 +639,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
-            statusMessage.Text = "Canceling";
+            statusMessage.Text = Translations.Strings.StatusCanceling;
             try
             {
                 _cancellationTokenSource.Cancel();

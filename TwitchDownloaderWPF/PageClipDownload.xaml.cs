@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -26,6 +26,7 @@ namespace TwitchDownloaderWPF
         public string clipId = "";
         public DateTime currentVideoTime;
         private CancellationTokenSource _cancellationTokenSource;
+
         public PageClipDownload()
         {
             InitializeComponent();
@@ -36,7 +37,7 @@ namespace TwitchDownloaderWPF
             clipId = ValidateUrl(textUrl.Text.Trim());
             if (string.IsNullOrWhiteSpace(clipId))
             {
-                MessageBox.Show("Please enter a valid clip ID/URL" + Environment.NewLine + "Examples:" + Environment.NewLine + "https://clips.twitch.tv/ImportantPlausibleMetalOSsloth" + Environment.NewLine + "ImportantPlausibleMetalOSsloth", "Invalid Video ID/URL", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Translations.Strings.InvalidClipLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidClipLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -53,12 +54,12 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     string thumbUrl = clipData.data.clip.thumbnailURL;
-                    imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
+                    imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
                 }
                 catch
                 {
-                    AppendLog("ERROR: Unable to find thumbnail");
-                    var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                     if (success)
                     {
                         imgThumbnail.Source = image;
@@ -83,11 +84,11 @@ namespace TwitchDownloaderWPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Unable to get Clip information. Please double check Clip Slug and try again", "Unable to get info", MessageBoxButton.OK, MessageBoxImage.Error);
-                AppendLog("ERROR: " + ex);
+                MessageBox.Show(Translations.Strings.UnableToGetClipInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                AppendLog(Translations.Strings.ErrorLog + ex);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 btnGetInfo.IsEnabled = true;
             }
@@ -151,7 +152,7 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            SettingsPage settings = new SettingsPage();
+            WindowSettings settings = new WindowSettings();
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -185,28 +186,28 @@ namespace TwitchDownloaderWPF
             _cancellationTokenSource = new CancellationTokenSource();
 
             SetImage("Images/ppOverheat.gif", true);
-            statusMessage.Text = "Downloading";
+            statusMessage.Text = Translations.Strings.StatusDownloading;
             UpdateActionButtons(true);
             try
             {
                 await new ClipDownloader(downloadOptions).DownloadAsync(_cancellationTokenSource.Token);
 
-                statusMessage.Text = "Done";
+                statusMessage.Text = Translations.Strings.StatusDone;
                 SetImage("Images/ppHop.gif", true);
             }
             catch (Exception ex) when (ex is not OperationCanceledException and not TaskCanceledException)
             {
-                statusMessage.Text = "ERROR";
+                statusMessage.Text = Translations.Strings.StatusError;
                 SetImage("Images/peepoSad.png", false);
-                AppendLog("ERROR: " + ex.Message);
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch
             {
-                statusMessage.Text = "Canceled";
+                statusMessage.Text = Translations.Strings.StatusCanceled;
                 SetImage("Images/ppHop.gif", true);
             }
             btnGetInfo.IsEnabled = true;
@@ -227,7 +228,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
-            statusMessage.Text = "Canceling";
+            statusMessage.Text = Translations.Strings.StatusCanceling;
             try
             {
                 _cancellationTokenSource.Cancel();

@@ -1,23 +1,49 @@
-﻿<Window x:Class="TwitchDownloader.WindowQueueOptions"
+﻿<Window x:Class="TwitchDownloaderWPF.WindowQueueOptions"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TwitchDownloader"
+        xmlns:local="clr-namespace:TwitchDownloaderWPF"
+        xmlns:lex="http://wpflocalizeextension.codeplex.com"
+        lex:LocalizeDictionary.DesignCulture=""
+        lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
+        lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="Queue Options" Height="200" Width="500" Loaded="Window_loaded">
-	<Grid Background="{DynamicResource AppBackground}">
-		<TextBox x:Name="textFolder" HorizontalAlignment="Left" Height="23" Margin="106,10,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="279" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<Button x:Name="btnFolder" Content="Select Folder" HorizontalAlignment="Left" Margin="390,10,0,0" VerticalAlignment="Top" Width="89" Click="btnFolder_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-		<TextBlock Text="Download Folder:" HorizontalAlignment="Left" Margin="10,16,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}"/>
-		<CheckBox x:Name="checkChat" Content="Download Chat" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Checked="checkChat_Checked" Unchecked="checkChat_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<CheckBox x:Name="checkRender" IsEnabled="False" Content="Render Chat" HorizontalAlignment="Left" Margin="10,137,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<Button x:Name="btnQueue" Content="Add To Queue" HorizontalAlignment="Left" Margin="199,115,0,0" VerticalAlignment="Top" Width="105" Height="45" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-		<RadioButton x:Name="radioJson" IsEnabled="False" IsChecked="True" Content="JSON" HorizontalAlignment="Left" Margin="27,87,0,0" VerticalAlignment="Top" Checked="radioJson_Checked" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<RadioButton x:Name="radioTxt" IsEnabled="False" Content="TXT" HorizontalAlignment="Left" Margin="82,87,0,0" VerticalAlignment="Top" Checked="radioTxt_Checked" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<RadioButton x:Name="radioHTML" IsEnabled="False" Content="HTML" HorizontalAlignment="Left" Margin="130,87,0,0" VerticalAlignment="Top" Checked="radioHTML_Checked" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<CheckBox x:Name="checkEmbed" IsEnabled="False" Content="Embed Emotes" HorizontalAlignment="Left" Margin="27,115,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-		<CheckBox x:Name="checkVideo" Content="Download Video" HorizontalAlignment="Left" Margin="10,43,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-
+        Title="Queue Options" MinHeight="240" Height="240" MinWidth="500" Width="500" Loaded="Window_loaded">
+    <Grid Background="{DynamicResource AppBackground}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="6"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="6"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1">
+            <WrapPanel Orientation="Horizontal">
+                <TextBlock Text="{lex:Loc DownloadFolder}" HorizontalAlignment="Left" Margin="0,6,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}"/>
+                <TextBox x:Name="textFolder" HorizontalAlignment="Left" Height="23" Margin="3,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" MinWidth="300" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <Button x:Name="btnFolder" Content="{lex:Loc Browse}" HorizontalAlignment="Left" Margin="3,0,0,0" VerticalAlignment="Top" MinWidth="60" Click="btnFolder_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            </WrapPanel>
+            <CheckBox x:Name="checkVideo" Content="{lex:Loc DownloadVideo}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <CheckBox x:Name="checkChat" Content="{lex:Loc DownloadChat}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Checked="checkChat_Checked" Unchecked="checkChat_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="20,5,0,0" Visibility="Visible">
+                    <TextBlock x:Name="TextDownloadFormat" Text="{lex:Loc DownloadFormat}" IsEnabled="False" Margin="5,0,0,0" Foreground="{DynamicResource AppTextDisabled}"/>
+                    <RadioButton x:Name="radioJson" IsEnabled="False" IsChecked="True" Content="JSON" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Checked="radioJson_Checked" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <RadioButton x:Name="radioTxt" IsEnabled="False" Content="TXT" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Checked="radioTxt_Checked" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <RadioButton x:Name="radioHTML" IsEnabled="False" Content="HTML" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Checked="radioHTML_Checked" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
+                <StackPanel x:Name="StackChatCompression" Orientation="Horizontal" Margin="20,5,0,0">
+                    <TextBlock x:Name="TextCompression" Text="{lex:Loc ChatCompression}" Margin="5,0,0,0" Foreground="{DynamicResource AppTextDisabled}"/>
+                    <RadioButton x:Name="RadioCompressionNone" IsEnabled="False" IsChecked="True" Content="{lex:Loc ChatCompressionNone}" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <RadioButton x:Name="RadioCompressionGzip" IsEnabled="False" Content="{lex:Loc ChatCompressionGzip}" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
+                <CheckBox x:Name="checkEmbed" IsEnabled="False" Content="{lex:Loc EmbedImages}" HorizontalAlignment="Left" Margin="25,5,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            </StackPanel>
+            <CheckBox x:Name="checkRender" IsEnabled="False" Content="{lex:Loc RenderChat}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Left" Margin="182,-18,0,0" VerticalAlignment="Top" MinWidth="105" Height="45" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        </StackPanel>
     </Grid>
 </Window>

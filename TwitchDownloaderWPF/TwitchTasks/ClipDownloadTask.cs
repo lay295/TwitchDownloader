@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 
-namespace TwitchDownloader.TwitchTasks
+namespace TwitchDownloaderWPF.TwitchTasks
 {
     class ClipDownloadTask : ITwitchTask
     {
@@ -15,7 +15,7 @@ namespace TwitchDownloader.TwitchTasks
         public ClipDownloadOptions DownloadOptions { get; set; }
         public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
         public ITwitchTask DependantTask { get; set; }
-        public string TaskType { get; } = "Clip Download";
+        public string TaskType { get; } = Translations.Strings.ClipDownload;
         public TwitchTaskException Exception { get; private set; } = new();
 
         public event PropertyChangedEventHandler PropertyChanged;

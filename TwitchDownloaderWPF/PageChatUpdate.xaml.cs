@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -51,15 +51,15 @@ namespace TwitchDownloaderWPF
             InputFile = openFileDialog.FileName;
             SetEnabled(true);
 
-            if (Path.GetExtension(InputFile).ToLower() is not ".json" or ".gz")
+            if (Path.GetExtension(InputFile)!.ToLower() is not ".json" or ".gz")
             {
                 return;
             }
 
             ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getEmbeds: false);
             textStreamer.Text = ChatJsonInfo.streamer.name;
-            textCreatedAt.Text = ChatJsonInfo.video.created_at.ToLocalTime().ToShortDateString();
-            textTitle.Text = ChatJsonInfo.video.title ?? "Unknown";
+            textCreatedAt.Text = ChatJsonInfo.video.created_at.ToLocalTime().ToString();
+            textTitle.Text = ChatJsonInfo.video.title ?? Translations.Strings.Unknown;
 
             VideoCreatedAt = ChatJsonInfo.video.created_at.ToLocalTime();
 
@@ -76,7 +76,7 @@ namespace TwitchDownloaderWPF
             TimeSpan videoLength = TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.length) ? 0.0 : ChatJsonInfo.video.length);
             labelLength.Text = videoLength.Seconds > 0
                 ? videoLength.ToString("c")
-                : "Unknown";
+                : Translations.Strings.Unknown;
 
             VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments?.FirstOrDefault(defaultValue:null)?.content_id;
 
@@ -85,8 +85,8 @@ namespace TwitchDownloaderWPF
                 GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(VideoId));
                 if (videoInfo.data.video == null)
                 {
-                    AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
-                    var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
+                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                     if (success)
                     {
                         imgThumbnail.Source = image;
@@ -104,12 +104,12 @@ namespace TwitchDownloaderWPF
                     try
                     {
                         string thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
-                        imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
+                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
                     }
                     catch
                     {
-                        AppendLog("ERROR: Unable to find thumbnail");
-                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                         if (success)
                         {
                             imgThumbnail.Source = image;
@@ -124,8 +124,8 @@ namespace TwitchDownloaderWPF
                 GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
                 if (videoInfo.data.clip.video == null)
                 {
-                    AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
-                    var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
+                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                     if (success)
                     {
                         imgThumbnail.Source = image;
@@ -139,12 +139,12 @@ namespace TwitchDownloaderWPF
                     try
                     {
                         string thumbUrl = videoInfo.data.clip.thumbnailURL;
-                        imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
+                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
                     }
                     catch
                     {
-                        AppendLog("ERROR: Unable to find thumbnail");
-                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                         if (success)
                         {
                             imgThumbnail.Source = image;
@@ -320,7 +320,7 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            SettingsPage settings = new SettingsPage();
+            WindowSettings settings = new WindowSettings();
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -475,7 +475,7 @@ namespace TwitchDownloaderWPF
                 SetEnabled(false);
 
                 SetImage("Images/ppOverheat.gif", true);
-                statusMessage.Text = "Updating";
+                statusMessage.Text = Translations.Strings.StatusUpdating;
                 _cancellationTokenSource = new CancellationTokenSource();
                 UpdateActionButtons(true);
 
@@ -486,22 +486,22 @@ namespace TwitchDownloaderWPF
                     await currentUpdate.UpdateAsync(updateProgress, _cancellationTokenSource.Token);
                     await Task.Delay(300); // we need to wait a bit incase the "writing to output file" report comes late
                     textJson.Text = "";
-                    statusMessage.Text = "Done";
+                    statusMessage.Text = Translations.Strings.StatusDone;
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException and not TaskCanceledException)
                 {
-                    statusMessage.Text = "ERROR";
+                    statusMessage.Text = Translations.Strings.StatusError;
                     SetImage("Images/peepoSad.png", false);
-                    AppendLog("ERROR: " + ex.Message);
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
                     {
-                        MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
                 catch
                 {
-                    statusMessage.Text = "Canceled";
+                    statusMessage.Text = Translations.Strings.StatusCanceled;
                     SetImage("Images/ppHop.gif", true);
                 }
                 btnBrowse.IsEnabled = true;
@@ -511,21 +511,20 @@ namespace TwitchDownloaderWPF
 
                 currentUpdate = null;
                 GC.Collect();
-                GC.WaitForPendingFinalizers();
             }
             catch (Exception ex)
             {
-                AppendLog("ERROR: " + ex.Message);
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
-            statusMessage.Text = "Canceling";
+            statusMessage.Text = Translations.Strings.StatusCanceling;
             try
             {
                 _cancellationTokenSource.Cancel();

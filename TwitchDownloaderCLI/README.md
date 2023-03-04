@@ -41,7 +41,7 @@ Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b
 (Default: 2048) The maximum bandwidth a thread will be allowed to use in kilobytes per second (KB/s).
 
 **--oauth**
-OAuth access token to download subscriber only VODs. <u>**DO NOT SHARE YOUR OAUTH WITH ANYONE.**</u>
+OAuth access token to download subscriber only VODs. <ins>**DO NOT SHARE YOUR OUATH TOKEN WITH ANYONE.**</ins>
 
 **--ffmpeg-path**
 Path to ffmpeg executable.

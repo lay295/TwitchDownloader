@@ -5,18 +5,17 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
-using TwitchDownloader.Models;
-using TwitchDownloader.Properties;
-using TwitchDownloaderWPF;
+using TwitchDownloaderWPF.Models;
+using TwitchDownloaderWPF.Properties;
 
-namespace TwitchDownloader.Tools
+namespace TwitchDownloaderWPF.Services
 {
     public partial class ThemeService
     {
         private const int TITLEBAR_THEME_ATTRIBUTE = 20;
 
-        private bool AppDarkTitleBar = false;
-        private bool AppElementDarkTheme = false;
+        private bool _darkAppTitleBar = false;
+        private bool _darkHandyControl = false;
 
         private readonly WindowsThemeService _windowsThemeService;
         private readonly App _wpfApplication;
@@ -27,18 +26,21 @@ namespace TwitchDownloader.Tools
             {
                 Directory.CreateDirectory("Themes");
             }
-            DefaultThemeService.WriteIncludedThemes();
+            if (!DefaultThemeService.WriteIncludedThemes())
+            {
+                MessageBox.Show(Translations.Strings.ThemesFailedToWrite, Translations.Strings.ThemesFailedToWrite, MessageBoxButton.OK, MessageBoxImage.Information);
+            }
 
             _windowsThemeService = windowsThemeService;
             _wpfApplication = app;
             _windowsThemeService.ThemeChanged += WindowsThemeChanged;
 
             // If the current theme is not system and the old theme file is not found
-            if (!Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && !File.Exists($"{Path.Combine("Themes", Settings.Default.GuiTheme)}.xaml"))
+            if (!Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && !File.Exists(Path.Combine("Themes", $"{Settings.Default.GuiTheme}.xaml")))
             {
                 MessageBox.Show(
-                    $"{Settings.Default.GuiTheme}.xaml was not found. Reverting theme to System",
-                    "Theme not found",
+                    Translations.Strings.ThemeNotFoundMessage.Replace("{theme}", Settings.Default.GuiTheme + ".xaml"),
+                    Translations.Strings.ThemeNotFound,
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
 
@@ -67,7 +69,7 @@ namespace TwitchDownloader.Tools
             }
             ChangeThemePath(_wpfApplication, newTheme);
 
-            SkinType newSkin = AppElementDarkTheme ? SkinType.Dark : SkinType.Default;
+            SkinType newSkin = _darkHandyControl ? SkinType.Dark : SkinType.Default;
             SetHandyControlTheme(newSkin, _wpfApplication);
 
             if (_wpfApplication.Windows.Count > 0)
@@ -87,7 +89,7 @@ namespace TwitchDownloader.Tools
             foreach (Window window in windows)
             {
                 var windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
-                NativeFunctions.SetWindowAttribute(windowHandle, TITLEBAR_THEME_ATTRIBUTE, ref AppDarkTitleBar, Marshal.SizeOf(AppDarkTitleBar));
+                NativeFunctions.SetWindowAttribute(windowHandle, TITLEBAR_THEME_ATTRIBUTE, ref _darkAppTitleBar, Marshal.SizeOf(_darkAppTitleBar));
             }
 
             Window _wnd = new()
@@ -121,8 +123,8 @@ namespace TwitchDownloader.Tools
                     {
                         switch (boolean.Key)
                         {
-                            case "DarkTitleBar": AppDarkTitleBar = boolean.Value; break;
-                            case "DarkModeElements": AppElementDarkTheme = boolean.Value; break;
+                            case "DarkTitleBar": _darkAppTitleBar = boolean.Value; break;
+                            case "DarkHandyControl": _darkHandyControl = boolean.Value; break;
                             default: break;
                         }
                     }
