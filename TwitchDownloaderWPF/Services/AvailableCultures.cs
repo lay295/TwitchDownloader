@@ -7,7 +7,8 @@ namespace TwitchDownloaderWPF.Services
 
         // Notes for translators:
         //
-        // Please place your culture in the enum in English alphabetical order by the 'name' code
+        // Please place your culture in the enum in English alphabetical order by the 'name' code. The enum order is the order
+        // that they will appear in the language dropdown menu. i.e. ar-SA -> en-US -> es-ES -> fr-FR
         //
         // If you do not know the 'name' for your culture, you can find it using the Visual Studio ResX Resource Manager extension
         // https://marketplace.visualstudio.com/items?itemName=TomEnglert.ResXManager
@@ -21,18 +22,18 @@ namespace TwitchDownloaderWPF.Services
         {
             English,
             French,
-            Turkish,
-			Polish
+            Polish,
+            Turkish
         }
 
         private const string ENGLISH_NAME = "en-US";
         private const string ENGLISH_NATIVE_NAME = "English";
         private const string FRENCH_NAME = "fr-FR";
         private const string FRENCH_NATIVE_NAME = "Français";
+        private const string POLISH_NAME = "pl-PL";
+        private const string POLISH_NATIVE_NAME = "Polski";
         private const string TURKISH_NAME = "tr-TR";
         private const string TURKISH_NATIVE_NAME = "Türkçe";
-		private const string POLISH_NAME = "pl-PL";
-        private const string POLISH_NATIVE_NAME = "Polski";
         private const string INVARIANT_NAME = "";
         private const string INVARIANT_NATIVE_NAME = "Invariant";
 
@@ -42,8 +43,8 @@ namespace TwitchDownloaderWPF.Services
             {
                 Culture.English => ENGLISH_NAME,
                 Culture.French => FRENCH_NAME,
+                Culture.Polish => POLISH_NAME,
                 Culture.Turkish => TURKISH_NAME,
-				Culture.Polish => POLISH_NAME,
                 _ => INVARIANT_NAME
             };
         }
