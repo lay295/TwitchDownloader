@@ -411,6 +411,43 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
+        public static async Task<List<EmbedChatBadge>> GetChatBadgesData(List<Comment> comments, int streamerId, CancellationToken cancellationToken = new())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
+            // TODO: would want to make this configurable as we do for emotes though...
+            TwitchBadgeResponse globalBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display", cancellationToken));
+            TwitchBadgeResponse subBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display", cancellationToken));
+
+            List<EmbedChatBadge> badges = new List<EmbedChatBadge>();
+            List<string> alreadyAdded = new List<string>();
+
+            foreach (var name in globalBadges.badge_sets.Keys.Union(subBadges.badge_sets.Keys)
+                         .Where(n => !alreadyAdded.Contains(n))
+                         .Where(n => comments.Any(c => c.message.user_badges.Any(ub => ub._id == n))))
+            {
+                Dictionary<string, string> urls = new Dictionary<string, string>();
+                foreach(var (version, badge) in globalBadges.badge_sets[name].versions)
+                {
+                    urls.Add(version, badge.image_url_2x);
+                }
+                //Prefer channel specific badges over global ones
+                if (subBadges.badge_sets.TryGetValue(name, out var subBadge))
+                {
+                    foreach(var (version, badge) in subBadge.versions)
+                    {
+                        urls[version] = badge.image_url_2x;
+                    }
+                }
+
+                badges.Add(new EmbedChatBadge() { name = name, urls = urls });
+                alreadyAdded.Add(name);
+            }
+
+            return badges;
+        }
+
         public static async Task<List<ChatBadge>> GetChatBadges(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
@@ -433,46 +470,27 @@ namespace TwitchDownloaderCore
                 return returnList;
             }
 
-            // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
-            // TODO: would want to make this configurable as we do for emotes though...
-            TwitchBadgeResponse globalBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display", cancellationToken));
-            TwitchBadgeResponse subBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display", cancellationToken));
+            List<EmbedChatBadge> badgesData = await GetChatBadgesData(comments, streamerId, cancellationToken);
 
             string badgeFolder = Path.Combine(cacheFolder, "badges");
             if (!Directory.Exists(badgeFolder))
                 TwitchHelper.CreateDirectory(badgeFolder);
 
-            foreach (var (name, badge) in globalBadges.badge_sets.Union(subBadges.badge_sets)
-                         .Where(b => !alreadyAdded.Contains(b.Key))
-                         .Where(b => comments.Any(c => c.message.user_badges.Any(ub => ub._id == b.Key))))
+            foreach(var badge in badgesData)
             {
                 try
                 {
                     Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
-                    foreach (var version in badge.versions)
+
+                    foreach (var (version, url) in badge.urls)
                     {
-                        string downloadUrl = version.Value.image_url_2x;
-                        string[] id_parts = downloadUrl.Split('/');
+                        string[] id_parts = url.Split('/');
                         string id = id_parts[id_parts.Length - 2];
-                        byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png", cancellationToken);
-                        versions.Add(version.Key, bytes);
+                        byte[] bytes = await GetImage(badgeFolder, url, id, "2", "png", cancellationToken);
+                        versions.Add(version, bytes);
                     }
 
-                    //Prefer channel specific badges over global ones
-                    if (subBadges.badge_sets.TryGetValue(name, out var subBadge))
-                    {
-                        foreach (var version in subBadge.versions)
-                        {
-                            string downloadUrl = version.Value.image_url_2x;
-                            string[] id_parts = downloadUrl.Split('/');
-                            string id = id_parts[id_parts.Length - 2];
-                            byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png", cancellationToken);
-                            versions[version.Key] = bytes;
-                        }
-                    }
-
-                    returnList.Add(new ChatBadge(name, versions));
-                    alreadyAdded.Add(name);
+                    returnList.Add(new ChatBadge(badge.name, versions));
                 }
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
             }
