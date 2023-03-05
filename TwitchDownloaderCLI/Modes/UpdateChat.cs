@@ -51,11 +51,6 @@ namespace TwitchDownloaderCLI.Modes
             {
                 Console.WriteLine("[WARNING] - Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanantly overwritten!");
             }
-            if (!inputOptions.EmbedMissing && !inputOptions.ReplaceEmbeds && double.IsNegative(inputOptions.CropBeginningTime) && double.IsNegative(inputOptions.CropEndingTime))
-            {
-                Console.WriteLine("[ERROR] - No update options were passed. Please pass --embed-missing, --replace-embeds, -b, or -e");
-                Environment.Exit(1);
-            }
 
             ChatUpdateOptions updateOptions = new()
             {
