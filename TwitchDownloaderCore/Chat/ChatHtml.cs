@@ -23,7 +23,10 @@ namespace TwitchDownloaderCore.Chat
             Dictionary<string, EmbedEmoteData> thirdEmoteData = new();
             await BuildThirdPartyDictionary(chatRoot, embedData, thirdEmoteData, cancellationToken);
 
-            BadgeResponse badges = await TwitchHelper.GetChatBadgesData(chatRoot.streamer.id, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            Dictionary<string, EmbedChatBadge> chatBadgeData = new();
+            await BuildChatBadgesDictionary(chatRoot, embedData, chatBadgeData, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -70,7 +73,7 @@ namespace TwitchDownloaderCore.Chat
                         {
                             var relativeTime = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
                             string timestamp = relativeTime.ToString(@"h\:mm\:ss");
-                            await sw.WriteAsync($"<pre class=\"comment-root\">[{timestamp}] {GetChatBadgesHtml(embedData, badges, chatRoot, comment)} <a href=\"https://www.twitch.tv/{comment.commenter.name}\" target=\"_blank\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>\n");
+                            await sw.WriteAsync($"<pre class=\"comment-root\">[{timestamp}] {GetChatBadgesHtml(embedData, chatBadgeData, chatRoot, comment)} <a href=\"https://www.twitch.tv/{comment.commenter.name}\" target=\"_blank\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>\n");
                         }
                         break;
                     default:
@@ -111,34 +114,42 @@ namespace TwitchDownloaderCore.Chat
             }
         }
 
-        private static string GetChatBadgesHtml(bool embedData, BadgeResponse badges, ChatRoot chatRoot, Comment comment)
+        private static async Task BuildChatBadgesDictionary(ChatRoot chatRoot, bool embedData, Dictionary<string, EmbedChatBadge> chatBadgeData, CancellationToken cancellationToken)
         {
+            // No need to build the dictionary if badges are embeded
+            if (embedData)
+                return;
+
+            List<EmbedChatBadge> badges = await TwitchHelper.GetChatBadgesData(chatRoot.comments, chatRoot.streamer.id, cancellationToken);
+
+            foreach (var badge in badges)
+            {
+                chatBadgeData[badge.name] = badge;
+            }
+        }
+
+        private static string GetChatBadgesHtml(bool embedData, Dictionary<string, EmbedChatBadge> chatBadgeData, ChatRoot chatRoot, Comment comment)
+        {
+            if (comment.message.user_badges.Count == 0)
+                return string.Empty;
+
             List<string> badgesHtml = new List<string>();
 
             foreach (var messageBadge in comment.message.user_badges)
             {
                 if (embedData)
                 {
-                    foreach(var channelBadge in chatRoot.embeddedData.twitchBadges)
-                    {
-                        if (channelBadge.name != messageBadge._id)
-                            continue;
-
-                        if (!channelBadge.versions.ContainsKey(messageBadge.version))
-                            continue;
-
-                        badgesHtml.Add($"<img class=\"emote-image badge-{messageBadge._id}-{messageBadge.version}\" title=\"{messageBadge._id}\"\"><div class=\"invis-text\">{messageBadge._id}</div>");
-                    }
+                    badgesHtml.Add($"<img class=\"emote-image badge-{messageBadge._id}-{messageBadge.version}\" title=\"{messageBadge._id}\"\"><div class=\"invis-text\">{messageBadge._id}</div>");
                 }
                 else
                 {
-                    if (!badges.BadgeSets.ContainsKey(messageBadge._id))
+                    if (!chatBadgeData.ContainsKey(messageBadge._id))
                         continue;
                     
-                    if (!badges.BadgeSets[messageBadge._id].Versions.ContainsKey(messageBadge.version))
+                    if (!chatBadgeData[messageBadge._id].urls.ContainsKey(messageBadge.version))
                         continue;
 
-                    badgesHtml.Add($"<img class=\"emote-image\" title=\"{messageBadge._id}\" src=\"{badges.BadgeSets[messageBadge._id].Versions[messageBadge.version].ImageUrl}\"><div class=\"invis-text\">{messageBadge._id}</div>");
+                    badgesHtml.Add($"<img class=\"emote-image\" title=\"{messageBadge._id}\" src=\"{chatBadgeData[messageBadge._id].urls[messageBadge.version]}\"><div class=\"invis-text\">{messageBadge._id}</div>");
                 }
             }
 

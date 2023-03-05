@@ -212,6 +212,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public string name { get; set; }
         public Dictionary<string, byte[]> versions { get; set; }
+        public Dictionary<string, string> urls { get; set; }
     }
 
     public class EmbedCheerEmote
