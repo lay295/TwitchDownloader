@@ -233,9 +233,9 @@ namespace TwitchDownloaderCore
                         description = responseChapter.node.description,
                         subDescription = responseChapter.node.subDescription,
                         thumbnailUrl = responseChapter.node.thumbnailURL,
-                        gameId = responseChapter.node.details.game.id,
-                        gameDisplayName = responseChapter.node.details.game.displayName,
-                        gameBoxArtUrl = responseChapter.node.details.game.boxArtURL
+                        gameId = responseChapter.node.details.game?.id ?? null,
+                        gameDisplayName = responseChapter.node.details.game?.displayName ?? null,
+                        gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL ?? null
                     };
                     chatRoot.video.chapters.Add(chapter);
                 }
