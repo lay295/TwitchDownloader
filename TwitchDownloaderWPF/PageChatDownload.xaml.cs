@@ -91,17 +91,14 @@ namespace TwitchDownloaderWPF
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
             string id = ValidateUrl(textUrl.Text.Trim());
-            if (id == "")
+            if (string.IsNullOrWhiteSpace(id))
             {
                 MessageBox.Show(Translations.Strings.UnableToParseLinkMessage, Translations.Strings.UnableToParseLink, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             btnGetInfo.IsEnabled = false;
             downloadId = id;
-            if (id.All(Char.IsDigit))
-                downloadType = DownloadType.Video;
-            else
-                downloadType = DownloadType.Clip;
+            downloadType = id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
 
             try
             {
