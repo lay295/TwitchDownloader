@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TwitchDownloaderWPF.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
@@ -81,13 +81,13 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="TemplateVod" Type="System.String" Scope="User">
-      <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title}</Value>
+      <Value Profile="(Default)">[{date_custom=&quot;M-d-yy&quot;}] {channel} - {title}</Value>
     </Setting>
     <Setting Name="TemplateClip" Type="System.String" Scope="User">
-      <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title}</Value>
+      <Value Profile="(Default)">[{date_custom=&quot;M-d-yy&quot;}] {channel} - {title}</Value>
     </Setting>
     <Setting Name="TemplateChat" Type="System.String" Scope="User">
-      <Value Profile="(Default)">[{date_custom="M-d-yy"}] {channel} - {title} - Chat</Value>
+      <Value Profile="(Default)">[{date_custom=&quot;M-d-yy&quot;}] {channel} - {title} - Chat</Value>
     </Setting>
     <Setting Name="SubMessages" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -191,5 +191,9 @@
     <Setting Name="ChatRenderSharpening" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="UTCVideoTime" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
+

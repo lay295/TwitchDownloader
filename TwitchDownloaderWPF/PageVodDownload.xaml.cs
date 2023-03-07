@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -127,8 +128,9 @@ namespace TwitchDownloaderWPF
                 TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                 textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
                 textTitle.Text = taskVideoInfo.Result.data.video.title;
-                textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToString();
-                currentVideoTime = taskVideoInfo.Result.data.video.createdAt.ToLocalTime();
+                var videoCreatedAt = taskVideoInfo.Result.data.video.createdAt;
+                textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+                currentVideoTime = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
                 var urlTimecodeRegex = new Regex(@"\?t=(\d+)h(\d+)m(\d+)s");
                 var urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
                 if (urlTimecodeMatch.Success)

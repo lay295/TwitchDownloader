@@ -701,4 +701,10 @@
   <data name="RenderImageSharpening" xml:space="preserve">
     <value>Sharpening:</value>
   </data>
+  <data name="TimestampLocal" xml:space="preserve">
+    <value>Local</value>
+  </data>
+  <data name="SettingsTimeFormat" xml:space="preserve">
+    <value>Time Format:</value>
+  </data>
 </root>

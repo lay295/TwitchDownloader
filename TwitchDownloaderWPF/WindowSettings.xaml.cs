@@ -50,6 +50,7 @@ namespace TwitchDownloaderWPF
             checkDonation.IsChecked = Settings.Default.HideDonation;
             checkVerboseErrors.IsChecked = Settings.Default.VerboseErrors;
             NumMaximumBandwidth.Value = Settings.Default.MaximumBandwidthKb;
+            radioTimeFormatUTC.IsChecked = Settings.Default.UTCVideoTime;
 
             // Setup theme dropdown
             comboTheme.Items.Add("System"); // Cannot be localized
@@ -123,6 +124,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.HideDonation = (bool)checkDonation.IsChecked;
             Settings.Default.VerboseErrors = (bool)checkVerboseErrors.IsChecked;
             Settings.Default.MaximumBandwidthKb = (int)NumMaximumBandwidth.Value;
+            Settings.Default.UTCVideoTime = (bool)radioTimeFormatUTC.IsChecked;
             Settings.Default.Save();
         }
 
@@ -141,9 +143,9 @@ namespace TwitchDownloaderWPF
 
         private void comboTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
+            if (!((string)comboTheme.SelectedItem).Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
             {
-                Settings.Default.GuiTheme = comboTheme.SelectedItem.ToString();
+                Settings.Default.GuiTheme = (string)comboTheme.SelectedItem;
                 AppSingleton.RequestAppThemeChange();
             }
         }

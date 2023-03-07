@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.TwitchTasks;
 using static TwitchDownloaderWPF.App;
 
@@ -105,7 +106,7 @@ namespace TwitchDownloaderWPF
                         catch { }
                         newData.Title = data.data.video.title;
                         newData.Streamer = data.data.video.owner.displayName;
-                        newData.Time = data.data.video.createdAt.ToLocalTime();
+                        newData.Time = Settings.Default.UTCVideoTime ? data.data.video.createdAt : data.data.video.createdAt.ToLocalTime();
                         dataList.Add(newData);
                     }
                     else
@@ -137,7 +138,7 @@ namespace TwitchDownloaderWPF
                         catch { }
                         newData.Title = data.data.clip.title;
                         newData.Streamer = data.data.clip.broadcaster.displayName;
-                        newData.Time = data.data.clip.createdAt.ToLocalTime();
+                        newData.Time = Settings.Default.UTCVideoTime ? data.data.clip.createdAt : data.data.clip.createdAt.ToLocalTime();
                         dataList.Add(newData);
                     }
                     else

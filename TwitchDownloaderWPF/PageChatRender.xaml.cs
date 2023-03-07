@@ -590,7 +590,6 @@ namespace TwitchDownloaderWPF
 
                 SetImage("Images/ppOverheat.gif", true);
                 statusMessage.Text = Translations.Strings.StatusRendering;
-                SplitBtnRender.IsEnabled = false;
                 ffmpegLog.Clear();
                 UpdateActionButtons(true);
                 try

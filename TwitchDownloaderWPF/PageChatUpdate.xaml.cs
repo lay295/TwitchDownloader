@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -58,10 +59,10 @@ namespace TwitchDownloaderWPF
 
             ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getEmbeds: false);
             textStreamer.Text = ChatJsonInfo.streamer.name;
-            textCreatedAt.Text = ChatJsonInfo.video.created_at.ToLocalTime().ToString();
+            var videoCreatedAt = ChatJsonInfo.video.created_at;
+            textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+            VideoCreatedAt = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
             textTitle.Text = ChatJsonInfo.video.title ?? Translations.Strings.Unknown;
-
-            VideoCreatedAt = ChatJsonInfo.video.created_at.ToLocalTime();
 
             TimeSpan chatStart = TimeSpan.FromSeconds(ChatJsonInfo.video.start);
             numStartHour.Value = (int)chatStart.TotalHours;

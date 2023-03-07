@@ -1194,6 +1194,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Time Format:.
+        /// </summary>
+        public static string SettingsTimeFormat {
+            get {
+                return ResourceManager.GetString("SettingsTimeFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Side Padding Scale:.
         /// </summary>
         public static string SidePaddingScale {
@@ -1415,6 +1424,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string TimestampFormat {
             get {
                 return ResourceManager.GetString("TimestampFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Local.
+        /// </summary>
+        public static string TimestampLocal {
+            get {
+                return ResourceManager.GetString("TimestampLocal", resourceCulture);
             }
         }
         

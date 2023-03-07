@@ -8,20 +8,20 @@
 //------------------------------------------------------------------------------
 
 namespace TwitchDownloaderWPF.Properties {
-
-
+    
+    
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.9.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
-
+        
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
-
+        
         public static Settings Default {
             get {
                 return defaultInstance;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("4")]
@@ -33,7 +33,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["VodDownloadThreads"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Arial")]
@@ -45,7 +45,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["Font"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("24")]
@@ -57,7 +57,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FontSize"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -69,7 +69,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["Outline"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -81,7 +81,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["Timestamp"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1200")]
@@ -93,7 +93,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["Height"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("700")]
@@ -105,7 +105,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["Width"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -117,7 +117,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["UpdateTime"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
@@ -129,7 +129,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FFZEmotes"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
@@ -141,7 +141,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["BTTVEmotes"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
@@ -153,7 +153,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["STVEmotes"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("17")]
@@ -165,7 +165,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["BackgroundColorR"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("17")]
@@ -177,7 +177,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["BackgroundColorG"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("17")]
@@ -189,7 +189,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["BackgroundColorB"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
@@ -201,7 +201,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FontColorR"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
@@ -213,7 +213,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FontColorG"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
@@ -225,7 +225,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FontColorB"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("60")]
@@ -237,7 +237,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["Framerate"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("MP4")]
@@ -249,7 +249,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["VideoContainer"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("H264")]
@@ -261,7 +261,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["VideoCodec"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
@@ -273,7 +273,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["BackgroundColorA"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
@@ -285,7 +285,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["OAuth"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -297,7 +297,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["EncodeCFR"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -309,7 +309,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["GenerateMask"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
@@ -321,7 +321,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["TempPath"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -333,7 +333,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["HideDonation"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("[{date_custom=\"M-d-yy\"}] {channel} - {title}")]
@@ -345,7 +345,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["TemplateVod"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("[{date_custom=\"M-d-yy\"}] {channel} - {title}")]
@@ -357,7 +357,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["TemplateClip"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("[{date_custom=\"M-d-yy\"}] {channel} - {title} - Chat")]
@@ -369,7 +369,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["TemplateChat"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
@@ -381,7 +381,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["SubMessages"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
@@ -393,7 +393,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["UpgradeRequired"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
@@ -405,7 +405,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ChatBadges"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("6")]
@@ -417,7 +417,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["LimitVod"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
@@ -429,7 +429,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["LimitClip"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
@@ -441,7 +441,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["LimitChat"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("2")]
@@ -453,7 +453,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["LimitRender"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
@@ -465,10 +465,10 @@ namespace TwitchDownloaderWPF.Properties {
                 this["QueueFolder"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public int ChatDownloadThreads {
             get {
                 return ((int)(this["ChatDownloadThreads"]));
@@ -477,7 +477,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ChatDownloadThreads"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
@@ -489,7 +489,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ChatDownloadType"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -501,7 +501,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ChatEmbedEmotes"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("[]")]
@@ -513,7 +513,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FfmpegArguments"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -525,7 +525,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["EmoteScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("System")]
@@ -537,7 +537,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["GuiTheme"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
@@ -549,7 +549,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["IgnoreUsersList"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
@@ -561,7 +561,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ChatBadgeMask"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -573,7 +573,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["VerboseErrors"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -585,7 +585,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ChatEmbedMissing"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -597,7 +597,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ChatReplaceEmbeds"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -609,7 +609,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["Offline"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
@@ -621,7 +621,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["BannedWordsList"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -633,7 +633,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["BadgeScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -645,7 +645,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["VerticalSpacingScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -657,7 +657,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["EmojiScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -669,7 +669,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["LeftSpacingScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -681,7 +681,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["SectionHeightScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -693,7 +693,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["WordSpacingScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -705,7 +705,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["EmoteSpacingScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -717,7 +717,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["AccentStrokeScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -729,7 +729,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["AccentIndentScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -741,7 +741,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["DisperseCommentOffsets"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("en-US")]
@@ -753,7 +753,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["GuiCulture"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("2048")]
@@ -765,7 +765,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["MaximumBandwidthKb"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -775,6 +775,18 @@ namespace TwitchDownloaderWPF.Properties {
             }
             set {
                 this["ChatRenderSharpening"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UTCVideoTime {
+            get {
+                return ((bool)(this["UTCVideoTime"]));
+            }
+            set {
+                this["UTCVideoTime"] = value;
             }
         }
     }
