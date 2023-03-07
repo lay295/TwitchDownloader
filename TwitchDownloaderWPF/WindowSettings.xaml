@@ -11,7 +11,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
-        Title="Global Settings" MinWidth="400" MinHeight="444" Width="500" Height="480" Initialized="Window_Initialized" Closing="Window_Closing">
+        Title="Global Settings" MinWidth="400" MinHeight="450" Width="500" Height="500" Initialized="Window_Initialized" Closing="Window_Closing">
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="8"/>
@@ -35,6 +35,11 @@
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,4,3,3" Text="{lex:Loc HideDonationButton}" Foreground="{DynamicResource AppText}" />
                 <CheckBox x:Name="checkDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                <TextBlock Margin="3,4,3,3" Text="{lex:Loc SettingsTimeFormat}" Foreground="{DynamicResource AppText}" />
+                <RadioButton x:Name="radioTimeFormatUTC" Content="{lex:Loc TimestampUtc}" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <RadioButton x:Name="radioTimeFormatLocal" IsChecked="True" Content="{lex:Loc TimestampLocal}" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,4,3,3" Text="{lex:Loc VerboseErrors}" Foreground="{DynamicResource AppText}" />

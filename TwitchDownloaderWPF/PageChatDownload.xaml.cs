@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -123,8 +124,9 @@ namespace TwitchDownloaderWPF
                     TimeSpan vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                     textTitle.Text = videoInfo.data.video.title;
                     textStreamer.Text = videoInfo.data.video.owner.displayName;
-                    textCreatedAt.Text = videoInfo.data.video.createdAt.ToLocalTime().ToString();
-                    currentVideoTime = videoInfo.data.video.createdAt.ToLocalTime();
+                    var videoTime = videoInfo.data.video.createdAt;
+                    textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoTime.ToString(CultureInfo.CurrentCulture) : videoTime.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+                    currentVideoTime = Settings.Default.UTCVideoTime ? videoTime : videoTime.ToLocalTime();
                     streamerId = int.Parse(videoInfo.data.video.owner.id);
                     var urlTimecodeRegex = new Regex(@"\?t=(\d+)h(\d+)m(\d+)s");
                     var urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
@@ -171,8 +173,9 @@ namespace TwitchDownloaderWPF
                     }
                     TimeSpan clipLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
                     textStreamer.Text = clipInfo.data.clip.broadcaster.displayName;
-                    textCreatedAt.Text = clipInfo.data.clip.createdAt.ToLocalTime().ToString();
-                    currentVideoTime = clipInfo.data.clip.createdAt.ToLocalTime();
+                    var clipCreatedAt = clipInfo.data.clip.createdAt;
+                    textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+                    currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                     textTitle.Text = clipInfo.data.clip.title;
                     streamerId = int.Parse(clipInfo.data.clip.broadcaster.id);
                     labelLength.Text = clipLength.ToString("c");
