@@ -59,6 +59,11 @@ namespace TwitchDownloaderCore.Tools
 
         private static string SanitizeKeyValue(string str)
         {
+            if (string.IsNullOrWhiteSpace(str))
+            {
+                return str;
+            }
+
             return str
                 .Replace("=", @"\=")
                 .Replace(";", @"\;")
