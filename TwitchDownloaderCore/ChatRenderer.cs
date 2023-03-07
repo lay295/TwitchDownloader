@@ -1264,11 +1264,11 @@ namespace TwitchDownloaderCore
         /// <remarks>chatRoot.embeddedData will be empty after calling this to save on memory!</remarks>
         private async Task FetchScaledImages(CancellationToken cancellationToken)
         {
-            var badgeTask = GetScaledBadges();
-            var emoteTask = GetScaledEmotes();
+            var badgeTask = GetScaledBadges(cancellationToken);
+            var emoteTask = GetScaledEmotes(cancellationToken);
             var emoteThirdTask = GetScaledThirdEmotes(cancellationToken);
-            var cheerTask = GetScaledBits();
-            var emojiTask = GetScaledEmojis();
+            var cheerTask = GetScaledBits(cancellationToken);
+            var emojiTask = GetScaledEmojis(cancellationToken);
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
 
@@ -1285,7 +1285,7 @@ namespace TwitchDownloaderCore
             emojiCache = emojiTask.Result;
         }
 
-        private async Task<List<ChatBadge>> GetScaledBadges()
+        private async Task<List<ChatBadge>> GetScaledBadges(CancellationToken cancellationToken)
         {
             // Do not fetch if badges are disabled
             if (!renderOptions.ChatBadges)
@@ -1293,7 +1293,7 @@ namespace TwitchDownloaderCore
                 return new List<ChatBadge>();
             }
 
-            var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var badge in badgeTask)
             {
@@ -1308,9 +1308,9 @@ namespace TwitchDownloaderCore
             return badgeTask;
         }
 
-        private async Task<List<TwitchEmote>> GetScaledEmotes()
+        private async Task<List<TwitchEmote>> GetScaledEmotes(CancellationToken cancellationToken)
         {
-            var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var emote in emoteTask)
             {
@@ -1343,9 +1343,9 @@ namespace TwitchDownloaderCore
             return emoteThirdTask;
         }
 
-        private async Task<List<CheerEmote>> GetScaledBits()
+        private async Task<List<CheerEmote>> GetScaledBits(CancellationToken cancellationToken)
         {
-            var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
+            var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var cheer in cheerTask)
             {
@@ -1364,9 +1364,9 @@ namespace TwitchDownloaderCore
             return cheerTask;
         }
 
-        private async Task<Dictionary<string, SKBitmap>> GetScaledEmojis()
+        private async Task<Dictionary<string, SKBitmap>> GetScaledEmojis(CancellationToken cancellationToken)
         {
-            var emojiTask = await TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
+            var emojiTask = await TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder, cancellationToken);
 
             //Assume emojis are 4x (they're 72x72)
             double emojiScale = 0.5 * renderOptions.ReferenceScale * renderOptions.EmojiScale;
