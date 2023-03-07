@@ -786,18 +786,20 @@ namespace TwitchDownloaderCore
             while (enumerator.MoveNext())
             {
                 List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
-                foreach (var emoji in Emoji.All.AsParallel().Where(emoji => ((string)enumerator.Current).StartsWith(emoji.Sequence.AsString)))
-                {
-                    if (emoji.Group != "Flags")
+                Emoji.All.AsParallel()
+                    .Where(emoji => enumerator.GetTextElement().StartsWith(emoji.Sequence.AsString))
+                    .ForAll(emoji =>
                     {
-                        emojiMatches.Add(emoji);
-                        continue;
-                    }
-                    if (((string)enumerator.Current).StartsWith(emoji.Sequence.AsString, StringComparison.Ordinal))
-                    {
-                        emojiMatches.Add(emoji);
-                    }
-                }
+                        if (emoji.Group != "Flags")
+                        {
+                            emojiMatches.Add(emoji);
+                            return;
+                        }
+                        if (enumerator.GetTextElement().StartsWith(emoji.Sequence.AsString, StringComparison.Ordinal))
+                        {
+                            emojiMatches.Add(emoji);
+                        }
+                    });
 
                 // Make sure the found emojis actually exist in our cache
                 int emojiMatchesCount = emojiMatches.Count;
@@ -842,7 +844,7 @@ namespace TwitchDownloaderCore
                 }
                 else
                 {
-                    nonEmojiBuffer.Append((string)enumerator.Current);
+                    nonEmojiBuffer.Append(enumerator.GetTextElement());
                 }
             }
             if (nonEmojiBuffer.Length > 0)
