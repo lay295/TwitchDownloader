@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -131,7 +132,7 @@ namespace TwitchDownloaderCore
                 if (ffmpegExitCode != 0 || !File.Exists(downloadOptions.Filename))
                 {
                     _shouldClearCache = false;
-                    throw new Exception($"Failed to finalize video. The download cache has not been cleared and can be found at {downloadFolder}.");
+                    throw new Exception($"Failed to finalize video. The download cache has not been cleared and can be found at {downloadFolder} along with a log file.");
                 }
 
                 progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video 100% [4/4]"));
@@ -154,10 +155,8 @@ namespace TwitchDownloaderCore
                 {
                     FileName = downloadOptions.FfmpegPath,
                     Arguments = string.Format(
-                        "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {2} " : "") +
-                        "-i \"{0}\" -i \"{1}\" \"\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.CropEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"",
-                        Path.Combine(downloadFolder, "output.ts"), metadataPath, (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), int.MaxValue,
-                        seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
+                        "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i \"{1}\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.CropEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"",
+                        Path.Combine(downloadFolder, "output.ts"), metadataPath, (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), int.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardInput = false,
@@ -169,10 +168,14 @@ namespace TwitchDownloaderCore
             var videoLength = TimeSpan.Zero;
             var videoLengthRegex = new Regex(@"(?<=^\s?\s?Duration: )\d\d:\d\d:\d\d\.\d\d", RegexOptions.Multiline);
             var encodingTimeRegex = new Regex(@"(?<=time=)\d\d:\d\d:\d\d\.\d\d", RegexOptions.Compiled);
-            process.ErrorDataReceived += (sender, e) =>
+            using var logWriter = File.AppendText(Path.Combine(downloadFolder, "ffmpegLog.txt"));
+
+            process.ErrorDataReceived += async (sender, e) =>
             {
                 if (e.Data is null)
                     return;
+
+                await logWriter.WriteLineAsync(e.Data);
 
                 if (videoLength == TimeSpan.Zero)
                 {
@@ -183,7 +186,7 @@ namespace TwitchDownloaderCore
                     videoLength = TimeSpan.Parse(videoLengthMatch.ValueSpan);
                 }
 
-                HandleFfmpegProgress(e.Data, encodingTimeRegex, videoLength, progress);
+                HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength, progress);
             };
 
             process.Start();
@@ -193,7 +196,7 @@ namespace TwitchDownloaderCore
             return process.ExitCode;
         }
 
-        private static void HandleFfmpegProgress(string output, Regex encodingTimeRegex, TimeSpan videoLength, IProgress<ProgressReport> progress)
+        private static void HandleFfmpegOutput(string output, Regex encodingTimeRegex, TimeSpan videoLength, IProgress<ProgressReport> progress)
         {
             if (videoLength == TimeSpan.Zero)
                 return;
