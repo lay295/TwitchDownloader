@@ -67,7 +67,7 @@ namespace TwitchDownloaderWPF
                 }
                 TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                 textStreamer.Text = clipData.data.clip.broadcaster.displayName;
-                textCreatedAt.Text = clipData.data.clip.createdAt.ToString();
+                textCreatedAt.Text = clipData.data.clip.createdAt.ToLocalTime().ToString();
                 currentVideoTime = clipData.data.clip.createdAt.ToLocalTime();
                 textTitle.Text = clipData.data.clip.title;
                 labelLength.Text = clipLength.ToString("c");

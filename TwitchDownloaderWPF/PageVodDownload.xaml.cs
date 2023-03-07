@@ -127,7 +127,7 @@ namespace TwitchDownloaderWPF
                 TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                 textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
                 textTitle.Text = taskVideoInfo.Result.data.video.title;
-                textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToString();
+                textCreatedAt.Text = taskVideoInfo.Result.data.video.createdAt.ToLocalTime().ToString();
                 currentVideoTime = taskVideoInfo.Result.data.video.createdAt.ToLocalTime();
                 var urlTimecodeRegex = new Regex(@"\?t=(\d+)h(\d+)m(\d+)s");
                 var urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
