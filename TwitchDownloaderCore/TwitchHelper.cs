@@ -673,7 +673,7 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
-        public static void CleanupUnmanagedCacheFiles(string cacheFolder)
+        public static void CleanupUnmanagedCacheFiles(string cacheFolder, IProgress<ProgressReport> progress)
         {
             if (!Directory.Exists(cacheFolder))
             {
@@ -681,38 +681,34 @@ namespace TwitchDownloaderCore
             }
 
             // Let's delete any video download cache folders older than 24 hours
-            // Or that have been inactive for 2 hours
             var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
             var directories = Directory.GetDirectories(cacheFolder);
-            foreach (var directory in directories)
+            var directoriesDeleted = (from directory in directories
+                let videoFolderMatch = videoFolderRegex.Match(directory)
+                where videoFolderMatch.Success
+                where DeleteOldDirectory(directory, videoFolderMatch.Groups[1].ValueSpan)
+                select directory).Count();
+
+            if (directoriesDeleted > 0)
             {
-                var videoFolderMatch = videoFolderRegex.Match(directory);
-                if (videoFolderMatch.Success)
-                {
-                    bool wasDeleted = DeleteOldDirectory(directory, videoFolderMatch.Groups[1].ToString());
-
-                    if (wasDeleted) continue;
-
-                    wasDeleted = DeleteColdDirectory(directory);
-
-                    if (wasDeleted) continue;
-                }
+                progress.Report(new ProgressReport(ReportType.Log, $"{directoriesDeleted} old video caches were deleted."));
             }
         }
 
-        private static bool DeleteOldDirectory(string directory, string directoryCreationMillis)
+        private static bool DeleteOldDirectory(string directory, ReadOnlySpan<char> directoryCreationMillis)
         {
             var downloadTime = long.Parse(directoryCreationMillis);
             var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            if (currentTime - downloadTime > 86_400_000) // 24 hours in millis
+            const int TWENTY_FOUR_HOURS_MILLIS = 86_400_000;
+            if (currentTime - downloadTime > TWENTY_FOUR_HOURS_MILLIS)
             {
                 try
                 {
                     Directory.Delete(directory, true);
                     return true;
                 }
-                catch { }
+                catch { /* Eat the exception */ }
             }
             return false;
         }
@@ -723,14 +719,15 @@ namespace TwitchDownloaderCore
             var directoryWriteTimeMillis = Directory.GetLastWriteTimeUtc(directory).Ticks / TimeSpan.TicksPerMillisecond;
             var currentTimeMillis = DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
 
-            if (currentTimeMillis - directoryWriteTimeMillis > 14_400_000) // 4 hours in millis
+            const int SIX_HOURS_MILLIS = 21_600_000;
+            if (currentTimeMillis - directoryWriteTimeMillis > SIX_HOURS_MILLIS)
             {
                 try
                 {
                     Directory.Delete(directory, true);
                     return true;
                 }
-                catch { }
+                catch { /* Eat the exception */ }
             }
             return false;
         }
