@@ -32,7 +32,7 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            TwitchHelper.CleanupUnmanagedCacheFiles(downloadOptions.TempFolder);
+            TwitchHelper.CleanupUnmanagedCacheFiles(downloadOptions.TempFolder, progress);
 
             string downloadFolder = Path.Combine(
                 downloadOptions.TempFolder,

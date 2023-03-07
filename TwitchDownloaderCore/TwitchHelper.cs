@@ -673,7 +673,7 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
-        public static void CleanupUnmanagedCacheFiles(string cacheFolder)
+        public static void CleanupUnmanagedCacheFiles(string cacheFolder, IProgress<ProgressReport> progress)
         {
             if (!Directory.Exists(cacheFolder))
             {
@@ -683,13 +683,15 @@ namespace TwitchDownloaderCore
             // Let's delete any video download cache folders older than 24 hours
             var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
             var directories = Directory.GetDirectories(cacheFolder);
-            foreach (var directory in directories)
+            var directoriesDeleted = (from directory in directories
+                let videoFolderMatch = videoFolderRegex.Match(directory)
+                where videoFolderMatch.Success
+                where DeleteOldDirectory(directory, videoFolderMatch.Groups[1].ValueSpan)
+                select directory).Count();
+
+            if (directoriesDeleted > 0)
             {
-                var videoFolderMatch = videoFolderRegex.Match(directory);
-                if (videoFolderMatch.Success)
-                {
-                    DeleteOldDirectory(directory, videoFolderMatch.Groups[1].ValueSpan);
-                }
+                progress.Report(new ProgressReport(ReportType.Log, $"{directoriesDeleted} old video caches were deleted."));
             }
         }
 
