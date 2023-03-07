@@ -785,13 +785,15 @@ namespace TwitchDownloaderCore
             StringBuilder nonEmojiBuffer = new();
             while (enumerator.MoveNext())
             {
-                // Old LINQ method. Leaving this for reference
-                //List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
-
                 List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
-                foreach (var emoji in Emoji.All)
+                foreach (var emoji in Emoji.All.AsParallel().Where(emoji => ((string)enumerator.Current).StartsWith(emoji.Sequence.AsString)))
                 {
-                    if (((string)enumerator.Current).StartsWith(emoji.Sequence.AsString))
+                    if (emoji.Group != "Flags")
+                    {
+                        emojiMatches.Add(emoji);
+                        continue;
+                    }
+                    if (((string)enumerator.Current).StartsWith(emoji.Sequence.AsString, StringComparison.Ordinal))
                     {
                         emojiMatches.Add(emoji);
                     }
