@@ -498,12 +498,12 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<Dictionary<string, SKBitmap>> GetTwitterEmojis(string cacheFolder)
+        public static async Task<Dictionary<string, SKBitmap>> GetTwitterEmojis(string cacheFolder, CancellationToken cancellationToken = default)
         {
             Dictionary<string, SKBitmap> returnCache = new Dictionary<string, SKBitmap>();
 
             string emojiFolder = Path.Combine(cacheFolder, "emojis");
-            Regex emojiExtensions = new Regex(@"\.(?:png|PNG)\z", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
+            Regex emojiExtensions = new Regex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
 
             if (!Directory.Exists(emojiFolder))
                 TwitchHelper.CreateDirectory(emojiFolder);
@@ -516,15 +516,18 @@ namespace TwitchDownloaderCore
                 string emojiZipPath = Path.Combine(emojiFolder, Path.GetRandomFileName());
                 try
                 {
-                    byte[] emojiZipData = Resources.twemoji_14_0_0;
-                    await File.WriteAllBytesAsync(emojiZipPath, emojiZipData);
+                    using (var ms = new MemoryStream(Resources.twemoji_14_0_0))
+                    {
+                        await using var fs = File.OpenWrite(emojiZipPath);
+                        await ms.CopyToAsync(fs, cancellationToken);
+                    }
 
-                    using ZipArchive archive = ZipFile.OpenRead(emojiZipPath);
+                    using var archive = ZipFile.OpenRead(emojiZipPath);
                     var emojiAssetsPath = Path.Combine("twemoji-14.0.0", "assets", "72x72");
                     var emojis = archive.Entries.Where(x => !string.IsNullOrWhiteSpace(x.Name) && Path.GetDirectoryName(x.FullName) == emojiAssetsPath);
                     foreach (var emoji in emojis)
                     {
-                        string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace("-", " "));
+                        string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace('-', ' '));
                         if (!File.Exists(filePath))
                         {
                             try
@@ -546,8 +549,8 @@ namespace TwitchDownloaderCore
 
             foreach (var emojiPath in emojiFiles)
             {
-                byte[] emojiBytes = await File.ReadAllBytesAsync(emojiPath);
-                SKBitmap emojiImage = SKBitmap.Decode(emojiBytes);
+                await using var fs = File.OpenRead(emojiPath);
+                SKBitmap emojiImage = SKBitmap.Decode(fs);
                 returnCache.Add(Path.GetFileNameWithoutExtension(emojiPath), emojiImage);
             }
 
