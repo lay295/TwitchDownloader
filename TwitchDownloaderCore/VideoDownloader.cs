@@ -19,6 +19,7 @@ namespace TwitchDownloaderCore
     {
         private readonly VideoDownloadOptions downloadOptions;
         private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
+        private bool _shouldClearCache = true;
 
         public VideoDownloader(VideoDownloadOptions DownloadOptions)
         {
@@ -106,7 +107,8 @@ namespace TwitchDownloaderCore
                 double seekDuration = Math.Round(downloadOptions.CropEndingTime - seekTime);
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
-                await FfmpegMetadata.SerializeAsync(metadataPath, videoInfoResponse.data.video.owner.displayName, startOffset, downloadOptions.Id, videoInfoResponse.data.video.title, videoInfoResponse.data.video.createdAt, videoChapterResponse.data.video.moments.edges, cancellationToken);
+                await FfmpegMetadata.SerializeAsync(metadataPath, videoInfoResponse.data.video.owner.displayName, startOffset, downloadOptions.Id,
+                    videoInfoResponse.data.video.title, videoInfoResponse.data.video.createdAt, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
                 var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
                 if (!finalizedFileDirectory.Exists)
@@ -114,75 +116,94 @@ namespace TwitchDownloaderCore
                     TwitchHelper.CreateDirectory(finalizedFileDirectory.FullName);
                 }
 
-                await Task.Run(() =>
+                int ffmpegExitCode;
+                var ffmpegRetries = 0;
+                do
                 {
-                    var process = new Process
+                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(progress, downloadFolder, metadataPath, seekTime, startOffset, seekDuration), cancellationToken);
+                    if (ffmpegExitCode != 0)
                     {
-                        StartInfo =
-                            {
-                                FileName = downloadOptions.FfmpegPath,
-                                Arguments = String.Format("-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i \"{1}\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.CropEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"", Path.Combine(downloadFolder, "output.ts"), metadataPath, (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), Int32.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
-                                UseShellExecute = false,
-                                CreateNoWindow = true,
-                                RedirectStandardInput = false,
-                                RedirectStandardOutput = true,
-                                RedirectStandardError = true
-                            }
-                    };
+                        progress.Report(new ProgressReport(ReportType.Log, $"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds..."));
+                        await Task.Delay(10_000, cancellationToken);
+                    }
+                } while (ffmpegExitCode != 0 && ffmpegRetries++ < 1);
 
-                    TimeSpan videoLength = TimeSpan.FromTicks(0);
-                    var videoLengthRegex = new Regex(@"^\s?\s?Duration: (\d\d:\d\d:\d\d.\d\d)", RegexOptions.Multiline);
-                    var encodingTimeRegex = new Regex(@"time=(\d\d:\d\d:\d\d.\d\d)", RegexOptions.Compiled);
-                    process.ErrorDataReceived += (s, e) =>
-                    {
-                        if (e.Data is null)
-                        {
-                            return;
-                        }
+                if (ffmpegExitCode != 0 || !File.Exists(downloadOptions.Filename))
+                {
+                    _shouldClearCache = false;
+                    throw new Exception($"Failed to finalize video. The download cache has not been cleared and can be found at {downloadFolder}.");
+                }
 
-                        if (videoLength.Ticks == 0)
-                        {
-                            var videoLengthMatch = videoLengthRegex.Match(e.Data);
-                            if (!videoLengthMatch.Success)
-                            {
-                                return;
-                            }
-                            videoLength = TimeSpan.Parse(videoLengthMatch.Groups[1].ToString());
-                        }
-
-                        HandleFfmpegProgress(e.Data, encodingTimeRegex, videoLength, progress);
-                    };
-
-                    process.Start();
-                    process.BeginOutputReadLine();
-                    process.BeginErrorReadLine();
-                    process.WaitForExit();
-
-                    progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video 100% [4/4]"));
-                    progress.Report(new ProgressReport(100));
-                }, cancellationToken);
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video 100% [4/4]"));
+                progress.Report(new ProgressReport(100));
             }
             finally
             {
-                Cleanup(downloadFolder);
+                if (_shouldClearCache)
+                {
+                    Cleanup(downloadFolder);
+                }
             }
+        }
+
+        private int RunFfmpegVideoCopy(IProgress<ProgressReport> progress, string downloadFolder, string metadataPath, double seekTime, double startOffset, double seekDuration)
+        {
+            var process = new Process
+            {
+                StartInfo =
+                {
+                    FileName = downloadOptions.FfmpegPath,
+                    Arguments = string.Format(
+                        "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {2} " : "") +
+                        "-i \"{0}\" -i \"{1}\" \"\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.CropEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"",
+                        Path.Combine(downloadFolder, "output.ts"), metadataPath, (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), int.MaxValue,
+                        seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardInput = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+
+            var videoLength = TimeSpan.Zero;
+            var videoLengthRegex = new Regex(@"(?<=^\s?\s?Duration: )\d\d:\d\d:\d\d\.\d\d", RegexOptions.Multiline);
+            var encodingTimeRegex = new Regex(@"(?<=time=)\d\d:\d\d:\d\d\.\d\d", RegexOptions.Compiled);
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data is null)
+                    return;
+
+                if (videoLength == TimeSpan.Zero)
+                {
+                    var videoLengthMatch = videoLengthRegex.Match(e.Data);
+                    if (!videoLengthMatch.Success)
+                        return;
+
+                    videoLength = TimeSpan.Parse(videoLengthMatch.ValueSpan);
+                }
+
+                HandleFfmpegProgress(e.Data, encodingTimeRegex, videoLength, progress);
+            };
+
+            process.Start();
+            process.BeginErrorReadLine();
+            process.WaitForExit();
+
+            return process.ExitCode;
         }
 
         private static void HandleFfmpegProgress(string output, Regex encodingTimeRegex, TimeSpan videoLength, IProgress<ProgressReport> progress)
         {
-            if (videoLength.Ticks == 0)
-            {
+            if (videoLength == TimeSpan.Zero)
                 return;
-            }
 
             var encodingTimeMatch = encodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
-            {
                 return;
-            }
 
-            var encodingTime = TimeSpan.Parse(encodingTimeMatch.Groups[1].ToString());
-            int percent = (int)(encodingTime.TotalMilliseconds / videoLength.TotalMilliseconds * 100);
+            var encodingTime = TimeSpan.Parse(encodingTimeMatch.ValueSpan);
+            var percent = (int)(encodingTime.TotalMilliseconds / videoLength.TotalMilliseconds * 100);
 
             progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [4/4]"));
             progress.Report(new ProgressReport(percent));
@@ -351,7 +372,7 @@ namespace TwitchDownloaderCore
             int partCount = videoParts.Count;
             int doneCount = 0;
 
-            using FileStream outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None);
+            await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None);
             foreach (var part in videoParts)
             {
                 await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
@@ -359,7 +380,7 @@ namespace TwitchDownloaderCore
                 string partFile = Path.Combine(downloadFolder, RemoveQueryString(part));
                 if (File.Exists(partFile))
                 {
-                    using (var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.None))
+                    await using (var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.None))
                     {
                         await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
                     }
@@ -368,7 +389,7 @@ namespace TwitchDownloaderCore
                     {
                         File.Delete(partFile);
                     }
-                    catch { }
+                    catch { /* If we can't delete, oh well. It should get cleanup up later anyways */ }
                 }
 
                 doneCount++;
@@ -393,7 +414,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void Cleanup(string downloadFolder)
+        private static void Cleanup(string downloadFolder)
         {
             try
             {
