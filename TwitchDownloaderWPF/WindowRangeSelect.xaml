@@ -1,20 +1,23 @@
-﻿<Window xmlns:hc="https://handyorg.github.io/handycontrol"  x:Class="TwitchDownloader.WindowRangeSelect"
+﻿<Window xmlns:hc="https://handyorg.github.io/handycontrol"  x:Class="TwitchDownloaderWPF.WindowRangeSelect"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TwitchDownloader"
+        xmlns:local="clr-namespace:TwitchDownloaderWPF"
+        xmlns:lex="http://wpflocalizeextension.codeplex.com"
+        lex:LocalizeDictionary.DesignCulture=""
+        lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
+        lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="Select Render Range (Seconds)" Height="150" Width="400" Background="#FFEFEFEF" Initialized="Window_Initialized">
-    <Grid>
+        Title="Select Render Range (Seconds)" Height="150" Width="400" Background="#FFEFEFEF" Initialized="Window_Initialized" Loaded="Window_Loaded">
+    <Grid Background="{DynamicResource AppBackground}">
         <StackPanel Orientation="Vertical">
             <hc:RangeSlider x:Name="rangeTime" IsSnapToTickEnabled="True" Height="20" Margin="20,10,20,0" ValueChanged="rangeTime_ValueChanged" />
             <DockPanel Margin="20,10,20,0">
-                <TextBox x:Name="numStart" Width="60" HorizontalAlignment="Left" TextChanged="numStart_TextChanged"></TextBox>
-                <TextBox x:Name="numEnd" Width="60" HorizontalAlignment="Right" TextChanged="numEnd_TextChanged"></TextBox>
+                <TextBox x:Name="numStart" Width="60" HorizontalAlignment="Left" TextChanged="numStart_TextChanged" Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" />
+                <TextBox x:Name="numEnd" Width="60" HorizontalAlignment="Right" TextChanged="numEnd_TextChanged" Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" />
             </DockPanel>
-            <Button Content="Accept" Click="Button_Click"></Button>
+            <Button Content="{lex:Loc Accept}" Click="Button_Click" Foreground="{DynamicResource ActionButtonText}" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" />
         </StackPanel>
-        
     </Grid>
 </Window>

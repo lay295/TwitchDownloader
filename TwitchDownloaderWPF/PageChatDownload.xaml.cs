@@ -1,18 +1,20 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -28,6 +30,7 @@ namespace TwitchDownloaderWPF
         public string downloadId;
         public int streamerId;
         public DateTime currentVideoTime;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public PageChatDownload()
         {
@@ -65,8 +68,8 @@ namespace TwitchDownloaderWPF
             checkBttvEmbed.IsEnabled = isEnabled;
             checkFfzEmbed.IsEnabled = isEnabled;
             checkStvEmbed.IsEnabled = isEnabled;
-            btnDownload.IsEnabled = isEnabled;
-            btnQueue.IsEnabled = isEnabled;
+            SplitBtnDownload.IsEnabled = isEnabled;
+            MenuItemEnqueue.IsEnabled = isEnabled;
             radioJson.IsEnabled = isEnabled;
             radioText.IsEnabled = isEnabled;
             radioHTML.IsEnabled = isEnabled;
@@ -88,18 +91,15 @@ namespace TwitchDownloaderWPF
 
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
-            string id = ValidateUrl(textUrl.Text);
-            if (id == "")
+            string id = ValidateUrl(textUrl.Text.Trim());
+            if (string.IsNullOrWhiteSpace(id))
             {
-                MessageBox.Show("Please double check the VOD/Clip link", "Unable to parse input", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Translations.Strings.UnableToParseLinkMessage, Translations.Strings.UnableToParseLink, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             btnGetInfo.IsEnabled = false;
             downloadId = id;
-            if (id.All(Char.IsDigit))
-                downloadType = DownloadType.Video;
-            else
-                downloadType = DownloadType.Clip;
+            downloadType = id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
 
             try
             {
@@ -110,12 +110,12 @@ namespace TwitchDownloaderWPF
                     try
                     {
                         string thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
-                        imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
+                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
                     }
                     catch
                     {
-                        AppendLog("ERROR: Unable to find thumbnail");
-                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                         if (success)
                         {
                             imgThumbnail.Source = image;
@@ -124,17 +124,18 @@ namespace TwitchDownloaderWPF
                     TimeSpan vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                     textTitle.Text = videoInfo.data.video.title;
                     textStreamer.Text = videoInfo.data.video.owner.displayName;
-                    textCreatedAt.Text = videoInfo.data.video.createdAt.ToString();
-                    currentVideoTime = videoInfo.data.video.createdAt.ToLocalTime();
+                    var videoTime = videoInfo.data.video.createdAt;
+                    textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoTime.ToString(CultureInfo.CurrentCulture) : videoTime.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+                    currentVideoTime = Settings.Default.UTCVideoTime ? videoTime : videoTime.ToLocalTime();
                     streamerId = int.Parse(videoInfo.data.video.owner.id);
-                    Regex urlTimecodeRegex = new Regex(@"\?t=(\d?\dh)(\d?\dm)(\d?\ds)"); // ?t=##h##m##s
-                    Match urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
+                    var urlTimecodeRegex = new Regex(@"\?t=(\d+)h(\d+)m(\d+)s");
+                    var urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
                     if (urlTimecodeMatch.Success)
                     {
                         checkCropStart.IsChecked = true;
-                        numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].Value[..urlTimecodeMatch.Groups[1].ToString().IndexOf('h')]);
-                        numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].Value[..urlTimecodeMatch.Groups[2].ToString().IndexOf('m')]);
-                        numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].Value[..urlTimecodeMatch.Groups[3].ToString().IndexOf('s')]);
+                        numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].ValueSpan);
+                        numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].ValueSpan);
+                        numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].ValueSpan);
                     }
                     else
                     {
@@ -159,12 +160,12 @@ namespace TwitchDownloaderWPF
                     try
                     {
                         string thumbUrl = clipInfo.data.clip.thumbnailURL;
-                        imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
+                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
                     }
                     catch
                     {
-                        AppendLog("ERROR: Unable to find thumbnail");
-                        var (success, image) = await InfoHelper.TryGetThumb(InfoHelper.THUMBNAIL_MISSING_URL);
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                         if (success)
                         {
                             imgThumbnail.Source = image;
@@ -172,8 +173,9 @@ namespace TwitchDownloaderWPF
                     }
                     TimeSpan clipLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
                     textStreamer.Text = clipInfo.data.clip.broadcaster.displayName;
-                    textCreatedAt.Text = clipInfo.data.clip.createdAt.ToString();
-                    currentVideoTime = clipInfo.data.clip.createdAt.ToLocalTime();
+                    var clipCreatedAt = clipInfo.data.clip.createdAt;
+                    textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+                    currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                     textTitle.Text = clipInfo.data.clip.title;
                     streamerId = int.Parse(clipInfo.data.clip.broadcaster.id);
                     labelLength.Text = clipLength.ToString("c");
@@ -186,37 +188,31 @@ namespace TwitchDownloaderWPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Unable to get Clip/Video information. Please double check your link and try again", "Unable to get info", MessageBoxButton.OK, MessageBoxImage.Error);
-                AppendLog("ERROR: " + ex.Message);
+                MessageBox.Show(Translations.Strings.UnableToGetInfoMessage, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 btnGetInfo.IsEnabled = true;
             }
         }
 
-        static public string ValidateUrl(string text)
+        private void UpdateActionButtons(bool isDownloading)
         {
-            Regex clipRegex = new Regex(@"twitch.tv\/(\S+)\/clip\/");
-            if (text.All(Char.IsLetter) || text.All(Char.IsDigit))
+            if (isDownloading)
             {
-                return text;
+                SplitBtnDownload.Visibility = Visibility.Collapsed;
+                BtnCancel.Visibility = Visibility.Visible;
+                return;
             }
-            else if (text.Contains("twitch.tv/videos/"))
-            {
-                int number;
-                Uri url = new UriBuilder(text).Uri;
-                string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
-                bool success = Int32.TryParse(Regex.Match(path, @"\d+").Value, out number);
-                if (success)
-                    return number.ToString();
-                else
-                    return "";
-            }
-            else if (text.Contains("clips.twitch.tv/") || clipRegex.IsMatch(text))
-            {
-                Uri url = new UriBuilder(text).Uri;
-                string path = String.Format("{0}{1}{2}{3}", url.Scheme, Uri.SchemeDelimiter, url.Authority, url.AbsolutePath);
-                return path.Split('/').Last();
-            }
-            return "";
+            SplitBtnDownload.Visibility = Visibility.Visible;
+            BtnCancel.Visibility = Visibility.Collapsed;
+        }
+
+        public static string ValidateUrl(string text)
+        {
+            var vodClipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:videos|\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
+            var vodClipIdMatch = vodClipIdRegex.Match(text);
+            return vodClipIdMatch.Success
+                ? vodClipIdMatch.Value
+                : null;
         }
 
         private void AppendLog(string message)
@@ -291,7 +287,7 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            SettingsPage settings = new SettingsPage();
+            WindowSettings settings = new WindowSettings();
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -440,7 +436,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private async void SplitButton_Click(object sender, RoutedEventArgs e)
+        private async void SplitBtnDownload_Click(object sender, RoutedEventArgs e)
         {
             if (((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
             {
@@ -472,23 +468,18 @@ namespace TwitchDownloaderWPF
                 ChatDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
                 if (downloadType == DownloadType.Video)
                 {
-                    int startTime = 0;
-                    int endTime = 0;
-
                     if (checkCropStart.IsChecked == true)
                     {
                         downloadOptions.CropBeginning = true;
                         TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                        startTime = (int)start.TotalSeconds;
-                        downloadOptions.CropBeginningTime = startTime;
+                        downloadOptions.CropBeginningTime = (int)start.TotalSeconds;
                     }
 
                     if (checkCropEnd.IsChecked == true)
                     {
                         downloadOptions.CropEnding = true;
                         TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                        endTime = (int)end.TotalSeconds;
-                        downloadOptions.CropEndingTime = endTime;
+                        downloadOptions.CropEndingTime = (int)end.TotalSeconds;
                     }
 
                     downloadOptions.Id = downloadId;
@@ -509,38 +500,57 @@ namespace TwitchDownloaderWPF
 
                 btnGetInfo.IsEnabled = false;
                 SetEnabled(false, false);
+
                 SetImage("Images/ppOverheat.gif", true);
-                statusMessage.Text = "Downloading";
+                statusMessage.Text = Translations.Strings.StatusDone;
+                _cancellationTokenSource = new CancellationTokenSource();
+                UpdateActionButtons(true);
 
                 Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
 
                 try
                 {
-                    await currentDownload.DownloadAsync(downloadProgress, new CancellationToken());
-                    statusMessage.Text = "Done";
+                    await currentDownload.DownloadAsync(downloadProgress, _cancellationTokenSource.Token);
+                    statusMessage.Text = Translations.Strings.StatusDone;
                     SetImage("Images/ppHop.gif", true);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OperationCanceledException and not TaskCanceledException)
                 {
-                    statusMessage.Text = "ERROR";
+                    statusMessage.Text = Translations.Strings.StatusError;
                     SetImage("Images/peepoSad.png", false);
-                    AppendLog("ERROR: " + ex.Message);
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
                     {
-                        MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
+                }
+                catch
+                {
+                    statusMessage.Text = Translations.Strings.StatusCanceled;
+                    SetImage("Images/ppHop.gif", true);
                 }
                 btnGetInfo.IsEnabled = true;
                 statusProgressBar.Value = 0;
+                _cancellationTokenSource.Dispose();
+                UpdateActionButtons(false);
 
                 currentDownload = null;
                 GC.Collect();
-                GC.WaitForPendingFinalizers();
             }
             catch (Exception ex)
             {
-                AppendLog("ERROR: " + ex.Message);
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
             }
+        }
+
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            statusMessage.Text = Translations.Strings.StatusCanceling;
+            try
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            catch (ObjectDisposedException) { }
         }
 
         private void checkCropStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
@@ -553,7 +563,8 @@ namespace TwitchDownloaderWPF
             SetEnabledCropEnd((bool)checkCropEnd.IsChecked);
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+
+        private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e)
         {
             WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();

@@ -1,15 +1,19 @@
 ﻿<Page x:Class="TwitchDownloaderWPF.PageChatDownload"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
       xmlns:gif="http://wpfanimatedgif.codeplex.com"
       xmlns:hc="https://handyorg.github.io/handycontrol"
       xmlns:fa="http://schemas.fontawesome.com/icons/"
+      xmlns:lex="http://wpflocalizeextension.codeplex.com"
+      lex:LocalizeDictionary.DesignCulture=""
+      lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
+      lex:ResxLocalizationProvider.DefaultDictionary="Strings"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
-      mc:Ignorable="d" 
+      mc:Ignorable="d"
       d:DesignHeight="400" d:DesignWidth="800"
       Title="PageChatDownload" Initialized="Page_Initialized" Loaded="Page_Loaded">
 
@@ -23,7 +27,7 @@
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="10"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -35,36 +39,36 @@
                 <Image Stretch="Fill" StretchDirection="Both" x:Name="imgThumbnail" MinHeight="100"/>
             </Border>
             <WrapPanel Orientation="Horizontal">
-                <TextBlock Margin="0,3,3,3" Text="Streamer:" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="0,3,3,3" Text="{lex:Loc Streamer}" Foreground="{DynamicResource AppText}" />
                 <TextBlock Margin="3" x:Name="textStreamer" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
             <WrapPanel Orientation="Horizontal">
-                <TextBlock Margin="0,3,3,3" Text="Created:" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="0,3,3,3" Text="{lex:Loc VideoCreatedAt}" Foreground="{DynamicResource AppText}" />
                 <TextBlock Margin="3" x:Name="textCreatedAt" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
             <WrapPanel Orientation="Horizontal">
-                <TextBlock Margin="0,3,3,3" Text="Title:" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="0,3,3,3" Text="{lex:Loc VideoTitle}" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
             <emoji:TextBlock TextWrapping="Wrap" x:Name="textTitle" Foreground="{DynamicResource AppText}" />
         </StackPanel>
         <!-- MIDDLE -->
         <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Margin="3,8,3,3" Text="VOD/Clip Link:" Foreground="{DynamicResource AppText}" />
+            <TextBlock Margin="3,8,3,3" Text="{lex:Loc VodClipLink}" Foreground="{DynamicResource AppText}" />
             <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-            <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="Get Info" RenderTransformOrigin="0.503,0.508" Click="btnGetInfo_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
+            <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="{lex:Loc GetInfo}" RenderTransformOrigin="0.503,0.508" Click="btnGetInfo_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
         </WrapPanel>
         <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
             <StackPanel HorizontalAlignment="Left">
-                <TextBlock Text="Length:" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
-                <TextBlock Text="Download Format:" HorizontalAlignment="Right" Margin="0,13,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock Visibility="Visible" x:Name="compressionText" Text="Compression:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock Visibility="Collapsed" x:Name="timeText" Text="Timestamp Format:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock x:Name="textCrop" Text="Crop Chat:" HorizontalAlignment="Right" Margin="0,12,0,36" Foreground="{DynamicResource AppText}" />
+                <TextBlock Text="{lex:Loc Length}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
+                <TextBlock Text="{lex:Loc DownloadFormat}" HorizontalAlignment="Right" Margin="0,13,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock Visibility="Visible" x:Name="compressionText" Text="{lex:Loc ChatCompression}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock Visibility="Collapsed" x:Name="timeText" Text="{lex:Loc TimestampFormat}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock x:Name="textCrop" Text="{lex:Loc ChatCrop}" HorizontalAlignment="Right" Margin="0,12,0,36" Foreground="{DynamicResource AppText}" />
                 <StackPanel x:Name="stackEmbedText" Visibility="Visible">
-                    <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" >Embed Images <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
-                    <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" >3rd Party Emotes <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Also embed third party emotes into the file. File size will be much larger.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                    <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" ><Run Text="{lex:Loc EmbedImages}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc EmbedImagesTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                    <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" ><Run Text="{lex:Loc ThirdPartyEmotes}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ThirdPartyEmotesTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 </StackPanel>
-                <TextBlock HorizontalAlignment="Right" Text="Connections:" Margin="0,14,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock HorizontalAlignment="Right" Text="{lex:Loc DownloadConnections}" Margin="0,14,0,0" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel>
                 <TextBlock x:Name="labelLength" Text="0:0:0" Margin="5,0,0,0" Foreground="{DynamicResource AppText}" />
@@ -74,25 +78,25 @@
                     <RadioButton x:Name="radioHTML" Content="HTML" Checked="radioHTML_Checked" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </hc:ButtonGroup>
                 <StackPanel Visibility="Visible" x:Name="compressionOptions" Margin="5,8,0,0" Orientation="Horizontal">
-                    <RadioButton x:Name="radioCompressionNone" IsChecked="True" Content="None" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <RadioButton x:Name="radioCompressionGzip" Content="Gzip" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioCompressionNone" IsChecked="True" Content="{lex:Loc ChatCompressionNone}" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioCompressionGzip" Content="{lex:Loc ChatCompressionGzip}" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
                 <StackPanel Visibility="Collapsed" x:Name="timeOptions" Margin="5,8,0,0" Orientation="Horizontal">
-                    <RadioButton x:Name="radioTimestampUTC" IsChecked="True" Content="UTC" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <RadioButton x:Name="radioTimestampRelative" Content="Relative" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <RadioButton x:Name="radioTimestampNone" Content="None" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioTimestampUTC" IsChecked="True" Content="{lex:Loc TimestampUtc}" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioTimestampRelative" Content="{lex:Loc TimestampRelative}" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <RadioButton x:Name="radioTimestampNone" Content="{lex:Loc TimestampNone}" Margin="3,0,0,0" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
                 <StackPanel Margin="5,5,0,0">
                     <StackPanel Orientation="Horizontal">
                         <CheckBox x:Name="checkCropStart" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkCropStart_OnCheckStateChanged" Unchecked="checkCropStart_OnCheckStateChanged" BorderBrush="{DynamicResource AppElementBorder}" />
-                        <TextBlock Margin="2,0,0,0" Text="Start" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
+                        <TextBlock Margin="2,0,0,0" Text="{lex:Loc CropStart}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" Value="0" x:Name="numStartHour" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numStartMinute" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numStartSecond" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                         <CheckBox x:Name="checkCropEnd" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkCropEnd_OnCheckStateChanged" Unchecked="checkCropEnd_OnCheckStateChanged" BorderBrush="{DynamicResource AppElementBorder}" />
-                        <TextBlock Margin="2,0,5,0" Text="End" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Margin="2,0,5,0" Text="{lex:Loc CropEnd}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" Value="0" x:Name="numEndHour" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndMinute" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndSecond" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
@@ -111,23 +115,24 @@
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom">
-            <hc:SplitButton x:Name="btnDownload" Height="40" Width="120" Content="Download" Click="SplitButton_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
+            <hc:SplitButton x:Name="SplitBtnDownload" Height="40" Width="120" Content="{lex:Loc Download}" Click="SplitBtnDownload_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
-                        <MenuItem x:Name="btnQueue" Header="Enqueue Download" Click="MenuItem_Click" />
+                        <MenuItem x:Name="MenuItemEnqueue" Header="{lex:Loc EnqueueDownload}" Click="MenuItemEnqueue_Click" />
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
+            <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc TaskCancel}" Click="BtnCancel_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal">
-                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="Use the program often and want to support me? Buy me a coffee :)" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
-            <TextBlock Text="Log:" Foreground="{DynamicResource AppText}" />
+            <TextBlock Text="{lex:Loc Logheader}" Foreground="{DynamicResource AppText}" />
             <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
@@ -138,13 +143,13 @@
         </StackPanel>
         <!--STATUS BAR-->
         <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
-            <StatusBarItem Padding="10,0,0,0">
+            <StatusBarItem Padding="10,5,0,5">
                 <Image x:Name="statusImage" gif:ImageBehavior.AnimatedSource="Images/ppHop.gif"/>
             </StatusBarItem>
-            <StatusBarItem Padding="10,0,0,0">
-                <TextBlock Text="Idle" x:Name="statusMessage" FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
+            <StatusBarItem Padding="10,1,0,1">
+                <TextBlock Text="{lex:Loc StatusIdle}" x:Name="statusMessage" FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
             </StatusBarItem>
-            <StatusBarItem Padding="10,0,10,0" HorizontalAlignment="Right">
+            <StatusBarItem Padding="10,1,10,1" HorizontalAlignment="Right">
                 <ProgressBar Width="200" Height="14" x:Name="statusProgressBar" Background="{DynamicResource StatusBarElement}" Foreground="{DynamicResource ProgressBarForeground}"/>
             </StatusBarItem>
         </StatusBar>

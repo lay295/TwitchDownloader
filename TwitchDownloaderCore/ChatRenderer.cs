@@ -132,7 +132,7 @@ namespace TwitchDownloaderCore
          * For example, before any jittering:
          *   the input a=1.0 b=2.0 c=2.0  d=2.0 e=2.0  f=3.0
          *     becomes a=1.0 b=2.0 c=2.25 d=2.5 e=2.75 f=3.0
-         *     
+         *
          * The only drawback to this method is there will _never_ be multiple comments drawn on the same tick
          * like in a real chat. The overall improved chat flow is still worth it regardless. */
         private static void DisperseCommentOffsets(List<Comment> comments)
@@ -185,7 +185,7 @@ namespace TwitchDownloaderCore
         }
 
         /* Why are we doing this? The question is when to display a 0.5 second offset comment with an update rate of 1.
-         * At the update frame at 0 seconds, or 1 second? We're choosing at 0 seconds here. Flooring to either the 
+         * At the update frame at 0 seconds, or 1 second? We're choosing at 0 seconds here. Flooring to either the
          * update rate, or if the update rate is greater than 1 just to the next whole number */
         private void FloorCommentOffsets(List<Comment> comments)
         {
@@ -547,10 +547,6 @@ namespace TwitchDownloaderCore
             bool accentMessage = false;
             defaultPos.X = renderOptions.SidePadding;
 
-            if (comment.source != "chat")
-            {
-                return null;
-            }
             if (comment.message.user_notice_params?.msg_id != null)
             {
                 if (comment.message.user_notice_params.msg_id is not "highlighted-message" and not "sub" and not "resub" and not "subgift" and not "")
@@ -785,38 +781,25 @@ namespace TwitchDownloaderCore
 #pragma warning disable IDE0057
         private void DrawEmojiMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString)
         {
-            ReadOnlySpan<char> fragmentSpan = fragmentString.AsSpan();
+            var enumerator = StringInfo.GetTextElementEnumerator(fragmentString);
             StringBuilder nonEmojiBuffer = new();
-            while (fragmentSpan.Length > 0)
+            while (enumerator.MoveNext())
             {
-                // Old LINQ method. Leaving this for reference
-                //List<SingleEmoji> emojiMatches = Emoji.All.Where(x => fragmentString.StartsWith(x.ToString()) && fragmentString.Contains(x.Sequence.AsString.Trim('\uFE0F'))).ToList();
-
                 List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
-                foreach (var emoji in Emoji.All)
-                {
-                    if (fragmentSpan.StartsWith(emoji.Sequence.AsString))
+                Emoji.All.AsParallel()
+                    .Where(emoji => enumerator.GetTextElement().StartsWith(emoji.Sequence.AsString))
+                    .ForAll(emoji =>
                     {
-                        emojiMatches.Add(emoji);
-                    }
-                }
-
-                // If no valid emojis were found retry with a less accurate approach
-                if (emojiMatches.Count == 0 && fragmentSpan.Length > 1 && char.IsSurrogatePair(fragmentSpan[0], fragmentSpan[1]))
-                {
-                    var surrogateSequence = char.ConvertToUtf32(fragmentSpan[0], fragmentSpan[1]);
-                    foreach (var emoji in Emoji.All)
-                    {
-                        if (emoji.Group == "country-flag")
-                            continue;
-
-                        var utf32EmojiSequence = emoji.Sequence.AsUtf32().FirstOrDefault(defaultValue: (uint)0);
-                        if (surrogateSequence == utf32EmojiSequence)
+                        if (emoji.Group != "Flags")
+                        {
+                            emojiMatches.Add(emoji);
+                            return;
+                        }
+                        if (enumerator.GetTextElement().StartsWith(emoji.Sequence.AsString, StringComparison.Ordinal))
                         {
                             emojiMatches.Add(emoji);
                         }
-                    }
-                }
+                    });
 
                 // Make sure the found emojis actually exist in our cache
                 int emojiMatchesCount = emojiMatches.Count;
@@ -838,7 +821,7 @@ namespace TwitchDownloaderCore
                         nonEmojiBuffer.Clear();
                     }
 
-                    SingleEmoji selectedEmoji = emojiMatches.OrderByDescending(x => x.Sequence.Codepoints.Count()).First();
+                    SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
                     SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
 
                     if (drawPos.X + emojiImage.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
@@ -858,26 +841,15 @@ namespace TwitchDownloaderCore
                     }
 
                     drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
-
-                    try
-                    {
-                        fragmentSpan = fragmentSpan.Slice(selectedEmoji.Sequence.AsString.Trim('\uFE0F').Length);
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        // This tends to happen when specific emojis are at the end of a fragment
-                        fragmentSpan = fragmentSpan.Slice(1);
-                    }
                 }
                 else
                 {
-                    nonEmojiBuffer.Append(fragmentSpan[0]);
-                    fragmentSpan = fragmentSpan.Slice(1);
+                    nonEmojiBuffer.Append(enumerator.GetTextElement());
                 }
             }
             if (nonEmojiBuffer.Length > 0)
             {
-                DrawText(nonEmojiBuffer.ToString(), messageFont, false, sectionImages, ref drawPos, defaultPos);
+                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), true, true);
                 nonEmojiBuffer.Clear();
             }
         }
@@ -1296,11 +1268,11 @@ namespace TwitchDownloaderCore
         /// <remarks>chatRoot.embeddedData will be empty after calling this to save on memory!</remarks>
         private async Task FetchScaledImages(CancellationToken cancellationToken)
         {
-            var badgeTask = GetScaledBadges();
-            var emoteTask = GetScaledEmotes();
+            var badgeTask = GetScaledBadges(cancellationToken);
+            var emoteTask = GetScaledEmotes(cancellationToken);
             var emoteThirdTask = GetScaledThirdEmotes(cancellationToken);
-            var cheerTask = GetScaledBits();
-            var emojiTask = GetScaledEmojis();
+            var cheerTask = GetScaledBits(cancellationToken);
+            var emojiTask = GetScaledEmojis(cancellationToken);
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
 
@@ -1317,7 +1289,7 @@ namespace TwitchDownloaderCore
             emojiCache = emojiTask.Result;
         }
 
-        private async Task<List<ChatBadge>> GetScaledBadges()
+        private async Task<List<ChatBadge>> GetScaledBadges(CancellationToken cancellationToken)
         {
             // Do not fetch if badges are disabled
             if (!renderOptions.ChatBadges)
@@ -1325,7 +1297,7 @@ namespace TwitchDownloaderCore
                 return new List<ChatBadge>();
             }
 
-            var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var badge in badgeTask)
             {
@@ -1340,9 +1312,9 @@ namespace TwitchDownloaderCore
             return badgeTask;
         }
 
-        private async Task<List<TwitchEmote>> GetScaledEmotes()
+        private async Task<List<TwitchEmote>> GetScaledEmotes(CancellationToken cancellationToken)
         {
-            var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline);
+            var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var emote in emoteTask)
             {
@@ -1359,7 +1331,7 @@ namespace TwitchDownloaderCore
 
         private async Task<List<TwitchEmote>> GetScaledThirdEmotes(CancellationToken cancellationToken)
         {
-            var emoteThirdTask = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes,
+            var emoteThirdTask = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes,
                 renderOptions.StvEmotes, renderOptions.AllowUnlistedEmotes, renderOptions.Offline, cancellationToken);
 
             foreach (var emote in emoteThirdTask)
@@ -1375,9 +1347,9 @@ namespace TwitchDownloaderCore
             return emoteThirdTask;
         }
 
-        private async Task<List<CheerEmote>> GetScaledBits()
+        private async Task<List<CheerEmote>> GetScaledBits(CancellationToken cancellationToken)
         {
-            var cheerTask = await TwitchHelper.GetBits(renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline);
+            var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var cheer in cheerTask)
             {
@@ -1396,9 +1368,9 @@ namespace TwitchDownloaderCore
             return cheerTask;
         }
 
-        private async Task<Dictionary<string, SKBitmap>> GetScaledEmojis()
+        private async Task<Dictionary<string, SKBitmap>> GetScaledEmojis(CancellationToken cancellationToken)
         {
-            var emojiTask = await TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder);
+            var emojiTask = await TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder, cancellationToken);
 
             //Assume emojis are 4x (they're 72x72)
             double emojiScale = 0.5 * renderOptions.ReferenceScale * renderOptions.EmojiScale;

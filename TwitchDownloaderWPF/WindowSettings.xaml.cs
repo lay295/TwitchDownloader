@@ -1,20 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using TwitchDownloader.Properties;
-using MessageBox = System.Windows.MessageBox;
+using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using static TwitchDownloaderWPF.App;
+using MessageBox = System.Windows.MessageBox;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     /// <summary>
     /// Interaction logic for SettingsPage.xaml
     /// </summary>
-    public partial class SettingsPage : Window
+    public partial class WindowSettings : Window
     {
-        public SettingsPage()
+        private readonly List<(string name, string nativeName)> _cultureList = new();
+
+        public WindowSettings()
         {
             InitializeComponent();
         }
@@ -44,19 +49,42 @@ namespace TwitchDownloader
             textChatTemplate.Text = Settings.Default.TemplateChat;
             checkDonation.IsChecked = Settings.Default.HideDonation;
             checkVerboseErrors.IsChecked = Settings.Default.VerboseErrors;
+            NumMaximumBandwidth.Value = Settings.Default.MaximumBandwidthKb;
+            radioTimeFormatUTC.IsChecked = Settings.Default.UTCVideoTime;
 
-            comboTheme.Items.Add("System");
+            // Setup theme dropdown
+            comboTheme.Items.Add("System"); // Cannot be localized
             string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
             foreach (string themeFile in themeFiles)
             {
                 comboTheme.Items.Add(Path.GetFileNameWithoutExtension(themeFile));
             }
             comboTheme.SelectedItem = Settings.Default.GuiTheme;
+
+            // Setup culture dropdown
+            foreach (var culture in (AvailableCultures.Culture[])Enum.GetValues(typeof(AvailableCultures.Culture)))
+            {
+                string name = culture.ToName();
+                string nativeName = culture.ToNativeName();
+                _cultureList.Add((name, nativeName));
+                comboLocale.Items.Add(nativeName);
+            }
+            var currentCulture = Settings.Default.GuiCulture;
+            var selectedIndex = _cultureList.Select((item, index) => new { item, index })
+                .Where(x => x.item.name == currentCulture)
+                .Select(x => x.index)
+                .DefaultIfEmpty(-1)
+                .First();
+
+            if (selectedIndex > -1)
+            {
+                comboLocale.SelectedIndex = selectedIndex;
+            }
         }
 
         private void btnClearCache_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to clear your cache?\nYou should only really do this if the program isn't working correctly", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
+            MessageBoxResult messageBoxResult = MessageBox.Show(Translations.Strings.ClearCacheConfirmation.Replace(@"\n", Environment.NewLine), Translations.Strings.DeleteConfirmation, MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
                 //Let's clear the user selected temp folder and the default one
@@ -81,10 +109,11 @@ namespace TwitchDownloader
             }
         }
 
-		private void Window_Loaded(object sender, RoutedEventArgs e)
-		{
-			AppSingleton.RequestTitleBarChange();
-		}
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Title = Translations.Strings.TitleGlobalSettings;
+            AppSingleton.RequestTitleBarChange();
+        }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -94,6 +123,8 @@ namespace TwitchDownloader
             Settings.Default.TempPath = textTempPath.Text;
             Settings.Default.HideDonation = (bool)checkDonation.IsChecked;
             Settings.Default.VerboseErrors = (bool)checkVerboseErrors.IsChecked;
+            Settings.Default.MaximumBandwidthKb = (int)NumMaximumBandwidth.Value;
+            Settings.Default.UTCVideoTime = (bool)radioTimeFormatUTC.IsChecked;
             Settings.Default.Save();
         }
 
@@ -110,13 +141,28 @@ namespace TwitchDownloader
             e.Handled = true;
         }
 
-		private void comboTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
-		{
-			if (!comboTheme.SelectedItem.ToString().Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
-			{
-				Settings.Default.GuiTheme = comboTheme.SelectedItem.ToString();
-				AppSingleton.RequestAppThemeChange();
-			}
-		}
-	}
+        private void comboTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!((string)comboTheme.SelectedItem).Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
+            {
+                Settings.Default.GuiTheme = (string)comboTheme.SelectedItem;
+                AppSingleton.RequestAppThemeChange();
+            }
+        }
+
+        private void comboLocale_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (comboLocale.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            if (_cultureList[comboLocale.SelectedIndex].name != Settings.Default.GuiCulture)
+            {
+                Settings.Default.GuiCulture = _cultureList[comboLocale.SelectedIndex].name;
+                AppSingleton.RequestCultureChange();
+                Title = Translations.Strings.TitleGlobalSettings;
+            }
+        }
+    }
 }

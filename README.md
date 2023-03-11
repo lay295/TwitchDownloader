@@ -17,33 +17,43 @@
 
 
 ## Chat Render Example
+
 https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4
 
 
 ## What can it do?
+
 - Download Twitch VODs
 - Download Twitch Clips
-- Download chat for VODS and Clips, in either a [JSON with all the original information](https://pastebin.com/raw/YDgRe6X4), a browser HTML file, or a [plain text file](https://pastebin.com/raw/016azeQX)
+- Download chat for VODs and Clips, in either a [JSON with all the original information](https://pastebin.com/raw/YDgRe6X4), a browser HTML file, or a [plain text file](https://pastebin.com/raw/016azeQX)
 - Update the contents of a previously generated JSON chat file with an option to save as another format
 - Use a previously generated JSON chat file to render the chat with Noto Color emojis and BTTV, FFZ, 7TV static and animated emotes
 
 # GUI
 
-## Windows
+## Windows WPF
 
 ![](https://i.imgur.com/bLegxGX.gif)
 
+### [See the full WPF documentation here](TwitchDownloaderWPF/README.md).
+
 ### Functionality
 
-The Windows GUI implements all of the main functions of the program along with some extra quality of life functions:
+The Windows WPF GUI implements all of the main functions of the program along with some extra quality of life functions:
 - Queue up multiple download/render jobs to run simultaneously
 - Create a list of download jobs from a list of vod/clip links
-- Search for and download multiple vods/clips from any streamer without leaving the app
+- Search for and download multiple VODs/clips from any streamer without leaving the app
+
+### Multi-language Support
+
+The Windows WPF GUI is available in multiple languages thanks to community translations. See the [Localization section](TwitchDownloaderWPF/README.md#localization) of the [WPF README](TwitchDownloaderWPF/README.md) for more details. 
 
 ### Theming
-The Windows GUI comes with a light and dark theme and will update according the current Windows theme by default. The GUI also supports user created themes! See `Themes/README.txt` (generated on every run) for more details.
+
+The Windows WPF GUI comes bundled with both light and dark themes, along with an option to update live according the current Windows theme. It also supports user created themes! See the [Theming section](TwitchDownloaderWPF/README.md#theming) of the [WPF README](TwitchDownloaderWPF/README.md) for more details.
 
 ### Video Demonstration
+
 https://www.youtube.com/watch?v=0W3MhfhnYjk
 (older version, same concept)
 

@@ -24,7 +24,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var clipIdRegex = new Regex(@"(?<=(?:clips\.)?twitch\.tv\/(?:\S+\/clip\/)?)\D\w+(?:-\S+)?(?=$|\?)");
+            var clipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
             var clipIdMatch = clipIdRegex.Match(inputOptions.Id);
             if (!clipIdMatch.Success)
             {
@@ -36,7 +36,8 @@ namespace TwitchDownloaderCLI.Modes
             {
                 Id = clipIdMatch.Value,
                 Filename = inputOptions.OutputFile,
-                Quality = inputOptions.Quality
+                Quality = inputOptions.Quality,
+                ThrottleKb = inputOptions.ThrottleKb
             };
 
             return downloadOptions;

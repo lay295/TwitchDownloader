@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
@@ -76,6 +76,7 @@
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
     <PackageReference Include="System.Management" Version="7.0.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
+    <PackageReference Include="WPFLocalizeExtension" Version="3.9.4" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.0" />
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.252501">
       <PrivateAssets>all</PrivateAssets>
@@ -90,6 +91,23 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Update="Translations\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Translations\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Translations\Strings.tr.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Translations\Strings.fr.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Update="Properties\Settings.settings">
@@ -98,19 +116,7 @@
     </None>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>RMDIR "$(TargetDir)de/" /S /Q
-RMDIR "$(TargetDir)es/" /S /Q 
-RMDIR "$(TargetDir)fr/" /S /Q
-RMDIR "$(TargetDir)it/" /S /Q
-RMDIR "$(TargetDir)ja/" /S /Q
-RMDIR "$(TargetDir)ko/" /S /Q
-RMDIR "$(TargetDir)ru/" /S /Q
-RMDIR "$(TargetDir)ro/" /S /Q
-RMDIR "$(TargetDir)sv/" /S /Q
-RMDIR "$(TargetDir)hu/" /S /Q
-RMDIR "$(TargetDir)pt-BR/" /S /Q
-RMDIR "$(TargetDir)zh-Hans/" /S /Q
-RMDIR "$(TargetDir)zh-Hant/" /S /Q</PostBuildEvent>
+    <PostBuildEvent></PostBuildEvent>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
   </PropertyGroup>

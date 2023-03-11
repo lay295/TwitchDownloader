@@ -1,14 +1,18 @@
 ﻿<Page x:Class="TwitchDownloaderWPF.PageChatRender"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       xmlns:gif="http://wpfanimatedgif.codeplex.com"
       xmlns:hc="https://handyorg.github.io/handycontrol"
       xmlns:fa="http://schemas.fontawesome.com/icons/"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
-      mc:Ignorable="d" 
+      xmlns:lex="http://wpflocalizeextension.codeplex.com"
+      lex:LocalizeDictionary.DesignCulture=""
+      lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
+      lex:ResxLocalizationProvider.DefaultDictionary="Strings"
+      mc:Ignorable="d"
       d:DesignHeight="400" d:DesignWidth="800"
       Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded" Loaded="Page_Loaded"
       >
@@ -23,7 +27,7 @@
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="10"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -31,21 +35,21 @@
         </Grid.RowDefinitions>
 
         <TabControl Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,0,20,0" Background="{DynamicResource AppBackground}" BorderThickness="1">
-            <TabItem Header="General" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
+            <TabItem Header="{lex:Loc RenderTabGeneral}" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
                 <DockPanel Background="{DynamicResource AppBackground}">
                     <StackPanel Orientation="Vertical" Margin="5,10,5,5">
-                        <TextBlock Text="Width:" HorizontalAlignment="Right" Margin="0,5,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Height:" HorizontalAlignment="Right" Margin="0,22,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc ChatWidth}" HorizontalAlignment="Right" Margin="0,5,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc ChatHeight}" HorizontalAlignment="Right" Margin="0,22,0,0" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,0,5">
                         <TextBox x:Name="textWidth" Text="12" Width="75" HorizontalAlignment="Left" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <TextBox x:Name="textHeight" Text="12" Width="75" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="5,10,5,5">
-                        <TextBlock Text="Font:" HorizontalAlignment="Right" Margin="0,5,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Font Size:" HorizontalAlignment="Right" Margin="0,21,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Font Color:" HorizontalAlignment="Right" Margin="0,16,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Background Color:" HorizontalAlignment="Right" Margin="0,12,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc ChatFont}" HorizontalAlignment="Right" Margin="0,5,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc ChatFontSize}" HorizontalAlignment="Right" Margin="0,21,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc FontColor}" HorizontalAlignment="Right" Margin="0,16,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc BackgroundColor}" HorizontalAlignment="Right" Margin="0,12,0,0" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,0,5">
                         <ComboBox x:Name="comboFont" MinWidth="180" MaxWidth="300" HorizontalAlignment="Left" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
@@ -55,15 +59,15 @@
                     </StackPanel>
                 </DockPanel>
             </TabItem>
-            <TabItem Header="Rendering" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
+            <TabItem Header="{lex:Loc RenderTabRendering}" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
                 <DockPanel Background="{DynamicResource AppBackground}">
                     <StackPanel Orientation="Vertical" Margin="5,10,5,5">
-                        <TextBlock Text="Outline:" HorizontalAlignment="Right" Margin="0,0,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Timestamps:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Sub Messages:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Chat Badges:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Update Rate:" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}">Dispersion <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                        <TextBlock Text="{lex:Loc Outline}" HorizontalAlignment="Right" Margin="0,0,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc Timestamps}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc SubMessages}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc ChatBadges}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc UpdateRate}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MessageDispersion}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MessageDispersionTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,0,5">
                         <CheckBox x:Name="checkOutline" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
@@ -74,10 +78,10 @@
                         <CheckBox x:Name="checkDispersion" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="15,10,5,2">
-                        <TextBlock Text="BTTV Emotes:" HorizontalAlignment="Right" Margin="0,0,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="FFZ Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="7TV Emotes:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}">Offline <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>Render the chat using only resources embedded in the chat json file.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                        <TextBlock Text="{lex:Loc BttvEmotes}" HorizontalAlignment="Right" Margin="0,0,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc FfzEmotes}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc StvEmotes}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc Offline}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc OfflineTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,0,2">
                         <CheckBox x:Name="checkBTTV" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
@@ -86,24 +90,24 @@
                         <CheckBox x:Name="checkOffline" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="20,10,0,5">
-                        <TextBlock Text="Chat Badge Filter:" Foreground="{DynamicResource AppText}"></TextBlock>
+                        <TextBlock Text="{lex:Loc ChatBadgeFilter}" Foreground="{DynamicResource AppText}"></TextBlock>
                         <hc:CheckComboBox x:Name="comboBadges" MinWidth="200" HorizontalAlignment="Left" Margin="0,4,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource AppText}">Ignore users list <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>List of usernames - comma separated, spaces around commas ignored, NOT case-sensitive.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                        <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc IgnoreUsersList}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc IgnoreUsersListTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                         <TextBox x:Name="textIgnoreUsersList" Margin="0,4,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource AppText}">Banned words list <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>List of banned words or phrases - comma separated, spaces around commas ignored, NOT case-sensitive.</Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                        <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc BannedWordsList}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc BannedWordsListTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                         <TextBox x:Name="textBannedWordsList" Margin="0,4,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                 </DockPanel>
             </TabItem>
-            <TabItem Header="Scaling" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
+            <TabItem Header="{lex:Loc RenderTabScaling}" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
                 <DockPanel Background="{DynamicResource AppBackground}">
                     <StackPanel Orientation="Vertical" Margin="5,10,5,5">
-                        <TextBlock Text="Emote Scale:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Badge Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Emoji Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Vertical Spacing Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Side Padding Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Section Height Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc EmoteScale}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc BadgeScale}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc EmojiScale}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc VerticalSpacingScale}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc SidePaddingScale}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc SectionHeightScale}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,5,5">
                         <TextBox x:Name="textEmoteScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
@@ -114,10 +118,10 @@
                         <TextBox x:Name="textSectionHeightScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,1,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="5,10,5,5">
-                        <TextBlock Text="Word Spacing Scale:" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Emote Spacing Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Highlight Stroke Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Highlight Indent Scale:" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc WordSpacingScale}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc EmoteSpacingScale}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc HighlightStrokeScale}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc HighlightIndentScale}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,5,5">
                         <TextBox x:Name="textWordSpaceScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
@@ -127,75 +131,75 @@
                     </StackPanel>
                 </DockPanel>
             </TabItem>
-            <TabItem Header="Encoding" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
+            <TabItem Header="{lex:Loc RenderTabEncoding}" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
                 <DockPanel Background="{DynamicResource AppBackground}">
                     <StackPanel Orientation="Vertical" Margin="5,10,5,5">
-                        <TextBlock Text="File Format:" HorizontalAlignment="Right" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Codec:" HorizontalAlignment="Right" Margin="0,22,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Framerate:" HorizontalAlignment="Right" Margin="0,20,0,0" Foreground="{DynamicResource AppText}"/>
-                        <TextBlock Text="Generate Mask:" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc RenderFileFormat}" HorizontalAlignment="Right" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc RenderCodec}" HorizontalAlignment="Right" Margin="0,22,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc RenderFramerate}" HorizontalAlignment="Right" Margin="0,20,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc GenerateMask}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc RenderImageSharpening}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,5,5">
                         <ComboBox x:Name="comboFormat" MinWidth="120" MaxWidth="300" HorizontalAlignment="Left" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <ComboBox x:Name="comboCodec" MinWidth="120" MaxWidth="300" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <TextBox x:Name="textFramerate" Text="30" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <CheckBox x:Name="checkMask" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+                        <CheckBox x:Name="CheckRenderSharpening" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                     </StackPanel>
                 </DockPanel>
             </TabItem>
-            <TabItem Header="Ffmpeg" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
+            <TabItem Header="{lex:Loc RenderTabFfmpeg}" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
                 <StackPanel Orientation="Vertical" Background="{DynamicResource AppBackground}" Margin="5,10,5,5">
-                    <StackPanel Orientation="Horizontal">
+                    <WrapPanel Orientation="Horizontal">
                         <fa:SvgAwesome Icon="Solid_ExclamationTriangle" Width="16" Margin="0,0,3,0" Foreground="{DynamicResource AppText}" />
-                        <TextBlock Foreground="{DynamicResource AppInnerText}">
-                    <Bold>
-                        This is for advanced users only, if you get a pipe ended error this is probably why
-                    </Bold>
-                        </TextBlock>
-                    </StackPanel>
-                    <TextBlock Text="Input Arguments" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"></TextBlock>
+                        <TextBlock Text="{lex:Loc RenderFfmpegWarning}" Foreground="{DynamicResource AppInnerText}" FontWeight="Bold" TextWrapping="Wrap" />
+                    </WrapPanel>
+                    <TextBlock Text="{lex:Loc FfmpegInputArguments}" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"></TextBlock>
                     <TextBox x:Name="textFfmpegInput" LostFocus="textFfmpegInput_LostFocus" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"></TextBox>
-                    <TextBlock Text="Output Arguments" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"></TextBlock>
+                    <TextBlock Text="{lex:Loc FfmpegOutputArguments}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"></TextBlock>
                     <TextBox x:Name="textFfmpegOutput" LostFocus="textFfmpegOutput_LostFocus" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"></TextBox>
-                    <Button HorizontalAlignment="Left" Content="Reset To Defaults" Margin="0,6,0,0" Click="btnResetFfmpeg_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"></Button>
+                    <Button HorizontalAlignment="Left" Content="{lex:Loc FfmpegReset}" Margin="0,6,0,0" Click="btnResetFfmpeg_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"></Button>
                     <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppText}">
-                Avaliable paramaters are: <Bold>{fps} {height} {width} {max_int} {save_path}</Bold>
+                        <Run Text="{lex:Loc AvailableParameters}" /> <Run Text="{lex:Loc FfmpegParameters}" FontWeight="Bold" />
                     </TextBlock>
                     <TextBlock>
                 <Hyperlink NavigateUri="https://ffmpeg.org/ffmpeg.html" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}">
-                Click here to learn about FFmpeg options
+                <Run Text="{lex:Loc FfmpegOptionsHyperlink}" />
                     </Hyperlink>
                     </TextBlock>
                 </StackPanel>
             </TabItem>
-            <TabItem Visibility="Hidden" Header="Preview">
+            <TabItem Visibility="Hidden" Header="{lex:Loc RenderTabPreview}">
             </TabItem>
         </TabControl>
 
         <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Margin="3,8,3,3" Text="JSON File:" Foreground="{DynamicResource AppText}"/>
+            <TextBlock Margin="3,8,3,3" Text="{lex:Loc JsonFile}" Foreground="{DynamicResource AppText}"/>
             <TextBox x:Name="textJson" Margin="3" MinWidth="200" MaxWidth="400" TextChanged="TextJson_TextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-            <Button x:Name="btnBrowse" Margin="3" MinWidth="50" Content="Browse" Click="btnBrowse_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="btnBrowse" Margin="3" MinWidth="50" Content="{lex:Loc Browse}" Click="btnBrowse_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </WrapPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
-            <hc:SplitButton x:Name="SplitBtnRender" Height="40" MinWidth="120" Margin="0,6,0,0" Content="Render Chat" Click="SplitBtnRender_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
+            <hc:SplitButton x:Name="SplitBtnRender" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc Render}" Click="SplitBtnRender_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
-                        <MenuItem Name="MenuItemPartialRender" Header="Partial Render" Click="MenuItemPartialRender_Click"/>
-                        <MenuItem Name="MenuItemEnqueueRender" Header="Enqueue Render" Click="MenuItemEnqueueRender_Click"/>
+                        <MenuItem x:Name="MenuItemPartialRender" Header="{lex:Loc PartialRender}" Click="MenuItemPartialRender_Click"/>
+                        <MenuItem x:Name="MenuItemEnqueue" Header="{lex:Loc EnqueueRender}" Click="MenuItemEnqueue_Click"/>
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
+            <Button x:Name="BtnEnqueue" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc EnqueueRender}" Click="BtnEnqueue_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc TaskCancel}" Click="BtnCancel_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal">
-                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="Use the program often and want to support me? Buy me a coffee :)" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
-            <TextBlock Text="Log:" Foreground="{DynamicResource AppText}"/>
+            <TextBlock Text="{lex:Loc LogHeader}" Foreground="{DynamicResource AppText}"/>
             <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
@@ -204,16 +208,15 @@
                 </RichTextBox.Resources>
             </RichTextBox>
         </StackPanel>
-
         <!--STATUS BAR-->
         <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
-            <StatusBarItem Padding="10,0,0,0">
+            <StatusBarItem Padding="10,5,0,5">
                 <Image x:Name="statusImage" gif:ImageBehavior.AnimatedSource="Images/ppHop.gif"/>
             </StatusBarItem>
-            <StatusBarItem Padding="10,0,0,0">
-                <TextBlock Text="Idle" x:Name="statusMessage" FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
+            <StatusBarItem Padding="10,1,0,1">
+                <TextBlock Text="{lex:Loc StatusIdle}" x:Name="statusMessage" FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
             </StatusBarItem>
-            <StatusBarItem Padding="10,0,10,0" HorizontalAlignment="Right">
+            <StatusBarItem Padding="10,1,10,1" HorizontalAlignment="Right">
                 <ProgressBar Width="200" Height="14" x:Name="statusProgressBar" Background="{DynamicResource StatusBarElement}" Foreground="{DynamicResource ProgressBarForeground}"/>
             </StatusBarItem>
         </StatusBar>

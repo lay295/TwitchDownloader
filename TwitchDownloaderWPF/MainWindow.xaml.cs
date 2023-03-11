@@ -6,8 +6,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
+using TwitchDownloaderWPF.Properties;
 using Xabe.FFmpeg.Downloader;
 using static TwitchDownloaderWPF.App;
 
@@ -18,12 +17,12 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        static public PageVodDownload pageVodDownload = new PageVodDownload();
-        static public PageClipDownload pageClipDownload = new PageClipDownload();
-        static public PageChatDownload pageChatDownload = new PageChatDownload();
-        static public PageChatUpdate pageChatUpdate = new PageChatUpdate();
-        static public PageChatRender pageChatRender = new PageChatRender();
-        static public PageQueue pageQueue = new PageQueue();
+        public static PageVodDownload pageVodDownload = new PageVodDownload();
+        public static PageClipDownload pageClipDownload = new PageClipDownload();
+        public static PageChatDownload pageChatDownload = new PageChatDownload();
+        public static PageChatUpdate pageChatUpdate = new PageChatUpdate();
+        public static PageChatRender pageChatRender = new PageChatRender();
+        public static PageQueue pageQueue = new PageQueue();
 
         public MainWindow()
         {
@@ -76,8 +75,8 @@ namespace TwitchDownloaderWPF
             if (!File.Exists("ffmpeg.exe"))
                 await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
 
-            Version currentVersion = new Version("1.51.2");
-            Title = string.Format("Twitch Downloader v{0}", currentVersion);
+            Version currentVersion = new Version("1.52.1");
+            Title = $"Twitch Downloader v{currentVersion}";
             AutoUpdater.InstalledVersion = currentVersion;
 #if !DEBUG
             AutoUpdater.RunUpdateAsAdmin = false;

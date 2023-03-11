@@ -249,7 +249,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = new())
+        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = new())
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -261,7 +261,7 @@ namespace TwitchDownloaderCore
             }
 
             // Load our embedded data from file
-            if (embeddedData != null && embeddedData.thirdParty != null)
+            if (embeddedData?.thirdParty != null)
             {
                 foreach (EmbedEmoteData emoteData in embeddedData.thirdParty)
                 {
@@ -292,10 +292,10 @@ namespace TwitchDownloaderCore
                 if (!Directory.Exists(bttvFolder))
                     TwitchHelper.CreateDirectory(bttvFolder);
 
-                foreach (var emote in emoteDataResponse.BTTV)
+                foreach (var emote in emoteDataResponse.BTTV
+                             .Where(emote => !alreadyAdded.Contains(emote.Code))
+                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )"))))
                 {
-                    if (alreadyAdded.Contains(emote.Code))
-                        continue;
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(await GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
@@ -315,10 +315,10 @@ namespace TwitchDownloaderCore
                 if (!Directory.Exists(ffzFolder))
                     TwitchHelper.CreateDirectory(ffzFolder);
 
-                foreach (var emote in emoteDataResponse.FFZ)
+                foreach (var emote in emoteDataResponse.FFZ
+                             .Where(emote => !alreadyAdded.Contains(emote.Code))
+                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )"))))
                 {
-                    if (alreadyAdded.Contains(emote.Code))
-                        continue;
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(await GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
@@ -336,10 +336,10 @@ namespace TwitchDownloaderCore
                 if (!Directory.Exists(stvFolder))
                     TwitchHelper.CreateDirectory(stvFolder);
 
-                foreach (var emote in emoteDataResponse.STV)
+                foreach (var emote in emoteDataResponse.STV
+                             .Where(emote => !alreadyAdded.Contains(emote.Code))
+                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )"))))
                 {
-                    if (alreadyAdded.Contains(emote.Code))
-                        continue;
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
@@ -355,7 +355,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false)
+        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -366,7 +366,7 @@ namespace TwitchDownloaderCore
                 TwitchHelper.CreateDirectory(emoteFolder);
 
             // Load our embedded emotes
-            if (embeddedData != null && embeddedData.firstParty != null)
+            if (embeddedData?.firstParty != null)
             {
                 foreach (EmbedEmoteData emoteData in embeddedData.firstParty)
                 {
@@ -386,30 +386,24 @@ namespace TwitchDownloaderCore
                 return returnList;
             }
 
-            foreach (var comment in comments)
+            foreach (var comment in comments.Where(c => c.message.fragments != null))
             {
-                if (comment.message.fragments == null)
-                    continue;
+                cancellationToken.ThrowIfCancellationRequested();
 
-                foreach (var fragment in comment.message.fragments)
+                foreach (var id in comment.message.fragments
+                             .Select(f => f.emoticon?.emoticon_id)
+                             .Where(id => !alreadyAdded.Contains(id) && !failedEmotes.Contains(id)))
                 {
-                    if (fragment.emoticon != null)
+                    try
                     {
-                        string id = fragment.emoticon.emoticon_id;
-                        if (!alreadyAdded.Contains(id) && !failedEmotes.Contains(id))
-                        {
-                            try
-                            {
-                                byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png");
-                                TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
-                                alreadyAdded.Add(id);
-                                returnList.Add(newEmote);
-                            }
-                            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-                            {
-                                failedEmotes.Add(id);
-                            }
-                        }
+                        byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png", cancellationToken);
+                        TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
+                        alreadyAdded.Add(id);
+                        returnList.Add(newEmote);
+                    }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        failedEmotes.Add(id);
                     }
                 }
             }
@@ -417,13 +411,50 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<ChatBadge>> GetChatBadges(int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false)
+        public static async Task<List<EmbedChatBadge>> GetChatBadgesData(List<Comment> comments, int streamerId, CancellationToken cancellationToken = new())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
+            // TODO: would want to make this configurable as we do for emotes though...
+            TwitchBadgeResponse globalBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display", cancellationToken));
+            TwitchBadgeResponse subBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display", cancellationToken));
+
+            List<EmbedChatBadge> badges = new List<EmbedChatBadge>();
+            List<string> alreadyAdded = new List<string>();
+
+            foreach (var name in globalBadges.badge_sets.Keys.Union(subBadges.badge_sets.Keys)
+                         .Where(n => !alreadyAdded.Contains(n))
+                         .Where(n => comments.Any(c => c.message.user_badges.Any(ub => ub._id == n))))
+            {
+                Dictionary<string, string> urls = new Dictionary<string, string>();
+                foreach(var (version, badge) in globalBadges.badge_sets[name].versions)
+                {
+                    urls.Add(version, badge.image_url_2x);
+                }
+                //Prefer channel specific badges over global ones
+                if (subBadges.badge_sets.TryGetValue(name, out var subBadge))
+                {
+                    foreach(var (version, badge) in subBadge.versions)
+                    {
+                        urls[version] = badge.image_url_2x;
+                    }
+                }
+
+                badges.Add(new EmbedChatBadge() { name = name, urls = urls });
+                alreadyAdded.Add(name);
+            }
+
+            return badges;
+        }
+
+        public static async Task<List<ChatBadge>> GetChatBadges(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
             List<string> alreadyAdded = new List<string>();
 
             // Load our embedded data from file
-            if (embeddedData != null && embeddedData.twitchBadges != null)
+            if (embeddedData?.twitchBadges != null)
             {
                 foreach (EmbedChatBadge data in embeddedData.twitchBadges)
                 {
@@ -439,48 +470,27 @@ namespace TwitchDownloaderCore
                 return returnList;
             }
 
-            // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
-            // TODO: would want to make this configurable as we do for emotes though...
-            TwitchBadgeResponse globalBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync("https://badges.twitch.tv/v1/badges/global/display"));
-            TwitchBadgeResponse subBadges = JsonConvert.DeserializeObject<TwitchBadgeResponse>(await httpClient.GetStringAsync($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display"));
+            List<EmbedChatBadge> badgesData = await GetChatBadgesData(comments, streamerId, cancellationToken);
 
             string badgeFolder = Path.Combine(cacheFolder, "badges");
             if (!Directory.Exists(badgeFolder))
                 TwitchHelper.CreateDirectory(badgeFolder);
 
-            foreach (var badge in globalBadges.badge_sets.Union(subBadges.badge_sets))
+            foreach(var badge in badgesData)
             {
-                string name = badge.Key;
-                if (alreadyAdded.Contains(name))
-                    continue;
-
                 try
                 {
                     Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
-                    foreach (var version in badge.Value.versions)
+
+                    foreach (var (version, url) in badge.urls)
                     {
-                        string downloadUrl = version.Value.image_url_2x;
-                        string[] id_parts = downloadUrl.Split('/');
+                        string[] id_parts = url.Split('/');
                         string id = id_parts[id_parts.Length - 2];
-                        byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
-                        versions.Add(version.Key, bytes);
+                        byte[] bytes = await GetImage(badgeFolder, url, id, "2", "png", cancellationToken);
+                        versions.Add(version, bytes);
                     }
 
-                    //Prefer channel specific badges over global ones
-                    if (subBadges.badge_sets.ContainsKey(name))
-                    {
-                        foreach (var version in subBadges.badge_sets[name].versions)
-                        {
-                            string downloadUrl = version.Value.image_url_2x;
-                            string[] id_parts = downloadUrl.Split('/');
-                            string id = id_parts[id_parts.Length - 2];
-                            byte[] bytes = await GetImage(badgeFolder, downloadUrl, id, "2", "png");
-                            versions[version.Key] = bytes;
-                        }
-                    }
-
-                    returnList.Add(new ChatBadge(name, versions));
-                    alreadyAdded.Add(name);
+                    returnList.Add(new ChatBadge(badge.name, versions));
                 }
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
             }
@@ -488,33 +498,36 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<Dictionary<string, SKBitmap>> GetTwitterEmojis(string cacheFolder)
+        public static async Task<Dictionary<string, SKBitmap>> GetTwitterEmojis(string cacheFolder, CancellationToken cancellationToken = default)
         {
             Dictionary<string, SKBitmap> returnCache = new Dictionary<string, SKBitmap>();
 
             string emojiFolder = Path.Combine(cacheFolder, "emojis");
-            Regex emojiExtensions = new Regex(@"\.(?:png|PNG)\z", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
+            Regex emojiExtensions = new Regex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
 
             if (!Directory.Exists(emojiFolder))
                 TwitchHelper.CreateDirectory(emojiFolder);
 
             string[] emojiFiles = Directory.GetFiles(emojiFolder).Where(i => emojiExtensions.IsMatch(i)).ToArray();
 
-            // Google Noto Color Emoji 15 has 3680 emoji images
-            if (emojiFiles.Length < 3680)
+            // Twemoji 14 has 3689 emoji images
+            if (emojiFiles.Length < 3689)
             {
                 string emojiZipPath = Path.Combine(emojiFolder, Path.GetRandomFileName());
                 try
                 {
-                    byte[] emojiZipData = Resources.noto_emoji_2_038;
-                    await File.WriteAllBytesAsync(emojiZipPath, emojiZipData);
+                    using (var ms = new MemoryStream(Resources.twemoji_14_0_0))
+                    {
+                        await using var fs = File.OpenWrite(emojiZipPath);
+                        await ms.CopyToAsync(fs, cancellationToken);
+                    }
 
-                    using ZipArchive archive = ZipFile.OpenRead(emojiZipPath);
-                    var emojiAssetsPath = Path.Combine("noto-emoji-2.038", "png", "72");
+                    using var archive = ZipFile.OpenRead(emojiZipPath);
+                    var emojiAssetsPath = Path.Combine("twemoji-14.0.0", "assets", "72x72");
                     var emojis = archive.Entries.Where(x => !string.IsNullOrWhiteSpace(x.Name) && Path.GetDirectoryName(x.FullName) == emojiAssetsPath);
                     foreach (var emoji in emojis)
                     {
-                        string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace("_", " "));
+                        string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace('-', ' '));
                         if (!File.Exists(filePath))
                         {
                             try
@@ -536,21 +549,21 @@ namespace TwitchDownloaderCore
 
             foreach (var emojiPath in emojiFiles)
             {
-                byte[] emojiBytes = await File.ReadAllBytesAsync(emojiPath);
-                SKBitmap emojiImage = SKBitmap.Decode(emojiBytes);
+                await using var fs = File.OpenRead(emojiPath);
+                SKBitmap emojiImage = SKBitmap.Decode(fs);
                 returnCache.Add(Path.GetFileNameWithoutExtension(emojiPath), emojiImage);
             }
 
             return returnCache;
         }
 
-        public static async Task<List<CheerEmote>> GetBits(string cacheFolder, string channel_id = "", EmbeddedData embeddedData = null, bool offline = false)
+        public static async Task<List<CheerEmote>> GetBits(List<Comment> comments, string cacheFolder, string channel_id = "", EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<CheerEmote> returnList = new List<CheerEmote>();
             List<string> alreadyAdded = new List<string>();
 
             // Load our embedded data from file
-            if (embeddedData != null && embeddedData.twitchBits != null)
+            if (embeddedData?.twitchBits != null)
             {
                 foreach (EmbedCheerEmote data in embeddedData.twitchBits)
                 {
@@ -579,7 +592,7 @@ namespace TwitchDownloaderCore
                 Content = new StringContent("{\"query\":\"query{cheerConfig{groups{nodes{id, prefix, tiers{bits}}, templateURL}},user(id:\\\"" + channel_id + "\\\"){cheer{cheerGroups{nodes{id,prefix,tiers{bits}},templateURL}}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-            string response = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
+            string response = await (await httpClient.SendAsync(request, cancellationToken)).Content.ReadAsStringAsync(cancellationToken);
             GqlCheerResponse cheerResponse = JsonConvert.DeserializeObject<GqlCheerResponse>(response);
 
             string bitFolder = Path.Combine(cacheFolder, "bits");
@@ -612,6 +625,10 @@ namespace TwitchDownloaderCore
                         string prefix = node.prefix;
                         if (alreadyAdded.Contains(prefix))
                             continue;
+
+                        if (comments.Where(c => c.message.bits_spent > 0).All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){node.prefix}\d")))
+                            continue;
+
                         try
                         {
                             List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
@@ -620,7 +637,7 @@ namespace TwitchDownloaderCore
                             {
                                 int minBits = tier.bits;
                                 string url = templateURL.Replace("PREFIX", node.prefix.ToLower()).Replace("BACKGROUND", "dark").Replace("ANIMATION", "animated").Replace("TIER", tier.bits.ToString()).Replace("SCALE.EXTENSION", "2.gif");
-                                TwitchEmote emote = new TwitchEmote(await GetImage(bitFolder, url, node.id + tier.bits, "2", "gif"), EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
+                                TwitchEmote emote = new TwitchEmote(await GetImage(bitFolder, url, node.id + tier.bits, "2", "gif", cancellationToken), EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
                                 tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
                             }
                             returnList.Add(newEmote);
@@ -659,7 +676,7 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
-        public static void CleanupUnmanagedCacheFiles(string cacheFolder)
+        public static void CleanupUnmanagedCacheFiles(string cacheFolder, IProgress<ProgressReport> progress)
         {
             if (!Directory.Exists(cacheFolder))
             {
@@ -667,38 +684,34 @@ namespace TwitchDownloaderCore
             }
 
             // Let's delete any video download cache folders older than 24 hours
-            // Or that have been inactive for 2 hours
             var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
             var directories = Directory.GetDirectories(cacheFolder);
-            foreach (var directory in directories)
+            var directoriesDeleted = (from directory in directories
+                let videoFolderMatch = videoFolderRegex.Match(directory)
+                where videoFolderMatch.Success
+                where DeleteOldDirectory(directory, videoFolderMatch.Groups[1].ValueSpan)
+                select directory).Count();
+
+            if (directoriesDeleted > 0)
             {
-                var videoFolderMatch = videoFolderRegex.Match(directory);
-                if (videoFolderMatch.Success)
-                {
-                    bool wasDeleted = DeleteOldDirectory(directory, videoFolderMatch.Groups[1].ToString());
-
-                    if (wasDeleted) continue;
-
-                    wasDeleted = DeleteColdDirectory(directory);
-
-                    if (wasDeleted) continue;
-                }
+                progress.Report(new ProgressReport(ReportType.Log, $"{directoriesDeleted} old video caches were deleted."));
             }
         }
 
-        private static bool DeleteOldDirectory(string directory, string directoryCreationMillis)
+        private static bool DeleteOldDirectory(string directory, ReadOnlySpan<char> directoryCreationMillis)
         {
             var downloadTime = long.Parse(directoryCreationMillis);
             var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            if (currentTime - downloadTime > 86_400_000) // 24 hours in millis
+            const int TWENTY_FOUR_HOURS_MILLIS = 86_400_000;
+            if (currentTime - downloadTime > TWENTY_FOUR_HOURS_MILLIS)
             {
                 try
                 {
                     Directory.Delete(directory, true);
                     return true;
                 }
-                catch { }
+                catch { /* Eat the exception */ }
             }
             return false;
         }
@@ -709,14 +722,15 @@ namespace TwitchDownloaderCore
             var directoryWriteTimeMillis = Directory.GetLastWriteTimeUtc(directory).Ticks / TimeSpan.TicksPerMillisecond;
             var currentTimeMillis = DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
 
-            if (currentTimeMillis - directoryWriteTimeMillis > 14_400_000) // 4 hours in millis
+            const int SIX_HOURS_MILLIS = 21_600_000;
+            if (currentTimeMillis - directoryWriteTimeMillis > SIX_HOURS_MILLIS)
             {
                 try
                 {
                     Directory.Delete(directory, true);
                     return true;
                 }
-                catch { }
+                catch { /* Eat the exception */ }
             }
             return false;
         }
@@ -756,6 +770,8 @@ namespace TwitchDownloaderCore
 
         public static async Task<byte[]> GetImage(string cachePath, string imageUrl, string imageId, string imageScale, string imageType, CancellationToken cancellationToken = new())
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             byte[] imageBytes = null;
 
             if (!Directory.Exists(cachePath))

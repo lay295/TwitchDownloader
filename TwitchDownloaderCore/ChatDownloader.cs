@@ -20,7 +20,7 @@ namespace TwitchDownloaderCore
     {
         private readonly ChatDownloadOptions downloadOptions;
         private static HttpClient httpClient = new HttpClient();
-        private static readonly Regex _bitsRegex = new(@"(?:Cheer|BibleThump|cheerwhal|Corgo|Scoops|uni|ShowLove|Party|SeemsGood|Pride|Kappa|FrankerZ|HeyGuys|DansGame|EleGiggle|TriHard|Kreygasm|4Head|SwiftRage|NotLikeThis|FailFish|VoHiYo|PJSalt|MrDestructoid|bday|RIPCheer|Shamrock|DoodleCheer|BitBoss|Streamlabs|Muxy|HolidayCheer|Goal|Anon|Charity)(\d+)(?:\s|$)", RegexOptions.Compiled);
+        private static readonly Regex _bitsRegex = new(@"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d?\d?\d?\d?\d?\d?(?=\s|$)", RegexOptions.Compiled);
         private enum DownloadType { Clip, Video }
 
         public ChatDownloader(ChatDownloadOptions DownloadOptions)
@@ -126,7 +126,6 @@ namespace TwitchDownloaderCore
                 var oldComment = comment.node;
                 newComment._id = oldComment.id;
                 newComment.created_at = oldComment.createdAt;
-                newComment.updated_at = oldComment.createdAt;
                 newComment.channel_id = video.creator.id;
                 newComment.content_type = "video";
                 newComment.content_id = video.id;
@@ -135,10 +134,7 @@ namespace TwitchDownloaderCore
                 commenter.display_name = oldComment.commenter.displayName;
                 commenter._id = oldComment.commenter.id;
                 commenter.name = oldComment.commenter.login;
-                commenter.type = "user";
                 newComment.commenter = commenter;
-                newComment.source = "chat";
-                newComment.state = "published";
                 Message message = new Message();
                 message.body = "";
                 List<Fragment> fragments = new List<Fragment>();
@@ -165,7 +161,6 @@ namespace TwitchDownloaderCore
                     fragments.Add(newFragment);
                 }
                 message.fragments = fragments;
-                message.is_action = false;
                 List<UserBadge> badges = new List<UserBadge>();
                 foreach (var badge in oldComment.message.userBadges)
                 {
@@ -178,9 +173,9 @@ namespace TwitchDownloaderCore
                 message.user_color = oldComment.message.userColor;
                 message.emoticons = emoticons;
                 var bitMatch = _bitsRegex.Match(message.body);
-                if (bitMatch.Success)
+                if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
                 {
-                    message.bits_spent = int.Parse(bitMatch.Groups[1].Value);
+                    message.bits_spent = result;
                 }
                 newComment.message = message;
 
@@ -238,9 +233,9 @@ namespace TwitchDownloaderCore
                         description = responseChapter.node.description,
                         subDescription = responseChapter.node.subDescription,
                         thumbnailUrl = responseChapter.node.thumbnailURL,
-                        gameId = responseChapter.node.details.game.id,
-                        gameDisplayName = responseChapter.node.details.game.displayName,
-                        gameBoxArtUrl = responseChapter.node.details.game.boxArtURL
+                        gameId = responseChapter.node.details.game?.id ?? null,
+                        gameDisplayName = responseChapter.node.details.game?.displayName ?? null,
+                        gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL ?? null
                     };
                     chatRoot.video.chapters.Add(chapter);
                 }
@@ -329,10 +324,10 @@ namespace TwitchDownloaderCore
 
                 // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
                 // TODO: Combine this with ChatUpdater in a different file
-                List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.streamer.id, downloadOptions.TempFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
-                List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(comments, downloadOptions.TempFolder);
-                List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.streamer.id, downloadOptions.TempFolder);
-                List<CheerEmote> twitchBits = await TwitchHelper.GetBits(downloadOptions.TempFolder, chatRoot.streamer.id.ToString());
+                List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(comments, chatRoot.streamer.id, downloadOptions.TempFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
+                List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(comments, downloadOptions.TempFolder, cancellationToken: cancellationToken);
+                List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(comments, chatRoot.streamer.id, downloadOptions.TempFolder, cancellationToken: cancellationToken);
+                List<CheerEmote> twitchBits = await TwitchHelper.GetBits(comments, downloadOptions.TempFolder, chatRoot.streamer.id.ToString(), cancellationToken: cancellationToken);
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -413,9 +408,8 @@ namespace TwitchDownloaderCore
 
                 foreach (var comment in chatRoot.comments)
                 {
-                    if (userInfo.ContainsKey(comment.commenter._id))
+                    if (userInfo.TryGetValue(comment.commenter._id, out var user))
                     {
-                        User user = userInfo[comment.commenter._id];
                         comment.commenter.updated_at = user.updatedAt;
                         comment.commenter.created_at = user.createdAt;
                         comment.commenter.bio = user.description;
