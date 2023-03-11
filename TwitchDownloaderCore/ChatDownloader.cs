@@ -20,7 +20,7 @@ namespace TwitchDownloaderCore
     {
         private readonly ChatDownloadOptions downloadOptions;
         private static HttpClient httpClient = new HttpClient();
-        private static readonly Regex _bitsRegex = new(@"(?:Cheer|BibleThump|cheerwhal|Corgo|Scoops|uni|ShowLove|Party|SeemsGood|Pride|Kappa|FrankerZ|HeyGuys|DansGame|EleGiggle|TriHard|Kreygasm|4Head|SwiftRage|NotLikeThis|FailFish|VoHiYo|PJSalt|MrDestructoid|bday|RIPCheer|Shamrock|DoodleCheer|BitBoss|Streamlabs|Muxy|HolidayCheer|Goal|Anon|Charity)(\d+)(?:\s|$)", RegexOptions.Compiled);
+        private static readonly Regex _bitsRegex = new(@"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d?\d?\d?\d?\d?\d?(?=\s|$)", RegexOptions.Compiled);
         private enum DownloadType { Clip, Video }
 
         public ChatDownloader(ChatDownloadOptions DownloadOptions)
@@ -173,9 +173,9 @@ namespace TwitchDownloaderCore
                 message.user_color = oldComment.message.userColor;
                 message.emoticons = emoticons;
                 var bitMatch = _bitsRegex.Match(message.body);
-                if (bitMatch.Success)
+                if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
                 {
-                    message.bits_spent = int.Parse(bitMatch.Groups[1].Value);
+                    message.bits_spent = result;
                 }
                 newComment.message = message;
 
