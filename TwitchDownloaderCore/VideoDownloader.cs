@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -6,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -168,14 +168,14 @@ namespace TwitchDownloaderCore
             var videoLength = TimeSpan.Zero;
             var videoLengthRegex = new Regex(@"(?<=^\s?\s?Duration: )\d\d:\d\d:\d\d\.\d\d", RegexOptions.Multiline);
             var encodingTimeRegex = new Regex(@"(?<=time=)\d\d:\d\d:\d\d\.\d\d", RegexOptions.Compiled);
-            using var logWriter = File.AppendText(Path.Combine(downloadFolder, "ffmpegLog.txt"));
+            var logQueue = new ConcurrentQueue<string>();
 
-            process.ErrorDataReceived += async (sender, e) =>
+            process.ErrorDataReceived += (sender, e) =>
             {
                 if (e.Data is null)
                     return;
 
-                await logWriter.WriteLineAsync(e.Data);
+                logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
                 if (videoLength == TimeSpan.Zero)
                 {
@@ -184,6 +184,7 @@ namespace TwitchDownloaderCore
                         return;
 
                     videoLength = TimeSpan.Parse(videoLengthMatch.ValueSpan);
+                    return;
                 }
 
                 HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength, progress);
@@ -191,16 +192,22 @@ namespace TwitchDownloaderCore
 
             process.Start();
             process.BeginErrorReadLine();
-            process.WaitForExit();
+
+            using var logWriter = File.AppendText(Path.Combine(downloadFolder, "ffmpegLog.txt"));
+            do // We cannot handle logging inside the ErrorDataReceived lambda because more than 1 can come in at once and cause a race condition. lay295#598
+            {
+                Thread.Sleep(330);
+                while (!logQueue.IsEmpty && logQueue.TryDequeue(out var logMessage))
+                {
+                    logWriter.WriteLine(logMessage);
+                }
+            } while (!process.HasExited || !logQueue.IsEmpty);
 
             return process.ExitCode;
         }
 
         private static void HandleFfmpegOutput(string output, Regex encodingTimeRegex, TimeSpan videoLength, IProgress<ProgressReport> progress)
         {
-            if (videoLength == TimeSpan.Zero)
-                return;
-
             var encodingTimeMatch = encodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
                 return;
