@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'>
 <title>
@@ -92,7 +93,7 @@ Messages Per Page:
 <script>
 /* https://stackoverflow.com/a/63270816 */
 /* I am lazy, seriously if you want to have better solution to contrast PRs are welcome :) */
-const getLuminanace = (values) => {
+const getLuminance = (values) => {
     const rgb = values.map((v) => {
         const val = v / 255;
         return val <= 0.03928 ? val / 12.92 : ((val + 0.055) / 1.055) ** 2.4;
@@ -101,8 +102,8 @@ const getLuminanace = (values) => {
 };
 
 const getContrastRatio = (colorA, colorB) => {
-    const lumA = getLuminanace(colorA);
-    const lumB = getLuminanace(colorB);
+    const lumA = getLuminance(colorA);
+    const lumB = getLuminance(colorB);
 
     return (Math.max(lumA, lumB) + 0.05) / (Math.min(lumA, lumB) + 0.05);
 };
@@ -111,13 +112,12 @@ const back_color = [255, 255, 255];
 $('.comment-author').each(function (i, obj) {
     let colorRgb = $(obj).css("color");
     let color = colorRgb.substring(4, colorRgb.length - 1).replace(/ /g, '').split(',');
-    console.log(getContrastRatio(back_color, color))
     if (getContrastRatio(back_color, color) < 1.2) {
         $(obj).css("color", "black");
     }
 });
 
-var flexiblePagination = $('#content').flexiblePagination({
+let flexiblePagination = $('#content').flexiblePagination({
     pagingControlsContainer: "#pagingControls",
     pagingContainer: "#content",
     itemSelector: ".comment-root:visible",
