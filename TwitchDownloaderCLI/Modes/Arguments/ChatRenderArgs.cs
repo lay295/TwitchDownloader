@@ -102,7 +102,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, and bits from the input json.")]
         public bool Offline { get; set; }
 
-        [Option("emoji-vendor", Default = "notocolor", HelpText = "The emoji vendor used for rendering emojis. Valid values are: 'twitter' / 'twemoji', 'google' / 'notocolor'.")]
+        [Option("emoji-vendor", Default = "notocolor", HelpText = "The emoji vendor used for rendering emojis. Valid values are: 'twitter' / 'twemoji', 'google' / 'notocolor', and 'system' / 'none'.")]
         public string EmojiVendor { get; set; }
 
         [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]

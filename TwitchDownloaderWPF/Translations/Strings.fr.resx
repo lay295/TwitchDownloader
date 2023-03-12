@@ -717,4 +717,7 @@
   <data name="EmojiVendorTwemoji" xml:space="preserve">
     <value>Twitter</value>
   </data>
+  <data name="EmojiVendorNone" xml:space="preserve">
+    <value>Non</value>
+  </data>
 </root>

@@ -502,6 +502,9 @@ namespace TwitchDownloaderCore
         {
             var returnCache = new Dictionary<string, SKBitmap>();
 
+            if (emojiVendor == EmojiVendor.None)
+                return returnCache;
+
             var emojiFolder = Path.Combine(cacheFolder, "emojis", emojiVendor.EmojiFolder());
             var emojiExtensions = new Regex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
 

@@ -75,6 +75,7 @@ namespace TwitchDownloaderCLI.Modes
                 {
                     "twitter" or "twemoji" => EmojiVendor.TwitterTwemoji,
                     "google" or "notocolor" => EmojiVendor.GoogleNotoColor,
+                    "system" or "none" => EmojiVendor.None,
                     _ => throw new NotSupportedException("Invalid emoji vendor. Valid values are: 'twitter' / 'twemoji', and 'google' / 'notocolor'")
                 },
                 LogFfmpegOutput = inputOptions.LogFfmpegOutput,

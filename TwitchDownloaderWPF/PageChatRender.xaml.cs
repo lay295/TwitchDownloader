@@ -124,10 +124,15 @@ namespace TwitchDownloaderWPF
                 SubMessages = (bool)checkSub.IsChecked,
                 ChatBadges = (bool)checkBadge.IsChecked,
                 Offline = (bool)checkOffline.IsChecked,
-                EmojiVendor = (bool)RadioEmojiNotoColor.IsChecked ? EmojiVendor.GoogleNotoColor : EmojiVendor.TwitterTwemoji,
                 DisperseCommentOffsets = (bool)checkDispersion.IsChecked,
                 LogFfmpegOutput = true
             };
+            if (RadioEmojiNotoColor.IsChecked == true)
+                options.EmojiVendor = EmojiVendor.GoogleNotoColor;
+            else if (RadioEmojiTwemoji.IsChecked == true)
+                options.EmojiVendor = EmojiVendor.TwitterTwemoji;
+            else if (RadioEmojiNone.IsChecked == true)
+                options.EmojiVendor = EmojiVendor.None;
             foreach (var item in comboBadges.SelectedItems)
             {
                 options.ChatBadgeMask += (int)((ChatBadgeListItem)item).Type;
@@ -192,6 +197,7 @@ namespace TwitchDownloaderWPF
                 checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
                 RadioEmojiNotoColor.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.GoogleNotoColor;
                 RadioEmojiTwemoji.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.TwitterTwemoji;
+                RadioEmojiNone.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.None;
 
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Broadcaster, Name = "Broadcaster" });
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Moderator, Name = "Mods" });
@@ -299,7 +305,12 @@ namespace TwitchDownloaderWPF
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             Settings.Default.BannedWordsList = string.Join(",", textBannedWordsList.Text.ToLower()
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-            Settings.Default.RenderEmojiVendor = (int)((bool)RadioEmojiNotoColor.IsChecked ? EmojiVendor.GoogleNotoColor : EmojiVendor.TwitterTwemoji);
+            if (RadioEmojiNotoColor.IsChecked == true)
+                Settings.Default.RenderEmojiVendor = (int)EmojiVendor.GoogleNotoColor;
+            else if (RadioEmojiTwemoji.IsChecked == true)
+                Settings.Default.RenderEmojiVendor = (int)EmojiVendor.TwitterTwemoji;
+            else if (RadioEmojiNone.IsChecked == true)
+                Settings.Default.RenderEmojiVendor = (int)EmojiVendor.None;
             int newMask = 0;
             foreach (var item in comboBadges.SelectedItems)
             {

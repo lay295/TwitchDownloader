@@ -6,6 +6,7 @@ namespace TwitchDownloaderCore.Chat
 {
     public enum EmojiVendor
     {
+        None,
         TwitterTwemoji,
         GoogleNotoColor
     }

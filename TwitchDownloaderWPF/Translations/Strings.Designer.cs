@@ -573,6 +573,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        public static string EmojiVendorNone {
+            get {
+                return ResourceManager.GetString("EmojiVendorNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Google.
         /// </summary>
         public static string EmojiVendorNotoColor {
