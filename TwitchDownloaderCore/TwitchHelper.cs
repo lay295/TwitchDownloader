@@ -498,7 +498,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<Dictionary<string, SKBitmap>> GetTwitterEmojis(string cacheFolder, CancellationToken cancellationToken = default)
+                public static async Task<Dictionary<string, SKBitmap>> GetTwitterEmojis(string cacheFolder, CancellationToken cancellationToken = default)
         {
             Dictionary<string, SKBitmap> returnCache = new Dictionary<string, SKBitmap>();
 
@@ -528,6 +528,66 @@ namespace TwitchDownloaderCore
                     foreach (var emoji in emojis)
                     {
                         string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace('-', ' '));
+                        if (!File.Exists(filePath))
+                        {
+                            try
+                            {
+                                emoji.ExtractToFile(filePath);
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                finally
+                {
+                    if (File.Exists(emojiZipPath))
+                    {
+                        File.Delete(emojiZipPath);
+                    }
+                }
+            }
+
+            foreach (var emojiPath in emojiFiles)
+            {
+                await using var fs = File.OpenRead(emojiPath);
+                SKBitmap emojiImage = SKBitmap.Decode(fs);
+                returnCache.Add(Path.GetFileNameWithoutExtension(emojiPath), emojiImage);
+            }
+
+            return returnCache;
+        }
+
+        // TODO: Combine with GetTwitterEmojis() using an enum to select the desired vendor
+        public static async Task<Dictionary<string, SKBitmap>> GetGoogleEmojis(string cacheFolder, CancellationToken cancellationToken = default)
+        {
+            Dictionary<string, SKBitmap> returnCache = new Dictionary<string, SKBitmap>();
+
+            string emojiFolder = Path.Combine(cacheFolder, "emojis");
+            Regex emojiExtensions = new Regex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
+
+            if (!Directory.Exists(emojiFolder))
+                TwitchHelper.CreateDirectory(emojiFolder);
+
+            string[] emojiFiles = Directory.GetFiles(emojiFolder).Where(i => emojiExtensions.IsMatch(i)).ToArray();
+
+            // Google Noto Color Emoji 15 has 3680 emoji images
+            if (emojiFiles.Length < 3680)
+            {
+                string emojiZipPath = Path.Combine(emojiFolder, Path.GetRandomFileName());
+                try
+                {
+                    using (var ms = new MemoryStream(Resources.noto_emoji_2_038))
+                    {
+                        await using var fs = File.OpenWrite(emojiZipPath);
+                        await ms.CopyToAsync(fs, cancellationToken);
+                    }
+
+                    using var archive = ZipFile.OpenRead(emojiZipPath);
+                    var emojiAssetsPath = Path.Combine("noto-emoji-2.038", "png", "72");
+                    var emojis = archive.Entries.Where(x => !string.IsNullOrWhiteSpace(x.Name) && Path.GetDirectoryName(x.FullName) == emojiAssetsPath);
+                    foreach (var emoji in emojis)
+                    {
+                        string filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace('_', ' '));
                         if (!File.Exists(filePath))
                         {
                             try
