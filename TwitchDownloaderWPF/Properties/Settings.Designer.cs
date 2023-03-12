@@ -789,5 +789,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["UTCVideoTime"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int RenderEmojiVendor {
+            get {
+                return ((int)(this["RenderEmojiVendor"]));
+            }
+            set {
+                this["RenderEmojiVendor"] = value;
+            }
+        }
     }
 }

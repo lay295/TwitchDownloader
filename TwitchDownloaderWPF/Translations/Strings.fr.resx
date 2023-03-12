@@ -708,4 +708,13 @@
   <data name="TimestampLocal" xml:space="preserve">
     <value>L'Heure locale</value>
   </data>
+  <data name="EmojiVendor" xml:space="preserve">
+    <value>Fournisseur d'Emoji:</value>
+  </data>
+  <data name="EmojiVendorNotoColor" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="EmojiVendorTwemoji" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
 </root>
