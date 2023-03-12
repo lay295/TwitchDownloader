@@ -1,9 +1,9 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -45,7 +45,7 @@ namespace TwitchDownloaderCore
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                string response;
+                List<GqlCommentResponse> commentResponse;
                 try
                 {
                     var request = new HttpRequestMessage()
@@ -67,7 +67,7 @@ namespace TwitchDownloaderCore
                     using (var httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
                     {
                         httpResponse.EnsureSuccessStatusCode();
-                        response = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
+                        commentResponse = await httpResponse.Content.ReadFromJsonAsync<List<GqlCommentResponse>>(options: null, cancellationToken);
                     }
 
                     errorCount = 0;
@@ -83,11 +83,13 @@ namespace TwitchDownloaderCore
                     continue;
                 }
 
-                // We can technically switch to the System.Text.Json deserializer to deserialize the HttpContent as a stream instead
-                // of a string. https://josef.codes/you-are-probably-still-using-httpclient-wrong-and-it-is-destabilizing-your-software/
-                GqlCommentResponse commentResponse = JsonConvert.DeserializeObject<List<GqlCommentResponse>>(response)[0];
-                List<Comment> convertedComments = ConvertComments(commentResponse.data.video);
+                if (commentResponse[0].data.video.comments?.edges is null)
+                {
+                    // video.comments can be null for some dumb reason, skip
+                    continue;
+                }
 
+                var convertedComments = ConvertComments(commentResponse[0].data.video);
                 lock (commentLock)
                 {
                     foreach (var comment in convertedComments)
@@ -98,10 +100,10 @@ namespace TwitchDownloaderCore
                         latestMessage = comment.content_offset_seconds;
                     }
                 }
-                if (!commentResponse.data.video.comments.pageInfo.hasNextPage)
+                if (!commentResponse[0].data.video.comments.pageInfo.hasNextPage)
                     break;
                 else
-                    cursor = commentResponse.data.video.comments.edges.Last().cursor;
+                    cursor = commentResponse[0].data.video.comments.edges.Last().cursor;
 
                 int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
                 progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
