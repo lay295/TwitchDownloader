@@ -1,6 +1,5 @@
 ﻿using SkiaSharp;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.TwitchObjects;
@@ -83,7 +82,8 @@ namespace TwitchDownloaderCore.Tools
                     return HighlightType.Unknown;
                 }
 
-                return convertedToMatch.ValueSpan switch
+                // TODO: Use ValueSpan once on NET7
+                return convertedToMatch.Value switch
                 {
                     "Prime" => HighlightType.SubscribedPrime,
                     "Tier 1" => HighlightType.SubscribedTier,
