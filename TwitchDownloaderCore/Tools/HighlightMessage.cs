@@ -1,5 +1,6 @@
 ﻿using SkiaSharp;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.TwitchObjects;
@@ -14,7 +15,8 @@ namespace TwitchDownloaderCore.Tools
         GiftedMany,
         GiftedSingle,
         ContinuingGift,
-        GiftedAnonymous
+        GiftedAnonymous,
+        Unknown
     }
 
     public class HighlightMessage : IDisposable
@@ -29,7 +31,7 @@ namespace TwitchDownloaderCore.Tools
 
         private static readonly Regex SubMessageRegex = new(@"^(subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d?\d?\d months(?:, currently on a \d?\d?\d month streak)?! )(.+)$", RegexOptions.Compiled);
         private static readonly Regex GiftAnonymousRegex = new(@"^An anonymous user (?:gifted a|is gifting \d\d?\d?) Tier \d", RegexOptions.Compiled);
-        
+
         private SKBitmap _subscribedTierIcon = null;
         private SKBitmap _subscribedPrimeIcon = null;
         private SKBitmap _giftSingleIcon = null;
@@ -73,11 +75,28 @@ namespace TwitchDownloaderCore.Tools
             {
                 return HighlightType.ContinuingGift;
             }
+            if (comment.message.body.StartsWith(comment.commenter.display_name + " converted from a "))
+            {
+                var convertedToMatch = Regex.Match(comment.message.body, @$"(?<=^{comment.commenter.display_name} converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
+                if (!convertedToMatch.Success)
+                {
+                    return HighlightType.Unknown;
+                }
+
+                return convertedToMatch.ValueSpan switch
+                {
+                    "Prime" => HighlightType.SubscribedPrime,
+                    "Tier 1" => HighlightType.SubscribedTier,
+                    "Tier 2" => HighlightType.SubscribedTier,
+                    "Tier 3" => HighlightType.SubscribedTier,
+                    _ => HighlightType.Unknown
+                };
+            }
             if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
             {
                 return HighlightType.GiftedAnonymous;
             }
-            // There is one more resub along the lines of "...is on month # of # of their Tier # Gift Sub from..." but I don't know the exact wording and it's very rare
+            // There are more re-sub messages but I don't know the exact wordings and they tend to be very rare
             return HighlightType.None;
         }
 
@@ -122,7 +141,7 @@ namespace TwitchDownloaderCore.Tools
                     _giftAnonymousIcon = returnBitmap.Copy();
                     break;
                 default:
-                    throw new NotImplementedException("This should not be possible.");
+                    throw new NotSupportedException("This should not be possible.");
             }
 
             // Return the generated icon
@@ -154,7 +173,7 @@ namespace TwitchDownloaderCore.Tools
                 HighlightType.SubscribedPrime => SUBSCRIBED_PRIME_ICON_SVG,
                 HighlightType.GiftedSingle => GIFTED_SINGLE_ICON_SVG,
                 HighlightType.GiftedAnonymous => GIFTED_ANONYMOUS_ICON_SVG,
-                _ => throw new NotImplementedException("This should not be possible.")
+                _ => throw new NotSupportedException("This should not be possible.")
             });
             iconPath.FillType = SKPathFillType.EvenOdd;
 
@@ -166,7 +185,7 @@ namespace TwitchDownloaderCore.Tools
                     HighlightType.SubscribedPrime => SKColor.Parse(purple),
                     HighlightType.GiftedSingle => textColor,
                     HighlightType.GiftedAnonymous => textColor,
-                    _ => throw new NotImplementedException("This should not be possible.")
+                    _ => throw new NotSupportedException("This should not be possible.")
                 },
                 IsAntialias = true,
                 LcdRenderText = true
@@ -179,11 +198,11 @@ namespace TwitchDownloaderCore.Tools
         }
 
         /// <summary>
-        /// Splits a comment into 2 comments based on the start index of a custom resub message
+        /// Splits a comment into 2 comments based on the start index of a custom re-sub message
         /// </summary>
         /// <returns>
-        /// 2 clones of <paramref name="comment"/> whose <see cref="Message.body"/> and <see cref="Message.fragments"/> contain the split resub details and
-        /// the user's custom resub message if there is one, else the original <paramref name="comment"/> and null
+        /// 2 clones of <paramref name="comment"/> whose <see cref="Message.body"/> and <see cref="Message.fragments"/> contain the split re-sub details and
+        /// the user's custom re-sub message if there is one, else the original <paramref name="comment"/> and null
         /// </returns>
         public static (Comment subMessage, Comment customMessage) SplitSubComment(Comment comment)
         {
@@ -228,7 +247,7 @@ namespace TwitchDownloaderCore.Tools
             throw new NotImplementedException("This should not be possible.");
         }
 
-        /// <returns>The split resub details and user's custom resub message if there is one, else the resub details and null</returns>
+        /// <returns>The split re-sub details and user's custom re-sub message if there is one, else the re-sub details and null</returns>
         public static (string subMessage, string customMessage) SplitSubMessage(string commentMessage)
         {
             var subMessageMatch = SubMessageRegex.Match(commentMessage);
