@@ -704,9 +704,9 @@
     <value>Keskinlik:</value>
   </data>
   <data name="TimestampLocal" xml:space="preserve">
-    <value>Local</value>
+    <value>Lokal</value>
   </data>
   <data name="SettingsTimeFormat" xml:space="preserve">
-    <value>Time Format:</value>
+    <value>Zaman Formatı:</value>
   </data>
 </root>
