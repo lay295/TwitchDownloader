@@ -294,7 +294,7 @@ namespace TwitchDownloaderCore
 
                 foreach (var emote in emoteDataResponse.BTTV
                              .Where(emote => !alreadyAdded.Contains(emote.Code))
-                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )"))))
+                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"))))
                 {
                     try
                     {
@@ -317,7 +317,7 @@ namespace TwitchDownloaderCore
 
                 foreach (var emote in emoteDataResponse.FFZ
                              .Where(emote => !alreadyAdded.Contains(emote.Code))
-                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )"))))
+                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"))))
                 {
                     try
                     {
@@ -338,7 +338,7 @@ namespace TwitchDownloaderCore
 
                 foreach (var emote in emoteDataResponse.STV
                              .Where(emote => !alreadyAdded.Contains(emote.Code))
-                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){emote.Code}(?=$| )"))))
+                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"))))
                 {
                     try
                     {
@@ -626,7 +626,7 @@ namespace TwitchDownloaderCore
                         if (alreadyAdded.Contains(prefix))
                             continue;
 
-                        if (comments.Where(c => c.message.bits_spent > 0).All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){node.prefix}\d")))
+                        if (comments.Where(c => c.message.bits_spent > 0).All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){Regex.Escape(node.prefix)}\d")))
                             continue;
 
                         try
