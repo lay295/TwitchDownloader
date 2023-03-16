@@ -1219,7 +1219,7 @@ namespace TwitchDownloaderCore
                         {
                             if (cachedVersion.Key == version)
                             {
-                                returnList.Add((cachedVersion.Value, cachedBadge.Type));
+                                returnList.Add((cachedVersion.Value.bitmap, cachedBadge.Type));
                                 foundBadge = true;
                                 break;
                             }

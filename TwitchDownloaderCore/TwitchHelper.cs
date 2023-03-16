@@ -427,17 +427,27 @@ namespace TwitchDownloaderCore
                          .Where(n => !alreadyAdded.Contains(n))
                          .Where(n => comments.Any(c => c.message.user_badges.Any(ub => ub._id == n))))
             {
-                Dictionary<string, string> urls = new Dictionary<string, string>();
+                Dictionary<string, EmbedChatBadgeData> urls = new();
                 foreach(var (version, badge) in globalBadges.badge_sets[name].versions)
                 {
-                    urls.Add(version, badge.image_url_2x);
+                    urls.Add(version, new()
+                    {
+                        title = badge.title,
+                        description = badge.description,
+                        url = badge.image_url_2x
+                    });
                 }
                 //Prefer channel specific badges over global ones
                 if (subBadges.badge_sets.TryGetValue(name, out var subBadge))
                 {
                     foreach(var (version, badge) in subBadge.versions)
                     {
-                        urls[version] = badge.image_url_2x;
+                        urls[version] = new()
+                        {
+                            title = badge.title,
+                            description = badge.description,
+                            url = badge.image_url_2x
+                        };
                     }
                 }
 
@@ -480,14 +490,19 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    Dictionary<string, byte[]> versions = new Dictionary<string, byte[]>();
+                    Dictionary<string, ChatBadgeByteData> versions = new();
 
-                    foreach (var (version, url) in badge.urls)
+                    foreach (var (version, data) in badge.urls)
                     {
-                        string[] id_parts = url.Split('/');
+                        string[] id_parts = data.url.Split('/');
                         string id = id_parts[id_parts.Length - 2];
-                        byte[] bytes = await GetImage(badgeFolder, url, id, "2", "png", cancellationToken);
-                        versions.Add(version, bytes);
+                        byte[] bytes = await GetImage(badgeFolder, data.url, id, "2", "png", cancellationToken);
+                        versions.Add(version, new ChatBadgeByteData
+                        {
+                            title = data.title,
+                            description = data.description,
+                            bytes = bytes
+                        });
                     }
 
                     returnList.Add(new ChatBadge(badge.name, versions));
@@ -844,4 +859,5 @@ namespace TwitchDownloaderCore
             return JsonConvert.DeserializeObject<GqlVideoChapterResponse>(response);
         }
     }
+
 }

@@ -12,6 +12,14 @@ namespace TwitchDownloaderCore.Chat
 {
     public static class ChatJson
     {
+        private static JsonSerializerOptions _jsonSerializerOptions = new()
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+#if DEBUG // To help debug your work
+            WriteIndented = true
+#endif
+        };
+
         /// <summary>
         /// Asynchronously deserializes a chat json file.
         /// </summary>
@@ -29,7 +37,7 @@ namespace TwitchDownloaderCore.Chat
             JsonDocumentOptions deserializationOptions = new()
             {
                 CommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true
+                AllowTrailingCommas = true,
             };
 
             await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
@@ -103,12 +111,12 @@ namespace TwitchDownloaderCore.Chat
             switch (compression)
             {
                 case ChatCompression.None:
-                    await JsonSerializer.SerializeAsync(fs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
+                    await JsonSerializer.SerializeAsync(fs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
                 case ChatCompression.Gzip:
                     await using (var gs = new GZipStream(fs, CompressionLevel.SmallestSize))
                     {
-                        await JsonSerializer.SerializeAsync(gs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
+                        await JsonSerializer.SerializeAsync(gs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     }
                     break;
                 default:

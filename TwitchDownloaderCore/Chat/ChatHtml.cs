@@ -63,7 +63,7 @@ namespace TwitchDownloaderCore.Chat
                             {
                                 foreach(var (version, badgeData) in badge.versions)
                                 {
-                                    await sw.WriteLineAsync(".badge-" + badge.name + "-" + version + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(badgeData) + "\"); }");
+                                    await sw.WriteLineAsync(".badge-" + badge.name + "-" + version + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(badgeData.bytes) + "\"); }");
                                 }
                             }
                         }
