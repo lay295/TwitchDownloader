@@ -221,6 +221,14 @@ namespace TwitchDownloaderCore.TwitchObjects
         [SystemText::JsonIgnore(Condition = SystemText.JsonIgnoreCondition.WhenWritingNull)]
         public Dictionary<string, EmbedChatBadgeData> urls { get; set; }
     }
+    
+    public class LegacyEmbedChatBadge
+    {
+        public string name { get; set; }
+        public Dictionary<string, byte[]> versions { get; set; }
+        [SystemText::JsonIgnore(Condition = SystemText.JsonIgnoreCondition.WhenWritingNull)]
+        public Dictionary<string, string> urls { get; set; }
+    }
 
     public class EmbedCheerEmote
     {
@@ -233,6 +241,13 @@ namespace TwitchDownloaderCore.TwitchObjects
         public List<EmbedEmoteData> thirdParty { get; set; } = new();
         public List<EmbedEmoteData> firstParty { get; set; } = new();
         public List<EmbedChatBadge> twitchBadges { get; set; } = new();
+        public List<EmbedCheerEmote> twitchBits { get; set; } = new();
+    }
+    public class LegacyEmbeddedData
+    {
+        public List<EmbedEmoteData> thirdParty { get; set; } = new();
+        public List<EmbedEmoteData> firstParty { get; set; } = new();
+        public List<LegacyEmbedChatBadge> twitchBadges { get; set; } = new();
         public List<EmbedCheerEmote> twitchBits { get; set; } = new();
     }
 

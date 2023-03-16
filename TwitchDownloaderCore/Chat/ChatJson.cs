@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
@@ -83,7 +84,27 @@ namespace TwitchDownloaderCore.Chat
             {
                 if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embeddedDataElement))
                 {
-                    returnChatRoot.embeddedData = embeddedDataElement.Deserialize<EmbeddedData>();
+
+                    if (returnChatRoot.FileInfo.Version >= ChatRootVersion.CurrentVersion)
+                    {
+                        returnChatRoot.embeddedData = embeddedDataElement.Deserialize<EmbeddedData>();
+                    }
+                    else
+                    {
+                        var legacyEmbeddedData = embeddedDataElement.Deserialize<LegacyEmbeddedData>();
+                        returnChatRoot.embeddedData = new()
+                        {
+                            firstParty = legacyEmbeddedData.firstParty,
+                            thirdParty = legacyEmbeddedData.thirdParty,
+                            twitchBadges = legacyEmbeddedData.twitchBadges.Select(item => new EmbedChatBadge
+                            {
+                                name = item.name,
+                                versions = item.versions.Select(x => new KeyValuePair<string, ChatBadgeByteData>(x.Key, new ChatBadgeByteData { bytes = x.Value })).ToDictionary(k => k.Key, v => v.Value),
+                                urls = item.urls?.Select(x=>new KeyValuePair<string, EmbedChatBadgeData>(x.Key, new EmbedChatBadgeData {url= x.Value})).ToDictionary(k =>k.Key, v=>v.Value),
+                            }).ToList(),
+                            twitchBits = legacyEmbeddedData.twitchBits
+                        };
+                    }
                 }
                 else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesElement))
                 {
