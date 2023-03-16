@@ -208,12 +208,18 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int height { get; set; }
     }
 
+    public class EmbedChatBadgeData
+    {
+        public string title { get; set; }
+        public string description { get; set; }
+        public string url { get; set; }
+    }
     public class EmbedChatBadge
     {
         public string name { get; set; }
-        public Dictionary<string, byte[]> versions { get; set; }
+        public Dictionary<string, ChatBadgeByteData> versions { get; set; }
         [SystemText::JsonIgnore(Condition = SystemText.JsonIgnoreCondition.WhenWritingNull)]
-        public Dictionary<string, string> urls { get; set; }
+        public Dictionary<string, EmbedChatBadgeData> urls { get; set; }
     }
 
     public class EmbedCheerEmote
