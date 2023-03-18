@@ -1,6 +1,7 @@
 ﻿using SkiaSharp;
 using System;
 using System.IO;
+using TwitchDownloaderCore.Chat;
 
 namespace TwitchDownloaderCore.Options
 {
@@ -85,5 +86,6 @@ namespace TwitchDownloaderCore.Options
         public bool AllowUnlistedEmotes { get; set; } = true;
         public bool DisperseCommentOffsets { get; set; } = true;
         public bool SkipDriveWaiting { get; set; } = false;
+        public EmojiVendor EmojiVendor { get; set; } = EmojiVendor.GoogleNotoColor;
     }
 }

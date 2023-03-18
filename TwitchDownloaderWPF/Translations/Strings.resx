@@ -707,4 +707,22 @@
   <data name="SettingsTimeFormat" xml:space="preserve">
     <value>Time Format:</value>
   </data>
+  <data name="NoJsonFilesSelected" xml:space="preserve">
+    <value>No JSON files selected</value>
+  </data>
+  <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
+    <value>Insufficient access. OAuth may be required.</value>
+  </data>
+  <data name="EmojiVendor" xml:space="preserve">
+    <value>Emoji Vendor:</value>
+  </data>
+  <data name="EmojiVendorNotoColor" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="EmojiVendorTwemoji" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="EmojiVendorNone" xml:space="preserve">
+    <value>None</value>
+  </data>
 </root>

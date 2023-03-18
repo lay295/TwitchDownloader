@@ -184,6 +184,8 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Banned Words List**: A comma-separated, case-insensitive list of words that will cause messages to be removed from the render. For example, in Figure 5.2 any message that contains `" pog "`, `"[pOg+"`, `"/POg9"` will be removed from the render. Any message that contains `" poggers "` will not be removed.
 
+**Emoji Vendor**: The style of emojis used in the render. Currently Twitter's _Twemoji_, Google's _Noto Color_, and your system's (_None_) emojis are supported.
+
 #### <ins>Scaling</ins>
 
 **Emote Scale**: The scale of emotes.

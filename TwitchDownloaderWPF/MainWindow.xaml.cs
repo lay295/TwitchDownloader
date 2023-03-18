@@ -75,7 +75,7 @@ namespace TwitchDownloaderWPF
             if (!File.Exists("ffmpeg.exe"))
                 await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
 
-            Version currentVersion = new Version("1.52.1");
+            Version currentVersion = new Version("1.52.2");
             Title = $"Twitch Downloader v{currentVersion}";
             AutoUpdater.InstalledVersion = currentVersion;
 #if !DEBUG
@@ -94,7 +94,7 @@ namespace TwitchDownloaderWPF
                 Match dateRegexMatch = dateRegex.Match(returnString.ToString());
                 if (dateRegexMatch.Success)
                 {
-                    string formatString = dateRegexMatch.Groups[1].ToString();
+                    string formatString = dateRegexMatch.Groups[1].Value;
                     returnString.Remove(dateRegexMatch.Groups[0].Index, dateRegexMatch.Groups[0].Length);
                     returnString.Insert(dateRegexMatch.Groups[0].Index, date.ToString(formatString));
                 }

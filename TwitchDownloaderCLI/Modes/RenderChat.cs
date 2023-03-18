@@ -5,6 +5,7 @@ using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
@@ -50,14 +51,14 @@ namespace TwitchDownloaderCLI.Modes
                     "normal" => SKFontStyle.Normal,
                     "bold" => SKFontStyle.Bold,
                     "italic" or "italics" => SKFontStyle.Italic,
-                    _ => throw new NotImplementedException("Invalid message font style. Valid values are: normal, bold, and italic")
+                    _ => throw new NotSupportedException("Invalid message font style. Valid values are: normal, bold, and italic")
                 },
                 UsernameFontStyle = inputOptions.UsernameFontStyle.ToLower() switch
                 {
                     "normal" => SKFontStyle.Normal,
                     "bold" => SKFontStyle.Bold,
                     "italic" or "italics" => SKFontStyle.Italic,
-                    _ => throw new NotImplementedException("Invalid username font style. Valid values are: normal, bold, and italic")
+                    _ => throw new NotSupportedException("Invalid username font style. Valid values are: normal, bold, and italic")
                 },
                 UpdateRate = inputOptions.UpdateRate,
                 Framerate = inputOptions.Framerate,
@@ -70,6 +71,13 @@ namespace TwitchDownloaderCLI.Modes
                 ChatBadges = (bool)inputOptions.ChatBadges!,
                 Timestamp = inputOptions.Timestamp,
                 Offline = inputOptions.Offline,
+                EmojiVendor = inputOptions.EmojiVendor.ToLower() switch
+                {
+                    "twitter" or "twemoji" => EmojiVendor.TwitterTwemoji,
+                    "google" or "notocolor" => EmojiVendor.GoogleNotoColor,
+                    "system" or "none" => EmojiVendor.None,
+                    _ => throw new NotSupportedException("Invalid emoji vendor. Valid values are: 'twitter' / 'twemoji', and 'google' / 'notocolor'")
+                },
                 LogFfmpegOutput = inputOptions.LogFfmpegOutput,
                 SkipDriveWaiting = inputOptions.SkipDriveWaiting,
                 EmoteScale = inputOptions.ScaleEmote,

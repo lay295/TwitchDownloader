@@ -708,4 +708,22 @@
   <data name="TimestampLocal" xml:space="preserve">
     <value>L'Heure locale</value>
   </data>
+  <data name="NoJsonFilesSelected" xml:space="preserve">
+    <value>No JSON files selected</value>
+  </data>
+  <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
+    <value>Insufficient access. OAuth may be required.</value>
+  </data>
+  <data name="EmojiVendor" xml:space="preserve">
+    <value>Fournisseur d'Emoji:</value>
+  </data>
+  <data name="EmojiVendorNotoColor" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="EmojiVendorTwemoji" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="EmojiVendorNone" xml:space="preserve">
+    <value>Non</value>
+  </data>
 </root>

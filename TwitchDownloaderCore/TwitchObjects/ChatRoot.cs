@@ -1,8 +1,7 @@
-﻿using Newtonsoft = Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using SystemText = System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -98,7 +97,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public List<Fragment> fragments { get; set; }
         public List<UserBadge> user_badges { get; set; }
         public string user_color { get; set; }
-        [SystemText::JsonIgnore(Condition = SystemText.JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public UserNoticeParams user_notice_params { get; set; }
         public List<Emoticon2> emoticons { get; set; }
 
@@ -112,7 +111,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 user_badges = new List<UserBadge>(user_badges.Capacity),
                 user_color = user_color,
                 user_notice_params = user_notice_params?.Clone(),
-                emoticons = new List<Emoticon2>(emoticons.Capacity)
+                emoticons = new List<Emoticon2>(emoticons?.Capacity ?? 0)
             };
             for (int i = 0; i < fragments.Count; i++)
             {
@@ -122,7 +121,7 @@ namespace TwitchDownloaderCore.TwitchObjects
             {
                 newMessage.user_badges.Add(user_badges[i].Clone());
             }
-            for (int i = 0; i < emoticons.Count; i++)
+            for (int i = 0; i < emoticons?.Count; i++)
             {
                 newMessage.emoticons.Add(emoticons[i].Clone());
             }
@@ -175,8 +174,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string id { get; set; }
         public int startMilliseconds { get; set; }
         public int lengthMilliseconds { get; set; }
-        [Newtonsoft::JsonProperty("type")]
-        [SystemText::JsonPropertyName("type")]
+        [JsonPropertyName("type")]
         public string _type { get; set; }
         public string description { get; set; }
         public string subDescription { get; set; }
@@ -227,7 +225,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public string name { get; set; }
         public Dictionary<string, byte[]> versions { get; set; }
-        [SystemText::JsonIgnore(Condition = SystemText.JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public Dictionary<string, string> urls { get; set; }
     }
 

@@ -69,11 +69,11 @@ namespace TwitchDownloaderCore.Chat
                         }
                         break;
                     case "<!-- CUSTOM HTML -->":
-                        foreach (Comment comment in chatRoot.comments)
+                        foreach (var comment in chatRoot.comments)
                         {
                             var relativeTime = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
                             string timestamp = relativeTime.ToString(@"h\:mm\:ss");
-                            await sw.WriteAsync($"<pre class=\"comment-root\">[{timestamp}] {GetChatBadgesHtml(embedData, chatBadgeData, chatRoot, comment)} <a href=\"https://www.twitch.tv/{comment.commenter.name}\" target=\"_blank\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>\n");
+                            await sw.WriteLineAsync($"<pre class=\"comment-root\">[{timestamp}] {GetChatBadgesHtml(embedData, chatBadgeData, comment)} <a href=\"https://twitch.tv/{comment.commenter.name}\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>");
                         }
                         break;
                     default:
@@ -125,37 +125,37 @@ namespace TwitchDownloaderCore.Chat
             }
         }
 
-        private static string GetChatBadgesHtml(bool embedData, IReadOnlyDictionary<string, EmbedChatBadge> chatBadgeData, ChatRoot chatRoot, Comment comment)
+        private static string GetChatBadgesHtml(bool embedData, IReadOnlyDictionary<string, EmbedChatBadge> chatBadgeData, Comment comment)
         {
             if (comment.message.user_badges.Count == 0)
-                return string.Empty;
+                return "";
 
-            List<string> badgesHtml = new List<string>();
+            var badgesHtml = new List<string>(comment.message.user_badges.Count);
 
             foreach (var messageBadge in comment.message.user_badges)
             {
                 if (embedData)
                 {
-                    badgesHtml.Add($"<img width=\"auto\" height=\"18px\" class=\"emote-image badge-{messageBadge._id}-{messageBadge.version}\" title=\"{messageBadge._id}\"\"><div class=\"invis-text\">{messageBadge._id}</div>");
+                    badgesHtml.Add($"<img class=\"badge-image badge-{messageBadge._id}-{messageBadge.version}\" title=\"{messageBadge._id}\"><span class=\"text-hide\">{messageBadge._id}</span>");
                 }
                 else
                 {
-                    if (!chatBadgeData.ContainsKey(messageBadge._id))
+                    if (!chatBadgeData.TryGetValue(messageBadge._id, out var badgeId))
                         continue;
 
-                    if (!chatBadgeData[messageBadge._id].urls.ContainsKey(messageBadge.version))
+                    if (!badgeId.urls.TryGetValue(messageBadge.version, out var badgeUrl))
                         continue;
 
-                    badgesHtml.Add($"<img width=\"auto\" height=\"18px\" class=\"emote-image\" title=\"{messageBadge._id}\" src=\"{chatBadgeData[messageBadge._id].urls[messageBadge.version].url}\"><div class=\"invis-text\">{messageBadge._id}</div>");
+                    badgesHtml.Add($"<img class=\"badge-image\" title=\"{messageBadge._id}\" src=\"{badgeUrl}\"><span class=\"text-hide\">{messageBadge._id}</span>");
                 }
             }
 
-            return string.Join(" ", badgesHtml);
+            return string.Join(' ', badgesHtml);
         }
 
         private static string GetMessageHtml(bool embedEmotes, IReadOnlyDictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
         {
-            StringBuilder message = new();
+            var message = new StringBuilder(comment.message.body.Length);
 
             comment.message.fragments ??= new List<Fragment> { new Fragment() { text = comment.message.body } };
 
@@ -163,24 +163,22 @@ namespace TwitchDownloaderCore.Chat
             {
                 if (fragment.emoticon == null)
                 {
-                    List<string> wordList = new List<string>(fragment.text.Split(' '));
-
-                    foreach (var word in wordList)
+                    foreach (var word in fragment.text.Split(' '))
                     {
                         if (thirdEmoteData.ContainsKey(word))
                         {
                             if (embedEmotes)
                             {
-                                message.Append($"<img width=\"auto\" height=\"32px\" class=\"emote-image third-{thirdEmoteData[word].id}\" title=\"{word}\"\"><div class=\"invis-text\">{word}</div> ");
+                                message.Append($"<img class=\"emote-image third-{thirdEmoteData[word].id}\" title=\"{word}\"\"><span class=\"text-hide\">{word}</span> ");
                             }
                             else
                             {
-                                message.Append($"<img width=\"auto\" height=\"32px\" class=\"emote-image\" title=\"{word}\" src=\"{thirdEmoteData[word].url}\"><div class=\"invis-text\">{word}</div> ");
+                                message.Append($"<img class=\"emote-image\" title=\"{word}\" src=\"{thirdEmoteData[word].url}\"><span class=\"text-hide\">{word}</span> ");
                             }
                         }
                         else if (word != "")
                         {
-                            message.Append(HttpUtility.HtmlEncode(word) + " ");
+                            message.Append(HttpUtility.HtmlEncode(word) + ' ');
                         }
                     }
                 }
@@ -188,11 +186,11 @@ namespace TwitchDownloaderCore.Chat
                 {
                     if (embedEmotes && chatRoot.embeddedData.firstParty.Any(x => x.id == fragment.emoticon.emoticon_id))
                     {
-                        message.Append($"<img width=\"auto\" height=\"32px\" class=\"emote-image first-{fragment.emoticon.emoticon_id}\" title=\"{fragment.text}\"><div class=\"invis-text\">{fragment.text}</div> ");
+                        message.Append($"<img class=\"emote-image first-{fragment.emoticon.emoticon_id}\" title=\"{fragment.text}\"><span class=\"text-hide\">{fragment.text}</span> ");
                     }
                     else
                     {
-                        message.Append($"<img width=\"auto\" height=\"32px\" class=\"emote-image\" src=\"https://static-cdn.jtvnw.net/emoticons/v2/{fragment.emoticon.emoticon_id}/default/dark/1.0\" title=\"{fragment.text}\"><div class=\"invis-text\">{fragment.text}</div> ");
+                        message.Append($"<img class=\"emote-image\" src=\"https://static-cdn.jtvnw.net/emoticons/v2/{fragment.emoticon.emoticon_id}/default/dark/1.0\" title=\"{fragment.text}\"><span class=\"text-hide\">{fragment.text}</span> ");
                     }
                 }
             }

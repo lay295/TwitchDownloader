@@ -27,7 +27,7 @@ https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-8
 - Download Twitch Clips
 - Download chat for VODs and Clips, in either a [JSON with all the original information](https://pastebin.com/raw/YDgRe6X4), a browser HTML file, or a [plain text file](https://pastebin.com/raw/016azeQX)
 - Update the contents of a previously generated JSON chat file with an option to save as another format
-- Use a previously generated JSON chat file to render the chat with Twemoji emojis and BTTV, FFZ, 7TV static and animated emotes
+- Use a previously generated JSON chat file to render the chat with Twitter Twemoji or Google Noto Color emojis and BTTV, FFZ, 7TV static and animated emotes
 
 # GUI
 
@@ -180,3 +180,8 @@ cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 # License
 
 [MIT](./LICENSE.txt)
+
+# Credits
+[Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google and contributors.
+
+[Twemoji](https://github.com/twitter/twemoji) © Twitter and contributors.
