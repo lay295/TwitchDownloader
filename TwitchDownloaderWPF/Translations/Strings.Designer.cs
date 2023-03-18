@@ -771,6 +771,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Insufficient access. OAuth may be required..
+        /// </summary>
+        public static string InsufficientAccessMayNeedOauth {
+            get {
+                return ResourceManager.GetString("InsufficientAccessMayNeedOauth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid Clip Link/ID.
         /// </summary>
         public static string InvalidClipLinkId {
@@ -920,6 +929,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string MessageDispersionTooltip {
             get {
                 return ResourceManager.GetString("MessageDispersionTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No JSON files selected.
+        /// </summary>
+        public static string NoJsonFilesSelected {
+            get {
+                return ResourceManager.GetString("NoJsonFilesSelected", resourceCulture);
             }
         }
         

@@ -61,7 +61,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             string playlist = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
-            return playlist.Split('\n');
+            return playlist.Split('\n', StringSplitOptions.RemoveEmptyEntries);
         }
 
         public static async Task<GqlClipResponse> GetClipInfo(object clipId)

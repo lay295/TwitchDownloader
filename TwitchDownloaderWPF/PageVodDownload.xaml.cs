@@ -103,9 +103,9 @@ namespace TwitchDownloaderWPF
                 comboQuality.Items.Clear();
                 videoQualties.Clear();
                 string[] playlist = await taskPlaylist;
-                if (taskPlaylist.Result[0] == "Forbidden")
+                if (playlist[0].Contains("vod_manifest_restricted"))
                 {
-                    throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
+                    throw new NullReferenceException(Translations.Strings.InsufficientAccessMayNeedOauth);
                 }
 
                 for (int i = 0; i < playlist.Length; i++)

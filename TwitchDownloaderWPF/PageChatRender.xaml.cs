@@ -328,7 +328,7 @@ namespace TwitchDownloaderWPF
         {
             if (FileNames.Length == 0)
             {
-                AppendLog("ERROR: No JSON Files Are Selected");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.NoJsonFilesSelected);
                 return false;
             }
             foreach (string fileName in FileNames)
@@ -376,7 +376,7 @@ namespace TwitchDownloaderWPF
 
             if (checkMask.IsChecked == true && colorBackground.SelectedColor.Value.A == 255)
             {
-                AppendLog("ERROR: You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.AlphaNotSupportedByCodec);
                 return false;
             }
 
@@ -671,7 +671,7 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                AppendLog("ERROR: Invalid Crop Inputs");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidCropInputs);
             }
         }
 

@@ -324,7 +324,7 @@ namespace TwitchDownloaderCore
             }
 
             string[] videoPlaylist = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, accessToken.data.videoPlaybackAccessToken.value, accessToken.data.videoPlaybackAccessToken.signature);
-            if (videoPlaylist[0] == "Forbidden")
+            if (videoPlaylist[0].Contains("vod_manifest_restricted"))
             {
                 throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
             }

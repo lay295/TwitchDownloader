@@ -708,4 +708,10 @@
   <data name="TimestampLocal" xml:space="preserve">
     <value>L'Heure locale</value>
   </data>
+  <data name="NoJsonFilesSelected" xml:space="preserve">
+    <value>No JSON files selected</value>
+  </data>
+  <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
+    <value>Insufficient access. OAuth may be required.</value>
+  </data>
 </root>
