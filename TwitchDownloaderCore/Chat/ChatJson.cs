@@ -45,7 +45,7 @@ namespace TwitchDownloaderCore.Chat
                     jsonDocument = await JsonDocument.ParseAsync(fs, deserializationOptions, cancellationToken);
                     break;
                 default:
-                    throw new NotImplementedException(Path.GetFileName(filePath) + " is not a valid chat format");
+                    throw new NotSupportedException(Path.GetFileName(filePath) + " is not a valid chat format");
             }
 
             if (jsonDocument.RootElement.TryGetProperty("FileInfo", out JsonElement fileInfoElement))
@@ -112,7 +112,7 @@ namespace TwitchDownloaderCore.Chat
                     }
                     break;
                 default:
-                    throw new NotImplementedException("The requested chat format is not implemented");
+                    throw new NotSupportedException("The requested chat format is not implemented");
             }
         }
     }

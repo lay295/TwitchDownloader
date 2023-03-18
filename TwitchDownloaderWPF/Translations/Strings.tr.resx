@@ -704,10 +704,16 @@
     <value>Keskinlik:</value>
   </data>
   <data name="TimestampLocal" xml:space="preserve">
-    <value>Local</value>
+    <value>Lokal</value>
   </data>
   <data name="SettingsTimeFormat" xml:space="preserve">
-    <value>Time Format:</value>
+    <value>Zaman Formatı:</value>
+  </data>
+  <data name="NoJsonFilesSelected" xml:space="preserve">
+    <value>No JSON files selected</value>
+  </data>
+  <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
+    <value>Insufficient access. OAuth may be required.</value>
   </data>
   <data name="EmojiVendor" xml:space="preserve">
     <value>Emoji Vendor:</value>

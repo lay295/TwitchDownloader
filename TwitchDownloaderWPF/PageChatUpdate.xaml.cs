@@ -52,12 +52,14 @@ namespace TwitchDownloaderWPF
             InputFile = openFileDialog.FileName;
             SetEnabled(true);
 
-            if (Path.GetExtension(InputFile)!.ToLower() is not ".json" or ".gz")
+            if (Path.GetExtension(InputFile)!.ToLower() is not ".json" and not ".gz")
             {
                 return;
             }
 
-            ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getEmbeds: false);
+            ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, true, false, CancellationToken.None);
+            ChatJsonInfo.comments.RemoveRange(1, ChatJsonInfo.comments.Count - 2);
+            GC.Collect();
             textStreamer.Text = ChatJsonInfo.streamer.name;
             var videoCreatedAt = ChatJsonInfo.video.created_at;
             textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
@@ -79,7 +81,7 @@ namespace TwitchDownloaderWPF
                 ? videoLength.ToString("c")
                 : Translations.Strings.Unknown;
 
-            VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments?.FirstOrDefault(defaultValue:null)?.content_id;
+            VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1";
 
             if (VideoId.All(char.IsDigit))
             {
@@ -458,7 +460,7 @@ namespace TwitchDownloaderWPF
             else if (radioText.IsChecked == true)
                 saveFileDialog.Filter = "TXT Files | *.txt";
 
-            saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, ChatJsonInfo.video.id ?? "-1", VideoCreatedAt, textStreamer.Text);
+            saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text);
 
             if (saveFileDialog.ShowDialog() != true)
             {
@@ -470,7 +472,19 @@ namespace TwitchDownloaderWPF
                 ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
 
                 ChatUpdater currentUpdate = new ChatUpdater(updateOptions);
-                await currentUpdate.ParseJsonAsync(new CancellationToken());
+                try
+                {
+                    await currentUpdate.ParseJsonAsync(CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    return;
+                }
 
                 btnBrowse.IsEnabled = false;
                 SetEnabled(false);

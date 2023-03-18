@@ -344,7 +344,7 @@ namespace TwitchDownloaderWPF
         {
             if (FileNames.Length == 0)
             {
-                AppendLog("ERROR: No JSON Files Are Selected");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.NoJsonFilesSelected);
                 return false;
             }
             foreach (string fileName in FileNames)
@@ -392,7 +392,7 @@ namespace TwitchDownloaderWPF
 
             if (checkMask.IsChecked == true && colorBackground.SelectedColor.Value.A == 255)
             {
-                AppendLog("ERROR: You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.AlphaNotSupportedByCodec);
                 return false;
             }
 
@@ -564,7 +564,7 @@ namespace TwitchDownloaderWPF
                     return;
                 }
 
-                string fileFormat = comboFormat.SelectedItem.ToString();
+                string fileFormat = comboFormat.SelectedItem.ToString()!;
                 SaveFileDialog saveFileDialog = new SaveFileDialog
                 {
                     Filter = $"{fileFormat} Files | *.{fileFormat.ToLower()}",
@@ -581,8 +581,19 @@ namespace TwitchDownloaderWPF
 
                 Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
                 ChatRenderer currentRender = new ChatRenderer(options, renderProgress);
-                _cancellationTokenSource = new CancellationTokenSource();
-                await currentRender.ParseJsonAsync(_cancellationTokenSource.Token);
+                try
+                {
+                    await currentRender.ParseJsonAsync(CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    return;
+                }
 
                 if (ReferenceEquals(sender, MenuItemPartialRender))
                 {
@@ -607,6 +618,7 @@ namespace TwitchDownloaderWPF
                 SetImage("Images/ppOverheat.gif", true);
                 statusMessage.Text = Translations.Strings.StatusRendering;
                 ffmpegLog.Clear();
+                _cancellationTokenSource = new CancellationTokenSource();
                 UpdateActionButtons(true);
                 try
                 {
@@ -675,7 +687,7 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                AppendLog("ERROR: Invalid Crop Inputs");
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidCropInputs);
             }
         }
 
