@@ -183,3 +183,5 @@ cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 
 # Credits
 [Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google and contributors.
+
+[Twemoji](https://github.com/twitter/twemoji) © Twitter and contributors.
