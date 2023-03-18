@@ -111,7 +111,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 user_badges = new List<UserBadge>(user_badges.Capacity),
                 user_color = user_color,
                 user_notice_params = user_notice_params?.Clone(),
-                emoticons = new List<Emoticon2>(emoticons.Capacity)
+                emoticons = new List<Emoticon2>(emoticons?.Capacity ?? 0)
             };
             for (int i = 0; i < fragments.Count; i++)
             {
@@ -121,7 +121,7 @@ namespace TwitchDownloaderCore.TwitchObjects
             {
                 newMessage.user_badges.Add(user_badges[i].Clone());
             }
-            for (int i = 0; i < emoticons.Count; i++)
+            for (int i = 0; i < emoticons?.Count; i++)
             {
                 newMessage.emoticons.Add(emoticons[i].Clone());
             }
