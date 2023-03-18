@@ -146,7 +146,7 @@ namespace TwitchDownloaderCore.Chat
                     if (!badgeId.urls.TryGetValue(messageBadge.version, out var badgeUrl))
                         continue;
 
-                    badgesHtml.Add($"<img class=\"badge-image\" title=\"{messageBadge._id}\" src=\"{badgeUrl}\"><span class=\"text-hide\">{messageBadge._id}</span>");
+                    badgesHtml.Add($"<img class=\"badge-image\" title=\"{messageBadge._id}\" src=\"{badgeUrl.url}\"><span class=\"text-hide\">{messageBadge._id}</span>");
                 }
             }
 
