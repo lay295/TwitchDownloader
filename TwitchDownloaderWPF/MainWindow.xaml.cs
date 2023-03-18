@@ -94,7 +94,7 @@ namespace TwitchDownloaderWPF
                 Match dateRegexMatch = dateRegex.Match(returnString.ToString());
                 if (dateRegexMatch.Success)
                 {
-                    string formatString = dateRegexMatch.Groups[1].ToString();
+                    string formatString = dateRegexMatch.Groups[1].Value;
                     returnString.Remove(dateRegexMatch.Groups[0].Index, dateRegexMatch.Groups[0].Length);
                     returnString.Insert(dateRegexMatch.Groups[0].Index, date.ToString(formatString));
                 }

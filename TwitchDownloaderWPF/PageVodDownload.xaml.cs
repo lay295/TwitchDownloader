@@ -18,7 +18,6 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
-using TwitchDownloaderWPF.Translations;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -104,6 +103,11 @@ namespace TwitchDownloaderWPF
                 comboQuality.Items.Clear();
                 videoQualties.Clear();
                 string[] playlist = await taskPlaylist;
+                if (taskPlaylist.Result[0] == "Forbidden")
+                {
+                    throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
+                }
+
                 for (int i = 0; i < playlist.Length; i++)
                 {
                     if (playlist[i].Contains("#EXT-X-MEDIA"))
@@ -449,7 +453,7 @@ namespace TwitchDownloaderWPF
             }
             catch
             {
-                statusMessage.Text = Strings.StatusCanceled;
+                statusMessage.Text = Translations.Strings.StatusCanceled;
                 SetImage("Images/ppHop.gif", true);
             }
             btnGetInfo.IsEnabled = true;
@@ -463,7 +467,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
-            statusMessage.Text = Strings.StatusCanceling;
+            statusMessage.Text = Translations.Strings.StatusCanceling;
             try
             {
                 _cancellationTokenSource.Cancel();
