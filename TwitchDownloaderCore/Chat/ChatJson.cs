@@ -82,7 +82,7 @@ namespace TwitchDownloaderCore.Chat
                 if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embeddedDataElement))
                 {
 
-                    if (returnChatRoot.FileInfo.Version >= ChatRootVersion.CurrentVersion)
+                    if (returnChatRoot.FileInfo.Version > new ChatRootVersion(1, 2, 2))
                     {
                         returnChatRoot.embeddedData = embeddedDataElement.Deserialize<EmbeddedData>();
                     }
