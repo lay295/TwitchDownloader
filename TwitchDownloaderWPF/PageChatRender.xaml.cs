@@ -16,6 +16,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderWPF.Properties;
@@ -126,6 +127,12 @@ namespace TwitchDownloaderWPF
                 DisperseCommentOffsets = (bool)checkDispersion.IsChecked,
                 LogFfmpegOutput = true
             };
+            if (RadioEmojiNotoColor.IsChecked == true)
+                options.EmojiVendor = EmojiVendor.GoogleNotoColor;
+            else if (RadioEmojiTwemoji.IsChecked == true)
+                options.EmojiVendor = EmojiVendor.TwitterTwemoji;
+            else if (RadioEmojiNone.IsChecked == true)
+                options.EmojiVendor = EmojiVendor.None;
             foreach (var item in comboBadges.SelectedItems)
             {
                 options.ChatBadgeMask += (int)((ChatBadgeListItem)item).Type;
@@ -188,6 +195,9 @@ namespace TwitchDownloaderWPF
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
                 checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
+                RadioEmojiNotoColor.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.GoogleNotoColor;
+                RadioEmojiTwemoji.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.TwitterTwemoji;
+                RadioEmojiNone.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.None;
 
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Broadcaster, Name = "Broadcaster" });
                 comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Moderator, Name = "Mods" });
@@ -295,6 +305,12 @@ namespace TwitchDownloaderWPF
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             Settings.Default.BannedWordsList = string.Join(",", textBannedWordsList.Text.ToLower()
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            if (RadioEmojiNotoColor.IsChecked == true)
+                Settings.Default.RenderEmojiVendor = (int)EmojiVendor.GoogleNotoColor;
+            else if (RadioEmojiTwemoji.IsChecked == true)
+                Settings.Default.RenderEmojiVendor = (int)EmojiVendor.TwitterTwemoji;
+            else if (RadioEmojiNone.IsChecked == true)
+                Settings.Default.RenderEmojiVendor = (int)EmojiVendor.None;
             int newMask = 0;
             foreach (var item in comboBadges.SelectedItems)
             {

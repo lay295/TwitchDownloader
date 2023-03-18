@@ -785,21 +785,25 @@ namespace TwitchDownloaderCore
             StringBuilder nonEmojiBuffer = new();
             while (enumerator.MoveNext())
             {
+
                 List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
-                Emoji.All.AsParallel()
-                    .Where(emoji => enumerator.GetTextElement().StartsWith(emoji.Sequence.AsString))
-                    .ForAll(emoji =>
-                    {
-                        if (emoji.Group != "Flags")
+                if (renderOptions.EmojiVendor != EmojiVendor.None)
+                {
+                    Emoji.All.AsParallel()
+                        .Where(emoji => enumerator.GetTextElement().StartsWith(emoji.Sequence.AsString))
+                        .ForAll(emoji =>
                         {
-                            emojiMatches.Add(emoji);
-                            return;
-                        }
-                        if (enumerator.GetTextElement().StartsWith(emoji.Sequence.AsString, StringComparison.Ordinal))
-                        {
-                            emojiMatches.Add(emoji);
-                        }
-                    });
+                            if (emoji.Group != "Flags")
+                            {
+                                emojiMatches.Add(emoji);
+                                return;
+                            }
+                            if (enumerator.GetTextElement().StartsWith(emoji.Sequence.AsString, StringComparison.Ordinal))
+                            {
+                                emojiMatches.Add(emoji);
+                            }
+                        });
+                }
 
                 // Make sure the found emojis actually exist in our cache
                 int emojiMatchesCount = emojiMatches.Count;
@@ -1370,7 +1374,7 @@ namespace TwitchDownloaderCore
 
         private async Task<Dictionary<string, SKBitmap>> GetScaledEmojis(CancellationToken cancellationToken)
         {
-            var emojiTask = await TwitchHelper.GetTwitterEmojis(renderOptions.TempFolder, cancellationToken);
+            var emojiTask = await TwitchHelper.GetEmojis(renderOptions.TempFolder, renderOptions.EmojiVendor, cancellationToken);
 
             //Assume emojis are 4x (they're 72x72)
             double emojiScale = 0.5 * renderOptions.ReferenceScale * renderOptions.EmojiScale;

@@ -243,6 +243,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--offline**
 (Default: false) Render completely offline using only embedded emotes, badges, and bits from the input json.
 
+**--emoji-vendor**
+(Default: `notocolor`) The emoji vendor used for rendering emojis. Valid values are: `twitter` / `twemoji`, `google` / `notocolor`, `none`.
+
 **--ffmpeg-path**
 (Default: ` `) Path to ffmpeg executable.
 
