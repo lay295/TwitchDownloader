@@ -490,14 +490,14 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    Dictionary<string, ChatBadgeByteData> versions = new();
+                    Dictionary<string, ChatBadgeData> versions = new();
 
                     foreach (var (version, data) in badge.urls)
                     {
                         string[] id_parts = data.url.Split('/');
                         string id = id_parts[id_parts.Length - 2];
                         byte[] bytes = await GetImage(badgeFolder, data.url, id, "2", "png", cancellationToken);
-                        versions.Add(version, new ChatBadgeByteData
+                        versions.Add(version, new ChatBadgeData
                         {
                             title = data.title,
                             description = data.description,

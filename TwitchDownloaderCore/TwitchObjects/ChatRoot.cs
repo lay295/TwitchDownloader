@@ -214,10 +214,11 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string description { get; set; }
         public string url { get; set; }
     }
+
     public class EmbedChatBadge
     {
         public string name { get; set; }
-        public Dictionary<string, ChatBadgeByteData> versions { get; set; }
+        public Dictionary<string, ChatBadgeData> versions { get; set; }
         [SystemText::JsonIgnore(Condition = SystemText.JsonIgnoreCondition.WhenWritingNull)]
         public Dictionary<string, EmbedChatBadgeData> urls { get; set; }
     }

@@ -19,29 +19,24 @@ namespace TwitchDownloaderCore.TwitchObjects
         PrimeGaming = 128
     }
 
-    public class ChatBadgeSKBitmapData
+    public class ChatBadgeData
     {
         public string title { get; set; }
-        public object description { get; set; }
-        public SKBitmap bitmap { get; set; }
-    }
-    public class ChatBadgeByteData
-    {
-        public string title { get; set; }
-        public object description { get; set; }
+        public string description { get; set; }
         public byte[] bytes { get; set; }
     }
+
     public class ChatBadge
     {
         public string Name;
-        public Dictionary<string, ChatBadgeSKBitmapData> Versions;
-        public Dictionary<string, ChatBadgeByteData> VersionsData;
+        public Dictionary<string, SKBitmap> Versions;
+        public Dictionary<string, ChatBadgeData> VersionsData;
         public ChatBadgeType Type;
 
-        public ChatBadge(string name, Dictionary<string, ChatBadgeByteData> versions)
+        public ChatBadge(string name, Dictionary<string, ChatBadgeData> versions)
         {
             Name = name;
-            Versions = new Dictionary<string, ChatBadgeSKBitmapData>();
+            Versions = new Dictionary<string, SKBitmap>();
             VersionsData = versions;
 
             foreach (var version in versions)
@@ -50,12 +45,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 //For some reason, twitch has corrupted images sometimes :) for example
                 //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                 SKBitmap badgeImage = SKBitmap.Decode(ms);
-                Versions.Add(version.Key, new()
-                {
-                    title = version.Value.title,
-                    description = version.Value.description,
-                    bitmap = badgeImage
-                });
+                Versions.Add(version.Key, badgeImage);
             }
 
             Type = name switch
@@ -77,11 +67,11 @@ namespace TwitchDownloaderCore.TwitchObjects
 
             for (int i = 0; i < keyList.Count; i++)
             {
-                SKImageInfo imageInfo = new SKImageInfo((int)(Versions[keyList[i]].bitmap.Width * newScale), (int)(Versions[keyList[i]].bitmap.Height * newScale));
+                SKImageInfo imageInfo = new SKImageInfo((int)(Versions[keyList[i]].Width * newScale), (int)(Versions[keyList[i]].Height * newScale));
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
-                Versions[keyList[i]].bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
-                Versions[keyList[i]].bitmap.Dispose();
-                Versions[keyList[i]].bitmap = newBitmap;
+                Versions[keyList[i]].ScalePixels(newBitmap, SKFilterQuality.High);
+                Versions[keyList[i]].Dispose();
+                Versions[keyList[i]] = newBitmap;
             }
         }
     }

@@ -16,9 +16,6 @@ namespace TwitchDownloaderCore.Chat
         private static JsonSerializerOptions _jsonSerializerOptions = new()
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-#if DEBUG // To help debug your work
-            WriteIndented = true
-#endif
         };
 
         /// <summary>
@@ -99,7 +96,7 @@ namespace TwitchDownloaderCore.Chat
                             twitchBadges = legacyEmbeddedData.twitchBadges.Select(item => new EmbedChatBadge
                             {
                                 name = item.name,
-                                versions = item.versions.Select(x => new KeyValuePair<string, ChatBadgeByteData>(x.Key, new ChatBadgeByteData { bytes = x.Value })).ToDictionary(k => k.Key, v => v.Value),
+                                versions = item.versions.Select(x => new KeyValuePair<string, ChatBadgeData>(x.Key, new ChatBadgeData { bytes = x.Value })).ToDictionary(k => k.Key, v => v.Value),
                                 urls = item.urls?.Select(x=>new KeyValuePair<string, EmbedChatBadgeData>(x.Key, new EmbedChatBadgeData {url= x.Value})).ToDictionary(k =>k.Key, v=>v.Value),
                             }).ToList(),
                             twitchBits = legacyEmbeddedData.twitchBits
