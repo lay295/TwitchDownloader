@@ -1179,6 +1179,8 @@ namespace TwitchDownloaderCore
         //For debugging, works on Windows only
         private static void OpenImage(SKBitmap newBitmap)
         {
+            if (!OperatingSystem.IsWindows()) return;
+
             string tempFile = Path.GetFileNameWithoutExtension(Path.GetTempFileName()) + ".png";
             using (FileStream fs = new FileStream(tempFile, FileMode.Create))
                 newBitmap.Encode(SKEncodedImageFormat.Png, 100).SaveTo(fs);
