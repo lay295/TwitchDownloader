@@ -155,6 +155,8 @@ namespace TwitchDownloaderCore
             {
                 var channelEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://api.betterttv.net/3/cached/users/twitch/{streamerId}", UriKind.Absolute));
                 using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+                channelEmoteResponse.EnsureSuccessStatusCode();
+
                 var bttvChannel = await channelEmoteResponse.Content.ReadFromJsonAsync<BTTVChannelEmoteResponse>();
                 BTTV.AddRange(bttvChannel.channelEmotes);
                 BTTV.AddRange(bttvChannel.sharedEmotes);
@@ -182,6 +184,8 @@ namespace TwitchDownloaderCore
             {
                 var channelEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://api.betterttv.net/3/cached/frankerfacez/users/twitch/{streamerId}", UriKind.Absolute));
                 using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+                channelEmoteResponse.EnsureSuccessStatusCode();
+
                 var channelEmotes = await channelEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>();
                 FFZ.AddRange(channelEmotes);
             }
@@ -209,6 +213,8 @@ namespace TwitchDownloaderCore
             {
                 var streamerEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://7tv.io/v3/users/twitch/{streamerId}", UriKind.Absolute));
                 using var streamerEmoteResponse = await httpClient.SendAsync(streamerEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+                streamerEmoteResponse.EnsureSuccessStatusCode();
+
                 var streamerEmoteObject = await streamerEmoteResponse.Content.ReadFromJsonAsync<STVChannelEmoteResponse>();
                 // Channel might not have emotes setup
                 if (streamerEmoteObject.emote_set?.emotes != null)
@@ -640,7 +646,7 @@ namespace TwitchDownloaderCore
             if (!Directory.Exists(bitFolder))
                 TwitchHelper.CreateDirectory(bitFolder);
 
-            if (cheerResponse != null && cheerResponse.data != null)
+            if (cheerResponse?.data != null)
             {
                 List<CheerGroup> groupList = new List<CheerGroup>();
 
@@ -649,7 +655,7 @@ namespace TwitchDownloaderCore
                     groupList.Add(group);
                 }
 
-                if (cheerResponse.data.user != null && cheerResponse.data.user.cheer != null && cheerResponse.data.user.cheer.cheerGroups != null)
+                if (cheerResponse.data.user?.cheer?.cheerGroups != null)
                 {
                     foreach (var group in cheerResponse.data.user.cheer.cheerGroups)
                     {
