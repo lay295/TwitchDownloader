@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -24,6 +25,8 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string title { get; set; }
         public string description { get; set; }
         public byte[] bytes { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string url { get; set;}
     }
 
     public class ChatBadge

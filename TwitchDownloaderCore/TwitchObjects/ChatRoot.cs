@@ -206,19 +206,10 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int height { get; set; }
     }
 
-    public class EmbedChatBadgeData
-    {
-        public string title { get; set; }
-        public string description { get; set; }
-        public string url { get; set; }
-    }
-
     public class EmbedChatBadge
     {
         public string name { get; set; }
         public Dictionary<string, ChatBadgeData> versions { get; set; }
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Dictionary<string, EmbedChatBadgeData> urls { get; set; }
     }
     
     public class LegacyEmbedChatBadge

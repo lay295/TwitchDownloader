@@ -450,10 +450,10 @@ namespace TwitchDownloaderCore
                          .Where(n => !alreadyAdded.Contains(n))
                          .Where(n => comments.Any(c => c.message.user_badges.Any(ub => ub._id == n))))
             {
-                Dictionary<string, EmbedChatBadgeData> urls = new();
-                foreach(var (version, badge) in globalBadges.badge_sets[name].versions)
+                Dictionary<string, ChatBadgeData> versions = new();
+                foreach (var (version, badge) in globalBadges.badge_sets[name].versions)
                 {
-                    urls.Add(version, new()
+                    versions.Add(version, new()
                     {
                         title = badge.title,
                         description = badge.description,
@@ -465,7 +465,7 @@ namespace TwitchDownloaderCore
                 {
                     foreach(var (version, badge) in subBadge.versions)
                     {
-                        urls[version] = new()
+                        versions[version] = new()
                         {
                             title = badge.title,
                             description = badge.description,
@@ -474,7 +474,7 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                badges.Add(new EmbedChatBadge() { name = name, urls = urls });
+                badges.Add(new EmbedChatBadge() { name = name, versions = versions });
                 alreadyAdded.Add(name);
             }
 
@@ -515,7 +515,7 @@ namespace TwitchDownloaderCore
                 {
                     Dictionary<string, ChatBadgeData> versions = new();
 
-                    foreach (var (version, data) in badge.urls)
+                    foreach (var (version, data) in badge.versions)
                     {
                         string[] id_parts = data.url.Split('/');
                         string id = id_parts[id_parts.Length - 2];

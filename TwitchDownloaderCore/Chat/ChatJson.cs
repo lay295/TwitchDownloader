@@ -97,7 +97,6 @@ namespace TwitchDownloaderCore.Chat
                             {
                                 name = item.name,
                                 versions = item.versions.Select(x => new KeyValuePair<string, ChatBadgeData>(x.Key, new ChatBadgeData { bytes = x.Value })).ToDictionary(k => k.Key, v => v.Value),
-                                urls = item.urls?.Select(x=>new KeyValuePair<string, EmbedChatBadgeData>(x.Key, new EmbedChatBadgeData {url= x.Value})).ToDictionary(k =>k.Key, v=>v.Value),
                             }).ToList(),
                             twitchBits = legacyEmbeddedData.twitchBits
                         };

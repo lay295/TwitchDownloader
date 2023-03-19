@@ -143,10 +143,10 @@ namespace TwitchDownloaderCore.Chat
                     if (!chatBadgeData.TryGetValue(messageBadge._id, out var badgeId))
                         continue;
 
-                    if (!badgeId.urls.TryGetValue(messageBadge.version, out var badgeUrl))
+                    if (!badgeId.versions.TryGetValue(messageBadge.version, out var badge))
                         continue;
 
-                    badgesHtml.Add($"<img class=\"badge-image\" title=\"{messageBadge._id}\" src=\"{badgeUrl.url}\"><span class=\"text-hide\">{messageBadge._id}</span>");
+                    badgesHtml.Add($"<img class=\"badge-image\" title=\"{messageBadge._id}\" src=\"{badge.url}\"><span class=\"text-hide\">{messageBadge._id}</span>");
                 }
             }
 
