@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
@@ -12,6 +13,11 @@ namespace TwitchDownloaderCore.Chat
 {
     public static class ChatJson
     {
+        private static JsonSerializerOptions _jsonSerializerOptions = new()
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+
         /// <summary>
         /// Asynchronously deserializes a chat json file.
         /// </summary>
@@ -29,7 +35,7 @@ namespace TwitchDownloaderCore.Chat
             JsonDocumentOptions deserializationOptions = new()
             {
                 CommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true
+                AllowTrailingCommas = true,
             };
 
             await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
@@ -75,7 +81,26 @@ namespace TwitchDownloaderCore.Chat
             {
                 if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embeddedDataElement))
                 {
-                    returnChatRoot.embeddedData = embeddedDataElement.Deserialize<EmbeddedData>();
+
+                    if (returnChatRoot.FileInfo.Version > new ChatRootVersion(1, 2, 2))
+                    {
+                        returnChatRoot.embeddedData = embeddedDataElement.Deserialize<EmbeddedData>();
+                    }
+                    else
+                    {
+                        var legacyEmbeddedData = embeddedDataElement.Deserialize<LegacyEmbeddedData>();
+                        returnChatRoot.embeddedData = new()
+                        {
+                            firstParty = legacyEmbeddedData.firstParty,
+                            thirdParty = legacyEmbeddedData.thirdParty,
+                            twitchBadges = legacyEmbeddedData.twitchBadges.Select(item => new EmbedChatBadge
+                            {
+                                name = item.name,
+                                versions = item.versions.Select(x => new KeyValuePair<string, ChatBadgeData>(x.Key, new ChatBadgeData { bytes = x.Value })).ToDictionary(k => k.Key, v => v.Value),
+                            }).ToList(),
+                            twitchBits = legacyEmbeddedData.twitchBits
+                        };
+                    }
                 }
                 else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesElement))
                 {
@@ -103,12 +128,12 @@ namespace TwitchDownloaderCore.Chat
             switch (compression)
             {
                 case ChatCompression.None:
-                    await JsonSerializer.SerializeAsync(fs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
+                    await JsonSerializer.SerializeAsync(fs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
                 case ChatCompression.Gzip:
                     await using (var gs = new GZipStream(fs, CompressionLevel.SmallestSize))
                     {
-                        await JsonSerializer.SerializeAsync(gs, chatRoot, new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }, cancellationToken);
+                        await JsonSerializer.SerializeAsync(gs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     }
                     break;
                 default:

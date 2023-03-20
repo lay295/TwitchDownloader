@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -19,14 +20,23 @@ namespace TwitchDownloaderCore.TwitchObjects
         PrimeGaming = 128
     }
 
+    public class ChatBadgeData
+    {
+        public string title { get; set; }
+        public string description { get; set; }
+        public byte[] bytes { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string url { get; set;}
+    }
+
     public class ChatBadge
     {
         public string Name;
         public Dictionary<string, SKBitmap> Versions;
-        public Dictionary<string, byte[]> VersionsData;
+        public Dictionary<string, ChatBadgeData> VersionsData;
         public ChatBadgeType Type;
 
-        public ChatBadge(string name, Dictionary<string, byte[]> versions)
+        public ChatBadge(string name, Dictionary<string, ChatBadgeData> versions)
         {
             Name = name;
             Versions = new Dictionary<string, SKBitmap>();
@@ -34,7 +44,7 @@ namespace TwitchDownloaderCore.TwitchObjects
 
             foreach (var version in versions)
             {
-                using MemoryStream ms = new MemoryStream(version.Value);
+                using MemoryStream ms = new MemoryStream(version.Value.bytes);
                 //For some reason, twitch has corrupted images sometimes :) for example
                 //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                 SKBitmap badgeImage = SKBitmap.Decode(ms);

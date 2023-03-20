@@ -18,7 +18,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int Minor { get; set; } = 0;
         public int Patch { get; set; } = 0;
 
-        public static ChatRootVersion CurrentVersion { get; } = new(1, 2, 2);
+        public static ChatRootVersion CurrentVersion { get; } = new(1, 3, 0);
 
         // Constructors
         /// <summary>
