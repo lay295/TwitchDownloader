@@ -13,9 +13,10 @@ namespace TwitchDownloaderCore.Chat
 {
     public static class ChatJson
     {
-        private static JsonSerializerOptions _jsonSerializerOptions = new()
+        private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            AllowTrailingCommas = true
         };
 
         /// <summary>
@@ -35,7 +36,7 @@ namespace TwitchDownloaderCore.Chat
             JsonDocumentOptions deserializationOptions = new()
             {
                 CommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true,
+                AllowTrailingCommas = true
             };
 
             await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
@@ -56,24 +57,24 @@ namespace TwitchDownloaderCore.Chat
 
             if (jsonDocument.RootElement.TryGetProperty("FileInfo", out JsonElement fileInfoElement))
             {
-                returnChatRoot.FileInfo = fileInfoElement.Deserialize<ChatRootInfo>();
+                returnChatRoot.FileInfo = fileInfoElement.Deserialize<ChatRootInfo>(options: _jsonSerializerOptions);
             }
 
             if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerElement))
             {
-                returnChatRoot.streamer = streamerElement.Deserialize<Streamer>();
+                returnChatRoot.streamer = streamerElement.Deserialize<Streamer>(options: _jsonSerializerOptions);
             }
 
             if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoElement))
             {
-                returnChatRoot.video = videoElement.Deserialize<Video>();
+                returnChatRoot.video = videoElement.Deserialize<Video>(options: _jsonSerializerOptions);
             }
 
             if (getComments)
             {
                 if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsElement))
                 {
-                    returnChatRoot.comments = commentsElement.Deserialize<List<Comment>>();
+                    returnChatRoot.comments = commentsElement.Deserialize<List<Comment>>(options: _jsonSerializerOptions);
                 }
             }
 
@@ -81,30 +82,29 @@ namespace TwitchDownloaderCore.Chat
             {
                 if (jsonDocument.RootElement.TryGetProperty("embeddedData", out JsonElement embeddedDataElement))
                 {
-
                     if (returnChatRoot.FileInfo.Version > new ChatRootVersion(1, 2, 2))
                     {
-                        returnChatRoot.embeddedData = embeddedDataElement.Deserialize<EmbeddedData>();
+                        returnChatRoot.embeddedData = embeddedDataElement.Deserialize<EmbeddedData>(options: _jsonSerializerOptions);
                     }
                     else
                     {
-                        var legacyEmbeddedData = embeddedDataElement.Deserialize<LegacyEmbeddedData>();
-                        returnChatRoot.embeddedData = new()
+                        var legacyEmbeddedData = embeddedDataElement.Deserialize<LegacyEmbeddedData>(options: _jsonSerializerOptions);
+                        returnChatRoot.embeddedData = new EmbeddedData
                         {
-                            firstParty = legacyEmbeddedData.firstParty,
-                            thirdParty = legacyEmbeddedData.thirdParty,
-                            twitchBadges = legacyEmbeddedData.twitchBadges.Select(item => new EmbedChatBadge
+                            firstParty = legacyEmbeddedData?.firstParty ?? new List<EmbedEmoteData>(),
+                            thirdParty = legacyEmbeddedData?.thirdParty ?? new List<EmbedEmoteData>(),
+                            twitchBadges = legacyEmbeddedData?.twitchBadges.Select(item => new EmbedChatBadge
                             {
                                 name = item.name,
                                 versions = item.versions.Select(x => new KeyValuePair<string, ChatBadgeData>(x.Key, new ChatBadgeData { bytes = x.Value })).ToDictionary(k => k.Key, v => v.Value),
-                            }).ToList(),
-                            twitchBits = legacyEmbeddedData.twitchBits
+                            }).ToList() ?? new List<EmbedChatBadge>(),
+                            twitchBits = legacyEmbeddedData?.twitchBits ?? new List<EmbedCheerEmote>()
                         };
                     }
                 }
                 else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesElement))
                 {
-                    returnChatRoot.embeddedData = emotesElement.Deserialize<EmbeddedData>();
+                    returnChatRoot.embeddedData = emotesElement.Deserialize<EmbeddedData>(options: _jsonSerializerOptions);
                 }
             }
 
