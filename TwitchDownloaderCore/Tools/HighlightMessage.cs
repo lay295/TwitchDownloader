@@ -15,6 +15,8 @@ namespace TwitchDownloaderCore.Tools
         GiftedSingle,
         ContinuingGift,
         GiftedAnonymous,
+        PayingForward,
+        ChannelPointHighlight,
         Unknown
     }
 
@@ -45,12 +47,7 @@ namespace TwitchDownloaderCore.Tools
         }
 
         // If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
-        public static bool IsSubMessage(Comment comment)
-        {
-            return IsHighlightedMessage(comment) != HighlightType.None;
-        }
-
-        public static HighlightType IsHighlightedMessage(Comment comment)
+        public static HighlightType GetHighlightType(Comment comment)
         {
             const string ANONYMOUS_GIFT_ACCOUNT_ID = "274598607"; // '274598607' is the id of the anonymous gift message account, display name: 'AnAnonymousGifter'
 
@@ -74,12 +71,12 @@ namespace TwitchDownloaderCore.Tools
             {
                 return HighlightType.ContinuingGift;
             }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " converted from a "))
+            if (comment.message.body.StartsWith(comment.commenter.display_name + " converted from a"))
             {
                 var convertedToMatch = Regex.Match(comment.message.body, @$"(?<=^{comment.commenter.display_name} converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
                 if (!convertedToMatch.Success)
                 {
-                    return HighlightType.Unknown;
+                    return HighlightType.None;
                 }
 
                 // TODO: Use ValueSpan once on NET7
@@ -91,6 +88,10 @@ namespace TwitchDownloaderCore.Tools
                     "Tier 3" => HighlightType.SubscribedTier,
                     _ => HighlightType.Unknown
                 };
+            }
+            if (comment.message.body.StartsWith(comment.commenter.display_name + " is paying forward the Gift they got from"))
+            {
+                return HighlightType.PayingForward;
             }
             if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
             {
