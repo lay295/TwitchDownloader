@@ -124,7 +124,7 @@
     <value>Sıraya ekle</value>
   </data>
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
-    <value>Bir bir alfa kanalı (şeffaflık) desteklemeyen bir container/codec seçtiniz.\nSaydamlığı kaldırın veya MOV ve RLE/PRORES ile kodlayın. (dosya boyutu büyük olacaktır.)</value>
+    <value>Bir bir alfa kanalı (şeffaflık) desteklemeyen bir container/codec seçtiniz. Saydamlığı kaldırın veya MOV ve RLE/PRORES ile kodlayın. (dosya boyutu büyük olacaktır.)</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Tema </value>
@@ -726,5 +726,8 @@
   </data>
   <data name="EmojiVendorNone" xml:space="preserve">
     <value>None</value>
+  </data>
+  <data name="MaskWithNoAlpha" xml:space="preserve">
+    <value>You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.</value>
   </data>
 </root>

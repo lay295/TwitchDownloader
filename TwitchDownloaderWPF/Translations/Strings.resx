@@ -124,7 +124,7 @@
     <value>Add To Queue</value>
   </data>
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
-    <value>You've selected an alpha channel (transparency) for a container/codec that does not support it.\nRemove transparency or encode with MOV and RLE/PRORES (file size will be large)</value>
+    <value>You've selected an alpha channel (transparency) for a container/codec that does not support it. Remove transparency or encode with MOV + RLE/PRORES or WEBM + VP8/VP9</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Theme </value>
@@ -724,5 +724,8 @@
   </data>
   <data name="EmojiVendorNone" xml:space="preserve">
     <value>None</value>
+  </data>
+  <data name="MaskWithNoAlpha" xml:space="preserve">
+    <value>You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.</value>
   </data>
 </root>

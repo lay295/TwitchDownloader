@@ -78,7 +78,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You&apos;ve selected an alpha channel (transparency) for a container/codec that does not support it.\nRemove transparency or encode with MOV and RLE/PRORES (file size will be large).
+        ///   Looks up a localized string similar to You&apos;ve selected an alpha channel (transparency) for a container/codec that does not support it. Remove transparency or encode with MOV + RLE/PRORES or WEBM + VP8/VP9.
         /// </summary>
         public static string AlphaNotSupportedByCodec {
             get {
@@ -920,6 +920,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string LogHeader {
             get {
                 return ResourceManager.GetString("LogHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You&apos;ve selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask..
+        /// </summary>
+        public static string MaskWithNoAlpha {
+            get {
+                return ResourceManager.GetString("MaskWithNoAlpha", resourceCulture);
             }
         }
         

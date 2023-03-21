@@ -379,20 +379,18 @@ namespace TwitchDownloaderWPF
                 return false;
             }
 
-            if (colorBackground.SelectedColor.Value.A < 255)
+            if (checkMask.IsChecked == false && colorBackground.SelectedColor!.Value.A < 255)
             {
-                if ((((VideoContainer)comboFormat.SelectedItem).Name != "MOV" ||
-                     (((Codec)comboCodec.SelectedItem).Name != "RLE" && ((Codec)comboCodec.SelectedItem).Name != "ProRes")) &&
-                    ((VideoContainer)comboFormat.SelectedItem).Name != "WEBM" && !(bool)checkMask.IsChecked!)
+                if (((Codec)comboCodec.SelectedItem).Name is not "RLE" and not "ProRes" and not "VP8" and not "VP9")
                 {
                     AppendLog(Translations.Strings.ErrorLog + Translations.Strings.AlphaNotSupportedByCodec);
                     return false;
                 }
             }
 
-            if (checkMask.IsChecked == true && colorBackground.SelectedColor.Value.A == 255)
+            if (checkMask.IsChecked == true && colorBackground.SelectedColor!.Value.A == 255)
             {
-                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.AlphaNotSupportedByCodec);
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.MaskWithNoAlpha);
                 return false;
             }
 

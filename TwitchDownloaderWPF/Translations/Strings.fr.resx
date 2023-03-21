@@ -124,7 +124,7 @@
     <value>Mettre en File d'Attente</value>
   </data>
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
-    <value>Le conteneur/codec sélectionné ne supporte pas l'alpha (transparence). Supprimez la transparence ou encodez avec MOV et RLE/PRORES (la taille du fichier sera importante).</value>
+    <value>Le conteneur/codec sélectionné ne supporte pas l'alpha (transparence). Supprimez la transparence ou encodez avec MOV + RLE/PRORES ou WEBM + VP8/VP9</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Le Thème </value>
@@ -725,5 +725,8 @@
   </data>
   <data name="EmojiVendorNone" xml:space="preserve">
     <value>Non</value>
+  </data>
+  <data name="MaskWithNoAlpha" xml:space="preserve">
+    <value>Vous avez choisi de générer un masque avec un arrière-plan opaque. Réduisez la couleur alpha de l'arrière-plan ou désactivez le masque de génération.</value>
   </data>
 </root>
