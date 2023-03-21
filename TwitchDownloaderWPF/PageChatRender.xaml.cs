@@ -381,7 +381,8 @@ namespace TwitchDownloaderWPF
 
             if (checkMask.IsChecked == false && colorBackground.SelectedColor!.Value.A < 255)
             {
-                if (((Codec)comboCodec.SelectedItem).Name is not "RLE" and not "ProRes" and not "VP8" and not "VP9")
+                if (((VideoContainer)comboFormat.SelectedItem).Name is not "MOV" and not "WEBM" ||
+                    ((Codec)comboCodec.SelectedItem).Name is not "RLE" and not "ProRes" and not "VP8" and not "VP9")
                 {
                     AppendLog(Translations.Strings.ErrorLog + Translations.Strings.AlphaNotSupportedByCodec);
                     return false;
