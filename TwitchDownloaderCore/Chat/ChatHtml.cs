@@ -127,10 +127,10 @@ namespace TwitchDownloaderCore.Chat
 
         private static string GetChatBadgesHtml(bool embedData, IReadOnlyDictionary<string, EmbedChatBadge> chatBadgeData, Comment comment)
         {
-            if (comment.message.user_badges.Count == 0)
+            if (comment.message.user_badges is null || comment.message.user_badges.Count == 0)
                 return "";
 
-            var badgesHtml = new List<string>(comment.message.user_badges.Count);
+            var badgesHtml = new List<string>(comment.message.user_badges!.Count);
 
             foreach (var messageBadge in comment.message.user_badges)
             {
@@ -169,7 +169,7 @@ namespace TwitchDownloaderCore.Chat
                         {
                             if (embedEmotes)
                             {
-                                message.Append($"<img class=\"emote-image third-{thirdEmoteData[word].id}\" title=\"{word}\"\"><span class=\"text-hide\">{word}</span> ");
+                                message.Append($"<img class=\"emote-image third-{thirdEmoteData[word].id}\" title=\"{word}\"><span class=\"text-hide\">{word}</span> ");
                             }
                             else
                             {
