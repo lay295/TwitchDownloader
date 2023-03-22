@@ -448,7 +448,7 @@ namespace TwitchDownloaderCore
 
             foreach (var name in globalBadges.badge_sets.Keys.Union(subBadges.badge_sets.Keys)
                          .Where(n => !alreadyAdded.Contains(n))
-                         .Where(n => comments.Any(c => c.message.user_badges.Any(ub => ub._id == n))))
+                         .Where(n => comments.Any(c => c.message.user_badges != null && c.message.user_badges.Any(ub => ub._id == n))))
             {
                 Dictionary<string, ChatBadgeData> versions = new();
                 foreach (var (version, badge) in globalBadges.badge_sets[name].versions)
