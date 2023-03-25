@@ -648,7 +648,7 @@ namespace TwitchDownloaderCore
             {
                 DrawBadges(comment, sectionImages, ref drawPos);
             }
-            DrawUsername(comment, sectionImages, ref drawPos);
+            DrawUsername(comment, sectionImages, ref drawPos, defaultPos);
             DrawMessage(comment, sectionImages, emotePositionList, highlightWords, ref drawPos, defaultPos);
         }
 
@@ -696,7 +696,7 @@ namespace TwitchDownloaderCore
             drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
             defaultPos.X = drawPos.X;
 
-            DrawUsername(comment, sectionImages, ref drawPos, false, PURPLE);
+            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, PURPLE);
             AddImageSection(sectionImages, ref drawPos, defaultPos);
 
             // Remove the commenter's name from the resub message
@@ -1035,23 +1035,30 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawText(string drawText, SKPaint textFont, bool padding, List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, bool highlightWords)
+        private void DrawText(string drawText, SKPaint textFont, bool padding, List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, bool highlightWords, bool noWrap = false)
         {
             bool isRtl = IsRightToLeft(drawText);
             float textWidth = MeasureText(drawText, textFont, isRtl);
-            int effectiveChatWidth = renderOptions.ChatWidth - renderOptions.SidePadding * 2;
+            int effectiveChatWidth = renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X;
 
-            // while drawText is wider than the chat width
-            while (textWidth > effectiveChatWidth)
+            while (!noWrap && textWidth > effectiveChatWidth)
             {
                 string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, new char[] { '?', '-' });
+                var overrideWrap = false;
 
-                DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos, highlightWords);
+                if (newDrawText.Length == 0)
+                {
+                    // When chat width and font size are small enough, 1 character can be wider than effectiveChatWidth.
+                    overrideWrap = true;
+                    newDrawText = drawText[..1];
+                }
+
+                DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos, highlightWords, overrideWrap);
 
                 drawText = drawText[newDrawText.Length..];
                 textWidth = MeasureText(drawText, textFont, isRtl);
             }
-            if (drawPos.X + textWidth > effectiveChatWidth)
+            if (drawPos.X + textWidth > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
             {
                 AddImageSection(sectionImages, ref drawPos, defaultPos);
             }
@@ -1159,9 +1166,8 @@ namespace TwitchDownloaderCore
             return measure.Width;
         }
 
-        private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, bool appendColon = true, string colorOverride = null)
+        private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, string colorOverride = null)
         {
-            using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
             SKColor userColor = SKColor.Parse(colorOverride ?? comment.message.user_color ?? defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Length]);
             if (colorOverride is null)
                 userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor, renderOptions);
@@ -1172,15 +1178,7 @@ namespace TwitchDownloaderCore
 
             userPaint.Color = userColor;
             string userName = comment.commenter.display_name + (appendColon ? ":" : "");
-            int textWidth = (int)userPaint.MeasureText(userName);
-            if (renderOptions.Outline)
-            {
-                SKPath outlinePath = userPaint.GetTextPath(userName, drawPos.X, drawPos.Y);
-                sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
-            }
-            userPaint.Color = userColor;
-            sectionImageCanvas.DrawText(userName, drawPos.X, drawPos.Y, userPaint);
-            drawPos.X += textWidth + renderOptions.WordSpacing;
+            DrawText(userName, userPaint, true, sectionImages, ref drawPos, defaultPos, false);
             userPaint.Dispose();
         }
 
