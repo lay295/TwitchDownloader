@@ -775,7 +775,7 @@ namespace TwitchDownloaderCore
             Point emotePoint = new Point();
             if (!twitchEmote.IsZeroWidth)
             {
-                if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
+                if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
                 }
@@ -846,7 +846,7 @@ namespace TwitchDownloaderCore
                     SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
                     SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
 
-                    if (drawPos.X + emojiImage.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
+                    if (drawPos.X + emojiImage.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                     {
                         AddImageSection(sectionImages, ref drawPos, defaultPos);
                     }
@@ -979,7 +979,7 @@ namespace TwitchDownloaderCore
                         bitsCount -= bitsAmount;
                         KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
                         TwitchEmote twitchEmote = tierList.Value;
-                        if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
+                        if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                         {
                             AddImageSection(sectionImages, ref drawPos, defaultPos);
                         }
@@ -1009,7 +1009,7 @@ namespace TwitchDownloaderCore
             if (emoteList.Any(x => x.Id == emoteId))
             {
                 TwitchEmote twitchEmote = emoteList.First(x => x.Id == emoteId);
-                if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X)
+                if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
                 }
@@ -1039,7 +1039,7 @@ namespace TwitchDownloaderCore
         {
             bool isRtl = IsRightToLeft(drawText);
             float textWidth = MeasureText(drawText, textFont, isRtl);
-            int effectiveChatWidth = renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X;
+            int effectiveChatWidth = renderOptions.ChatWidth - renderOptions.SidePadding * 2;
 
             // while drawText is wider than the chat width
             while (textWidth > effectiveChatWidth)
