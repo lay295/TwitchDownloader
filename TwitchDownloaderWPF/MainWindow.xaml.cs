@@ -84,6 +84,14 @@ namespace TwitchDownloaderWPF
 #endif
         }
 
+        internal static string[] GetTemplateSubfolders(ref string fullPath)
+        {
+            string[] returnString = fullPath.Split(new char[] { '\\', '\\', '/'}, StringSplitOptions.RemoveEmptyEntries);
+            fullPath = returnString[returnString.Length- 1];
+            Array.Resize(ref returnString, returnString.Length - 1);
+            return returnString;
+        }
+
         internal static string GetFilename(string template, string title, string id, DateTime date, string channel)
         {
             StringBuilder returnString = new StringBuilder(template.Replace("{title}", title).Replace("{id}", id).Replace("{channel}", channel).Replace("{date}", date.ToString("Mdyy")).Replace("{random_string}", Path.GetRandomFileName().Split('.').First()));
@@ -104,7 +112,9 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            return RemoveInvalidChars(returnString.ToString());
+            string fileName = returnString.ToString();
+            string[] additionalSubfolders = GetTemplateSubfolders(ref fileName);
+            return Path.Combine(Path.Combine(additionalSubfolders), RemoveInvalidChars(fileName));
         }
 
         public static string RemoveInvalidChars(string filename)
