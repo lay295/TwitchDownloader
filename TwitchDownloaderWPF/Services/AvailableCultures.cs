@@ -23,7 +23,8 @@ namespace TwitchDownloaderWPF.Services
             English,
             French,
             Polish,
-            Turkish
+            Turkish,
+            Russian
         }
 
         private const string ENGLISH_NAME = "en-US";
@@ -34,6 +35,8 @@ namespace TwitchDownloaderWPF.Services
         private const string POLISH_NATIVE_NAME = "Polski";
         private const string TURKISH_NAME = "tr-TR";
         private const string TURKISH_NATIVE_NAME = "Türkçe";
+        private const string RUSSIAN_NAME = "ru-RU";
+        private const string RUSSIAN_NATIVE_NAME = "Русский";
         private const string INVARIANT_NAME = "";
         private const string INVARIANT_NATIVE_NAME = "Invariant";
 
@@ -45,6 +48,7 @@ namespace TwitchDownloaderWPF.Services
                 Culture.French => FRENCH_NAME,
                 Culture.Polish => POLISH_NAME,
                 Culture.Turkish => TURKISH_NAME,
+                Culture.Russian => RUSSIAN_NAME,
                 _ => INVARIANT_NAME
             };
         }
@@ -57,6 +61,7 @@ namespace TwitchDownloaderWPF.Services
                 Culture.French => FRENCH_NATIVE_NAME,
                 Culture.Turkish => TURKISH_NATIVE_NAME,
                 Culture.Polish => POLISH_NATIVE_NAME,
+                Culture.Russian => RUSSIAN_NATIVE_NAME,
                 _ => INVARIANT_NATIVE_NAME
             };
         }
