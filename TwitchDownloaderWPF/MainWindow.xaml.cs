@@ -86,7 +86,7 @@ namespace TwitchDownloaderWPF
 
         internal static string[] GetTemplateSubfolders(ref string fullPath)
         {
-            string[] returnString = fullPath.Split(new char[] { '\\', '\\', '/'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] returnString = fullPath.Split(new char[] { '\\', '/'}, StringSplitOptions.RemoveEmptyEntries);
             fullPath = returnString[returnString.Length- 1];
             Array.Resize(ref returnString, returnString.Length - 1);
             return returnString;
