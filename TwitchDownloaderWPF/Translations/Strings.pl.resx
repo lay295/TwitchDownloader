@@ -709,13 +709,13 @@
     <value>Format Czasu:</value>
   </data>
   <data name="NoJsonFilesSelected" xml:space="preserve">
-    <value>No JSON files selected</value>
+    <value>Nie wybrano plików JSON</value>
   </data>
   <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
-    <value>Insufficient access. OAuth may be required.</value>
+    <value>Niewystarczający dostęp. OAuth może być wymagane.</value>
   </data>
   <data name="EmojiVendor" xml:space="preserve">
-    <value>Emoji Vendor:</value>
+    <value>Dostawca Emoji:</value>
   </data>
   <data name="EmojiVendorNotoColor" xml:space="preserve">
     <value>Google</value>
@@ -724,9 +724,9 @@
     <value>Twitter</value>
   </data>
   <data name="EmojiVendorNone" xml:space="preserve">
-    <value>None</value>
+    <value>Żaden</value>
   </data>
   <data name="MaskWithNoAlpha" xml:space="preserve">
-    <value>You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.</value>
+    <value>Wybrałeś generowanie maski z nieprzezroczystym tłem. Zmniejsz alfa koloru tła lub wyłącz generowanie maski.</value>
   </data>
 </root>
