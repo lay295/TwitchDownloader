@@ -1032,6 +1032,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Outline Scale:.
+        /// </summary>
+        public static string OutlineScale {
+            get {
+                return ResourceManager.GetString("OutlineScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parallel Task Limits.
         /// </summary>
         public static string ParallelTaskLimits {

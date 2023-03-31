@@ -729,4 +729,7 @@
   <data name="MaskWithNoAlpha" xml:space="preserve">
     <value>Вы включили опции генерации маски вместе с непрозрачным фоном. Уменшите прозрачность фона или выключите генерацию маски.</value>
   </data>
+  <data name="OutlineScale" xml:space="preserve">
+    <value>Outline Scale:</value>
+  </data>
 </root>

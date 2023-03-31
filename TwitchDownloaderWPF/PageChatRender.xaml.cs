@@ -118,7 +118,7 @@ namespace TwitchDownloaderWPF
                 MessageFontStyle = SKFontStyle.Normal,
                 UsernameFontStyle = SKFontStyle.Bold,
                 GenerateMask = (bool)checkMask.IsChecked,
-                OutlineSize = 4,
+                OutlineSize = 4 * double.Parse(textOutlineScale.Text, CultureInfo.CurrentCulture),
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath,
                 SubMessages = (bool)checkSub.IsChecked,
@@ -191,6 +191,7 @@ namespace TwitchDownloaderWPF
                 textEmoteSpaceScale.Text = Settings.Default.EmoteSpacingScale.ToString("0.0#");
                 textAccentStrokeScale.Text = Settings.Default.AccentStrokeScale.ToString("0.0#");
                 textAccentIndentScale.Text = Settings.Default.AccentIndentScale.ToString("0.0#");
+                textOutlineScale.Text = Settings.Default.OutlineScale.ToString("0.0#");
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
@@ -335,6 +336,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.EmoteSpacingScale = double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.AccentStrokeScale = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.AccentIndentScale = double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.OutlineScale = double.Parse(textOutlineScale.Text, CultureInfo.CurrentCulture);
             }
             catch { }
             Settings.Default.Save();
@@ -372,6 +374,7 @@ namespace TwitchDownloaderWPF
                 double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture);
                 double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture);
                 double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture);
+                double.Parse(textOutlineScale.Text, CultureInfo.CurrentCulture);
             }
             catch (Exception ex)
             {

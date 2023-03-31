@@ -730,4 +730,7 @@
   <data name="MaskWithNoAlpha" xml:space="preserve">
     <value>You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.</value>
   </data>
+  <data name="OutlineScale" xml:space="preserve">
+    <value>Outline Scale:</value>
+  </data>
 </root>

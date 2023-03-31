@@ -729,4 +729,7 @@
   <data name="MaskWithNoAlpha" xml:space="preserve">
     <value>Vous avez choisi de générer un masque avec un arrière-plan opaque. Réduisez la couleur alpha de l'arrière-plan ou désactivez le masque de génération.</value>
   </data>
+  <data name="OutlineScale" xml:space="preserve">
+    <value>Échelle des contours:</value>
+  </data>
 </root>

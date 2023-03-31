@@ -801,5 +801,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["RenderEmojiVendor"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double OutlineScale {
+            get {
+                return ((double)(this["OutlineScale"]));
+            }
+            set {
+                this["OutlineScale"] = value;
+            }
+        }
     }
 }
