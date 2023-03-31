@@ -35,10 +35,10 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
 
 **-t / --threads**
-(Default: 10) Number of download threads.
+(Default: `4`) Number of download threads.
 
 **--bandwidth**
-(Default: 2048) The maximum bandwidth a thread will be allowed to use in kilobytes per second (KB/s).
+(Default: `2048`) The maximum bandwidth a thread will be allowed to use in kilobytes per second (KB/s).
 
 **--oauth**
 OAuth access token to download subscriber only VODs. <ins>**DO NOT SHARE YOUR OUATH TOKEN WITH ANYONE.**</ins>
@@ -63,7 +63,7 @@ File the program will output to.
 The quality the program will attempt to download, for example "1080p60", if not found will download highest quality video.
 
 **--bandwidth**
-(Default: 8192) The maximum bandwidth the clip downloader is allowed to use in kilobytes per second (KB/s).
+(Default: `8192`) The maximum bandwidth the clip downloader is allowed to use in kilobytes per second (KB/s).
 
 ## Arguments for mode chatdownload
 <sup>Downloads the chat of a VOD, highlight, or clip</sup>
@@ -75,7 +75,7 @@ The ID or URL of the VOD or clip to download.
 File the program will output to. File extension will be used to determine download type. Valid extensions are: `.json`, `.html`, and `.txt`.
 
 **--compression**
-(Default: None) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
+(Default: `None`) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-b / --beginning**
 Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
@@ -84,59 +84,59 @@ Time in seconds to crop beginning. For example if I had a 10 second stream but o
 Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 **-E / --embed-images**
-(Default: false) Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.
+(Default: `false`) Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.
 
 **--bttv**
-(Default: true) BTTV emote embedding. Requires `-E / --embed-images`.
+(Default: `true) BTTV emote embedding. Requires `-E / --embed-images`.
 
 **--ffz**
-(Default: true) FFZ emote embedding. Requires `-E / --embed-images`.
+(Default: `true`) FFZ emote embedding. Requires `-E / --embed-images`.
 
 **--stv**
-(Default: true) 7TV emote embedding. Requires `-E / --embed-images`.
+(Default: `true`) 7TV emote embedding. Requires `-E / --embed-images`.
 
 **--timestamp-format**
-(Default: Relative) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `Relative`, and `None`.
+(Default: `Relative`) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `Relative`, and `None`.
 
 **--chat-connections**
-(Default: 4) The number of parallel downloads for chat.
+(Default: `4`) The number of parallel downloads for chat.
 
 
 ## Arguments for mode chatupdate
 <sup>Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format</sup>
 
 **-i / --input (REQUIRED)**
-Path to input file. Valid extensions are: `.json`.
+Path to input file. Valid extensions are: `.json`, `.json.gz`.
 
 **-o / --output (REQUIRED)**
 Path to output file. File extension will be used to determine new chat type. Valid extensions are: `.json`, `.html`, and `.txt`.
 
 **-c / --compression**
-(Default: None) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
+(Default: `None`) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-E / --embed-missing**
-(Default: false) Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.
+(Default: `false`) Embed missing emotes, badges, and cheermotes. Already embedded images will be untouched.
 
 **-R / --replace-embeds**
-(Default: false) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
+(Default: `false`) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
 
 **b / --beginning**
-(Default: -1) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
 
 **-e / --ending**
-(Default: -1) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
 
 **--bttv**
-(Default: true) Enable embedding BTTV emotes.
+(Default: `true`) Enable embedding BTTV emotes.
 
 **--ffz**
-(Default: true) Enable embedding FFZ emotes.
+(Default: `true`) Enable embedding FFZ emotes.
 
 **--stv**
-(Default: true) Enable embedding 7TV emotes.
+(Default: `true`) Enable embedding 7TV emotes.
 
 **--timestamp-format**
-(Default: Relative) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `Relative`, and `None`.
+(Default: `Relative`) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `Relative`, and `None`.
 
 **--temp-path**
 Path to temporary folder for cache.
@@ -146,79 +146,79 @@ Path to temporary folder for cache.
 <sup>Renders a chat JSON as a video</sup>
 
 **-i / --input (REQUIRED)**
-Path to JSON chat file input.
+The path to the `.json` or `.json.gz` chat file input.
 
 **-o / --output (REQUIRED)**
 File the program will output to.
 
 **--background-color**
-(Default: #111111) Color of background in HEX string format.
+(Default: `#111111`) Color of background in HEX string format.
 
 **--message-color**
-(Default: #ffffff) Color of messages in HEX string format.
+(Default: `#ffffff`) Color of messages in HEX string format.
 
 **-w / --chat-width**
-(Default: 350) Width of chat render.
+(Default: `350`) Width of chat render.
 
 **-h / --chat-height**
-(Default: 600) Height of chat render.
+(Default: `600`) Height of chat render.
 
 **-b / --beginning**
-(Default: -1) Time in seconds to crop the beginning of the render.
+(Default: `-1`) Time in seconds to crop the beginning of the render.
 
 **-e / --ending**
-(Default: -1) Time in seconds to crop the ending of the render.
+(Default: `-1`) Time in seconds to crop the ending of the render.
 
 **--bttv**
-(Default: true) Enable BTTV emotes.
+(Default: `true`) Enable BTTV emotes.
 
 **--ffz**
-(Default: true) Enable FFZ emotes.
+(Default: `true`) Enable FFZ emotes.
 
 **--stv**
-(Default: true) Enable 7TV emotes.
+(Default: `true`) Enable 7TV emotes.
 
 **--allow-unlisted-emotes**
-(Default: true) Allow unlisted 7TV emotes in the render.
+(Default: `true`) Allow unlisted 7TV emotes in the render.
 
 **--sub-messages**
-(Default: true) Enable sub / re-sub messages.
+(Default: `true`) Enable sub / re-sub messages.
 
 **--badges**
-(Default: true) Enable chat badges.
+(Default: `true`) Enable chat badges.
 
 **--outline**
-(Default: false) Enable outline around chat messages.
+(Default: `false`) Enable outline around chat messages.
 
 **--outline-size**
-(Default: 4) Size of outline if outline is enabled.
+(Default: `4`) Size of outline if outline is enabled.
 
 **-f / --font**
-(Default: Inter Embedded) Font to use.
+(Default: `Inter Embedded`) Font to use.
 
 **--font-size**
-(Default: 12) Font size.
+(Default: `12`) Font size.
 
 **--message-fontstyle**
-(Default: normal) Font style of message. Valid values are **normal**, **bold**, and **italic**.
+(Default: `normal`) Font style of message. Valid values are **normal**, **bold**, and **italic**.
 
 **--username-fontstyle**
-(Default: bold) Font style of username. Valid values are **normal**, **bold**, and **italic**.
+(Default: `bold`) Font style of username. Valid values are **normal**, **bold**, and **italic**.
 
 **--timestamp**
-(Default: false) Enables timestamps to left of messages, similar to VOD chat on Twitch.
+(Default: `false`) Enables timestamps to left of messages, similar to VOD chat on Twitch.
 
 **--generate-mask**
-(Default: false) Generates a mask file of the chat in addition to the rendered chat.
+(Default: `false`) Generates a mask file of the chat in addition to the rendered chat.
 
 **--sharpening**
-(Default: false) Appends `-filter_complex "smartblur=lr=1:ls=-1.0"` to the `input-args`. Works best with `font-size` 24 or larger.
+(Default: `false`) Appends `-filter_complex "smartblur=lr=1:ls=-1.0"` to the `input-args`. Works best with `font-size` 24 or larger.
 
 **--framerate**
-(Default: 30) Framerate of the render.
+(Default: `30`) Framerate of the render.
 
 **--update-rate**
-(Default: 0.2) Time in seconds to update chat render output.
+(Default: `0.2`) Time in seconds to update chat render output.
 
 **--input-args**
 (Default: `-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -`) Input arguments for ffmpeg chat render.
@@ -233,15 +233,15 @@ File the program will output to.
 (Default: ` `) List of words or phrases to ignore when rendering, separated by commas. Not case-sensitive.
 
 **--badge-filter**
-(Default: 0) Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, to filter out Moderator and Broadcaster badges only enter the value of 6.
+(Default: `0`) Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, to filter out Moderator and Broadcaster badges only enter the value of 6.
 
 Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, Predictions = `32`, NoAudioVisual = `64`, PrimeGaming = `128`
 
 **--dispersion**
-(Default: false) In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.
+(Default: `false`) In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.
 
 **--offline**
-(Default: false) Render completely offline using only embedded emotes, badges, and bits from the input json.
+(Default: `false`) Render completely offline using only embedded emotes, badges, and bits from the input json.
 
 **--emoji-vendor**
 (Default: `notocolor`) The emoji vendor used for rendering emojis. Valid values are: `twitter` / `twemoji`, `google` / `notocolor`, `none`.
@@ -253,56 +253,56 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 (Default: ` `) Path to temporary folder for cache.
 
 **--verbose-ffmpeg**
-(Default: false) Prints every message from ffmpeg.
+(Default: `false`) Prints every message from ffmpeg.
 
 **--skip-drive-waiting**
-(Default: false) Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives. Skipping can result in 1-5% render speed increases.
+(Default: `false`) Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives. Skipping can result in 1-5% render speed increases.
 
 **--scale-emote**
-(Default: 1.0) Number to scale emote images.
+(Default: `1.0`) Number to scale emote images.
 
 **--scale-badge**
-(Default: 1.0) Number to scale badge images.
+(Default: `1.0`) Number to scale badge images.
 
 **--scale-emoji**
-(Default: 1.0) Number to scale emoji images.
+(Default: `1.0`) Number to scale emoji images.
 
 **--scale-vertical**
-(Default: 1.0) Number to scale vertical padding.
+(Default: `1.0`) Number to scale vertical padding.
 
 **--scale-side-padding**
-(Default: 1.0) Number to scale side padding.
+(Default: `1.0`) Number to scale side padding.
 
 **--scale-section-height**
-(Default: 1.0) Number to scale section height of comments.
+(Default: `1.0`) Number to scale section height of comments.
 
 **--scale-word-space**
-(Default: 1.0) Number to scale spacing between words.
+(Default: `1.0`) Number to scale spacing between words.
 
 **--scale-emote-space**
-(Default: 1.0) Number to scale spacing between emotes.
+(Default: `1.0`) Number to scale spacing between emotes.
 
 **--scale-highlight-stroke**
-(Default: 1.0) Number to scale highlight stroke size (sub messages).
+(Default: `1.0`) Number to scale highlight stroke size (sub messages).
 
 **--scale-highlight-indent**
-(Default: 1.0) Number to scale highlight indent size (sub messages).
+(Default: `1.0`) Number to scale highlight indent size (sub messages).
 
 ## Arguments for mode ffmpeg
 <sup>Manage standalone ffmpeg</sup>
 
 **-d / --download**
-(Default: false) Downloads ffmpeg as a standalone file.
+(Default: `false`) Downloads ffmpeg as a standalone file.
 
 
 ## Arguments for mode cache
 <sup>Manage the working cache.</sup>
 
 **-c / --clear**
-(Default: false) Clears the default cache folder.
+(Default: `false`) Clears the default cache folder.
 
 **--force-clear**
-(Default: false) Clears the default cache folder, bypassing the confirmation prompt.
+(Default: `false`) Clears the default cache folder, bypassing the confirmation prompt.
 
 ---
 

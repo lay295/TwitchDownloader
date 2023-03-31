@@ -7,7 +7,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
     [Verb("chatupdate", HelpText = "Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format.")]
     public class ChatUpdateArgs
     {
-        [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are: .json.")]
+        [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are: .json, .json.gz.")]
         public string InputFile { get; set; }
 
         [Option('o', "output", Required = true, HelpText = "Path to output file. File extension will be used to determine new chat type. Valid extensions are: .json, .html, and .txt.")]
