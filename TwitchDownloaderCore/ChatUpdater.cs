@@ -15,7 +15,7 @@ namespace TwitchDownloaderCore
     {
         public ChatRoot chatRoot { get; internal set; } = new();
 
-        private readonly ChatUpdateOptions _updateOptions = new();
+        private readonly ChatUpdateOptions _updateOptions;
 
         public ChatUpdater(ChatUpdateOptions updateOptions)
         {
@@ -35,7 +35,7 @@ namespace TwitchDownloaderCore
             chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.ToLower() != ".json")
             {
-                throw new NotImplementedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
+                throw new NotSupportedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
             }
 
             // Dynamic step count setup

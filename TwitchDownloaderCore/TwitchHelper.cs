@@ -515,6 +515,9 @@ namespace TwitchDownloaderCore
                 {
                     Dictionary<string, ChatBadgeData> versions = new();
 
+                    if (alreadyAdded.Contains(badge.name))
+                        continue;
+
                     foreach (var (version, data) in badge.versions)
                     {
                         string[] id_parts = data.url.Split('/');
