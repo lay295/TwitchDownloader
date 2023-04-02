@@ -11,7 +11,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
-        Title="Global Settings" MinWidth="400" MinHeight="460" Width="500" Height="530" Initialized="Window_Initialized" Closing="Window_Closing">
+        Title="Global Settings" MinWidth="400" MinHeight="460" Width="500" Height="547" Initialized="Window_Initialized" Closing="Window_Closing">
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="8"/>
