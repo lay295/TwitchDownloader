@@ -138,7 +138,7 @@ namespace TwitchDownloaderWPF
                         else
                             chatOptions.DownloadFormat = ChatFormat.Text;
                         chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
-                        chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, vodPage.currentVideoTime, vodPage.textStreamer.Text) + "." + chatOptions.DownloadFormat);
+                        chatOptions.Filename = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(downloadOptions.Filename) + "." + chatOptions.DownloadFormat);
 
                         if (downloadOptions.CropBeginning)
                         {
@@ -200,7 +200,7 @@ namespace TwitchDownloaderWPF
 
                     ClipDownloadTask downloadTask = new ClipDownloadTask();
                     ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
-                    downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateClip, clipPage.textTitle.Text, clipPage.clipId, clipPage.currentVideoTime, clipPage.textStreamer.Text) + ".mp4");
+                    downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, clipPage.textTitle.Text, clipPage.clipId, clipPage.currentVideoTime, clipPage.textStreamer.Text, TimeSpan.Zero, clipPage.clipLength) + ".mp4");
                     downloadOptions.Id = clipPage.clipId;
                     downloadOptions.Quality = clipPage.comboQuality.Text;
                     downloadTask.DownloadOptions = downloadOptions;
@@ -217,7 +217,7 @@ namespace TwitchDownloaderWPF
                     {
                         ChatDownloadTask chatTask = new ChatDownloadTask();
                         ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
-                        chatOptions.Id = downloadOptions.Id.ToString();
+                        chatOptions.Id = downloadOptions.Id;
                         if (radioJson.IsChecked == true)
                             chatOptions.DownloadFormat = ChatFormat.Json;
                         else if (radioHTML.IsChecked == true)
@@ -226,7 +226,7 @@ namespace TwitchDownloaderWPF
                             chatOptions.DownloadFormat = ChatFormat.Text;
                         chatOptions.TimeFormat = TimestampFormat.Relative;
                         chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
-                        chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text) + "." + chatOptions.FileExtension);
+                        chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text, TimeSpan.Zero, clipPage.clipLength) + "." + chatOptions.FileExtension);
 
                         chatTask.DownloadOptions = chatOptions;
                         chatTask.Info.Title = clipPage.textTitle.Text;
@@ -277,7 +277,9 @@ namespace TwitchDownloaderWPF
                     ChatDownloadTask chatTask = new ChatDownloadTask();
                     ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
                     chatOptions.Id = chatPage.downloadId;
-                    chatOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatOptions.Id, chatPage.currentVideoTime, chatPage.textStreamer.Text) + "." + chatOptions.FileExtension);
+                    chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatOptions.Id, chatPage.currentVideoTime, chatPage.textStreamer.Text,
+                        chatOptions.CropBeginning ? TimeSpan.FromSeconds(chatOptions.CropBeginningTime) : TimeSpan.Zero,  chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatPage.vodLength
+                    ) + "." + chatOptions.FileExtension);
 
                     chatTask.DownloadOptions = chatOptions;
                     chatTask.Info.Title = chatPage.textTitle.Text;
@@ -322,7 +324,9 @@ namespace TwitchDownloaderWPF
                     ChatUpdateTask chatTask = new ChatUpdateTask();
                     ChatUpdateOptions chatOptions = MainWindow.pageChatUpdate.GetOptions(null);
                     chatOptions.InputFile = chatPage.InputFile;
-                    chatOptions.OutputFile = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatPage.VideoId, chatPage.VideoCreatedAt, chatPage.textStreamer.Text) + "." + chatOptions.FileExtension);
+                    chatOptions.OutputFile = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatPage.VideoId, chatPage.VideoCreatedAt, chatPage.textStreamer.Text,
+                        chatOptions.CropBeginning ? TimeSpan.FromSeconds(chatOptions.CropBeginningTime) : TimeSpan.Zero,  chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatPage.VideoLength
+                        ) + "." + chatOptions.FileExtension);
 
                     chatTask.UpdateOptions = chatOptions;
                     chatTask.Info.Title = chatPage.textTitle.Text;
@@ -399,7 +403,9 @@ namespace TwitchDownloaderWPF
                                 downloadOptions.CropEnding = false;
                                 downloadOptions.DownloadThreads = Settings.Default.VodDownloadThreads;
                                 downloadOptions.ThrottleKb = Settings.Default.MaximumBandwidthKb;
-                                downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateVod, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + ".mp4");
+                                downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer,
+                                    downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,  downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(dataList[i].Length)
+                                    ) + ".mp4");
                                 downloadTask.DownloadOptions = downloadOptions;
                                 downloadTask.Info.Title = dataList[i].Title;
                                 downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
@@ -415,7 +421,8 @@ namespace TwitchDownloaderWPF
                                 ClipDownloadTask downloadTask = new ClipDownloadTask();
                                 ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
                                 downloadOptions.Id = dataList[i].Id;
-                                downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateClip, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + ".mp4");
+                                downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer,
+                                    TimeSpan.Zero, TimeSpan.FromSeconds(dataList[i].Length)) + ".mp4");
                                 downloadTask.DownloadOptions = downloadOptions;
                                 downloadTask.Info.Title = dataList[i].Title;
                                 downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
@@ -444,7 +451,9 @@ namespace TwitchDownloaderWPF
                             downloadOptions.Id = dataList[i].Id;
                             downloadOptions.CropBeginning = false;
                             downloadOptions.CropEnding = false;
-                            downloadOptions.Filename = Path.Combine(folderPath, MainWindow.GetFilename(Settings.Default.TemplateChat, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer) + "." + downloadOptions.FileExtension);
+                            downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer,
+                                downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,  downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(dataList[i].Length)
+                                ) + "." + downloadOptions.FileExtension);
                             downloadTask.DownloadOptions = downloadOptions;
                             downloadTask.Info.Title = dataList[i].Title;
                             downloadTask.Info.Thumbnail = dataList[i].Thumbnail;

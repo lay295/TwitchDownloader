@@ -30,6 +30,7 @@ namespace TwitchDownloaderWPF
         public ChatRoot ChatJsonInfo;
         public string VideoId;
         public DateTime VideoCreatedAt;
+        public TimeSpan VideoLength;
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageChatUpdate()
@@ -76,9 +77,9 @@ namespace TwitchDownloaderWPF
             numEndMinute.Value = chatEnd.Minutes;
             numEndSecond.Value = chatEnd.Seconds;
 
-            TimeSpan videoLength = TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.length) ? 0.0 : ChatJsonInfo.video.length);
-            labelLength.Text = videoLength.Seconds > 0
-                ? videoLength.ToString("c")
+            VideoLength = TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.length) ? 0.0 : ChatJsonInfo.video.length);
+            labelLength.Text = VideoLength.Seconds > 0
+                ? VideoLength.ToString("c")
                 : Translations.Strings.Unknown;
 
             VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1";
@@ -99,10 +100,10 @@ namespace TwitchDownloaderWPF
                 }
                 else
                 {
-                    videoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
-                    labelLength.Text = videoLength.ToString("c");
-                    numStartHour.Maximum = (int)videoLength.TotalHours;
-                    numEndHour.Maximum = (int)videoLength.TotalHours;
+                    VideoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
+                    labelLength.Text = VideoLength.ToString("c");
+                    numStartHour.Maximum = (int)VideoLength.TotalHours;
+                    numEndHour.Maximum = (int)VideoLength.TotalHours;
 
                     try
                     {
@@ -136,8 +137,8 @@ namespace TwitchDownloaderWPF
                 }
                 else
                 {
-                    videoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
-                    labelLength.Text = videoLength.ToString("c");
+                    VideoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
+                    labelLength.Text = VideoLength.ToString("c");
 
                     try
                     {
@@ -460,7 +461,10 @@ namespace TwitchDownloaderWPF
             else if (radioText.IsChecked == true)
                 saveFileDialog.Filter = "TXT Files | *.txt";
 
-            saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text);
+            saveFileDialog.FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text,
+                ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text,
+                checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.start) ? 0.0 : ChatJsonInfo.video.start),
+                checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : VideoLength);
 
             if (saveFileDialog.ShowDialog() != true)
             {
