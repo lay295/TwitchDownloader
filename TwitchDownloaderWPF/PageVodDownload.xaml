@@ -84,7 +84,7 @@
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndMinute" ValueChanged="numEndMinute_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndSecond" ValueChanged="numEndSecond_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
-                    <hc:NumericUpDown Margin="2,5,0,0" Minimum="1" Value="4" Maximum="10" Width="60" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <hc:NumericUpDown Margin="2,5,0,0" Minimum="1" Value="4" Maximum="10" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     <PasswordBox x:Name="passwordOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" PasswordChanged="passwordOauth_PasswordChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
             </StackPanel>
