@@ -30,6 +30,7 @@ namespace TwitchDownloaderWPF
         public Dictionary<string, (string url, int bandwidth)> videoQualties = new();
         public int currentVideoId;
         public DateTime currentVideoTime;
+        public TimeSpan vodLength;
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageVodDownload()
@@ -129,7 +130,7 @@ namespace TwitchDownloaderWPF
                 }
                 comboQuality.SelectedIndex = 0;
 
-                TimeSpan vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
+                vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                 textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
                 textTitle.Text = taskVideoInfo.Result.data.video.title;
                 var videoCreatedAt = taskVideoInfo.Result.data.video.createdAt;
@@ -192,7 +193,9 @@ namespace TwitchDownloaderWPF
             {
                 DownloadThreads = (int)numDownloadThreads.Value,
                 ThrottleKb = Settings.Default.MaximumBandwidthKb,
-                Filename = filename ?? Path.Combine(folder, MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text) + ".mp4"),
+                Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
+                    checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
+                    checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength) + ".mp4"),
                 Oauth = passwordOauth.Password,
                 Quality = GetQualityWithoutSize(comboQuality.Text).ToString(),
                 Id = currentVideoId,
@@ -215,7 +218,7 @@ namespace TwitchDownloaderWPF
                 : TimeSpan.Zero;
             var cropEnd = checkEnd.IsChecked == true
                 ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value)
-                : TimeSpan.Parse(labelLength.Text);
+                : vodLength;
             for (int i = 0; i < comboQuality.Items.Count; i++)
             {
                 var qualityWithSize = (string)comboQuality.Items[i];
@@ -229,7 +232,7 @@ namespace TwitchDownloaderWPF
             comboQuality.SelectedIndex = selectedIndex;
         }
 
-        private ReadOnlySpan<char> GetQualityWithoutSize(string qualityWithSize)
+        private static ReadOnlySpan<char> GetQualityWithoutSize(string qualityWithSize)
         {
             int qualityIndex = qualityWithSize.LastIndexOf(" - ");
             return qualityIndex == -1
@@ -242,17 +245,17 @@ namespace TwitchDownloaderWPF
         {
             var sizeInBytes = EstimateVideoSizeBytes(bandwidth, startTime, endTime);
 
-            const long ONE_KILOBYTE = 1024;
-            const long ONE_MEGABYTE = 1_048_576;
-            const long ONE_GIGABYTE = 1_073_741_824;
+            const long ONE_KIBIBYTE = 1024;
+            const long ONE_MEBIBYTE = 1_048_576;
+            const long ONE_GIBIBYTE = 1_073_741_824;
 
             return sizeInBytes switch
             {
                 < 1 => "",
-                < ONE_KILOBYTE => $" - {sizeInBytes}B",
-                < ONE_MEGABYTE => $" - {(float)sizeInBytes / ONE_KILOBYTE:F1}KB",
-                < ONE_GIGABYTE => $" - {(float)sizeInBytes / ONE_MEGABYTE:F1}MB",
-                _ => $" - {(float)sizeInBytes / ONE_GIGABYTE:F1}GB",
+                < ONE_KIBIBYTE => $" - {sizeInBytes}B",
+                < ONE_MEBIBYTE => $" - {(float)sizeInBytes / ONE_KIBIBYTE:F1}KiB",
+                < ONE_GIBIBYTE => $" - {(float)sizeInBytes / ONE_MEBIBYTE:F1}MiB",
+                _ => $" - {(float)sizeInBytes / ONE_GIBIBYTE:F1}GiB",
             };
         }
 
@@ -314,9 +317,8 @@ namespace TwitchDownloaderWPF
         {
             if ((bool)checkStart.IsChecked)
             {
-                var videoLength = TimeSpan.Parse(labelLength.Text);
                 var beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                if (beginTime.TotalSeconds >= videoLength.TotalSeconds)
+                if (beginTime.TotalSeconds >= vodLength.TotalSeconds)
                 {
                     return false;
                 }
@@ -324,7 +326,7 @@ namespace TwitchDownloaderWPF
                 if ((bool)checkEnd.IsChecked)
                 {
                     var endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                    if (endTime.TotalSeconds < beginTime.TotalSeconds)
+                    if (endTime.TotalSeconds < vodLength.TotalSeconds)
                     {
                         return false;
                     }
@@ -416,7 +418,9 @@ namespace TwitchDownloaderWPF
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "MP4 Files | *.mp4",
-                FileName = MainWindow.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text)
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
+                    checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
+                    checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength)
             };
             if (saveFileDialog.ShowDialog() == false)
             {

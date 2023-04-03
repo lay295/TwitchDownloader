@@ -299,7 +299,7 @@
     <value>FFZ Emojileri:</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
-    <value>{title} {id} {date} {channel} {date_custom=""} {random_string}</value>
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {crop_start} {crop_end} {crop_start_custom=""} {crop_end_custom=""}</value>
     <comment>Do not translate</comment>
   </data>
   <data name="FontColor" xml:space="preserve">
@@ -732,5 +732,8 @@
   </data>
   <data name="OutlineScale" xml:space="preserve">
     <value>Outline Scale:</value>
+  </data>
+  <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
+    <value>C# standard TimeSpan format strings</value>
   </data>
 </root>

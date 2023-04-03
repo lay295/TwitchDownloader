@@ -30,6 +30,7 @@ namespace TwitchDownloaderWPF
         public string downloadId;
         public int streamerId;
         public DateTime currentVideoTime;
+        public TimeSpan vodLength;
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageChatDownload()
@@ -121,7 +122,7 @@ namespace TwitchDownloaderWPF
                             imgThumbnail.Source = image;
                         }
                     }
-                    TimeSpan vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
+                    vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                     textTitle.Text = videoInfo.data.video.title;
                     textStreamer.Text = videoInfo.data.video.owner.displayName;
                     var videoTime = videoInfo.data.video.createdAt;
@@ -456,7 +457,9 @@ namespace TwitchDownloaderWPF
             else if (radioText.IsChecked == true)
                 saveFileDialog.Filter = "TXT Files | *.txt";
 
-            saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text);
+            saveFileDialog.FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text,
+                checkCropStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
+                checkCropEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength);
 
             if (saveFileDialog.ShowDialog() != true)
             {

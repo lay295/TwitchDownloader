@@ -83,43 +83,5 @@ namespace TwitchDownloaderWPF
             AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
 #endif
         }
-
-        internal static string[] GetTemplateSubfolders(ref string fullPath)
-        {
-            string[] returnString = fullPath.Split(new char[] { '\\', '/'}, StringSplitOptions.RemoveEmptyEntries);
-            fullPath = returnString[returnString.Length- 1];
-            Array.Resize(ref returnString, returnString.Length - 1);
-            return returnString;
-        }
-
-        internal static string GetFilename(string template, string title, string id, DateTime date, string channel)
-        {
-            StringBuilder returnString = new StringBuilder(template.Replace("{title}", title).Replace("{id}", id).Replace("{channel}", channel).Replace("{date}", date.ToString("Mdyy")).Replace("{random_string}", Path.GetRandomFileName().Split('.').First()));
-            Regex dateRegex = new Regex("{date_custom=\"(.*)\"}");
-            bool done = false;
-            while (!done)
-            {
-                Match dateRegexMatch = dateRegex.Match(returnString.ToString());
-                if (dateRegexMatch.Success)
-                {
-                    string formatString = dateRegexMatch.Groups[1].Value;
-                    returnString.Remove(dateRegexMatch.Groups[0].Index, dateRegexMatch.Groups[0].Length);
-                    returnString.Insert(dateRegexMatch.Groups[0].Index, date.ToString(formatString));
-                }
-                else
-                {
-                    done = true;
-                }
-            }
-
-            string fileName = returnString.ToString();
-            string[] additionalSubfolders = GetTemplateSubfolders(ref fileName);
-            return Path.Combine(Path.Combine(additionalSubfolders), RemoveInvalidChars(fileName));
-        }
-
-        public static string RemoveInvalidChars(string filename)
-        {
-            return string.Concat(filename.Split(Path.GetInvalidFileNameChars()));
-        }
     }
 }

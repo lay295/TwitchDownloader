@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Chat
@@ -28,17 +29,16 @@ namespace TwitchDownloaderCore.Chat
                 if (timeFormat == TimestampFormat.Utc)
                 {
                     string timestamp = comment.created_at.ToString("u").Replace("Z", " UTC");
-                    await sw.WriteLineAsync(string.Format("[{0}] {1}: {2}", timestamp, username, message));
+                    await sw.WriteLineAsync($"[{timestamp}] {username}: {message}");
                 }
                 else if (timeFormat == TimestampFormat.Relative)
                 {
-                    var time = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
-                    string timestamp = time.ToString(@"h\:mm\:ss");
-                    await sw.WriteLineAsync(string.Format("[{0}] {1}: {2}", timestamp, username, message));
+                    var time = TimeSpan.FromSeconds(comment.content_offset_seconds);
+                    await sw.WriteLineAsync(string.Format(new TimeSpanHFormat(), @"[{0:H\:mm\:ss}] {1}: {2}", time, username, message));
                 }
                 else if (timeFormat == TimestampFormat.None)
                 {
-                    await sw.WriteLineAsync(string.Format("{0}: {1}", username, message));
+                    await sw.WriteLineAsync($"{username}: {message}");
                 }
             }
 

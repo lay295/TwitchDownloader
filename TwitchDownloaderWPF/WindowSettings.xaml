@@ -11,7 +11,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
-        Title="Global Settings" MinWidth="400" MinHeight="450" Width="500" Height="500" Initialized="Window_Initialized" Closing="Window_Closing">
+        Title="Global Settings" MinWidth="400" MinHeight="460" Width="500" Height="547" Initialized="Window_Initialized" Closing="Window_Closing">
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="8"/>
@@ -79,6 +79,9 @@
                 <LineBreak/>
                 <Run Text="{lex:Loc DateCustomFormatting}" />
                 <Hyperlink NavigateUri="https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc DateCustomFormattingHyperlink}" /></Hyperlink>
+                <LineBreak/>
+                <Run Text="{lex:Loc TimeSpanCustomFormatting}" />
+                <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-timespan-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc TimeSpanCustomFormattingHyperlink}" /></Hyperlink>
             </TextBlock>
         </StackPanel>
     </Grid>

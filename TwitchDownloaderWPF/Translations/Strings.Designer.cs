@@ -717,7 +717,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {title} {id} {date} {channel} {date_custom=&quot;&quot;} {random_string}.
+        ///   Looks up a localized string similar to {title} {id} {date} {channel} {date_custom=&quot;&quot;} {random_string} {crop_start} {crop_end} {crop_start_custom=&quot;&quot;} {crop_end_custom=&quot;&quot;}.
         /// </summary>
         public static string FilenameTemplateParameters {
             get {
@@ -1487,6 +1487,24 @@ namespace TwitchDownloaderWPF.Translations {
         public static string ThirdPartyEmotesTooltip {
             get {
                 return ResourceManager.GetString("ThirdPartyEmotesTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to crop_start_custom and crop_end_custom formattings are based on the.
+        /// </summary>
+        public static string TimeSpanCustomFormatting {
+            get {
+                return ResourceManager.GetString("TimeSpanCustomFormatting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to C# standard TimeSpan format strings.
+        /// </summary>
+        public static string TimeSpanCustomFormattingHyperlink {
+            get {
+                return ResourceManager.GetString("TimeSpanCustomFormattingHyperlink", resourceCulture);
             }
         }
         

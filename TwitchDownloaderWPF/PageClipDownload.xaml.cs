@@ -25,6 +25,7 @@ namespace TwitchDownloaderWPF
     {
         public string clipId = "";
         public DateTime currentVideoTime;
+        public TimeSpan clipLength;
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageClipDownload()
@@ -65,7 +66,7 @@ namespace TwitchDownloaderWPF
                         imgThumbnail.Source = image;
                     }
                 }
-                TimeSpan clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
+                clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                 textStreamer.Text = clipData.data.clip.broadcaster.displayName;
                 var clipCreatedAt = clipData.data.clip.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
@@ -173,7 +174,7 @@ namespace TwitchDownloaderWPF
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "MP4 Files | *.mp4",
-                FileName = MainWindow.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text)
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, TimeSpan.Zero, clipLength)
             };
             if (saveFileDialog.ShowDialog() != true)
             {
