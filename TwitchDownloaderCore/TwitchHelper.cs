@@ -34,6 +34,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlVideoResponse>();
         }
 
@@ -49,6 +50,7 @@ namespace TwitchDownloaderCore
             if (authToken != null && authToken != "")
                 request.Headers.Add("Authorization", "OAuth " + authToken);
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlVideoTokenResponse>();
         }
 
@@ -74,6 +76,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlClipResponse>();
         }
 
@@ -87,6 +90,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<List<GqlClipTokenResponse>>();
         }
 
@@ -100,6 +104,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlVideoSearchResponse>();
         }
 
@@ -113,6 +118,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlClipSearchResponse>();
         }
 
@@ -148,6 +154,7 @@ namespace TwitchDownloaderCore
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.betterttv.net/3/cached/emotes/global", UriKind.Absolute));
             using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+            globalEmoteResponse.EnsureSuccessStatusCode();
             var BTTV = await globalEmoteResponse.Content.ReadFromJsonAsync<List<BTTVEmote>>();
 
             //Channel might not have BTTV emotes
@@ -177,6 +184,7 @@ namespace TwitchDownloaderCore
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.betterttv.net/3/cached/frankerfacez/emotes/global", UriKind.Absolute));
             using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+            globalEmoteResponse.EnsureSuccessStatusCode();
             var FFZ = await globalEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>();
 
             //Channel might not have FFZ emotes
@@ -205,6 +213,7 @@ namespace TwitchDownloaderCore
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://7tv.io/v3/emote-sets/global", UriKind.Absolute));
             using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+            globalEmoteResponse.EnsureSuccessStatusCode();
             var globalEmoteObject = await globalEmoteResponse.Content.ReadFromJsonAsync<STVGlobalEmoteResponse>();
             var stvEmotes = globalEmoteObject.emotes;
 
@@ -437,10 +446,12 @@ namespace TwitchDownloaderCore
             // TODO: would want to make this configurable as we do for emotes though...
             var globalBadgeRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://badges.twitch.tv/v1/badges/global/display", UriKind.Absolute));
             using var globalBadgeResponse = await httpClient.SendAsync(globalBadgeRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            globalBadgeResponse.EnsureSuccessStatusCode();
             var globalBadges = await globalBadgeResponse.Content.ReadFromJsonAsync<TwitchBadgeResponse>(cancellationToken: cancellationToken);
 
             var subBadgeRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display", UriKind.Absolute));
             using var subBadgeResponse = await httpClient.SendAsync(subBadgeRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            subBadgeResponse.EnsureSuccessStatusCode();
             var subBadges = await subBadgeResponse.Content.ReadFromJsonAsync<TwitchBadgeResponse>(cancellationToken: cancellationToken);
 
             List<EmbedChatBadge> badges = new List<EmbedChatBadge>();
@@ -643,6 +654,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var cheerResponseMessage = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            cheerResponseMessage.EnsureSuccessStatusCode();
             var cheerResponse = await cheerResponseMessage.Content.ReadFromJsonAsync<GqlCheerResponse>(cancellationToken: cancellationToken);
 
             string bitFolder = Path.Combine(cacheFolder, "bits");
@@ -814,6 +826,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlUserInfoResponse>();
         }
 
@@ -890,6 +903,7 @@ namespace TwitchDownloaderCore
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
         }
     }
