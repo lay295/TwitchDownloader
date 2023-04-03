@@ -29,7 +29,7 @@ namespace TwitchDownloaderWPF
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             // Set the working dir to the process dir if run from sys32/syswow64
-            var processDir = Directory.GetParent(Environment.ProcessPath).FullName;
+            var processDir = Directory.GetParent(Environment.ProcessPath!)!.FullName;
             if (Environment.CurrentDirectory != processDir)
             {
                 Environment.CurrentDirectory = processDir;
@@ -37,7 +37,7 @@ namespace TwitchDownloaderWPF
 
             RequestCultureChange();
 
-            WindowsThemeService windowsThemeService = new();
+            var windowsThemeService = new WindowsThemeService();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
             MainWindow = new MainWindow();
@@ -46,7 +46,7 @@ namespace TwitchDownloaderWPF
 
         private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            Exception ex = e.Exception;
+            var ex = e.Exception;
             MessageBox.Show(ex.ToString(), Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
 
             Current?.Shutdown();
@@ -54,7 +54,7 @@ namespace TwitchDownloaderWPF
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Exception ex = (Exception)e.ExceptionObject;
+            var ex = (Exception)e.ExceptionObject;
             MessageBox.Show(ex.ToString(), Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
 
             Current?.Shutdown();

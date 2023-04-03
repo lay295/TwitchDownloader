@@ -3,7 +3,6 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using SkiaSharp;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -30,11 +29,8 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageChatRender : Page
     {
-        public SKPaint imagePaint = new SKPaint() { IsAntialias = true, FilterQuality = SKFilterQuality.High };
-        public SKPaint emotePaint = new SKPaint() { IsAntialias = true, FilterQuality = SKFilterQuality.High };
         public List<string> ffmpegLog = new List<string>();
         public SKFontManager fontManager = SKFontManager.CreateDefault();
-        public ConcurrentDictionary<char, SKPaint> fallbackCache = new ConcurrentDictionary<char, SKPaint>();
         public string[] FileNames = Array.Empty<string>();
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -353,7 +349,7 @@ namespace TwitchDownloaderWPF
             {
                 if (!File.Exists(fileName))
                 {
-                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.FileNotFound + Path.GetFileName(fileName));
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.FileNotFound + ' ' + Path.GetFileName(fileName));
                     return false;
                 }
             }
@@ -689,7 +685,7 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidCropInputs);
+                MessageBox.Show(Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

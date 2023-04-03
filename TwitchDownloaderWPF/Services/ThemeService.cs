@@ -10,7 +10,7 @@ using TwitchDownloaderWPF.Properties;
 
 namespace TwitchDownloaderWPF.Services
 {
-    public partial class ThemeService
+    public class ThemeService
     {
         private const int TITLEBAR_THEME_ATTRIBUTE = 20;
 
