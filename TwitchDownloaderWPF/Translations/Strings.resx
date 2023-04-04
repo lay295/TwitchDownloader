@@ -511,7 +511,7 @@
     <value>Top 24 Hours</value>
   </data>
   <data name="UnableToFindThumbnail" xml:space="preserve">
-    <value>Unable To Find Thumbnail</value>
+    <value>Unable to find thumbnail</value>
   </data>
   <data name="UnableToGetClipInfo" xml:space="preserve">
     <value>Unable to get Clip information. Please double check Clip ID and try again.</value>

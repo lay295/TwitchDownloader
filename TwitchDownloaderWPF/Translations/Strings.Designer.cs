@@ -1653,7 +1653,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable To Find Thumbnail.
+        ///   Looks up a localized string similar to Unable to find thumbnail.
         /// </summary>
         public static string UnableToFindThumbnail {
             get {

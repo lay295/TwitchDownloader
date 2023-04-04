@@ -61,10 +61,14 @@ namespace TwitchDownloaderWPF
             ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, true, false, CancellationToken.None);
             ChatJsonInfo.comments.RemoveRange(1, ChatJsonInfo.comments.Count - 2);
             GC.Collect();
-            textStreamer.Text = ChatJsonInfo.streamer.name;
-            var videoCreatedAt = ChatJsonInfo.video.created_at;
+
+            var videoCreatedAt = ChatJsonInfo.video.created_at == DateTime.MinValue
+                ? ChatJsonInfo.comments[0].created_at - TimeSpan.FromSeconds(ChatJsonInfo.comments[0].content_offset_seconds)
+                : ChatJsonInfo.video.created_at;
             textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
             VideoCreatedAt = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
+
+            textStreamer.Text = ChatJsonInfo.streamer.name;
             textTitle.Text = ChatJsonInfo.video.title ?? Translations.Strings.Unknown;
 
             TimeSpan chatStart = TimeSpan.FromSeconds(ChatJsonInfo.video.start);
