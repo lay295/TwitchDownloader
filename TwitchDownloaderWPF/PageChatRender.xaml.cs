@@ -37,6 +37,15 @@ namespace TwitchDownloaderWPF
         public PageChatRender()
         {
             InitializeComponent();
+            App.CultureServiceSingleton.CultureChanged += OnCultureChanged;
+        }
+
+        private void OnCultureChanged(object sender, CultureInfo e)
+        {
+            if (IsInitialized)
+            {
+                LoadSettings();
+            }
         }
 
         private void btnBrowse_Click(object sender, RoutedEventArgs e)
@@ -474,6 +483,7 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
+            SaveSettings();
             WindowSettings settings = new WindowSettings();
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;

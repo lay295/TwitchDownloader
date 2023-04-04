@@ -14,6 +14,7 @@ namespace TwitchDownloaderWPF
     public partial class App : Application
     {
         public static ThemeService ThemeServiceSingleton { get; private set; }
+        public static CultureService CultureServiceSingleton { get; private set; }
         public static App AppSingleton { get; private set; }
 
         public App()
@@ -35,6 +36,7 @@ namespace TwitchDownloaderWPF
                 Environment.CurrentDirectory = processDir;
             }
 
+            CultureServiceSingleton = new CultureService();
             RequestCultureChange();
 
             var windowsThemeService = new WindowsThemeService();
@@ -67,6 +69,6 @@ namespace TwitchDownloaderWPF
             => ThemeServiceSingleton.SetTitleBarTheme(Windows);
 
         public void RequestCultureChange()
-            => CultureService.SetApplicationCulture(Settings.Default.GuiCulture);
+            => CultureServiceSingleton.SetApplicationCulture(Settings.Default.GuiCulture);
     }
 }
