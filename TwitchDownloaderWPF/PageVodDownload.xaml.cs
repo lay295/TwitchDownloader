@@ -326,7 +326,7 @@ namespace TwitchDownloaderWPF
                 if ((bool)checkEnd.IsChecked)
                 {
                     var endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                    if (endTime.TotalSeconds < vodLength.TotalSeconds)
+                    if (endTime.TotalSeconds < beginTime.TotalSeconds)
                     {
                         return false;
                     }
