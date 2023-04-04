@@ -165,7 +165,7 @@
     <value>Значки чата:</value>
   </data>
   <data name="ChatCrop" xml:space="preserve">
-    <value>Масштабирование:</value>
+    <value>Обрезать:</value>
   </data>
   <data name="ChatDownload" xml:space="preserve">
     <value>Скачать чат</value>
@@ -231,7 +231,7 @@
     <value>C# строках стандартных форматов даты и времени</value>
   </data>
   <data name="DeleteConfirmation" xml:space="preserve">
-    <value>Delete Confirmation</value>
+    <value>Подтвердите удаление</value>
   </data>
   <data name="DonateTooltip" xml:space="preserve">
     <value>Часто импользуете программу и хотите поддержать меня? Подарите мне чашечку кофе :)</value>
@@ -327,7 +327,7 @@
     <value>Пожалуйста, введите правильную ссылку/ID клипа\nПример:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
   </data>
   <data name="InvalidCropInputs" xml:space="preserve">
-    <value>Invalid Crop Inputs</value>
+    <value>Неправильные границы обрезки</value>
   </data>
   <data name="InvalidStartEndTime" xml:space="preserve">
     <value>Неправильное начальное или конечное время</value>
@@ -511,7 +511,7 @@
     <value>Топ 24 часа</value>
   </data>
   <data name="UnableToFindThumbnail" xml:space="preserve">
-    <value>Unable To Find Thumbnail</value>
+    <value>Не удалось найти превью</value>
   </data>
   <data name="UnableToGetClipInfo" xml:space="preserve">
     <value>Не удалось найти информацию о клипе. Пожалуйста перепроверьте ID клипа и попробуйте заново.</value>
@@ -526,10 +526,10 @@
     <value>Не удалось получить информацию о видео. Пожалуйта убедитесь, что ссылка/ID видео правильные и попробуйте заново.</value>
   </data>
   <data name="UnableToParseInputs" xml:space="preserve">
-    <value>Unable to parse inputs</value>
+    <value>Не удалось распознать ввод</value>
   </data>
   <data name="UnableToParseInputsMessage" xml:space="preserve">
-    <value>Please double check your inputs are valid</value>
+    <value>Пожалуйста перепроверьте введенные значения</value>
   </data>
   <data name="UnableToParseLink" xml:space="preserve">
     <value>Не удалось распознать ссылку</value>
@@ -593,7 +593,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="RenderChat" xml:space="preserve">
-    <value>Render Chat</value>
+    <value>Рендер чата</value>
   </data>
   <data name="HighlightIndentScale" xml:space="preserve">
     <value>Размер отступа выделения:</value>
@@ -657,7 +657,7 @@
     <comment>Do not translate</comment>
   </data>
   <data name="ThemesFailedToWrite" xml:space="preserve">
-    <value>Some included themes failed to write.</value>
+    <value>Не удалось записать некоторые добавленные темы.</value>
   </data>
   <data name="TitleGlobalSettings" xml:space="preserve">
     <value>Общие настройки</value>
@@ -666,16 +666,16 @@
     <value>Опции очереди</value>
   </data>
   <data name="TitleRenderRange" xml:space="preserve">
-    <value>Select Render Rage (Seconds)</value>
+    <value>Выберите диапазон рендера (Секунды)</value>
   </data>
   <data name="TitleUrlList" xml:space="preserve">
     <value>Список URL для массовой загузки</value>
   </data>
   <data name="TitleVideoMassDownloader" xml:space="preserve">
-    <value>Video Mass Downloader</value>
+    <value>Массовая загрузка видео</value>
   </data>
   <data name="TitleClipMassDownloader" xml:space="preserve">
-    <value>Clip Mass Downloader</value>
+    <value>Массовая загрузка клипов</value>
   </data>
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
     <value>TwitchDownloaderWPF не доступен на твоем языке? Нажми здесь чтобы узнать как помочь с переводом!</value>
@@ -733,9 +733,9 @@
     <value>Outline Scale:</value>
   </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
-    <value>C# standard TimeSpan format strings</value>
+    <value>C# строки стандартного формата TimeSpan</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
-    <value>crop_start_custom and crop_end_custom formattings are based on the</value>
+    <value>crop_start_custom and crop_end_custom форматирование основанно на</value>
   </data>
 </root>
