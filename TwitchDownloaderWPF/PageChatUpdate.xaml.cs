@@ -127,8 +127,11 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                numStartHour.Maximum = 0;
-                numEndHour.Maximum = 0;
+                if (VideoId != "-1")
+                {
+                    numStartHour.Maximum = 0;
+                    numEndHour.Maximum = 0;
+                }
                 GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
                 if (videoInfo.data.clip.video == null)
                 {

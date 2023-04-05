@@ -10,18 +10,24 @@ namespace TwitchDownloaderWPF.Services
     {
         private static string[] GetTemplateSubfolders(ref string fullPath)
         {
-            string[] returnString = fullPath.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+            var returnString = fullPath.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
             fullPath = returnString[^1];
             Array.Resize(ref returnString, returnString.Length - 1);
+
+            for (var i = 0; i < returnString.Length; i++)
+            {
+                returnString[i] = RemoveInvalidFilenameChars(returnString[i]);
+            }
+
             return returnString;
         }
 
         internal static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan cropStart, TimeSpan cropEnd)
         {
             var stringBuilder = new StringBuilder(template)
-                .Replace("{title}", title)
+                .Replace("{title}", RemoveInvalidFilenameChars(title))
                 .Replace("{id}", id)
-                .Replace("{channel}", channel)
+                .Replace("{channel}", RemoveInvalidFilenameChars(channel))
                 .Replace("{date}", date.ToString("Mdyy"))
                 .Replace("{random_string}", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()))
                 .Replace("{crop_start}", string.Format(new TimeSpanHFormat(), @"{0:HH\-mm\-ss}", cropStart))
@@ -38,7 +44,7 @@ namespace TwitchDownloaderWPF.Services
                     {
                         var formatString = dateMatch.Groups[1].Value;
                         stringBuilder.Remove(dateMatch.Groups[0].Index, dateMatch.Groups[0].Length);
-                        stringBuilder.Insert(dateMatch.Groups[0].Index, date.ToString(formatString));
+                        stringBuilder.Insert(dateMatch.Groups[0].Index, RemoveInvalidFilenameChars(date.ToString(formatString)));
                     }
                     else
                     {
@@ -58,7 +64,7 @@ namespace TwitchDownloaderWPF.Services
                     {
                         var formatString = cropStartMatch.Groups[1].Value;
                         stringBuilder.Remove(cropStartMatch.Groups[0].Index, cropStartMatch.Groups[0].Length);
-                        stringBuilder.Insert(cropStartMatch.Groups[0].Index, cropStart.ToString(formatString));
+                        stringBuilder.Insert(cropStartMatch.Groups[0].Index, RemoveInvalidFilenameChars(cropStart.ToString(formatString)));
                     }
                     else
                     {
@@ -78,7 +84,7 @@ namespace TwitchDownloaderWPF.Services
                     {
                         var formatString = cropEndMatch.Groups[1].Value;
                         stringBuilder.Remove(cropEndMatch.Groups[0].Index, cropEndMatch.Groups[0].Length);
-                        stringBuilder.Insert(cropEndMatch.Groups[0].Index, cropEnd.ToString(formatString));
+                        stringBuilder.Insert(cropEndMatch.Groups[0].Index, RemoveInvalidFilenameChars(cropEnd.ToString(formatString)));
                     }
                     else
                     {
@@ -94,7 +100,17 @@ namespace TwitchDownloaderWPF.Services
 
         private static string RemoveInvalidFilenameChars(string filename)
         {
-            return string.Concat(filename.Split(Path.GetInvalidFileNameChars()));
+            if (string.IsNullOrWhiteSpace(filename))
+            {
+                return filename;
+            }
+
+            if (filename.IndexOfAny(Path.GetInvalidFileNameChars()) == -1)
+            {
+                return filename;
+            }
+
+            return string.Join('_', filename.Split(Path.GetInvalidFileNameChars()));
         }
     }
 }
