@@ -229,21 +229,17 @@ namespace TwitchDownloaderCore.Tools
             }
 
             subMessageComment.message.fragments.RemoveRange(1, comment.message.fragments.Count - 1);
+            subMessageComment.message.emoticons.Clear();
 
-            if (comment.message.fragments[1].emoticon is not null)
+            // Check to see if there is a custom message before the next fragment
+            // i.e. Foobar subscribed with Prime. They've subscribed for 45 months! Hey PogChamp
+            if (!customMessage.StartsWith(comment.message.fragments[1].text)) // If yes
             {
-                // Check to see if there is a custom message before the emote
-                // i.e. Foobar subscribed with Prime. They've subscribed for 45 months! Hey PogChamp
-                if (!customMessage.StartsWith(comment.message.fragments[1].text)) // If yes
-                {
-                    customMessageComment.message.fragments[0].text = customMessage[..(customMessage.IndexOf(comment.message.fragments[1].text) - 1)];
-                    return (subMessageComment, customMessageComment);
-                }
-
-                customMessageComment.message.fragments.RemoveAt(0);
+                customMessageComment.message.fragments[0].text = customMessage[..(customMessage.IndexOf(comment.message.fragments[1].text) - 1)];
                 return (subMessageComment, customMessageComment);
             }
 
+            customMessageComment.message.fragments.RemoveAt(0);
             return (subMessageComment, customMessageComment);
         }
 
