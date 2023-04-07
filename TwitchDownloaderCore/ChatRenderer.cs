@@ -839,7 +839,7 @@ namespace TwitchDownloaderCore
                 {
                     if (nonEmojiBuffer.Length > 0)
                     {
-                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), true, true);
+                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
                         nonEmojiBuffer.Clear();
                     }
 
