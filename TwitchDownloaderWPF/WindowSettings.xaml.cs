@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,8 +16,6 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class WindowSettings : Window
     {
-        private readonly List<(string name, string nativeName)> _cultureList = new();
-
         public WindowSettings()
         {
             InitializeComponent();
@@ -62,16 +59,13 @@ namespace TwitchDownloaderWPF
             comboTheme.SelectedItem = Settings.Default.GuiTheme;
 
             // Setup culture dropdown
-            foreach (var culture in (AvailableCultures.Culture[])Enum.GetValues(typeof(AvailableCultures.Culture)))
+            foreach (var culture in AvailableCultures.All)
             {
-                string name = culture.ToName();
-                string nativeName = culture.ToNativeName();
-                _cultureList.Add((name, nativeName));
-                comboLocale.Items.Add(nativeName);
+                comboLocale.Items.Add(culture.NativeName);
             }
             var currentCulture = Settings.Default.GuiCulture;
-            var selectedIndex = _cultureList.Select((item, index) => new { item, index })
-                .Where(x => x.item.name == currentCulture)
+            var selectedIndex = AvailableCultures.All.Select((item, index) => new { item, index })
+                .Where(x => x.item.Code == currentCulture)
                 .Select(x => x.index)
                 .DefaultIfEmpty(-1)
                 .First();
@@ -157,9 +151,10 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            if (_cultureList[comboLocale.SelectedIndex].name != Settings.Default.GuiCulture)
+            var selectedCulture = AvailableCultures.All[comboLocale.SelectedIndex].Code;
+            if (selectedCulture != Settings.Default.GuiCulture)
             {
-                Settings.Default.GuiCulture = _cultureList[comboLocale.SelectedIndex].name;
+                Settings.Default.GuiCulture = selectedCulture;
                 AppSingleton.RequestCultureChange();
                 Title = Translations.Strings.TitleGlobalSettings;
             }

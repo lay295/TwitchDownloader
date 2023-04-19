@@ -102,10 +102,13 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Translations\Strings.tr.resx">
+    <EmbeddedResource Update="Translations\Strings.fr.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Translations\Strings.fr.resx">
+    <EmbeddedResource Update="Translations\Strings.pl.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Translations\Strings.tr.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
 	  <EmbeddedResource Update="Translations\Strings.ru.resx">
