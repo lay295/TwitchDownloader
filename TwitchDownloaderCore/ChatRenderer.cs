@@ -2,6 +2,7 @@
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -803,8 +804,7 @@ namespace TwitchDownloaderCore
             StringBuilder nonEmojiBuffer = new();
             while (enumerator.MoveNext())
             {
-
-                List<SingleEmoji> emojiMatches = new List<SingleEmoji>();
+                var emojiBag = new ConcurrentBag<SingleEmoji>();
                 if (renderOptions.EmojiVendor != EmojiVendor.None)
                 {
                     Emoji.All.AsParallel()
@@ -813,17 +813,18 @@ namespace TwitchDownloaderCore
                         {
                             if (emoji.Group != "Flags")
                             {
-                                emojiMatches.Add(emoji);
+                                emojiBag.Add(emoji);
                                 return;
                             }
                             if (enumerator.GetTextElement().StartsWith(emoji.Sequence.AsString, StringComparison.Ordinal))
                             {
-                                emojiMatches.Add(emoji);
+                                emojiBag.Add(emoji);
                             }
                         });
                 }
 
                 // Make sure the found emojis actually exist in our cache
+                var emojiMatches = emojiBag.ToList();
                 int emojiMatchesCount = emojiMatches.Count;
                 for (int j = 0; j < emojiMatchesCount; j++)
                 {
