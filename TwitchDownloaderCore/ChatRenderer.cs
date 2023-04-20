@@ -539,7 +539,6 @@ namespace TwitchDownloaderCore
             return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
         }
 
-        // I would prefer if this and its sub-methods were in the CommentSection class ~ScrubN
         private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos, HighlightMessage highlightIcons)
         {
             CommentSection newSection = new CommentSection();
