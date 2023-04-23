@@ -733,9 +733,9 @@
     <value>Outline Scale:</value>
   </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
-    <value>C# standard TimeSpan format strings</value>
+    <value>Standardowych ciągach formatujących TimeSpan C#</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
-    <value>crop_start_custom and crop_end_custom formattings are based on the</value>
+    <value>formatowanie crop_start_custom i crop_end_custom jest bazowane na</value>
   </data>
 </root>
