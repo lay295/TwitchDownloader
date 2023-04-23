@@ -144,7 +144,7 @@ namespace TwitchDownloaderWPF
                         btnPrev.IsEnabled = false;
                     if (res.data.user.clips.pageInfo.hasNextPage)
                     {
-                        string newCursor = res.data.user.clips.edges.Where(x => x.cursor != null).First().cursor;
+                        string newCursor = res.data.user.clips.edges.First(x => x.cursor != null).cursor;
                         if (!cursorList.Contains(newCursor))
                             cursorList.Add(newCursor);
                     }

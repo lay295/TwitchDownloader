@@ -319,9 +319,13 @@ namespace TwitchDownloaderCore
                 if (!Directory.Exists(bttvFolder))
                     TwitchHelper.CreateDirectory(bttvFolder);
 
-                foreach (var emote in emoteDataResponse.BTTV
-                             .Where(emote => !alreadyAdded.Contains(emote.Code))
-                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"))))
+                var emoteResponseItemsQuery = from emote in emoteDataResponse.BTTV
+                    where !alreadyAdded.Contains(emote.Code)
+                    let pattern = $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"
+                    where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
+                    select emote;
+
+                foreach (var emote in emoteResponseItemsQuery)
                 {
                     try
                     {
@@ -342,9 +346,13 @@ namespace TwitchDownloaderCore
                 if (!Directory.Exists(ffzFolder))
                     TwitchHelper.CreateDirectory(ffzFolder);
 
-                foreach (var emote in emoteDataResponse.FFZ
-                             .Where(emote => !alreadyAdded.Contains(emote.Code))
-                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"))))
+                var emoteResponseItemsQuery = from emote in emoteDataResponse.FFZ
+                    where !alreadyAdded.Contains(emote.Code)
+                    let pattern = $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"
+                    where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
+                    select emote;
+
+                foreach (var emote in emoteResponseItemsQuery)
                 {
                     try
                     {
@@ -363,9 +371,13 @@ namespace TwitchDownloaderCore
                 if (!Directory.Exists(stvFolder))
                     TwitchHelper.CreateDirectory(stvFolder);
 
-                foreach (var emote in emoteDataResponse.STV
-                             .Where(emote => !alreadyAdded.Contains(emote.Code))
-                             .Where(emote => comments.Any(c => Regex.IsMatch(c.message.body, $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"))))
+                var emoteResponseItemsQuery = from emote in emoteDataResponse.STV
+                    where !alreadyAdded.Contains(emote.Code)
+                    let pattern = $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"
+                    where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
+                    select emote;
+
+                foreach (var emote in emoteResponseItemsQuery)
                 {
                     try
                     {
@@ -458,8 +470,11 @@ namespace TwitchDownloaderCore
             List<string> alreadyAdded = new List<string>();
 
             foreach (var name in globalBadges.badge_sets.Keys.Union(subBadges.badge_sets.Keys)
-                         .Where(n => !alreadyAdded.Contains(n))
-                         .Where(n => comments.Any(c => c.message.user_badges != null && c.message.user_badges.Any(ub => ub._id == n))))
+                         .Where(name => !alreadyAdded.Contains(name))
+                         .Where(name => comments
+                             .Where(comment => comment.message.user_badges != null)
+                             .Any(comment => comment.message.user_badges
+                                 .Any(ub => ub._id == name))))
             {
                 Dictionary<string, ChatBadgeData> versions = new();
                 foreach (var (version, badge) in globalBadges.badge_sets[name].versions)
@@ -678,19 +693,21 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                foreach (CheerGroup group in groupList)
+                foreach (CheerGroup cheerGroup in groupList)
                 {
-                    string templateURL = group.templateURL;
+                    string templateURL = cheerGroup.templateURL;
 
-                    foreach (CheerNode node in group.nodes)
+                    var cheerNodesQuery = from node in cheerGroup.nodes
+                        where !alreadyAdded.Contains(node.prefix)
+                        let pattern = $@"(?<=^| ){Regex.Escape(node.prefix)}(?=$| )"
+                        where comments
+                            .Where(comment => comment.message.bits_spent > 0)
+                            .Any(comment => Regex.IsMatch(comment.message.body, pattern))
+                        select node;
+
+                    foreach (CheerNode node in cheerNodesQuery)
                     {
                         string prefix = node.prefix;
-                        if (alreadyAdded.Contains(prefix))
-                            continue;
-
-                        if (comments.Where(c => c.message.bits_spent > 0).All(c => !Regex.IsMatch(c.message.body, $@"(?<=^| ){Regex.Escape(node.prefix)}\d")))
-                            continue;
-
                         try
                         {
                             List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
