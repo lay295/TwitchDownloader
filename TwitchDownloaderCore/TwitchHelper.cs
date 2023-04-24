@@ -321,7 +321,7 @@ namespace TwitchDownloaderCore
 
                 var emoteResponseItemsQuery = from emote in emoteDataResponse.BTTV
                     where !alreadyAdded.Contains(emote.Code)
-                    let pattern = $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"
+                    let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
                     where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
                     select emote;
 
@@ -348,7 +348,7 @@ namespace TwitchDownloaderCore
 
                 var emoteResponseItemsQuery = from emote in emoteDataResponse.FFZ
                     where !alreadyAdded.Contains(emote.Code)
-                    let pattern = $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"
+                    let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
                     where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
                     select emote;
 
@@ -373,7 +373,7 @@ namespace TwitchDownloaderCore
 
                 var emoteResponseItemsQuery = from emote in emoteDataResponse.STV
                     where !alreadyAdded.Contains(emote.Code)
-                    let pattern = $@"(?<=^| ){Regex.Escape(emote.Code)}(?=$| )"
+                    let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
                     where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
                     select emote;
 
@@ -699,7 +699,7 @@ namespace TwitchDownloaderCore
 
                     var cheerNodesQuery = from node in cheerGroup.nodes
                         where !alreadyAdded.Contains(node.prefix)
-                        let pattern = $@"(?<=^| ){Regex.Escape(node.prefix)}(?=$| )"
+                        let pattern = $@"(?<=^|\s){Regex.Escape(node.prefix)}(?=[1-9])"
                         where comments
                             .Where(comment => comment.message.bits_spent > 0)
                             .Any(comment => Regex.IsMatch(comment.message.body, pattern))
