@@ -631,7 +631,7 @@ namespace TwitchDownloaderCore
             List<string> codepointList = new List<string>();
             foreach (Codepoint codepoint in codepoints)
             {
-                if (codepoint.Value != 65039)
+                if (codepoint.Value != 0xFE0F)
                 {
                     codepointList.Add(codepoint.Value.ToString("X"));
                 }
@@ -802,27 +802,43 @@ namespace TwitchDownloaderCore
 
         private void DrawEmojiMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
         {
+            if (renderOptions.EmojiVendor == EmojiVendor.None)
+            {
+                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentString, highlightWords, true, true);
+                return;
+            }
+
             var enumerator = StringInfo.GetTextElementEnumerator(fragmentString);
             StringBuilder nonEmojiBuffer = new();
             while (enumerator.MoveNext())
             {
-                var emojiBag = new ConcurrentBag<SingleEmoji>();
-                if (renderOptions.EmojiVendor != EmojiVendor.None)
+                if (enumerator.GetTextElement().Length == 1 && char.IsAscii(enumerator.GetTextElement()[0]))
                 {
-                    Emoji.All.AsParallel()
-                        .Where(emoji => enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder]))
-                        .ForAll(emoji =>
+                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    continue;
+                }
+
+                var emojiBag = new ConcurrentBag<SingleEmoji>();
+                Emoji.All.AsParallel()
+                    .Where(emoji => enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder]))
+                    .ForAll(emoji =>
+                    {
+                        if (emoji.Group != "Flags")
                         {
-                            if (emoji.Group != "Flags")
-                            {
-                                emojiBag.Add(emoji);
-                                return;
-                            }
-                            if (enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
-                            {
-                                emojiBag.Add(emoji);
-                            }
-                        });
+                            emojiBag.Add(emoji);
+                            return;
+                        }
+
+                        if (enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
+                        {
+                            emojiBag.Add(emoji);
+                        }
+                    });
+
+                if (emojiBag.IsEmpty)
+                {
+                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    continue;
                 }
 
                 // Make sure the found emojis actually exist in our cache
@@ -838,43 +854,44 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                if (emojiMatchesCount > 0)
-                {
-                    if (nonEmojiBuffer.Length > 0)
-                    {
-                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
-                        nonEmojiBuffer.Clear();
-                    }
-
-                    SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
-                    SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
-
-                    if (drawPos.X + emojiImage.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
-                    {
-                        AddImageSection(sectionImages, ref drawPos, defaultPos);
-                    }
-
-                    Point emotePoint = new Point
-                    {
-                        X = drawPos.X + (int)Math.Ceiling(renderOptions.EmoteSpacing / 2d), // emotePoint.X halfway through emote padding
-                        Y = (int)((renderOptions.SectionHeight - emojiImage.Height) / 2.0)
-                    };
-
-                    using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
-                    {
-                        if (highlightWords)
-                        {
-                            canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImage.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, new SKPaint() { Color = SKColor.Parse(PURPLE) });
-                        }
-                        canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
-                    }
-
-                    drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
-                }
-                else
+                if (emojiMatchesCount == 0)
                 {
                     nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    continue;
                 }
+
+                if (nonEmojiBuffer.Length > 0)
+                {
+                    DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
+                    nonEmojiBuffer.Clear();
+                }
+
+                SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
+                SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
+
+                if (drawPos.X + emojiImage.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
+                {
+                    AddImageSection(sectionImages, ref drawPos, defaultPos);
+                }
+
+                Point emotePoint = new Point
+                {
+                    X = drawPos.X + (int)Math.Ceiling(renderOptions.EmoteSpacing / 2d), // emotePoint.X halfway through emote padding
+                    Y = (int)((renderOptions.SectionHeight - emojiImage.Height) / 2.0)
+                };
+
+                using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
+                {
+                    if (highlightWords)
+                    {
+                        canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImage.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight,
+                            new SKPaint() { Color = SKColor.Parse(PURPLE) });
+                    }
+
+                    canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
+                }
+
+                drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
             }
             if (nonEmojiBuffer.Length > 0)
             {
@@ -920,7 +937,7 @@ namespace TwitchDownloaderCore
                     }
                     int utf32Char = char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]);
                     //Don't attempt to draw U+E0000
-                    if (utf32Char != 917504)
+                    if (utf32Char != 0xE0000)
                     {
                         using SKPaint highSurrogateFallbackFont = GetFallbackFont(utf32Char, renderOptions).Clone();
                         highSurrogateFallbackFont.Color = renderOptions.MessageColor;
