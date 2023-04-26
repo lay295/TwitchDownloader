@@ -12,7 +12,7 @@ body:
   attributes:
     label: Checklist
     options:
-      - label: I have checked the [issue page](https://github.com/lay295/TwitchDownloader/issues) for duplicates
+      - label: I have checked the [issue page](https://github.com/lay295/TwitchDownloader/issues?q=is%3Aissue) for duplicates
         required: true
       - label: I am running the latest version ([download here](https://github.com/lay295/TwitchDownloader/releases/latest))
         required: true
