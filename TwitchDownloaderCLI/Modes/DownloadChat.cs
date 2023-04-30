@@ -38,13 +38,16 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
+            var fileExtension = Path.GetExtension(inputOptions.OutputFile)!.ToLower();
+
             ChatDownloadOptions downloadOptions = new()
             {
-                DownloadFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
+                DownloadFormat = fileExtension switch
                 {
                     ".html" or ".htm" => ChatFormat.Html,
                     ".json" => ChatFormat.Json,
-                    _ => ChatFormat.Text
+                    ".txt" or ".text" or "" => ChatFormat.Text,
+                    _ => throw new NotSupportedException($"{fileExtension} is not a valid chat file extension.")
                 },
                 Id = vodClipIdMatch.Value,
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
@@ -52,7 +55,9 @@ namespace TwitchDownloaderCLI.Modes
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
                 EmbedData = inputOptions.EmbedData,
-                Filename = inputOptions.Compression != ChatCompression.None ? inputOptions.OutputFile + ".gz" : inputOptions.OutputFile,
+                Filename = inputOptions.Compression is ChatCompression.Gzip
+                    ? inputOptions.OutputFile + ".gz"
+                    : inputOptions.OutputFile,
                 Compression = inputOptions.Compression,
                 TimeFormat = inputOptions.TimeFormat,
                 ConnectionCount = inputOptions.ChatConnections,
