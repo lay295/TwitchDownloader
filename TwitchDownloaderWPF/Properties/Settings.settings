@@ -185,8 +185,8 @@
     <Setting Name="GuiCulture" Type="System.String" Scope="User">
       <Value Profile="(Default)">en-US</Value>
     </Setting>
-    <Setting Name="MaximumBandwidthKb" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">2048</Value>
+    <Setting Name="MaximumBandwidthKib" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4096</Value>
     </Setting>
     <Setting Name="ChatRenderSharpening" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -199,6 +199,9 @@
     </Setting>
     <Setting Name="OutlineScale" Type="System.Double" Scope="User">
       <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="DownloadThrottleEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

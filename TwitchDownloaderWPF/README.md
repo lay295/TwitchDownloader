@@ -298,7 +298,7 @@ Manage the application's behavior.
 
 **Language**: The application language. See [Localization](#localization) for more details.
 
-**Maximum Thread Bandwidth**: The maximum bandwidth that new download threads will be allowed to use, in kilobytes per second (KB/s).
+**Maximum Thread Bandwidth**: The maximum bandwidth that new download threads will be allowed to use, in kibibytes per second (KiB/s).
 
 **Download Filename Templates**: The templates used to generate the default file names when downloading.
 

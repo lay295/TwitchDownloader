@@ -73,7 +73,7 @@ namespace TwitchDownloaderCore
                         await threadThrottler.WaitAsync(cancellationToken);
                         try
                         {
-                            await DownloadVideoPartAsync(baseUrl, request, downloadFolder, vodAge, downloadOptions.ThrottleKb, cancellationToken);
+                            await DownloadVideoPartAsync(baseUrl, request, downloadFolder, vodAge, downloadOptions.ThrottleKib, cancellationToken);
 
                             doneCount++;
                             int percent = (int)(doneCount / (double)partCount * 100);
@@ -230,7 +230,7 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport(percent));
         }
 
-        private async Task DownloadVideoPartAsync(string baseUrl, string videoPartName, string downloadFolder, double vodAge, int throttleKb, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartAsync(string baseUrl, string videoPartName, string downloadFolder, double vodAge, int throttleKib, CancellationToken cancellationToken)
         {
             bool tryUnmute = vodAge < 24;
             int errorCount = 0;
@@ -245,11 +245,11 @@ namespace TwitchDownloaderCore
                 {
                     if (tryUnmute && videoPartName.Contains("-muted"))
                     {
-                        await DownloadFileTaskAsync(baseUrl + videoPartName.Replace("-muted", ""), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKb, cancellationToken);
+                        await DownloadFileTaskAsync(baseUrl + videoPartName.Replace("-muted", ""), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, cancellationToken);
                     }
                     else
                     {
-                        await DownloadFileTaskAsync(baseUrl + videoPartName, Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKb, cancellationToken);
+                        await DownloadFileTaskAsync(baseUrl + videoPartName, Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, cancellationToken);
                     }
 
                     return;
@@ -366,22 +366,29 @@ namespace TwitchDownloaderCore
         }
 
         /// <summary>
-        /// Downloads the requested <paramref name="url"/> to the <paramref name="destinationFile"/> without storing it in memory
+        /// Downloads the requested <paramref name="url"/> to the <paramref name="destinationFile"/> without storing it in memory.
         /// </summary>
-        private async Task DownloadFileTaskAsync(string url, string destinationFile, int throttleKb, CancellationToken cancellationToken = new())
+        /// <param name="url">The url of the file to download.</param>
+        /// <param name="destinationFile">The path to the file where download will be saved.</param>
+        /// <param name="throttleKib">The maximum download speed in kibibytes per second, or -1 for no maximum.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
+        private async Task DownloadFileTaskAsync(string url, string destinationFile, int throttleKib, CancellationToken cancellationToken = default)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-            // We must specify HttpCompletionOption.ResponseHeadersRead or it will read the response content into memory
-            using (var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
-            {
-                response.EnsureSuccessStatusCode();
+            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
 
-                var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), throttleKb);
-                await using (var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
-                }
+            if (throttleKib == -1)
+            {
+                await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await using var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), throttleKib);
+                await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
             }
         }
 

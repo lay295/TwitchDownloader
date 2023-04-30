@@ -696,7 +696,7 @@
     <value>Maximum Thread Bandwidth </value><comment>Leave a trailing space</comment>
   </data>
   <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
-    <value>The maximum bandwidth that new download threads will be allowed to use, in kilobytes per second.</value>
+    <value>The maximum bandwidth that new download threads will be allowed to use, in kibibytes per second.</value>
   </data>
   <data name="RenderImageSharpening" xml:space="preserve">
     <value>Sharpening:</value>

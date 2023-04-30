@@ -951,7 +951,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The maximum bandwidth that new download threads will be allowed to use, in kilobytes per second..
+        ///   Looks up a localized string similar to The maximum bandwidth that new download threads will be allowed to use, in kibibytes per second..
         /// </summary>
         public static string MaximumThreadBandwidthTooltip {
             get {

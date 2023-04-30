@@ -62,15 +62,19 @@ namespace TwitchDownloaderCore
             }
 
             var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
-            using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
-            {
-                response.EnsureSuccessStatusCode();
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
 
-                var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), downloadOptions.ThrottleKb);
-                await using (var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
-                }
+            if (downloadOptions.ThrottleKib == -1)
+            {
+                await using var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+                await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await using var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), downloadOptions.ThrottleKib);
+                await using var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+                await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
             }
         }
     }

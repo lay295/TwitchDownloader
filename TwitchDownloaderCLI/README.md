@@ -38,7 +38,7 @@ Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b
 (Default: `4`) Number of download threads.
 
 **--bandwidth**
-(Default: `2048`) The maximum bandwidth a thread will be allowed to use in kilobytes per second (KB/s).
+(Default: `-1`) The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
 
 **--oauth**
 OAuth access token to download subscriber only VODs. <ins>**DO NOT SHARE YOUR OUATH TOKEN WITH ANYONE.**</ins>
@@ -63,7 +63,7 @@ File the program will output to.
 The quality the program will attempt to download, for example "1080p60", if not found will download highest quality video.
 
 **--bandwidth**
-(Default: `8192`) The maximum bandwidth the clip downloader is allowed to use in kilobytes per second (KB/s).
+(Default: `-1`) The maximum bandwidth the clip downloader is allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
 
 ## Arguments for mode chatdownload
 <sup>Downloads the chat of a VOD, highlight, or clip</sup>

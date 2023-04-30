@@ -756,13 +756,13 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2048")]
-        public int MaximumBandwidthKb {
+        [global::System.Configuration.DefaultSettingValueAttribute("4096")]
+        public int MaximumBandwidthKib {
             get {
-                return ((int)(this["MaximumBandwidthKb"]));
+                return ((int)(this["MaximumBandwidthKib"]));
             }
             set {
-                this["MaximumBandwidthKb"] = value;
+                this["MaximumBandwidthKib"] = value;
             }
         }
         
@@ -811,6 +811,18 @@ namespace TwitchDownloaderWPF.Properties {
             }
             set {
                 this["OutlineScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DownloadThrottleEnabled {
+            get {
+                return ((bool)(this["DownloadThrottleEnabled"]));
+            }
+            set {
+                this["DownloadThrottleEnabled"] = value;
             }
         }
     }

@@ -697,7 +697,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
-    <value>La bande passante maximale que les nouvelles connexions seront autorisées à utiliser, en kilo-octets par seconde.</value>
+    <value>La bande passante maximale que les nouvelles connexions seront autorisées à utiliser, en kibibytes par seconde.</value>
   </data>
   <data name="RenderImageSharpening" xml:space="preserve">
     <value>Renforcement de l'image:</value>

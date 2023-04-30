@@ -46,7 +46,9 @@ namespace TwitchDownloaderWPF
             textChatTemplate.Text = Settings.Default.TemplateChat;
             checkDonation.IsChecked = Settings.Default.HideDonation;
             checkVerboseErrors.IsChecked = Settings.Default.VerboseErrors;
-            NumMaximumBandwidth.Value = Settings.Default.MaximumBandwidthKb;
+            NumMaximumBandwidth.Value = Settings.Default.MaximumBandwidthKib;
+            NumMaximumBandwidth.IsEnabled = Settings.Default.DownloadThrottleEnabled;
+            CheckThrottleEnabled.IsChecked = Settings.Default.DownloadThrottleEnabled;
             radioTimeFormatUTC.IsChecked = Settings.Default.UTCVideoTime;
 
             // Setup theme dropdown
@@ -117,8 +119,9 @@ namespace TwitchDownloaderWPF
             Settings.Default.TempPath = textTempPath.Text;
             Settings.Default.HideDonation = (bool)checkDonation.IsChecked;
             Settings.Default.VerboseErrors = (bool)checkVerboseErrors.IsChecked;
-            Settings.Default.MaximumBandwidthKb = (int)NumMaximumBandwidth.Value;
+            Settings.Default.MaximumBandwidthKib = (int)NumMaximumBandwidth.Value;
             Settings.Default.UTCVideoTime = (bool)radioTimeFormatUTC.IsChecked;
+            Settings.Default.DownloadThrottleEnabled = (bool)CheckThrottleEnabled.IsChecked;
             Settings.Default.Save();
         }
 
@@ -158,6 +161,16 @@ namespace TwitchDownloaderWPF
                 AppSingleton.RequestCultureChange();
                 Title = Translations.Strings.TitleGlobalSettings;
             }
+        }
+
+        private void CheckThrottleEnabled_Checked(object sender, RoutedEventArgs e)
+        {
+            NumMaximumBandwidth.IsEnabled = true;
+        }
+
+        private void CheckThrottleEnabled_Unchecked(object sender, RoutedEventArgs e)
+        {
+            NumMaximumBandwidth.IsEnabled = false;
         }
     }
 }

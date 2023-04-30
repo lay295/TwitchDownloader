@@ -15,7 +15,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('q', "quality", HelpText = "The quality the program will attempt to download.")]
         public string Quality { get; set; }
 
-        [Option("bandwidth", Default = 8192, HelpText = "The maximum bandwidth the clip downloader is allowed to use in kilobytes per second (KB/s).")]
-        public int ThrottleKb { get; set; }
+        [Option("bandwidth", Default = -1, HelpText = "The maximum bandwidth the clip downloader is allowed to use in kibibytes per second (KiB/s), or -1 for no maximum.")]
+        public int ThrottleKib { get; set; }
     }
 }

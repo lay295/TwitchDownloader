@@ -224,7 +224,10 @@ namespace TwitchDownloaderWPF
             {
                 Filename = fileName,
                 Id = clipId,
-                Quality = comboQuality.Text
+                Quality = comboQuality.Text,
+                ThrottleKib = Settings.Default.DownloadThrottleEnabled
+                    ? Settings.Default.MaximumBandwidthKib
+                    : -1,
             };
         }
 

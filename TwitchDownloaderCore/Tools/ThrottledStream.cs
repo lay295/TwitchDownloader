@@ -18,11 +18,11 @@ namespace TwitchDownloaderCore.Tools
         /// Initializes a new instance of the <see cref="ThrottledStream"/> class
         /// </summary>
         /// <param name="in">The base stream to be read from in a throttled manner</param>
-        /// <param name="throttleKb">The maximum read bandwidth in kilobytes per second</param>
-        public ThrottledStream(Stream @in, int throttleKb)
+        /// <param name="throttleKib">The maximum read bandwidth in kibibytes per second, capped at gigabit</param>
+        public ThrottledStream(Stream @in, int throttleKib)
         {
-            const int FOURTY_MEGABYTES = 40_960;
-            MaximumBytesPerSecond = Math.Min(throttleKb, FOURTY_MEGABYTES) * 1024;
+            const int ONE_GIGABIT_IN_KIBIBYTES = 122_070;
+            MaximumBytesPerSecond = Math.Min(throttleKib, ONE_GIGABIT_IN_KIBIBYTES) * 1024;
             BaseStream = @in;
         }
 

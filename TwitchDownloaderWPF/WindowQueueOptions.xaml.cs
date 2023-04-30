@@ -203,6 +203,9 @@ namespace TwitchDownloaderWPF
                     downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, clipPage.textTitle.Text, clipPage.clipId, clipPage.currentVideoTime, clipPage.textStreamer.Text, TimeSpan.Zero, clipPage.clipLength) + ".mp4");
                     downloadOptions.Id = clipPage.clipId;
                     downloadOptions.Quality = clipPage.comboQuality.Text;
+                    downloadOptions.ThrottleKib = Settings.Default.DownloadThrottleEnabled
+                        ? Settings.Default.MaximumBandwidthKib
+                        : -1;
                     downloadTask.DownloadOptions = downloadOptions;
                     downloadTask.Info.Title = clipPage.textTitle.Text;
                     downloadTask.Info.Thumbnail = clipPage.imgThumbnail.Source;
@@ -402,7 +405,9 @@ namespace TwitchDownloaderWPF
                                 downloadOptions.CropBeginning = false;
                                 downloadOptions.CropEnding = false;
                                 downloadOptions.DownloadThreads = Settings.Default.VodDownloadThreads;
-                                downloadOptions.ThrottleKb = Settings.Default.MaximumBandwidthKb;
+                                downloadOptions.ThrottleKib = Settings.Default.DownloadThrottleEnabled
+                                    ? Settings.Default.MaximumBandwidthKib
+                                    : -1;
                                 downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer,
                                     downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,  downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(dataList[i].Length)
                                     ) + ".mp4");
@@ -423,6 +428,9 @@ namespace TwitchDownloaderWPF
                                 downloadOptions.Id = dataList[i].Id;
                                 downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer,
                                     TimeSpan.Zero, TimeSpan.FromSeconds(dataList[i].Length)) + ".mp4");
+                                downloadOptions.ThrottleKib = Settings.Default.DownloadThrottleEnabled
+                                    ? Settings.Default.MaximumBandwidthKib
+                                    : -1;
                                 downloadTask.DownloadOptions = downloadOptions;
                                 downloadTask.Info.Title = dataList[i].Title;
                                 downloadTask.Info.Thumbnail = dataList[i].Thumbnail;

@@ -24,8 +24,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('t', "threads", Default = 4, HelpText = "Number of download threads.")]
         public int DownloadThreads { get; set; }
 
-        [Option("bandwidth", Default = 2048, HelpText = "The maximum bandwidth a thread will be allowed to use in kilobytes per second (KB/s).")]
-        public int ThrottleKb { get; set; }
+        [Option("bandwidth", Default = -1, HelpText = "The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or -1 for no maximum.")]
+        public int ThrottleKib { get; set; }
 
         [Option("oauth", HelpText = "OAuth access token to download subscriber only VODs. DO NOT SHARE THIS WITH ANYONE.")]
         public string Oauth { get; set; }
