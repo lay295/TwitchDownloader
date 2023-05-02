@@ -87,7 +87,7 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 (Default: `false`) Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.
 
 **--bttv**
-(Default: `true) BTTV emote embedding. Requires `-E / --embed-images`.
+(Default: `true`) BTTV emote embedding. Requires `-E / --embed-images`.
 
 **--ffz**
 (Default: `true`) FFZ emote embedding. Requires `-E / --embed-images`.
