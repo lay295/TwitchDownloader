@@ -704,7 +704,15 @@ namespace TwitchDownloaderCore
 
             // Remove the commenter's name from the resub message
             comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 1)..];
-            comment.message.fragments[0].text = comment.message.fragments[0].text[(comment.commenter.display_name.Length + 1)..];
+            if (comment.message.fragments[0].text.Equals(comment.commenter.display_name, StringComparison.OrdinalIgnoreCase))
+            {
+                // Some older chat replays separate user names into separate fragments
+                comment.message.fragments.RemoveAt(0);
+            }
+            else
+            {
+                comment.message.fragments[0].text = comment.message.fragments[0].text[(comment.commenter.display_name.Length + 1)..];
+            }
 
             var (resubMessage, customResubMessage) = HighlightMessage.SplitSubComment(comment);
             DrawMessage(resubMessage, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
