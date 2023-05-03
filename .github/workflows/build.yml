@@ -200,7 +200,7 @@ jobs:
       with:
         upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
-        asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64ip
+        asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
         asset_content_type: application/zip
   
   build-cli-mac:
