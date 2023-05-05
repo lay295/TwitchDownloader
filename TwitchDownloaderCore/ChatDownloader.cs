@@ -102,7 +102,7 @@ namespace TwitchDownloaderCore
                 }
 
                 if (!addedComment)
-                    latestMessage = Math.Min(Math.Floor(latestMessage) + 5, videoEnd);
+                    latestMessage = Math.Min(Math.Floor(latestMessage) + 1, videoEnd);
 
                 int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
                 progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
