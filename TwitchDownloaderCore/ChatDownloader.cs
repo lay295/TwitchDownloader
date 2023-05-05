@@ -96,12 +96,13 @@ namespace TwitchDownloaderCore
                             addedComment = true;
                         }
 
-                        latestMessage = comment.content_offset_seconds;
+                        if (comment.content_offset_seconds > latestMessage)
+                            latestMessage = comment.content_offset_seconds;
                     }
                 }
 
                 if (!addedComment)
-                    latestMessage = Math.Floor(latestMessage) + 1;
+                    latestMessage = Math.Min(Math.Floor(latestMessage) + 5, videoEnd);
 
                 int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
                 progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
