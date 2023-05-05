@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,10 +36,10 @@ namespace TwitchDownloaderCore
             //GQL only wants ints
             videoStart = Math.Floor(videoStart);
             double videoDuration = videoEnd - videoStart;
-            double latestMessage = videoStart;
+            double latestMessage = videoStart - 1;
+            bool isFirst = true;
             string cursor = "";
             int errorCount = 0;
-            List<string> alreadyAdded = new List<string>();
 
             while (latestMessage < videoEnd)
             {
@@ -54,9 +53,16 @@ namespace TwitchDownloaderCore
                         RequestUri = new Uri("https://gql.twitch.tv/gql"),
                         Method = HttpMethod.Post
                     };
-                    request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                    request.Headers.Add("Client-ID", "kd1unb4b3q4t58fwlpcbzcbnm76a8fp");
 
-                    request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"contentOffsetSeconds\":" + (int)Math.Floor(latestMessage) + "},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
+                    if (isFirst)
+                    {
+                        request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"contentOffsetSeconds\":" + videoStart + "},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
+                    }
+                    else
+                    {
+                        request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"cursor\":\"" + cursor + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
+                    }
 
                     using (var httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
                     {
@@ -83,29 +89,28 @@ namespace TwitchDownloaderCore
                     continue;
                 }
 
-                bool addedComment = false;
                 var convertedComments = ConvertComments(commentResponse[0].data.video);
                 lock (commentLock)
                 {
                     foreach (var comment in convertedComments)
                     {
-                        if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart && !alreadyAdded.Contains(comment._id))
-                        {
-                            alreadyAdded.Add(comment._id);
+                        if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
                             comments.Add(comment);
-                            addedComment = true;
-                        }
 
-                        if (comment.content_offset_seconds > latestMessage)
-                            latestMessage = comment.content_offset_seconds;
+                        latestMessage = comment.content_offset_seconds;
                     }
                 }
-
-                if (!addedComment)
-                    latestMessage = Math.Min(Math.Floor(latestMessage) + 1, videoEnd);
+                if (!commentResponse[0].data.video.comments.pageInfo.hasNextPage)
+                    break;
+                else
+                    cursor = commentResponse[0].data.video.comments.edges.Last().cursor;
 
                 int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
                 progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
+
+                if (isFirst)
+                    isFirst = false;
+
             }
         }
 
