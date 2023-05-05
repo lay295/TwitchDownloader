@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>1.52.7</Version>
+    <Version>1.52.8</Version>
     <Platforms>AnyCPU;x64</Platforms>
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>default</LangVersion>
