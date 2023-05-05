@@ -168,11 +168,7 @@ dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile> -p:DebugType=None -p:DebugSymbols=false
 ```
 - Applicable Profiles: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`
-4. c) Locate binary
-```
-TwitchDownloaderCLI/bin/Release/net6.0/publish/<Profile>/TwitchDownloaderCLI
-```
-6. a) Navigate to the GUI build folder:
+5. a) Navigate to the GUI build folder:
 ```
 cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
 ```
