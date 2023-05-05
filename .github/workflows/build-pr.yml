@@ -68,6 +68,8 @@ jobs:
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine -p:DebugType=None -p:DebugSymbols=false
     - name: Build LinuxArm CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm -p:DebugType=None -p:DebugSymbols=false
+    - name: Build LinuxArm64 CLI
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm64 -p:DebugType=None -p:DebugSymbols=false
         
     - name: Zip Windows CLI
       uses: vimtor/action-zip@v1
@@ -92,6 +94,12 @@ jobs:
       with:
         files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-LinuxArm.zip
+        
+    - name: Zip LinuxArm64 CLI
+      uses: vimtor/action-zip@v1
+      with:
+        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm64/TwitchDownloaderCLI
+        dest: TwitchDownloaderCLI-LinuxArm64.zip
 
     - name: Upload Windows CLI Artifact Asset
       uses: actions/upload-artifact@v3
@@ -116,6 +124,12 @@ jobs:
       with:
         name: TwitchDownloaderCLI-LinuxArm.zip
         path: TwitchDownloaderCLI-LinuxArm.zip
+        
+    - name: Upload LinuxArm64 CLI Artifact Asset
+      uses: actions/upload-artifact@v3
+      with:
+        name: TwitchDownloaderCLI-LinuxArm64.zip
+        path: TwitchDownloaderCLI-LinuxArm64.zip
 
   build-cli-mac:
     runs-on: macos-latest

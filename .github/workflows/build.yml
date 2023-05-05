@@ -109,6 +109,8 @@ jobs:
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine -p:DebugType=None -p:DebugSymbols=false
     - name: Build LinuxArm CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm -p:DebugType=None -p:DebugSymbols=false
+    - name: Build LinuxArm64 CLI
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm64 -p:DebugType=None -p:DebugSymbols=false
         
     - name: Zip Windows CLI
       uses: vimtor/action-zip@v1
@@ -133,6 +135,12 @@ jobs:
       with:
         files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm.zip
+        
+    - name: Zip LinuxArm64 CLI
+      uses: vimtor/action-zip@v1
+      with:
+        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm64/TwitchDownloaderCLI
+        dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
     
     - name: Download URL
       uses: actions/download-artifact@v2
@@ -183,6 +191,16 @@ jobs:
         upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm.zip
         asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm.zip
+        asset_content_type: application/zip
+        
+    - name: Upload LinuxArm64 CLI Release Asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
+        asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
         asset_content_type: application/zip
   
   build-cli-mac:
