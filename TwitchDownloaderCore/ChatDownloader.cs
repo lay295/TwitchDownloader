@@ -414,8 +414,6 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            progress.Report(new ProgressReport(ReportType.Log, "Number of comments: " + chatRoot.comments.Count));
-
             progress.Report(new ProgressReport(ReportType.NewLineStatus, "Writing output file"));
             switch (downloadOptions.DownloadFormat)
             {
