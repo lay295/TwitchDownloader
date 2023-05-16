@@ -83,7 +83,7 @@ namespace TwitchDownloaderWPF
             try
             {
                 Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
-                Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, passwordOauth.Password);
+                Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, TextOauth.Text);
                 await Task.WhenAll(taskVideoInfo, taskAccessToken);
                 Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
                 try
@@ -198,7 +198,7 @@ namespace TwitchDownloaderWPF
                 Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength) + ".mp4"),
-                Oauth = passwordOauth.Password,
+                Oauth = TextOauth.Text,
                 Quality = GetQualityWithoutSize(comboQuality.Text).ToString(),
                 Id = currentVideoId,
                 CropBeginning = (bool)checkStart.IsChecked,
@@ -352,7 +352,7 @@ namespace TwitchDownloaderWPF
             SetEnabledCropEnd(false);
             WebRequest.DefaultWebProxy = null;
             numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
-            passwordOauth.Password = Settings.Default.OAuth;
+            TextOauth.Text = Settings.Default.OAuth;
         }
 
         private void numDownloadThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
@@ -364,11 +364,11 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void passwordOauth_PasswordChanged(object sender, RoutedEventArgs e)
+        private void TextOauth_TextChanged(object sender, RoutedEventArgs e)
         {
             if (this.IsInitialized)
             {
-                Settings.Default.OAuth = passwordOauth.Password;
+                Settings.Default.OAuth = TextOauth.Text;
                 Settings.Default.Save();
             }
         }
