@@ -165,8 +165,6 @@ namespace TwitchDownloaderCore
                 }
             };
 
-            var videoLength = TimeSpan.Zero;
-            var videoLengthRegex = new Regex(@"(?<=^\s?\s?Duration:\s)(\d\d):(\d\d):(\d\d)\.(\d\d)", RegexOptions.Multiline);
             var encodingTimeRegex = new Regex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)", RegexOptions.Compiled);
             var logQueue = new ConcurrentQueue<string>();
 
@@ -177,22 +175,7 @@ namespace TwitchDownloaderCore
 
                 logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
-                if (videoLength == TimeSpan.Zero)
-                {
-                    var videoLengthMatch = videoLengthRegex.Match(e.Data);
-                    if (!videoLengthMatch.Success)
-                        return;
-
-                    // TimeSpan.Parse insists that hours cannot be greater than 24, thus we must use the TimeSpan ctor.
-                    if (!int.TryParse(videoLengthMatch.Groups[1].ValueSpan, out var hours)) return;
-                    if (!int.TryParse(videoLengthMatch.Groups[2].ValueSpan, out var minutes)) return;
-                    if (!int.TryParse(videoLengthMatch.Groups[3].ValueSpan, out var seconds)) return;
-                    if (!int.TryParse(videoLengthMatch.Groups[4].ValueSpan, out var milliseconds)) return;
-                    videoLength = new TimeSpan(0, hours, minutes, seconds, milliseconds);
-                    return;
-                }
-
-                HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength, progress);
+                HandleFfmpegOutput(e.Data, encodingTimeRegex, seekDuration, progress);
             };
 
             process.Start();
@@ -211,7 +194,7 @@ namespace TwitchDownloaderCore
             return process.ExitCode;
         }
 
-        private static void HandleFfmpegOutput(string output, Regex encodingTimeRegex, TimeSpan videoLength, IProgress<ProgressReport> progress)
+        private static void HandleFfmpegOutput(string output, Regex encodingTimeRegex, double videoLength, IProgress<ProgressReport> progress)
         {
             var encodingTimeMatch = encodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
@@ -224,7 +207,7 @@ namespace TwitchDownloaderCore
             if (!int.TryParse(encodingTimeMatch.Groups[4].ValueSpan, out var milliseconds)) return;
             var encodingTime = new TimeSpan(0, hours, minutes, seconds, milliseconds);
 
-            var percent = (int)(encodingTime.TotalMilliseconds / videoLength.TotalMilliseconds * 100);
+            var percent = (int)(encodingTime.TotalSeconds / videoLength * 100);
 
             progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [4/4]"));
             progress.Report(new ProgressReport(percent));
