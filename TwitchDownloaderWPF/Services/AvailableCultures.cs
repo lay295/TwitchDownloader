@@ -23,6 +23,7 @@ namespace TwitchDownloaderWPF.Services
         public static readonly Culture Polish;
         public static readonly Culture Russian;
         public static readonly Culture Turkish;
+        public static readonly Culture SimplifiedChinese;
 
         public static readonly Culture[] All;
 
@@ -35,6 +36,7 @@ namespace TwitchDownloaderWPF.Services
                 Polish = new Culture("pl-PL", "Polski"),
                 Russian = new Culture("ru-RU", "Русский"),
                 Turkish = new Culture("tr-TR", "Türkçe"),
+                SimplifiedChinese = new Culture("zh-CN", "简体中文")
             };
         }
     }
