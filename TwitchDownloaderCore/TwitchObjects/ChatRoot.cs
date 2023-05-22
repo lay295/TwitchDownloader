@@ -108,7 +108,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 body = body,
                 bits_spent = bits_spent,
                 fragments = new List<Fragment>(fragments.Capacity),
-                user_badges = new List<UserBadge>(user_badges.Capacity),
+                user_badges = new List<UserBadge>(user_badges?.Capacity ?? 0),
                 user_color = user_color,
                 user_notice_params = user_notice_params?.Clone(),
                 emoticons = new List<Emoticon2>(emoticons?.Capacity ?? 0)
@@ -117,7 +117,7 @@ namespace TwitchDownloaderCore.TwitchObjects
             {
                 newMessage.fragments.Add(fragments[i].Clone());
             }
-            for (int i = 0; i < user_badges.Count; i++)
+            for (int i = 0; i < user_badges?.Count; i++)
             {
                 newMessage.user_badges.Add(user_badges[i].Clone());
             }
@@ -211,7 +211,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string name { get; set; }
         public Dictionary<string, ChatBadgeData> versions { get; set; }
     }
-    
+
     public class LegacyEmbedChatBadge
     {
         public string name { get; set; }
