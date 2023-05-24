@@ -477,8 +477,7 @@ namespace TwitchDownloaderCore
             subBadgeRequest.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var subBadgeResponse = await httpClient.SendAsync(subBadgeRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             subBadgeResponse.EnsureSuccessStatusCode();
-            var test = await subBadgeResponse.Content.ReadFromJsonAsync<GqlSubBadgeResponse>(cancellationToken: cancellationToken);
-            var subBadges = (test).data.user.badges.GroupBy(x => x.name).ToDictionary(x => x.Key, x => x.ToList());
+            var subBadges = (await subBadgeResponse.Content.ReadFromJsonAsync<GqlSubBadgeResponse>(cancellationToken: cancellationToken)).data.user.badges.GroupBy(x => x.name).ToDictionary(x => x.Key, x => x.ToList());
 
             List<EmbedChatBadge> badges = new List<EmbedChatBadge>();
 
