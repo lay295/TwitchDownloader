@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using NeoSmart.Unicode;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -456,42 +457,55 @@ namespace TwitchDownloaderCore
 
             // TODO: this currently only does twitch badges, but we could also support FFZ, BTTV, 7TV, etc badges!
             // TODO: would want to make this configurable as we do for emotes though...
-            var globalBadgeRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://badges.twitch.tv/v1/badges/global/display", UriKind.Absolute));
+            var globalBadgeRequest = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"query\":\"query{badges{imageURL(size:DOUBLE),description,title,setID,version}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            };
+            globalBadgeRequest.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var globalBadgeResponse = await httpClient.SendAsync(globalBadgeRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             globalBadgeResponse.EnsureSuccessStatusCode();
-            var globalBadges = await globalBadgeResponse.Content.ReadFromJsonAsync<TwitchBadgeResponse>(cancellationToken: cancellationToken);
+            var globalBadges = (await globalBadgeResponse.Content.ReadFromJsonAsync<GqlGlobalBadgeResponse>(cancellationToken: cancellationToken)).data.badges.GroupBy(x => x.name).ToDictionary(x => x.Key, x => x.ToList());
 
-            var subBadgeRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://badges.twitch.tv/v1/badges/channels/{streamerId}/display", UriKind.Absolute));
+            var subBadgeRequest = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"query\":\"query{user(id: " + streamerId + "){broadcastBadges{imageURL(size:DOUBLE),description,title,setID,version}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            };
+            subBadgeRequest.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var subBadgeResponse = await httpClient.SendAsync(subBadgeRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             subBadgeResponse.EnsureSuccessStatusCode();
-            var subBadges = await subBadgeResponse.Content.ReadFromJsonAsync<TwitchBadgeResponse>(cancellationToken: cancellationToken);
+            var test = await subBadgeResponse.Content.ReadFromJsonAsync<GqlSubBadgeResponse>(cancellationToken: cancellationToken);
+            var subBadges = (test).data.user.badges.GroupBy(x => x.name).ToDictionary(x => x.Key, x => x.ToList());
 
             List<EmbedChatBadge> badges = new List<EmbedChatBadge>();
-            List<string> alreadyAdded = new List<string>();
 
-            foreach (var name in globalBadges.badge_sets.Keys.Union(subBadges.badge_sets.Keys)
-                         .Where(name => !alreadyAdded.Contains(name))
-                         .Where(name => comments
-                             .Where(comment => comment.message.user_badges != null)
-                             .Any(comment => comment.message.user_badges
-                                 .Any(ub => ub._id == name))))
+            var nameList = comments.Where(comment => comment.message.user_badges != null)
+                .SelectMany(comment => comment.message.user_badges)
+                .Where(badge => !String.IsNullOrWhiteSpace(badge._id))
+                .Select(badge => badge._id).Distinct();
+
+            foreach (var name in nameList)
             {
                 Dictionary<string, ChatBadgeData> versions = new();
-                foreach (var (version, badge) in globalBadges.badge_sets[name].versions)
+                foreach (var badge in globalBadges[name])
                 {
-                    versions.Add(version, new()
+                    versions.Add(badge.version, new()
                     {
                         title = badge.title,
                         description = badge.description,
                         url = badge.image_url_2x
                     });
                 }
+
                 //Prefer channel specific badges over global ones
-                if (subBadges.badge_sets.TryGetValue(name, out var subBadge))
+                if (subBadges.TryGetValue(name, out var subBadge))
                 {
-                    foreach(var (version, badge) in subBadge.versions)
+                    foreach (var badge in subBadge)
                     {
-                        versions[version] = new()
+                        versions[badge.version] = new()
                         {
                             title = badge.title,
                             description = badge.description,
@@ -501,7 +515,6 @@ namespace TwitchDownloaderCore
                 }
 
                 badges.Add(new EmbedChatBadge() { name = name, versions = versions });
-                alreadyAdded.Add(name);
             }
 
             return badges;
