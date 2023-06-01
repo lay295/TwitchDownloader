@@ -166,6 +166,9 @@ namespace TwitchDownloaderCore
                 List<UserBadge> badges = new List<UserBadge>();
                 foreach (var badge in oldComment.message.userBadges)
                 {
+                    if (String.IsNullOrEmpty(badge.setID) && String.IsNullOrEmpty(badge.version))
+                        continue;
+
                     UserBadge newBadge = new UserBadge();
                     newBadge._id = badge.setID;
                     newBadge.version = badge.version;
