@@ -122,17 +122,20 @@ namespace TwitchDownloaderCore.Chat
                 name = chatRoot.video.user_name ?? await TwitchHelper.GetStreamerName(int.Parse(chatRoot.video.user_id ?? chatRoot.comments.First().channel_id))
             };
 
-            if (chatRoot.video.user_name is not null)
-                chatRoot.video.user_name = null;
-
-            if (chatRoot.video.user_id is not null)
-                chatRoot.video.user_id = null;
-
-            if (chatRoot.video.duration is not null)
+            if (chatRoot.video is not null)
             {
-                chatRoot.video.length = TimeSpanExtensions.ParseTimeCode(chatRoot.video.duration).TotalSeconds;
-                chatRoot.video.end = chatRoot.video.length;
-                chatRoot.video.duration = null;
+                if (chatRoot.video.user_name is not null)
+                    chatRoot.video.user_name = null;
+
+                if (chatRoot.video.user_id is not null)
+                    chatRoot.video.user_id = null;
+
+                if (chatRoot.video.duration is not null)
+                {
+                    chatRoot.video.length = TimeSpanExtensions.ParseTimeCode(chatRoot.video.duration).TotalSeconds;
+                    chatRoot.video.end = chatRoot.video.length;
+                    chatRoot.video.duration = null;
+                }
             }
         }
 

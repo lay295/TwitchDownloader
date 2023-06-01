@@ -484,19 +484,23 @@ namespace TwitchDownloaderCore
             var nameList = comments.Where(comment => comment.message.user_badges != null)
                 .SelectMany(comment => comment.message.user_badges)
                 .Where(badge => !String.IsNullOrWhiteSpace(badge._id))
+                .Where(badge => globalBadges.ContainsKey(badge._id) || subBadges.ContainsKey(badge._id))
                 .Select(badge => badge._id).Distinct();
 
             foreach (var name in nameList)
             {
                 Dictionary<string, ChatBadgeData> versions = new();
-                foreach (var badge in globalBadges[name])
+                if (globalBadges.TryGetValue(name, out var globalBadge))
                 {
-                    versions.Add(badge.version, new()
+                    foreach (var badge in globalBadge)
                     {
-                        title = badge.title,
-                        description = badge.description,
-                        url = badge.image_url_2x
-                    });
+                        versions[badge.version] = new()
+                        {
+                            title = badge.title,
+                            description = badge.description,
+                            url = badge.image_url_2x
+                        };
+                    }
                 }
 
                 //Prefer channel specific badges over global ones
