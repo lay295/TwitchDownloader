@@ -116,26 +116,27 @@ namespace TwitchDownloaderCore.Chat
 
         private static async ValueTask UpgradeChatJson(ChatRoot chatRoot)
         {
-            chatRoot.streamer ??= new Streamer
+            chatRoot.video ??= new Video();
+
+            if (chatRoot.streamer is null)
             {
-                id = int.Parse(chatRoot.video.user_id ?? chatRoot.comments.First().channel_id),
-                name = chatRoot.video.user_name ?? await TwitchHelper.GetStreamerName(int.Parse(chatRoot.video.user_id ?? chatRoot.comments.First().channel_id))
-            };
+                var assumedId = int.Parse(chatRoot.video.user_id ?? chatRoot.comments.FirstOrDefault()?.channel_id ?? "0");
+                var assumedName = chatRoot.video.user_name ?? await TwitchHelper.GetStreamerName(assumedId);
 
-            if (chatRoot.video is not null)
+                chatRoot.streamer = new Streamer { id = assumedId, name = assumedName };
+            }
+
+            if (chatRoot.video.user_name is not null)
+                chatRoot.video.user_name = null;
+
+            if (chatRoot.video.user_id is not null)
+                chatRoot.video.user_id = null;
+
+            if (chatRoot.video.duration is not null)
             {
-                if (chatRoot.video.user_name is not null)
-                    chatRoot.video.user_name = null;
-
-                if (chatRoot.video.user_id is not null)
-                    chatRoot.video.user_id = null;
-
-                if (chatRoot.video.duration is not null)
-                {
-                    chatRoot.video.length = TimeSpanExtensions.ParseTimeCode(chatRoot.video.duration).TotalSeconds;
-                    chatRoot.video.end = chatRoot.video.length;
-                    chatRoot.video.duration = null;
-                }
+                chatRoot.video.length = TimeSpanExtensions.ParseTimeCode(chatRoot.video.duration).TotalSeconds;
+                chatRoot.video.end = chatRoot.video.length;
+                chatRoot.video.duration = null;
             }
         }
 
