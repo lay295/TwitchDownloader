@@ -7,6 +7,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Chat
@@ -108,7 +109,31 @@ namespace TwitchDownloaderCore.Chat
                 }
             }
 
+            await UpgradeChatJson(returnChatRoot);
+
             return returnChatRoot;
+        }
+
+        private static async ValueTask UpgradeChatJson(ChatRoot chatRoot)
+        {
+            chatRoot.streamer ??= new Streamer
+            {
+                id = int.Parse(chatRoot.video.user_id ?? chatRoot.comments.First().channel_id),
+                name = chatRoot.video.user_name ?? await TwitchHelper.GetStreamerName(int.Parse(chatRoot.video.user_id ?? chatRoot.comments.First().channel_id))
+            };
+
+            if (chatRoot.video.user_name is not null)
+                chatRoot.video.user_name = null;
+
+            if (chatRoot.video.user_id is not null)
+                chatRoot.video.user_id = null;
+
+            if (chatRoot.video.duration is not null)
+            {
+                chatRoot.video.length = TimeSpanExtensions.ParseTimeCode(chatRoot.video.duration).TotalSeconds;
+                chatRoot.video.end = chatRoot.video.length;
+                chatRoot.video.duration = null;
+            }
         }
 
         /// <summary>
