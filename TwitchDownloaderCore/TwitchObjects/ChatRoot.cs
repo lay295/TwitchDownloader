@@ -193,6 +193,18 @@ namespace TwitchDownloaderCore.TwitchObjects
         public double end { get; set; }
         public double length { get; set; } = -1;
         public List<VideoChapter> chapters { get; set; } = new();
+
+#region DeprecatedProperties
+        /// <summary>Deprecated. Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21a.</summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string duration { get; set; } = null;
+        /// <summary>Deprecated. Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21a.</summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string user_id { get; set; } = null;
+        /// <summary>Deprecated. Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21a.</summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string user_name { get; set; } = null;
+#endregion
     }
 
     public class EmbedEmoteData
