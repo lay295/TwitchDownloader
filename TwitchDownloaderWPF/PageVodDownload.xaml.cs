@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -136,14 +137,14 @@ namespace TwitchDownloaderWPF
                 var videoCreatedAt = taskVideoInfo.Result.data.video.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
-                var urlTimecodeRegex = new Regex(@"\?t=(\d+)h(\d+)m(\d+)s");
-                var urlTimecodeMatch = urlTimecodeRegex.Match(textUrl.Text);
-                if (urlTimecodeMatch.Success)
+                var urlTimeCodeMatch = Regex.Match(textUrl.Text, @"(?<=\?t=)\d+h\d+m\d+s");
+                if (urlTimeCodeMatch.Success)
                 {
+                    var time = TimeSpanExtensions.ParseTimeCode(urlTimeCodeMatch.ValueSpan);
                     checkStart.IsChecked = true;
-                    numStartHour.Value = int.Parse(urlTimecodeMatch.Groups[1].ValueSpan);
-                    numStartMinute.Value = int.Parse(urlTimecodeMatch.Groups[2].ValueSpan);
-                    numStartSecond.Value = int.Parse(urlTimecodeMatch.Groups[3].ValueSpan);
+                    numStartHour.Value = time.Hours;
+                    numStartMinute.Value = time.Minutes;
+                    numStartSecond.Value = time.Seconds;
                 }
                 else
                 {
