@@ -1462,17 +1462,11 @@ namespace TwitchDownloaderCore
                 int totalTicks = renderOptions.EndOverride * renderOptions.Framerate - videoStartTick;
                 return (videoStartTick, totalTicks);
             }
-            else if (chatRoot.video != null)
+            else
             {
                 int startSeconds = (int)Math.Floor(chatRoot.video.start);
                 int videoStartTick = startSeconds * renderOptions.Framerate;
                 int totalTicks = (int)Math.Ceiling(chatRoot.video.end * renderOptions.Framerate) - videoStartTick;
-                return (videoStartTick, totalTicks);
-            }
-            else
-            {
-                int videoStartTick = (int)Math.Floor(chatRoot.comments.First().content_offset_seconds * renderOptions.Framerate);
-                int totalTicks = (int)Math.Ceiling(chatRoot.comments.Last().content_offset_seconds * renderOptions.Framerate) - videoStartTick;
                 return (videoStartTick, totalTicks);
             }
         }

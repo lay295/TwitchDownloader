@@ -116,7 +116,12 @@ namespace TwitchDownloaderCore.Chat
 
         private static async ValueTask UpgradeChatJson(ChatRoot chatRoot)
         {
-            chatRoot.video ??= new Video();
+            const int MAX_STREAM_LENGTH = 172_800; // 48 hours in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+            chatRoot.video ??= new Video
+            {
+                start = (int)Math.Floor(chatRoot.comments.FirstOrDefault()?.content_offset_seconds ?? 0),
+                end = (int)Math.Ceiling(chatRoot.comments.LastOrDefault()?.content_offset_seconds ?? MAX_STREAM_LENGTH)
+            };
 
             if (chatRoot.streamer is null)
             {

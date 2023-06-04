@@ -25,16 +25,8 @@ namespace TwitchDownloaderWPF
 
         private void Window_Initialized(object sender, EventArgs e)
         {
-            if (CurrentRender.chatRoot.video != null)
-            {
-                startSeconds = (int)Math.Floor(CurrentRender.chatRoot.video.start);
-                endSeconds = (int)Math.Ceiling(CurrentRender.chatRoot.video.end);
-            }
-            else
-            {
-                startSeconds = (int)Math.Floor(CurrentRender.chatRoot.comments.First().content_offset_seconds);
-                endSeconds = (int)Math.Ceiling(CurrentRender.chatRoot.comments.Last().content_offset_seconds);
-            }
+            startSeconds = (int)Math.Floor(CurrentRender.chatRoot.video.start);
+            endSeconds = (int)Math.Ceiling(CurrentRender.chatRoot.video.end);
 
             numStart.Text = startSeconds.ToString();
             numEnd.Text = endSeconds.ToString();
@@ -66,12 +58,12 @@ namespace TwitchDownloaderWPF
 
         private void numStart_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            
+
         }
 
         private void numEnd_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            
+
         }
 
         private void numStart_TextChanged(object sender, TextChangedEventArgs e)
