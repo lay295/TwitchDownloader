@@ -1,16 +1,16 @@
 ﻿using SkiaSharp;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal class RenderChat
+    internal static class RenderChat
     {
         internal static void Render(ChatRenderArgs inputOptions)
         {
@@ -19,10 +19,10 @@ namespace TwitchDownloaderCLI.Modes
             Progress<ProgressReport> progress = new();
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
 
-            ChatRenderOptions renderOptions = GetRenderOptions(inputOptions);
-            ChatRenderer chatRenderer = new(renderOptions);
+            var renderOptions = GetRenderOptions(inputOptions);
+            ChatRenderer chatRenderer = new(renderOptions, progress);
             chatRenderer.ParseJsonAsync().Wait();
-            chatRenderer.RenderVideoAsync(progress, new CancellationToken()).Wait();
+            chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
         }
 
         private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions)
@@ -35,9 +35,12 @@ namespace TwitchDownloaderCLI.Modes
                 MessageColor = SKColor.Parse(inputOptions.MessageColor),
                 ChatHeight = inputOptions.ChatHeight,
                 ChatWidth = inputOptions.ChatWidth,
-                BttvEmotes = (bool)inputOptions.BttvEmotes,
-                FfzEmotes = (bool)inputOptions.FfzEmotes,
-                StvEmotes = (bool)inputOptions.StvEmotes,
+                StartOverride = inputOptions.CropBeginningTime,
+                EndOverride = inputOptions.CropEndingTime,
+                BttvEmotes = (bool)inputOptions.BttvEmotes!,
+                FfzEmotes = (bool)inputOptions.FfzEmotes!,
+                StvEmotes = (bool)inputOptions.StvEmotes!,
+                AllowUnlistedEmotes = (bool)inputOptions.AllowUnlistedEmotes!,
                 Outline = inputOptions.Outline,
                 OutlineSize = inputOptions.OutlineSize,
                 Font = inputOptions.Font,
@@ -48,37 +51,46 @@ namespace TwitchDownloaderCLI.Modes
                     "normal" => SKFontStyle.Normal,
                     "bold" => SKFontStyle.Bold,
                     "italic" or "italics" => SKFontStyle.Italic,
-                    _ => throw new NotImplementedException("Invalid message font style. Valid values are: normal, bold, and italic")
+                    _ => throw new NotSupportedException("Invalid message font style. Valid values are: normal, bold, and italic")
                 },
                 UsernameFontStyle = inputOptions.UsernameFontStyle.ToLower() switch
                 {
                     "normal" => SKFontStyle.Normal,
                     "bold" => SKFontStyle.Bold,
                     "italic" or "italics" => SKFontStyle.Italic,
-                    _ => throw new NotImplementedException("Invalid username font style. Valid values are: normal, bold, and italic")
+                    _ => throw new NotSupportedException("Invalid username font style. Valid values are: normal, bold, and italic")
                 },
                 UpdateRate = inputOptions.UpdateRate,
                 Framerate = inputOptions.Framerate,
                 GenerateMask = inputOptions.GenerateMask,
-                InputArgs = inputOptions.InputArgs,
+                InputArgs = inputOptions.Sharpening ? inputOptions.InputArgs + " -filter_complex \"smartblur=lr=1:ls=-1.0\"" : inputOptions.InputArgs,
                 OutputArgs = inputOptions.OutputArgs,
-                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
+                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder,
-                SubMessages = (bool)inputOptions.SubMessages,
-                ChatBadges = (bool)inputOptions.ChatBadges,
+                SubMessages = (bool)inputOptions.SubMessages!,
+                ChatBadges = (bool)inputOptions.ChatBadges!,
                 Timestamp = inputOptions.Timestamp,
                 Offline = inputOptions.Offline,
+                EmojiVendor = inputOptions.EmojiVendor.ToLower() switch
+                {
+                    "twitter" or "twemoji" => EmojiVendor.TwitterTwemoji,
+                    "google" or "notocolor" => EmojiVendor.GoogleNotoColor,
+                    "system" or "none" => EmojiVendor.None,
+                    _ => throw new NotSupportedException("Invalid emoji vendor. Valid values are: 'twitter' / 'twemoji', and 'google' / 'notocolor'")
+                },
                 LogFfmpegOutput = inputOptions.LogFfmpegOutput,
+                SkipDriveWaiting = inputOptions.SkipDriveWaiting,
                 EmoteScale = inputOptions.ScaleEmote,
                 BadgeScale = inputOptions.ScaleBadge,
                 EmojiScale = inputOptions.ScaleEmoji,
                 VerticalSpacingScale = inputOptions.ScaleVertical,
-                LeftSpacingScale = inputOptions.ScaleLeft,
+                SidePaddingScale = inputOptions.ScaleLeft,
                 SectionHeightScale = inputOptions.ScaleSectionHeight,
                 WordSpacingScale = inputOptions.ScaleWordSpace,
                 EmoteSpacingScale = inputOptions.ScaleEmoteSpace,
                 AccentIndentScale = inputOptions.ScaleAccentIndent,
                 AccentStrokeScale = inputOptions.ScaleAccentStroke,
+                DisperseCommentOffsets = (bool)inputOptions.DisperseCommentOffsets
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
@@ -107,7 +119,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (inputOptions.BannedWordsString != "")
             {
-                renderOptions.BannedWordsArray = inputOptions.BannedWordsString.ToLower().Split(',',
+                renderOptions.BannedWordsArray = inputOptions.BannedWordsString.Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             }
 

@@ -6,7 +6,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
     [Verb("videodownload", HelpText = "Downloads a stream VOD from Twitch")]
     public class VideoDownloadArgs
     {
-        [Option('u', "id", Required = true, HelpText = "The ID of the VOD to download.")]
+        [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD to download.")]
         public string Id { get; set; }
 
         [Option('o', "output", Required = true, HelpText = "Path to output file.")]
@@ -17,13 +17,16 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option('b', "beginning", HelpText = "Time in seconds to crop beginning.")]
         public int CropBeginningTime { get; set; }
-        
+
         [Option('e', "ending", HelpText = "Time in seconds to crop ending.")]
         public int CropEndingTime { get; set; }
-        
-        [Option('t', "threads", Default = 10, HelpText = "Number of download threads.")]
+
+        [Option('t', "threads", Default = 4, HelpText = "Number of download threads.")]
         public int DownloadThreads { get; set; }
-        
+
+        [Option("bandwidth", Default = -1, HelpText = "The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or -1 for no maximum.")]
+        public int ThrottleKib { get; set; }
+
         [Option("oauth", HelpText = "OAuth access token to download subscriber only VODs. DO NOT SHARE THIS WITH ANYONE.")]
         public string Oauth { get; set; }
 

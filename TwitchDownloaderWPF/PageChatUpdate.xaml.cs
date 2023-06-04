@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -8,13 +9,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using TwitchDownloader;
-using TwitchDownloader.Properties;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -29,6 +30,8 @@ namespace TwitchDownloaderWPF
         public ChatRoot ChatJsonInfo;
         public string VideoId;
         public DateTime VideoCreatedAt;
+        public TimeSpan VideoLength;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public PageChatUpdate()
         {
@@ -37,94 +40,141 @@ namespace TwitchDownloaderWPF
 
         private async void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "JSON Files | *.json";
-            openFileDialog.RestoreDirectory = true;
-
-            if (openFileDialog.ShowDialog() == true)
+            OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                textJson.Text = openFileDialog.FileName;
-                InputFile = openFileDialog.FileName;
-                SetEnabled(true);
+                Filter = "JSON Files | *.json;*.json.gz"
+            };
+            if (openFileDialog.ShowDialog() != true)
+            {
+                return;
+            }
 
-                if (Path.GetExtension(InputFile).ToLower() == ".json")
+            textJson.Text = openFileDialog.FileName;
+            InputFile = openFileDialog.FileName;
+            SetEnabled(true);
+
+            if (Path.GetExtension(InputFile)!.ToLower() is not ".json" and not ".gz")
+            {
+                return;
+            }
+
+            ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, true, false, CancellationToken.None);
+            ChatJsonInfo.comments.RemoveRange(1, ChatJsonInfo.comments.Count - 2);
+            GC.Collect();
+
+            var videoCreatedAt = ChatJsonInfo.video.created_at == DateTime.MinValue
+                ? ChatJsonInfo.comments[0].created_at - TimeSpan.FromSeconds(ChatJsonInfo.comments[0].content_offset_seconds)
+                : ChatJsonInfo.video.created_at;
+            textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+            VideoCreatedAt = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
+
+            textStreamer.Text = ChatJsonInfo.streamer.name;
+            textTitle.Text = ChatJsonInfo.video.title ?? Translations.Strings.Unknown;
+
+            TimeSpan chatStart = TimeSpan.FromSeconds(ChatJsonInfo.video.start);
+            numStartHour.Value = (int)chatStart.TotalHours;
+            numStartMinute.Value = chatStart.Minutes;
+            numStartSecond.Value = chatStart.Seconds;
+
+            TimeSpan chatEnd = TimeSpan.FromSeconds(ChatJsonInfo.video.end);
+            numEndHour.Value = (int)chatEnd.TotalHours;
+            numEndMinute.Value = chatEnd.Minutes;
+            numEndSecond.Value = chatEnd.Seconds;
+
+            VideoLength = TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.length) ? 0.0 : ChatJsonInfo.video.length);
+            labelLength.Text = VideoLength.Seconds > 0
+                ? VideoLength.ToString("c")
+                : Translations.Strings.Unknown;
+
+            VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1";
+
+            if (VideoId.All(char.IsDigit))
+            {
+                GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(VideoId));
+                if (videoInfo.data.video == null)
                 {
-                    ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, getComments: false, getEmbeds: false);
-                    textStreamer.Text = ChatJsonInfo.streamer.name;
-                    textCreatedAt.Text = ChatJsonInfo.video.created_at.ToShortDateString();
-                    textTitle.Text = ChatJsonInfo.video.title ?? "Unknown";
-
-                    VideoCreatedAt = ChatJsonInfo.video.created_at;
-
-                    TimeSpan chatStart = TimeSpan.FromSeconds(ChatJsonInfo.video.start);
-                    numStartHour.Value = (int)chatStart.TotalHours;
-                    numStartMinute.Value = chatStart.Minutes;
-                    numStartSecond.Value = chatStart.Seconds;
-
-                    TimeSpan chatEnd = TimeSpan.FromSeconds(ChatJsonInfo.video.end);
-                    numEndHour.Value = (int)chatEnd.TotalHours;
-                    numEndMinute.Value = chatEnd.Minutes;
-                    numEndSecond.Value = chatEnd.Seconds;
-
-                    TimeSpan videoLength = TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.length) ? 0.0 : ChatJsonInfo.video.length);
-                    labelLength.Text = videoLength.Seconds > 0
-                        ? string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds)
-                        : "Unknown";
-
-                    VideoId = ChatJsonInfo.video.id ?? "-1";
-
-                    if (VideoId.All(char.IsDigit))
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
+                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                    if (success)
                     {
-                        GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(VideoId));
-                        if (videoInfo.data.video == null)
-                        {
-                            AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
-                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
-                        }
-                        else
-                        {
-                            videoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
-                            labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds);
-
-                            try
-                            {
-                                string thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
-                                imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
-                            }
-                            catch
-                            {
-                                AppendLog("ERROR: Unable to find thumbnail");
-                                imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
-                            }
-                        }
+                        imgThumbnail.Source = image;
                     }
-                    else
-                    {
-                        GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
-                        if (videoInfo.data.clip.video == null)
-                        {
-                            AppendLog("ERROR: Unable to find thumbnail: VOD is expired or embedded ID is corrupt");
-                            imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
-                        }
-                        else
-                        {
-                            videoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
-                            labelLength.Text = string.Format("{0:00}:{1:00}:{2:00}", (int)videoLength.TotalHours, videoLength.Minutes, videoLength.Seconds);
+                    numStartHour.Maximum = 48;
+                    numEndHour.Maximum = 48;
+                }
+                else
+                {
+                    VideoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
+                    labelLength.Text = VideoLength.ToString("c");
+                    numStartHour.Maximum = (int)VideoLength.TotalHours;
+                    numEndHour.Maximum = (int)VideoLength.TotalHours;
 
-                            try
-                            {
-                                string thumbUrl = videoInfo.data.clip.thumbnailURL;
-                                imgThumbnail.Source = await InfoHelper.GetThumb(thumbUrl);
-                            }
-                            catch
-                            {
-                                AppendLog("ERROR: Unable to find thumbnail");
-                                imgThumbnail.Source = await InfoHelper.GetThumb(InfoHelper.thumbnailMissingUrl);
-                            }
+                    try
+                    {
+                        string thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
+                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
+                    }
+                    catch
+                    {
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                        if (success)
+                        {
+                            imgThumbnail.Source = image;
                         }
                     }
                 }
             }
+            else
+            {
+                if (VideoId != "-1")
+                {
+                    numStartHour.Maximum = 0;
+                    numEndHour.Maximum = 0;
+                }
+                GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
+                if (videoInfo.data.clip.video == null)
+                {
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
+                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                    if (success)
+                    {
+                        imgThumbnail.Source = image;
+                    }
+                }
+                else
+                {
+                    VideoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
+                    labelLength.Text = VideoLength.ToString("c");
+
+                    try
+                    {
+                        string thumbUrl = videoInfo.data.clip.thumbnailURL;
+                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
+                    }
+                    catch
+                    {
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                        if (success)
+                        {
+                            imgThumbnail.Source = image;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UpdateActionButtons(bool isUpdating)
+        {
+            if (isUpdating)
+            {
+                SplitBtnUpdate.Visibility = Visibility.Collapsed;
+                BtnCancel.Visibility = Visibility.Visible;
+                return;
+            }
+            SplitBtnUpdate.Visibility = Visibility.Visible;
+            BtnCancel.Visibility = Visibility.Collapsed;
         }
 
         private void Page_Initialized(object sender, EventArgs e)
@@ -151,11 +201,13 @@ namespace TwitchDownloaderWPF
             checkEnd.IsEnabled = isEnabled;
             checkEmbedMissing.IsEnabled = isEnabled;
             checkReplaceEmbeds.IsEnabled = isEnabled;
-            btnDownload.IsEnabled = isEnabled;
-            btnQueue.IsEnabled = isEnabled;
-            radioRelative.IsEnabled = isEnabled;
-            radioUTC.IsEnabled = isEnabled;
-            radioNone.IsEnabled = isEnabled;
+            SplitBtnUpdate.IsEnabled = isEnabled;
+            MenuItemEnqueue.IsEnabled = isEnabled;
+            radioTimestampRelative.IsEnabled = isEnabled;
+            radioTimestampUTC.IsEnabled = isEnabled;
+            radioTimestampNone.IsEnabled = isEnabled;
+            radioCompressionNone.IsEnabled = isEnabled;
+            radioCompressionGzip.IsEnabled = isEnabled;
             radioJson.IsEnabled = isEnabled;
             radioText.IsEnabled = isEnabled;
             radioHTML.IsEnabled = isEnabled;
@@ -211,6 +263,11 @@ namespace TwitchDownloaderWPF
             else if ((bool)radioText.IsChecked)
                 options.OutputFormat = ChatFormat.Text;
 
+            if (radioCompressionNone.IsChecked == true)
+                options.Compression = ChatCompression.None;
+            else if (radioCompressionGzip.IsChecked == true)
+                options.Compression = ChatCompression.Gzip;
+
             if (checkStart.IsChecked == true)
             {
                 options.CropBeginning = true;
@@ -224,11 +281,11 @@ namespace TwitchDownloaderWPF
                 options.CropEndingTime = (int)Math.Round(end.TotalSeconds);
             }
 
-            if ((bool)radioUTC.IsChecked)
+            if ((bool)radioTimestampUTC.IsChecked)
                 options.TextTimestampFormat = TimestampFormat.Utc;
-            else if ((bool)radioRelative.IsChecked)
+            else if ((bool)radioTimestampRelative.IsChecked)
                 options.TextTimestampFormat = TimestampFormat.Relative;
-            else if ((bool)radioNone.IsChecked)
+            else if ((bool)radioTimestampNone.IsChecked)
                 options.TextTimestampFormat = TimestampFormat.None;
 
             return options;
@@ -241,7 +298,7 @@ namespace TwitchDownloaderWPF
                 case ReportType.Percent:
                     statusProgressBar.Value = (int)progress.Data;
                     break;
-                case ReportType.Status or ReportType.StatusInfo:
+                case ReportType.NewLineStatus or ReportType.SameLineStatus:
                     statusMessage.Text = (string)progress.Data;
                     break;
                 case ReportType.Log:
@@ -257,7 +314,9 @@ namespace TwitchDownloaderWPF
             image.UriSource = new Uri(imageUri, UriKind.Relative);
             image.EndInit();
             if (isGif)
+            {
                 ImageBehavior.SetAnimatedSource(statusImage, image);
+            }
             else
             {
                 ImageBehavior.SetAnimatedSource(statusImage, null);
@@ -272,7 +331,7 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            SettingsPage settings = new SettingsPage();
+            WindowSettings settings = new WindowSettings();
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -388,69 +447,115 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private async void SplitButton_Click(object sender, RoutedEventArgs e)
+        private async void SplitBtnUpdate_Click(object sender, RoutedEventArgs e)
         {
-            if (!((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
+            if (((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                return;
+            }
 
-                if ((bool)radioJson.IsChecked)
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+            if (radioJson.IsChecked == true)
+            {
+                if (radioCompressionNone.IsChecked == true)
                     saveFileDialog.Filter = "JSON Files | *.json";
-                if ((bool)radioHTML.IsChecked)
-                    saveFileDialog.Filter = "HTML Files | *.html;*.htm";
-                if ((bool)radioText.IsChecked)
-                    saveFileDialog.Filter = "TXT Files | *.txt";
+                else if (radioCompressionGzip.IsChecked == true)
+                    saveFileDialog.Filter = "GZip JSON Files | *.json.gz";
+            }
+            else if (radioHTML.IsChecked == true)
+                saveFileDialog.Filter = "HTML Files | *.html;*.htm";
+            else if (radioText.IsChecked == true)
+                saveFileDialog.Filter = "TXT Files | *.txt";
 
-                saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.FileName = MainWindow.GetFilename(Settings.Default.TemplateChat, textTitle.Text, ChatJsonInfo.video.id ?? "-1", VideoCreatedAt, textStreamer.Text);
+            saveFileDialog.FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text,
+                ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text,
+                checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.start) ? 0.0 : ChatJsonInfo.video.start),
+                checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : VideoLength);
 
-                if (saveFileDialog.ShowDialog() == true)
+            if (saveFileDialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
+
+                ChatUpdater currentUpdate = new ChatUpdater(updateOptions);
+                try
                 {
-                    try
+                    await currentUpdate.ParseJsonAsync(CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                    if (Settings.Default.VerboseErrors)
                     {
-                        ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
-
-                        ChatUpdater currentUpdate = new ChatUpdater(updateOptions);
-                        await currentUpdate.ParseJsonAsync(new CancellationToken());
-
-                        btnBrowse.IsEnabled = false;
-                        SetEnabled(false);
-                        SetImage("Images/ppOverheat.gif", true);
-                        statusMessage.Text = "Downloading";
-
-                        Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-
-                        try
-                        {
-                            await currentUpdate.UpdateAsync(downloadProgress, new CancellationToken());
-                            await Task.Delay(300); // we need to wait a bit incase the "writing to output file" report comes late
-                            textJson.Text = "";
-                            statusMessage.Text = "Done";
-                            SetImage("Images/ppHop.gif", true);
-                        }
-                        catch (Exception ex)
-                        {
-                            statusMessage.Text = "ERROR";
-                            SetImage("Images/peepoSad.png", false);
-                            AppendLog("ERROR: " + ex.Message);
-                            if (Settings.Default.VerboseErrors)
-                            {
-                                MessageBox.Show(ex.ToString(), "Verbose error output", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                        }
-                        btnBrowse.IsEnabled = true;
-                        statusProgressBar.Value = 0;
-
-                        currentUpdate = null;
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
+                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                    catch (Exception ex)
+                    return;
+                }
+
+                btnBrowse.IsEnabled = false;
+                SetEnabled(false);
+
+                SetImage("Images/ppOverheat.gif", true);
+                statusMessage.Text = Translations.Strings.StatusUpdating;
+                _cancellationTokenSource = new CancellationTokenSource();
+                UpdateActionButtons(true);
+
+                Progress<ProgressReport> updateProgress = new Progress<ProgressReport>(OnProgressChanged);
+
+                try
+                {
+                    await currentUpdate.UpdateAsync(updateProgress, _cancellationTokenSource.Token);
+                    await Task.Delay(300); // we need to wait a bit incase the "writing to output file" report comes late
+                    textJson.Text = "";
+                    statusMessage.Text = Translations.Strings.StatusDone;
+                    SetImage("Images/ppHop.gif", true);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException and not TaskCanceledException)
+                {
+                    statusMessage.Text = Translations.Strings.StatusError;
+                    SetImage("Images/peepoSad.png", false);
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                    if (Settings.Default.VerboseErrors)
                     {
-                        AppendLog("ERROR: " + ex.Message);
+                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
+                catch
+                {
+                    statusMessage.Text = Translations.Strings.StatusCanceled;
+                    SetImage("Images/ppHop.gif", true);
+                }
+                btnBrowse.IsEnabled = true;
+                statusProgressBar.Value = 0;
+                _cancellationTokenSource.Dispose();
+                UpdateActionButtons(false);
+
+                currentUpdate = null;
+                GC.Collect();
             }
+            catch (Exception ex)
+            {
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            statusMessage.Text = Translations.Strings.StatusCanceling;
+            try
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            catch (ObjectDisposedException) { }
         }
 
         private void radioJson_Checked(object sender, RoutedEventArgs e)
@@ -461,7 +566,9 @@ namespace TwitchDownloaderWPF
                 timeOptions.Visibility = Visibility.Collapsed;
                 stackEmbedText.Visibility = Visibility.Visible;
                 stackEmbedChecks.Visibility = Visibility.Visible;
-                textCrop.Margin = new Thickness(0, 15, 0, 0);
+                compressionText.Visibility = Visibility.Visible;
+                compressionOptions.Visibility = Visibility.Visible;
+                textCrop.Margin = new Thickness(0, 12, 0, 36);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Json;
                 Settings.Default.Save();
@@ -476,7 +583,9 @@ namespace TwitchDownloaderWPF
                 timeOptions.Visibility = Visibility.Collapsed;
                 stackEmbedText.Visibility = Visibility.Visible;
                 stackEmbedChecks.Visibility = Visibility.Visible;
-                textCrop.Margin = new Thickness(0, 15, 0, 0);
+                compressionText.Visibility = Visibility.Collapsed;
+                compressionOptions.Visibility = Visibility.Collapsed;
+                textCrop.Margin = new Thickness(0, 17, 0, 36);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Html;
                 Settings.Default.Save();
@@ -491,7 +600,9 @@ namespace TwitchDownloaderWPF
                 timeOptions.Visibility = Visibility.Visible;
                 stackEmbedText.Visibility = Visibility.Collapsed;
                 stackEmbedChecks.Visibility = Visibility.Collapsed;
-                textCrop.Margin = new Thickness(0, 10, 0, 0);
+                compressionText.Visibility = Visibility.Collapsed;
+                compressionOptions.Visibility = Visibility.Collapsed;
+                textCrop.Margin = new Thickness(0, 12, 0, 0);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
                 Settings.Default.Save();
@@ -508,7 +619,7 @@ namespace TwitchDownloaderWPF
             SetEnabledCropEnd((bool)checkEnd.IsChecked);
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e)
         {
             WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();

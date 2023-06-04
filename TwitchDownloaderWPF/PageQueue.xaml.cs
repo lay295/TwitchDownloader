@@ -5,11 +5,11 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using TwitchDownloader.Properties;
-using TwitchDownloader.TwitchTasks;
-using TwitchDownloaderWPF;
+using TwitchDownloaderWPF.TwitchTasks;
+using TwitchDownloaderWPF.Properties;
+using System.Diagnostics;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     /// <summary>
     /// Interaction logic for PageQueue.xaml
@@ -115,6 +115,18 @@ namespace TwitchDownloader
             }
         }
 
+        private void btnDonate_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            WindowSettings settings = new WindowSettings();
+            settings.ShowDialog();
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
         private void numVod_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
             if (this.IsInitialized)
@@ -199,7 +211,7 @@ namespace TwitchDownloader
                 errorMessage = taskException.Exception.ToString();
             }
 
-            MessageBox.Show(errorMessage, "Task Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(errorMessage, Translations.Strings.TaskError, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

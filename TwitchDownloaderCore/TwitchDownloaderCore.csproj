@@ -13,29 +13,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\gift-illustration.png" />
     <None Remove="Resources\interbold.otf" />
     <None Remove="Resources\interregular.otf" />
     <None Remove="Resources\template.html" />
-    <None Remove="Resources\twemoji-14.0.0.zip" />
+    <None Remove="Resources\noto-emoji-2.038.zip" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\interbold.otf" />
     <EmbeddedResource Include="Resources\interregular.otf" />
     <EmbeddedResource Include="Resources\template.html" />
-    <EmbeddedResource Include="Resources\twemoji-14.0.0.zip" />
+    <EmbeddedResource Include="Resources\noto-emoji-2.038.zip" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="2.8.2.3" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="SkiaSharp" Version="2.88.3" />
     <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.3" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.3" />
     <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="2.88.3" />
     <PackageReference Include="StoneCold.SkiaSharp.NativeAssets.AlpineLinux" Version="2.88.3" />
-    <PackageReference Include="System.Text.Json" Version="7.0.0" />
+    <PackageReference Include="System.Text.Json" Version="7.0.1" />
     <PackageReference Include="Unicode.net" Version="2.0.0" />
   </ItemGroup>
 

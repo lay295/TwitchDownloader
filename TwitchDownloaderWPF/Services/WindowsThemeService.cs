@@ -3,7 +3,7 @@ using System;
 using System.Management;
 using System.Security.Principal;
 
-namespace TwitchDownloader.Tools
+namespace TwitchDownloaderWPF.Services
 {
     public class WindowsThemeService : ManagementEventWatcher
     {
@@ -11,8 +11,8 @@ namespace TwitchDownloader.Tools
 
         private const string REGISTRY_KEY_PATH = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
         private const string REGISTRY_KEY_NAME = "AppsUseLightTheme";
-        internal const string LIGHT_THEME = "Light";
-        internal const string DARK_THEME = "Dark";
+        private const string LIGHT_THEME = "Light";
+        private const string DARK_THEME = "Dark";
 
         public WindowsThemeService() : base()
         {
@@ -28,10 +28,7 @@ namespace TwitchDownloader.Tools
         private void WindowsThemeService_EventArrived(object sender, EventArrivedEventArgs e)
         {
             var newWindowsTheme = GetWindowsTheme();
-            if (ThemeChanged.GetInvocationList().Length > 0)
-            {
-                ThemeChanged.Invoke(this, newWindowsTheme);
-            }
+            ThemeChanged?.Invoke(this, newWindowsTheme);
         }
 
         public static string GetWindowsTheme()

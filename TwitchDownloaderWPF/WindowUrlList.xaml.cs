@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using TwitchDownloader.TwitchTasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects.Gql;
-using TwitchDownloaderWPF;
+using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.TwitchTasks;
 using static TwitchDownloaderWPF.App;
 
-namespace TwitchDownloader
+namespace TwitchDownloaderWPF
 {
     /// <summary>
     /// Interaction logic for WindowUrlList.xaml
@@ -26,7 +26,7 @@ namespace TwitchDownloader
         {
             btnQueue.IsEnabled = false;
             List<string> idList = new List<string>();
-            List<string> urlList = new List<string>(textList.Text.Split('\n').Where(x => x.Trim() != ""));
+            List<string> urlList = new List<string>(textList.Text.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             List<string> invalidList = new List<string>();
             List<string> errorList = new List<string>();
             List<TaskData> dataList = new List<TaskData>();
@@ -49,7 +49,7 @@ namespace TwitchDownloader
 
             if (invalidList.Count > 0)
             {
-                MessageBox.Show("Please double check the VOD/Clip link", "Unable to parse inputs\n" + String.Join("\n", invalidList.ToArray()), MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Translations.Strings.UnableToParseInputsMessage + Environment.NewLine + string.Join(Environment.NewLine, invalidList.ToArray()), Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -106,7 +106,7 @@ namespace TwitchDownloader
                         catch { }
                         newData.Title = data.data.video.title;
                         newData.Streamer = data.data.video.owner.displayName;
-                        newData.Time = data.data.video.createdAt.ToLocalTime();
+                        newData.Time = Settings.Default.UTCVideoTime ? data.data.video.createdAt : data.data.video.createdAt.ToLocalTime();
                         dataList.Add(newData);
                     }
                     else
@@ -138,7 +138,7 @@ namespace TwitchDownloader
                         catch { }
                         newData.Title = data.data.clip.title;
                         newData.Streamer = data.data.clip.broadcaster.displayName;
-                        newData.Time = data.data.clip.createdAt.ToLocalTime();
+                        newData.Time = Settings.Default.UTCVideoTime ? data.data.clip.createdAt : data.data.clip.createdAt.ToLocalTime();
                         dataList.Add(newData);
                     }
                     else
@@ -150,7 +150,7 @@ namespace TwitchDownloader
 
             if (errorList.Count > 0)
             {
-                MessageBox.Show("Error getting VOD/Clip information", "Unable to get info for these VODs/Clips\n" + String.Join("\n", errorList.ToArray()), MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Translations.Strings.UnableToGetInfoMessage + Environment.NewLine + string.Join(Environment.NewLine, errorList.ToArray()), Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -164,6 +164,7 @@ namespace TwitchDownloader
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+            Title = Translations.Strings.TitleUrlList;
 			AppSingleton.RequestTitleBarChange();
 		}
     }

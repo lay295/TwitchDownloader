@@ -1,0 +1,741 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Accept" xml:space="preserve">
+    <value>Akceptuj</value>
+  </data>
+  <data name="AddToQueue" xml:space="preserve">
+    <value>Dodaj Do Kolejki</value>
+  </data>
+  <data name="AlphaNotSupportedByCodec" xml:space="preserve">
+    <value>Wybrałeś kanał alfa (przezroczystości) dla konteneru/kodeku, który tego nie wspiera. Usuń przezroczystość lub enkoduj z MOV + RLE/PRORES lub WEBM + VP8/VP9</value>
+  </data>
+  <data name="ApplicationTheme" xml:space="preserve">
+    <value>Motyw </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ApplicationThemeTooltip" xml:space="preserve">
+    <value>Kliknij, aby dowiedzieć się jak stworzyć własny motyw!</value>
+  </data>
+  <data name="AvailableParameters" xml:space="preserve">
+    <value>Dostępne parametry to:</value>
+  </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>Kolor tła:</value>
+  </data>
+  <data name="BannedWordsList" xml:space="preserve">
+    <value>Lista Zablokowanych Słów </value>
+    <comment>Leaving a trailing space</comment>
+  </data>
+  <data name="BannedWordsListTooltip" xml:space="preserve">
+    <value>Lista zablokowanych słów lub fraz - oddzielonych przecinkiem, spacje dookoła przecinków są ignorowane, nie wrażliwe na wielkość znaków.</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Przeglądaj</value>
+  </data>
+  <data name="BttvEmotes" xml:space="preserve">
+    <value>Emotki BTTV:</value>
+  </data>
+  <data name="CacheFolder" xml:space="preserve">
+    <value>Folder Cache:</value>
+  </data>
+  <data name="TemplateChats" xml:space="preserve">
+    <value>Czaty:</value>
+  </data>
+  <data name="ChatBadgeFilter" xml:space="preserve">
+    <value>Filtr Odznak Czatu:</value>
+  </data>
+  <data name="ChatBadges" xml:space="preserve">
+    <value>Odznaki Czatu:</value>
+  </data>
+  <data name="ChatCrop" xml:space="preserve">
+    <value>Utnij:</value>
+  </data>
+  <data name="ChatDownload" xml:space="preserve">
+    <value>Pobierz Czat</value>
+  </data>
+  <data name="ChatDownloads" xml:space="preserve">
+    <value>Pobrania Czatu</value>
+  </data>
+  <data name="ChatFont" xml:space="preserve">
+    <value>Czcionka:</value>
+  </data>
+  <data name="ChatFontSize" xml:space="preserve">
+    <value>Rozmiar Czcionki:</value>
+  </data>
+  <data name="ChatHeight" xml:space="preserve">
+    <value>Wysokość:</value>
+  </data>
+  <data name="ChatRender" xml:space="preserve">
+    <value>Render Czatu</value>
+  </data>
+  <data name="ChatRenders" xml:space="preserve">
+    <value>Rendery Czatu</value>
+  </data>
+  <data name="ChatUpdate" xml:space="preserve">
+    <value>Aktualizowanie Czatu</value>
+  </data>
+  <data name="ChatUpdater" xml:space="preserve">
+    <value>Aktualizator Czatu</value>
+  </data>
+  <data name="ChatWidth" xml:space="preserve">
+    <value>Szerokość:</value>
+  </data>
+  <data name="ClearCache" xml:space="preserve">
+    <value>Wyczyść</value>
+  </data>
+  <data name="ClearCacheConfirmation" xml:space="preserve">
+    <value>Czy na pewno chcesz usunąć swój cache?\nPowinieneś to zrobić tylko wtedy, gdy program nie działa poprawnie</value>
+  </data>
+  <data name="ClipDownload" xml:space="preserve">
+    <value>Pobierz Klip</value>
+  </data>
+  <data name="ClipDownloads" xml:space="preserve">
+    <value>Pobrania Klipów</value>
+  </data>
+  <data name="ClipLinkId" xml:space="preserve">
+    <value>Link/ID Klipu:</value>
+  </data>
+  <data name="TemplateClips" xml:space="preserve">
+    <value>Klipy:</value>
+  </data>
+  <data name="CropEnd" xml:space="preserve">
+    <value>Koniec</value>
+  </data>
+  <data name="CropStart" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="CropVideo" xml:space="preserve">
+    <value>Utnij Wideo:</value>
+  </data>
+  <data name="DateCustomFormatting" xml:space="preserve">
+    <value>formatowanie date_custom jest bazowane na</value>
+  </data>
+  <data name="DateCustomFormattingHyperlink" xml:space="preserve">
+    <value>standardowym formacie łańcuchów daty i czasu C#</value>
+  </data>
+  <data name="DeleteConfirmation" xml:space="preserve">
+    <value>Potwierdzenie Usunięcia</value>
+  </data>
+  <data name="DonateTooltip" xml:space="preserve">
+    <value>Używasz często programu i chcesz mnie wesprzeć? Kup mi kawę :)</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Pobierz</value>
+  </data>
+  <data name="DownloadConnections" xml:space="preserve">
+    <value>Połączenia:</value>
+  </data>
+  <data name="DownloadFilenameTemplates" xml:space="preserve">
+    <value>Szablony Nazw Pobranych Plików:</value>
+  </data>
+  <data name="DownloadFormat" xml:space="preserve">
+    <value>Format Pobierania:</value>
+  </data>
+  <data name="DownloadThreads" xml:space="preserve">
+    <value>Wątki Pobierania:</value>
+  </data>
+  <data name="EmbedImages" xml:space="preserve">
+    <value>Osadź Obrazy </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="EmbedImagesTooltip" xml:space="preserve">
+    <value>Osadź emotki, odznaki oraz cheermotki first party w pobranym pliku dla renderowania offline. Użyteczne do celów archiwalnych, rozmiar pliku będzie większy</value>
+  </data>
+  <data name="EmbedMissing" xml:space="preserve">
+    <value>Brakujące Osadzenie </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="EmbedMissingTooltip" xml:space="preserve">
+    <value>Osadzenia brakują emotek, odznak oraz cheermotek. Już osadzone obrazy nie będą zmieniane.</value>
+  </data>
+  <data name="EnqueueDownload" xml:space="preserve">
+    <value>Zakolejkuj Pobieranie</value>
+  </data>
+  <data name="EnqueueRender" xml:space="preserve">
+    <value>Zakolejkuj Render</value>
+  </data>
+  <data name="EnqueueUpdate" xml:space="preserve">
+    <value>Zakolejkuj Aktualizację</value>
+  </data>
+  <data name="ErrorLog" xml:space="preserve">
+    <value>BŁĄD: </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="FfmpegInputArguments" xml:space="preserve">
+    <value>Argumenty Wprowadzenia:</value>
+  </data>
+  <data name="FfmpegOptionsHyperlink" xml:space="preserve">
+    <value>Kliknij tutaj, aby dowiedzieć się więcej o ustawieniach Ffmpeg</value>
+  </data>
+  <data name="FfmpegOutputArguments" xml:space="preserve">
+    <value>Argumenty Wejścia:</value>
+  </data>
+  <data name="FfmpegParameters" xml:space="preserve">
+    <value>{fps} {height} {width} {max_int} {save_path}</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="FfmpegReset" xml:space="preserve">
+    <value>Przywróć Domyślne</value>
+  </data>
+  <data name="FfzEmotes" xml:space="preserve">
+    <value>Emotki FFZ:</value>
+  </data>
+  <data name="FilenameTemplateParameters" xml:space="preserve">
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {crop_start} {crop_end} {crop_start_custom=""} {crop_end_custom=""}</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="FontColor" xml:space="preserve">
+    <value>Kolor Czcionki:</value>
+  </data>
+  <data name="GenerateMask" xml:space="preserve">
+    <value>Generuj Maskę:</value>
+  </data>
+  <data name="GetInfo" xml:space="preserve">
+    <value>Zdobądź Informację</value>
+  </data>
+  <data name="HideDonationButton" xml:space="preserve">
+    <value>Ukryj Przycisk Dotacji:</value>
+  </data>
+  <data name="IgnoreUsersList" xml:space="preserve">
+    <value>Lista Ignorowanych Użytkowników </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="IgnoreUsersListTooltip" xml:space="preserve">
+    <value>Lista użytkowników - oddzielonych przecinkiem, spacje dookoła przecinków są ignorowane, nie wrażliwe na wielkość znaków.</value>
+  </data>
+  <data name="InvalidClipLinkId" xml:space="preserve">
+    <value>Nieprawidłowy Link/ID Klipów</value>
+  </data>
+  <data name="InvalidClipLinkIdMessage" xml:space="preserve">
+    <value>Proszę wprowadzić poprawny Link/ID klipu\nPrzykłady:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
+  </data>
+  <data name="InvalidCropInputs" xml:space="preserve">
+    <value>Nieprawidłowe Dane Ucięcia</value>
+  </data>
+  <data name="InvalidStartEndTime" xml:space="preserve">
+    <value>Nieprawidłowy czas rozpoczącia lub zakończenia</value>
+  </data>
+  <data name="InvalidVideoLinkId" xml:space="preserve">
+    <value>Nieprawidłowy Link/ID Wideo</value>
+  </data>
+  <data name="InvalidVideoLinkIdMessage" xml:space="preserve">
+    <value>Proszę wprowadzić poprawny Link/ID wideo\nPrzykłady:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
+  </data>
+  <data name="JsonFile" xml:space="preserve">
+    <value>Plik JSON:</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Długość:</value>
+  </data>
+  <data name="ListOfVodsClips" xml:space="preserve">
+    <value>Lista VODów/Klipów (Jeden na wiersz)</value>
+  </data>
+  <data name="LogHeader" xml:space="preserve">
+    <value>Log:</value>
+  </data>
+  <data name="MassDownloads" xml:space="preserve">
+    <value>Masowe Pobrania</value>
+  </data>
+  <data name="Oauth" xml:space="preserve">
+    <value>OAuth (opcjonalne) </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="OAuthTooltip" xml:space="preserve">
+    <value>Wymagane tylko do VODów dla subów. Wszystkie tokeny OAuth firm trzecich nie zadziałają. Kliknij, aby zobaczyć film Youtube jak zdobyć token OAuth.</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>Offline </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="OfflineTooltip" xml:space="preserve">
+    <value>Renderuj czat używając tylko danych osadzonych w pliku json czatu.</value>
+  </data>
+  <data name="Outline" xml:space="preserve">
+    <value>Obramowanie:</value>
+  </data>
+  <data name="ParallelTaskLimits" xml:space="preserve">
+    <value>Limit Równoległych Zadań</value>
+  </data>
+  <data name="PartialRender" xml:space="preserve">
+    <value>Częściowy Render</value>
+  </data>
+  <data name="Quality" xml:space="preserve">
+    <value>Jakość:</value>
+  </data>
+  <data name="Render" xml:space="preserve">
+    <value>Renderuj</value>
+  </data>
+  <data name="RenderFfmpegWarning" xml:space="preserve">
+    <value>Jest to tylko dla zaawansowanych użytkowników. Jeżeli otrzymasz "pipe ended error", to jest prawdopodobnie powód.</value>
+  </data>
+  <data name="RenderFileFormat" xml:space="preserve">
+    <value>Format Pliku:</value>
+  </data>
+  <data name="RenderFramerate" xml:space="preserve">
+    <value>Częstotliwość wyświetlania klatek:</value>
+  </data>
+  <data name="RenderCodec" xml:space="preserve">
+    <value>Kodek:</value>
+  </data>
+  <data name="RenderTabEncoding" xml:space="preserve">
+    <value>Enkodowanie</value>
+  </data>
+  <data name="RenderTabFfmpeg" xml:space="preserve">
+    <value>Ffmpeg</value>
+  </data>
+  <data name="RenderTabGeneral" xml:space="preserve">
+    <value>Ogólne</value>
+  </data>
+  <data name="RenderTabPreview" xml:space="preserve">
+    <value>Podgląd</value>
+  </data>
+  <data name="RenderTabRendering" xml:space="preserve">
+    <value>Renderowanie</value>
+  </data>
+  <data name="RenderTabScaling" xml:space="preserve">
+    <value>Skalowanie</value>
+  </data>
+  <data name="RenderWidthHeightMustBeEven" xml:space="preserve">
+    <value>Szerokość i Wysokość musi być parzysta</value>
+  </data>
+  <data name="ReplaceEmbeds" xml:space="preserve">
+    <value>Podmień Osadzenia </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ReplaceEmbedsTooltip" xml:space="preserve">
+    <value>Podmień wszystkie osadzone emotki, odznaki oraz cheermotki w pliku. Wszystkie osadzone obrazy zostaną podmienione!</value>
+  </data>
+  <data name="SearchClips" xml:space="preserve">
+    <value>Wyszukaj Klipy</value>
+  </data>
+  <data name="SearchVods" xml:space="preserve">
+    <value>Wyszukaj VODy</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Wybierz Wszystko</value>
+  </data>
+  <data name="SelectedItems" xml:space="preserve">
+    <value>Wybrane Elementy:</value>
+  </data>
+  <data name="SetChannel" xml:space="preserve">
+    <value>Ustaw Kanał</value>
+  </data>
+  <data name="Sort" xml:space="preserve">
+    <value>Sortuj:</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>Ukończono</value>
+  </data>
+  <data name="StatusDownloading" xml:space="preserve">
+    <value>Pobieranie</value>
+  </data>
+  <data name="StatusError" xml:space="preserve">
+    <value>BŁĄD</value>
+  </data>
+  <data name="StatusIdle" xml:space="preserve">
+    <value>Oczekiwanie</value>
+  </data>
+  <data name="StatusRendering" xml:space="preserve">
+    <value>Renderowanie</value>
+  </data>
+  <data name="StatusUpdating" xml:space="preserve">
+    <value>Aktualizowanie</value>
+  </data>
+  <data name="Streamer" xml:space="preserve">
+    <value>Nadawca:</value>
+  </data>
+  <data name="StvEmotes" xml:space="preserve">
+    <value>Emotki 7TV:</value>
+  </data>
+  <data name="SubMessages" xml:space="preserve">
+    <value>Wiadomości Subów:</value>
+  </data>
+  <data name="TaskCancel" xml:space="preserve">
+    <value>Anuluj</value>
+  </data>
+  <data name="TaskError" xml:space="preserve">
+    <value>Błąd</value>
+  </data>
+  <data name="TaskQueue" xml:space="preserve">
+    <value>Kolejka Zadań</value>
+  </data>
+  <data name="ThirdPartyEmotes" xml:space="preserve">
+    <value>Emotki Firm Trzecich </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
+    <value>Również osadź emotki firm trzecich w pliku. Rozmiar pliku będzie o wiele większy.</value>
+  </data>
+  <data name="TimestampFormat" xml:space="preserve">
+    <value>Format Znacznika Czasu:</value>
+  </data>
+  <data name="TimestampNone" xml:space="preserve">
+    <value>Żaden</value>
+  </data>
+  <data name="TimestampRelative" xml:space="preserve">
+    <value>Relatywny</value>
+  </data>
+  <data name="Timestamps" xml:space="preserve">
+    <value>Znaczniki czasu:</value>
+  </data>
+  <data name="TimestampUtc" xml:space="preserve">
+    <value>UTC</value>
+  </data>
+  <data name="TopAllTime" xml:space="preserve">
+    <value>Najlepsi Ogólnie</value>
+  </data>
+  <data name="TopSevenDays" xml:space="preserve">
+    <value>Najlepsi 7 dni</value>
+  </data>
+  <data name="TopThirtyDays" xml:space="preserve">
+    <value>Najlepsi 30 dni</value>
+  </data>
+  <data name="TopTwentyFourHours" xml:space="preserve">
+    <value>Najlepsi 24 godziny</value>
+  </data>
+  <data name="UnableToFindThumbnail" xml:space="preserve">
+    <value>Nie można uzyskać miniaturki</value>
+  </data>
+  <data name="UnableToGetClipInfo" xml:space="preserve">
+    <value>Nie można uzyskać informacji o Klipie. Sprawdź ponownie ID Klipu i spróbuj ponownie.</value>
+  </data>
+  <data name="UnableToGetInfo" xml:space="preserve">
+    <value>Nie można uzyskać informacji</value>
+  </data>
+  <data name="UnableToGetInfoMessage" xml:space="preserve">
+    <value>Nie można uzyskać informacji o Wideo/Klipie. Sprawdź ponownie swój link i spróbuj ponownie</value>
+  </data>
+  <data name="UnableToGetVideoInfo" xml:space="preserve">
+    <value>Nie można uzyskać informacji o wideo. Sprawdź ponownie czy Link/ID jest poprawny i spróbuj ponownie.</value>
+  </data>
+  <data name="UnableToParseInputs" xml:space="preserve">
+    <value>Nie można przetworzyć danych wejściowych</value>
+  </data>
+  <data name="UnableToParseInputsMessage" xml:space="preserve">
+    <value>Sprawdź czy twoje dane wejściowe są poprawne</value>
+  </data>
+  <data name="UnableToParseLink" xml:space="preserve">
+    <value>Nie można przetworzyć linku</value>
+  </data>
+  <data name="UnableToParseLinkMessage" xml:space="preserve">
+    <value>Sprawdź czy link VODa/Klipu jest poprawny</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Nieznany</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Aktualizuj</value>
+  </data>
+  <data name="UpdateRate" xml:space="preserve">
+    <value>Częstotliwość Aktualizacji:</value>
+  </data>
+  <data name="UrlList" xml:space="preserve">
+    <value>Lista URL</value>
+  </data>
+  <data name="VerboseErrorOutput" xml:space="preserve">
+    <value>Szczegółowe Wyjście Błedu</value>
+  </data>
+  <data name="VerboseErrors" xml:space="preserve">
+    <value>Wyświetlaj Błędy Szczegółowo:</value>
+  </data>
+  <data name="VideoCreatedAt" xml:space="preserve">
+    <value>Utworzone:</value>
+  </data>
+  <data name="VideoTitle" xml:space="preserve">
+    <value>Tytuł:</value>
+  </data>
+  <data name="VodClipLink" xml:space="preserve">
+    <value>Link VODa/Klipu:</value>
+  </data>
+  <data name="VodDownload" xml:space="preserve">
+    <value>Pobierz VOD</value>
+  </data>
+  <data name="VodDownloads" xml:space="preserve">
+    <value>Pobrania VOD</value>
+  </data>
+  <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
+    <value>Wideo wygasło lub osadzone ID jest uszkodzone</value>
+  </data>
+  <data name="VodLinkId" xml:space="preserve">
+    <value>Link/ID VOD:</value>
+  </data>
+  <data name="TemplateVods" xml:space="preserve">
+    <value>VODy:</value>
+  </data>
+  <data name="DownloadChat" xml:space="preserve">
+    <value>Pobierz Czat</value>
+  </data>
+  <data name="DownloadFolder" xml:space="preserve">
+    <value>Folder Pobrań:</value>
+  </data>
+  <data name="DownloadVideo" xml:space="preserve">
+    <value>Pobierz Wideo</value>
+  </data>
+  <data name="ApplicationLanguage" xml:space="preserve">
+    <value>Język </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="RenderChat" xml:space="preserve">
+    <value>Renderuj Czat</value>
+  </data>
+  <data name="HighlightIndentScale" xml:space="preserve">
+    <value>Podświetl Skalę Akapitu:</value>
+  </data>
+  <data name="HighlightStrokeScale" xml:space="preserve">
+    <value>Podświetl Skalę Obrysu:</value>
+  </data>
+  <data name="BadgeScale" xml:space="preserve">
+    <value>Skala Odznaki:</value>
+  </data>
+  <data name="EmojiScale" xml:space="preserve">
+    <value>Skala Emoji:</value>
+  </data>
+  <data name="EmoteScale" xml:space="preserve">
+    <value>Skala Emotek:</value>
+  </data>
+  <data name="EmoteSpacingScale" xml:space="preserve">
+    <value>Skala Odstępu Emotek:</value>
+  </data>
+  <data name="SidePaddingScale" xml:space="preserve">
+    <value>Skala Dopełnienia Bocznego:</value>
+  </data>
+  <data name="SectionHeightScale" xml:space="preserve">
+    <value>Skala Wysokości Sekcji:</value>
+  </data>
+  <data name="VerticalSpacingScale" xml:space="preserve">
+    <value>Pionowa Skala Odstępu:</value>
+  </data>
+  <data name="WordSpacingScale" xml:space="preserve">
+    <value>Skala Odstępu Słów:</value>
+  </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>Nie Znaleziono Pliku: </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="FatalError" xml:space="preserve">
+    <value>Błąd Krytyczny</value>
+  </data>
+  <data name="ThemeNotFound" xml:space="preserve">
+    <value>Motyw nie znaleziony</value>
+  </data>
+  <data name="ThemeNotFoundMessage" xml:space="preserve">
+    <value>{theme} nie został znaleziony. Przywracanie Systemowego motywu</value>
+    <comment>Do not translate {theme}</comment>
+  </data>
+  <data name="MessageDispersion" xml:space="preserve">
+    <value>Rozproszenie </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="MessageDispersionTooltip" xml:space="preserve">
+    <value>Zmiana API Twitcha w Listopadzie 2022 wymusiła pobieranie wiadomości czatu tylko w pełnych sekundach. Jeżeli istnieje parę wiadomości w jednej sekundzie, zostaną one inteligentnie rozproszone w sekundzie aby poprawic płynność czatu.</value>
+  </data>
+  <data name="ChatCompression" xml:space="preserve">
+    <value>Kompresja:</value>
+  </data>
+  <data name="ChatCompressionNone" xml:space="preserve">
+    <value>Żadna</value>
+  </data>
+  <data name="ChatCompressionGzip" xml:space="preserve">
+    <value>Gzip</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="ThemesFailedToWrite" xml:space="preserve">
+    <value>Nie udało się zapisać niektórych zawartch motywów.</value>
+  </data>
+  <data name="TitleGlobalSettings" xml:space="preserve">
+    <value>Ustawienia Globalne</value>
+  </data>
+  <data name="TitleEnqueueOptions" xml:space="preserve">
+    <value>Opcje Zakolejkowania</value>
+  </data>
+  <data name="TitleRenderRange" xml:space="preserve">
+    <value>Wybierz Rage Renderu (Sekundy)</value>
+  </data>
+  <data name="TitleUrlList" xml:space="preserve">
+    <value>Masowo Pobierz Listę URL</value>
+  </data>
+  <data name="TitleVideoMassDownloader" xml:space="preserve">
+    <value>Masowe Pobieranie Wideo</value>
+  </data>
+  <data name="TitleClipMassDownloader" xml:space="preserve">
+    <value>Masowe Pobieranie Klipów</value>
+  </data>
+  <data name="ApplicationLanguageTooltip" xml:space="preserve">
+    <value>TwitchDownloaderWPF nie jest dostępny w twoim natywnym języku? Kliknij, aby dowiedzieć się jak nas wspomóc!</value>
+  </data>
+  <data name="InvalidFolderPath" xml:space="preserve">
+    <value>Nieprawidłowa Ścieżka Folderu</value>
+  </data>
+  <data name="InvaliFolderPathMessage" xml:space="preserve">
+    <value>Folder nie istnieje</value>
+  </data>
+  <data name="StatusCanceled" xml:space="preserve">
+    <value>Anulowano</value>
+  </data>
+  <data name="StatusCanceling" xml:space="preserve">
+    <value>Anulowanie</value>
+  </data>
+  <data name="MaximumThreadBandwidth" xml:space="preserve">
+    <value>Maksymalna Przepustowość Wątku </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
+    <value>Maksymalna przepustowość, którą nowe wątki pobierania będą mogły używać, kilobajty na sekundę.</value>
+  </data>
+  <data name="RenderImageSharpening" xml:space="preserve">
+    <value>Wyostrzanie:</value>
+  </data>
+  <data name="TimestampLocal" xml:space="preserve">
+    <value>Lokalny</value>
+  </data>
+  <data name="SettingsTimeFormat" xml:space="preserve">
+    <value>Format Czasu:</value>
+  </data>
+  <data name="NoJsonFilesSelected" xml:space="preserve">
+    <value>Nie wybrano plików JSON</value>
+  </data>
+  <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
+    <value>Niewystarczający dostęp. OAuth może być wymagane.</value>
+  </data>
+  <data name="EmojiVendor" xml:space="preserve">
+    <value>Dostawca Emoji:</value>
+  </data>
+  <data name="EmojiVendorNotoColor" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="EmojiVendorTwemoji" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="EmojiVendorNone" xml:space="preserve">
+    <value>Żaden</value>
+  </data>
+  <data name="MaskWithNoAlpha" xml:space="preserve">
+    <value>Wybrałeś generowanie maski z nieprzezroczystym tłem. Zmniejsz alfa koloru tła lub wyłącz generowanie maski.</value>
+  </data>
+  <data name="OutlineScale" xml:space="preserve">
+    <value>Outline Scale:</value>
+  </data>
+  <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
+    <value>Standardowych ciągach formatujących TimeSpan C#</value>
+  </data>
+  <data name="TimeSpanCustomFormatting" xml:space="preserve">
+    <value>formatowanie crop_start_custom i crop_end_custom jest bazowane na</value>
+  </data>
+</root>

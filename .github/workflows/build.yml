@@ -44,12 +44,12 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-    - name: Restore dependencies
+    - name: Restore Dependencies
       run: dotnet restore TwitchDownloaderWPF
     - name: Build Windows GUI
       run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
     
-    - name: Download File To Workspace
+    - name: Download Ffmpeg To Workspace
       # You may pin to the exact commit or the version.
       # uses: carlosperate/download-file-action@e85e0aa6262f13571d17a4a39687b26981c583dc
       uses: carlosperate/download-file-action@v1.0.3
@@ -59,10 +59,10 @@ jobs:
         # New filename to rename the downloaded file
         file-name: ffmpeg.zip
         
-    - name: Bundle ffmpeg
+    - name: Bundle Ffmpeg
       run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64/ffmpeg.exe
       
-    - name: Zip Release
+    - name: Zip Windows GUI Release Asset
       uses: vimtor/action-zip@v1
       with:
         files: "TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64"
@@ -79,7 +79,7 @@ jobs:
       with:
         path: upload_url.txt
         
-    - name: Upload Release Asset
+    - name: Upload Windows GUI Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
@@ -99,16 +99,18 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-    - name: Restore dependencies
+    - name: Restore Dependencies
       run: dotnet restore TwitchDownloaderCLI
-    - name: Build
+    - name: Build Windows CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
-    - name: Build
+    - name: Build Linux CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Linux -p:DebugType=None -p:DebugSymbols=false
-    - name: Build
+    - name: Build LinuxAlpine CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine -p:DebugType=None -p:DebugSymbols=false
-    - name: Build
+    - name: Build LinuxArm CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm -p:DebugType=None -p:DebugSymbols=false
+    - name: Build LinuxArm64 CLI
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm64 -p:DebugType=None -p:DebugSymbols=false
         
     - name: Zip Windows CLI
       uses: vimtor/action-zip@v1
@@ -133,6 +135,12 @@ jobs:
       with:
         files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm/TwitchDownloaderCLI
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm.zip
+        
+    - name: Zip LinuxArm64 CLI
+      uses: vimtor/action-zip@v1
+      with:
+        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm64/TwitchDownloaderCLI
+        dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
     
     - name: Download URL
       uses: actions/download-artifact@v2
@@ -145,7 +153,7 @@ jobs:
       with:
         path: upload_url.txt
     
-    - name: Upload Release Asset
+    - name: Upload Windows CLI Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -155,7 +163,7 @@ jobs:
         asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-Windows-x64.zip
         asset_content_type: application/zip
       
-    - name: Upload Release Asset 
+    - name: Upload Linux CLI Release Asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -165,7 +173,7 @@ jobs:
         asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-Linux-x64.zip
         asset_content_type: application/zip
         
-    - name: Upload Release Asset 
+    - name: Upload LinuxAlpine CLI Release Asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -175,7 +183,7 @@ jobs:
         asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxAlpine-x64.zip
         asset_content_type: application/zip
         
-    - name: Upload Release Asset 
+    - name: Upload LinuxArm CLI Release Asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -183,6 +191,16 @@ jobs:
         upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm.zip
         asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm.zip
+        asset_content_type: application/zip
+        
+    - name: Upload LinuxArm64 CLI Release Asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
+        asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
         asset_content_type: application/zip
   
   build-cli-mac:
@@ -194,12 +212,12 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-    - name: Restore dependencies
+    - name: Restore Dependencies
       run: dotnet restore TwitchDownloaderCLI
-    - name: Build
+    - name: Build MacOS CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=None -p:DebugSymbols=false
       
-    - name: Zip Release
+    - name: Zip MacOS CLI
       uses: vimtor/action-zip@v1
       with:
         files: TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOS/TwitchDownloaderCLI
@@ -216,7 +234,7 @@ jobs:
       with:
         path: upload_url.txt
     
-    - name: Upload Release Asset 
+    - name: Upload MacOS CLI Release Asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

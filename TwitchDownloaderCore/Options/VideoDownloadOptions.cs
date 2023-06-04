@@ -10,6 +10,7 @@
         public bool CropEnding { get; set; }
         public double CropEndingTime { get; set; }
         public int DownloadThreads { get; set; }
+        public int ThrottleKib { get; set; }
         public string Oauth { get; set; }
         public string FfmpegPath { get; set; }
         public string TempFolder { get; set; }

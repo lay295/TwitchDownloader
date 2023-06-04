@@ -1,7 +1,7 @@
 ﻿using SkiaSharp;
 using System;
-using System.Collections.Generic;
 using System.IO;
+using TwitchDownloaderCore.Chat;
 
 namespace TwitchDownloaderCore.Options
 {
@@ -62,7 +62,7 @@ namespace TwitchDownloaderCore.Options
         public double BadgeScale { get; set; } = 1.0;
         public double EmojiScale { get; set; } = 1.0;
         public double VerticalSpacingScale { get; set; } = 1.0;
-        public double LeftSpacingScale { get; set; } = 1.0;
+        public double SidePaddingScale { get; set; } = 1.0;
         public double SectionHeightScale { get; set; } = 1.0;
         public double WordSpacingScale { get; set; } = 1.0;
         public double EmoteSpacingScale { get; set; } = 1.0;
@@ -72,16 +72,20 @@ namespace TwitchDownloaderCore.Options
         public int ChatBadgeMask { get; set; } = 0;
         public int StartOverride { get; set; } = -1;
         public int EndOverride { get; set; } = -1;
-        public int SidePadding => (int)(6 * ReferenceScale * LeftSpacingScale);
+        public int SidePadding => (int)(6 * ReferenceScale * SidePaddingScale);
         public int VerticalPadding => (int)(24 * ReferenceScale * VerticalSpacingScale);
         public int WordSpacing => (int)(6 * ReferenceScale * WordSpacingScale);
         public int EmoteSpacing => (int)(6 * ReferenceScale * EmoteSpacingScale);
-        public int AccentStrokeWidth => (int)(12 * ReferenceScale * AccentStrokeScale);
-        public int AccentIndentWidth => (int)(24 * ReferenceScale * AccentIndentScale);
+        public int AccentStrokeWidth => (int)(8 * ReferenceScale * AccentStrokeScale);
+        public int AccentIndentWidth => (int)(32 * ReferenceScale * AccentIndentScale);
         public bool Offline { get; set; }
         public bool LogFfmpegOutput { get; set; } = false;
         public bool BlockArtPreWrap { get; set; } = false;
         public double BlockArtPreWrapWidth { get; set; }
         public float BlockArtCharWidth { get; set; }
+        public bool AllowUnlistedEmotes { get; set; } = true;
+        public bool DisperseCommentOffsets { get; set; } = true;
+        public bool SkipDriveWaiting { get; set; } = false;
+        public EmojiVendor EmojiVendor { get; set; } = EmojiVendor.GoogleNotoColor;
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Tools
@@ -19,25 +20,28 @@ namespace TwitchDownloaderCore.Tools
 
         public static CorruptionStatus VerifyIntegrity(this List<Comment> commentsList, out string message)
         {
-            message = "";
-            CorruptionStatus corruptionStatus = CorruptionStatus.Undefined;
+            var messageBuilder = new StringBuilder();
+            var corruptionStatus = CorruptionStatus.Undefined;
 
             if (!VerifyCommentOrder(commentsList))
             {
-                message += "1 or more comments are misaligned. ";
+                messageBuilder.Append("1 or more comments are misaligned. ");
                 corruptionStatus |= CorruptionStatus.HasCorruption;
             }
 
             if (!VerifyCommentMessage(commentsList))
             {
-                message += "Repaired 1 or more comments with corrupt message data. ";
+                messageBuilder.Append("Repaired 1 or more comments with corrupt message data. ");
                 corruptionStatus |= CorruptionStatus.PartiallyRepaired;
             }
 
-            if (message.Length == 0)
+            if (messageBuilder.Length == 0)
             {
-                message = "OK";
+                messageBuilder.Append("OK");
             }
+
+            message = messageBuilder.ToString();
+            messageBuilder.Clear();
 
             if (corruptionStatus == CorruptionStatus.Undefined)
             {
@@ -50,20 +54,20 @@ namespace TwitchDownloaderCore.Tools
         /// <returns>True if all of the comments in the <paramref name="comments"/> list are not null and ordered by <see cref="Comment.content_offset_seconds"/>.</returns>
         private static bool VerifyCommentOrder(List<Comment> comments)
         {
-            var asSpan = CollectionsMarshal.AsSpan(comments);
+            var commentSpan = CollectionsMarshal.AsSpan(comments);
 
-            if (asSpan[0] is null)
+            if (commentSpan[0] is null)
             {
                 return false;
             }
 
-            for (int i = 1; i < asSpan.Length; i++)
+            for (var i = 1; i < commentSpan.Length; i++)
             {
-                if (asSpan[i] is null)
+                if (commentSpan[i] is null)
                 {
                     return false;
                 }
-                if (asSpan[i - 1].content_offset_seconds > asSpan[i].content_offset_seconds)
+                if (commentSpan[i - 1].content_offset_seconds > commentSpan[i].content_offset_seconds)
                 {
                     return false;
                 }
@@ -76,9 +80,9 @@ namespace TwitchDownloaderCore.Tools
         private static bool VerifyCommentMessage(List<Comment> comments)
         {
             var commentSpan = CollectionsMarshal.AsSpan(comments);
-            bool repairPerformed = false;
+            var repairPerformed = false;
 
-            for (int i = 0; i < commentSpan.Length; i++)
+            for (var i = 0; i < commentSpan.Length; i++)
             {
                 if (commentSpan[i].message.user_color is "")
                 {
@@ -86,8 +90,7 @@ namespace TwitchDownloaderCore.Tools
                     repairPerformed = true;
                 }
 
-                if (commentSpan[i].message.user_notice_params is not null &&
-                    commentSpan[i].message.user_notice_params.msg_id is "")
+                if (commentSpan[i].message.user_notice_params?.msg_id is "")
                 {
                     commentSpan[i].message.user_notice_params = null;
                     repairPerformed = true;
@@ -106,24 +109,14 @@ namespace TwitchDownloaderCore.Tools
         private static bool VerifyCommentFragments(Span<Comment> commentSpan, int i)
         {
             var fragmentSpan = CollectionsMarshal.AsSpan(commentSpan[i].message.fragments);
-            bool repairPerformed = false;
+            var repairPerformed = false;
 
-            for (int f = 0; f < fragmentSpan.Length; f++)
+            for (var f = 0; f < fragmentSpan.Length; f++)
             {
                 // If both are "" then it should really be null
-                if (fragmentSpan[f].emoticon?.emoticon_set_id is "" &&
-                    fragmentSpan[f].emoticon?.emoticon_id is "")
+                if (fragmentSpan[f].emoticon?.emoticon_id is "")
                 {
                     fragmentSpan[f].emoticon = null;
-                    repairPerformed = true;
-                    continue;
-                }
-
-                // Otherwise if just one is "" then set it to null
-
-                if (fragmentSpan[f].emoticon?.emoticon_set_id is "")
-                {
-                    fragmentSpan[f].emoticon.emoticon_set_id = null;
                     repairPerformed = true;
                     continue;
                 }
@@ -143,7 +136,7 @@ namespace TwitchDownloaderCore.Tools
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         private static bool VerifyCommentCommenter(Span<Comment> commentSpan, int i)
         {
-            bool repairPerformed = false;
+            var repairPerformed = false;
 
             if (commentSpan[i].commenter.display_name is "")
             {
@@ -160,12 +153,6 @@ namespace TwitchDownloaderCore.Tools
             if (commentSpan[i].commenter.name is "")
             {
                 commentSpan[i].commenter.name = null;
-                repairPerformed = true;
-            }
-
-            if (commentSpan[i].commenter.type is "")
-            {
-                commentSpan[i].commenter.type = null;
                 repairPerformed = true;
             }
 

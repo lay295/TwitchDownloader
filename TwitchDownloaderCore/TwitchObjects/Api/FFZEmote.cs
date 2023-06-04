@@ -1,9 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects.Api
 {
@@ -19,13 +14,13 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
 
     public class FFZImages
     {
-        [JsonProperty("1x")]
+        [JsonPropertyName("1x")]
         public string _1x { get; set; }
 
-        [JsonProperty("2x")]
+        [JsonPropertyName("2x")]
         public string _2x { get; set; }
 
-        [JsonProperty("4x")]
+        [JsonPropertyName("4x")]
         public string _4x { get; set; }
     }
 

@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Linq;
+using System.Text.RegularExpressions;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal class DownloadClip
+    internal static class DownloadClip
     {
         internal static void Download(ClipDownloadArgs inputOptions)
         {
-            ClipDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions);
 
             ClipDownloader clipDownloader = new(downloadOptions);
             clipDownloader.DownloadAsync().Wait();
@@ -18,17 +18,26 @@ namespace TwitchDownloaderCLI.Modes
 
         private static ClipDownloadOptions GetDownloadOptions(ClipDownloadArgs inputOptions)
         {
-            if (string.IsNullOrWhiteSpace(inputOptions.Id) || inputOptions.Id.All(char.IsDigit))
+            if (inputOptions.Id is null)
             {
-                Console.WriteLine("[ERROR] - Invalid Clip ID, unable to parse.");
+                Console.WriteLine("[ERROR] - Clip ID/URL cannot be null!");
+                Environment.Exit(1);
+            }
+
+            var clipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
+            var clipIdMatch = clipIdRegex.Match(inputOptions.Id);
+            if (!clipIdMatch.Success)
+            {
+                Console.WriteLine("[ERROR] - Unable to parse Clip ID/URL.");
                 Environment.Exit(1);
             }
 
             ClipDownloadOptions downloadOptions = new()
             {
-                Id = inputOptions.Id,
+                Id = clipIdMatch.Value,
                 Filename = inputOptions.OutputFile,
-                Quality = inputOptions.Quality
+                Quality = inputOptions.Quality,
+                ThrottleKib = inputOptions.ThrottleKib
             };
 
             return downloadOptions;

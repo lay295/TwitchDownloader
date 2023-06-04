@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -15,7 +15,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
 
-            VideoDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions);
 
             VideoDownloader videoDownloader = new(downloadOptions);
             Progress<ProgressReport> progress = new();
@@ -25,16 +25,25 @@ namespace TwitchDownloaderCLI.Modes
 
         private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions)
         {
-            if (string.IsNullOrWhiteSpace(inputOptions.Id) || !inputOptions.Id.All(char.IsDigit))
+            if (inputOptions.Id is null)
             {
-                Console.WriteLine("[ERROR] - Invalid VOD ID, unable to parse. Must be only numbers.");
+                Console.WriteLine("[ERROR] - Vod ID/URL cannot be null!");
+                Environment.Exit(1);
+            }
+
+            var vodIdRegex = new Regex(@"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?)");
+            var vodIdMatch = vodIdRegex.Match(inputOptions.Id);
+            if (!vodIdMatch.Success)
+            {
+                Console.WriteLine("[ERROR] - Unable to parse Vod ID/URL.");
                 Environment.Exit(1);
             }
 
             VideoDownloadOptions downloadOptions = new()
             {
                 DownloadThreads = inputOptions.DownloadThreads,
-                Id = int.Parse(inputOptions.Id),
+                ThrottleKib = inputOptions.ThrottleKib,
+                Id = int.Parse(vodIdMatch.ValueSpan),
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,
@@ -42,7 +51,7 @@ namespace TwitchDownloaderCLI.Modes
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
-                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.ffmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
+                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder
             };
 

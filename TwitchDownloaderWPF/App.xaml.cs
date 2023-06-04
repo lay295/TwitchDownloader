@@ -1,5 +1,10 @@
-﻿using System.Windows;
-using TwitchDownloader.Tools;
+﻿using System;
+using System.IO;
+using System.Windows;
+using System.Windows.Threading;
+using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Translations;
 
 namespace TwitchDownloaderWPF
 {
@@ -9,6 +14,7 @@ namespace TwitchDownloaderWPF
     public partial class App : Application
     {
         public static ThemeService ThemeServiceSingleton { get; private set; }
+        public static CultureService CultureServiceSingleton { get; private set; }
         public static App AppSingleton { get; private set; }
 
         public App()
@@ -16,14 +22,44 @@ namespace TwitchDownloaderWPF
             AppSingleton = this;
         }
 
-        private void Application_Startup(object sender, StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
-            WindowsThemeService windowsThemeService = new();
+            base.OnStartup(e);
 
+            Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
+            // Set the working dir to the process dir if run from sys32/syswow64
+            var processDir = Directory.GetParent(Environment.ProcessPath!)!.FullName;
+            if (Environment.CurrentDirectory != processDir)
+            {
+                Environment.CurrentDirectory = processDir;
+            }
+
+            CultureServiceSingleton = new CultureService();
+            RequestCultureChange();
+
+            var windowsThemeService = new WindowsThemeService();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
-            MainWindow wnd = new();
-            wnd.Show();
+            MainWindow = new MainWindow();
+            MainWindow.Show();
+        }
+
+        private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            var ex = e.Exception;
+            MessageBox.Show(ex.ToString(), Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
+
+            Current?.Shutdown();
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var ex = (Exception)e.ExceptionObject;
+            MessageBox.Show(ex.ToString(), Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
+
+            Current?.Shutdown();
         }
 
         public void RequestAppThemeChange()
@@ -31,5 +67,8 @@ namespace TwitchDownloaderWPF
 
         public void RequestTitleBarChange()
             => ThemeServiceSingleton.SetTitleBarTheme(Windows);
+
+        public void RequestCultureChange()
+            => CultureServiceSingleton.SetApplicationCulture(Settings.Default.GuiCulture);
     }
 }

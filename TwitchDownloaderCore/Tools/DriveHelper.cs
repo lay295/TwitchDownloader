@@ -45,7 +45,7 @@ namespace TwitchDownloaderCore.Tools
             int driveNotReadyCount = 0;
             while (!drive.IsReady)
             {
-                progress.Report(new ProgressReport(ReportType.StatusInfo, $"Waiting for output drive ({(driveNotReadyCount + 1) / 2f:F1}s)"));
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Waiting for output drive ({(driveNotReadyCount + 1) / 2f:F1}s)"));
                 await Task.Delay(500, cancellationToken);
 
                 if (++driveNotReadyCount >= 20)

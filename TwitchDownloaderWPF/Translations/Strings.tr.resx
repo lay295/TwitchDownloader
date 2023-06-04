@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Accept" xml:space="preserve">
+    <value>Kabul et</value>
+  </data>
+  <data name="AddToQueue" xml:space="preserve">
+    <value>Sıraya ekle</value>
+  </data>
+  <data name="AlphaNotSupportedByCodec" xml:space="preserve">
+    <value>Bir bir alfa kanalı (şeffaflık) desteklemeyen bir container/codec seçtiniz. Saydamlığı kaldırın veya MOV ve RLE/PRORES ile kodlayın. (dosya boyutu büyük olacaktır.)</value>
+  </data>
+  <data name="ApplicationTheme" xml:space="preserve">
+    <value>Tema </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ApplicationThemeTooltip" xml:space="preserve">
+    <value>Kendi temanızı nasıl yapacağınızı öğrenmek için tıklayın!</value>
+  </data>
+  <data name="AvailableParameters" xml:space="preserve">
+    <value>Mevcut parametreler:</value>
+  </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>Arka plan rengi:</value>
+  </data>
+  <data name="BannedWordsList" xml:space="preserve">
+    <value>Yasaklı Kelimeler Listesi </value>
+    <comment>Leaving a trailing space</comment>
+  </data>
+  <data name="BannedWordsListTooltip" xml:space="preserve">
+    <value>Yasaklı kelimelerin veya kelime öbeklerinin listesi - virgülle ayrılmış, virgüllerin etrafındaki boşluklar yok sayılır, büyük/küçük harfe duyarlı DEĞİLDİR.</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Gözat</value>
+  </data>
+  <data name="BttvEmotes" xml:space="preserve">
+    <value>BTTV Emojileri:</value>
+  </data>
+  <data name="CacheFolder" xml:space="preserve">
+    <value>Önbellek Klasörü:</value>
+  </data>
+  <data name="TemplateChats" xml:space="preserve">
+    <value>Sohbetler:</value>
+  </data>
+  <data name="ChatBadgeFilter" xml:space="preserve">
+    <value>Sohbet Rozeti Filtresi:</value>
+  </data>
+  <data name="ChatBadges" xml:space="preserve">
+    <value>Sohbet Rozetleri:</value>
+  </data>
+  <data name="ChatCrop" xml:space="preserve">
+    <value>Kes:</value>
+  </data>
+  <data name="ChatDownload" xml:space="preserve">
+    <value>Sohbeti İndir</value>
+  </data>
+  <data name="ChatDownloads" xml:space="preserve">
+    <value>Sohbet İndirmeleri</value>
+  </data>
+  <data name="ChatFont" xml:space="preserve">
+    <value>Font:</value>
+  </data>
+  <data name="ChatFontSize" xml:space="preserve">
+    <value>Font Boyutu:</value>
+  </data>
+  <data name="ChatHeight" xml:space="preserve">
+    <value>Yükseklik:</value>
+  </data>
+  <data name="ChatRender" xml:space="preserve">
+    <value>Sohbet Oluşturma</value>
+  </data>
+  <data name="ChatRenders" xml:space="preserve">
+    <value>Sohbet Oluşturmaları</value>
+  </data>
+  <data name="ChatUpdate" xml:space="preserve">
+    <value>Sohbet Güncelle</value>
+  </data>
+  <data name="ChatUpdater" xml:space="preserve">
+    <value>Sohbet Güncelleyici</value>
+  </data>
+  <data name="ChatWidth" xml:space="preserve">
+    <value>Genişlik:</value>
+  </data>
+  <data name="ClearCache" xml:space="preserve">
+    <value>Temizle</value>
+  </data>
+  <data name="ClearCacheConfirmation" xml:space="preserve">
+    <value>Önbelleğinizi temizlemek istediğinizden emin misiniz?\nBunu yalnızca program düzgün çalışmıyorsa yapmalısınız</value>
+  </data>
+  <data name="ClipDownload" xml:space="preserve">
+    <value>Klip İndir</value>
+  </data>
+  <data name="ClipDownloads" xml:space="preserve">
+    <value>Klip İndirmeleri</value>
+  </data>
+  <data name="ClipLinkId" xml:space="preserve">
+    <value>Klip Bağlantısı/ID:</value>
+  </data>
+  <data name="TemplateClips" xml:space="preserve">
+    <value>Klipler:</value>
+  </data>
+  <data name="CropEnd" xml:space="preserve">
+    <value>Sonu</value>
+    <comment>I added some space as the gui looks broken</comment>
+  </data>
+  <data name="CropStart" xml:space="preserve">
+    <value>Başı</value>
+  </data>
+  <data name="CropVideo" xml:space="preserve">
+    <value>Videoyu Kırp:</value>
+  </data>
+  <data name="DateCustomFormatting" xml:space="preserve">
+    <value>date_custom biçimlendirmesi şuna dayalıdır</value>
+  </data>
+  <data name="DateCustomFormattingHyperlink" xml:space="preserve">
+    <value>C# standart tarih ve saat formatı dizeleri</value>
+  </data>
+  <data name="DeleteConfirmation" xml:space="preserve">
+    <value>Silme Onayı</value>
+  </data>
+  <data name="DonateTooltip" xml:space="preserve">
+    <value>Programı sık sık kullanıyor ve bana destek olmak mı istiyorsunuz? bana kebap ısmarla :)</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>İndir</value>
+  </data>
+  <data name="DownloadConnections" xml:space="preserve">
+    <value>Bağlantılar:</value>
+  </data>
+  <data name="DownloadFilenameTemplates" xml:space="preserve">
+    <value>Dosya Adı Şablonlarını Düzenleyin:</value>
+  </data>
+  <data name="DownloadFormat" xml:space="preserve">
+    <value>İndirme Formatı:</value>
+  </data>
+  <data name="DownloadThreads" xml:space="preserve">
+    <value>İndirme Parçacığı:</value>
+  </data>
+  <data name="EmbedImages" xml:space="preserve">
+    <value>Görüntüleri Yerleştir </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="EmbedImagesTooltip" xml:space="preserve">
+    <value>Çevrimdışı işleme için indirilen dosyaya birinci taraf emojileri, rozetlerini ve cheeremojileri(bitleri) ekleyin. Arşiv amaçlı kullanışlıdır fakat dosya boyutu daha büyük olacaktır.</value>
+  </data>
+  <data name="EmbedMissing" xml:space="preserve">
+    <value>Eksikleri Yerleştir </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="EmbedMissingTooltip" xml:space="preserve">
+    <value>Eksik emojiler, rozetleri ve cheeremojileri(bitleri) yerleştirir. Halihazırda gömülü olan resimlere dokunulmayacaktır.</value>
+  </data>
+  <data name="EnqueueDownload" xml:space="preserve">
+    <value>İndirmeyi Sıraya Al</value>
+  </data>
+  <data name="EnqueueRender" xml:space="preserve">
+    <value>Oluşturmayı Sıraya Al</value>
+  </data>
+  <data name="EnqueueUpdate" xml:space="preserve">
+    <value>Güncellemeyi Sıraya Al</value>
+  </data>
+  <data name="ErrorLog" xml:space="preserve">
+    <value>HATA: </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="FfmpegInputArguments" xml:space="preserve">
+    <value>Giriş Argümanları:</value>
+  </data>
+  <data name="FfmpegOptionsHyperlink" xml:space="preserve">
+    <value>Ffmpeg seçenekleri hakkında bilgi edinmek için buraya tıklayın</value>
+  </data>
+  <data name="FfmpegOutputArguments" xml:space="preserve">
+    <value>Çıktı Argümanları:</value>
+  </data>
+  <data name="FfmpegParameters" xml:space="preserve">
+    <value>{fps} {height} {width} {max_int} {save_path}</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="FfmpegReset" xml:space="preserve">
+    <value>Varsayılanlara dön</value>
+  </data>
+  <data name="FfzEmotes" xml:space="preserve">
+    <value>FFZ Emojileri:</value>
+  </data>
+  <data name="FilenameTemplateParameters" xml:space="preserve">
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {crop_start} {crop_end} {crop_start_custom=""} {crop_end_custom=""}</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="FontColor" xml:space="preserve">
+    <value>Font Rengi:</value>
+  </data>
+  <data name="GenerateMask" xml:space="preserve">
+    <value>Maske Oluştur:</value>
+  </data>
+  <data name="GetInfo" xml:space="preserve">
+    <value>Bilgi al</value>
+  </data>
+  <data name="HideDonationButton" xml:space="preserve">
+    <value>Bağış Düğmesini Gizle:</value>
+  </data>
+  <data name="IgnoreUsersList" xml:space="preserve">
+    <value>Kullanıcı Listesini Yoksay </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="IgnoreUsersListTooltip" xml:space="preserve">
+    <value>Kullanıcı adları listesi - virgülle ayrılmış, virgüllerin etrafındaki boşluklar yok sayılır, büyük/küçük harfe duyarlı DEĞİLDİR.</value>
+  </data>
+  <data name="InvalidClipLinkId" xml:space="preserve">
+    <value>Geçersiz Klip Bağlantısı/ID</value>
+  </data>
+  <data name="InvalidClipLinkIdMessage" xml:space="preserve">
+    <value>Lütfen geçerli bir klip Bağlantısı/ID girin\nÖrnek:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
+  </data>
+  <data name="InvalidCropInputs" xml:space="preserve">
+    <value>Geçersiz Kırpma Girişleri</value>
+  </data>
+  <data name="InvalidStartEndTime" xml:space="preserve">
+    <value>Geçersiz başlangıç veya bitiş zamanı</value>
+  </data>
+  <data name="InvalidVideoLinkId" xml:space="preserve">
+    <value>Geçersiz Video Bağlantısı/ID</value>
+  </data>
+  <data name="InvalidVideoLinkIdMessage" xml:space="preserve">
+    <value>Lütfen geçerli bir video Bağlantısı girin/ID\nÖrnek:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
+  </data>
+  <data name="JsonFile" xml:space="preserve">
+    <value>JSON Dosyası:</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Süre:</value>
+  </data>
+  <data name="ListOfVodsClips" xml:space="preserve">
+    <value>VOD/Klip Listesi (Her satıra bir adet)</value>
+  </data>
+  <data name="LogHeader" xml:space="preserve">
+    <value>Log:</value>
+  </data>
+  <data name="MassDownloads" xml:space="preserve">
+    <value>Toplu İndirmeler</value>
+  </data>
+  <data name="Oauth" xml:space="preserve">
+    <value>OAuth (isteğe bağlı) </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="OAuthTooltip" xml:space="preserve">
+    <value>Yalnızca yalnızca abone özel VOD'lar için gereklidir. Tüm 3.parti OAuth tokenleri çalışmayacaktır. OAuth tokenin nasıl alınacağına ilişkin YouTube videosunu izlemek için tıklayın.</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>Çevrimdışı </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="OfflineTooltip" xml:space="preserve">
+    <value>Sohbeti, yalnızca sohbet json dosyasına yerleştirilmiş kaynakları kullanarak işleyin.</value>
+  </data>
+  <data name="Outline" xml:space="preserve">
+    <value>Kontur:</value>
+  </data>
+  <data name="ParallelTaskLimits" xml:space="preserve">
+    <value>Paralel Görev Sınırları</value>
+  </data>
+  <data name="PartialRender" xml:space="preserve">
+    <value>Kısmi Oluşturma</value>
+  </data>
+  <data name="Quality" xml:space="preserve">
+    <value>Kalite:</value>
+  </data>
+  <data name="Render" xml:space="preserve">
+    <value>Oluştur</value>
+  </data>
+  <data name="RenderFfmpegWarning" xml:space="preserve">
+    <value>Bu yalnızca ileri düzey kullanıcılar içindir. Bir "pipe ended error" alırsanız muhtemelen nedeni budur.</value>
+  </data>
+  <data name="RenderFileFormat" xml:space="preserve">
+    <value>Dosya formatı:</value>
+  </data>
+  <data name="RenderFramerate" xml:space="preserve">
+    <value>Kare hızı:</value>
+  </data>
+  <data name="RenderCodec" xml:space="preserve">
+    <value>Kodlayıcı:</value>
+  </data>
+  <data name="RenderTabEncoding" xml:space="preserve">
+    <value>Encoding</value>
+  </data>
+  <data name="RenderTabFfmpeg" xml:space="preserve">
+    <value>Ffmpeg</value>
+  </data>
+  <data name="RenderTabGeneral" xml:space="preserve">
+    <value>Genel</value>
+  </data>
+  <data name="RenderTabPreview" xml:space="preserve">
+    <value>Önizleme</value>
+  </data>
+  <data name="RenderTabRendering" xml:space="preserve">
+    <value>Oluşturma</value>
+  </data>
+  <data name="RenderTabScaling" xml:space="preserve">
+    <value>Ölçekle</value>
+  </data>
+  <data name="RenderWidthHeightMustBeEven" xml:space="preserve">
+    <value>Genişlik ve Yükseklik eşit olmalıdır</value>
+  </data>
+  <data name="ReplaceEmbeds" xml:space="preserve">
+    <value>Gömülü Verileri Değiştir </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ReplaceEmbedsTooltip" xml:space="preserve">
+    <value>Dosyadaki tüm gömülü emojileri, rozetleri ve cheeremojileri(bitleri) değiştirin. Gömülü tüm görüntülerin üzerine yazılacak!</value>
+  </data>
+  <data name="SearchClips" xml:space="preserve">
+    <value>Klipleri ara</value>
+  </data>
+  <data name="SearchVods" xml:space="preserve">
+    <value>VOD'ları ara</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Hepsini Seç</value>
+  </data>
+  <data name="SelectedItems" xml:space="preserve">
+    <value>Seçilen Öğeler:</value>
+  </data>
+  <data name="SetChannel" xml:space="preserve">
+    <value>Kanalı Ayarla</value>
+  </data>
+  <data name="Sort" xml:space="preserve">
+    <value>Sırala:</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>Tamamlandı</value>
+  </data>
+  <data name="StatusDownloading" xml:space="preserve">
+    <value>İndiriliyor</value>
+  </data>
+  <data name="StatusError" xml:space="preserve">
+    <value>HATA</value>
+  </data>
+  <data name="StatusIdle" xml:space="preserve">
+    <value>Boşta</value>
+  </data>
+  <data name="StatusRendering" xml:space="preserve">
+    <value>Oluşturuluyor</value>
+  </data>
+  <data name="StatusUpdating" xml:space="preserve">
+    <value>Güncelleniyor</value>
+  </data>
+  <data name="Streamer" xml:space="preserve">
+    <value>Yayıncı:</value>
+  </data>
+  <data name="StvEmotes" xml:space="preserve">
+    <value>7TV Emojileri:</value>
+  </data>
+  <data name="SubMessages" xml:space="preserve">
+    <value>Abone Mesajları:</value>
+  </data>
+  <data name="TaskCancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="TaskError" xml:space="preserve">
+    <value>Hata</value>
+  </data>
+  <data name="TaskQueue" xml:space="preserve">
+    <value>Görev Sırası</value>
+  </data>
+  <data name="ThirdPartyEmotes" xml:space="preserve">
+    <value>3.Parti İfadeleri </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
+    <value>Ayrıca dosyaya üçüncü parti emojileri ekleyin. Dosya boyutu çok daha büyük olacaktır.</value>
+  </data>
+  <data name="TimestampFormat" xml:space="preserve">
+    <value>Zaman Damgası Biçimi:</value>
+  </data>
+  <data name="TimestampNone" xml:space="preserve">
+    <value>Hiçbiri</value>
+  </data>
+  <data name="TimestampRelative" xml:space="preserve">
+    <value>Bağlantılı</value>
+  </data>
+  <data name="Timestamps" xml:space="preserve">
+    <value>Zaman damgaları:</value>
+  </data>
+  <data name="TimestampUtc" xml:space="preserve">
+    <value>UTC</value>
+  </data>
+  <data name="TopAllTime" xml:space="preserve">
+    <value>Tüm Zamanların En İyisi</value>
+  </data>
+  <data name="TopSevenDays" xml:space="preserve">
+    <value>Top 7 Gün</value>
+  </data>
+  <data name="TopThirtyDays" xml:space="preserve">
+    <value>Top 30 Gün</value>
+  </data>
+  <data name="TopTwentyFourHours" xml:space="preserve">
+    <value>Top 24 Zaman</value>
+  </data>
+  <data name="UnableToFindThumbnail" xml:space="preserve">
+    <value>Küçük Resim Bulunamıyor</value>
+  </data>
+  <data name="UnableToGetClipInfo" xml:space="preserve">
+    <value>Klip bilgisi alınamıyor. Lütfen Clip Slug'u tekrar kontrol edin ve tekrar deneyin.</value>
+  </data>
+  <data name="UnableToGetInfo" xml:space="preserve">
+    <value>Bilgi alınamıyor</value>
+  </data>
+  <data name="UnableToGetInfoMessage" xml:space="preserve">
+    <value>Video/Klip bilgileri alınamıyor. Lütfen bağlantınızı iki kez kontrol edin ve tekrar deneyin</value>
+  </data>
+  <data name="UnableToGetVideoInfo" xml:space="preserve">
+    <value>Video bilgileri alınamıyor. Lütfen Bağlantının/Kimliğin doğru olduğundan emin olun ve tekrar deneyin.</value>
+  </data>
+  <data name="UnableToParseInputs" xml:space="preserve">
+    <value>Girişler ayrıştırılamıyor</value>
+  </data>
+  <data name="UnableToParseInputsMessage" xml:space="preserve">
+    <value>Lütfen girdilerinizin geçerli olup olmadığını bir kez daha kontrol edin</value>
+  </data>
+  <data name="UnableToParseLink" xml:space="preserve">
+    <value>Bağlantı ayrıştırılamıyor</value>
+  </data>
+  <data name="UnableToParseLinkMessage" xml:space="preserve">
+    <value>Lütfen VOD/Klip bağlantısını iki kez kontrol edin</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Bilinmeyen</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Güncelleme</value>
+  </data>
+  <data name="UpdateRate" xml:space="preserve">
+    <value>Güncelleme Sıklığı:</value>
+  </data>
+  <data name="UrlList" xml:space="preserve">
+    <value>Bağlantı Listesi</value>
+  </data>
+  <data name="VerboseErrorOutput" xml:space="preserve">
+    <value>Ayrıntılı Hata Çıktısı</value>
+  </data>
+  <data name="VerboseErrors" xml:space="preserve">
+    <value>Ayrıntılı Hatalar:</value>
+  </data>
+  <data name="VideoCreatedAt" xml:space="preserve">
+    <value>Tarih:</value>
+  </data>
+  <data name="VideoTitle" xml:space="preserve">
+    <value>Başlık:</value>
+  </data>
+  <data name="VodClipLink" xml:space="preserve">
+    <value>VOD/Klip Bağlantısı:</value>
+  </data>
+  <data name="VodDownload" xml:space="preserve">
+    <value>VOD İndir</value>
+  </data>
+  <data name="VodDownloads" xml:space="preserve">
+    <value>VOD İndirmeleri</value>
+  </data>
+  <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
+    <value>Videonun süresi dolmuş veya yerleştirlmiş kimlik bozuk</value>
+  </data>
+  <data name="VodLinkId" xml:space="preserve">
+    <value>VOD Bağlantısı/ID:</value>
+  </data>
+  <data name="TemplateVods" xml:space="preserve">
+    <value>VOD'lar:</value>
+  </data>
+  <data name="DownloadChat" xml:space="preserve">
+    <value>Sohbeti İndir</value>
+  </data>
+  <data name="DownloadFolder" xml:space="preserve">
+    <value>İndirme Klasörü:</value>
+  </data>
+  <data name="DownloadVideo" xml:space="preserve">
+    <value>Videoyu indir</value>
+  </data>
+  <data name="ApplicationLanguage" xml:space="preserve">
+    <value>Dil </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="RenderChat" xml:space="preserve">
+    <value>Sohbeti Oluştur</value>
+  </data>
+  <data name="HighlightIndentScale" xml:space="preserve">
+    <value>Girinti Ölçeğini Vurgula:</value>
+  </data>
+  <data name="HighlightStrokeScale" xml:space="preserve">
+    <value>Stoke Skalasını Vurgulayın:</value>
+  </data>
+  <data name="BadgeScale" xml:space="preserve">
+    <value>Rozet Ölçeği:</value>
+  </data>
+  <data name="EmojiScale" xml:space="preserve">
+    <value>Emoji Ölçeği:</value>
+  </data>
+  <data name="EmoteScale" xml:space="preserve">
+    <value>Emoji Ölçeği:</value>
+  </data>
+  <data name="EmoteSpacingScale" xml:space="preserve">
+    <value>Emoji Aralığı Ölçeği:</value>
+  </data>
+  <data name="SidePaddingScale" xml:space="preserve">
+    <value>Yan Dolgu Ölçeği:</value>
+  </data>
+  <data name="SectionHeightScale" xml:space="preserve">
+    <value>Bölüm Yüksekliği Ölçeği:</value>
+  </data>
+  <data name="VerticalSpacingScale" xml:space="preserve">
+    <value>Dikey Aralık Ölçeği:</value>
+  </data>
+  <data name="WordSpacingScale" xml:space="preserve">
+    <value>Kelime Boşluğu Ölçeği:</value>
+  </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>Dosya bulunamadı: </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="FatalError" xml:space="preserve">
+    <value>Önemli hata</value>
+  </data>
+  <data name="ThemeNotFound" xml:space="preserve">
+    <value>Tema bulunamadı</value>
+  </data>
+  <data name="ThemeNotFoundMessage" xml:space="preserve">
+    <value>{theme} bulunamadı. Sistem temasına geri döndürülüyor</value>
+    <comment>Do not translate {theme}</comment>
+  </data>
+  <data name="MessageDispersion" xml:space="preserve">
+    <value>Dağıtma </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="MessageDispersionTooltip" xml:space="preserve">
+    <value>Kasım 2022'de bir Twitch API değişikliği ile, sohbet mesajlarının yalnızca tam saniyeler içinde indirilmesini sağladı. Saniyede birden fazla mesaj varsa, sohbet akışını iyileştirmek için akıllı bir şekilde mesajlar saniyeye dağıtılacaktır.</value>
+  </data>
+  <data name="ChatCompression" xml:space="preserve">
+    <value>Sıkıştırma:</value>
+  </data>
+  <data name="ChatCompressionNone" xml:space="preserve">
+    <value>Hiçbiri</value>
+  </data>
+  <data name="ChatCompressionGzip" xml:space="preserve">
+    <value>Gzip</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="ThemesFailedToWrite" xml:space="preserve">
+    <value>Dahil edilen bazı temalar yazılamadı.</value>
+  </data>
+  <data name="TitleGlobalSettings" xml:space="preserve">
+    <value>Genel Ayarlar</value>
+  </data>
+  <data name="TitleEnqueueOptions" xml:space="preserve">
+    <value>Sıraya Alma Seçenekleri</value>
+  </data>
+  <data name="TitleRenderRange" xml:space="preserve">
+    <value>Oluşturma Süresini seçin (Saniye)</value>
+  </data>
+  <data name="TitleUrlList" xml:space="preserve">
+    <value>Toplu İndirme URL Listesi</value>
+  </data>
+  <data name="TitleVideoMassDownloader" xml:space="preserve">
+    <value>Toplu Video İndirici</value>
+  </data>
+  <data name="TitleClipMassDownloader" xml:space="preserve">
+    <value>Toplu Klip İndirici</value>
+  </data>
+  <data name="ApplicationLanguageTooltip" xml:space="preserve">
+    <value>TwitchDownloaderWPF ana dilinizde mevcut değil mi?  Çeviriye nasıl yardım edeceğinizi öğrenmek için tıklayın!</value>
+  </data>
+  <data name="InvalidFolderPath" xml:space="preserve">
+    <value>Geçersiz Klasör Yolu</value>
+  </data>
+  <data name="InvaliFolderPathMessage" xml:space="preserve">
+    <value>Klasör mevcut değil</value>
+  </data>
+  <data name="StatusCanceled" xml:space="preserve">
+    <value>İptal edildi</value>
+  </data>
+  <data name="StatusCanceling" xml:space="preserve">
+    <value>İptal Ediliyor</value>
+  </data>
+  <data name="MaximumThreadBandwidth" xml:space="preserve">
+    <value>Maksimum İşlem Bant Genişliği </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
+    <value>Yeni indirme iş parçacıklarına izin verilecek maksimum bant genişliği, saniye/kilobayt cinsinden ifade edilir.</value>
+  </data>
+  <data name="RenderImageSharpening" xml:space="preserve">
+    <value>Keskinlik:</value>
+  </data>
+  <data name="TimestampLocal" xml:space="preserve">
+    <value>Lokal</value>
+  </data>
+  <data name="SettingsTimeFormat" xml:space="preserve">
+    <value>Zaman Formatı:</value>
+  </data>
+  <data name="NoJsonFilesSelected" xml:space="preserve">
+    <value>No JSON files selected</value>
+  </data>
+  <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
+    <value>Insufficient access. OAuth may be required.</value>
+  </data>
+  <data name="EmojiVendor" xml:space="preserve">
+    <value>Emoji Vendor:</value>
+  </data>
+  <data name="EmojiVendorNotoColor" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="EmojiVendorTwemoji" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="EmojiVendorNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="MaskWithNoAlpha" xml:space="preserve">
+    <value>You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.</value>
+  </data>
+  <data name="OutlineScale" xml:space="preserve">
+    <value>Outline Scale:</value>
+  </data>
+  <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
+    <value>C# standard TimeSpan format strings</value>
+  </data>
+</root>

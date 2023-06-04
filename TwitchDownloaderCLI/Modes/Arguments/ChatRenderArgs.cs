@@ -24,14 +24,23 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('h', "chat-height", Default = 600, HelpText = "Height of chat render.")]
         public int ChatHeight { get; set; }
 
+        [Option('b', "beginning", Default = -1, HelpText = "Time in seconds to crop beginning of the render.")]
+        public int CropBeginningTime { get; set; }
+
+        [Option('e', "ending", Default = -1, HelpText = "Time in seconds to crop ending of the render.")]
+        public int CropEndingTime { get; set; }
+
         [Option("bttv", Default = true, HelpText = "Enable BTTV emotes.")]
         public bool? BttvEmotes { get; set; }
 
         [Option("ffz", Default = true, HelpText = "Enable FFZ emotes.")]
         public bool? FfzEmotes { get; set; }
 
-        [Option("stv", Default = true, HelpText = "Enable 7tv emotes.")]
+        [Option("stv", Default = true, HelpText = "Enable 7TV emotes.")]
         public bool? StvEmotes { get; set; }
+
+        [Option("allow-unlisted-emotes", Default = true, HelpText = "Allow unlisted 7TV emotes in the render.")]
+        public bool? AllowUnlistedEmotes { get; set; }
 
         [Option("sub-messages", Default = true, HelpText = "Enable sub/re-sub messages.")]
         public bool? SubMessages { get; set; }
@@ -63,6 +72,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("generate-mask", Default = false, HelpText = "Generates a mask file of the chat in addition to the rendered chat.")]
         public bool GenerateMask { get; set; }
 
+        [Option("sharpening", Default = false, HelpText = "Appends a smartblur sharpening filter to the input-args. Works best with font-size 24 or larger.")]
+        public bool Sharpening { get; set; }
+
         [Option("framerate", Default = 30, HelpText = "Framerate of the render.")]
         public int Framerate { get; set; }
 
@@ -84,8 +96,14 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("badge-filter", Default = 0, HelpText = "Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, 6 = no broadcaster or moderator badges.\r\nKey: Other = 1, Broadcaster = 2, Moderator = 4, VIP = 8, Subscriber = 16, Predictions = 32, NoAudio/NoVideo = 64, PrimeGaming = 128")]
         public int BadgeFilterMask { get; set; }
 
+        [Option("dispersion", Default = false, HelpText = "In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.")]
+        public bool? DisperseCommentOffsets { get; set; }
+
         [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, and bits from the input json.")]
         public bool Offline { get; set; }
+
+        [Option("emoji-vendor", Default = "notocolor", HelpText = "The emoji vendor used for rendering emojis. Valid values are: 'twitter' / 'twemoji', 'google' / 'notocolor', and 'system' / 'none'.")]
+        public string EmojiVendor { get; set; }
 
         [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]
         public string FfmpegPath { get; set; }
@@ -95,25 +113,38 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from ffmpeg.")]
         public bool LogFfmpegOutput { get; set; }
+
+        [Option("skip-drive-waiting", Default = false, HelpText = "Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives.")]
+        public bool SkipDriveWaiting { get; set; }
+
         [Option("scale-emote", Default = 1.0, HelpText = "Number to scale emote images.")]
         public double ScaleEmote { get; set; }
+
         [Option("scale-badge", Default = 1.0, HelpText = "Number to scale badge images.")]
         public double ScaleBadge { get; set; }
+
         [Option("scale-emoji", Default = 1.0, HelpText = "Number to scale emoji images.")]
         public double ScaleEmoji { get; set; }
+
         [Option("scale-vertical", Default = 1.0, HelpText = "Number to scale vertical padding.")]
         public double ScaleVertical { get; set; }
-        [Option("scale-left", Default = 1.0, HelpText = "Number to scale left indent padding.")]
+
+        [Option("scale-side-padding", Default = 1.0, HelpText = "Number to scale side padding.")]
         public double ScaleLeft { get; set; }
-        [Option("scale-sectionheight", Default = 1.0, HelpText = "Number to scale section height of comments.")]
+
+        [Option("scale-section-height", Default = 1.0, HelpText = "Number to scale section height of comments.")]
         public double ScaleSectionHeight { get; set; }
-        [Option("scale-wordspace", Default = 1.0, HelpText = "Number to scale spacing between words.")]
+
+        [Option("scale-word-space", Default = 1.0, HelpText = "Number to scale spacing between words.")]
         public double ScaleWordSpace { get; set; }
-        [Option("scale-emotespace", Default = 1.0, HelpText = "Number to scale spacing between emotes.")]
+
+        [Option("scale-emote-space", Default = 1.0, HelpText = "Number to scale spacing between emotes.")]
         public double ScaleEmoteSpace { get; set; }
-        [Option("scale-accentstroke", Default = 1.0, HelpText = "Number to scale accent stroke size (sub messages).")]
+
+        [Option("scale-highlight-stroke", Default = 1.0, HelpText = "Number to scale highlight stroke size (sub messages).")]
         public double ScaleAccentStroke { get; set; }
-        [Option("scale-accentindent", Default = 1.0, HelpText = "Number to scale accent indent size (sub messages).")]
+
+        [Option("scale-highlight-indent", Default = 1.0, HelpText = "Number to scale highlight indent size (sub messages).")]
         public double ScaleAccentIndent { get; set; }
     }
 }

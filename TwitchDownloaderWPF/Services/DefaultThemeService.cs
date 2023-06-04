@@ -2,26 +2,41 @@
 using System.Linq;
 using System.Reflection;
 
-namespace TwitchDownloader.Tools
+namespace TwitchDownloaderWPF.Services
 {
     public class DefaultThemeService
     {
-        public static void WriteIncludedThemes()
+        public static bool WriteIncludedThemes()
         {
+            var success = true;
             var resourceNames = GetResourceNames();
-            var themePaths = resourceNames.Where((i) => i.StartsWith($"{nameof(TwitchDownloader)}.Themes."));
+            var themeResourcePaths = resourceNames.Where(i => i.StartsWith($"{nameof(TwitchDownloaderWPF)}.Themes."));
 
-            foreach (var themePath in themePaths)
+            foreach (var themeResourcePath in themeResourcePaths)
             {
-                var themeData = ReadResource(themePath);
-                var themePathSplit = themePath.Split(".");
+                using var themeStream = GetResourceStream(themeResourcePath);
+                var themePathSplit = themeResourcePath.Split(".");
 
                 var themeName = themePathSplit[^2];
                 var themeExtension = themePathSplit[^1];
-                var themeFullName = $"{themeName}.{themeExtension}";
+                var themeFullPath = Path.Combine("Themes", $"{themeName}.{themeExtension}");
 
-                File.WriteAllText(Path.Combine("Themes", themeFullName), themeData);
+                try
+                {
+                    using var fs = new FileStream(themeFullPath, FileMode.Create, FileAccess.Write, FileShare.Read, 4096);
+                    themeStream.CopyTo(fs);
+                }
+                catch (IOException) { }
+                catch (System.UnauthorizedAccessException) { }
+                catch (System.Security.SecurityException) { }
+
+                if (!File.Exists(themeFullPath))
+                {
+                    success = false;
+                }
             }
+
+            return success;
         }
 
         private static string[] GetResourceNames()
@@ -30,14 +45,10 @@ namespace TwitchDownloader.Tools
             return assembly.GetManifestResourceNames();
         }
 
-        private static string ReadResource(string resourcePath)
+        private static Stream GetResourceStream(string resourcePath)
         {
             var assembly = Assembly.GetExecutingAssembly();
-
-            using var manifestStream = assembly.GetManifestResourceStream(resourcePath);
-            using var streamReader = new StreamReader(manifestStream);
-
-            return streamReader.ReadToEnd();
+            return assembly.GetManifestResourceStream(resourcePath);
         }
     }
 }

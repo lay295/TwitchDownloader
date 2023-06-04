@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace TwitchDownloader.TwitchTasks
+namespace TwitchDownloaderWPF.TwitchTasks
 {
     public class TaskData
     {
@@ -21,18 +17,17 @@ namespace TwitchDownloader.TwitchTasks
             get
             {
                 TimeSpan time = TimeSpan.FromSeconds(Length);
-                if ((int)time.TotalHours  > 0)
+                if ((int)time.TotalHours > 0)
                 {
-                    return (int)time.TotalHours + ":" + time.Hours.ToString("D2") + ":" + time.Seconds.ToString("D2");
+                    return (int)time.TotalHours + ":" + time.Minutes.ToString("D2") + ":" + time.Seconds.ToString("D2");
                 }
-                else if ((int)time.TotalMinutes > 0)
+
+                if ((int)time.TotalMinutes > 0)
                 {
                     return time.Minutes.ToString("D2") + ":" + time.Seconds.ToString("D2");
                 }
-                else
-                {
-                    return time.Seconds.ToString("D2") + "s";
-                }
+
+                return time.Seconds.ToString("D2") + "s";
             }
         }
     }

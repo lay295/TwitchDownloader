@@ -1,12 +1,9 @@
-﻿using NeoSmart.Unicode;
-using Newtonsoft.Json.Linq;
-using SkiaSharp;
+﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
+using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -23,14 +20,23 @@ namespace TwitchDownloaderCore.TwitchObjects
         PrimeGaming = 128
     }
 
+    public class ChatBadgeData
+    {
+        public string title { get; set; }
+        public string description { get; set; }
+        public byte[] bytes { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string url { get; set;}
+    }
+
     public class ChatBadge
     {
         public string Name;
         public Dictionary<string, SKBitmap> Versions;
-        public Dictionary<string, byte[]> VersionsData;
+        public Dictionary<string, ChatBadgeData> VersionsData;
         public ChatBadgeType Type;
 
-        public ChatBadge(string name, Dictionary<string, byte[]> versions)
+        public ChatBadge(string name, Dictionary<string, ChatBadgeData> versions)
         {
             Name = name;
             Versions = new Dictionary<string, SKBitmap>();
@@ -38,41 +44,24 @@ namespace TwitchDownloaderCore.TwitchObjects
 
             foreach (var version in versions)
             {
-                using MemoryStream ms = new MemoryStream(version.Value);
+                using MemoryStream ms = new MemoryStream(version.Value.bytes);
                 //For some reason, twitch has corrupted images sometimes :) for example
                 //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                 SKBitmap badgeImage = SKBitmap.Decode(ms);
                 Versions.Add(version.Key, badgeImage);
             }
 
-            switch (name)
+            Type = name switch
             {
-                case "broadcaster":
-                    Type = ChatBadgeType.Broadcaster;
-                    break;
-                case "moderator":
-                    Type = ChatBadgeType.Moderator;
-                    break;
-                case "vip":
-                    Type = ChatBadgeType.VIP;
-                    break;
-                case "subscriber":
-                    Type = ChatBadgeType.Subscriber;
-                    break;
-                case "predictions":
-                    Type = ChatBadgeType.Predictions;
-                    break;
-                case "no_video":
-                case "no_audio":
-                    Type = ChatBadgeType.NoAudioVisual;
-                    break;
-                case "premium":
-                    Type = ChatBadgeType.PrimeGaming;
-                    break;
-                default:
-                    Type = ChatBadgeType.Other;
-                    break;
-            }
+                "broadcaster" => ChatBadgeType.Broadcaster,
+                "moderator" => ChatBadgeType.Moderator,
+                "vip" => ChatBadgeType.VIP,
+                "subscriber" => ChatBadgeType.Subscriber,
+                "predictions" => ChatBadgeType.Predictions,
+                "no_video" or "no_audio" => ChatBadgeType.NoAudioVisual,
+                "premium" => ChatBadgeType.PrimeGaming,
+                _ => ChatBadgeType.Other,
+            };
         }
 
         public void Resize(double newScale)

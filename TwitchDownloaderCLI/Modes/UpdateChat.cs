@@ -4,15 +4,16 @@ using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal class UpdateChat
+    internal static class UpdateChat
     {
         internal static void Update(ChatUpdateArgs inputOptions)
         {
-            ChatUpdateOptions updateOptions = GetUpdateOptions(inputOptions);
+            var updateOptions = GetUpdateOptions(inputOptions);
 
             ChatUpdater chatUpdater = new(updateOptions);
             Progress<ProgressReport> progress = new();
@@ -28,37 +29,41 @@ namespace TwitchDownloaderCLI.Modes
                 Console.WriteLine("[ERROR] - Input file does not exist!");
                 Environment.Exit(1);
             }
-            ChatFormat inFormat = Path.GetExtension(inputOptions.InputFile)!.ToLower() switch
+
+            var inFileExtension = Path.GetExtension(inputOptions.InputFile)!.ToLower();
+            var inFormat = inFileExtension switch
             {
                 ".html" or ".htm" => ChatFormat.Html,
-                ".json" => ChatFormat.Json,
-                _ => ChatFormat.Text
+                ".json" or ".gz" => ChatFormat.Json,
+                ".txt" or ".text" or "" => ChatFormat.Text,
+                _ => throw new NotSupportedException($"{inFileExtension} is not a valid chat file extension.")
             };
-            ChatFormat outFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
+            var outFileExtension = Path.GetExtension(inputOptions.OutputFile)!.ToLower();
+            var outFormat = outFileExtension switch
             {
                 ".html" or ".htm" => ChatFormat.Html,
                 ".json" => ChatFormat.Json,
-                _ => ChatFormat.Text
+                ".txt" or ".text" or "" => ChatFormat.Text,
+                _ => throw new NotSupportedException($"{outFileExtension} is not a valid chat file extension.")
             };
             if (inFormat != ChatFormat.Json)
             {
-                Console.WriteLine("[ERROR] - Input file must be json!");
+                Console.WriteLine("[ERROR] - Input file must be .json or .json.gz!");
                 Environment.Exit(1);
             }
-            if (inputOptions.InputFile == inputOptions.OutputFile)
+
+            if (Path.GetFullPath(inputOptions.InputFile!) == Path.GetFullPath(inputOptions.OutputFile!))
             {
                 Console.WriteLine("[WARNING] - Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanantly overwritten!");
-            }
-            if (!inputOptions.EmbedMissing && !inputOptions.ReplaceEmbeds && double.IsNegative(inputOptions.CropBeginningTime) && double.IsNegative(inputOptions.CropEndingTime))
-            {
-                Console.WriteLine("[ERROR] - No update options were passed. Please pass --embed-missing, --replace-embeds, -b, or -e");
-                Environment.Exit(1);
             }
 
             ChatUpdateOptions updateOptions = new()
             {
                 InputFile = inputOptions.InputFile,
-                OutputFile = inputOptions.OutputFile,
+                OutputFile = inputOptions.Compression is ChatCompression.Gzip
+                    ? inputOptions.OutputFile + ".gz"
+                    : inputOptions.OutputFile,
+                Compression = inputOptions.Compression,
                 OutputFormat = outFormat,
                 EmbedMissing = inputOptions.EmbedMissing,
                 ReplaceEmbeds = inputOptions.ReplaceEmbeds,
@@ -66,9 +71,9 @@ namespace TwitchDownloaderCLI.Modes
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = !double.IsNegative(inputOptions.CropEndingTime),
                 CropEndingTime = inputOptions.CropEndingTime,
-                BttvEmotes = (bool)inputOptions.BttvEmotes,
-                FfzEmotes = (bool)inputOptions.FfzEmotes,
-                StvEmotes = (bool)inputOptions.StvEmotes,
+                BttvEmotes = (bool)inputOptions.BttvEmotes!,
+                FfzEmotes = (bool)inputOptions.FfzEmotes!,
+                StvEmotes = (bool)inputOptions.StvEmotes!,
                 TextTimestampFormat = inputOptions.TimeFormat,
                 TempFolder = inputOptions.TempFolder
             };

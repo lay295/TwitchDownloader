@@ -1,18 +1,20 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal class DownloadChat
+    internal static class DownloadChat
     {
         internal static void Download(ChatDownloadArgs inputOptions)
         {
-            ChatDownloadOptions downloadOptions = GetDownloadOptions(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions);
 
             ChatDownloader chatDownloader = new(downloadOptions);
             Progress<ProgressReport> progress = new();
@@ -22,32 +24,46 @@ namespace TwitchDownloaderCLI.Modes
 
         private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions)
         {
-            if (string.IsNullOrWhiteSpace(inputOptions.Id))
+            if (inputOptions.Id is null)
             {
-                Console.WriteLine("[ERROR] - Invalid ID, unable to parse.");
+                Console.WriteLine("[ERROR] - Vod/Clip ID/URL cannot be null!");
                 Environment.Exit(1);
             }
 
+            var vodClipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:videos|\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
+            var vodClipIdMatch = vodClipIdRegex.Match(inputOptions.Id);
+            if (!vodClipIdMatch.Success)
+            {
+                Console.WriteLine("[ERROR] - Unable to parse Vod/Clip ID/URL.");
+                Environment.Exit(1);
+            }
+
+            var fileExtension = Path.GetExtension(inputOptions.OutputFile)!.ToLower();
+
             ChatDownloadOptions downloadOptions = new()
             {
-                DownloadFormat = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
+                DownloadFormat = fileExtension switch
                 {
                     ".html" or ".htm" => ChatFormat.Html,
                     ".json" => ChatFormat.Json,
-                    _ => ChatFormat.Text
+                    ".txt" or ".text" or "" => ChatFormat.Text,
+                    _ => throw new NotSupportedException($"{fileExtension} is not a valid chat file extension.")
                 },
-                Id = inputOptions.Id,
+                Id = vodClipIdMatch.Value,
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
                 EmbedData = inputOptions.EmbedData,
-                Filename = inputOptions.OutputFile,
+                Filename = inputOptions.Compression is ChatCompression.Gzip
+                    ? inputOptions.OutputFile + ".gz"
+                    : inputOptions.OutputFile,
+                Compression = inputOptions.Compression,
                 TimeFormat = inputOptions.TimeFormat,
                 ConnectionCount = inputOptions.ChatConnections,
-                BttvEmotes = (bool)inputOptions.BttvEmotes,
-                FfzEmotes = (bool)inputOptions.FfzEmotes,
-                StvEmotes = (bool)inputOptions.StvEmotes,
+                BttvEmotes = (bool)inputOptions.BttvEmotes!,
+                FfzEmotes = (bool)inputOptions.FfzEmotes!,
+                StvEmotes = (bool)inputOptions.StvEmotes!,
                 TempFolder = inputOptions.TempFolder
             };
 
