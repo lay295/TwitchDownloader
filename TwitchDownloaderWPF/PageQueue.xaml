@@ -49,7 +49,7 @@
                                     </Grid.RowDefinitions>
                                     <Image Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Source="{Binding Info.Thumbnail}" MaxHeight="60"></Image>
                                     <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Orientation="Vertical" Margin="20,0,0,0" >
-                                        <emoji:TextBlock Text="{Binding Info.Title, StringFormat=Title: {0}}" Foreground="{DynamicResource AppText}"></emoji:TextBlock>
+                                        <emoji:TextBlock Text="{Binding Info.Title, StringFormat=Title: {0}}" TextWrapping="Wrap" Foreground="{DynamicResource AppText}"></emoji:TextBlock>
                                         <TextBlock Text="{Binding TaskType, StringFormat=Task Type: {0}}" Foreground="{DynamicResource AppText}"></TextBlock>
                                         <TextBlock Text="{Binding Status, StringFormat=Status: {0}, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Foreground="{DynamicResource AppText}"></TextBlock>
                                         <StackPanel Orientation="Horizontal" Margin="1,1,0,1">
