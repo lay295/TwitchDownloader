@@ -213,5 +213,24 @@ namespace TwitchDownloaderWPF
 
             MessageBox.Show(errorMessage, Translations.Strings.TaskError, MessageBoxButton.OK, MessageBoxImage.Error);
         }
+
+        private void btnRemoveTask_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button { DataContext: ITwitchTask task }))
+            {
+                return;
+            }
+
+            if (task.CanRun() || task.Status == TwitchTaskStatus.Running)
+            {
+                MessageBox.Show(Translations.Strings.CancelTaskBeforeRemoving, Translations.Strings.TaskCouldNotBeRemoved, MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (!taskList.Remove(task))
+            {
+                MessageBox.Show(Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
     }
 }
