@@ -50,6 +50,12 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public async Task RunAsync()
         {
+            if (TokenSource.IsCancellationRequested)
+            {
+                TokenSource.Dispose();
+                return;
+            }
+
             ChatUpdater updater = new ChatUpdater(UpdateOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
