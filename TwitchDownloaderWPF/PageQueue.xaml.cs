@@ -53,9 +53,8 @@ namespace TwitchDownloaderWPF
                 int currentClip = 0;
                 int currentChat = 0;
                 int currentRender = 0;
-                IEnumerable<ITwitchTask> tasks = taskList.AsEnumerable();
 
-                foreach (var task in tasks)
+                foreach (var task in taskList)
                 {
                     if (task.Status == TwitchTaskStatus.Running)
                     {
@@ -80,7 +79,7 @@ namespace TwitchDownloaderWPF
                     }
                 }
 
-                foreach (var task in tasks)
+                foreach (var task in taskList)
                 {
                     if (task.CanRun())
                     {
@@ -183,10 +182,13 @@ namespace TwitchDownloaderWPF
 
         private void btnCancelTask_Click(object sender, RoutedEventArgs e)
         {
-            Button cancelButton = (Button)sender;
+            if (!(sender is Button { DataContext: ITwitchTask task } cancelButton))
+            {
+                return;
+            }
+
             cancelButton.IsEnabled = false;
 
-            ITwitchTask task = (ITwitchTask)cancelButton.DataContext;
             if (task.Status is TwitchTaskStatus.Failed or TwitchTaskStatus.Cancelled or TwitchTaskStatus.Finished)
             {
                 return;
@@ -197,10 +199,14 @@ namespace TwitchDownloaderWPF
 
         private void btnTaskError_Click(object sender, RoutedEventArgs e)
         {
-            Button errorButton = (Button)sender;
-            TwitchTaskException taskException = ((ITwitchTask)errorButton.DataContext).Exception;
+            if (!(sender is Button { DataContext: ITwitchTask task }))
+            {
+                return;
+            }
 
-            if (taskException == null || taskException.Exception == null)
+            TwitchTaskException taskException = task.Exception;
+
+            if (taskException?.Exception == null)
             {
                 return;
             }
@@ -212,6 +218,25 @@ namespace TwitchDownloaderWPF
             }
 
             MessageBox.Show(errorMessage, Translations.Strings.TaskError, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private void btnRemoveTask_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button { DataContext: ITwitchTask task }))
+            {
+                return;
+            }
+
+            if (task.CanRun() || task.Status is TwitchTaskStatus.Running or TwitchTaskStatus.Waiting)
+            {
+                MessageBox.Show(Translations.Strings.CancelTaskBeforeRemoving, Translations.Strings.TaskCouldNotBeRemoved, MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (!taskList.Remove(task))
+            {
+                MessageBox.Show(Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

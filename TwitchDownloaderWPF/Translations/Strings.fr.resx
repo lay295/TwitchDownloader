@@ -738,4 +738,13 @@
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
     <value>crop_start_custom and crop_end_custom formattings are based on the</value>
   </data>
+  <data name="UnknownErrorOccurred" xml:space="preserve">
+    <value>Une erreur inconnue s'est produite</value>
+  </data>
+  <data name="TaskCouldNotBeRemoved" xml:space="preserve">
+    <value>Le travail n'a pas pu être supprimé</value>
+  </data>
+  <data name="CancelTaskBeforeRemoving" xml:space="preserve">
+    <value>Veuillez annuler le travail ou attendre qu'il soit terminé avant de le supprimer</value>
+  </data>
 </root>

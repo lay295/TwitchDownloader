@@ -41,6 +41,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         {
             return Status == TwitchTaskStatus.Ready;
         }
+
         public void ChangeStatus(TwitchTaskStatus newStatus)
         {
             Status = newStatus;
@@ -49,6 +50,12 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public async Task RunAsync()
         {
+            if (TokenSource.IsCancellationRequested)
+            {
+                TokenSource.Dispose();
+                return;
+            }
+
             ChatDownloader downloader = new ChatDownloader(DownloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
