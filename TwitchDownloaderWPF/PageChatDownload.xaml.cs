@@ -518,7 +518,12 @@ namespace TwitchDownloaderWPF
                     statusMessage.Text = Translations.Strings.StatusDone;
                     SetImage("Images/ppHop.gif", true);
                 }
-                catch (Exception ex) when (ex is not OperationCanceledException and not TaskCanceledException)
+                catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
+                {
+                    statusMessage.Text = Translations.Strings.StatusCanceled;
+                    SetImage("Images/ppHop.gif", true);
+                }
+                catch (Exception ex)
                 {
                     statusMessage.Text = Translations.Strings.StatusError;
                     SetImage("Images/peepoSad.png", false);
@@ -527,11 +532,6 @@ namespace TwitchDownloaderWPF
                     {
                         MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                }
-                catch
-                {
-                    statusMessage.Text = Translations.Strings.StatusCanceled;
-                    SetImage("Images/ppHop.gif", true);
                 }
                 btnGetInfo.IsEnabled = true;
                 statusProgressBar.Value = 0;
