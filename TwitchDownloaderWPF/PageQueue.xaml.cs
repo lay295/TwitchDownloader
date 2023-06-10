@@ -126,6 +126,11 @@ namespace TwitchDownloaderWPF
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+        }
+
         private void numVod_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
             if (this.IsInitialized)
