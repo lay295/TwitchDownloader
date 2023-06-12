@@ -33,6 +33,11 @@ body:
   id: issue_text
   attributes:
     label: Describe your issue here
-    placeholder: When i try to download a VOD it gives me a 403 error
+    placeholder: When I try to download a VOD it gives me a 403 error
   validations:
       required: true
+- type: textarea
+  id: related_information
+  attributes:
+    label: Add any related files or extra information here
+    placeholder: Here is the VOD id: 1694846567
