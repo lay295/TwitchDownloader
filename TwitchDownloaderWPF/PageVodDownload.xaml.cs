@@ -306,11 +306,10 @@ namespace TwitchDownloaderWPF
 
         private static int ValidateUrl(string text)
         {
-            var vodIdRegex = new Regex(@"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?)");
-            var vodIdMatch = vodIdRegex.Match(text);
-            if (vodIdMatch.Success)
+            var vodIdMatch = Regex.Match(text, @"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?)");
+            if (vodIdMatch.Success && int.TryParse(vodIdMatch.ValueSpan, out var vodId))
             {
-                return int.Parse(vodIdMatch.ValueSpan);
+                return vodId;
             }
 
             return -1;
