@@ -40,4 +40,4 @@ body:
   id: related_information
   attributes:
     label: Add any related files or extra information here
-    placeholder: Here is the VOD id: 1694846567
+    placeholder: "Here is the VOD id: 1694846567"
