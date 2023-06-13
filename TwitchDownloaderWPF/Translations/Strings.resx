@@ -746,4 +746,10 @@
   <data name="CancelTaskBeforeRemoving" xml:space="preserve">
     <value>Please cancel the task or wait for it to finish before removing it</value>
   </data>
+  <data name="UnableToDownloadFfmpeg" xml:space="preserve">
+    <value>Unable to download ffmpeg</value>
+  </data>
+  <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
+    <value>Unable to download ffmpeg. Please manually download it from https://ffmpeg.org/download.html and place the file at {0}</value>
+  </data>
 </root>
