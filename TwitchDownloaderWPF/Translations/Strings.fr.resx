@@ -751,6 +751,6 @@
     <value>Impossible de télécharger ffmpeg</value>
   </data>
   <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
-    <value>Impossible de télécharger ffmpeg. Veuillez le télécharger manuellement à partir de https://ffmpeg.org/download.html et déplacer  le fichier à {0}.</value>
+    <value>Impossible de télécharger ffmpeg. Veuillez le télécharger manuellement à partir de https://ffmpeg.org/download.html et déplacer le fichier à {0}.</value>
   </data>
 </root>
