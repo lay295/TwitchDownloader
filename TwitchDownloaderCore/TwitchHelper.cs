@@ -205,7 +205,9 @@ namespace TwitchDownloaderCore
                 string id = emote.id.ToString();
                 string name = emote.code;
                 string mime = emote.imageType;
-                string url = $"https://cdn.betterttv.net/frankerfacez_emote/{id}/[scale]";
+                string url = emote.animated
+                    ? $"https://cdn.betterttv.net/frankerfacez_emote/{id}/animated/[scale]"
+                    : $"https://cdn.betterttv.net/frankerfacez_emote/{id}/[scale]";
                 ffzResponse.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url });
             }
         }

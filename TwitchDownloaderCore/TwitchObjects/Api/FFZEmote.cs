@@ -10,6 +10,8 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
         public string code { get; set; }
         public FFZImages images { get; set; }
         public string imageType { get; set; }
+        public bool animated { get; set; }
+        public bool modifier { get; set; }
     }
 
     public class FFZImages
