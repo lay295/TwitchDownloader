@@ -34,7 +34,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            ChangeStatus(TwitchTaskStatus.Cancelled);
+            ChangeStatus(TwitchTaskStatus.Canceled);
         }
 
         public bool CanRun()
@@ -65,7 +65,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 await downloader.DownloadAsync(TokenSource.Token);
                 if (TokenSource.IsCancellationRequested)
                 {
-                    ChangeStatus(TwitchTaskStatus.Cancelled);
+                    ChangeStatus(TwitchTaskStatus.Canceled);
                 }
                 else
                 {
@@ -76,7 +76,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             }
             catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && TokenSource.IsCancellationRequested)
             {
-                ChangeStatus(TwitchTaskStatus.Cancelled);
+                ChangeStatus(TwitchTaskStatus.Canceled);
             }
             catch (Exception ex)
             {

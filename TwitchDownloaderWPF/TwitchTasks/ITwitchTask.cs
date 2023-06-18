@@ -12,7 +12,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         Failed,
         Finished,
         Stopping,
-        Cancelled
+        Canceled
     }
 
     public interface ITwitchTask : INotifyPropertyChanged

@@ -194,7 +194,7 @@ namespace TwitchDownloaderWPF
 
             cancelButton.IsEnabled = false;
 
-            if (task.Status is TwitchTaskStatus.Failed or TwitchTaskStatus.Cancelled or TwitchTaskStatus.Finished)
+            if (task.Status is TwitchTaskStatus.Failed or TwitchTaskStatus.Canceled or TwitchTaskStatus.Finished)
             {
                 return;
             }

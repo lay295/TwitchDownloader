@@ -34,7 +34,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            ChangeStatus(TwitchTaskStatus.Cancelled);
+            ChangeStatus(TwitchTaskStatus.Canceled);
         }
 
         public bool CanRun()
@@ -52,9 +52,9 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 {
                     return true;
                 }
-                if (DependantTask.Status is TwitchTaskStatus.Failed or TwitchTaskStatus.Cancelled)
+                if (DependantTask.Status is TwitchTaskStatus.Failed or TwitchTaskStatus.Canceled)
                 {
-                    ChangeStatus(TwitchTaskStatus.Cancelled);
+                    ChangeStatus(TwitchTaskStatus.Canceled);
                     return false;
                 }
             }
@@ -85,7 +85,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 await renderer.RenderVideoAsync(TokenSource.Token);
                 if (TokenSource.IsCancellationRequested)
                 {
-                    ChangeStatus(TwitchTaskStatus.Cancelled);
+                    ChangeStatus(TwitchTaskStatus.Canceled);
                 }
                 else
                 {
@@ -96,7 +96,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             }
             catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && TokenSource.IsCancellationRequested)
             {
-                ChangeStatus(TwitchTaskStatus.Cancelled);
+                ChangeStatus(TwitchTaskStatus.Canceled);
             }
             catch (Exception ex)
             {
