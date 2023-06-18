@@ -341,7 +341,7 @@ namespace TwitchDownloaderCore
 
             if (downloadOptions.Quality != null && videoQualities.Any(x => x.Key.StartsWith(downloadOptions.Quality)))
             {
-                return videoQualities.First(x => x.Key.StartsWith(downloadOptions.Quality)).Value;
+                return videoQualities.Last(x => x.Key.StartsWith(downloadOptions.Quality)).Value;
             }
 
             // Unable to find specified quality, defaulting to highest quality
