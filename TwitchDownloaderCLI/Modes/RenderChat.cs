@@ -91,7 +91,7 @@ namespace TwitchDownloaderCLI.Modes
                 EmoteSpacingScale = inputOptions.ScaleEmoteSpace,
                 AccentIndentScale = inputOptions.ScaleAccentIndent,
                 AccentStrokeScale = inputOptions.ScaleAccentStroke,
-                DisperseCommentOffsets = (bool)inputOptions.DisperseCommentOffsets,
+                DisperseCommentOffsets = inputOptions.DisperseCommentOffsets,
                 AlternateMessageBackgrounds = inputOptions.AlternateMessageBackgrounds
             };
 

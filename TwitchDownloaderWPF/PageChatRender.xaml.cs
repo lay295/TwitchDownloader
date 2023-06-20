@@ -132,6 +132,7 @@ namespace TwitchDownloaderWPF
                 SubMessages = (bool)checkSub.IsChecked,
                 ChatBadges = (bool)checkBadge.IsChecked,
                 Offline = (bool)checkOffline.IsChecked,
+                AllowUnlistedEmotes = true,
                 DisperseCommentOffsets = (bool)checkDispersion.IsChecked,
                 LogFfmpegOutput = true
             };

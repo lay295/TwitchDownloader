@@ -152,13 +152,13 @@ The path to the `.json` or `.json.gz` chat file input.
 File the program will output to.
 
 **--background-color**
-(Default: `#111111`) Color of background in HEX string format.
+(Default: `#111111`) The render background color in the string format of `#RRGGBB` or `#AARRGGBB` in hexadecimal.
 
 **--alt-background-color**
 (Default: `#191919`) The alternate message background color in the string format of `#RRGGBB` or `#AARRGGBB` in hexadecimal. Requires `--alternate-backgrounds`.
 
 **--message-color**
-(Default: `#ffffff`) Color of messages in HEX string format.
+(Default: `#ffffff`) The message text color in the string format of `#RRGGBB` or `#AARRGGBB` in hexadecimal.
 
 **-w / --chat-width**
 (Default: `350`) Width of chat render.
