@@ -88,12 +88,15 @@ namespace TwitchDownloaderWPF
         public ChatRenderOptions GetOptions(string filename)
         {
             SKColor backgroundColor = new(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
+            SKColor altBackgroundColor = new(colorAlternateBackground.SelectedColor.Value.R, colorAlternateBackground.SelectedColor.Value.G, colorAlternateBackground.SelectedColor.Value.B, colorAlternateBackground.SelectedColor.Value.A);
             SKColor messageColor = new(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
             ChatRenderOptions options = new()
             {
                 OutputFile = filename,
                 InputFile = textJson.Text,
                 BackgroundColor = backgroundColor,
+                AlternateBackgroundColor = altBackgroundColor,
+                AlternateMessageBackgrounds = (bool)checkAlternateMessageBackgrounds.IsChecked,
                 ChatHeight = int.Parse(textHeight.Text),
                 ChatWidth = int.Parse(textWidth.Text),
                 BttvEmotes = (bool)checkBTTV.IsChecked,
@@ -387,7 +390,7 @@ namespace TwitchDownloaderWPF
                 return false;
             }
 
-            if (checkMask.IsChecked == false && colorBackground.SelectedColor!.Value.A < 255)
+            if (checkMask.IsChecked == false && (colorBackground.SelectedColor!.Value.A < 255 || ((bool)checkAlternateMessageBackgrounds.IsChecked! && colorAlternateBackground.SelectedColor!.Value.A < 255)))
             {
                 if (((VideoContainer)comboFormat.SelectedItem).Name is not "MOV" and not "WEBM" ||
                     ((Codec)comboCodec.SelectedItem).Name is not "RLE" and not "ProRes" and not "VP8" and not "VP9")
@@ -397,7 +400,7 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            if (checkMask.IsChecked == true && colorBackground.SelectedColor!.Value.A == 255)
+            if (checkMask.IsChecked == true && colorBackground.SelectedColor!.Value.A == 255 && !((bool)checkAlternateMessageBackgrounds.IsChecked! && colorAlternateBackground.SelectedColor!.Value.A != 255))
             {
                 AppendLog(Translations.Strings.ErrorLog + Translations.Strings.MaskWithNoAlpha);
                 return false;

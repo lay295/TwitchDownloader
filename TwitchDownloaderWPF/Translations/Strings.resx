@@ -746,4 +746,13 @@
   <data name="CancelTaskBeforeRemoving" xml:space="preserve">
     <value>Please cancel the task or wait for it to finish before removing it</value>
   </data>
+  <data name="AlternateBackgroundColor" xml:space="preserve">
+    <value>Alt Background Color:</value>
+  </data>
+  <data name="AlternateMessageBackgrounds" xml:space="preserve">
+    <value>Alternate Backgrounds </value><comment>Leave a trailing space</comment>
+  </data>
+  <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
+    <value>Alternates the background color of every other chat message to help tell them apart.</value>
+  </data>
 </root>

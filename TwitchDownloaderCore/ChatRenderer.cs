@@ -512,6 +512,12 @@ namespace TwitchDownloaderCore
                 {
                     var comment = commentList[commentListIndex];
                     frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
+
+                    if (renderOptions.AlternateMessageBackgrounds && comment.CommentIndex % 2 == 1)
+                    {
+                        frameCanvas.DrawRect(0, frameHeight - renderOptions.VerticalPadding / 2f, newFrame.Width, comment.Image.Height + renderOptions.VerticalPadding, renderOptions.AlternateBackgroundPaint);
+                    }
+
                     frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
 
                     for (int i = 0; i < comment.Emotes.Count; i++)

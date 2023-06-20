@@ -154,6 +154,9 @@ File the program will output to.
 **--background-color**
 (Default: `#111111`) Color of background in HEX string format.
 
+**--alt-background-color**
+(Default: `#191919`) The alternate message background color in the string format of `#RRGGBB` or `#AARRGGBB` in hexadecimal. Requires `--alternate-backgrounds`.
+
 **--message-color**
 (Default: `#ffffff`) Color of messages in HEX string format.
 
@@ -239,6 +242,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 
 **--dispersion**
 (Default: `false`) In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.
+
+**--alternate-backgrounds**
+(Default: `false`) Alternates the background color of every other chat message to help tell them apart.
 
 **--offline**
 (Default: `false`) Render completely offline using only embedded emotes, badges, and bits from the input json.

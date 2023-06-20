@@ -32,6 +32,7 @@ namespace TwitchDownloaderCLI.Modes
                 InputFile = inputOptions.InputFile,
                 OutputFile = inputOptions.OutputFile,
                 BackgroundColor = SKColor.Parse(inputOptions.BackgroundColor),
+                AlternateBackgroundColor = SKColor.Parse(inputOptions.AlternateBackgroundColor),
                 MessageColor = SKColor.Parse(inputOptions.MessageColor),
                 ChatHeight = inputOptions.ChatHeight,
                 ChatWidth = inputOptions.ChatWidth,
@@ -90,10 +91,11 @@ namespace TwitchDownloaderCLI.Modes
                 EmoteSpacingScale = inputOptions.ScaleEmoteSpace,
                 AccentIndentScale = inputOptions.ScaleAccentIndent,
                 AccentStrokeScale = inputOptions.ScaleAccentStroke,
-                DisperseCommentOffsets = (bool)inputOptions.DisperseCommentOffsets
+                DisperseCommentOffsets = (bool)inputOptions.DisperseCommentOffsets,
+                AlternateMessageBackgrounds = inputOptions.AlternateMessageBackgrounds
             };
 
-            if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255)
+            if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255 && !(renderOptions.AlternateMessageBackgrounds! && renderOptions.AlternateBackgroundColor.Alpha != 255))
             {
                 Console.WriteLine("[WARNING] - Generate mask option has been selected with an opaque background. You most likely want to set a transparent background with --background-color \"#00000000\"");
             }

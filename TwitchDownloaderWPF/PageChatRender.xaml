@@ -50,12 +50,14 @@
                         <TextBlock Text="{lex:Loc ChatFontSize}" HorizontalAlignment="Right" Margin="0,21,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="{lex:Loc FontColor}" HorizontalAlignment="Right" Margin="0,16,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="{lex:Loc BackgroundColor}" HorizontalAlignment="Right" Margin="0,12,0,0" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Text="{lex:Loc AlternateBackgroundColor}" HorizontalAlignment="Right" Margin="0,12,0,0" Foreground="{DynamicResource AppText}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,0,5">
                         <ComboBox x:Name="comboFont" MinWidth="180" MaxWidth="300" HorizontalAlignment="Left" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <hc:NumericUpDown x:Name="numFontSize" Value="12" Width="75" HorizontalAlignment="Left" Margin="0,7,0,0" Minimum="1" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <xctk:ColorPicker x:Name="colorFont" SelectedColor="#FFFFFF" Width="50" UsingAlphaChannel="False" Margin="0,5,0,0" HorizontalAlignment="Left" Background="White" BorderBrush="{DynamicResource AppElementInnerBorder}" DropDownBackground="{DynamicResource AppElementInnerBackground}" Foreground="{DynamicResource AppText}" HeaderBackground="{DynamicResource AppElementInnerBackground}" HeaderForeground="{DynamicResource AppText}" TabBackground="{DynamicResource AppElementBorder}" TabForeground="{DynamicResource AppText}"/>
                         <xctk:ColorPicker x:Name="colorBackground" SelectedColor="#111111" Width="50" UsingAlphaChannel="True" Margin="0,5,0,0" HorizontalAlignment="Left" Background="White" BorderBrush="{DynamicResource AppElementInnerBorder}" DropDownBackground="{DynamicResource AppElementInnerBackground}" Foreground="{DynamicResource AppText}" HeaderBackground="{DynamicResource AppElementInnerBackground}" HeaderForeground="{DynamicResource AppText}" TabBackground="{DynamicResource AppElementBorder}" TabForeground="{DynamicResource AppText}"/>
+                        <xctk:ColorPicker x:Name="colorAlternateBackground" SelectedColor="#191919" Width="50" UsingAlphaChannel="True" Margin="0,5,0,0" HorizontalAlignment="Left" Background="White" BorderBrush="{DynamicResource AppElementInnerBorder}" DropDownBackground="{DynamicResource AppElementInnerBackground}" Foreground="{DynamicResource AppText}" HeaderBackground="{DynamicResource AppElementInnerBackground}" HeaderForeground="{DynamicResource AppText}" TabBackground="{DynamicResource AppElementBorder}" TabForeground="{DynamicResource AppText}"/>
                     </StackPanel>
                 </DockPanel>
             </TabItem>
@@ -68,6 +70,7 @@
                         <TextBlock Text="{lex:Loc ChatBadges}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock Text="{lex:Loc UpdateRate}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                         <TextBlock HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MessageDispersion}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MessageDispersionTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                        <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" MaxWidth="120" TextWrapping="Wrap" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc AlternateMessageBackgrounds}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc AlternateMessageBackgroundsTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,10,0,5">
                         <CheckBox x:Name="checkOutline" HorizontalAlignment="Left" Margin="0,2,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
@@ -76,6 +79,7 @@
                         <CheckBox x:Name="checkBadge" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                         <TextBox x:Name="textUpdateTime" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <CheckBox x:Name="checkDispersion" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+                        <CheckBox x:Name="checkAlternateMessageBackgrounds" HorizontalAlignment="Left" Margin="0,22,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="15,10,5,2">
                         <TextBlock Text="{lex:Loc BttvEmotes}" HorizontalAlignment="Right" Margin="0,0,0,0" Foreground="{DynamicResource AppText}"/>

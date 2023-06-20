@@ -10,6 +10,10 @@ namespace TwitchDownloaderCore.Options
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
         public SKColor BackgroundColor { get; set; }
+        public SKColor AlternateBackgroundColor { get; set; }
+        private SKPaint _alternateBackgroundPaint;
+        public SKPaint AlternateBackgroundPaint => _alternateBackgroundPaint ??= new SKPaint { Color = AlternateBackgroundColor, BlendMode = SKBlendMode.Src };
+        public bool AlternateMessageBackgrounds { get; set; }
         public SKColor MessageColor { get; set; }
         public int ChatHeight { get; set; }
         public int ChatWidth { get; set; }
