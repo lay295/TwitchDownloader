@@ -176,7 +176,8 @@ namespace TwitchDownloaderWPF
                 comboFont.SelectedItem = Settings.Default.Font;
                 checkOutline.IsChecked = Settings.Default.Outline;
                 checkTimestamp.IsChecked = Settings.Default.Timestamp;
-                colorBackground.SelectedColor = System.Windows.Media.Color.FromArgb((byte)Settings.Default.BackgroundColorA, (byte)Settings.Default.BackgroundColorR, (byte)Settings.Default.BackgroundColorG, (byte)Settings.Default.BackgroundColorB);
+                colorBackground.SelectedColor = System.Windows.Media.Color.FromArgb(Settings.Default.BackgroundColorA, Settings.Default.BackgroundColorR, Settings.Default.BackgroundColorG, Settings.Default.BackgroundColorB);
+                colorAlternateBackground.SelectedColor = System.Windows.Media.Color.FromArgb(Settings.Default.AlternateBackgroundColorA, Settings.Default.AlternateBackgroundColorR, Settings.Default.AlternateBackgroundColorG, Settings.Default.AlternateBackgroundColorB);
                 checkFFZ.IsChecked = Settings.Default.FFZEmotes;
                 checkBTTV.IsChecked = Settings.Default.BTTVEmotes;
                 checkSTV.IsChecked = Settings.Default.STVEmotes;
@@ -184,7 +185,7 @@ namespace TwitchDownloaderWPF
                 textWidth.Text = Settings.Default.Width.ToString();
                 numFontSize.Value = Settings.Default.FontSize;
                 textUpdateTime.Text = Settings.Default.UpdateTime.ToString("0.0#");
-                colorFont.SelectedColor = System.Windows.Media.Color.FromRgb((byte)Settings.Default.FontColorR, (byte)Settings.Default.FontColorG, (byte)Settings.Default.FontColorB);
+                colorFont.SelectedColor = System.Windows.Media.Color.FromRgb(Settings.Default.FontColorR, Settings.Default.FontColorG, Settings.Default.FontColorB);
                 textFramerate.Text = Settings.Default.Framerate.ToString();
                 checkMask.IsChecked = Settings.Default.GenerateMask;
                 CheckRenderSharpening.IsChecked = Settings.Default.ChatRenderSharpening;
@@ -205,6 +206,7 @@ namespace TwitchDownloaderWPF
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
                 checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
+                checkAlternateMessageBackgrounds.IsChecked = Settings.Default.AlternateMessageBackgrounds;
                 RadioEmojiNotoColor.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.GoogleNotoColor;
                 RadioEmojiTwemoji.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.TwitterTwemoji;
                 RadioEmojiNone.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.None;
@@ -291,6 +293,10 @@ namespace TwitchDownloaderWPF
             Settings.Default.BackgroundColorG = colorBackground.SelectedColor.Value.G;
             Settings.Default.BackgroundColorB = colorBackground.SelectedColor.Value.B;
             Settings.Default.BackgroundColorA = colorBackground.SelectedColor.Value.A;
+            Settings.Default.AlternateBackgroundColorR = colorAlternateBackground.SelectedColor.Value.R;
+            Settings.Default.AlternateBackgroundColorG = colorAlternateBackground.SelectedColor.Value.G;
+            Settings.Default.AlternateBackgroundColorB = colorAlternateBackground.SelectedColor.Value.B;
+            Settings.Default.AlternateBackgroundColorA = colorAlternateBackground.SelectedColor.Value.A;
             Settings.Default.FFZEmotes = (bool)checkFFZ.IsChecked;
             Settings.Default.BTTVEmotes = (bool)checkBTTV.IsChecked;
             Settings.Default.STVEmotes = (bool)checkSTV.IsChecked;
@@ -303,6 +309,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.ChatBadges = (bool)checkBadge.IsChecked;
             Settings.Default.Offline = (bool)checkOffline.IsChecked;
             Settings.Default.DisperseCommentOffsets = (bool)checkDispersion.IsChecked;
+            Settings.Default.AlternateMessageBackgrounds = (bool)checkAlternateMessageBackgrounds.IsChecked;
             if (comboFormat.SelectedItem != null)
             {
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;

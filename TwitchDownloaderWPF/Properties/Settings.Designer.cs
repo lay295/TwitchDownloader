@@ -156,10 +156,22 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("17")]
-        public int BackgroundColorR {
+        [global::System.Configuration.DefaultSettingValueAttribute("255")]
+        public byte BackgroundColorA {
             get {
-                return ((int)(this["BackgroundColorR"]));
+                return ((byte)(this["BackgroundColorA"]));
+            }
+            set {
+                this["BackgroundColorA"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("17")]
+        public byte BackgroundColorR {
+            get {
+                return ((byte)(this["BackgroundColorR"]));
             }
             set {
                 this["BackgroundColorR"] = value;
@@ -169,9 +181,9 @@ namespace TwitchDownloaderWPF.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("17")]
-        public int BackgroundColorG {
+        public byte BackgroundColorG {
             get {
-                return ((int)(this["BackgroundColorG"]));
+                return ((byte)(this["BackgroundColorG"]));
             }
             set {
                 this["BackgroundColorG"] = value;
@@ -181,9 +193,9 @@ namespace TwitchDownloaderWPF.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("17")]
-        public int BackgroundColorB {
+        public byte BackgroundColorB {
             get {
-                return ((int)(this["BackgroundColorB"]));
+                return ((byte)(this["BackgroundColorB"]));
             }
             set {
                 this["BackgroundColorB"] = value;
@@ -193,9 +205,57 @@ namespace TwitchDownloaderWPF.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
-        public int FontColorR {
+        public byte AlternateBackgroundColorA {
             get {
-                return ((int)(this["FontColorR"]));
+                return ((byte)(this["AlternateBackgroundColorA"]));
+            }
+            set {
+                this["AlternateBackgroundColorA"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        public byte AlternateBackgroundColorR {
+            get {
+                return ((byte)(this["AlternateBackgroundColorR"]));
+            }
+            set {
+                this["AlternateBackgroundColorR"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        public byte AlternateBackgroundColorG {
+            get {
+                return ((byte)(this["AlternateBackgroundColorG"]));
+            }
+            set {
+                this["AlternateBackgroundColorG"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        public byte AlternateBackgroundColorB {
+            get {
+                return ((byte)(this["AlternateBackgroundColorB"]));
+            }
+            set {
+                this["AlternateBackgroundColorB"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("255")]
+        public byte FontColorR {
+            get {
+                return ((byte)(this["FontColorR"]));
             }
             set {
                 this["FontColorR"] = value;
@@ -205,9 +265,9 @@ namespace TwitchDownloaderWPF.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
-        public int FontColorG {
+        public byte FontColorG {
             get {
-                return ((int)(this["FontColorG"]));
+                return ((byte)(this["FontColorG"]));
             }
             set {
                 this["FontColorG"] = value;
@@ -217,9 +277,9 @@ namespace TwitchDownloaderWPF.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
-        public int FontColorB {
+        public byte FontColorB {
             get {
-                return ((int)(this["FontColorB"]));
+                return ((byte)(this["FontColorB"]));
             }
             set {
                 this["FontColorB"] = value;
@@ -259,18 +319,6 @@ namespace TwitchDownloaderWPF.Properties {
             }
             set {
                 this["VideoCodec"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("255")]
-        public int BackgroundColorA {
-            get {
-                return ((int)(this["BackgroundColorA"]));
-            }
-            set {
-                this["BackgroundColorA"] = value;
             }
         }
         
@@ -823,6 +871,18 @@ namespace TwitchDownloaderWPF.Properties {
             }
             set {
                 this["DownloadThrottleEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AlternateMessageBackgrounds {
+            get {
+                return ((bool)(this["AlternateMessageBackgrounds"]));
+            }
+            set {
+                this["AlternateMessageBackgrounds"] = value;
             }
         }
     }
