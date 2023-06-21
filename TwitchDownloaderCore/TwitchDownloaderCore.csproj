@@ -13,14 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\gift-illustration.png" />
-    <None Remove="Resources\interbold.otf" />
-    <None Remove="Resources\interregular.otf" />
-    <None Remove="Resources\template.html" />
-    <None Remove="Resources\noto-emoji-2.038.zip" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Resources\interbold.otf" />
     <EmbeddedResource Include="Resources\interregular.otf" />
     <EmbeddedResource Include="Resources\template.html" />

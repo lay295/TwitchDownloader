@@ -1,4 +1,4 @@
-	<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
@@ -18,7 +18,6 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 	<EnableNETAnalyzers>false</EnableNETAnalyzers>
@@ -36,16 +35,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Resource Include="Images\settings.png" />
-    <Resource Include="Images\donate.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\ppOverheat.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\ppHop.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\peepoSad.png" />
   </ItemGroup>
   <ItemGroup>
@@ -58,12 +49,6 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Themes\README.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\HACKERMANS.gif" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TwitchDownloaderCore\TwitchDownloaderCore.csproj" />
