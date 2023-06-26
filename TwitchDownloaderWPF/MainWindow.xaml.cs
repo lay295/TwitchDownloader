@@ -1,5 +1,6 @@
 ﻿using AutoUpdaterDotNET;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Windows;
@@ -70,7 +71,25 @@ namespace TwitchDownloaderWPF
             }
 
             if (!File.Exists("ffmpeg.exe"))
-                await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
+            {
+                try
+                {
+                    await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
+                }
+                catch (Exception ex)
+                {
+                    if (MessageBox.Show(string.Format(Translations.Strings.UnableToDownloadFfmpegFull, "https://ffmpeg.org/download.html" , $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}ffmpeg.exe"),
+                            Translations.Strings.UnableToDownloadFfmpeg, MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
+                    {
+                        Process.Start(new ProcessStartInfo("https://ffmpeg.org/download.html") { UseShellExecute = true });
+                    }
+
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
 
             Version currentVersion = new Version("1.53.0");
             Title = $"Twitch Downloader v{currentVersion}";

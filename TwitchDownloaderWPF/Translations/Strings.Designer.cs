@@ -1671,6 +1671,24 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to download ffmpeg.
+        /// </summary>
+        public static string UnableToDownloadFfmpeg {
+            get {
+                return ResourceManager.GetString("UnableToDownloadFfmpeg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to download ffmpeg. Please manually download it from {0} and place the file at {1}.
+        /// </summary>
+        public static string UnableToDownloadFfmpegFull {
+            get {
+                return ResourceManager.GetString("UnableToDownloadFfmpegFull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to find thumbnail.
         /// </summary>
         public static string UnableToFindThumbnail {
