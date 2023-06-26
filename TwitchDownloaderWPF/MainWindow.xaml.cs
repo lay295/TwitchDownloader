@@ -78,8 +78,8 @@ namespace TwitchDownloaderWPF
                 }
                 catch (Exception ex)
                 {
-                    if (MessageBox.Show(string.Format(Translations.Strings.UnableToDownloadFfmpegFull, $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}ffmpeg.exe"),
-                            Translations.Strings.UnableToDownloadFfmpeg, MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+                    if (MessageBox.Show(string.Format(Translations.Strings.UnableToDownloadFfmpegFull, "https://ffmpeg.org/download.html" , $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}ffmpeg.exe"),
+                            Translations.Strings.UnableToDownloadFfmpeg, MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
                     {
                         Process.Start(new ProcessStartInfo("https://ffmpeg.org/download.html") { UseShellExecute = true });
                     }

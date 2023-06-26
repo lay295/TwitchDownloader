@@ -750,6 +750,6 @@
     <value>Unable to download ffmpeg</value>
   </data>
   <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
-    <value>Unable to download ffmpeg. Please manually download it from https://ffmpeg.org/download.html and place the file at {0}</value>
+    <value>Unable to download ffmpeg. Please manually download it from {0} and place the file at {1}</value>
   </data>
 </root>
