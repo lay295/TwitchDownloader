@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace TwitchDownloaderWPF.Services
 {
-    // native as in native to Windows
     public static class NativeFunctions
     {
         [DllImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute", PreserveSig = true)]

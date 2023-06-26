@@ -29,12 +29,8 @@ namespace TwitchDownloaderWPF
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            // Set the working dir to the process dir if run from sys32/syswow64
-            var processDir = Directory.GetParent(Environment.ProcessPath!)!.FullName;
-            if (Environment.CurrentDirectory != processDir)
-            {
-                Environment.CurrentDirectory = processDir;
-            }
+            // Set the working dir to the app dir in case we inherited a different working dir
+            Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
             CultureServiceSingleton = new CultureService();
             RequestCultureChange();

@@ -76,7 +76,11 @@ namespace TwitchDownloaderWPF
             Title = $"Twitch Downloader v{currentVersion}";
             AutoUpdater.InstalledVersion = currentVersion;
 #if !DEBUG
-            AutoUpdater.RunUpdateAsAdmin = false;
+            if (AppContext.BaseDirectory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
+            {
+                // If the app is in user profile, the updater probably doesn't need administrator permissions
+                AutoUpdater.RunUpdateAsAdmin = false;
+            }
             AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
 #endif
         }
