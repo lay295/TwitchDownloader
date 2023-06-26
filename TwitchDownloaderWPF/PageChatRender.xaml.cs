@@ -88,12 +88,15 @@ namespace TwitchDownloaderWPF
         public ChatRenderOptions GetOptions(string filename)
         {
             SKColor backgroundColor = new(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
+            SKColor altBackgroundColor = new(colorAlternateBackground.SelectedColor.Value.R, colorAlternateBackground.SelectedColor.Value.G, colorAlternateBackground.SelectedColor.Value.B, colorAlternateBackground.SelectedColor.Value.A);
             SKColor messageColor = new(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
             ChatRenderOptions options = new()
             {
                 OutputFile = filename,
                 InputFile = textJson.Text,
                 BackgroundColor = backgroundColor,
+                AlternateBackgroundColor = altBackgroundColor,
+                AlternateMessageBackgrounds = (bool)checkAlternateMessageBackgrounds.IsChecked,
                 ChatHeight = int.Parse(textHeight.Text),
                 ChatWidth = int.Parse(textWidth.Text),
                 BttvEmotes = (bool)checkBTTV.IsChecked,
@@ -129,6 +132,7 @@ namespace TwitchDownloaderWPF
                 SubMessages = (bool)checkSub.IsChecked,
                 ChatBadges = (bool)checkBadge.IsChecked,
                 Offline = (bool)checkOffline.IsChecked,
+                AllowUnlistedEmotes = true,
                 DisperseCommentOffsets = (bool)checkDispersion.IsChecked,
                 LogFfmpegOutput = true
             };
@@ -172,7 +176,8 @@ namespace TwitchDownloaderWPF
                 comboFont.SelectedItem = Settings.Default.Font;
                 checkOutline.IsChecked = Settings.Default.Outline;
                 checkTimestamp.IsChecked = Settings.Default.Timestamp;
-                colorBackground.SelectedColor = System.Windows.Media.Color.FromArgb((byte)Settings.Default.BackgroundColorA, (byte)Settings.Default.BackgroundColorR, (byte)Settings.Default.BackgroundColorG, (byte)Settings.Default.BackgroundColorB);
+                colorBackground.SelectedColor = System.Windows.Media.Color.FromArgb(Settings.Default.BackgroundColorA, Settings.Default.BackgroundColorR, Settings.Default.BackgroundColorG, Settings.Default.BackgroundColorB);
+                colorAlternateBackground.SelectedColor = System.Windows.Media.Color.FromArgb(Settings.Default.AlternateBackgroundColorA, Settings.Default.AlternateBackgroundColorR, Settings.Default.AlternateBackgroundColorG, Settings.Default.AlternateBackgroundColorB);
                 checkFFZ.IsChecked = Settings.Default.FFZEmotes;
                 checkBTTV.IsChecked = Settings.Default.BTTVEmotes;
                 checkSTV.IsChecked = Settings.Default.STVEmotes;
@@ -180,7 +185,7 @@ namespace TwitchDownloaderWPF
                 textWidth.Text = Settings.Default.Width.ToString();
                 numFontSize.Value = Settings.Default.FontSize;
                 textUpdateTime.Text = Settings.Default.UpdateTime.ToString("0.0#");
-                colorFont.SelectedColor = System.Windows.Media.Color.FromRgb((byte)Settings.Default.FontColorR, (byte)Settings.Default.FontColorG, (byte)Settings.Default.FontColorB);
+                colorFont.SelectedColor = System.Windows.Media.Color.FromRgb(Settings.Default.FontColorR, Settings.Default.FontColorG, Settings.Default.FontColorB);
                 textFramerate.Text = Settings.Default.Framerate.ToString();
                 checkMask.IsChecked = Settings.Default.GenerateMask;
                 CheckRenderSharpening.IsChecked = Settings.Default.ChatRenderSharpening;
@@ -201,6 +206,7 @@ namespace TwitchDownloaderWPF
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
                 checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
+                checkAlternateMessageBackgrounds.IsChecked = Settings.Default.AlternateMessageBackgrounds;
                 RadioEmojiNotoColor.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.GoogleNotoColor;
                 RadioEmojiTwemoji.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.TwitterTwemoji;
                 RadioEmojiNone.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.None;
@@ -287,6 +293,10 @@ namespace TwitchDownloaderWPF
             Settings.Default.BackgroundColorG = colorBackground.SelectedColor.Value.G;
             Settings.Default.BackgroundColorB = colorBackground.SelectedColor.Value.B;
             Settings.Default.BackgroundColorA = colorBackground.SelectedColor.Value.A;
+            Settings.Default.AlternateBackgroundColorR = colorAlternateBackground.SelectedColor.Value.R;
+            Settings.Default.AlternateBackgroundColorG = colorAlternateBackground.SelectedColor.Value.G;
+            Settings.Default.AlternateBackgroundColorB = colorAlternateBackground.SelectedColor.Value.B;
+            Settings.Default.AlternateBackgroundColorA = colorAlternateBackground.SelectedColor.Value.A;
             Settings.Default.FFZEmotes = (bool)checkFFZ.IsChecked;
             Settings.Default.BTTVEmotes = (bool)checkBTTV.IsChecked;
             Settings.Default.STVEmotes = (bool)checkSTV.IsChecked;
@@ -299,6 +309,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.ChatBadges = (bool)checkBadge.IsChecked;
             Settings.Default.Offline = (bool)checkOffline.IsChecked;
             Settings.Default.DisperseCommentOffsets = (bool)checkDispersion.IsChecked;
+            Settings.Default.AlternateMessageBackgrounds = (bool)checkAlternateMessageBackgrounds.IsChecked;
             if (comboFormat.SelectedItem != null)
             {
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
@@ -387,7 +398,7 @@ namespace TwitchDownloaderWPF
                 return false;
             }
 
-            if (checkMask.IsChecked == false && colorBackground.SelectedColor!.Value.A < 255)
+            if (checkMask.IsChecked == false && (colorBackground.SelectedColor!.Value.A < 255 || ((bool)checkAlternateMessageBackgrounds.IsChecked! && colorAlternateBackground.SelectedColor!.Value.A < 255)))
             {
                 if (((VideoContainer)comboFormat.SelectedItem).Name is not "MOV" and not "WEBM" ||
                     ((Codec)comboCodec.SelectedItem).Name is not "RLE" and not "ProRes" and not "VP8" and not "VP9")
@@ -397,7 +408,7 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            if (checkMask.IsChecked == true && colorBackground.SelectedColor!.Value.A == 255)
+            if (checkMask.IsChecked == true && colorBackground.SelectedColor!.Value.A == 255 && !((bool)checkAlternateMessageBackgrounds.IsChecked! && colorAlternateBackground.SelectedColor!.Value.A != 255))
             {
                 AppendLog(Translations.Strings.ErrorLog + Translations.Strings.MaskWithNoAlpha);
                 return false;

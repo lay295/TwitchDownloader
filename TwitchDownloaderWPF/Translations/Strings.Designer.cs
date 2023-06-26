@@ -87,6 +87,33 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Alt Background Color:.
+        /// </summary>
+        public static string AlternateBackgroundColor {
+            get {
+                return ResourceManager.GetString("AlternateBackgroundColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alternate Backgrounds .
+        /// </summary>
+        public static string AlternateMessageBackgrounds {
+            get {
+                return ResourceManager.GetString("AlternateMessageBackgrounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alternates the background color of every other chat message to help tell them apart..
+        /// </summary>
+        public static string AlternateMessageBackgroundsTooltip {
+            get {
+                return ResourceManager.GetString("AlternateMessageBackgroundsTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Language .
         /// </summary>
         public static string ApplicationLanguage {

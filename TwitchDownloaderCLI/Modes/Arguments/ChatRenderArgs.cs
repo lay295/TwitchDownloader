@@ -12,10 +12,13 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('o', "output", Required = true, HelpText = "File the program will output to.")]
         public string OutputFile { get; set; }
 
-        [Option("background-color", Default = "#111111", HelpText = "Color of background in HEX string format.")]
+        [Option("background-color", Default = "#111111", HelpText = "The render background color in the string format of '#RRGGBB' or '#AARRGGBB' in hexadecimal.")]
         public string BackgroundColor { get; set; }
 
-        [Option("message-color", Default = "#ffffff", HelpText = "Color of messages in HEX string format.")]
+        [Option("alt-background-color", Default = "#191919", HelpText = "The alternate message background color in the string format of '#RRGGBB' or '#AARRGGBB' in hexadecimal. Requires --alternate-backgrounds")]
+        public string AlternateBackgroundColor { get; set; }
+
+        [Option("message-color", Default = "#ffffff", HelpText = "The message text color in the string format of '#RRGGBB' or '#AARRGGBB' in hexadecimal.")]
         public string MessageColor { get; set; }
 
         [Option('w', "chat-width", Default = 350, HelpText = "Width of chat render.")]
@@ -97,7 +100,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public int BadgeFilterMask { get; set; }
 
         [Option("dispersion", Default = false, HelpText = "In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.")]
-        public bool? DisperseCommentOffsets { get; set; }
+        public bool DisperseCommentOffsets { get; set; }
+
+        [Option("alternate-backgrounds", Default = false, HelpText = "Alternates the background color of every other chat message to help tell them apart.")]
+        public bool AlternateMessageBackgrounds { get; set; }
 
         [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, and bits from the input json.")]
         public bool Offline { get; set; }

@@ -35,22 +35,37 @@
     <Setting Name="STVEmotes" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="BackgroundColorR" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">17</Value>
-    </Setting>
-    <Setting Name="BackgroundColorG" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">17</Value>
-    </Setting>
-    <Setting Name="BackgroundColorB" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">17</Value>
-    </Setting>
-    <Setting Name="FontColorR" Type="System.Int32" Scope="User">
+    <Setting Name="BackgroundColorA" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">255</Value>
     </Setting>
-    <Setting Name="FontColorG" Type="System.Int32" Scope="User">
+    <Setting Name="BackgroundColorR" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">17</Value>
+    </Setting>
+    <Setting Name="BackgroundColorG" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">17</Value>
+    </Setting>
+    <Setting Name="BackgroundColorB" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">17</Value>
+    </Setting>
+    <Setting Name="AlternateBackgroundColorA" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">255</Value>
     </Setting>
-    <Setting Name="FontColorB" Type="System.Int32" Scope="User">
+    <Setting Name="AlternateBackgroundColorR" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">19</Value>
+    </Setting>
+    <Setting Name="AlternateBackgroundColorG" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">19</Value>
+    </Setting>
+    <Setting Name="AlternateBackgroundColorB" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">19</Value>
+    </Setting>
+    <Setting Name="FontColorR" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">255</Value>
+    </Setting>
+    <Setting Name="FontColorG" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">255</Value>
+    </Setting>
+    <Setting Name="FontColorB" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">255</Value>
     </Setting>
     <Setting Name="Framerate" Type="System.Int32" Scope="User">
@@ -61,9 +76,6 @@
     </Setting>
     <Setting Name="VideoCodec" Type="System.String" Scope="User">
       <Value Profile="(Default)">H264</Value>
-    </Setting>
-    <Setting Name="BackgroundColorA" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">255</Value>
     </Setting>
     <Setting Name="OAuth" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -201,6 +213,9 @@
       <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="DownloadThrottleEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="AlternateMessageBackgrounds" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

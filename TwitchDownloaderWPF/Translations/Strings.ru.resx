@@ -738,4 +738,7 @@
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
     <value>crop_start_custom and crop_end_custom форматирование основанно на</value>
   </data>
+  <data name="AlternateMessageBackgrounds" xml:space="preserve">
+    <value>Alternate Backgrounds </value><comment>Leave a trailing space</comment>
+  </data>
 </root>
