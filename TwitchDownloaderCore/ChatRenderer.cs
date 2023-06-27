@@ -1106,22 +1106,11 @@ namespace TwitchDownloaderCore
 
                 if (renderOptions.Outline)
                 {
-                    SKPath outlinePath;
-                    if (isRtl)
-                    {
-                        // There is currently an issue with SKPath.GetTextPath where RTL is not respected so we need to reverse the drawText
-                        var reversedText = drawText.ToCharArray();
-                        new Span<char>(reversedText).Reverse();
-
-                        outlinePath = textFont.GetTextPath(reversedText, drawPos.X, drawPos.Y);
-                    }
-                    else
-                    {
-                        outlinePath = textFont.GetTextPath(drawText, drawPos.X, drawPos.Y);
-                    }
+                    using var outlinePath = isRtl
+                        ? GetShapedPath(textFont, drawText, drawPos.X, drawPos.Y)
+                        : textFont.GetTextPath(drawText, drawPos.X, drawPos.Y);
 
                     sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
-                    outlinePath.Dispose();
                 }
 
                 if (rtlRegex.IsMatch(drawText))
@@ -1198,6 +1187,45 @@ namespace TwitchDownloaderCore
             using SKShaper messageShape = new SKShaper(textFont.Typeface);
             SKShaper.Result measure = messageShape.Shape(rtlText, textFont);
             return measure.Width;
+        }
+
+        // Heavily modified from SkiaSharp.HarfBuzz.CanvasExtensions.DrawShapedText
+        private static SKPath GetShapedPath(SKPaint paint, string text, float x, float y)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return new SKPath();
+            if (paint == null)
+                throw new ArgumentNullException(nameof(paint));
+
+            using var font = paint.ToFont();
+            using var shaper = new SKShaper(paint.Typeface);
+            var result = shaper.Shape(text, x, y, paint);
+            var glyphSpan = result.Codepoints.AsSpan();
+            var positionSpan = result.Points.AsSpan();
+
+            var x1 = 0.0f;
+            if (paint.TextAlign != SKTextAlign.Left)
+            {
+                var width = result.Width;
+                if (paint.TextAlign == SKTextAlign.Center)
+                    width *= 0.5f;
+                x1 -= width;
+            }
+
+            var returnPath = new SKPath();
+            for (var i = 0; i < positionSpan.Length; i++)
+            {
+                var point = positionSpan[i];
+                using var glyphPath = font.GetGlyphPath((ushort)glyphSpan[i]);
+                glyphPath.Transform(new SKMatrix(
+                    1, 0, x1 + point.X,
+                    0, 1, point.Y,
+                    0, 0, 1
+                ));
+                returnPath.AddPath(glyphPath);
+            }
+
+            return returnPath;
         }
 
         private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, string colorOverride = null)
