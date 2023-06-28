@@ -264,10 +264,10 @@ namespace TwitchDownloaderWPF
 
         private static long EstimateVideoSizeBytes(int bandwidth, TimeSpan startTime, TimeSpan endTime)
         {
-            if (bandwidth == 0)
-            {
+            if (bandwidth < 1)
                 return 0;
-            }
+            if (endTime < startTime)
+                return 0;
 
             var totalTime = endTime - startTime;
             return (long)(bandwidth / 8d * totalTime.TotalSeconds);
@@ -296,7 +296,9 @@ namespace TwitchDownloaderWPF
             image.UriSource = new Uri(imageUri, UriKind.Relative);
             image.EndInit();
             if (isGif)
+            {
                 ImageBehavior.SetAnimatedSource(statusImage, image);
+            }
             else
             {
                 ImageBehavior.SetAnimatedSource(statusImage, null);

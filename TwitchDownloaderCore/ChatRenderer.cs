@@ -1107,7 +1107,7 @@ namespace TwitchDownloaderCore
                 if (renderOptions.Outline)
                 {
                     using var outlinePath = isRtl
-                        ? GetShapedPath(textFont, drawText, drawPos.X, drawPos.Y)
+                        ? GetShapedTextPath(textFont, drawText, drawPos.X, drawPos.Y)
                         : textFont.GetTextPath(drawText, drawPos.X, drawPos.Y);
 
                     sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
@@ -1190,7 +1190,7 @@ namespace TwitchDownloaderCore
         }
 
         // Heavily modified from SkiaSharp.HarfBuzz.CanvasExtensions.DrawShapedText
-        private static SKPath GetShapedPath(SKPaint paint, string text, float x, float y)
+        private static SKPath GetShapedTextPath(SKPaint paint, string text, float x, float y)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return new SKPath();
@@ -1200,25 +1200,29 @@ namespace TwitchDownloaderCore
             using var font = paint.ToFont();
             using var shaper = new SKShaper(paint.Typeface);
             var result = shaper.Shape(text, x, y, paint);
-            var glyphSpan = result.Codepoints.AsSpan();
-            var positionSpan = result.Points.AsSpan();
 
-            var x1 = 0.0f;
+            var glyphSpan = result.Codepoints.AsSpan();
+            var pointSpan = result.Points.AsSpan();
+
+            var xOffset = 0.0f;
             if (paint.TextAlign != SKTextAlign.Left)
             {
                 var width = result.Width;
                 if (paint.TextAlign == SKTextAlign.Center)
                     width *= 0.5f;
-                x1 -= width;
+                xOffset -= width;
             }
 
             var returnPath = new SKPath();
-            for (var i = 0; i < positionSpan.Length; i++)
+            for (var i = 0; i < pointSpan.Length; i++)
             {
-                var point = positionSpan[i];
                 using var glyphPath = font.GetGlyphPath((ushort)glyphSpan[i]);
+                if (glyphPath.IsEmpty)
+                    continue;
+
+                var point = pointSpan[i];
                 glyphPath.Transform(new SKMatrix(
-                    1, 0, x1 + point.X,
+                    1, 0, point.X + xOffset,
                     0, 1, point.Y,
                     0, 0, 1
                 ));
