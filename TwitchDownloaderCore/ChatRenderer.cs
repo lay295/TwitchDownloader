@@ -1335,32 +1335,32 @@ namespace TwitchDownloaderCore
         {
             List<(SKBitmap, ChatBadgeType)> returnList = new List<(SKBitmap, ChatBadgeType)>();
 
-            if (comment.message.user_badges != null)
+            if (comment.message.user_badges == null)
+                return returnList;
+
+            foreach (var badge in comment.message.user_badges)
             {
-                foreach (var badge in comment.message.user_badges)
+                bool foundBadge = false;
+                string id = badge._id;
+                string version = badge.version;
+
+                foreach (var cachedBadge in badgeList)
                 {
-                    bool foundBadge = false;
-                    string id = badge._id.ToString();
-                    string version = badge.version.ToString();
+                    if (cachedBadge.Name != id)
+                        continue;
 
-                    foreach (var cachedBadge in badgeList)
+                    foreach (var cachedVersion in cachedBadge.Versions)
                     {
-                        if (cachedBadge.Name != id)
-                            continue;
-
-                        foreach (var cachedVersion in cachedBadge.Versions)
+                        if (cachedVersion.Key == version)
                         {
-                            if (cachedVersion.Key == version)
-                            {
-                                returnList.Add((cachedVersion.Value, cachedBadge.Type));
-                                foundBadge = true;
-                                break;
-                            }
-                        }
-
-                        if (foundBadge)
+                            returnList.Add((cachedVersion.Value, cachedBadge.Type));
+                            foundBadge = true;
                             break;
+                        }
                     }
+
+                    if (foundBadge)
+                        break;
                 }
             }
 

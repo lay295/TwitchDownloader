@@ -882,7 +882,7 @@ namespace TwitchDownloaderCore
                     using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     byte[] bytes = new byte[stream.Length];
                     stream.Seek(0, SeekOrigin.Begin);
-                    await stream.ReadAsync(bytes, cancellationToken);
+                    _ = await stream.ReadAsync(bytes, cancellationToken);
 
                     //Check if image file is not corrupt
                     if (bytes.Length > 0)
