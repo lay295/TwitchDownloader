@@ -91,7 +91,7 @@ namespace TwitchDownloaderCore
             }
 
             // Rough estimation of the width of a single block art character
-            renderOptions.BlockArtCharWidth = GetFallbackFont('█', renderOptions).MeasureText("█");
+            renderOptions.BlockArtCharWidth = GetFallbackFont('█').MeasureText("█");
 
             BannedWordRegexes = new Regex[renderOptions.BannedWordsArray.Length];
             for (int i = 0; i < renderOptions.BannedWordsArray.Length; i++)
@@ -946,7 +946,7 @@ namespace TwitchDownloaderCore
                     }
                     if (nonFontBuffer.Length > 0)
                     {
-                        using SKPaint nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
+                        using SKPaint nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0]).Clone();
                         nonFontFallbackFont.Color = renderOptions.MessageColor;
                         DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                         nonFontBuffer.Clear();
@@ -955,7 +955,7 @@ namespace TwitchDownloaderCore
                     //Don't attempt to draw U+E0000
                     if (utf32Char != 0xE0000)
                     {
-                        using SKPaint highSurrogateFallbackFont = GetFallbackFont(utf32Char, renderOptions).Clone();
+                        using SKPaint highSurrogateFallbackFont = GetFallbackFont(utf32Char).Clone();
                         highSurrogateFallbackFont.Color = renderOptions.MessageColor;
                         DrawText(fragmentSpan.Slice(j, 2).ToString(), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                     }
@@ -975,7 +975,7 @@ namespace TwitchDownloaderCore
                 {
                     if (nonFontBuffer.Length > 0)
                     {
-                        using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
+                        using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0]).Clone();
                         fallbackFont.Color = renderOptions.MessageColor;
                         DrawText(nonFontBuffer.ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                         nonFontBuffer.Clear();
@@ -987,7 +987,7 @@ namespace TwitchDownloaderCore
             // Only one or the other should occur
             if (nonFontBuffer.Length > 0)
             {
-                using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0], renderOptions).Clone();
+                using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0]).Clone();
                 fallbackFont.Color = renderOptions.MessageColor;
                 DrawText(nonFontBuffer.ToString(), fallbackFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
                 nonFontBuffer.Clear();
@@ -1269,14 +1269,13 @@ namespace TwitchDownloaderCore
             if (colorOverride is null)
                 userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor, renderOptions);
 
-            SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
-                ? GetFallbackFont(comment.commenter.display_name.Where(IsNotAscii).First(), renderOptions).Clone()
+            using SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
+                ? GetFallbackFont(comment.commenter.display_name.First(IsNotAscii)).Clone()
                 : nameFont.Clone();
 
             userPaint.Color = userColor;
             string userName = comment.commenter.display_name + (appendColon ? ":" : "");
             DrawText(userName, userPaint, true, sectionImages, ref drawPos, defaultPos, false);
-            userPaint.Dispose();
         }
 
         private static SKColor GenerateUserColor(SKColor userColor, SKColor background_color, ChatRenderOptions renderOptions)
@@ -1540,7 +1539,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        public SKPaint GetFallbackFont(int input, ChatRenderOptions renderOptions)
+        private SKPaint GetFallbackFont(int input)
         {
             ref var fallbackPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(fallbackFontCache, input, out bool alreadyExists);
             if (alreadyExists)
