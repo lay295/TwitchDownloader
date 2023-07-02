@@ -8,12 +8,14 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
@@ -1077,12 +1079,12 @@ namespace TwitchDownloaderCore
 
             while (!noWrap && textWidth > effectiveChatWidth)
             {
-                string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, new char[] { '?', '-' });
+                string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, new[] { '?', '-' }).ToString();
                 var overrideWrap = false;
 
                 if (newDrawText.Length == 0)
                 {
-                    // When chat width and font size are small enough, 1 character can be wider than effectiveChatWidth.
+                    // When chat width is small enough and font size is big enough, 1 character can be wider than effectiveChatWidth.
                     overrideWrap = true;
                     newDrawText = drawText[..1];
                 }
@@ -1130,76 +1132,103 @@ namespace TwitchDownloaderCore
         /// Produces a <see langword="string"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/> OR substringed to the last index of any character in <paramref name="delimiters"/>.
         /// </summary>
         /// <returns>A shortened in visual width or delimited <see langword="string"/>, whichever comes first.</returns>
-        private static string SubstringToTextWidth(string text, SKPaint textFont, int maxWidth, bool isRtl, char[] delimiters)
+        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, char[] delimiters)
         {
-            ReadOnlySpan<char> inputText = text.AsSpan();
+            // If we are dealing with non-RTL and don't have any delimiters then SKPaint.BreakText is over
+            if (!isRtl && text.IndexOfAny(delimiters) == -1)
+            {
+                return SubstringToTextWidth(text, textFont, maxWidth);
+            }
 
-            // input text was already less than max width
-            if (MeasureText(inputText, textFont, isRtl) <= maxWidth)
+            using var shaper = isRtl
+                ? new SKShaper(textFont.Typeface)
+                : null;
+
+            // Input text was already less than max width
+            if (MeasureText(text, textFont, isRtl, shaper) <= maxWidth)
             {
                 return text;
             }
 
             // Cut in half until <= width
-            int length = inputText.Length;
+            var length = text.Length;
             do
             {
                 length /= 2;
             }
-            while (MeasureText(inputText.Slice(0, length), textFont, isRtl) > maxWidth);
+            while (MeasureText(text[..length], textFont, isRtl, shaper) > maxWidth);
 
             // Add chars until greater than width, then remove the last
             do
             {
                 length++;
-            } while (MeasureText(inputText.Slice(0, length), textFont, isRtl) < maxWidth);
-            inputText = inputText.Slice(0, length - 1);
+            } while (MeasureText(text[..length], textFont, isRtl, shaper) < maxWidth);
+            text = text[..(length - 1)];
 
             // Cut at the last delimiter character if applicable
-            int delimiterIndex = inputText.LastIndexOfAny(delimiters);
+            var delimiterIndex = text.LastIndexOfAny(delimiters);
             if (delimiterIndex != -1)
             {
-                return inputText.Slice(0, delimiterIndex + 1).ToString();
+                return text[..(delimiterIndex + 1)];
             }
 
-            return inputText.ToString();
+            return text;
         }
 
-        private static float MeasureText(ReadOnlySpan<char> text, SKPaint textFont, bool? isRtl = null)
+        /// <summary>
+        /// Produces a <see langword="ReadOnlySpan"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/>
+        /// </summary>
+        /// <returns>A shortened in visual width <see langword="ReadOnlySpan"/>.</returns>
+        /// <remarks>This is not compatible with text that needs to be shaped.</remarks>
+        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth)
         {
-            isRtl ??= IsRightToLeft(text[0].ToString());
+            var length = (int)textFont.BreakText(text, maxWidth);
+            return text[..length];
+        }
+
+        private static float MeasureText(ReadOnlySpan<char> text, SKPaint textFont, bool? isRtl = null, SKShaper shaper = null)
+        {
+            isRtl ??= IsRightToLeft(text);
 
             if (isRtl == false)
             {
                 return textFont.MeasureText(text);
             }
-            else
+
+            if (shaper == null)
             {
                 return MeasureRtlText(text, textFont);
             }
+
+            return MeasureRtlText(text, textFont, shaper);
         }
 
         private static float MeasureRtlText(ReadOnlySpan<char> rtlText, SKPaint textFont)
-            => MeasureRtlText(rtlText.ToString(), textFont);
-
-        private static float MeasureRtlText(string rtlText, SKPaint textFont)
         {
-            using SKShaper messageShape = new SKShaper(textFont.Typeface);
-            SKShaper.Result measure = messageShape.Shape(rtlText, textFont);
+            using var shaper = new SKShaper(textFont.Typeface);
+            return MeasureRtlText(rtlText, textFont, shaper);
+        }
+
+        private static float MeasureRtlText(ReadOnlySpan<char> rtlText, SKPaint textFont, SKShaper shaper)
+        {
+            using var buffer = new HarfBuzzSharp.Buffer();
+            buffer.Add(rtlText, textFont.TextEncoding);
+            SKShaper.Result measure = shaper.Shape(buffer, textFont);
             return measure.Width;
         }
 
         // Heavily modified from SkiaSharp.HarfBuzz.CanvasExtensions.DrawShapedText
-        private static SKPath GetShapedTextPath(SKPaint paint, string text, float x, float y)
+        private static SKPath GetShapedTextPath(SKPaint paint, ReadOnlySpan<char> text, float x, float y)
         {
-            if (string.IsNullOrWhiteSpace(text))
-                return new SKPath();
-            if (paint == null)
-                throw new ArgumentNullException(nameof(paint));
+            var returnPath = new SKPath();
 
-            using var font = paint.ToFont();
+            if (text.IsEmpty || text.IsWhiteSpace())
+                return returnPath;
+
             using var shaper = new SKShaper(paint.Typeface);
-            var result = shaper.Shape(text, x, y, paint);
+            using var buffer = new HarfBuzzSharp.Buffer();
+            buffer.Add(text, paint.TextEncoding);
+            var result = shaper.Shape(buffer, x, y, paint);
 
             var glyphSpan = result.Codepoints.AsSpan();
             var pointSpan = result.Points.AsSpan();
@@ -1213,7 +1242,9 @@ namespace TwitchDownloaderCore
                 xOffset -= width;
             }
 
-            var returnPath = new SKPath();
+            // We cannot dispose because it is a reference, not a clone.
+            var getFont = typeof(SKPaint).GetMethod("GetFont", BindingFlags.NonPublic | BindingFlags.Instance)!;
+            var font = (SKFont)getFont.Invoke(paint, Array.Empty<object>())!;
             for (var i = 0; i < pointSpan.Length; i++)
             {
                 using var glyphPath = font.GetGlyphPath((ushort)glyphSpan[i]);
@@ -1563,7 +1594,7 @@ namespace TwitchDownloaderCore
             return finalWords.AsEnumerable();
         }
 
-        private static bool IsRightToLeft(string message)
+        private static bool IsRightToLeft(ReadOnlySpan<char> message)
         {
             if (message.Length > 0)
             {
