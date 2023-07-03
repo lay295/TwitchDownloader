@@ -101,17 +101,18 @@ namespace TwitchDownloaderCore.Tools
             return HighlightType.None;
         }
 
-        /// <returns>A copy of the requested icon or null if no icon exists for the highlight type</returns>
+        /// <returns>A the requested icon or null if no icon exists for the highlight type</returns>
+        /// <remarks>The icon returned is NOT a copy and should not be manually disposed.</remarks>
         public SKBitmap GetHighlightIcon(HighlightType highlightType, string purple, SKColor textColor, double fontSize)
         {
-            // Return a copy of the needed icon from cache or generate if null
+            // Return the needed icon from cache or generate if null
             return highlightType switch
             {
-                HighlightType.SubscribedTier => _subscribedTierIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.SubscribedPrime => _subscribedPrimeIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.GiftedSingle => _giftSingleIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.GiftedMany => _giftManyIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.GiftedAnonymous => _giftAnonymousIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
+                HighlightType.SubscribedTier => _subscribedTierIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
+                HighlightType.SubscribedPrime => _subscribedPrimeIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
+                HighlightType.GiftedSingle => _giftSingleIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
+                HighlightType.GiftedMany => _giftManyIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
+                HighlightType.GiftedAnonymous => _giftAnonymousIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
                 _ => null
             };
         }
@@ -123,23 +124,23 @@ namespace TwitchDownloaderCore.Tools
                 ? GenerateGiftedManyIcon(fontSize, _cachePath)
                 : GenerateSvgIcon(highlightType, purple, textColor, fontSize);
 
-            // Cache a copy of the icon
+            // Cache the icon
             switch (highlightType)
             {
                 case HighlightType.SubscribedTier:
-                    _subscribedTierIcon = returnBitmap.Copy();
+                    _subscribedTierIcon = returnBitmap;
                     break;
                 case HighlightType.SubscribedPrime:
-                    _subscribedPrimeIcon = returnBitmap.Copy();
+                    _subscribedPrimeIcon = returnBitmap;
                     break;
                 case HighlightType.GiftedSingle:
-                    _giftSingleIcon = returnBitmap.Copy();
+                    _giftSingleIcon = returnBitmap;
                     break;
                 case HighlightType.GiftedMany:
-                    _giftManyIcon = returnBitmap.Copy();
+                    _giftManyIcon = returnBitmap;
                     break;
                 case HighlightType.GiftedAnonymous:
-                    _giftAnonymousIcon = returnBitmap.Copy();
+                    _giftAnonymousIcon = returnBitmap;
                     break;
                 default:
                     throw new NotSupportedException("This should not be possible.");

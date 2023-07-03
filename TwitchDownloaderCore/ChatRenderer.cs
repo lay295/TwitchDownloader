@@ -669,12 +669,12 @@ namespace TwitchDownloaderCore
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
 
-            using var highlightIcon = highlightIcons.GetHighlightIcon(highlightType, PURPLE, messageFont.Color, renderOptions.FontSize);
+            var highlightIcon = highlightIcons.GetHighlightIcon(highlightType, PURPLE, messageFont.Color, renderOptions.FontSize);
 
             Point iconPoint = new()
             {
                 X = drawPos.X,
-                Y = (int)((renderOptions.SectionHeight - (highlightIcon?.Height ?? 0)) / 2.0)
+                Y = (int)((renderOptions.SectionHeight - highlightIcon?.Height) / 2.0 ?? 0)
             };
 
             switch (highlightType)
