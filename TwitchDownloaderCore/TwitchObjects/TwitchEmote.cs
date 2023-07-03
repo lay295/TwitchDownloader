@@ -14,8 +14,9 @@ namespace TwitchDownloaderCore.TwitchObjects
     }
 
     [DebuggerDisplay("{Name}")]
-    public class TwitchEmote
+    public sealed class TwitchEmote : IDisposable
     {
+        public bool Disposed { get; private set; } = false;
         public SKCodec Codec { get; set; }
         public byte[] ImageData { get; set; }
         public EmoteProvider EmoteProvider { get; set; }
@@ -107,5 +108,39 @@ namespace TwitchDownloaderCore.TwitchObjects
                 EmoteFrames[i] = newBitmap;
             }
         }
+
+#region ImplementIDisposable
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        private void Dispose(bool isDisposing)
+        {
+            try
+            {
+                if (Disposed)
+                {
+                    return;
+                }
+
+                if (isDisposing)
+                {
+                    foreach (var bitmap in EmoteFrames)
+                    {
+                        bitmap?.Dispose();
+                    }
+
+                    Codec?.Dispose();
+                }
+            }
+            finally
+            {
+                Disposed = true;
+            }
+        }
+
+#endregion
     }
 }

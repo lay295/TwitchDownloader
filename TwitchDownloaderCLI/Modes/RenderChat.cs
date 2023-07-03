@@ -20,7 +20,7 @@ namespace TwitchDownloaderCLI.Modes
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
 
             var renderOptions = GetRenderOptions(inputOptions);
-            ChatRenderer chatRenderer = new(renderOptions, progress);
+            using ChatRenderer chatRenderer = new(renderOptions, progress);
             chatRenderer.ParseJsonAsync().Wait();
             chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
         }

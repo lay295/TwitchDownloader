@@ -22,8 +22,9 @@ using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
 {
-    public sealed class ChatRenderer
+    public sealed class ChatRenderer : IDisposable
     {
+        public bool Disposed { get; private set; } = false;
         public ChatRoot chatRoot { get; private set; } = new ChatRoot();
 
         private const string PURPLE = "#7b2cf2";
@@ -52,6 +53,7 @@ namespace TwitchDownloaderCore
         private SKPaint messageFont = new SKPaint();
         private SKPaint nameFont = new SKPaint();
         private SKPaint outlinePaint = new SKPaint();
+        private readonly HighlightIcons highlightIcons = null;
 
         public ChatRenderer(ChatRenderOptions chatRenderOptions, IProgress<ProgressReport> progress)
         {
@@ -62,6 +64,7 @@ namespace TwitchDownloaderCore
             renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize - renderOptions.SidePadding * 2;
             renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
             _progress = progress;
+            highlightIcons = new HighlightIcons(renderOptions.TempFolder);
         }
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
@@ -265,22 +268,20 @@ namespace TwitchDownloaderCore
             messageFont.MeasureText("ABC123", ref sampleTextBounds);
             int sectionDefaultYPos = (int)(((renderOptions.SectionHeight - sampleTextBounds.Height) / 2.0) + sampleTextBounds.Height);
 
-            using var highlightIcons = new HighlightMessage(renderOptions.TempFolder);
-
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    latestUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, highlightIcons, latestUpdate);
+                    latestUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, latestUpdate);
                 }
 
                 SKBitmap frame = null;
                 bool isCopyFrame = false;
                 try
                 {
-                    (frame, isCopyFrame) = GetFrameFromTick(currentTick, sectionDefaultYPos, highlightIcons, latestUpdate);
+                    (frame, isCopyFrame) = GetFrameFromTick(currentTick, sectionDefaultYPos, latestUpdate);
 
                     if (!renderOptions.SkipDriveWaiting)
                         DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
@@ -407,9 +408,9 @@ namespace TwitchDownloaderCore
             return new FfmpegProcess(process, savePath);
         }
 
-        private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int sectionDefaultYPos, HighlightMessage highlightIcons, UpdateFrame currentFrame = null)
+        private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
         {
-            currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos, highlightIcons);
+            currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos);
             var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
             return (frame, isCopyFrame);
         }
@@ -467,7 +468,7 @@ namespace TwitchDownloaderCore
             return (newFrame, true);
         }
 
-        private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, HighlightMessage highlightIcons, UpdateFrame lastUpdate = null)
+        private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
         {
             SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
             double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
@@ -493,7 +494,7 @@ namespace TwitchDownloaderCore
 
                 do
                 {
-                    CommentSection comment = GenerateCommentSection(currentIndex, sectionDefaultYPos, highlightIcons);
+                    CommentSection comment = GenerateCommentSection(currentIndex, sectionDefaultYPos);
                     if (comment != null)
                     {
                         commentList.Add(comment);
@@ -547,7 +548,7 @@ namespace TwitchDownloaderCore
             return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
         }
 
-        private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos, HighlightMessage highlightIcons)
+        private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos)
         {
             CommentSection newSection = new CommentSection();
             List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
@@ -582,7 +583,7 @@ namespace TwitchDownloaderCore
 
             if (highlightType is HighlightType.None)
             {
-                highlightType = HighlightMessage.GetHighlightType(comment);
+                highlightType = HighlightIcons.GetHighlightType(comment);
             }
 
             if (highlightType is not HighlightType.None)
@@ -592,7 +593,7 @@ namespace TwitchDownloaderCore
                     return null;
                 }
 
-                DrawAccentedMessage(comment, sectionImages, emoteSectionList, highlightType, highlightIcons, ref drawPos, defaultPos);
+                DrawAccentedMessage(comment, sectionImages, emoteSectionList, highlightType, ref drawPos, defaultPos);
             }
             else
             {
@@ -663,7 +664,7 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, highlightWords, ref drawPos, defaultPos);
         }
 
-        private void DrawAccentedMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, HighlightMessage highlightIcons, ref Point drawPos, Point defaultPos)
+        private void DrawAccentedMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, ref Point drawPos, Point defaultPos)
         {
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
@@ -722,7 +723,7 @@ namespace TwitchDownloaderCore
                 comment.message.fragments[0].text = comment.message.fragments[0].text[(comment.commenter.display_name.Length + 1)..];
             }
 
-            var (resubMessage, customResubMessage) = HighlightMessage.SplitSubComment(comment);
+            var (resubMessage, customResubMessage) = HighlightIcons.SplitSubComment(comment);
             DrawMessage(resubMessage, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
 
             // Return if there is no custom resub message to draw
@@ -1603,19 +1604,66 @@ namespace TwitchDownloaderCore
             return chatRoot;
         }
 
-        ~ChatRenderer()
+
+#region ImplementIDisposable
+
+        public void Dispose()
         {
-            chatRoot = null;
-            badgeList = null;
-            emoteList = null;
-            emoteThirdList = null;
-            cheermotesList = null;
-            emojiCache = null;
-            fallbackFontCache = null;
-            fontManager.Dispose();
-            outlinePaint.Dispose();
-            nameFont.Dispose();
-            messageFont.Dispose();
+            Dispose(true);
         }
+
+        private void Dispose(bool isDisposing)
+        {
+            try
+            {
+                if (Disposed)
+                {
+                    return;
+                }
+
+                if (isDisposing)
+                {
+                    foreach (var badge in badgeList)
+                        badge?.Dispose();
+                    foreach (var emote in emoteList)
+                        emote?.Dispose();
+                    foreach (var emote in emoteThirdList)
+                        emote?.Dispose();
+                    foreach (var cheerEmote in cheermotesList)
+                        cheerEmote?.Dispose();
+                    foreach (var (_, bitmap) in emojiCache)
+                        bitmap?.Dispose();
+                    foreach (var (_, paint) in fallbackFontCache)
+                        paint?.Dispose();
+                    fontManager?.Dispose();
+                    nameFont?.Dispose();
+                    messageFont?.Dispose();
+                    outlinePaint?.Dispose();
+                    highlightIcons?.Dispose();
+
+                    badgeList.Clear();
+                    emoteList.Clear();
+                    emoteThirdList.Clear();
+                    cheermotesList.Clear();
+                    emojiCache.Clear();
+                    fallbackFontCache.Clear();
+
+                    // Set the root references to null to explicitly tell the garbage collector that the resources have been disposed
+                    chatRoot = null;
+                    badgeList = null;
+                    emoteList = null;
+                    emoteThirdList = null;
+                    cheermotesList = null;
+                    emojiCache = null;
+                    fallbackFontCache = null;
+                }
+            }
+            finally
+            {
+                Disposed = true;
+            }
+        }
+
+#endregion
     }
 }

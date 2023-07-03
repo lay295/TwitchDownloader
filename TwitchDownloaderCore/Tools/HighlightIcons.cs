@@ -20,9 +20,9 @@ namespace TwitchDownloaderCore.Tools
         Unknown
     }
 
-    public class HighlightMessage : IDisposable
+    public sealed class HighlightIcons : IDisposable
     {
-        public bool Disposed = false;
+        public bool Disposed { get; private set; } = false;
 
         private const string SUBSCRIBED_TIER_ICON_SVG = "m 32.599229,13.144498 c 1.307494,-2.80819 5.494049,-2.80819 6.80154,0 l 5.648628,12.140919 13.52579,1.877494 c 3.00144,0.418654 4.244522,3.893468 2.138363,5.967405 -3.357829,3.309501 -6.715662,6.618992 -10.073491,9.928491 L 53.07148,56.81637 c 0.524928,2.962772 -2.821092,5.162303 -5.545572,3.645496 L 36,54.043603 24.474093,60.461866 C 21.749613,61.975455 18.403591,59.779142 18.92852,56.81637 L 21.359942,43.058807 11.286449,33.130316 c -2.1061588,-2.073937 -0.863074,-5.548751 2.138363,-5.967405 l 13.52579,-1.877494 z";
         private const string SUBSCRIBED_PRIME_ICON_SVG = "m 61.894653,21.663055 v 25.89488 c 0,3.575336 -2.898361,6.47372 -6.473664,6.47372 H 16.57901 c -3.573827,-0.0036 -6.470094,-2.89986 -6.473663,-6.47372 V 21.663055 L 23.052674,31.373635 36,18.426194 c 4.315772,4.315816 8.631553,8.631629 12.947323,12.947441 z";
@@ -41,7 +41,7 @@ namespace TwitchDownloaderCore.Tools
 
         private readonly string _cachePath;
 
-        public HighlightMessage(string cachePath)
+        public HighlightIcons(string cachePath)
         {
             _cachePath = Path.Combine(cachePath, "icons");
         }
@@ -260,11 +260,9 @@ namespace TwitchDownloaderCore.Tools
         public void Dispose()
         {
             Dispose(true);
-
-            GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool isDisposing)
+        private void Dispose(bool isDisposing)
         {
             try
             {

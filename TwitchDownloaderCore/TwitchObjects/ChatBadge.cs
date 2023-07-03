@@ -31,8 +31,9 @@ namespace TwitchDownloaderCore.TwitchObjects
     }
 
     [DebuggerDisplay("{Name}")]
-    public class ChatBadge
+    public sealed class ChatBadge : IDisposable
     {
+        public bool Disposed { get; private set; } = false;
         public string Name;
         public Dictionary<string, SKBitmap> Versions;
         public Dictionary<string, ChatBadgeData> VersionsData;
@@ -79,5 +80,37 @@ namespace TwitchDownloaderCore.TwitchObjects
                 Versions[keyList[i]] = newBitmap;
             }
         }
+
+#region ImplementIDisposable
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        private void Dispose(bool isDisposing)
+        {
+            try
+            {
+                if (Disposed)
+                {
+                    return;
+                }
+
+                if (isDisposing)
+                {
+                    foreach (var (_, bitmap) in Versions)
+                    {
+                        bitmap?.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                Disposed = true;
+            }
+        }
+
+#endregion
     }
 }

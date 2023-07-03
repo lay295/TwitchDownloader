@@ -6,8 +6,9 @@ using System.Linq;
 namespace TwitchDownloaderCore.TwitchObjects
 {
     [DebuggerDisplay("{prefix}")]
-    public class CheerEmote
+    public sealed class CheerEmote : IDisposable
     {
+        public bool Disposed { get; private set; } = false;
         public string prefix { get; set; }
         public List<KeyValuePair<int, TwitchEmote>> tierList { get; set; } = new List<KeyValuePair<int, TwitchEmote>>();
 
@@ -31,5 +32,37 @@ namespace TwitchDownloaderCore.TwitchObjects
                 tierList[i].Value.Resize(newScale);
             }
         }
+
+#region ImplementIDisposable
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        private void Dispose(bool isDisposing)
+        {
+            try
+            {
+                if (Disposed)
+                {
+                    return;
+                }
+
+                if (isDisposing)
+                {
+                    foreach (var (_, emote) in tierList)
+                    {
+                        emote?.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                Disposed = true;
+            }
+        }
+
+#endregion
     }
 }

@@ -672,9 +672,8 @@ namespace TwitchDownloaderWPF
                 _cancellationTokenSource.Dispose();
                 UpdateActionButtons(false);
 
-                currentRender = null;
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                currentRender.Dispose();
+                GC.Collect(2, GCCollectionMode.Default, false);
             }
         }
 
