@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
@@ -35,9 +34,9 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public bool Disposed { get; private set; } = false;
         public string Name;
-        public Dictionary<string, SKBitmap> Versions;
-        public Dictionary<string, ChatBadgeData> VersionsData;
-        public ChatBadgeType Type;
+        public readonly Dictionary<string, SKBitmap> Versions;
+        public readonly Dictionary<string, ChatBadgeData> VersionsData;
+        public readonly ChatBadgeType Type;
 
         public ChatBadge(string name, Dictionary<string, ChatBadgeData> versions)
         {
@@ -45,13 +44,13 @@ namespace TwitchDownloaderCore.TwitchObjects
             Versions = new Dictionary<string, SKBitmap>();
             VersionsData = versions;
 
-            foreach (var version in versions)
+            foreach (var (versionName, versionData) in versions)
             {
-                using MemoryStream ms = new MemoryStream(version.Value.bytes);
+                using MemoryStream ms = new MemoryStream(versionData.bytes);
                 //For some reason, twitch has corrupted images sometimes :) for example
                 //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                 SKBitmap badgeImage = SKBitmap.Decode(ms);
-                Versions.Add(version.Key, badgeImage);
+                Versions.Add(versionName, badgeImage);
             }
 
             Type = name switch
@@ -69,15 +68,13 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         public void Resize(double newScale)
         {
-            List<string> keyList = new List<string>(Versions.Keys.ToList());
-
-            for (int i = 0; i < keyList.Count; i++)
+            foreach (var (versionName, bitmap) in Versions)
             {
-                SKImageInfo imageInfo = new SKImageInfo((int)(Versions[keyList[i]].Width * newScale), (int)(Versions[keyList[i]].Height * newScale));
+                SKImageInfo imageInfo = new SKImageInfo((int)(bitmap.Width * newScale), (int)(bitmap.Height * newScale));
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
-                Versions[keyList[i]].ScalePixels(newBitmap, SKFilterQuality.High);
-                Versions[keyList[i]].Dispose();
-                Versions[keyList[i]] = newBitmap;
+                bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
+                bitmap.Dispose();
+                Versions[versionName] = newBitmap;
             }
         }
 

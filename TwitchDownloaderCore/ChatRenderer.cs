@@ -1135,7 +1135,7 @@ namespace TwitchDownloaderCore
         /// <returns>A shortened in visual width or delimited <see langword="string"/>, whichever comes first.</returns>
         private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, char[] delimiters)
         {
-            // If we are dealing with non-RTL and don't have any delimiters then SKPaint.BreakText is over
+            // If we are dealing with non-RTL and don't have any delimiters then SKPaint.BreakText is over 9x faster
             if (!isRtl && text.IndexOfAny(delimiters) == -1)
             {
                 return SubstringToTextWidth(text, textFont, maxWidth);
