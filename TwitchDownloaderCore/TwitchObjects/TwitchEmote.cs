@@ -17,28 +17,19 @@ namespace TwitchDownloaderCore.TwitchObjects
     public sealed class TwitchEmote : IDisposable
     {
         public bool Disposed { get; private set; } = false;
-        public SKCodec Codec { get; set; }
+        public SKCodec Codec { get; }
         public byte[] ImageData { get; set; }
         public EmoteProvider EmoteProvider { get; set; }
-        public List<SKBitmap> EmoteFrames { get; set; } = new List<SKBitmap>();
-        public List<int> EmoteFrameDurations { get; set; } = new List<int>();
+        public List<SKBitmap> EmoteFrames { get; } = new List<SKBitmap>();
+        public List<int> EmoteFrameDurations { get; private set; } = new List<int>();
         public int TotalDuration { get; set; }
-        public string Name { get; set; }
-        public string Id { get; set; }
-        public int ImageScale { get; set; }
+        public string Name { get; }
+        public string Id { get; }
+        public int ImageScale { get; }
         public bool IsZeroWidth { get; set; } = false;
-        public int FrameCount
-        {
-            get
-            {
-                if (Codec.FrameCount == 0)
-                    return 1;
-                else
-                    return Codec.FrameCount;
-            }
-        }
-        public int Height { get { return EmoteFrames[0].Height; } }
-        public int Width { get { return EmoteFrames[0].Width; } }
+        public int FrameCount { get; }
+        public int Height => EmoteFrames[0].Height;
+        public int Width => EmoteFrames[0].Width;
 
         public TwitchEmote(byte[] imageData, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName)
         {
@@ -49,6 +40,7 @@ namespace TwitchDownloaderCore.TwitchObjects
             Name = imageName;
             ImageScale = imageScale;
             ImageData = imageData;
+            FrameCount = Math.Max(1, Codec.FrameCount);
 
             ExtractFrames();
             CalculateDurations();
@@ -56,15 +48,20 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         private void CalculateDurations()
         {
-            EmoteFrameDurations = new List<int>();
-            for (int i = 0; i < Codec.FrameCount; i++)
+            EmoteFrameDurations = new List<int>(FrameCount);
+
+            if (FrameCount == 1)
+                return;
+
+            var frameInfo = Codec.FrameInfo;
+            for (int i = 0; i < FrameCount; i++)
             {
-                var duration = Codec.FrameInfo[i].Duration / 10;
+                var duration = frameInfo[i].Duration / 10;
                 EmoteFrameDurations.Add(duration);
                 TotalDuration += duration;
             }
 
-            if (TotalDuration == 0 || TotalDuration == Codec.FrameCount)
+            if (TotalDuration == 0 || TotalDuration == FrameCount)
             {
                 for (int i = 0; i < EmoteFrameDurations.Count; i++)
                 {
@@ -86,9 +83,10 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         private void ExtractFrames()
         {
+            var codecInfo = Codec.Info;
             for (int i = 0; i < FrameCount; i++)
             {
-                SKImageInfo imageInfo = new SKImageInfo(Codec.Info.Width, Codec.Info.Height);
+                SKImageInfo imageInfo = new SKImageInfo(codecInfo.Width, codecInfo.Height);
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
                 IntPtr pointer = newBitmap.GetPixels();
                 SKCodecOptions codecOptions = new SKCodecOptions(i);
@@ -99,9 +97,10 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         public void Resize(double newScale)
         {
+            var codecInfo = Codec.Info;
             for (int i = 0; i < FrameCount; i++)
             {
-                SKImageInfo imageInfo = new SKImageInfo((int)(Codec.Info.Width * newScale), (int)(Codec.Info.Height * newScale));
+                SKImageInfo imageInfo = new SKImageInfo((int)(codecInfo.Width * newScale), (int)(codecInfo.Height * newScale));
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
                 EmoteFrames[i].ScalePixels(newBitmap, SKFilterQuality.High);
                 EmoteFrames[i].Dispose();
