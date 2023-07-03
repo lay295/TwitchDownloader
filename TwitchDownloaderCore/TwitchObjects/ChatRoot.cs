@@ -11,7 +11,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int id { get; set; }
     }
 
-    [DebuggerDisplay("display_name: {display_name}")]
+    [DebuggerDisplay("{display_name}")]
     public class Commenter
     {
         public string display_name { get; set; }
@@ -37,11 +37,13 @@ namespace TwitchDownloaderCore.TwitchObjects
         }
     }
 
+    [DebuggerDisplay("{emoticon_id}")]
     public class Emoticon
     {
         public string emoticon_id { get; set; }
     }
 
+    [DebuggerDisplay("{text}")]
     public class Fragment
     {
         public string text { get; set; }
@@ -57,6 +59,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         }
     }
 
+    [DebuggerDisplay("{_id}")]
     public class UserBadge
     {
         public string _id { get; set; }
@@ -72,6 +75,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         }
     }
 
+    [DebuggerDisplay("{_id}")]
     public class Emoticon2
     {
         public string _id { get; set; }
@@ -89,7 +93,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         }
     }
 
-    [DebuggerDisplay("body: {body}")]
+    [DebuggerDisplay("{body}")]
     public class Message
     {
         public string body { get; set; }
@@ -129,6 +133,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         }
     }
 
+    [DebuggerDisplay("{msg_id}")]
     public class UserNoticeParams
     {
         public string msg_id { get; set; }
@@ -142,6 +147,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         }
     }
 
+    [DebuggerDisplay("{commenter} {message}")]
     public class Comment
     {
         public string _id { get; set; }
@@ -207,6 +213,7 @@ namespace TwitchDownloaderCore.TwitchObjects
 #endregion
     }
 
+    [DebuggerDisplay("{name}")]
     public class EmbedEmoteData
     {
         public string id { get; set; }
@@ -218,12 +225,14 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int height { get; set; }
     }
 
+    [DebuggerDisplay("{name}")]
     public class EmbedChatBadge
     {
         public string name { get; set; }
         public Dictionary<string, ChatBadgeData> versions { get; set; }
     }
 
+    [DebuggerDisplay("{name}")]
     public class LegacyEmbedChatBadge
     {
         public string name { get; set; }
@@ -232,6 +241,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public Dictionary<string, string> urls { get; set; }
     }
 
+    [DebuggerDisplay("{prefix}")]
     public class EmbedCheerEmote
     {
         public string prefix { get; set; }

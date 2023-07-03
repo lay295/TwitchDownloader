@@ -1304,17 +1304,6 @@ namespace TwitchDownloaderCore
             return userColor;
         }
 
-#if DEBUG
-        //For debugging, works on Windows only
-        private static void OpenImage(SKBitmap newBitmap)
-        {
-            string tempFile = Path.GetFileNameWithoutExtension(Path.GetTempFileName()) + ".png";
-            using (FileStream fs = new FileStream(tempFile, FileMode.Create))
-                newBitmap.Encode(SKEncodedImageFormat.Png, 100).SaveTo(fs);
-
-            Process.Start(new ProcessStartInfo(tempFile) { UseShellExecute = true });
-        }
-#endif
         private void DrawBadges(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos)
         {
             using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());

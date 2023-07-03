@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
+    [DebuggerDisplay("{prefix}")]
     public class CheerEmote
     {
         public string prefix { get; set; }
