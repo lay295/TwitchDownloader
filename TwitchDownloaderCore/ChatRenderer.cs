@@ -441,15 +441,16 @@ namespace TwitchDownloaderCore
             long currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
             {
-                foreach (var comment in comments.Reverse<CommentSection>())
+                for (int c = comments.Count - 1; c >= 0; c--)
                 {
+                    var comment = comments[c];
                     frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
                     foreach ((Point drawPoint, TwitchEmote emote) in comment.Emotes)
                     {
                         if (emote.FrameCount > 1)
                         {
                             int frameIndex = emote.EmoteFrameDurations.Count - 1;
-                            long imageFrame = currentTickMs % (emote.EmoteFrameDurations.Sum() * 10);
+                            long imageFrame = currentTickMs % (emote.TotalDuration * 10);
                             for (int i = 0; i < emote.EmoteFrameDurations.Count; i++)
                             {
                                 if (imageFrame - emote.EmoteFrameDurations[i] * 10 <= 0)
