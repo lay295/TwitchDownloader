@@ -300,9 +300,9 @@ namespace TwitchDownloaderCore
                 }
                 finally
                 {
-                    if (isCopyFrame && frame is not null)
+                    if (isCopyFrame)
                     {
-                        frame.Dispose();
+                        frame?.Dispose();
                     }
                 }
 
@@ -1189,9 +1189,9 @@ namespace TwitchDownloaderCore
         }
 
         /// <summary>
-        /// Produces a <see langword="ReadOnlySpan"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/>
+        /// Produces a <see cref="ReadOnlySpan{T}"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/>
         /// </summary>
-        /// <returns>A shortened in visual width <see langword="ReadOnlySpan"/>.</returns>
+        /// <returns>A shortened in visual width <see cref="ReadOnlySpan{T}"/>.</returns>
         /// <remarks>This is not compatible with text that needs to be shaped.</remarks>
         private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth)
         {
@@ -1569,9 +1569,9 @@ namespace TwitchDownloaderCore
             return input > 127;
         }
 
-        private static IEnumerable<string> SwapRightToLeft(string[] words)
+        private static List<string> SwapRightToLeft(string[] words)
         {
-            List<string> finalWords = new List<string>();
+            List<string> finalWords = new List<string>(words.Length);
             Stack<string> rtlStack = new Stack<string>();
             foreach (var word in words)
             {
@@ -1592,7 +1592,7 @@ namespace TwitchDownloaderCore
             {
                 finalWords.Add(rtlStack.Pop());
             }
-            return finalWords.AsEnumerable();
+            return finalWords;
         }
 
         private static bool IsRightToLeft(ReadOnlySpan<char> message)

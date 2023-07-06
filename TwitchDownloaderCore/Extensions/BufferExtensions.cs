@@ -23,7 +23,7 @@ namespace TwitchDownloaderCore.Extensions
                     break;
                 case SKTextEncoding.Utf32:
                 {
-                    Span<byte> byteSpan = stackalloc byte[Encoding.UTF8.GetByteCount(text)];
+                    Span<byte> byteSpan = stackalloc byte[Encoding.UTF32.GetByteCount(text)];
                     Encoding.UTF32.GetBytes(text, byteSpan);
                     buffer.AddUtf32(byteSpan);
                     break;
