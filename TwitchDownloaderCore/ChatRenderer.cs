@@ -129,8 +129,8 @@ namespace TwitchDownloaderCore
             }
             catch
             {
-                ffmpegProcess.Process.Dispose();
-                maskProcess?.Process.Dispose();
+                ffmpegProcess.Dispose();
+                maskProcess?.Dispose();
                 GC.Collect();
                 throw;
             }
@@ -254,12 +254,12 @@ namespace TwitchDownloaderCore
         private void RenderVideoSection(int startTick, int endTick, FfmpegProcess ffmpegProcess, FfmpegProcess maskProcess = null, CancellationToken cancellationToken = new())
         {
             UpdateFrame latestUpdate = null;
-            BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.Process.StandardInput.BaseStream);
+            BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.StandardInput.BaseStream);
             BinaryWriter maskStream = null;
             if (maskProcess != null)
-                maskStream = new BinaryWriter(maskProcess.Process.StandardInput.BaseStream);
+                maskStream = new BinaryWriter(maskProcess.StandardInput.BaseStream);
 
-            DriveInfo outputDrive = DriveHelper.GetOutputDrive(ffmpegProcess);
+            DriveInfo outputDrive = DriveHelper.GetOutputDrive(ffmpegProcess.SavePath);
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -327,8 +327,8 @@ namespace TwitchDownloaderCore
             ffmpegStream.Dispose();
             maskStream?.Dispose();
 
-            ffmpegProcess.Process.WaitForExit(100_000);
-            maskProcess?.Process.WaitForExit(100_000);
+            ffmpegProcess.WaitForExit(100_000);
+            maskProcess?.WaitForExit(100_000);
         }
 
         private void SetFrameMask(SKBitmap frame)
@@ -376,7 +376,7 @@ namespace TwitchDownloaderCore
                 .Replace("{height}", renderOptions.ChatHeight.ToString()).Replace("{width}", renderOptions.ChatWidth.ToString())
                 .Replace("{save_path}", savePath).Replace("{max_int}", int.MaxValue.ToString());
 
-            var process = new Process
+            var process = new FfmpegProcess
             {
                 StartInfo =
                 {
@@ -387,7 +387,8 @@ namespace TwitchDownloaderCore
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                }
+                },
+                SavePath = savePath
             };
 
             if (renderOptions.LogFfmpegOutput && _progress != null)
@@ -405,7 +406,7 @@ namespace TwitchDownloaderCore
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
 
-            return new FfmpegProcess(process, savePath);
+            return process;
         }
 
         private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
