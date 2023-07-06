@@ -40,10 +40,12 @@ namespace TwitchDownloaderCore.Tools
         private SKBitmap _giftAnonymousIcon = null;
 
         private readonly string _cachePath;
+        private readonly SKColor _purple;
 
-        public HighlightIcons(string cachePath)
+        public HighlightIcons(string cachePath, SKColor iconPurple)
         {
             _cachePath = Path.Combine(cachePath, "icons");
+            _purple = iconPurple;
         }
 
         // If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
@@ -103,26 +105,26 @@ namespace TwitchDownloaderCore.Tools
 
         /// <returns>A the requested icon or null if no icon exists for the highlight type</returns>
         /// <remarks>The icon returned is NOT a copy and should not be manually disposed.</remarks>
-        public SKBitmap GetHighlightIcon(HighlightType highlightType, string purple, SKColor textColor, double fontSize)
+        public SKBitmap GetHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
         {
             // Return the needed icon from cache or generate if null
             return highlightType switch
             {
-                HighlightType.SubscribedTier => _subscribedTierIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.SubscribedPrime => _subscribedPrimeIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.GiftedSingle => _giftSingleIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.GiftedMany => _giftManyIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.GiftedAnonymous => _giftAnonymousIcon ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
+                HighlightType.SubscribedTier => _subscribedTierIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
+                HighlightType.SubscribedPrime => _subscribedPrimeIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
+                HighlightType.GiftedSingle => _giftSingleIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
+                HighlightType.GiftedMany => _giftManyIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
+                HighlightType.GiftedAnonymous => _giftAnonymousIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
                 _ => null
             };
         }
 
-        private SKBitmap GenerateHighlightIcon(HighlightType highlightType, string purple, SKColor textColor, double fontSize)
+        private SKBitmap GenerateHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
         {
             // Generate the needed icon
             var returnBitmap = highlightType is HighlightType.GiftedMany
                 ? GenerateGiftedManyIcon(fontSize, _cachePath)
-                : GenerateSvgIcon(highlightType, purple, textColor, fontSize);
+                : GenerateSvgIcon(highlightType, _purple, textColor, fontSize);
 
             // Cache the icon
             switch (highlightType)
@@ -164,7 +166,7 @@ namespace TwitchDownloaderCore.Tools
             return tempBitmap.Resize(imageInfo, SKFilterQuality.High);
         }
 
-        private static SKBitmap GenerateSvgIcon(HighlightType highlightType, string purple, SKColor textColor, double fontSize)
+        private static SKBitmap GenerateSvgIcon(HighlightType highlightType, SKColor purple, SKColor textColor, double fontSize)
         {
             using var tempBitmap = new SKBitmap(72, 72); // Icon SVG strings are scaled for 72x72
             using var tempCanvas = new SKCanvas(tempBitmap);
@@ -184,7 +186,7 @@ namespace TwitchDownloaderCore.Tools
                 Color = highlightType switch
                 {
                     HighlightType.SubscribedTier => textColor,
-                    HighlightType.SubscribedPrime => SKColor.Parse(purple),
+                    HighlightType.SubscribedPrime => purple,
                     HighlightType.GiftedSingle => textColor,
                     HighlightType.GiftedAnonymous => textColor,
                     _ => throw new NotSupportedException("This should not be possible.")

@@ -27,8 +27,9 @@ namespace TwitchDownloaderCore
         public bool Disposed { get; private set; } = false;
         public ChatRoot chatRoot { get; private set; } = new ChatRoot();
 
-        private const string PURPLE = "#7b2cf2";
-        private const string HIGHLIGHT_BACKGROUND = "#1A6B6B6E";
+        private const string PURPLE = "#7B2CF2";
+        private static readonly SKColor Purple = SKColor.Parse(PURPLE);
+        private static readonly SKColor HighlightBackground = SKColor.Parse("#1A6B6B6E");
         private static readonly string[] defaultColors = { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
 
         private static readonly Regex rtlRegex = new("[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]", RegexOptions.Compiled);
@@ -64,7 +65,7 @@ namespace TwitchDownloaderCore
             renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize - renderOptions.SidePadding * 2;
             renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
             _progress = progress;
-            highlightIcons = new HighlightIcons(renderOptions.TempFolder);
+            highlightIcons = new HighlightIcons(renderOptions.TempFolder, Purple);
         }
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
@@ -331,11 +332,12 @@ namespace TwitchDownloaderCore
             maskProcess?.WaitForExit(100_000);
         }
 
-        private void SetFrameMask(SKBitmap frame)
+        private static void SetFrameMask(SKBitmap frame)
         {
             IntPtr pixelsAddr = frame.GetPixels();
-            int height = frame.Height;
-            int width = frame.Width;
+            SKImageInfo frameInfo = frame.Info;
+            int height = frameInfo.Height;
+            int width = frameInfo.Width;
             unsafe
             {
                 byte* ptr = (byte*)pixelsAddr.ToPointer();
@@ -525,10 +527,8 @@ namespace TwitchDownloaderCore
 
                     frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
 
-                    for (int i = 0; i < comment.Emotes.Count; i++)
+                    foreach (var (drawPoint, emote) in comment.Emotes)
                     {
-                        (Point drawPoint, TwitchEmote emote) = comment.Emotes[i];
-
                         //Only draw static emotes
                         if (emote.FrameCount == 1)
                         {
@@ -613,17 +613,21 @@ namespace TwitchDownloaderCore
         private SKBitmap CombineImages(List<SKBitmap> sectionImages, HighlightType highlightType)
         {
             SKBitmap finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.Height));
+            var finalBitmapInfo = finalBitmap.Info;
             using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
             {
                 if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight)
                 {
-                    var colorString = highlightType is HighlightType.PayingForward ? "#26262c" : "#80808c";
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmap.Height, new SKPaint() { Color = SKColor.Parse(colorString) });
+                    var colorString = highlightType is HighlightType.PayingForward ? "#26262C" : "#80808C";
+                    using var paint = new SKPaint { Color = SKColor.Parse(colorString) };
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
                 }
                 else if (highlightType is not HighlightType.None)
                 {
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmap.Width - renderOptions.SidePadding * 2, finalBitmap.Height, new SKPaint() { Color = SKColor.Parse(HIGHLIGHT_BACKGROUND) });
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmap.Height, new SKPaint() { Color = SKColor.Parse(PURPLE) });
+                    using var backgroundPaint = new SKPaint { Color = HighlightBackground };
+                    using var accentPaint = new SKPaint { Color = Purple };
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, accentPaint);
                 }
 
                 for (int i = 0; i < sectionImages.Count; i++)
@@ -671,7 +675,7 @@ namespace TwitchDownloaderCore
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
 
-            var highlightIcon = highlightIcons.GetHighlightIcon(highlightType, PURPLE, messageFont.Color, renderOptions.FontSize);
+            var highlightIcon = highlightIcons.GetHighlightIcon(highlightType, messageFont.Color, renderOptions.FontSize);
 
             Point iconPoint = new()
             {
@@ -794,10 +798,11 @@ namespace TwitchDownloaderCore
         private void DrawThirdPartyEmote(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, string fragmentString, bool highlightWords)
         {
             TwitchEmote twitchEmote = emoteThirdList.First(x => x.Name == fragmentString);
+            SKImageInfo emoteInfo = twitchEmote.Info;
             Point emotePoint = new Point();
             if (!twitchEmote.IsZeroWidth)
             {
-                if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
+                if (drawPos.X + emoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
                 }
@@ -805,17 +810,18 @@ namespace TwitchDownloaderCore
                 if (highlightWords)
                 {
                     using var canvas = new SKCanvas(sectionImages.Last());
-                    canvas.DrawRect(drawPos.X, 0, twitchEmote.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, new SKPaint() { Color = SKColor.Parse(PURPLE) });;
+                    using var paint = new SKPaint { Color = Purple };
+                    canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);;
                 }
 
                 emotePoint.X = drawPos.X;
-                drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
+                drawPos.X += emoteInfo.Width + renderOptions.EmoteSpacing;
             }
             else
             {
-                emotePoint.X = drawPos.X - renderOptions.EmoteSpacing - twitchEmote.Width;
+                emotePoint.X = drawPos.X - renderOptions.EmoteSpacing - emoteInfo.Width;
             }
-            emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0));
+            emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0));
             emotePositionList.Add((emotePoint, twitchEmote));
         }
 
@@ -887,8 +893,9 @@ namespace TwitchDownloaderCore
 
                 SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
                 SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
+                SKImageInfo emojiImageInfo = emojiImage.Info;
 
-                if (drawPos.X + emojiImage.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
+                if (drawPos.X + emojiImageInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
                 }
@@ -896,21 +903,21 @@ namespace TwitchDownloaderCore
                 Point emotePoint = new Point
                 {
                     X = drawPos.X + (int)Math.Ceiling(renderOptions.EmoteSpacing / 2d), // emotePoint.X halfway through emote padding
-                    Y = (int)((renderOptions.SectionHeight - emojiImage.Height) / 2.0)
+                    Y = (int)((renderOptions.SectionHeight - emojiImageInfo.Height) / 2.0)
                 };
 
                 using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
                 {
                     if (highlightWords)
                     {
-                        canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImage.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight,
-                            new SKPaint() { Color = SKColor.Parse(PURPLE) });
+                        using var paint = new SKPaint { Color = Purple };
+                        canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImageInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                     }
 
                     canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
                 }
 
-                drawPos.X += emojiImage.Width + renderOptions.EmoteSpacing;
+                drawPos.X += emojiImageInfo.Width + renderOptions.EmoteSpacing;
             }
             if (nonEmojiBuffer.Length > 0)
             {
@@ -1017,8 +1024,9 @@ namespace TwitchDownloaderCore
                         int bitsAmount = int.Parse(fragmentString.AsSpan()[bitsIndex..]);
                         bitsCount -= bitsAmount;
                         KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
-                        TwitchEmote twitchEmote = tierList.Value;
-                        if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
+                        TwitchEmote cheerEmote = tierList.Value;
+                        SKImageInfo cheerEmoteInfo = cheerEmote.Info;
+                        if (drawPos.X + cheerEmoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                         {
                             AddImageSection(sectionImages, ref drawPos, defaultPos);
                         }
@@ -1026,10 +1034,10 @@ namespace TwitchDownloaderCore
                         Point emotePoint = new Point
                         {
                             X = drawPos.X,
-                            Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0))
+                            Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - cheerEmoteInfo.Height) / 2.0))
                         };
-                        emotePositionList.Add((emotePoint, twitchEmote));
-                        drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
+                        emotePositionList.Add((emotePoint, cheerEmote));
+                        drawPos.X += cheerEmoteInfo.Width + renderOptions.EmoteSpacing;
                         bitsPrinted = true;
                     }
                 }
@@ -1048,24 +1056,25 @@ namespace TwitchDownloaderCore
             if (emoteList.Any(x => x.Id == emoteId))
             {
                 TwitchEmote twitchEmote = emoteList.First(x => x.Id == emoteId);
-                if (drawPos.X + twitchEmote.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
+                SKImageInfo emoteInfo = twitchEmote.Info;
+                if (drawPos.X + emoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
                 }
                 Point emotePoint = new Point
                 {
                     X = drawPos.X,
-                    Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - twitchEmote.Height) / 2.0))
+                    Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0))
                 };
 
                 if (highlightWords)
                 {
                     using var canvas = new SKCanvas(sectionImages.Last());
-                    canvas.DrawRect(drawPos.X, 0, twitchEmote.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, new SKPaint() { Color = SKColor.Parse(PURPLE) });
+                    canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, new SKPaint() { Color = Purple });
                 }
 
                 emotePositionList.Add((emotePoint, twitchEmote));
-                drawPos.X += twitchEmote.Width + renderOptions.EmoteSpacing;
+                drawPos.X += emoteInfo.Width + renderOptions.EmoteSpacing;
             }
             else
             {
@@ -1106,7 +1115,8 @@ namespace TwitchDownloaderCore
             {
                 if (highlightWords)
                 {
-                    sectionImageCanvas.DrawRect(drawPos.X, 0, textWidth + (padding ? renderOptions.WordSpacing : 0), renderOptions.SectionHeight, new SKPaint() { Color = SKColor.Parse(PURPLE) });
+                    using var paint = new SKPaint { Color = Purple};
+                    sectionImageCanvas.DrawRect(drawPos.X, 0, textWidth + (padding ? renderOptions.WordSpacing : 0), renderOptions.SectionHeight, paint);
                 }
 
                 if (renderOptions.Outline)

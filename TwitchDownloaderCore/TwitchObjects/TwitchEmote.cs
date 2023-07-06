@@ -30,6 +30,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int FrameCount { get; }
         public int Height => EmoteFrames[0].Height;
         public int Width => EmoteFrames[0].Width;
+        public SKImageInfo Info => EmoteFrames[0].Info;
 
         public TwitchEmote(byte[] imageData, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName)
         {
