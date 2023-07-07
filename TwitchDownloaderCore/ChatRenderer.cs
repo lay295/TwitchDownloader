@@ -515,6 +515,12 @@ namespace TwitchDownloaderCore
             {
                 oldCommentIndex = commentList.Last().CommentIndex;
             }
+            else if (newestCommentIndex > 100)
+            {
+                // If we are starting partially through the comment list, we don't want to needlessly render *every* comment before our starting comment.
+                // Skipping to 100 comments before our starting index should be more than enough to fill the frame with previous comments
+                oldCommentIndex = newestCommentIndex - 100;
+            }
 
             if (newestCommentIndex > oldCommentIndex)
             {
