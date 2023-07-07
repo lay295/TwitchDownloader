@@ -217,24 +217,38 @@ namespace TwitchDownloaderCore
 
         private void RemoveRestrictedComments(List<Comment> comments)
         {
-            for (int i = 0; i < comments.Count; i++)
+            if (renderOptions.IgnoreUsersArray.Length == 0 && BannedWordRegexes.Length == 0)
             {
-                if (renderOptions.IgnoreUsersArray.Contains(comments[i].commenter.name.ToLower()))
+                return;
+            }
+
+            // Enumerating over and accessing a span is faster than a list
+            var commentSpan = CollectionsMarshal.AsSpan(comments);
+            for (var i = 0; i < commentSpan.Length; i++)
+            {
+                foreach (var username in renderOptions.IgnoreUsersArray)
                 {
-                    comments.RemoveAt(i);
-                    i--;
-                    continue;
+                    if (username.Equals(commentSpan[i].commenter.name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        comments.RemoveAt(i);
+                        i--;
+                        goto NextComment;
+                    }
                 }
 
                 foreach (var bannedWordRegex in BannedWordRegexes)
                 {
-                    if (bannedWordRegex.IsMatch(comments[i].message.body))
+                    if (bannedWordRegex.IsMatch(commentSpan[i].message.body))
                     {
                         comments.RemoveAt(i);
                         i--;
-                        break;
+                        goto NextComment;
                     }
                 }
+
+                // goto is cheaper and more readable than using a boolean + branch check after each operation
+                NextComment:
+                continue;
             }
         }
 

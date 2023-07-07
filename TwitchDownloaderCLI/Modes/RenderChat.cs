@@ -115,7 +115,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (inputOptions.IgnoreUsersString != "")
             {
-                renderOptions.IgnoreUsersArray = inputOptions.IgnoreUsersString.ToLower().Split(',',
+                renderOptions.IgnoreUsersArray = inputOptions.IgnoreUsersString.Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             }
 

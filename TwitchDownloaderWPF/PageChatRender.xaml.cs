@@ -116,7 +116,7 @@ namespace TwitchDownloaderWPF
                 AccentIndentScale = double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture),
                 AccentStrokeScale = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture),
                 VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture),
-                IgnoreUsersArray = textIgnoreUsersList.Text.ToLower().Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                IgnoreUsersArray = textIgnoreUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 BannedWordsArray = textBannedWordsList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 Timestamp = (bool)checkTimestamp.IsChecked,
                 MessageColor = messageColor,
@@ -318,9 +318,9 @@ namespace TwitchDownloaderWPF
             {
                 Settings.Default.VideoCodec = ((Codec)comboCodec.SelectedItem).Name;
             }
-            Settings.Default.IgnoreUsersList = string.Join(",", textIgnoreUsersList.Text.ToLower()
+            Settings.Default.IgnoreUsersList = string.Join(",", textIgnoreUsersList.Text
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-            Settings.Default.BannedWordsList = string.Join(",", textBannedWordsList.Text.ToLower()
+            Settings.Default.BannedWordsList = string.Join(",", textBannedWordsList.Text
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             if (RadioEmojiNotoColor.IsChecked == true)
                 Settings.Default.RenderEmojiVendor = (int)EmojiVendor.GoogleNotoColor;
