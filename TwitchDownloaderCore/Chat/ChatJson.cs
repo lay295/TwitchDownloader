@@ -171,7 +171,7 @@ namespace TwitchDownloaderCore.Chat
                     }
                     break;
                 default:
-                    throw new NotSupportedException("The requested chat format is not implemented");
+                    throw new NotSupportedException($"{compression} is not a supported chat compression.");
             }
         }
     }

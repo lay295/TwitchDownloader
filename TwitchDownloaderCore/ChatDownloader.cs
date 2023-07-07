@@ -436,7 +436,7 @@ namespace TwitchDownloaderCore
                     await ChatText.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.TimeFormat);
                     break;
                 default:
-                    throw new NotSupportedException("Requested output chat format is not supported");
+                    throw new NotSupportedException($"{downloadOptions.DownloadFormat} is not a supported output format.");
             }
         }
     }

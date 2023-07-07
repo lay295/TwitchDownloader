@@ -74,7 +74,7 @@ namespace TwitchDownloaderCore
                     await ChatText.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.TextTimestampFormat);
                     break;
                 default:
-                    throw new NotSupportedException("Requested output chat format is not implemented");
+                    throw new NotSupportedException($"{_updateOptions.OutputFormat} is not a supported output format.");
             }
         }
 
