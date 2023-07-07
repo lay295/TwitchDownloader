@@ -6,7 +6,6 @@ using System.IO;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
-    
     public enum EmoteProvider
     {
         FirstParty,
@@ -35,7 +34,10 @@ namespace TwitchDownloaderCore.TwitchObjects
         public TwitchEmote(byte[] imageData, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName)
         {
             using MemoryStream ms = new MemoryStream(imageData);
-            Codec = SKCodec.Create(ms);
+            Codec = SKCodec.Create(ms, out var result);
+            if (Codec is null)
+                throw new BadImageFormatException($"Skia was unable to decode {imageName} ({imageId}). Returned: {result}");
+
             EmoteProvider = emoteProvider;
             Id = imageId;
             Name = imageName;
@@ -54,10 +56,10 @@ namespace TwitchDownloaderCore.TwitchObjects
             if (FrameCount == 1)
                 return;
 
-            var frameInfo = Codec.FrameInfo;
+            var frameInfos = Codec.FrameInfo;
             for (int i = 0; i < FrameCount; i++)
             {
-                var duration = frameInfo[i].Duration / 10;
+                var duration = frameInfos[i].Duration / 10;
                 EmoteFrameDurations.Add(duration);
                 TotalDuration += duration;
             }
