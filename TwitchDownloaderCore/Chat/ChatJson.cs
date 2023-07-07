@@ -7,7 +7,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Chat

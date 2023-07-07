@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Extensions
 {
     public static class TimeSpanExtensions
     {
