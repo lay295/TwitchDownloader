@@ -384,13 +384,23 @@ namespace TwitchDownloaderCore
                 savePath = Path.Combine(renderOptions.TempFolder, Path.GetRandomFileName() + (isMask ? "_mask" : "") + Path.GetExtension(renderOptions.OutputFile));
             }
 
-            string inputArgs = renderOptions.InputArgs.Replace("{fps}", renderOptions.Framerate.ToString())
-                .Replace("{height}", renderOptions.ChatHeight.ToString()).Replace("{width}", renderOptions.ChatWidth.ToString())
-                .Replace("{save_path}", savePath).Replace("{max_int}", int.MaxValue.ToString())
-                .Replace("{pix_fmt}", SKImageInfo.PlatformColorType == SKColorType.Bgra8888 ? "bgra" : "rgba");
-            string outputArgs = renderOptions.OutputArgs.Replace("{fps}", renderOptions.Framerate.ToString())
-                .Replace("{height}", renderOptions.ChatHeight.ToString()).Replace("{width}", renderOptions.ChatWidth.ToString())
-                .Replace("{save_path}", savePath).Replace("{max_int}", int.MaxValue.ToString());
+            savePath = Path.GetFullPath(savePath);
+
+            string inputArgs = new StringBuilder(renderOptions.InputArgs)
+                .Replace("{fps}", renderOptions.Framerate.ToString())
+                .Replace("{height}", renderOptions.ChatHeight.ToString())
+                .Replace("{width}", renderOptions.ChatWidth.ToString())
+                .Replace("{save_path}", savePath)
+                .Replace("{max_int}", int.MaxValue.ToString())
+                .Replace("{pix_fmt}", SKImageInfo.PlatformColorType == SKColorType.Bgra8888 ? "bgra" : "rgba")
+                .ToString();
+            string outputArgs = new StringBuilder(renderOptions.OutputArgs)
+                .Replace("{fps}", renderOptions.Framerate.ToString())
+                .Replace("{height}", renderOptions.ChatHeight.ToString())
+                .Replace("{width}", renderOptions.ChatWidth.ToString())
+                .Replace("{save_path}", savePath)
+                .Replace("{max_int}", int.MaxValue.ToString())
+                .ToString();
 
             var process = new FfmpegProcess
             {
