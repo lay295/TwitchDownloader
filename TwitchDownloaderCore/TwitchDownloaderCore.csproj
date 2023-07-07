@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.1" />
     <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="2.8.2.3" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
     <PackageReference Include="SkiaSharp" Version="2.88.3" />

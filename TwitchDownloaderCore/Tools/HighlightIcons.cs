@@ -2,6 +2,8 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using CommunityToolkit.HighPerformance.Buffers;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Tools
@@ -53,36 +55,41 @@ namespace TwitchDownloaderCore.Tools
         {
             const string ANONYMOUS_GIFT_ACCOUNT_ID = "274598607"; // '274598607' is the id of the anonymous gift message account, display name: 'AnAnonymousGifter'
 
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " subscribed at Tier"))
+            if (comment.message.body.Length == 0)
+            {
+                // This likely happens due to the 7TV extension letting users bypass the IRC message trimmer
+                return HighlightType.None;
+            }
+            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name," subscribed at Tier")))
             {
                 return HighlightType.SubscribedTier;
             }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " subscribed with Prime"))
+            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " subscribed with Prime")))
             {
                 return HighlightType.SubscribedPrime;
             }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " is gifting"))
+            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " is gifting")))
             {
                 return HighlightType.GiftedMany;
             }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " gifted a Tier"))
+            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name," gifted a Tier")))
             {
                 return HighlightType.GiftedSingle;
             }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " is continuing the Gift Sub"))
+            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " is continuing the Gift Sub")))
             {
                 return HighlightType.ContinuingGift;
             }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " converted from a"))
+            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " converted from a")))
             {
-                var convertedToMatch = Regex.Match(comment.message.body, @$"(?<=^{comment.commenter.display_name} converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
+                var pattern = StringPool.Shared.ConcatAndGetOrAdd("(?<=^", comment.commenter.display_name, @" converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
+                var convertedToMatch = Regex.Match(comment.message.body, pattern);
                 if (!convertedToMatch.Success)
                 {
                     return HighlightType.None;
                 }
 
-                // TODO: Use ValueSpan once on NET7
-                return convertedToMatch.Value switch
+                return convertedToMatch.ValueSpan switch
                 {
                     "Prime" => HighlightType.SubscribedPrime,
                     "Tier 1" => HighlightType.SubscribedTier,
@@ -91,7 +98,7 @@ namespace TwitchDownloaderCore.Tools
                     _ => HighlightType.Unknown
                 };
             }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " is paying forward the Gift they got from"))
+            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " is paying forward the Gift they got from")))
             {
                 return HighlightType.PayingForward;
             }
