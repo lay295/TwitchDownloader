@@ -7,7 +7,7 @@ namespace TwitchDownloaderCore.Extensions
     {
         public static string ConcatAndGetOrAdd(this StringPool stringPool, string str1, string str2)
         {
-            var span = (Span<char>)stackalloc char[str1.Length + str2.Length];
+            Span<char> span = stackalloc char[str1.Length + str2.Length];
 
             str1.CopyTo(span);
 
@@ -19,7 +19,7 @@ namespace TwitchDownloaderCore.Extensions
 
         public static string ConcatAndGetOrAdd(this StringPool stringPool, string str1, string str2, string str3)
         {
-            var span = (Span<char>)stackalloc char[str1.Length + str2.Length + str3.Length];
+            Span<char> span = stackalloc char[str1.Length + str2.Length + str3.Length];
 
             str1.CopyTo(span);
 

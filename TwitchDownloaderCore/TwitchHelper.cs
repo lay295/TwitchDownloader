@@ -249,7 +249,7 @@ namespace TwitchDownloaderCore
                 string emoteFormat = "";
                 foreach (var fileItem in emoteFiles)
                 {
-                    if (fileItem.format.ToLower() == "webp") // Is the emote offered in webp?
+                    if (fileItem.format.Equals("webp", StringComparison.OrdinalIgnoreCase)) // Is the emote offered in webp?
                     {
                         emoteFormat = "webp";
                         break;
