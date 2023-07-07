@@ -588,7 +588,7 @@ namespace TwitchDownloaderCore
             List<SKBitmap> sectionImages = new List<SKBitmap>();
             Point drawPos = new Point();
             Point defaultPos = new Point();
-            var highlightType = HighlightType.None;
+            var highlightType = HighlightType.Unknown;
             defaultPos.X = renderOptions.SidePadding;
 
             if (comment.message.user_notice_params?.msg_id != null)
@@ -613,7 +613,7 @@ namespace TwitchDownloaderCore
             defaultPos.Y = sectionDefaultYPos;
             drawPos.Y = defaultPos.Y;
 
-            if (highlightType is HighlightType.None)
+            if (highlightType is HighlightType.Unknown)
             {
                 highlightType = HighlightIcons.GetHighlightType(comment);
             }

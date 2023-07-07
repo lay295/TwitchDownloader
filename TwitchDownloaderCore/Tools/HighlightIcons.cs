@@ -2,8 +2,6 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using CommunityToolkit.HighPerformance.Buffers;
-using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Tools
@@ -60,53 +58,51 @@ namespace TwitchDownloaderCore.Tools
                 // This likely happens due to the 7TV extension letting users bypass the IRC message trimmer
                 return HighlightType.None;
             }
-            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name," subscribed at Tier")))
-            {
-                return HighlightType.SubscribedTier;
-            }
-            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " subscribed with Prime")))
-            {
-                return HighlightType.SubscribedPrime;
-            }
-            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " is gifting")))
-            {
-                return HighlightType.GiftedMany;
-            }
-            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name," gifted a Tier")))
-            {
-                return HighlightType.GiftedSingle;
-            }
-            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " is continuing the Gift Sub")))
-            {
-                return HighlightType.ContinuingGift;
-            }
-            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " converted from a")))
-            {
-                var pattern = StringPool.Shared.ConcatAndGetOrAdd("(?<=^", comment.commenter.display_name, @" converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
-                var convertedToMatch = Regex.Match(comment.message.body, pattern);
-                if (!convertedToMatch.Success)
-                {
-                    return HighlightType.None;
-                }
 
-                return convertedToMatch.ValueSpan switch
+            var bodySpan = comment.message.body.AsSpan();
+            var displayName = comment.commenter.display_name.AsSpan();
+            if (bodySpan.StartsWith(displayName))
+            {
+                var bodyWithoutName = bodySpan[displayName.Length..];
+                if (bodyWithoutName.StartsWith(" subscribed at Tier"))
+                    return HighlightType.SubscribedTier;
+
+                if (bodyWithoutName.StartsWith(" subscribed with Prime"))
+                    return HighlightType.SubscribedPrime;
+
+                if (bodyWithoutName.StartsWith(" is gifting"))
+                    return HighlightType.GiftedMany;
+
+                if (bodyWithoutName.StartsWith(" gifted a Tier"))
+                    return HighlightType.GiftedSingle;
+
+                if (bodyWithoutName.StartsWith(" is continuing the Gift Sub"))
+                    return HighlightType.ContinuingGift;
+
+                if (bodyWithoutName.StartsWith(" is paying forward the Gift they got from"))
+                    return HighlightType.PayingForward;
+
+                if (bodyWithoutName.StartsWith(" converted from a"))
                 {
-                    "Prime" => HighlightType.SubscribedPrime,
-                    "Tier 1" => HighlightType.SubscribedTier,
-                    "Tier 2" => HighlightType.SubscribedTier,
-                    "Tier 3" => HighlightType.SubscribedTier,
-                    _ => HighlightType.Unknown
-                };
+                    // TODO: use bodySpan when .NET 7
+                    var convertedToMatch = Regex.Match(comment.message.body, $@"(?<=^{comment.commenter.display_name} converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
+                    if (!convertedToMatch.Success)
+                        return HighlightType.None;
+
+                    return convertedToMatch.ValueSpan switch
+                    {
+                        "Prime" => HighlightType.SubscribedPrime,
+                        "Tier 1" => HighlightType.SubscribedTier,
+                        "Tier 2" => HighlightType.SubscribedTier,
+                        "Tier 3" => HighlightType.SubscribedTier,
+                        _ => HighlightType.None
+                    };
+                }
             }
-            if (comment.message.body.StartsWith(StringPool.Shared.ConcatAndGetOrAdd(comment.commenter.display_name, " is paying forward the Gift they got from")))
-            {
-                return HighlightType.PayingForward;
-            }
+
             if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
-            {
                 return HighlightType.GiftedAnonymous;
-            }
-            // There are more re-sub messages but I don't know the exact wordings and they tend to be very rare
+
             return HighlightType.None;
         }
 
