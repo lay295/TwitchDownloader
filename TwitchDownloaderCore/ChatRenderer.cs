@@ -1031,8 +1031,8 @@ namespace TwitchDownloaderCore
                 if (bitsCount > 0 && fragmentString.Any(char.IsDigit) && fragmentString.Any(char.IsLetter))
                 {
                     int bitsIndex = fragmentString.IndexOfAny("0123456789".ToCharArray());
-                    string outputPrefix = fragmentString.Substring(0, bitsIndex).ToLower();
-                    var currentCheerEmote = cheermotesList.FirstOrDefault(x => x.prefix.ToLower() == outputPrefix, null);
+                    string outputPrefix = fragmentString.Substring(0, bitsIndex);
+                    var currentCheerEmote = cheermotesList.FirstOrDefault(x => x.prefix.Equals(outputPrefix, StringComparison.OrdinalIgnoreCase), null);
                     if (currentCheerEmote is not null)
                     {
                         int bitsAmount = int.Parse(fragmentString.AsSpan()[bitsIndex..]);

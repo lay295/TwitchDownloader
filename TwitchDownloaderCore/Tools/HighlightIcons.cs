@@ -238,7 +238,7 @@ namespace TwitchDownloaderCore.Tools
             // i.e. Foobar subscribed with Prime. They've subscribed for 45 months! Hey PogChamp
             if (!customMessage.StartsWith(comment.message.fragments[1].text)) // If yes
             {
-                customMessageComment.message.fragments[0].text = customMessage[..(customMessage.IndexOf(comment.message.fragments[1].text) - 1)];
+                customMessageComment.message.fragments[0].text = customMessage[..(customMessage.IndexOf(comment.message.fragments[1].text, StringComparison.Ordinal) - 1)];
                 return (subMessageComment, customMessageComment);
             }
 
