@@ -222,13 +222,11 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            // Enumerating over and accessing a span is faster than a list
-            var commentSpan = CollectionsMarshal.AsSpan(comments);
-            for (var i = 0; i < commentSpan.Length; i++)
+            for (var i = 0; i < comments.Count; i++)
             {
                 foreach (var username in renderOptions.IgnoreUsersArray)
                 {
-                    if (username.Equals(commentSpan[i].commenter.name, StringComparison.OrdinalIgnoreCase))
+                    if (username.Equals(comments[i].commenter.name, StringComparison.OrdinalIgnoreCase))
                     {
                         comments.RemoveAt(i);
                         i--;
@@ -238,7 +236,7 @@ namespace TwitchDownloaderCore
 
                 foreach (var bannedWordRegex in BannedWordRegexes)
                 {
-                    if (bannedWordRegex.IsMatch(commentSpan[i].message.body))
+                    if (bannedWordRegex.IsMatch(comments[i].message.body))
                     {
                         comments.RemoveAt(i);
                         i--;
@@ -320,7 +318,7 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                if (_progress != null)
+                if (_progress != null && currentTick % 3 == 0)
                 {
                     double percentDouble = (currentTick - startTick) / (double)(endTick - startTick) * 100.0;
                     int percentInt = (int)percentDouble;
@@ -329,13 +327,14 @@ namespace TwitchDownloaderCore
                     int timeLeftInt = (int)(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
                     TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
                     TimeSpan timeElapsed = new TimeSpan(0, 0, (int)stopwatch.Elapsed.TotalSeconds);
-                    _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Rendering Video: {percentInt}% ({timeElapsed.ToString(@"h\hm\ms\s")} Elapsed | {timeLeft.ToString(@"h\hm\ms\s")} Remaining)"));
+                    _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Rendering Video: {percentInt}% ({timeElapsed:h\\hm\\ms\\s} Elapsed | {timeLeft:h\\hm\\ms\\s} Remaining)"));
                 }
             }
 
             stopwatch.Stop();
+            _progress?.Report(new ProgressReport(100));
             _progress?.Report(new ProgressReport(ReportType.SameLineStatus, "Rendering Video: 100%"));
-            _progress?.Report(new ProgressReport(ReportType.Log, $"FINISHED. RENDER TIME: {(int)stopwatch.Elapsed.TotalSeconds}s SPEED: {((endTick - startTick) / renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds).ToString("0.##")}x"));
+            _progress?.Report(new ProgressReport(ReportType.Log, $"FINISHED. RENDER TIME: {stopwatch.Elapsed.TotalSeconds:F1}s SPEED: {(endTick - startTick) / (double)renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds:F2}x"));
 
             latestUpdate?.Image.Dispose();
 
