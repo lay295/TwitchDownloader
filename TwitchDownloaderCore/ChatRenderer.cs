@@ -584,7 +584,7 @@ namespace TwitchDownloaderCore
             CommentSection newSection = new CommentSection();
             List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
             Comment comment = chatRoot.comments[commentIndex];
-            List<SKBitmap> sectionImages = new List<SKBitmap>();
+            List<(SKImageInfo info, SKBitmap bitmap)> sectionImages = new List<(SKImageInfo info, SKBitmap bitmap)>();
             Point drawPos = new Point();
             Point defaultPos = new Point();
             var highlightType = HighlightType.Unknown;
@@ -639,9 +639,9 @@ namespace TwitchDownloaderCore
             return newSection;
         }
 
-        private SKBitmap CombineImages(List<SKBitmap> sectionImages, HighlightType highlightType)
+        private SKBitmap CombineImages(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, HighlightType highlightType)
         {
-            SKBitmap finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.Height));
+            SKBitmap finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.info.Height));
             var finalBitmapInfo = finalBitmap.Info;
             using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
             {
@@ -661,8 +661,8 @@ namespace TwitchDownloaderCore
 
                 for (int i = 0; i < sectionImages.Count; i++)
                 {
-                    finalCanvas.DrawBitmap(sectionImages[i], 0, i * renderOptions.SectionHeight);
-                    sectionImages[i].Dispose();
+                    finalCanvas.DrawBitmap(sectionImages[i].bitmap, 0, i * renderOptions.SectionHeight);
+                    sectionImages[i].bitmap.Dispose();
                 }
 
             }
@@ -685,7 +685,7 @@ namespace TwitchDownloaderCore
             return emojiKey;
         }
 
-        private void DrawNonAccentedMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, ref Point defaultPos)
+        private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, ref Point defaultPos)
         {
             if (renderOptions.Timestamp)
             {
@@ -699,7 +699,7 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, highlightWords, ref drawPos, defaultPos);
         }
 
-        private void DrawAccentedMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, ref Point drawPos, Point defaultPos)
+        private void DrawAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, ref Point drawPos, Point defaultPos)
         {
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
@@ -734,9 +734,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawSubscribeMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
+        private void DrawSubscribeMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
         {
-            using SKCanvas canvas = new(sectionImages.Last());
+            using SKCanvas canvas = new(sectionImages.Last().bitmap);
             canvas.DrawBitmap(highlightIcon, iconPoint.X, iconPoint.Y);
 
             Point customMessagePos = drawPos;
@@ -773,9 +773,9 @@ namespace TwitchDownloaderCore
             DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
         }
 
-        private void DrawGiftMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
+        private void DrawGiftMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
         {
-            using SKCanvas canvas = new(sectionImages.Last());
+            using SKCanvas canvas = new(sectionImages.Last().bitmap);
 
             canvas.DrawBitmap(highlightIcon, iconPoint.X, iconPoint.Y);
             drawPos.X += highlightIcon.Width + renderOptions.AccentIndentWidth - renderOptions.AccentStrokeWidth;
@@ -783,7 +783,7 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private void DrawMessage(Comment comment, List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
+        private void DrawMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
         {
             int bitsCount = comment.message.bits_spent;
             foreach (var fragment in comment.message.fragments)
@@ -804,11 +804,11 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawFragmentPart(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
+        private void DrawFragmentPart(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
         {
-            if (!skipThird && emoteThirdList.Any(x => x.Name == fragmentPart))
+            if (!skipThird && TryGetTwitchEmote(emoteThirdList, fragmentPart, out var emote))
             {
-                DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, fragmentPart, highlightWords);
+                DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, emote, highlightWords);
             }
             else if (!skipEmoji && emojiRegex.IsMatch(fragmentPart))
             {
@@ -822,11 +822,27 @@ namespace TwitchDownloaderCore
             {
                 DrawRegularMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
             }
+
+            bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, out TwitchEmote twitchEmote)
+            {
+                // Enumerating over a span is faster than a list
+                var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
+                foreach (var emote1 in emoteListSpan)
+                {
+                    if (emote1.Name.AsSpan().SequenceEqual(emoteName))
+                    {
+                        twitchEmote = emote1;
+                        return true;
+                    }
+                }
+
+                twitchEmote = default;
+                return false;
+            }
         }
 
-        private void DrawThirdPartyEmote(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, string fragmentString, bool highlightWords)
+        private void DrawThirdPartyEmote(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, TwitchEmote twitchEmote, bool highlightWords)
         {
-            TwitchEmote twitchEmote = emoteThirdList.First(x => x.Name == fragmentString);
             SKImageInfo emoteInfo = twitchEmote.Info;
             Point emotePoint = new Point();
             if (!twitchEmote.IsZeroWidth)
@@ -838,9 +854,9 @@ namespace TwitchDownloaderCore
 
                 if (highlightWords)
                 {
-                    using var canvas = new SKCanvas(sectionImages.Last());
+                    using var canvas = new SKCanvas(sectionImages.Last().bitmap);
                     using var paint = new SKPaint { Color = Purple };
-                    canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);;
+                    canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                 }
 
                 emotePoint.X = drawPos.X;
@@ -850,11 +866,11 @@ namespace TwitchDownloaderCore
             {
                 emotePoint.X = drawPos.X - renderOptions.EmoteSpacing - emoteInfo.Width;
             }
-            emotePoint.Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0));
+            emotePoint.Y = (int)(sectionImages.Sum(x => x.info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0));
             emotePositionList.Add((emotePoint, twitchEmote));
         }
 
-        private void DrawEmojiMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
+        private void DrawEmojiMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
         {
             if (renderOptions.EmojiVendor == EmojiVendor.None)
             {
@@ -935,7 +951,7 @@ namespace TwitchDownloaderCore
                     Y = (int)((renderOptions.SectionHeight - emojiImageInfo.Height) / 2.0)
                 };
 
-                using (SKCanvas canvas = new SKCanvas(sectionImages.Last()))
+                using (SKCanvas canvas = new SKCanvas(sectionImages.Last().bitmap))
                 {
                     if (highlightWords)
                     {
@@ -955,9 +971,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawNonFontMessage(List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, string fragmentString, bool highlightWords)
+        private void DrawNonFontMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, string fragmentString, bool highlightWords)
         {
-            ReadOnlySpan<char> fragmentSpan = fragmentString.Trim('\uFE0F').AsSpan();
+            ReadOnlySpan<char> fragmentSpan = fragmentString.AsSpan().Trim('\uFE0F');
 
             // TODO: use fragmentSpan instead of fragmentString once upgraded to .NET 7
             if (blockArtRegex.IsMatch(fragmentString))
@@ -1038,7 +1054,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawRegularMessage(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
+        private void DrawRegularMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
         {
             bool bitsPrinted = false;
             try
@@ -1063,7 +1079,7 @@ namespace TwitchDownloaderCore
                         Point emotePoint = new Point
                         {
                             X = drawPos.X,
-                            Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - cheerEmoteInfo.Height) / 2.0))
+                            Y = (int)(sectionImages.Sum(x => x.info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - cheerEmoteInfo.Height) / 2.0))
                         };
                         emotePositionList.Add((emotePoint, cheerEmote));
                         drawPos.X += cheerEmoteInfo.Width + renderOptions.EmoteSpacing;
@@ -1078,14 +1094,12 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawFirstPartyEmote(List<SKBitmap> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, Fragment fragment, bool highlightWords)
+        private void DrawFirstPartyEmote(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, Fragment fragment, bool highlightWords)
         {
             // First party emote
-            string emoteId = fragment.emoticon.emoticon_id;
-            if (emoteList.Any(x => x.Id == emoteId))
+            if (TryGetTwitchEmote(emoteList, fragment.emoticon.emoticon_id, out var emote))
             {
-                TwitchEmote twitchEmote = emoteList.First(x => x.Id == emoteId);
-                SKImageInfo emoteInfo = twitchEmote.Info;
+                SKImageInfo emoteInfo = emote.Info;
                 if (drawPos.X + emoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
@@ -1093,16 +1107,16 @@ namespace TwitchDownloaderCore
                 Point emotePoint = new Point
                 {
                     X = drawPos.X,
-                    Y = (int)(sectionImages.Sum(x => x.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0))
+                    Y = (int)(sectionImages.Sum(x => x.info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0))
                 };
 
                 if (highlightWords)
                 {
-                    using var canvas = new SKCanvas(sectionImages.Last());
+                    using var canvas = new SKCanvas(sectionImages.Last().bitmap);
                     canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, new SKPaint() { Color = Purple });
                 }
 
-                emotePositionList.Add((emotePoint, twitchEmote));
+                emotePositionList.Add((emotePoint, emote));
                 drawPos.X += emoteInfo.Width + renderOptions.EmoteSpacing;
             }
             else
@@ -1110,9 +1124,26 @@ namespace TwitchDownloaderCore
                 // Probably an old emote that was removed
                 DrawText(fragment.text, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
             }
+
+            bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteId, out TwitchEmote twitchEmote)
+            {
+                // Enumerating over a span is faster than a list
+                var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
+                foreach (var emote1 in emoteListSpan)
+                {
+                    if (emote1.Id.AsSpan().SequenceEqual(emoteId))
+                    {
+                        twitchEmote = emote1;
+                        return true;
+                    }
+                }
+
+                twitchEmote = default;
+                return false;
+            }
         }
 
-        private void DrawText(string drawText, SKPaint textFont, bool padding, List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, bool highlightWords, bool noWrap = false)
+        private void DrawText(string drawText, SKPaint textFont, bool padding, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool highlightWords, bool noWrap = false)
         {
             bool isRtl = IsRightToLeft(drawText);
             float textWidth = MeasureText(drawText, textFont, isRtl);
@@ -1140,7 +1171,7 @@ namespace TwitchDownloaderCore
                 AddImageSection(sectionImages, ref drawPos, defaultPos);
             }
 
-            using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last()))
+            using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last().bitmap))
             {
                 if (highlightWords)
                 {
@@ -1305,7 +1336,7 @@ namespace TwitchDownloaderCore
             return returnPath;
         }
 
-        private void DrawUsername(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, string colorOverride = null)
+        private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, string colorOverride = null)
         {
             SKColor userColor = SKColor.Parse(colorOverride ?? comment.message.user_color ?? defaultColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % defaultColors.Length]);
             if (colorOverride is null)
@@ -1346,9 +1377,9 @@ namespace TwitchDownloaderCore
             return userColor;
         }
 
-        private void DrawBadges(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos)
+        private void DrawBadges(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos)
         {
-            using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
+            using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last().bitmap);
             List<(SKBitmap, ChatBadgeType)> badgeImages = ParseCommentBadges(comment);
             foreach (var (badgeImage, badgeType) in badgeImages)
             {
@@ -1398,9 +1429,9 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        private void DrawTimestamp(Comment comment, List<SKBitmap> sectionImages, ref Point drawPos, ref Point defaultPos)
+        private void DrawTimestamp(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, ref Point defaultPos)
         {
-            using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last());
+            using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last().bitmap);
             TimeSpan timestamp = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
             string timeString = "";
 
@@ -1419,11 +1450,13 @@ namespace TwitchDownloaderCore
             defaultPos.X = drawPos.X;
         }
 
-        private void AddImageSection(List<SKBitmap> sectionImages, ref Point drawPos, Point defaultPos)
+        private void AddImageSection(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos)
         {
             drawPos.X = defaultPos.X;
             drawPos.Y = defaultPos.Y;
-            sectionImages.Add(new SKBitmap(renderOptions.ChatWidth, renderOptions.SectionHeight));
+            SKBitmap newBitmap = new SKBitmap(renderOptions.ChatWidth, renderOptions.SectionHeight);
+            SKImageInfo newInfo = newBitmap.Info;
+            sectionImages.Add((newInfo, newBitmap));
         }
 
         /// <summary>
