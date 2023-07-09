@@ -1057,40 +1057,49 @@ namespace TwitchDownloaderCore
         private void DrawRegularMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
         {
             bool bitsPrinted = false;
-            try
+            if (bitsCount > 0 && fragmentString.Any(char.IsDigit) && fragmentString.Any(char.IsLetter))
             {
-                if (bitsCount > 0 && fragmentString.Any(char.IsDigit) && fragmentString.Any(char.IsLetter))
+                int bitsIndex = fragmentString.AsSpan().IndexOfAny("0123456789");
+                if (int.TryParse(fragmentString.AsSpan(bitsIndex), out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString.AsSpan(0, bitsIndex), out var currentCheerEmote))
                 {
-                    int bitsIndex = fragmentString.IndexOfAny("0123456789".ToCharArray());
-                    string outputPrefix = fragmentString.Substring(0, bitsIndex);
-                    var currentCheerEmote = cheermotesList.FirstOrDefault(x => x.prefix.Equals(outputPrefix, StringComparison.OrdinalIgnoreCase), null);
-                    if (currentCheerEmote is not null)
+                    KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
+                    TwitchEmote cheerEmote = tierList.Value;
+                    SKImageInfo cheerEmoteInfo = cheerEmote.Info;
+                    if (drawPos.X + cheerEmoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                     {
-                        int bitsAmount = int.Parse(fragmentString.AsSpan()[bitsIndex..]);
-                        bitsCount -= bitsAmount;
-                        KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
-                        TwitchEmote cheerEmote = tierList.Value;
-                        SKImageInfo cheerEmoteInfo = cheerEmote.Info;
-                        if (drawPos.X + cheerEmoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
-                        {
-                            AddImageSection(sectionImages, ref drawPos, defaultPos);
-                        }
-
-                        Point emotePoint = new Point
-                        {
-                            X = drawPos.X,
-                            Y = (int)(sectionImages.Sum(x => x.info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - cheerEmoteInfo.Height) / 2.0))
-                        };
-                        emotePositionList.Add((emotePoint, cheerEmote));
-                        drawPos.X += cheerEmoteInfo.Width + renderOptions.EmoteSpacing;
-                        bitsPrinted = true;
+                        AddImageSection(sectionImages, ref drawPos, defaultPos);
                     }
+
+                    Point emotePoint = new Point
+                    {
+                        X = drawPos.X,
+                        Y = (int)(sectionImages.Sum(x => x.info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - cheerEmoteInfo.Height) / 2.0))
+                    };
+                    emotePositionList.Add((emotePoint, cheerEmote));
+                    drawPos.X += cheerEmoteInfo.Width + renderOptions.EmoteSpacing;
+                    bitsPrinted = true;
                 }
             }
-            catch { }
             if (!bitsPrinted)
             {
                 DrawText(fragmentString, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
+            }
+
+            bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, out CheerEmote cheerEmote)
+            {
+                // Enumerating over a span is faster than a list
+                var cheerEmoteListSpan = CollectionsMarshal.AsSpan(cheerEmoteList);
+                foreach (var emote1 in cheerEmoteListSpan)
+                {
+                    if (emote1.prefix.AsSpan().Equals(prefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        cheerEmote = emote1;
+                        return true;
+                    }
+                }
+
+                cheerEmote = default;
+                return false;
             }
         }
 
@@ -1151,7 +1160,7 @@ namespace TwitchDownloaderCore
 
             while (!noWrap && textWidth > effectiveChatWidth)
             {
-                string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, new[] { '?', '-' }).ToString();
+                string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, "?-").ToString();
                 var overrideWrap = false;
 
                 if (newDrawText.Length == 0)
@@ -1205,7 +1214,7 @@ namespace TwitchDownloaderCore
         /// Produces a <see langword="string"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/> OR substringed to the last index of any character in <paramref name="delimiters"/>.
         /// </summary>
         /// <returns>A shortened in visual width or delimited <see langword="string"/>, whichever comes first.</returns>
-        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, char[] delimiters)
+        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, ReadOnlySpan<char> delimiters)
         {
             // If we are dealing with non-RTL and don't have any delimiters then SKPaint.BreakText is over 9x faster
             if (!isRtl && text.IndexOfAny(delimiters) == -1)

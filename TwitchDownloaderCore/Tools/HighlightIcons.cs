@@ -84,7 +84,7 @@ namespace TwitchDownloaderCore.Tools
 
                 if (bodyWithoutName.StartsWith(" converted from a"))
                 {
-                    // TODO: use bodySpan when .NET 7
+                    // TODO: use bodyWithoutName when .NET 7
                     var convertedToMatch = Regex.Match(comment.message.body, $@"(?<=^{comment.commenter.display_name} converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
                     if (!convertedToMatch.Success)
                         return HighlightType.None;
@@ -148,7 +148,7 @@ namespace TwitchDownloaderCore.Tools
                     _giftAnonymousIcon = returnBitmap;
                     break;
                 default:
-                    throw new NotSupportedException("This should not be possible.");
+                    throw new NotSupportedException("The requested highlight icon does not exist.");
             }
 
             // Return the generated icon
@@ -160,7 +160,7 @@ namespace TwitchDownloaderCore.Tools
             var taskIconBytes = TwitchHelper.GetImage(cachePath, GIFTED_MANY_ICON_URL, "gift-illus", "3", "png");
             taskIconBytes.Wait();
             using var ms = new MemoryStream(taskIconBytes.Result); // Illustration is 72x72
-            var codec = SKCodec.Create(ms);
+            using var codec = SKCodec.Create(ms);
             using var tempBitmap = SKBitmap.Decode(codec);
 
             //int newSize = (int)(fontSize / 0.2727); // 44*44px @ 12pt font // Doesn't work because our image sections aren't tall enough and I'm not rewriting that right now
@@ -174,13 +174,13 @@ namespace TwitchDownloaderCore.Tools
             using var tempBitmap = new SKBitmap(72, 72); // Icon SVG strings are scaled for 72x72
             using var tempCanvas = new SKCanvas(tempBitmap);
 
-            var iconPath = SKPath.ParseSvgPathData(highlightType switch
+            using var iconPath = SKPath.ParseSvgPathData(highlightType switch
             {
                 HighlightType.SubscribedTier => SUBSCRIBED_TIER_ICON_SVG,
                 HighlightType.SubscribedPrime => SUBSCRIBED_PRIME_ICON_SVG,
                 HighlightType.GiftedSingle => GIFTED_SINGLE_ICON_SVG,
                 HighlightType.GiftedAnonymous => GIFTED_ANONYMOUS_ICON_SVG,
-                _ => throw new NotSupportedException("This should not be possible.")
+                _ => throw new NotSupportedException("The requested icon svg path does not exist.")
             });
             iconPath.FillType = SKPathFillType.EvenOdd;
 
@@ -192,7 +192,7 @@ namespace TwitchDownloaderCore.Tools
                     HighlightType.SubscribedPrime => purple,
                     HighlightType.GiftedSingle => textColor,
                     HighlightType.GiftedAnonymous => textColor,
-                    _ => throw new NotSupportedException("This should not be possible.")
+                    _ => throw new NotSupportedException("The requested icon color does not exist.")
                 },
                 IsAntialias = true,
                 LcdRenderText = true
