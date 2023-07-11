@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderWPF.Services
@@ -30,8 +31,8 @@ namespace TwitchDownloaderWPF.Services
                 .Replace("{channel}", RemoveInvalidFilenameChars(channel))
                 .Replace("{date}", date.ToString("Mdyy"))
                 .Replace("{random_string}", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()))
-                .Replace("{crop_start}", string.Format(new TimeSpanHFormat(), @"{0:HH\-mm\-ss}", cropStart))
-                .Replace("{crop_end}", string.Format(new TimeSpanHFormat(), @"{0:HH\-mm\-ss}", cropEnd));
+                .Replace("{crop_start}", cropStart.ToFormattedString(@"HH\-mm\-ss", new TimeSpanHFormat()))
+                .Replace("{crop_end}", cropEnd.ToFormattedString(@"HH\-mm\-ss", new TimeSpanHFormat()));
 
             if (template.Contains("{date_custom="))
             {

@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Text;
 
 namespace TwitchDownloaderCore.Tools
 {
     /// <summary>
-    /// Adds an 'H' parameter to TimeSpan string formatting. The 'H' parameter is equivalent to flooring <see cref="TimeSpan"/>.TotalHours.
+    /// Adds an 'H' parameter to <see cref="TimeSpan"/> string formatting. The 'H' parameter is equivalent to flooring <see cref="TimeSpan"/>.<see cref="TimeSpan.TotalHours"/>.
     /// </summary>
     /// <remarks>
-    /// The fact that this is not part of .NET is stupid.
+    /// For optimal memory performance, resulting strings split about any 'H' parameters should be less than 256.
     /// </remarks>
     public class TimeSpanHFormat : IFormatProvider, ICustomFormatter
     {
@@ -23,18 +22,23 @@ namespace TwitchDownloaderCore.Tools
 
         public string Format(string format, object arg, IFormatProvider formatProvider)
         {
+            if (string.IsNullOrEmpty(format))
+            {
+                return "";
+            }
+
             if (!(arg is TimeSpan timeSpan))
             {
-                return HandleOtherFormats(format, arg);
+                return HandleOtherFormats(format, arg, formatProvider);
             }
 
             if (!format.Contains('H'))
             {
-                return HandleOtherFormats(format, arg);
+                return HandleOtherFormats(format, arg, formatProvider);
             }
 
-            var reader = new StringReader(format);
-            var builder = new StringBuilder(format.Length);
+            using var reader = new StringReader(format);
+            var formattedStringBuilder = new StringBuilder(format.Length);
             var regularFormatCharStart = -1;
             var bigHStart = -1;
             var position = -1;
@@ -52,7 +56,7 @@ namespace TwitchDownloaderCore.Tools
 
                     if (regularFormatCharStart != -1)
                     {
-                        builder.Append(timeSpan.ToString(format.Substring(regularFormatCharStart, position - regularFormatCharStart)));
+                        AppendRegularFormat(formattedStringBuilder, timeSpan, format, regularFormatCharStart, position - regularFormatCharStart);
                         regularFormatCharStart = -1;
                     }
                 }
@@ -65,14 +69,15 @@ namespace TwitchDownloaderCore.Tools
 
                     if (bigHStart != -1)
                     {
-                        var formatString = "";
-                        for (var i = 0; i < position - bigHStart; i++)
-                        {
-                            formatString += "0";
-                        }
-
-                        builder.Append(((int)timeSpan.TotalHours).ToString(formatString));
+                        AppendBigHFormat(formattedStringBuilder, timeSpan, position - bigHStart);
                         bigHStart = -1;
+                    }
+
+                    // If the current char is an escape and the next char is an H, we need to escape it
+                    if (readChar == '\\' && reader.Peek() == 'H')
+                    {
+                        _ = reader.Read();
+                        position++;
                     }
                 }
             } while (reader.Peek() != -1);
@@ -80,26 +85,51 @@ namespace TwitchDownloaderCore.Tools
             position++;
             if (regularFormatCharStart != -1)
             {
-                builder.Append(timeSpan.ToString(format.Substring(regularFormatCharStart, position - regularFormatCharStart)));
+                AppendRegularFormat(formattedStringBuilder, timeSpan, format, regularFormatCharStart, position - regularFormatCharStart);
             }
             else if (bigHStart != -1)
             {
-                var formatString = "";
-                for (var i = 0; i < position - bigHStart; i++)
-                {
-                    formatString += "0";
-                }
-
-                builder.Append(((int)timeSpan.TotalHours).ToString(formatString));
+                AppendBigHFormat(formattedStringBuilder, timeSpan, position - bigHStart);
             }
 
-            return builder.ToString();
+            return formattedStringBuilder.ToString();
         }
 
-        private string HandleOtherFormats(string format, object arg)
+        private static void AppendRegularFormat(StringBuilder formattedStringBuilder, TimeSpan timeSpan, string formatString, int start, int length)
         {
-            if (arg is IFormattable)
-                return ((IFormattable)arg).ToString(format, CultureInfo.CurrentCulture);
+            Span<char> destination = stackalloc char[256];
+            var format = formatString.AsSpan(start, length);
+
+            if (timeSpan.TryFormat(destination, out var charsWritten, format))
+            {
+                formattedStringBuilder.Append(destination[..charsWritten]);
+            }
+            else
+            {
+                formattedStringBuilder.Append(timeSpan.ToString(format.ToString()));
+            }
+        }
+
+        private static void AppendBigHFormat(StringBuilder formattedStringBuilder, TimeSpan timeSpan, int count)
+        {
+            Span<char> destination = stackalloc char[8];
+            Span<char> format = stackalloc char[count];
+            format.Fill('0');
+
+            if (((int)timeSpan.TotalHours).TryFormat(destination, out var charsWritten, format))
+            {
+                formattedStringBuilder.Append(destination[..charsWritten]);
+            }
+            else
+            {
+                formattedStringBuilder.Append(((int)timeSpan.TotalHours).ToString(format.ToString()));
+            }
+        }
+
+        private static string HandleOtherFormats(string format, object arg, IFormatProvider formatProvider)
+        {
+            if (arg is IFormattable formattable)
+                return formattable.ToString(format, formatProvider);
             else if (arg != null)
                 return arg.ToString();
             else

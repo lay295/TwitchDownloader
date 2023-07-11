@@ -19,15 +19,15 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 TimeSpan time = TimeSpan.FromSeconds(Length);
                 if ((int)time.TotalHours > 0)
                 {
-                    return (int)time.TotalHours + ":" + time.Minutes.ToString("D2") + ":" + time.Seconds.ToString("D2");
+                    return $"{(int)time.TotalHours}:{time.Minutes:D2}:{time.Seconds:D2}";
                 }
 
                 if ((int)time.TotalMinutes > 0)
                 {
-                    return time.Minutes.ToString("D2") + ":" + time.Seconds.ToString("D2");
+                    return $"{time.Minutes:D2}:{time.Seconds:D2}";
                 }
 
-                return time.Seconds.ToString("D2") + "s";
+                return $"{time.Seconds:D2}s";
             }
         }
     }
