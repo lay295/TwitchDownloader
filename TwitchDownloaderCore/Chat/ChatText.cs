@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Tools;
@@ -21,29 +22,28 @@ namespace TwitchDownloaderCore.Chat
                 TwitchHelper.CreateDirectory(outputDirectory.FullName);
             }
 
+            var utcTimestampFormat = timeFormat is TimestampFormat.Utc ? DateTimeFormatInfo.CurrentInfo.UniversalSortableDateTimePattern.Replace("Z", " UTC") : null;
             await using var sw = new StreamWriter(filePath);
             foreach (var comment in chatRoot.comments)
             {
-                string username = comment.commenter.display_name;
-                string message = comment.message.body;
+                var username = comment.commenter.display_name;
+                var message = comment.message.body;
                 if (timeFormat == TimestampFormat.Utc)
                 {
-                    string timestamp = comment.created_at.ToString("u").Replace("Z", " UTC");
+                    // This branch could be optimized even more but the loss of readability isn't worth it
+                    var timestamp = comment.created_at.ToString(utcTimestampFormat);
                     await sw.WriteLineAsync($"[{timestamp}] {username}: {message}");
                 }
                 else if (timeFormat == TimestampFormat.Relative)
                 {
                     var time = TimeSpan.FromSeconds(comment.content_offset_seconds);
-                    await sw.WriteLineAsync(string.Format(new TimeSpanHFormat(), @"[{0:H\:mm\:ss}] {1}: {2}", time, username, message));
+                    await sw.WriteLineAsync(string.Create(TimeSpanHFormat.ReusableInstance, @$"[{time:H\:mm\:ss}] {username}: {message}"));
                 }
                 else if (timeFormat == TimestampFormat.None)
                 {
                     await sw.WriteLineAsync($"{username}: {message}");
                 }
             }
-
-            await sw.FlushAsync();
-            sw.Close();
         }
     }
 }
