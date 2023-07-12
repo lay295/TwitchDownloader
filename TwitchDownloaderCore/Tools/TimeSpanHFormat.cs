@@ -12,6 +12,8 @@ namespace TwitchDownloaderCore.Tools
     /// </remarks>
     public class TimeSpanHFormat : IFormatProvider, ICustomFormatter
     {
+        public static readonly TimeSpanHFormat ReusableInstance = new();
+
         public object GetFormat(Type formatType)
         {
             if (formatType == typeof(ICustomFormatter))
