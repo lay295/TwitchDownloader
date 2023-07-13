@@ -19,13 +19,13 @@ namespace TwitchDownloaderCore
     public sealed class ChatDownloader
     {
         private readonly ChatDownloadOptions downloadOptions;
-        private static HttpClient httpClient = new HttpClient();
-        private static readonly Regex _bitsRegex = new(@"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d?\d?\d?\d?\d?\d?(?=\s|$)", RegexOptions.Compiled);
+        private static readonly HttpClient HttpClient = new();
+        private static readonly Regex BitsRegex = new(@"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d?\d?\d?\d?\d?\d?(?=\s|$)", RegexOptions.Compiled);
         private enum DownloadType { Clip, Video }
 
-        public ChatDownloader(ChatDownloadOptions DownloadOptions)
+        public ChatDownloader(ChatDownloadOptions chatDownloadOptions)
         {
-            downloadOptions = DownloadOptions;
+            downloadOptions = chatDownloadOptions;
             downloadOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
                 "TwitchDownloader");
@@ -64,7 +64,7 @@ namespace TwitchDownloaderCore
                         request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"cursor\":\"" + cursor + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
                     }
 
-                    using (var httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
+                    using (var httpResponse = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
                     {
                         httpResponse.EnsureSuccessStatusCode();
                         commentResponse = await httpResponse.Content.ReadFromJsonAsync<List<GqlCommentResponse>>(options: null, cancellationToken);
@@ -138,14 +138,14 @@ namespace TwitchDownloaderCore
                 commenter.name = oldComment.commenter.login;
                 newComment.commenter = commenter;
                 Message message = new Message();
-                message.body = "";
+                StringBuilder messageBodyBuilder = new StringBuilder();
                 List<Fragment> fragments = new List<Fragment>();
                 List<Emoticon2> emoticons = new List<Emoticon2>();
                 foreach (var fragment in oldComment.message.fragments)
                 {
                     Fragment newFragment = new Fragment();
                     if (fragment.text != null)
-                        message.body += fragment.text;
+                        messageBodyBuilder.Append(fragment.text);
 
                     if (fragment.emote != null)
                     {
@@ -155,7 +155,7 @@ namespace TwitchDownloaderCore
                         Emoticon2 newEmote = new Emoticon2();
                         newEmote._id = fragment.emote.emoteID;
                         newEmote.begin = fragment.emote.from;
-                        newEmote.end = newEmote.begin + fragment.text.Length + 1;
+                        newEmote.end = newEmote.begin + fragment.text!.Length + 1;
                         emoticons.Add(newEmote);
                     }
 
@@ -163,6 +163,8 @@ namespace TwitchDownloaderCore
                     fragments.Add(newFragment);
                 }
                 message.fragments = fragments;
+                message.body = messageBodyBuilder.ToString();
+                messageBodyBuilder.Clear();
                 List<UserBadge> badges = new List<UserBadge>();
                 foreach (var badge in oldComment.message.userBadges)
                 {
@@ -177,7 +179,7 @@ namespace TwitchDownloaderCore
                 message.user_badges = badges;
                 message.user_color = oldComment.message.userColor;
                 message.emoticons = emoticons;
-                var bitMatch = _bitsRegex.Match(message.body);
+                var bitMatch = BitsRegex.Match(message.body);
                 if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
                 {
                     message.bits_spent = result;
@@ -238,9 +240,9 @@ namespace TwitchDownloaderCore
                         description = responseChapter.node.description,
                         subDescription = responseChapter.node.subDescription,
                         thumbnailUrl = responseChapter.node.thumbnailURL,
-                        gameId = responseChapter.node.details.game?.id ?? null,
-                        gameDisplayName = responseChapter.node.details.game?.displayName ?? null,
-                        gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL ?? null
+                        gameId = responseChapter.node.details.game?.id,
+                        gameDisplayName = responseChapter.node.details.game?.displayName,
+                        gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL
                     };
                     chatRoot.video.chapters.Add(chapter);
                 }

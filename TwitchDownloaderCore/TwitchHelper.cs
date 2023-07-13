@@ -879,7 +879,7 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    await using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     byte[] bytes = new byte[stream.Length];
                     stream.Seek(0, SeekOrigin.Begin);
                     _ = await stream.ReadAsync(bytes, cancellationToken);
