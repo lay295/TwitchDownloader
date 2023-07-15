@@ -92,6 +92,15 @@ namespace TwitchDownloaderCore
                 messageFont.Typeface = SKTypeface.FromFamilyName(renderOptions.Font, renderOptions.MessageFontStyle);
             }
 
+            // Cache the rendered timestamp widths
+            renderOptions.TimestampWidths = !renderOptions.Timestamp ? Array.Empty<int>() : new[]
+            {
+                (int)messageFont.MeasureText("0:00"),
+                (int)messageFont.MeasureText("00:00"),
+                (int)messageFont.MeasureText("0:00:00"),
+                (int)messageFont.MeasureText("00:00:00")
+            };
+
             // Rough estimation of the width of a single block art character
             renderOptions.BlockArtCharWidth = GetFallbackFont('█').MeasureText("█");
 
@@ -1392,23 +1401,50 @@ namespace TwitchDownloaderCore
 
         private void DrawTimestamp(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, ref Point defaultPos)
         {
-            using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last().bitmap);
-            TimeSpan timestamp = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
-            string timeString = "";
+            using var sectionImageCanvas = new SKCanvas(sectionImages.Last().bitmap);
+            var timestamp = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
 
-            if (timestamp.Hours >= 1)
-                timeString = timestamp.ToString(@"h\:mm\:ss");
-            else
-                timeString = timestamp.ToString(@"m\:ss");
-            int textWidth = (int)messageFont.MeasureText(Regex.Replace(timeString, "[0-9]", "0"));
+            const int MAX_TIMESTAMP_LENGTH = 8; // 48:00:00
+            var formattedTimestamp = FormatTimestamp(stackalloc char[MAX_TIMESTAMP_LENGTH], timestamp);
+
             if (renderOptions.Outline)
             {
-                SKPath outlinePath = messageFont.GetTextPath(timeString, drawPos.X, drawPos.Y);
+                using var outlinePath = messageFont.GetTextPath(formattedTimestamp, drawPos.X, drawPos.Y);
                 sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
             }
-            sectionImageCanvas.DrawText(timeString, drawPos.X, drawPos.Y, messageFont);
-            drawPos.X += textWidth + (renderOptions.WordSpacing * 2);
+
+            sectionImageCanvas.DrawText(formattedTimestamp, drawPos.X, drawPos.Y, messageFont);
+            var textWidth =
+                timestamp.TotalHours >= 1
+                    ? timestamp.TotalHours >= 10
+                        ? renderOptions.TimestampWidths[3]
+                        : renderOptions.TimestampWidths[2]
+                    : timestamp.Minutes >= 10
+                        ? renderOptions.TimestampWidths[1]
+                        : renderOptions.TimestampWidths[0];
+            drawPos.X += textWidth + renderOptions.WordSpacing * 2;
             defaultPos.X = drawPos.X;
+
+            ReadOnlySpan<char> FormatTimestamp(Span<char> stackSpace, TimeSpan timespan)
+            {
+                if (timespan.TotalHours >= 1)
+                {
+                    if (timespan.TotalHours >= 24)
+                    {
+                        return TimeSpanHFormat.ReusableInstance.Format(@"HH\:mm\:ss", timespan);
+                    }
+
+                    return timespan.TryFormat(stackSpace, out var charsWritten, @"h\:mm\:ss")
+                        ? stackSpace[..charsWritten]
+                        : timespan.ToString(@"h\:mm\:ss");
+                }
+                else
+                {
+                    return timespan.TryFormat(stackSpace, out var charsWritten, @"m\:ss")
+                        ? stackSpace[..charsWritten]
+                        : timespan.ToString(@"m\:ss");
+                }
+            }
         }
 
         private void AddImageSection(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos)

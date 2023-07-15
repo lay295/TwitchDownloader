@@ -30,8 +30,8 @@ namespace TwitchDownloaderWPF.Services
                 .Replace("{channel}", RemoveInvalidFilenameChars(channel))
                 .Replace("{date}", date.ToString("Mdyy"))
                 .Replace("{random_string}", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()))
-                .Replace("{crop_start}", string.Create(TimeSpanHFormat.ReusableInstance, @$"{cropStart:HH\-mm\-ss}"))
-                .Replace("{crop_end}", string.Create(TimeSpanHFormat.ReusableInstance, @$"{cropEnd:HH\-mm\-ss}"));
+                .Replace("{crop_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropStart))
+                .Replace("{crop_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropEnd));
 
             if (template.Contains("{date_custom="))
             {
