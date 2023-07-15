@@ -94,6 +94,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 IntPtr pointer = newBitmap.GetPixels();
                 SKCodecOptions codecOptions = new SKCodecOptions(i);
                 Codec.GetPixels(imageInfo, pointer, codecOptions);
+                newBitmap.SetImmutable();
                 EmoteFrames.Add(newBitmap);
             }
         }
@@ -107,6 +108,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
                 EmoteFrames[i].ScalePixels(newBitmap, SKFilterQuality.High);
                 EmoteFrames[i].Dispose();
+                newBitmap.SetImmutable();
                 EmoteFrames[i] = newBitmap;
             }
         }

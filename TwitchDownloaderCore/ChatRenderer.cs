@@ -63,7 +63,7 @@ namespace TwitchDownloaderCore
             renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize - renderOptions.SidePadding * 2;
             renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
             _progress = progress;
-            highlightIcons = new HighlightIcons(renderOptions.TempFolder, Purple);
+            highlightIcons = new HighlightIcons(renderOptions.TempFolder, Purple, renderOptions.Offline);
         }
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
@@ -674,6 +674,7 @@ namespace TwitchDownloaderCore
 
             }
             sectionImages.Clear();
+            finalBitmap.SetImmutable();
             return finalBitmap;
         }
 
@@ -704,6 +705,11 @@ namespace TwitchDownloaderCore
             }
             DrawUsername(comment, sectionImages, ref drawPos, defaultPos);
             DrawMessage(comment, sectionImages, emotePositionList, highlightWords, ref drawPos, defaultPos);
+
+            foreach (var (_, bitmap) in sectionImages)
+            {
+                bitmap.SetImmutable();
+            }
         }
 
         private void DrawAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, ref Point drawPos, Point defaultPos)
@@ -739,12 +745,17 @@ namespace TwitchDownloaderCore
                     DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
                     break;
             }
+
+            foreach (var (_, bitmap) in sectionImages)
+            {
+                bitmap.SetImmutable();
+            }
         }
 
-        private void DrawSubscribeMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
+        private void DrawSubscribeMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             using SKCanvas canvas = new(sectionImages.Last().bitmap);
-            canvas.DrawBitmap(highlightIcon, iconPoint.X, iconPoint.Y);
+            canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
 
             Point customMessagePos = drawPos;
             drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
@@ -780,11 +791,11 @@ namespace TwitchDownloaderCore
             DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
         }
 
-        private void DrawGiftMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKBitmap highlightIcon, Point iconPoint)
+        private void DrawGiftMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             using SKCanvas canvas = new(sectionImages.Last().bitmap);
 
-            canvas.DrawBitmap(highlightIcon, iconPoint.X, iconPoint.Y);
+            canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
             drawPos.X += highlightIcon.Width + renderOptions.AccentIndentWidth - renderOptions.AccentStrokeWidth;
             defaultPos.X = drawPos.X;
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);

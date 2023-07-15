@@ -33,19 +33,21 @@ namespace TwitchDownloaderCore.Tools
         private static readonly Regex SubMessageRegex = new(@"^(subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d?\d?\d months(?:, currently on a \d?\d?\d month streak)?! )(.+)$", RegexOptions.Compiled);
         private static readonly Regex GiftAnonymousRegex = new(@"^An anonymous user (?:gifted a|is gifting \d\d?\d?) Tier \d", RegexOptions.Compiled);
 
-        private SKBitmap _subscribedTierIcon = null;
-        private SKBitmap _subscribedPrimeIcon = null;
-        private SKBitmap _giftSingleIcon = null;
-        private SKBitmap _giftManyIcon = null;
-        private SKBitmap _giftAnonymousIcon = null;
+        private SKImage _subscribedTierIcon;
+        private SKImage _subscribedPrimeIcon;
+        private SKImage _giftSingleIcon;
+        private SKImage _giftManyIcon;
+        private SKImage _giftAnonymousIcon;
 
         private readonly string _cachePath;
         private readonly SKColor _purple;
+        private readonly bool _offline;
 
-        public HighlightIcons(string cachePath, SKColor iconPurple)
+        public HighlightIcons(string cachePath, SKColor iconPurple, bool offline)
         {
             _cachePath = Path.Combine(cachePath, "icons");
             _purple = iconPurple;
+            _offline = offline;
         }
 
         // If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
@@ -108,7 +110,7 @@ namespace TwitchDownloaderCore.Tools
 
         /// <returns>A the requested icon or null if no icon exists for the highlight type</returns>
         /// <remarks>The icon returned is NOT a copy and should not be manually disposed.</remarks>
-        public SKBitmap GetHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
+        public SKImage GetHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
         {
             // Return the needed icon from cache or generate if null
             return highlightType switch
@@ -122,54 +124,66 @@ namespace TwitchDownloaderCore.Tools
             };
         }
 
-        private SKBitmap GenerateHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
+        private SKImage GenerateHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
         {
             // Generate the needed icon
-            var returnBitmap = highlightType is HighlightType.GiftedMany
-                ? GenerateGiftedManyIcon(fontSize, _cachePath)
+            var returnIcon = highlightType is HighlightType.GiftedMany
+                ? GenerateGiftedManyIcon(fontSize, _cachePath, _offline)
                 : GenerateSvgIcon(highlightType, _purple, textColor, fontSize);
 
             // Cache the icon
             switch (highlightType)
             {
                 case HighlightType.SubscribedTier:
-                    _subscribedTierIcon = returnBitmap;
+                    _subscribedTierIcon = returnIcon;
                     break;
                 case HighlightType.SubscribedPrime:
-                    _subscribedPrimeIcon = returnBitmap;
+                    _subscribedPrimeIcon = returnIcon;
                     break;
                 case HighlightType.GiftedSingle:
-                    _giftSingleIcon = returnBitmap;
+                    _giftSingleIcon = returnIcon;
                     break;
                 case HighlightType.GiftedMany:
-                    _giftManyIcon = returnBitmap;
+                    _giftManyIcon = returnIcon;
                     break;
                 case HighlightType.GiftedAnonymous:
-                    _giftAnonymousIcon = returnBitmap;
+                    _giftAnonymousIcon = returnIcon;
                     break;
                 default:
                     throw new NotSupportedException("The requested highlight icon does not exist.");
             }
 
             // Return the generated icon
-            return returnBitmap;
+            return returnIcon;
         }
 
-        private static SKBitmap GenerateGiftedManyIcon(double fontSize, string cachePath)
+        private static SKImage GenerateGiftedManyIcon(double fontSize, string cachePath, bool offline)
         {
+            //int newSize = (int)(fontSize / 0.2727); // 44*44px @ 12pt font // Doesn't work because our image sections aren't tall enough and I'm not rewriting that right now
+            var finalIconSize = (int)(fontSize / 0.6); // 20x20px @ 12pt font
+
+            if (offline)
+            {
+                using var offlineBitmap = new SKBitmap(finalIconSize, finalIconSize);
+                using (var offlineCanvas = new SKCanvas(offlineBitmap))
+                    offlineCanvas.Clear();
+                offlineBitmap.SetImmutable();
+                return SKImage.FromBitmap(offlineBitmap);
+            }
+
             var taskIconBytes = TwitchHelper.GetImage(cachePath, GIFTED_MANY_ICON_URL, "gift-illus", "3", "png");
             taskIconBytes.Wait();
             using var ms = new MemoryStream(taskIconBytes.Result); // Illustration is 72x72
             using var codec = SKCodec.Create(ms);
             using var tempBitmap = SKBitmap.Decode(codec);
 
-            //int newSize = (int)(fontSize / 0.2727); // 44*44px @ 12pt font // Doesn't work because our image sections aren't tall enough and I'm not rewriting that right now
-            var newSize = (int)(fontSize / 0.6); // 20x20px @ 12pt font
-            SKImageInfo imageInfo = new(newSize, newSize);
-            return tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            var imageInfo = new SKImageInfo(finalIconSize, finalIconSize);
+            using var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            resizedBitmap.SetImmutable();
+            return SKImage.FromBitmap(resizedBitmap);
         }
 
-        private static SKBitmap GenerateSvgIcon(HighlightType highlightType, SKColor purple, SKColor textColor, double fontSize)
+        private static SKImage GenerateSvgIcon(HighlightType highlightType, SKColor purple, SKColor textColor, double fontSize)
         {
             using var tempBitmap = new SKBitmap(72, 72); // Icon SVG strings are scaled for 72x72
             using var tempCanvas = new SKCanvas(tempBitmap);
@@ -201,7 +215,9 @@ namespace TwitchDownloaderCore.Tools
             tempCanvas.DrawPath(iconPath, iconColor);
             var newSize = (int)(fontSize / 0.6); // 20*20px @ 12pt font
             var imageInfo = new SKImageInfo(newSize, newSize);
-            return tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            resizedBitmap.SetImmutable();
+            return SKImage.FromBitmap(resizedBitmap);
         }
 
         /// <summary>
