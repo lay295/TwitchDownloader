@@ -136,32 +136,38 @@ namespace TwitchDownloaderCore
             var partCount = videoPartsList.Count;
             var videoPartsQueue = new ConcurrentQueue<string>(videoPartsList);
             var downloadTasks = new Task[downloadOptions.DownloadThreads];
-            var threadsCompleted = 0;
+            var threadsExited = 0;
 
             // ReSharper disable once ConvertToLocalFunction - Lambda only allocates once here, using local function allocates a new Action for each thread.
-            var onComplete = void () => Interlocked.Add(ref threadsCompleted, 1);
+            var onThreadExit = void () => Interlocked.Add(ref threadsExited, 1);
 
             // Setup the download threads
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
             {
                 downloadTasks[i] = Task.Factory.StartNew(async state =>
                     {
-                        var (partQueue, token, rootUrl, cacheFolder, videoAge, throttleKib, completionDelegate) =
+                        var (partQueue, token, rootUrl, cacheFolder, videoAge, throttleKib, exitDelegate) =
                             (Tuple<ConcurrentQueue<string>, CancellationToken, string, string, double, int, Action>)state;
 
-                        while (!partQueue.IsEmpty)
+                        try
                         {
-                            if (partQueue.TryDequeue(out var request))
+                            while (!partQueue.IsEmpty)
                             {
-                                await DownloadVideoPartAsync(rootUrl, request, cacheFolder, videoAge, throttleKib, token);
+                                if (partQueue.TryDequeue(out var request))
+                                {
+                                    await DownloadVideoPartAsync(rootUrl, request, cacheFolder, videoAge, throttleKib, token);
+                                }
+
+                                await Task.Delay(77, token);
                             }
-
-                            await Task.Delay(77, token);
                         }
-
-                        completionDelegate?.Invoke();
+                        finally
+                        {
+                            // If an exception is thrown, we still need to register that we exited or the downloader will deadlock
+                            exitDelegate?.Invoke();
+                        }
                     }, new Tuple<ConcurrentQueue<string>, CancellationToken, string, string, double, int, Action>(
-                        videoPartsQueue, cancellationToken, baseUrl, downloadFolder, vodAge, downloadOptions.ThrottleKib, onComplete
+                        videoPartsQueue, cancellationToken, baseUrl, downloadFolder, vodAge, downloadOptions.ThrottleKib, onThreadExit
                     ),
                     cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
             }
@@ -188,7 +194,8 @@ namespace TwitchDownloaderCore
                 }
 
                 await Task.Delay(500, cancellationToken);
-            } while (threadsCompleted < downloadOptions.DownloadThreads);
+                // We need to observe a local variable because for some reason the tasks return task.IsCompleted == true even while still working
+            } while (threadsExited < downloadOptions.DownloadThreads);
 
             if (downloadExceptions.Count != 0)
             {
@@ -308,8 +315,6 @@ namespace TwitchDownloaderCore
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // There is a cleaner way to do delayed retries with Polly but in this
-                // scenario we need more control than just blindly retrying
                 try
                 {
                     if (tryUnmute && videoPartName.Contains("-muted"))
