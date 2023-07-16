@@ -411,16 +411,31 @@ namespace TwitchDownloaderCore
             using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            if (throttleKib == -1)
+            switch (throttleKib)
             {
-                await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
-                await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                await using var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), throttleKib);
-                await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
-                await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                case -1:
+                {
+                    await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                    break;
+                }
+                default:
+                {
+                    try
+                    {
+                        await using var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), throttleKib);
+                        await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                        await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (IOException e) when (e.Message.Contains("EOF"))
+                    {
+                        // The throttled stream throws when it reads an unexpected EOF, try again without the limiter
+                        // TODO: Log this somehow
+                        await Task.Delay(2_000, cancellationToken);
+                        goto case -1;
+                    }
+                    break;
+                }
             }
         }
 
