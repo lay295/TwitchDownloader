@@ -56,13 +56,13 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            VideoDownloader downloader = new VideoDownloader(DownloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
+            VideoDownloader downloader = new VideoDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {
-                await downloader.DownloadAsync(progress, TokenSource.Token);
+                await downloader.DownloadAsync(TokenSource.Token);
                 if (TokenSource.IsCancellationRequested)
                 {
                     ChangeStatus(TwitchTaskStatus.Canceled);

@@ -15,12 +15,12 @@ namespace TwitchDownloaderCLI.Modes
         {
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
 
-            var downloadOptions = GetDownloadOptions(inputOptions);
-
-            VideoDownloader videoDownloader = new(downloadOptions);
             Progress<ProgressReport> progress = new();
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            videoDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
+
+            var downloadOptions = GetDownloadOptions(inputOptions);
+            VideoDownloader videoDownloader = new(downloadOptions, progress);
+            videoDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
         private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions)
