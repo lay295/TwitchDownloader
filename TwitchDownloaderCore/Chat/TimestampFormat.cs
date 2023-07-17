@@ -4,6 +4,7 @@
     {
         Utc,
         Relative,
-        None
+        None,
+        UtcMilliseconds
     }
 }
