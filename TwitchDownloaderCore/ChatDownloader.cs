@@ -19,9 +19,22 @@ namespace TwitchDownloaderCore
     public sealed class ChatDownloader
     {
         private readonly ChatDownloadOptions downloadOptions;
-        private static HttpClient httpClient = new HttpClient();
-        private static readonly Regex _bitsRegex = new(@"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d?\d?\d?\d?\d?\d?(?=\s|$)", RegexOptions.Compiled);
-        private enum DownloadType { Clip, Video }
+
+        private static HttpClient httpClient = new HttpClient()
+        {
+            BaseAddress = new Uri("https://gql.twitch.tv/gql"),
+            DefaultRequestHeaders = {{"Client-ID", "kd1unb4b3q4t58fwlpcbzcbnm76a8fp"}}
+        };
+
+        private static readonly Regex _bitsRegex = new(
+            @"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d?\d?\d?\d?\d?\d?(?=\s|$)",
+            RegexOptions.Compiled);
+
+        private enum DownloadType
+        {
+            Clip,
+            Video
+        }
 
         public ChatDownloader(ChatDownloadOptions DownloadOptions)
         {
@@ -31,8 +44,10 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        private static async Task DownloadSection(double videoStart, double videoEnd, string videoId, SortedSet<Comment> comments, object commentLock, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        private static async Task<List<Comment>> DownloadSection(double videoStart, double videoEnd, string videoId,
+            IProgress<ProgressReport> progress, ChatFormat format, CancellationToken cancellationToken)
         {
+            var comments = new List<Comment>();
             //GQL only wants ints
             videoStart = Math.Floor(videoStart);
             double videoDuration = videoEnd - videoStart;
@@ -40,6 +55,7 @@ namespace TwitchDownloaderCore
             bool isFirst = true;
             string cursor = "";
             int errorCount = 0;
+
 
             while (latestMessage < videoEnd)
             {
@@ -50,24 +66,35 @@ namespace TwitchDownloaderCore
                 {
                     var request = new HttpRequestMessage()
                     {
-                        RequestUri = new Uri("https://gql.twitch.tv/gql"),
                         Method = HttpMethod.Post
                     };
-                    request.Headers.Add("Client-ID", "kd1unb4b3q4t58fwlpcbzcbnm76a8fp");
+
 
                     if (isFirst)
                     {
-                        request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"contentOffsetSeconds\":" + videoStart + "},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
+                        request.Content = new StringContent(
+                            "[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" +
+                            videoId + "\",\"contentOffsetSeconds\":" + videoStart +
+                            "},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]",
+                            Encoding.UTF8, "application/json");
                     }
                     else
                     {
-                        request.Content = new StringContent("[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"cursor\":\"" + cursor + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]", Encoding.UTF8, "application/json");
+                        request.Content = new StringContent(
+                            "[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" +
+                            videoId + "\",\"cursor\":\"" + cursor +
+                            "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]",
+                            Encoding.UTF8, "application/json");
                     }
 
-                    using (var httpResponse = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
+                    using (var httpResponse = await httpClient
+                               .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+                               .ConfigureAwait(false))
                     {
                         httpResponse.EnsureSuccessStatusCode();
-                        commentResponse = await httpResponse.Content.ReadFromJsonAsync<List<GqlCommentResponse>>(options: null, cancellationToken);
+                        commentResponse =
+                            await httpResponse.Content.ReadFromJsonAsync<List<GqlCommentResponse>>(options: null,
+                                cancellationToken);
                     }
 
                     errorCount = 0;
@@ -89,32 +116,34 @@ namespace TwitchDownloaderCore
                     continue;
                 }
 
-                var convertedComments = ConvertComments(commentResponse[0].data.video);
-                lock (commentLock)
+                var convertedComments = ConvertComments(commentResponse[0].data.video, format);
+                foreach (var comment in convertedComments)
                 {
-                    foreach (var comment in convertedComments)
-                    {
-                        if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
-                            comments.Add(comment);
+                    if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
+                        comments.Add(comment);
 
-                        latestMessage = comment.content_offset_seconds;
-                    }
+                    latestMessage = comment.content_offset_seconds;
                 }
+
+
                 if (!commentResponse[0].data.video.comments.pageInfo.hasNextPage)
                     break;
                 else
                     cursor = commentResponse[0].data.video.comments.edges.Last().cursor;
-
-                int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
+                if (progress != null)
+                {
+                    int percent = (int) Math.Floor((latestMessage - videoStart) / videoDuration * 100);
+                    progress.Report(new ProgressReport() {ReportType = ReportType.Percent, Data = percent});
+                }
 
                 if (isFirst)
                     isFirst = false;
-
             }
+
+            return comments;
         }
 
-        private static List<Comment> ConvertComments(CommentVideo video)
+        private static List<Comment> ConvertComments(CommentVideo video, ChatFormat format)
         {
             List<Comment> returnList = new List<Comment>();
 
@@ -123,65 +152,91 @@ namespace TwitchDownloaderCore
                 //Commenter can be null for some reason, skip (deleted account?)
                 if (comment.node.commenter == null)
                     continue;
-
-                Comment newComment = new Comment();
                 var oldComment = comment.node;
-                newComment._id = oldComment.id;
-                newComment.created_at = oldComment.createdAt;
-                newComment.channel_id = video.creator.id;
-                newComment.content_type = "video";
-                newComment.content_id = video.id;
-                newComment.content_offset_seconds = oldComment.contentOffsetSeconds;
-                Commenter commenter = new Commenter();
-                commenter.display_name = oldComment.commenter.displayName;
-                commenter._id = oldComment.commenter.id;
-                commenter.name = oldComment.commenter.login;
-                newComment.commenter = commenter;
-                Message message = new Message();
-                message.body = "";
-                List<Fragment> fragments = new List<Fragment>();
-                List<Emoticon2> emoticons = new List<Emoticon2>();
-                foreach (var fragment in oldComment.message.fragments)
+                var newComment = new Comment
                 {
-                    Fragment newFragment = new Fragment();
-                    if (fragment.text != null)
-                        message.body += fragment.text;
+                    _id = oldComment.id,
+                    created_at = oldComment.createdAt,
+                    channel_id = video.creator.id,
+                    content_type = "video",
+                    content_id = video.id,
+                    content_offset_seconds = oldComment.contentOffsetSeconds
+                };
+                var commenter = new Commenter
+                {
+                    display_name = oldComment.commenter.displayName,
+                    _id = oldComment.commenter.id,
+                    name = oldComment.commenter.login
+                };
+                newComment.commenter = commenter;
+                var message = new Message();
 
-                    if (fragment.emote != null)
+                var bodyStringBuilder = new StringBuilder();
+                if (format == ChatFormat.Text)
+                {
+                    foreach (var fragment in oldComment.message.fragments.Where(fragment => fragment.text != null))
                     {
-                        newFragment.emoticon = new Emoticon();
-                        newFragment.emoticon.emoticon_id = fragment.emote.emoteID;
+                        bodyStringBuilder.Append(fragment.text);
+                    }
+                }
+                else
+                {
+                    var fragments = new List<Fragment>();
+                    var emoticons = new List<Emoticon2>();
+                    foreach (var fragment in oldComment.message.fragments)
+                    {
+                        var newFragment = new Fragment();
+                        if (fragment.text != null)
+                            bodyStringBuilder.Append(fragment.text);
 
-                        Emoticon2 newEmote = new Emoticon2();
-                        newEmote._id = fragment.emote.emoteID;
-                        newEmote.begin = fragment.emote.from;
-                        newEmote.end = newEmote.begin + fragment.text.Length + 1;
-                        emoticons.Add(newEmote);
+                        if (fragment.emote != null)
+                        {
+                            newFragment.emoticon = new Emoticon
+                            {
+                                emoticon_id = fragment.emote.emoteID
+                            };
+
+                            var newEmote = new Emoticon2
+                            {
+                                _id = fragment.emote.emoteID,
+                                begin = fragment.emote.from
+                            };
+                            newEmote.end = newEmote.begin + fragment.text.Length + 1;
+                            emoticons.Add(newEmote);
+                        }
+
+                        newFragment.text = fragment.text;
+                        fragments.Add(newFragment);
                     }
 
-                    newFragment.text = fragment.text;
-                    fragments.Add(newFragment);
-                }
-                message.fragments = fragments;
-                List<UserBadge> badges = new List<UserBadge>();
-                foreach (var badge in oldComment.message.userBadges)
-                {
-                    if (String.IsNullOrEmpty(badge.setID) && String.IsNullOrEmpty(badge.version))
-                        continue;
+                    message.fragments = fragments;
+                    message.emoticons = emoticons;
+                    var badges = new List<UserBadge>();
+                    foreach (var badge in oldComment.message.userBadges)
+                    {
+                        if (string.IsNullOrEmpty(badge.setID) && string.IsNullOrEmpty(badge.version))
+                            continue;
 
-                    UserBadge newBadge = new UserBadge();
-                    newBadge._id = badge.setID;
-                    newBadge.version = badge.version;
-                    badges.Add(newBadge);
+                        var newBadge = new UserBadge
+                        {
+                            _id = badge.setID,
+                            version = badge.version
+                        };
+                        badges.Add(newBadge);
+                    }
+
+                    message.user_badges = badges;
+                    message.user_color = oldComment.message.userColor;
                 }
-                message.user_badges = badges;
-                message.user_color = oldComment.message.userColor;
-                message.emoticons = emoticons;
+
+                message.body = bodyStringBuilder.ToString();
+
                 var bitMatch = _bitsRegex.Match(message.body);
                 if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
                 {
                     message.bits_spent = result;
                 }
+
                 newComment.message = message;
 
                 returnList.Add(newComment);
@@ -196,10 +251,15 @@ namespace TwitchDownloaderCore
             {
                 throw new NullReferenceException("Null or empty video/clip ID");
             }
+
             DownloadType downloadType = downloadOptions.Id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
 
-            List<Comment> comments = new List<Comment>();
-            ChatRoot chatRoot = new() { FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = DateTime.Now }, streamer = new(), video = new(), comments = comments };
+            var comments = new List<Comment>();
+            ChatRoot chatRoot = new()
+            {
+                FileInfo = new() {Version = ChatRootVersion.CurrentVersion, CreatedAt = DateTime.Now}, streamer = new(),
+                video = new(), comments = comments
+            };
 
             string videoId = downloadOptions.Id;
             string videoTitle;
@@ -223,7 +283,9 @@ namespace TwitchDownloaderCore
                 videoTitle = videoInfoResponse.data.video.title;
                 videoCreatedAt = videoInfoResponse.data.video.createdAt;
                 videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
-                videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : videoInfoResponse.data.video.lengthSeconds;
+                videoEnd = downloadOptions.CropEnding
+                    ? downloadOptions.CropEndingTime
+                    : videoInfoResponse.data.video.lengthSeconds;
                 videoTotalLength = videoInfoResponse.data.video.lengthSeconds;
 
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(int.Parse(videoId));
@@ -255,15 +317,17 @@ namespace TwitchDownloaderCore
 
                 videoId = clipInfoResponse.data.clip.video.id;
                 downloadOptions.CropBeginning = true;
-                downloadOptions.CropBeginningTime = (int)clipInfoResponse.data.clip.videoOffsetSeconds;
+                downloadOptions.CropBeginningTime = (int) clipInfoResponse.data.clip.videoOffsetSeconds;
                 downloadOptions.CropEnding = true;
-                downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + clipInfoResponse.data.clip.durationSeconds;
+                downloadOptions.CropEndingTime =
+                    downloadOptions.CropBeginningTime + clipInfoResponse.data.clip.durationSeconds;
                 chatRoot.streamer.name = clipInfoResponse.data.clip.broadcaster.displayName;
                 chatRoot.streamer.id = int.Parse(clipInfoResponse.data.clip.broadcaster.id);
                 videoTitle = clipInfoResponse.data.clip.title;
                 videoCreatedAt = clipInfoResponse.data.clip.createdAt;
-                videoStart = (int)clipInfoResponse.data.clip.videoOffsetSeconds;
-                videoEnd = (int)clipInfoResponse.data.clip.videoOffsetSeconds + clipInfoResponse.data.clip.durationSeconds;
+                videoStart = (int) clipInfoResponse.data.clip.videoOffsetSeconds;
+                videoEnd = (int) clipInfoResponse.data.clip.videoOffsetSeconds +
+                           clipInfoResponse.data.clip.durationSeconds;
                 videoTotalLength = clipInfoResponse.data.clip.durationSeconds;
                 connectionCount = 1;
             }
@@ -276,48 +340,61 @@ namespace TwitchDownloaderCore
             chatRoot.video.length = videoTotalLength;
             videoDuration = videoEnd - videoStart;
 
-            SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
-            object commentLock = new object();
-            List<Task> tasks = new List<Task>();
-            List<int> percentages = new List<int>(connectionCount);
+            var commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
+            var tasks = new List<Task<List<Comment>>>();
+            var percentages = new int[connectionCount];
+
 
             double chunk = videoDuration / connectionCount;
             for (int i = 0; i < connectionCount; i++)
             {
                 int tc = i;
-                percentages.Add(0);
-                var taskProgress = new Progress<ProgressReport>(progressReport =>
+
+                Progress<ProgressReport> taskProgress = null;
+                if (!downloadOptions.Quiet)
                 {
-                    if (progressReport.ReportType != ReportType.Percent)
+                    taskProgress = new Progress<ProgressReport>(progressReport =>
                     {
-                        progress.Report(progressReport);
-                    }
-                    else
-                    {
-                        int percent = (int)progressReport.Data;
-                        if (percent > 100)
+                        if (progressReport.ReportType != ReportType.Percent)
                         {
-                            percent = 100;
+                            progress.Report(progressReport);
                         }
-
-                        percentages[tc] = percent;
-
-                        percent = 0;
-                        for (int j = 0; j < connectionCount; j++)
+                        else
                         {
-                            percent += percentages[j];
-                        }
-                        percent /= connectionCount;
+                            int percent = (int) progressReport.Data;
+                            if (percent > 100)
+                            {
+                                percent = 100;
+                            }
 
-                        progress.Report(new ProgressReport() { ReportType = ReportType.SameLineStatus, Data = $"Downloading {percent}%" });
-                        progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
-                    }
-                });
+                            percentages[tc] = percent;
+
+                            percent = 0;
+                            for (int j = 0; j < connectionCount; j++)
+                            {
+                                percent += percentages[j];
+                            }
+
+                            percent /= connectionCount;
+
+                            progress.Report(new ProgressReport()
+                                {ReportType = ReportType.SameLineStatus, Data = $"Downloading {percent}%"});
+                            progress.Report(new ProgressReport() {ReportType = ReportType.Percent, Data = percent});
+                        }
+                    });
+                }
+
                 double start = videoStart + chunk * i;
-                tasks.Add(DownloadSection(start, start + chunk, videoId, commentsSet, commentLock, taskProgress, cancellationToken));
+                tasks.Add(DownloadSection(start, start + chunk, videoId, taskProgress, downloadOptions.DownloadFormat,
+                    cancellationToken));
             }
 
             await Task.WhenAll(tasks);
+            foreach (var comment in tasks.Select(task => task.Result).SelectMany(result => result))
+            {
+                commentsSet.Add(comment);
+            }
+
 
             comments = commentsSet.DistinctBy(x => x._id).ToList();
             chatRoot.comments = comments;

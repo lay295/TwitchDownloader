@@ -40,6 +40,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("chat-connections", Default = 4, HelpText = "Number of downloading connections for chat")]
         public int ChatConnections { get; set; }
 
+        [Option('q', "quiet", Default = false, HelpText = "Suppresses progress console output")]
+        public bool Quiet { get; set; }
+
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
     }
