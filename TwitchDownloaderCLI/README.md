@@ -96,7 +96,7 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 (Default: `true`) 7TV emote embedding. Requires `-E / --embed-images`.
 
 **--timestamp-format**
-(Default: `Relative`) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `Relative`, and `None`.
+(Default: `Relative`) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `UtcFull`, `Relative`, and `None`.
 
 **--chat-connections**
 (Default: `4`) The number of parallel downloads for chat.
