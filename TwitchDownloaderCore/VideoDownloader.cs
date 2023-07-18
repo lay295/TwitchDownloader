@@ -353,10 +353,19 @@ namespace TwitchDownloaderCore
             if (!int.TryParse(encodingTimeMatch.Groups[4].ValueSpan, out var milliseconds)) return;
             var encodingTime = new TimeSpan(0, hours, minutes, seconds, milliseconds);
 
-            var percent = (int)(encodingTime.TotalSeconds / videoLength * 100);
+            var percent = (int)Math.Round(encodingTime.TotalSeconds / videoLength * 100);
 
-            progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [4/4]"));
-            progress.Report(new ProgressReport(percent));
+            // Apparently it is possible for the percent to not be within the range of 0-100. lay295#716
+            if (percent is < 0 or > 100)
+            {
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video... [4/4]"));
+                progress.Report(new ProgressReport(0));
+            }
+            else
+            {
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [4/4]"));
+                progress.Report(new ProgressReport(percent));
+            }
         }
 
         private async Task DownloadVideoPartAsync(string baseUrl, string videoPartName, string downloadFolder, double vodAge, int throttleKib, CancellationToken cancellationToken)
