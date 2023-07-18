@@ -710,13 +710,13 @@
     <value>Zaman Formatı:</value>
   </data>
   <data name="NoJsonFilesSelected" xml:space="preserve">
-    <value>No JSON files selected</value>
+    <value>JSON dosyası seçilmedi</value>
   </data>
   <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
-    <value>Insufficient access. OAuth may be required.</value>
+    <value>Yetersiz erişim. OAuth gerekli olabilir.</value>
   </data>
   <data name="EmojiVendor" xml:space="preserve">
-    <value>Emoji Vendor:</value>
+    <value>Emoji:</value>
   </data>
   <data name="EmojiVendorNotoColor" xml:space="preserve">
     <value>Google</value>
@@ -725,18 +725,18 @@
     <value>Twitter</value>
   </data>
   <data name="EmojiVendorNone" xml:space="preserve">
-    <value>None</value>
+    <value>Hiçbiri</value>
   </data>
   <data name="MaskWithNoAlpha" xml:space="preserve">
-    <value>You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.</value>
+    <value>Opak bir arka plana sahip maske oluşturmayı seçtiniz. Arka plan rengi alfasını azaltın veya oluşturma maskesini devre dışı bırakın.</value>
   </data>
   <data name="OutlineScale" xml:space="preserve">
-    <value>Outline Scale:</value>
+    <value>Anahat Ölçeği:</value>
   </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
-    <value>C# standard TimeSpan format strings</value>
+    <value>C# standart TimeSpan biçim dizeleri</value>
   </data>
   <data name="AlternateMessageBackgrounds" xml:space="preserve">
-    <value>Alternate Backgrounds </value><comment>Leave a trailing space</comment>
+    <value>Alternatif Arka Planlar </value><comment>Leave a trailing space</comment>
   </data>
 </root>

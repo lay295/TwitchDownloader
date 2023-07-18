@@ -28,7 +28,13 @@ namespace TwitchDownloaderCore.Chat
                 var message = comment.message.body;
                 if (timeFormat == TimestampFormat.Utc)
                 {
-                    await sw.WriteLineAsync(@$"[{comment.created_at:yyyy\-MM\-dd HH\:mm\:ss 'UTC'}] {username}: {message}");
+                    var time = comment.created_at;
+                    await sw.WriteLineAsync($"[{time:yyyy'-'MM'-'dd HH':'mm':'ss 'UTC'}] {username}: {message}");
+                }
+                else if (timeFormat == TimestampFormat.UtcFull)
+                {
+                    var time = comment.created_at;
+                    await sw.WriteLineAsync($"[{time:yyyy'-'MM'-'dd HH':'mm':'ss.fff 'UTC'}] {username}: {message}");
                 }
                 else if (timeFormat == TimestampFormat.Relative)
                 {
