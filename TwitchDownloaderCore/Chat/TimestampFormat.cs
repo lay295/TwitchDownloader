@@ -5,6 +5,6 @@
         Utc,
         Relative,
         None,
-        UtcMilliseconds
+        UtcFull
     }
 }
