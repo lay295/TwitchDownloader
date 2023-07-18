@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Tools;
@@ -22,7 +21,6 @@ namespace TwitchDownloaderCore.Chat
                 TwitchHelper.CreateDirectory(outputDirectory.FullName);
             }
 
-            var utcTimestampFormat = timeFormat is TimestampFormat.Utc ? DateTimeFormatInfo.CurrentInfo.UniversalSortableDateTimePattern.Replace("Z", " UTC") : null;
             await using var sw = new StreamWriter(filePath);
             foreach (var comment in chatRoot.comments)
             {
@@ -30,9 +28,7 @@ namespace TwitchDownloaderCore.Chat
                 var message = comment.message.body;
                 if (timeFormat == TimestampFormat.Utc)
                 {
-                    // This branch could be optimized even more but the loss of readability isn't worth it
-                    var timestamp = comment.created_at.ToString(utcTimestampFormat);
-                    await sw.WriteLineAsync($"[{timestamp}] {username}: {message}");
+                    await sw.WriteLineAsync(@$"[{comment.created_at:yyyy\-MM\-dd HH\:mm\:ss 'UTC'}] {username}: {message}");
                 }
                 else if (timeFormat == TimestampFormat.Relative)
                 {
