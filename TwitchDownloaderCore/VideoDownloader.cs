@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace TwitchDownloaderCore
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(downloadOptions.Id);
 
                 string playlistUrl = await GetPlaylistUrl();
-                string baseUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf("/") + 1);
+                string baseUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf('/') + 1);
 
                 List<KeyValuePair<string, double>> videoList = new List<KeyValuePair<string, double>>();
                 (List<string> videoPartsList, double vodAge) = await GetVideoPartsList(playlistUrl, videoList, cancellationToken);
@@ -136,44 +137,44 @@ namespace TwitchDownloaderCore
             var partCount = videoPartsList.Count;
             var videoPartsQueue = new ConcurrentQueue<string>(videoPartsList);
             var downloadTasks = new Task[downloadOptions.DownloadThreads];
-            var threadsExited = 0;
 
-            // ReSharper disable once ConvertToLocalFunction - Lambda only allocates once here, using local function allocates a new Action for each thread.
-            var onThreadExit = void () => Interlocked.Add(ref threadsExited, 1);
-
-            // Setup the download threads
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
             {
-                downloadTasks[i] = Task.Factory.StartNew(async state =>
-                    {
-                        var (partQueue, token, rootUrl, cacheFolder, videoAge, throttleKib, exitDelegate) =
-                            (Tuple<ConcurrentQueue<string>, CancellationToken, string, string, double, int, Action>)state;
-
-                        try
-                        {
-                            while (!partQueue.IsEmpty)
-                            {
-                                if (partQueue.TryDequeue(out var request))
-                                {
-                                    await DownloadVideoPartAsync(rootUrl, request, cacheFolder, videoAge, throttleKib, token);
-                                }
-
-                                await Task.Delay(77, token);
-                            }
-                        }
-                        finally
-                        {
-                            // If an exception is thrown, we still need to register that we exited or the downloader will deadlock
-                            exitDelegate?.Invoke();
-                        }
-                    }, new Tuple<ConcurrentQueue<string>, CancellationToken, string, string, double, int, Action>(
-                        videoPartsQueue, cancellationToken, baseUrl, downloadFolder, vodAge, downloadOptions.ThrottleKib, onThreadExit
-                    ),
-                    cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+                downloadTasks[i] = StartNewDownloadThread(videoPartsQueue, baseUrl, downloadFolder, vodAge, cancellationToken);
             }
 
-            // Loop until all of the download threads have completed
+            var downloadExceptions = await WaitForDownloadThreads(downloadTasks, videoPartsQueue, baseUrl, downloadFolder, vodAge, partCount, cancellationToken);
+
+            LogDownloadThreadExceptions(downloadExceptions);
+        }
+
+        private Task StartNewDownloadThread(ConcurrentQueue<string> videoPartsQueue, string baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
+        {
+            return Task.Factory.StartNew(state =>
+                {
+                    var (partQueue, rootUrl, cacheFolder, videoAge, throttleKib, cancelToken) =
+                        (Tuple<ConcurrentQueue<string>, string, string, double, int, CancellationToken>)state;
+
+                    while (!partQueue.IsEmpty)
+                    {
+                        if (partQueue.TryDequeue(out var request))
+                        {
+                            DownloadVideoPartAsync(rootUrl, request, cacheFolder, videoAge, throttleKib, cancelToken).GetAwaiter().GetResult();
+                        }
+
+                        Task.Delay(77, cancelToken).GetAwaiter().GetResult();
+                    }
+                }, new Tuple<ConcurrentQueue<string>, string, string, double, int, CancellationToken>(
+                    videoPartsQueue, baseUrl, downloadFolder, vodAge, downloadOptions.ThrottleKib, cancellationToken),
+                cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+        }
+
+        private async Task<Dictionary<int, Exception>> WaitForDownloadThreads(Task[] tasks, ConcurrentQueue<string> videoPartsQueue, string baseUrl, string downloadFolder, double vodAge, int partCount, CancellationToken cancellationToken)
+        {
+            var allThreadsExited = false;
             var previousDoneCount = 0;
+            var restartedThreads = 0;
+            var maxRestartedThreads = Math.Max(downloadOptions.DownloadThreads, 10);
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
@@ -185,22 +186,74 @@ namespace TwitchDownloaderCore
                     _progress.Report(new ProgressReport(percent));
                 }
 
-                foreach (var task in downloadTasks)
+                allThreadsExited = true;
+                for (var t = 0; t < tasks.Length; t++)
                 {
+                    var task = tasks[t];
+
                     if (task.IsFaulted)
                     {
                         downloadExceptions.TryAdd(task.Id, task.Exception);
+
+                        if (restartedThreads <= maxRestartedThreads)
+                        {
+                            tasks[t] = StartNewDownloadThread(videoPartsQueue, baseUrl, downloadFolder, vodAge, cancellationToken);
+                            restartedThreads++;
+                        }
+                    }
+
+                    if (allThreadsExited && !task.IsCompleted)
+                    {
+                        allThreadsExited = false;
                     }
                 }
 
-                await Task.Delay(500, cancellationToken);
-                // We need to observe a local variable because for some reason the tasks return task.IsCompleted == true even while still working
-            } while (threadsExited < downloadOptions.DownloadThreads);
+                await Task.Delay(300, cancellationToken);
+            } while (!allThreadsExited);
 
-            if (downloadExceptions.Count != 0)
+            if (restartedThreads == maxRestartedThreads)
             {
-                throw new AggregateException(downloadExceptions.Values);
+                throw new AggregateException("The download thread restart limit was reached.", downloadExceptions.Values);
             }
+
+            return downloadExceptions;
+        }
+
+        private void LogDownloadThreadExceptions(Dictionary<int, Exception> downloadExceptions)
+        {
+            if (downloadExceptions.Count == 0)
+                return;
+
+            var culpritList = new List<string>();
+            var sb = new StringBuilder();
+            foreach (var downloadException in downloadExceptions.Values)
+            {
+                var ex = downloadException switch
+                {
+                    AggregateException { InnerException: { } innerException } => innerException,
+                    _ => downloadException
+                };
+
+                // Try to only log exceptions from different sources
+                var culprit = ex.TargetSite?.Name;
+                if (string.IsNullOrEmpty(culprit) || culpritList.Contains(culprit))
+                    continue;
+
+                sb.EnsureCapacity(sb.Capacity + ex.Message.Length + culprit.Length + 6);
+                sb.Append(", ");
+                sb.Append(ex.Message);
+                sb.Append(" at ");
+                sb.Append(culprit);
+                culpritList.Add(culprit);
+            }
+
+            if (sb.Length == 0)
+            {
+                return;
+            }
+
+            sb.Replace(",", $"{downloadExceptions.Count} errors were encountered while downloading:", 0, 1);
+            _progress.Report(new ProgressReport(ReportType.Log, sb.ToString()));
         }
 
         private async Task VerifyDownloadedParts(List<string> videoParts, string baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
