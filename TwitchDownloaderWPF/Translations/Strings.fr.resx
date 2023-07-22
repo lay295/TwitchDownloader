@@ -144,7 +144,7 @@
     <comment>Leaving a trailing space</comment>
   </data>
   <data name="BannedWordsListTooltip" xml:space="preserve">
-    <value>List of banned words or phrases - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+    <value>Liste de mots ou de phrases interdits - séparés par des virgules, les espaces autour des virgules ne sont pas pris en compte, il n'y a pas de distinction entre les majuscules et les minuscules.</value>
   </data>
   <data name="Browse" xml:space="preserve">
     <value>Naviguer</value>
@@ -318,7 +318,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
-    <value>List of usernames - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+    <value>Liste des noms d'utilisateurs - séparés par des virgules, les espaces autour des virgules sont ignorés, pas de distinction entre les majuscules et les minuscules.</value>
   </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
     <value>Lien/ID Clip Invalide</value>
@@ -644,7 +644,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="MessageDispersionTooltip" xml:space="preserve">
-    <value>In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow.</value>
+    <value>En novembre 2022, une modification de l'API de Twitch a fait en sorte que les messages de chat ne se téléchargent plus que par secondes entières. S'il y a plusieurs messages sur une seule seconde, ils seront intelligemment répartis sur la seconde afin d'améliorer le flux de discussion.</value>
   </data>
   <data name="ChatCompression" xml:space="preserve">
     <value>Compression:</value>
@@ -669,13 +669,13 @@
     <value>Sélectionnez la plage de rendu (Secondes)</value>
   </data>
   <data name="TitleUrlList" xml:space="preserve">
-    <value>Mass Download URL List</value>
+    <value>Téléchargement d'URL en masse</value>
   </data>
   <data name="TitleVideoMassDownloader" xml:space="preserve">
     <value>Téléchargeur de vidéos en masse</value>
   </data>
   <data name="TitleClipMassDownloader" xml:space="preserve">
-    <value>Téléchargeur de masse de clips</value>
+    <value>Téléchargeur des clips en masse</value>
   </data>
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
     <value>TwitchDownloaderWPF n'est pas disponible dans votre langue maternelle ? Cliquez pour apprendre comment aider à traduire !</value>
@@ -702,17 +702,17 @@
   <data name="RenderImageSharpening" xml:space="preserve">
     <value>Renforcement de l'image:</value>
   </data>
-  <data name="SettingsTimeFormat" xml:space="preserve">
-    <value>Format horaire:</value>
-  </data>
   <data name="TimestampLocal" xml:space="preserve">
     <value>L'Heure locale</value>
+  </data>
+  <data name="SettingsTimeFormat" xml:space="preserve">
+    <value>Format horaire:</value>
   </data>
   <data name="NoJsonFilesSelected" xml:space="preserve">
     <value>No JSON files selected</value>
   </data>
   <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
-    <value>Insufficient access. OAuth may be required.</value>
+    <value>Accès insuffisant. OAuth peut être nécessaire.</value>
   </data>
   <data name="EmojiVendor" xml:space="preserve">
     <value>Fournisseur d'Emoji:</value>
@@ -732,11 +732,11 @@
   <data name="OutlineScale" xml:space="preserve">
     <value>Échelle des contours:</value>
   </data>
-  <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
-    <value>C# standard TimeSpan format strings</value>
-  </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
     <value>crop_start_custom and crop_end_custom formattings are based on the</value>
+  </data>
+  <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
+    <value>C# standard TimeSpan format strings</value>
   </data>
   <data name="UnknownErrorOccurred" xml:space="preserve">
     <value>Une erreur inconnue s'est produite</value>
@@ -752,5 +752,14 @@
   </data>
   <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
     <value>Impossible de télécharger ffmpeg. Veuillez le télécharger manuellement à partir de {0} et déplacer le fichier à {1}</value>
+  </data>
+  <data name="AlternateBackgroundColor" xml:space="preserve">
+    <value>Alt Background Color:</value>
+  </data>
+  <data name="AlternateMessageBackgrounds" xml:space="preserve">
+    <value>Alternate Backgrounds </value><comment>Leave a trailing space</comment>
+  </data>
+  <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
+    <value>Alterne la couleur d'arrière-plan de tous les messages de chat impairs pour les différencier.</value>
   </data>
 </root>
