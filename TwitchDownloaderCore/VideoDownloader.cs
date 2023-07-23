@@ -264,18 +264,9 @@ namespace TwitchDownloaderCore
 
             foreach (var part in videoParts)
             {
-                var partFile = Path.Combine(downloadFolder, RemoveQueryString(part));
-                if (!File.Exists(partFile))
+                if (!VerifyVideoPart(downloadFolder, part))
                 {
-                    failedParts.Add(partFile);
-                    continue;
-                }
-
-                await using var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.None);
-                if (fs.Length < 300)
-                {
-                    // The ts file headers are about 300 bytes on their own. If the file is less than that, we know it didn't download correctly.
-                    failedParts.Add(partFile);
+                    failedParts.Add(part);
                 }
 
                 doneCount++;
@@ -288,9 +279,35 @@ namespace TwitchDownloaderCore
 
             if (failedParts.Count != 0)
             {
+                if (failedParts.Count == videoParts.Count)
+                {
+                    // Every video part returned corrupted, probably a false positive.
+                    return;
+                }
+
                 _progress.Report(new ProgressReport(ReportType.Log, $"The following parts will be redownloaded: {string.Join(", ", failedParts)}"));
                 await DownloadVideoPartsAsync(failedParts, baseUrl, downloadFolder, vodAge, cancellationToken);
             }
+        }
+
+        private static bool VerifyVideoPart(string downloadFolder, string part)
+        {
+            const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
+
+            var partFile = Path.Combine(downloadFolder, RemoveQueryString(part));
+            if (!File.Exists(partFile))
+            {
+                return false;
+            }
+
+            using var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.None);
+            var fileLength = fs.Length;
+            if (fileLength == 0 || fileLength % TS_PACKET_LENGTH != 0)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private int RunFfmpegVideoCopy(string downloadFolder, string metadataPath, double seekTime, double startOffset, double seekDuration)
@@ -583,14 +600,13 @@ namespace TwitchDownloaderCore
         //Some old twitch VODs have files with a query string at the end such as 1.ts?offset=blah which isn't a valid filename
         private static string RemoveQueryString(string inputString)
         {
-            if (inputString.Contains('?'))
-            {
-                return inputString.Split('?')[0];
-            }
-            else
+            var queryIndex = inputString.IndexOf('?');
+            if (queryIndex == -1)
             {
                 return inputString;
             }
+
+            return inputString[..queryIndex];
         }
 
         private static void Cleanup(string downloadFolder)
