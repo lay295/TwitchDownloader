@@ -436,8 +436,8 @@ namespace TwitchDownloaderWPF
 
             VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
 
-            VideoDownloader currentDownload = new VideoDownloader(options);
             Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
+            VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
             _cancellationTokenSource = new CancellationTokenSource();
 
             SetImage("Images/ppOverheat.gif", true);
@@ -445,7 +445,7 @@ namespace TwitchDownloaderWPF
             UpdateActionButtons(true);
             try
             {
-                await currentDownload.DownloadAsync(downloadProgress, _cancellationTokenSource.Token);
+                await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
                 statusMessage.Text = Translations.Strings.StatusDone;
                 SetImage("Images/ppHop.gif", true);
             }
