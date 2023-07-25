@@ -733,10 +733,34 @@
   <data name="OutlineScale" xml:space="preserve">
     <value>Anahat Ölçeği:</value>
   </data>
+  <data name="TimeSpanCustomFormatting" xml:space="preserve">
+    <value>crop_start_custom and crop_end_custom formattings are based on the</value>
+  </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
     <value>C# standart TimeSpan biçim dizeleri</value>
   </data>
+  <data name="UnknownErrorOccurred" xml:space="preserve">
+    <value>An unknown error occurred</value>
+  </data>
+  <data name="TaskCouldNotBeRemoved" xml:space="preserve">
+    <value>The task could not be removed</value>
+  </data>
+  <data name="CancelTaskBeforeRemoving" xml:space="preserve">
+    <value>Please cancel the task or wait for it to finish before removing it</value>
+  </data>
+  <data name="UnableToDownloadFfmpeg" xml:space="preserve">
+    <value>Unable to download ffmpeg</value>
+  </data>
+  <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
+    <value>Unable to download ffmpeg. Please manually download it from {0} and place the file at {1}</value>
+  </data>
+  <data name="AlternateBackgroundColor" xml:space="preserve">
+    <value>Alt Background Color:</value>
+  </data>
   <data name="AlternateMessageBackgrounds" xml:space="preserve">
     <value>Alternatif Arka Planlar </value><comment>Leave a trailing space</comment>
+  </data>
+  <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
+    <value>Alternates the background color of every other chat message to help tell them apart.</value>
   </data>
 </root>
