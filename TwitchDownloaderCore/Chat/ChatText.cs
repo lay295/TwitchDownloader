@@ -24,17 +24,17 @@ namespace TwitchDownloaderCore.Chat
             await using var sw = new StreamWriter(filePath);
             foreach (var comment in chatRoot.comments)
             {
-                string username = comment.commenter.display_name;
-                string message = comment.message.body;
+                var username = comment.commenter.display_name;
+                var message = comment.message.body;
                 if (timeFormat == TimestampFormat.Utc)
                 {
-                    var timestamp = comment.created_at.ToString("yyyy'-'MM'-'dd HH':'mm':'ss 'UTC'");;
-                    await sw.WriteLineAsync($"[{timestamp}] {username}: {message}");
+                    var timestamp = comment.created_at;
+                    await sw.WriteLineAsync($"[{timestamp:yyyy'-'MM'-'dd HH':'mm':'ss 'UTC'}] {username}: {message}");
                 }
                 else if (timeFormat == TimestampFormat.UtcFull)
                 {
-                    var timestamp = comment.created_at.ToString("yyyy'-'MM'-'dd HH':'mm':'ss.fff 'UTC'");;
-                    await sw.WriteLineAsync($"[{timestamp}] {username}: {message}");
+                    var timestamp = comment.created_at;
+                    await sw.WriteLineAsync($"[{timestamp:yyyy'-'MM'-'dd HH':'mm':'ss.fff 'UTC'}] {username}: {message}");
                 }
                 else if (timeFormat == TimestampFormat.Relative)
                 {

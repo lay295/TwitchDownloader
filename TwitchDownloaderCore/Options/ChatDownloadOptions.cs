@@ -17,6 +17,7 @@ namespace TwitchDownloaderCore.Options
         public bool FfzEmotes { get; set; }
         public bool StvEmotes { get; set; }
         public int ConnectionCount { get; set; } = 1;
+        public bool Quiet { get; set; } = false;
         public TimestampFormat TimeFormat { get; set; }
         public string FileExtension
         {
