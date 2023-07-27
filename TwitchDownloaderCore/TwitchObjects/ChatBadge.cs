@@ -26,7 +26,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string description { get; set; }
         public byte[] bytes { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string url { get; set;}
+        public string url { get; set; }
     }
 
     [DebuggerDisplay("{Name}")]
@@ -50,6 +50,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 //For some reason, twitch has corrupted images sometimes :) for example
                 //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                 SKBitmap badgeImage = SKBitmap.Decode(ms);
+                badgeImage.SetImmutable();
                 Versions.Add(versionName, badgeImage);
             }
 
@@ -74,6 +75,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
                 bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
                 bitmap.Dispose();
+                newBitmap.SetImmutable();
                 Versions[versionName] = newBitmap;
             }
         }
