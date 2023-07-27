@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Text;
 using SkiaSharp;
 using Buffer = HarfBuzzSharp.Buffer;
@@ -11,11 +12,20 @@ namespace TwitchDownloaderCore.Extensions
         {
             switch (textEncoding)
             {
+                // Encoding.GetBytes(ReadOnlySpan<char>, Span<byte>) internally allocates arrays, so we may as well use ArrayPools to reduce the GC footprint
                 case SKTextEncoding.Utf8:
                 {
-                    Span<byte> byteSpan = stackalloc byte[Encoding.UTF8.GetByteCount(text)];
-                    Encoding.UTF8.GetBytes(text, byteSpan);
-                    buffer.AddUtf8(byteSpan);
+                    var byteCount = Encoding.UTF8.GetByteCount(text);
+                    var encodedBytes = ArrayPool<byte>.Shared.Rent(byteCount);
+
+                    var textChars = ArrayPool<char>.Shared.Rent(text.Length);
+                    text.CopyTo(textChars);
+
+                    Encoding.UTF8.GetBytes(textChars, 0, text.Length, encodedBytes, 0);
+                    buffer.AddUtf8(encodedBytes.AsSpan(0, byteCount));
+
+                    ArrayPool<byte>.Shared.Return(encodedBytes);
+                    ArrayPool<char>.Shared.Return(textChars);
                     break;
                 }
                 case SKTextEncoding.Utf16:
@@ -23,9 +33,17 @@ namespace TwitchDownloaderCore.Extensions
                     break;
                 case SKTextEncoding.Utf32:
                 {
-                    Span<byte> byteSpan = stackalloc byte[Encoding.UTF32.GetByteCount(text)];
-                    Encoding.UTF32.GetBytes(text, byteSpan);
-                    buffer.AddUtf32(byteSpan);
+                    var byteCount = Encoding.UTF32.GetByteCount(text);
+                    var encodedBytes = ArrayPool<byte>.Shared.Rent(byteCount);
+
+                    var textChars = ArrayPool<char>.Shared.Rent(text.Length);
+                    text.CopyTo(textChars);
+
+                    Encoding.UTF32.GetBytes(textChars, 0, text.Length, encodedBytes, 0);
+                    buffer.AddUtf32(encodedBytes.AsSpan(0, byteCount));
+
+                    ArrayPool<byte>.Shared.Return(encodedBytes);
+                    ArrayPool<char>.Shared.Return(textChars);
                     break;
                 }
                 default:
