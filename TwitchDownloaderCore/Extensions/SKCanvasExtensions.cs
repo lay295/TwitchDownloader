@@ -19,6 +19,7 @@ namespace TwitchDownloaderCore.Extensions
             using var text1 = SKTextBlob.Create(text, paint.AsFont());
             if (text1 == null)
                 return;
+
             canvas.DrawText(text1, x, y, paint);
         }
     }

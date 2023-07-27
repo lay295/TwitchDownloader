@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
-using HandyControl.Tools;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 

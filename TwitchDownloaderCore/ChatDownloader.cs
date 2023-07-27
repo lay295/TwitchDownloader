@@ -202,7 +202,7 @@ namespace TwitchDownloaderCore
                                 _id = fragment.emote.emoteID,
                                 begin = fragment.emote.from
                             };
-                            newEmote.end = newEmote.begin + fragment.text!.Length + 1;
+                            newEmote.end = newEmote.begin + fragment.text.Length + 1;
                             emoticons.Add(newEmote);
                         }
 
@@ -256,10 +256,10 @@ namespace TwitchDownloaderCore
 
             ChatRoot chatRoot = new()
             {
-                FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = DateTime.Now },
+                FileInfo = new ChatRootInfo { Version = ChatRootVersion.CurrentVersion, CreatedAt = DateTime.Now },
                 streamer = new(),
                 video = new(),
-                comments = new()
+                comments = new List<Comment>()
             };
 
             string videoId = downloadOptions.Id;
