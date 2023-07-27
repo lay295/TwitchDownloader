@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
+using HandyControl.Tools;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 
@@ -39,7 +40,7 @@ namespace TwitchDownloaderWPF.Services
             if (!Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && !File.Exists(Path.Combine("Themes", $"{Settings.Default.GuiTheme}.xaml")))
             {
                 MessageBox.Show(
-                    Translations.Strings.ThemeNotFoundMessage.Replace("{theme}", Settings.Default.GuiTheme + ".xaml"),
+                    Translations.Strings.ThemeNotFoundMessage.Replace("{theme}", $"{Settings.Default.GuiTheme}.xaml"),
                     Translations.Strings.ThemeNotFound,
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
@@ -51,26 +52,26 @@ namespace TwitchDownloaderWPF.Services
 
         private void WindowsThemeChanged(object sender, string newWindowsTheme)
         {
-            if (_wpfApplication.Windows.Count > 0)
+            if (_wpfApplication.Windows.Count == 0)
+                return;
+
+            if (Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
             {
-                if (Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
-                {
-                    ChangeAppTheme();
-                }
+                ChangeAppTheme();
             }
         }
 
         public void ChangeAppTheme()
         {
-            string newTheme = Settings.Default.GuiTheme;
+            var newTheme = Settings.Default.GuiTheme;
             if (newTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
             {
                 newTheme = WindowsThemeService.GetWindowsTheme();
             }
-            ChangeThemePath(_wpfApplication, newTheme);
+            ChangeThemePath(newTheme);
 
-            SkinType newSkin = _darkHandyControl ? SkinType.Dark : SkinType.Default;
-            SetHandyControlTheme(newSkin, _wpfApplication);
+            var newSkin = _darkHandyControl ? SkinType.Dark : SkinType.Default;
+            SetHandyControlTheme(newSkin);
 
             if (_wpfApplication.Windows.Count > 0)
             {
@@ -92,51 +93,56 @@ namespace TwitchDownloaderWPF.Services
                 NativeFunctions.SetWindowAttribute(windowHandle, TITLEBAR_THEME_ATTRIBUTE, ref _darkAppTitleBar, Marshal.SizeOf(_darkAppTitleBar));
             }
 
-            Window _wnd = new()
+            Window wnd = new()
             {
                 SizeToContent = SizeToContent.WidthAndHeight
             };
-            _wnd.Show();
-            _wnd.Close();
+            wnd.Show();
+            wnd.Close();
             // Dark title bar is a bit buggy, requires window resize or focus change to fully apply
             // Win11 might not have this issue but Win10 does so please leave this
         }
 
-        private void ChangeThemePath(App app, string newTheme)
+        private void ChangeThemePath(string newTheme)
         {
-            string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
-            string newThemeString = $"{Path.Combine("Themes", newTheme)}.xaml";
+            var themeFiles = Directory.GetFiles("Themes", "*.xaml");
+            var newThemeString = Path.Combine("Themes", $"{newTheme}.xaml");
 
-            foreach (string themeFile in themeFiles)
+            foreach (var themeFile in themeFiles)
             {
-                if (newThemeString.Equals(themeFile, StringComparison.OrdinalIgnoreCase))
-                {
-                    var xmlReader = new XmlSerializer(typeof(ResourceDictionaryModel));
-                    using var streamReader = new StreamReader(themeFile);
-                    var themeValues = (ResourceDictionaryModel)xmlReader.Deserialize(streamReader);
+                if (!newThemeString.Equals(themeFile, StringComparison.OrdinalIgnoreCase))
+                    continue;
 
-                    foreach (SolidColorBrushModel solidBrush in themeValues.SolidColorBrush)
-                    {
-                        app.Resources[solidBrush.Key] = (SolidColorBrush)new BrushConverter().ConvertFrom(solidBrush.Color);
-                    }
-                    foreach (BooleanModel boolean in themeValues.Boolean)
-                    {
-                        switch (boolean.Key)
-                        {
-                            case "DarkTitleBar": _darkAppTitleBar = boolean.Value; break;
-                            case "DarkHandyControl": _darkHandyControl = boolean.Value; break;
-                            default: break;
-                        }
-                    }
-                    return;
+                var xmlReader = new XmlSerializer(typeof(ResourceDictionaryModel));
+                using var streamReader = new StreamReader(themeFile);
+                var themeValues = (ResourceDictionaryModel)xmlReader.Deserialize(streamReader)!;
+
+                foreach (var solidBrush in themeValues.SolidColorBrush)
+                {
+                    _wpfApplication.Resources[solidBrush.Key] = (SolidColorBrush)new BrushConverter().ConvertFrom(solidBrush.Color);
                 }
+
+                foreach (var boolean in themeValues.Boolean)
+                {
+                    switch (boolean.Key)
+                    {
+                        case "DarkTitleBar":
+                            _darkAppTitleBar = boolean.Value;
+                            break;
+                        case "DarkHandyControl":
+                            _darkHandyControl = boolean.Value;
+                            break;
+                    }
+                }
+
+                return;
             }
         }
 
-        private void SetHandyControlTheme(SkinType newSkin, App app)
+        private void SetHandyControlTheme(SkinType newSkin)
         {
-            app.Resources.MergedDictionaries[0].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Skin{newSkin}.xaml", UriKind.Absolute);
-            app.Resources.MergedDictionaries[1].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Theme.xaml", UriKind.Absolute);
+            _wpfApplication.Resources.MergedDictionaries[0].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Skin{newSkin}.xaml", UriKind.Absolute);
+            _wpfApplication.Resources.MergedDictionaries[1].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Theme.xaml", UriKind.Absolute);
         }
     }
 }
