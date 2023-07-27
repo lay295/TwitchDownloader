@@ -841,7 +841,7 @@ namespace TwitchDownloaderCore
                 DrawRegularMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
             }
 
-            bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, out TwitchEmote twitchEmote)
+            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, out TwitchEmote twitchEmote)
             {
                 // Enumerating over a span is faster than a list
                 var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
@@ -1103,7 +1103,7 @@ namespace TwitchDownloaderCore
                 DrawText(fragmentString, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
             }
 
-            bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, out CheerEmote cheerEmote)
+            static bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, out CheerEmote cheerEmote)
             {
                 // Enumerating over a span is faster than a list
                 var cheerEmoteListSpan = CollectionsMarshal.AsSpan(cheerEmoteList);
@@ -1152,7 +1152,7 @@ namespace TwitchDownloaderCore
                 DrawText(fragment.text, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
             }
 
-            bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteId, out TwitchEmote twitchEmote)
+            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteId, out TwitchEmote twitchEmote)
             {
                 // Enumerating over a span is faster than a list
                 var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
@@ -1436,7 +1436,7 @@ namespace TwitchDownloaderCore
             drawPos.X += textWidth + renderOptions.WordSpacing * 2;
             defaultPos.X = drawPos.X;
 
-            ReadOnlySpan<char> FormatTimestamp(Span<char> stackSpace, TimeSpan timespan)
+            static ReadOnlySpan<char> FormatTimestamp(Span<char> stackSpace, TimeSpan timespan)
             {
                 if (timespan.TotalHours >= 1)
                 {
