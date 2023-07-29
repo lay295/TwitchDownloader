@@ -124,8 +124,8 @@
   <data name="InterBold" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\interbold.otf;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="template" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\template.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  <data name="chat_template" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\chat-template.html;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="twemoji_14_0_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\twemoji-14.0.0.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
