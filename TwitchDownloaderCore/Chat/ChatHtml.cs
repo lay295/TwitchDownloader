@@ -76,7 +76,7 @@ namespace TwitchDownloaderCore.Chat
                         {
                             var relativeTime = TimeSpan.FromSeconds(comment.content_offset_seconds);
                             var timestamp = TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", relativeTime);
-                            await sw.WriteLineAsync($"<pre class=\"comment-root\">[{timestamp}]{GetChatBadgesHtml(embedData, chatBadgeData, comment)}<a href=\"https://twitch.tv/{comment.commenter.name}\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>");
+                            await sw.WriteLineAsync($"<pre class=\"comment-root\">[{timestamp}] {GetChatBadgesHtml(embedData, chatBadgeData, comment)}<a href=\"https://twitch.tv/{comment.commenter.name}\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>");
                         }
                         break;
                     default:
@@ -153,6 +153,7 @@ namespace TwitchDownloaderCore.Chat
                 }
             }
 
+            badgesHtml.Add(""); // Ensure the html string ends with a space
             return string.Join(' ', badgesHtml);
         }
 
