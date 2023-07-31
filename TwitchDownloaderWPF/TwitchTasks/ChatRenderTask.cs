@@ -104,10 +104,9 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 Exception = new TwitchTaskException(ex);
                 OnPropertyChanged(nameof(Exception));
             }
-            renderer = null;
+            renderer.Dispose();
             TokenSource.Dispose();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            GC.Collect(2, GCCollectionMode.Default, false);
         }
 
         private void Progress_ProgressChanged(object sender, ProgressReport e)

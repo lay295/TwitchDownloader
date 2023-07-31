@@ -62,6 +62,16 @@ namespace TwitchDownloaderCore.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] chat_template {
+            get {
+                object obj = ResourceManager.GetObject("chat_template", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Inter {
             get {
                 object obj = ResourceManager.GetObject("Inter", resourceCulture);
@@ -86,27 +96,6 @@ namespace TwitchDownloaderCore.Properties {
             get {
                 object obj = ResourceManager.GetObject("noto_emoji_2_038", resourceCulture);
                 return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;html&gt;
-        ///&lt;head&gt;
-        ///&lt;link href=&apos;https://fonts.googleapis.com/css?family=Inter&apos; rel=&apos;stylesheet&apos;&gt;
-        ///&lt;title&gt;
-        ///&lt;!-- TITLE --&gt;
-        ///&lt;/title&gt;
-        ///&lt;style&gt;
-        /// /*!
-        /// * Bootstrap v4.0.0 (https://getbootstrap.com)
-        /// * Copyright 2011-2018 The Bootstrap Authors
-        /// * Copyright 2011-2018 Twitter, Inc.
-        /// * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-        /// */:root{--blue:#007bff;--indigo:#6610f2;--purple:#6f42c1;--pink:#e83e8c;--red:#dc3545;--orange:#fd7e14;--yellow:#ffc107;--green:#28a745;--teal:#20c997;--cyan [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string template {
-            get {
-                return ResourceManager.GetString("template", resourceCulture);
             }
         }
         

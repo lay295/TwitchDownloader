@@ -48,8 +48,8 @@ namespace TwitchDownloaderCore
                 Content = new StringContent("{\"operationName\":\"PlaybackAccessToken_Template\",\"query\":\"query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: \\\"web\\\", playerBackend: \\\"mediaplayer\\\", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: \\\"web\\\", playerBackend: \\\"mediaplayer\\\", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}\",\"variables\":{\"isLive\":false,\"login\":\"\",\"isVod\":true,\"vodID\":\"" + videoId + "\",\"playerType\":\"embed\"}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-            if (authToken != null && authToken != "")
-                request.Headers.Add("Authorization", "OAuth " + authToken);
+            if (!string.IsNullOrWhiteSpace(authToken))
+                request.Headers.Add("Authorization", $"OAuth {authToken}");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlVideoTokenResponse>();
@@ -59,7 +59,7 @@ namespace TwitchDownloaderCore
         {
             var request = new HttpRequestMessage()
             {
-                RequestUri = new Uri(String.Format("http://usher.ttvnw.net/vod/{0}?nauth={1}&nauthsig={2}&allow_source=true&player=twitchweb", videoId, token, sig)),
+                RequestUri = new Uri($"http://usher.ttvnw.net/vod/{videoId}?nauth={token}&nauthsig={sig}&allow_source=true&player=twitchweb"),
                 Method = HttpMethod.Get
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
@@ -249,7 +249,7 @@ namespace TwitchDownloaderCore
                 string emoteFormat = "";
                 foreach (var fileItem in emoteFiles)
                 {
-                    if (fileItem.format.ToLower() == "webp") // Is the emote offered in webp?
+                    if (fileItem.format.Equals("webp", StringComparison.OrdinalIgnoreCase)) // Is the emote offered in webp?
                     {
                         emoteFormat = "webp";
                         break;
@@ -879,10 +879,10 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    await using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     byte[] bytes = new byte[stream.Length];
                     stream.Seek(0, SeekOrigin.Begin);
-                    await stream.ReadAsync(bytes, cancellationToken);
+                    _ = await stream.ReadAsync(bytes, cancellationToken);
 
                     //Check if image file is not corrupt
                     if (bytes.Length > 0)

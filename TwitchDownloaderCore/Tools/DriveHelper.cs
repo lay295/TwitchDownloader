@@ -7,9 +7,6 @@ namespace TwitchDownloaderCore.Tools
 {
     public static class DriveHelper
     {
-        public static DriveInfo GetOutputDrive(FfmpegProcess ffmpegProcess)
-            => GetOutputDrive(Path.GetFullPath(ffmpegProcess.SavePath));
-
         public static DriveInfo GetOutputDrive(string outputPath)
         {
             // Cannot instantiate a null DriveInfo
@@ -37,11 +34,6 @@ namespace TwitchDownloaderCore.Tools
 
         public static async Task WaitForDrive(DriveInfo drive, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            if (drive.IsReady)
-            {
-                return;
-            }
-
             int driveNotReadyCount = 0;
             while (!drive.IsReady)
             {
@@ -52,7 +44,6 @@ namespace TwitchDownloaderCore.Tools
                 {
                     throw new DriveNotFoundException("The output drive disconnected for 10 or more consecutive seconds.");
                 }
-
             }
         }
     }

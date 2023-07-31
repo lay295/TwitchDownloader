@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Extensions
 {
     public static class TimeSpanExtensions
     {
@@ -17,30 +17,30 @@ namespace TwitchDownloaderCore.Tools
             var secondIndex = input.IndexOf('s');
             var returnTimespan = TimeSpan.Zero;
 
-            if (dayIndex != -1)
+            if (dayIndex != -1 && int.TryParse(input[..dayIndex], out var days))
             {
-                returnTimespan = returnTimespan.Add(TimeSpan.FromDays(int.Parse(input[..dayIndex])));
+                returnTimespan = returnTimespan.Add(TimeSpan.FromDays(days));
             }
 
             dayIndex++;
 
-            if (hourIndex != -1)
+            if (hourIndex != -1 && int.TryParse(input[dayIndex..hourIndex], out var hours))
             {
-                returnTimespan = returnTimespan.Add(TimeSpan.FromHours(int.Parse(input[dayIndex..hourIndex])));
+                returnTimespan = returnTimespan.Add(TimeSpan.FromHours(hours));
             }
 
             hourIndex++;
 
-            if (minuteIndex != -1)
+            if (minuteIndex != -1 && int.TryParse(input[hourIndex..minuteIndex], out var minutes))
             {
-                returnTimespan = returnTimespan.Add(TimeSpan.FromMinutes(int.Parse(input[hourIndex..minuteIndex])));
+                returnTimespan = returnTimespan.Add(TimeSpan.FromMinutes(minutes));
             }
 
             minuteIndex++;
 
-            if (secondIndex != -1)
+            if (secondIndex != -1 && int.TryParse(input[minuteIndex..secondIndex], out var seconds))
             {
-                returnTimespan = returnTimespan.Add(TimeSpan.FromSeconds(int.Parse(input[minuteIndex..secondIndex])));
+                returnTimespan = returnTimespan.Add(TimeSpan.FromSeconds(seconds));
             }
 
             return returnTimespan;

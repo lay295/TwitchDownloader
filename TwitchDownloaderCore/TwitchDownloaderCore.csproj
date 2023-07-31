@@ -15,7 +15,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\interbold.otf" />
     <EmbeddedResource Include="Resources\interregular.otf" />
-    <EmbeddedResource Include="Resources\template.html" />
+    <EmbeddedResource Include="Resources\chat-template.html" />
     <EmbeddedResource Include="Resources\noto-emoji-2.038.zip" />
   </ItemGroup>
 

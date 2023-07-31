@@ -25,7 +25,7 @@ namespace TwitchDownloaderCore
             BaseAddress = new Uri("https://gql.twitch.tv/gql"),
             DefaultRequestHeaders = { { "Client-ID", "kd1unb4b3q4t58fwlpcbzcbnm76a8fp" } }
         };
-        private static readonly Regex _bitsRegex = new(
+        private static readonly Regex BitsRegex = new(
             @"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d?\d?\d?\d?\d?\d?(?=\s|$)",
             RegexOptions.Compiled);
 
@@ -35,9 +35,9 @@ namespace TwitchDownloaderCore
             Video
         }
 
-        public ChatDownloader(ChatDownloadOptions DownloadOptions)
+        public ChatDownloader(ChatDownloadOptions chatDownloadOptions)
         {
-            downloadOptions = DownloadOptions;
+            downloadOptions = chatDownloadOptions;
             downloadOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
                 "TwitchDownloader");
@@ -231,7 +231,7 @@ namespace TwitchDownloaderCore
 
                 message.body = bodyStringBuilder.ToString();
 
-                var bitMatch = _bitsRegex.Match(message.body);
+                var bitMatch = BitsRegex.Match(message.body);
                 if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
                 {
                     message.bits_spent = result;
@@ -256,10 +256,10 @@ namespace TwitchDownloaderCore
 
             ChatRoot chatRoot = new()
             {
-                FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = DateTime.Now },
+                FileInfo = new ChatRootInfo { Version = ChatRootVersion.CurrentVersion, CreatedAt = DateTime.Now },
                 streamer = new(),
                 video = new(),
-                comments = new()
+                comments = new List<Comment>()
             };
 
             string videoId = downloadOptions.Id;
@@ -290,7 +290,7 @@ namespace TwitchDownloaderCore
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(int.Parse(videoId));
                 foreach (var responseChapter in videoChapterResponse.data.video.moments.edges)
                 {
-                    VideoChapter chapter = new()
+                    chatRoot.video.chapters.Add(new VideoChapter
                     {
                         id = responseChapter.node.id,
                         startMilliseconds = responseChapter.node.positionMilliseconds,
@@ -299,11 +299,10 @@ namespace TwitchDownloaderCore
                         description = responseChapter.node.description,
                         subDescription = responseChapter.node.subDescription,
                         thumbnailUrl = responseChapter.node.thumbnailURL,
-                        gameId = responseChapter.node.details.game?.id ?? null,
-                        gameDisplayName = responseChapter.node.details.game?.displayName ?? null,
-                        gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL ?? null
-                    };
-                    chatRoot.video.chapters.Add(chapter);
+                        gameId = responseChapter.node.details.game?.id,
+                        gameDisplayName = responseChapter.node.details.game?.displayName,
+                        gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL
+                    });
                 }
             }
             else
@@ -508,7 +507,7 @@ namespace TwitchDownloaderCore
                     await ChatText.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.TimeFormat);
                     break;
                 default:
-                    throw new NotImplementedException("Requested output chat format is not implemented");
+                    throw new NotSupportedException($"{downloadOptions.DownloadFormat} is not a supported output format.");
             }
         }
     }

@@ -20,9 +20,9 @@ namespace TwitchDownloaderCore.Tools
         Unknown
     }
 
-    public class HighlightMessage : IDisposable
+    public sealed class HighlightIcons : IDisposable
     {
-        public bool Disposed = false;
+        public bool Disposed { get; private set; } = false;
 
         private const string SUBSCRIBED_TIER_ICON_SVG = "m 32.599229,13.144498 c 1.307494,-2.80819 5.494049,-2.80819 6.80154,0 l 5.648628,12.140919 13.52579,1.877494 c 3.00144,0.418654 4.244522,3.893468 2.138363,5.967405 -3.357829,3.309501 -6.715662,6.618992 -10.073491,9.928491 L 53.07148,56.81637 c 0.524928,2.962772 -2.821092,5.162303 -5.545572,3.645496 L 36,54.043603 24.474093,60.461866 C 21.749613,61.975455 18.403591,59.779142 18.92852,56.81637 L 21.359942,43.058807 11.286449,33.130316 c -2.1061588,-2.073937 -0.863074,-5.548751 2.138363,-5.967405 l 13.52579,-1.877494 z";
         private const string SUBSCRIBED_PRIME_ICON_SVG = "m 61.894653,21.663055 v 25.89488 c 0,3.575336 -2.898361,6.47372 -6.473664,6.47372 H 16.57901 c -3.573827,-0.0036 -6.470094,-2.89986 -6.473663,-6.47372 V 21.663055 L 23.052674,31.373635 36,18.426194 c 4.315772,4.315816 8.631553,8.631629 12.947323,12.947441 z";
@@ -33,17 +33,21 @@ namespace TwitchDownloaderCore.Tools
         private static readonly Regex SubMessageRegex = new(@"^(subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d?\d?\d months(?:, currently on a \d?\d?\d month streak)?! )(.+)$", RegexOptions.Compiled);
         private static readonly Regex GiftAnonymousRegex = new(@"^An anonymous user (?:gifted a|is gifting \d\d?\d?) Tier \d", RegexOptions.Compiled);
 
-        private SKBitmap _subscribedTierIcon = null;
-        private SKBitmap _subscribedPrimeIcon = null;
-        private SKBitmap _giftSingleIcon = null;
-        private SKBitmap _giftManyIcon = null;
-        private SKBitmap _giftAnonymousIcon = null;
+        private SKImage _subscribedTierIcon;
+        private SKImage _subscribedPrimeIcon;
+        private SKImage _giftSingleIcon;
+        private SKImage _giftManyIcon;
+        private SKImage _giftAnonymousIcon;
 
         private readonly string _cachePath;
+        private readonly SKColor _purple;
+        private readonly bool _offline;
 
-        public HighlightMessage(string cachePath)
+        public HighlightIcons(string cachePath, SKColor iconPurple, bool offline)
         {
             _cachePath = Path.Combine(cachePath, "icons");
+            _purple = iconPurple;
+            _offline = offline;
         }
 
         // If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
@@ -51,130 +55,146 @@ namespace TwitchDownloaderCore.Tools
         {
             const string ANONYMOUS_GIFT_ACCOUNT_ID = "274598607"; // '274598607' is the id of the anonymous gift message account, display name: 'AnAnonymousGifter'
 
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " subscribed at Tier"))
+            if (comment.message.body.Length == 0)
             {
-                return HighlightType.SubscribedTier;
+                // This likely happens due to the 7TV extension letting users bypass the IRC message trimmer
+                return HighlightType.None;
             }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " subscribed with Prime"))
-            {
-                return HighlightType.SubscribedPrime;
-            }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " is gifting"))
-            {
-                return HighlightType.GiftedMany;
-            }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " gifted a Tier"))
-            {
-                return HighlightType.GiftedSingle;
-            }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " is continuing the Gift Sub"))
-            {
-                return HighlightType.ContinuingGift;
-            }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " converted from a"))
-            {
-                var convertedToMatch = Regex.Match(comment.message.body, @$"(?<=^{comment.commenter.display_name} converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
-                if (!convertedToMatch.Success)
-                {
-                    return HighlightType.None;
-                }
 
-                // TODO: Use ValueSpan once on NET7
-                return convertedToMatch.Value switch
+            var bodySpan = comment.message.body.AsSpan();
+            var displayName = comment.commenter.display_name.AsSpan();
+            if (bodySpan.StartsWith(displayName))
+            {
+                var bodyWithoutName = bodySpan[displayName.Length..];
+                if (bodyWithoutName.StartsWith(" subscribed at Tier"))
+                    return HighlightType.SubscribedTier;
+
+                if (bodyWithoutName.StartsWith(" subscribed with Prime"))
+                    return HighlightType.SubscribedPrime;
+
+                if (bodyWithoutName.StartsWith(" is gifting"))
+                    return HighlightType.GiftedMany;
+
+                if (bodyWithoutName.StartsWith(" gifted a Tier"))
+                    return HighlightType.GiftedSingle;
+
+                if (bodyWithoutName.StartsWith(" is continuing the Gift Sub"))
+                    return HighlightType.ContinuingGift;
+
+                if (bodyWithoutName.StartsWith(" is paying forward the Gift they got from"))
+                    return HighlightType.PayingForward;
+
+                if (bodyWithoutName.StartsWith(" converted from a"))
                 {
-                    "Prime" => HighlightType.SubscribedPrime,
-                    "Tier 1" => HighlightType.SubscribedTier,
-                    "Tier 2" => HighlightType.SubscribedTier,
-                    "Tier 3" => HighlightType.SubscribedTier,
-                    _ => HighlightType.Unknown
-                };
+                    // TODO: use bodyWithoutName when .NET 7
+                    var convertedToMatch = Regex.Match(comment.message.body, $@"(?<=^{comment.commenter.display_name} converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
+                    if (!convertedToMatch.Success)
+                        return HighlightType.None;
+
+                    return convertedToMatch.ValueSpan switch
+                    {
+                        "Prime" => HighlightType.SubscribedPrime,
+                        "Tier 1" => HighlightType.SubscribedTier,
+                        "Tier 2" => HighlightType.SubscribedTier,
+                        "Tier 3" => HighlightType.SubscribedTier,
+                        _ => HighlightType.None
+                    };
+                }
             }
-            if (comment.message.body.StartsWith(comment.commenter.display_name + " is paying forward the Gift they got from"))
-            {
-                return HighlightType.PayingForward;
-            }
+
             if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
-            {
                 return HighlightType.GiftedAnonymous;
-            }
-            // There are more re-sub messages but I don't know the exact wordings and they tend to be very rare
+
             return HighlightType.None;
         }
 
-        /// <returns>A copy of the requested icon or null if no icon exists for the highlight type</returns>
-        public SKBitmap GetHighlightIcon(HighlightType highlightType, string purple, SKColor textColor, double fontSize)
+        /// <returns>A the requested icon or null if no icon exists for the highlight type</returns>
+        /// <remarks>The icon returned is NOT a copy and should not be manually disposed.</remarks>
+        public SKImage GetHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
         {
-            // Return a copy of the needed icon from cache or generate if null
+            // Return the needed icon from cache or generate if null
             return highlightType switch
             {
-                HighlightType.SubscribedTier => _subscribedTierIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.SubscribedPrime => _subscribedPrimeIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.GiftedSingle => _giftSingleIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.GiftedMany => _giftManyIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
-                HighlightType.GiftedAnonymous => _giftAnonymousIcon?.Copy() ?? GenerateHighlightIcon(highlightType, purple, textColor, fontSize),
+                HighlightType.SubscribedTier => _subscribedTierIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
+                HighlightType.SubscribedPrime => _subscribedPrimeIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
+                HighlightType.GiftedSingle => _giftSingleIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
+                HighlightType.GiftedMany => _giftManyIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
+                HighlightType.GiftedAnonymous => _giftAnonymousIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
                 _ => null
             };
         }
 
-        private SKBitmap GenerateHighlightIcon(HighlightType highlightType, string purple, SKColor textColor, double fontSize)
+        private SKImage GenerateHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
         {
             // Generate the needed icon
-            var returnBitmap = highlightType is HighlightType.GiftedMany
-                ? GenerateGiftedManyIcon(fontSize, _cachePath)
-                : GenerateSvgIcon(highlightType, purple, textColor, fontSize);
+            var returnIcon = highlightType is HighlightType.GiftedMany
+                ? GenerateGiftedManyIcon(fontSize, _cachePath, _offline)
+                : GenerateSvgIcon(highlightType, _purple, textColor, fontSize);
 
-            // Cache a copy of the icon
+            // Cache the icon
             switch (highlightType)
             {
                 case HighlightType.SubscribedTier:
-                    _subscribedTierIcon = returnBitmap.Copy();
+                    _subscribedTierIcon = returnIcon;
                     break;
                 case HighlightType.SubscribedPrime:
-                    _subscribedPrimeIcon = returnBitmap.Copy();
+                    _subscribedPrimeIcon = returnIcon;
                     break;
                 case HighlightType.GiftedSingle:
-                    _giftSingleIcon = returnBitmap.Copy();
+                    _giftSingleIcon = returnIcon;
                     break;
                 case HighlightType.GiftedMany:
-                    _giftManyIcon = returnBitmap.Copy();
+                    _giftManyIcon = returnIcon;
                     break;
                 case HighlightType.GiftedAnonymous:
-                    _giftAnonymousIcon = returnBitmap.Copy();
+                    _giftAnonymousIcon = returnIcon;
                     break;
                 default:
-                    throw new NotSupportedException("This should not be possible.");
+                    throw new NotSupportedException("The requested highlight icon does not exist.");
             }
 
             // Return the generated icon
-            return returnBitmap;
+            return returnIcon;
         }
 
-        private static SKBitmap GenerateGiftedManyIcon(double fontSize, string cachePath)
+        private static SKImage GenerateGiftedManyIcon(double fontSize, string cachePath, bool offline)
         {
+            //int newSize = (int)(fontSize / 0.2727); // 44*44px @ 12pt font // Doesn't work because our image sections aren't tall enough and I'm not rewriting that right now
+            var finalIconSize = (int)(fontSize / 0.6); // 20x20px @ 12pt font
+
+            if (offline)
+            {
+                using var offlineBitmap = new SKBitmap(finalIconSize, finalIconSize);
+                using (var offlineCanvas = new SKCanvas(offlineBitmap))
+                    offlineCanvas.Clear();
+                offlineBitmap.SetImmutable();
+                return SKImage.FromBitmap(offlineBitmap);
+            }
+
             var taskIconBytes = TwitchHelper.GetImage(cachePath, GIFTED_MANY_ICON_URL, "gift-illus", "3", "png");
             taskIconBytes.Wait();
             using var ms = new MemoryStream(taskIconBytes.Result); // Illustration is 72x72
-            var codec = SKCodec.Create(ms);
+            using var codec = SKCodec.Create(ms);
             using var tempBitmap = SKBitmap.Decode(codec);
 
-            //int newSize = (int)(fontSize / 0.2727); // 44*44px @ 12pt font // Doesn't work because our image sections aren't tall enough and I'm not rewriting that right now
-            var newSize = (int)(fontSize / 0.6); // 20x20px @ 12pt font
-            SKImageInfo imageInfo = new(newSize, newSize);
-            return tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            var imageInfo = new SKImageInfo(finalIconSize, finalIconSize);
+            using var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            resizedBitmap.SetImmutable();
+            return SKImage.FromBitmap(resizedBitmap);
         }
 
-        private static SKBitmap GenerateSvgIcon(HighlightType highlightType, string purple, SKColor textColor, double fontSize)
+        private static SKImage GenerateSvgIcon(HighlightType highlightType, SKColor purple, SKColor textColor, double fontSize)
         {
             using var tempBitmap = new SKBitmap(72, 72); // Icon SVG strings are scaled for 72x72
             using var tempCanvas = new SKCanvas(tempBitmap);
 
-            var iconPath = SKPath.ParseSvgPathData(highlightType switch
+            using var iconPath = SKPath.ParseSvgPathData(highlightType switch
             {
                 HighlightType.SubscribedTier => SUBSCRIBED_TIER_ICON_SVG,
                 HighlightType.SubscribedPrime => SUBSCRIBED_PRIME_ICON_SVG,
                 HighlightType.GiftedSingle => GIFTED_SINGLE_ICON_SVG,
                 HighlightType.GiftedAnonymous => GIFTED_ANONYMOUS_ICON_SVG,
-                _ => throw new NotSupportedException("This should not be possible.")
+                _ => throw new NotSupportedException("The requested icon svg path does not exist.")
             });
             iconPath.FillType = SKPathFillType.EvenOdd;
 
@@ -183,10 +203,10 @@ namespace TwitchDownloaderCore.Tools
                 Color = highlightType switch
                 {
                     HighlightType.SubscribedTier => textColor,
-                    HighlightType.SubscribedPrime => SKColor.Parse(purple),
+                    HighlightType.SubscribedPrime => purple,
                     HighlightType.GiftedSingle => textColor,
                     HighlightType.GiftedAnonymous => textColor,
-                    _ => throw new NotSupportedException("This should not be possible.")
+                    _ => throw new NotSupportedException("The requested icon color does not exist.")
                 },
                 IsAntialias = true,
                 LcdRenderText = true
@@ -195,7 +215,9 @@ namespace TwitchDownloaderCore.Tools
             tempCanvas.DrawPath(iconPath, iconColor);
             var newSize = (int)(fontSize / 0.6); // 20*20px @ 12pt font
             var imageInfo = new SKImageInfo(newSize, newSize);
-            return tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            resizedBitmap.SetImmutable();
+            return SKImage.FromBitmap(resizedBitmap);
         }
 
         /// <summary>
@@ -235,7 +257,7 @@ namespace TwitchDownloaderCore.Tools
             // i.e. Foobar subscribed with Prime. They've subscribed for 45 months! Hey PogChamp
             if (!customMessage.StartsWith(comment.message.fragments[1].text)) // If yes
             {
-                customMessageComment.message.fragments[0].text = customMessage[..(customMessage.IndexOf(comment.message.fragments[1].text) - 1)];
+                customMessageComment.message.fragments[0].text = customMessage[..(customMessage.IndexOf(comment.message.fragments[1].text, StringComparison.Ordinal) - 1)];
                 return (subMessageComment, customMessageComment);
             }
 
@@ -260,11 +282,9 @@ namespace TwitchDownloaderCore.Tools
         public void Dispose()
         {
             Dispose(true);
-
-            GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool isDisposing)
+        private void Dispose(bool isDisposing)
         {
             try
             {

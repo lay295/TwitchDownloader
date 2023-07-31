@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Chat
@@ -30,7 +31,8 @@ namespace TwitchDownloaderCore.Chat
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            string[] templateStrings = Properties.Resources.template.Split('\n');
+            using var templateStream = new MemoryStream(Properties.Resources.chat_template);
+            using var templateReader = new StreamReader(templateStream);
 
             var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
             if (!outputDirectory.Exists)
@@ -41,9 +43,10 @@ namespace TwitchDownloaderCore.Chat
             await using var fs = File.Create(filePath);
             await using var sw = new StreamWriter(fs, Encoding.Unicode);
 
-            for (int i = 0; i < templateStrings.Length; i++)
+            while (!templateReader.EndOfStream)
             {
-                switch (templateStrings[i].TrimEnd('\r', '\n'))
+                var line = await templateReader.ReadLineAsync();
+                switch (line.AsSpan().TrimEnd("\r\n"))
                 {
                     case "<!-- TITLE -->":
                         await sw.WriteLineAsync(HttpUtility.HtmlEncode(Path.GetFileNameWithoutExtension(filePath)));
@@ -71,13 +74,13 @@ namespace TwitchDownloaderCore.Chat
                     case "<!-- CUSTOM HTML -->":
                         foreach (var comment in chatRoot.comments)
                         {
-                            var relativeTime = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
-                            string timestamp = relativeTime.ToString(@"h\:mm\:ss");
-                            await sw.WriteLineAsync($"<pre class=\"comment-root\">[{timestamp}] {GetChatBadgesHtml(embedData, chatBadgeData, comment)} <a href=\"https://twitch.tv/{comment.commenter.name}\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>");
+                            var relativeTime = TimeSpan.FromSeconds(comment.content_offset_seconds);
+                            var timestamp = TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", relativeTime);
+                            await sw.WriteLineAsync($"<pre class=\"comment-root\">[{timestamp}] {GetChatBadgesHtml(embedData, chatBadgeData, comment)}<a href=\"https://twitch.tv/{comment.commenter.name}\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>");
                         }
                         break;
                     default:
-                        await sw.WriteLineAsync(templateStrings[i].TrimEnd('\r', '\n'));
+                        await sw.WriteLineAsync(line.AsMemory().TrimEnd("\r\n"), cancellationToken);
                         break;
                 }
             }
@@ -150,6 +153,7 @@ namespace TwitchDownloaderCore.Chat
                 }
             }
 
+            badgesHtml.Add(""); // Ensure the html string ends with a space
             return string.Join(' ', badgesHtml);
         }
 
@@ -157,7 +161,7 @@ namespace TwitchDownloaderCore.Chat
         {
             var message = new StringBuilder(comment.message.body.Length);
 
-            comment.message.fragments ??= new List<Fragment> { new Fragment() { text = comment.message.body } };
+            comment.message.fragments ??= new List<Fragment> { new() { text = comment.message.body } };
 
             foreach (var fragment in comment.message.fragments)
             {
@@ -178,7 +182,8 @@ namespace TwitchDownloaderCore.Chat
                         }
                         else if (word != "")
                         {
-                            message.Append(HttpUtility.HtmlEncode(word) + ' ');
+                            message.Append(HttpUtility.HtmlEncode(word));
+                            message.Append(' ');
                         }
                     }
                 }

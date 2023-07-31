@@ -266,6 +266,6 @@ public class TwitchClip
         public string ToString()
     {
         //Only show framerate if it's not 30fps
-        return String.Format("{0}p{1}", quality, framerate == "30" ? "" : framerate);
+        return $"{quality}p{(framerate == "30" ? "" : framerate)}";
     }
 }

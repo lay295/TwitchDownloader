@@ -33,7 +33,7 @@ namespace TwitchDownloaderCore
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
-            if (Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.ToLower() != ".json")
+            if (!Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.Equals(".json", StringComparison.OrdinalIgnoreCase))
             {
                 throw new NotSupportedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
             }
@@ -74,7 +74,7 @@ namespace TwitchDownloaderCore
                     await ChatText.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.TextTimestampFormat);
                     break;
                 default:
-                    throw new NotSupportedException("Requested output chat format is not implemented");
+                    throw new NotSupportedException($"{_updateOptions.OutputFormat} is not a supported output format.");
             }
         }
 

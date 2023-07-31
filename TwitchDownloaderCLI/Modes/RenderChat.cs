@@ -20,7 +20,7 @@ namespace TwitchDownloaderCLI.Modes
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
 
             var renderOptions = GetRenderOptions(inputOptions);
-            ChatRenderer chatRenderer = new(renderOptions, progress);
+            using ChatRenderer chatRenderer = new(renderOptions, progress);
             chatRenderer.ParseJsonAsync().Wait();
             chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
         }
@@ -115,7 +115,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (inputOptions.IgnoreUsersString != "")
             {
-                renderOptions.IgnoreUsersArray = inputOptions.IgnoreUsersString.ToLower().Split(',',
+                renderOptions.IgnoreUsersArray = inputOptions.IgnoreUsersString.Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             }
 

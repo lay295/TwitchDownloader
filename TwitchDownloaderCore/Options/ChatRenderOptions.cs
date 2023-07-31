@@ -91,5 +91,6 @@ namespace TwitchDownloaderCore.Options
         public bool DisperseCommentOffsets { get; set; } = true;
         public bool SkipDriveWaiting { get; set; } = false;
         public EmojiVendor EmojiVendor { get; set; } = EmojiVendor.GoogleNotoColor;
+        public int[] TimestampWidths { get; set; }
     }
 }

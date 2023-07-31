@@ -7,7 +7,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Chat
@@ -171,7 +171,7 @@ namespace TwitchDownloaderCore.Chat
                     }
                     break;
                 default:
-                    throw new NotSupportedException("The requested chat format is not implemented");
+                    throw new NotSupportedException($"{compression} is not a supported chat compression.");
             }
         }
     }
