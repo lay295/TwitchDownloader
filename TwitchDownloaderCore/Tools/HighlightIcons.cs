@@ -91,7 +91,8 @@ namespace TwitchDownloaderCore.Tools
                     if (!convertedToMatch.Success)
                         return HighlightType.None;
 
-                    return convertedToMatch.ValueSpan switch
+                    // TODO: use ValueSpan when .NET 7
+                    return convertedToMatch.Value switch
                     {
                         "Prime" => HighlightType.SubscribedPrime,
                         "Tier 1" => HighlightType.SubscribedTier,
