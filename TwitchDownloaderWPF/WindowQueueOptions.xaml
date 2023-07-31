@@ -4,12 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchDownloaderWPF"
+        xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
         lex:LocalizeDictionary.DesignCulture=""
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
         Title="Queue Options" MinHeight="240" Height="240" MinWidth="500" Width="500" Loaded="Window_loaded">
+    <Window.Resources>
+        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
+            <Setter Property="Template" Value="{StaticResource TextBoxExtendLeftTemplate}" />
+        </Style>
+    </Window.Resources>
+
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6"/>

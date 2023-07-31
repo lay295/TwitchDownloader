@@ -8,6 +8,7 @@
       xmlns:hc="https://handyorg.github.io/handycontrol"
       xmlns:fa="http://schemas.fontawesome.com/icons/"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
+      xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
       xmlns:lex="http://wpflocalizeextension.codeplex.com"
       lex:LocalizeDictionary.DesignCulture=""
       lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
@@ -16,6 +17,12 @@
       d:DesignHeight="400" d:DesignWidth="800"
       Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded" Loaded="Page_Loaded"
       >
+    <Page.Resources>
+        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
+            <Setter Property="Template" Value="{StaticResource TextBoxExtendLeftTemplate}" />
+        </Style>
+    </Page.Resources>
 
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.ColumnDefinitions>
