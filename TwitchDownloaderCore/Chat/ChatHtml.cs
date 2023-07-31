@@ -41,12 +41,12 @@ namespace TwitchDownloaderCore.Chat
             }
 
             await using var fs = File.Create(filePath);
-            await using var sw = new StreamWriter(fs, Encoding.Unicode);
+            await using var sw = new StreamWriter(fs);
 
             while (!templateReader.EndOfStream)
             {
                 var line = await templateReader.ReadLineAsync();
-                switch (line.AsSpan().TrimEnd("\r\n"))
+                switch (line)
                 {
                     case "<!-- TITLE -->":
                         await sw.WriteLineAsync(HttpUtility.HtmlEncode(Path.GetFileNameWithoutExtension(filePath)));
@@ -80,7 +80,7 @@ namespace TwitchDownloaderCore.Chat
                         }
                         break;
                     default:
-                        await sw.WriteLineAsync(line.AsMemory().TrimEnd("\r\n"), cancellationToken);
+                        await sw.WriteLineAsync(line);
                         break;
                 }
             }
