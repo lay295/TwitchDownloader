@@ -92,6 +92,12 @@ namespace TwitchDownloaderWPF
                 Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
                 Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, TextOauth.Text);
                 await Task.WhenAll(taskVideoInfo, taskAccessToken);
+
+                if (taskAccessToken.Result.data.videoPlaybackAccessToken is null)
+                {
+                    throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                }
+
                 Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
                 try
                 {
