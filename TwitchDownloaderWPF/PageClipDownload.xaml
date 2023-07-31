@@ -60,7 +60,7 @@
         <!-- MIDDLE -->
         <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
             <TextBlock Margin="3,8,3,3" Text="{lex:Loc ClipLinkId}" Foreground="{DynamicResource AppText}" />
-            <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+            <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" KeyDown="TextUrl_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="{lex:Loc GetInfo}" Click="btnGetInfo_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </WrapPanel>
         <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Center">

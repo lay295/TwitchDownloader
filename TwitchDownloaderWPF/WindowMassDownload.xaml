@@ -30,7 +30,7 @@
             </ComboBox>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBox x:Name="textChannel" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="194" Margin="0,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+            <TextBox x:Name="textChannel" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="194" Margin="0,6,0,0" KeyDown="TextChannel_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
         <Button x:Name="btnChannel" Content="{lex:Loc SetChannel}" HorizontalAlignment="Left" Margin="3,6,0,0" VerticalAlignment="Top" MinWidth="84" Height="30" Click="btnChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <WrapPanel HorizontalAlignment="Left" Height="329" Margin="10,54,0,0" VerticalAlignment="Top" Width="772"/>

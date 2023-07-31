@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using TwitchDownloaderCore;
@@ -70,8 +71,13 @@ namespace TwitchDownloaderWPF
             e.Handled = true;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0018:Inline variable declaration")]
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
+        {
+            await GetVideoInfo();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0018:Inline variable declaration")]
+        private async Task GetVideoInfo()
         {
             int videoId = ValidateUrl(textUrl.Text.Trim());
             if (videoId <= 0)
@@ -529,6 +535,14 @@ namespace TwitchDownloaderWPF
         private void numStartSecond_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
             UpdateVideoSizeEstimates();
+        }
+
+        private async void TextUrl_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                await GetVideoInfo();
+            }
         }
     }
 }
