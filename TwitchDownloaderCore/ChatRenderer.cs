@@ -1383,7 +1383,6 @@ namespace TwitchDownloaderCore
 
             foreach (var badge in comment.message.user_badges)
             {
-                bool foundBadge = false;
                 string id = badge._id;
                 string version = badge.version;
 
@@ -1397,14 +1396,13 @@ namespace TwitchDownloaderCore
                         if (cachedVersion.Key == version)
                         {
                             returnList.Add((cachedVersion.Value, cachedBadge.Type));
-                            foundBadge = true;
-                            break;
+                            goto NextUserBadge;
                         }
                     }
-
-                    if (foundBadge)
-                        break;
                 }
+
+                // goto is cheaper and more readable than using a boolean + branch check after each operation
+                NextUserBadge: ;
             }
 
             return returnList;
