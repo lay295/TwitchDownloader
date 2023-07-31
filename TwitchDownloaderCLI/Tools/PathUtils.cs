@@ -3,15 +3,16 @@ using System.IO;
 
 namespace TwitchDownloaderCLI.Tools
 {
-    public static class PathExtensions
+    public static class PathUtils
     {
         // https://stackoverflow.com/a/3856090/12204538
-        public static bool ExistsOnPath(string fileName)
+        public static bool ExistsOnPATH(string fileName)
         {
-            return GetFileOnPath(fileName) != null;
+            return GetFileOnPATH(fileName) != null;
         }
 
-        public static string GetFileOnPath(string fileName)
+        /// <returns>The path to <paramref name="fileName"/> as specified in the PATH environment variable, or <see langword="null"/> if was not found</returns>
+        public static string GetFileOnPATH(string fileName)
         {
             if (File.Exists(fileName))
             {
@@ -27,6 +28,7 @@ namespace TwitchDownloaderCLI.Tools
                     return fullPath;
                 }
             }
+
             return null;
         }
     }

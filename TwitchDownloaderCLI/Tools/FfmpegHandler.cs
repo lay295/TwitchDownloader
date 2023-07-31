@@ -47,7 +47,7 @@ namespace TwitchDownloaderCLI.Tools
 
         public static void DetectFfmpeg(string ffmpegPath)
         {
-            if (File.Exists(FfmpegExecutableName) || PathExtensions.ExistsOnPath(FfmpegExecutableName) || File.Exists(ffmpegPath))
+            if (File.Exists(ffmpegPath) || File.Exists(FfmpegExecutableName) || PathUtils.ExistsOnPATH(FfmpegExecutableName))
             {
                 return;
             }
