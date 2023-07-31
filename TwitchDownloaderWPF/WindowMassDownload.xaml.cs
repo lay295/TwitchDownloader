@@ -45,6 +45,11 @@ namespace TwitchDownloaderWPF
 
         private async void btnChannel_Click(object sender, RoutedEventArgs e)
         {
+            await ChangeCurrentChannel();
+        }
+
+        private async Task ChangeCurrentChannel()
+        {
             currentChannel = textChannel.Text;
             videoList.Clear();
             cursorList.Clear();
@@ -243,5 +248,13 @@ namespace TwitchDownloaderWPF
                 : Translations.Strings.TitleClipMassDownloader;
 			AppSingleton.RequestTitleBarChange();
 		}
+
+        private async void TextChannel_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                await ChangeCurrentChannel();
+            }
+        }
     }
 }

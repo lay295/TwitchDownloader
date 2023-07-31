@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
@@ -92,6 +93,11 @@ namespace TwitchDownloaderWPF
         }
 
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
+        {
+            await GetVideoInfo();
+        }
+
+        private async Task GetVideoInfo()
         {
             string id = ValidateUrl(textUrl.Text.Trim());
             if (string.IsNullOrWhiteSpace(id))
@@ -575,6 +581,14 @@ namespace TwitchDownloaderWPF
         {
             WindowQueueOptions queueOptions = new WindowQueueOptions(this);
             queueOptions.ShowDialog();
+        }
+
+        private async void TextUrl_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                await GetVideoInfo();
+            }
         }
     }
 }
