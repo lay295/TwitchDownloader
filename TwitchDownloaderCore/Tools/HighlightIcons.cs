@@ -17,6 +17,7 @@ namespace TwitchDownloaderCore.Tools
         GiftedAnonymous,
         PayingForward,
         ChannelPointHighlight,
+        Raid,
         Unknown
     }
 
@@ -101,6 +102,13 @@ namespace TwitchDownloaderCore.Tools
                         _ => HighlightType.None
                     };
                 }
+            }
+
+            if (char.IsDigit(bodySpan[0]) && bodySpan.Contains("have joined!", StringComparison.Ordinal))
+            {
+                // TODO: use bodySpan when .NET 7
+                if (Regex.IsMatch(comment.message.body, $@"^\d+ raiders from {comment.commenter.display_name} have joined!"))
+                    return HighlightType.Raid;
             }
 
             if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))

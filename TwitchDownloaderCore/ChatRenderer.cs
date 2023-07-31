@@ -741,6 +741,7 @@ namespace TwitchDownloaderCore
                     break;
                 case HighlightType.ContinuingGift:
                 case HighlightType.PayingForward:
+                case HighlightType.Raid:
                 default:
                     DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
                     break;
