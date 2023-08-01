@@ -139,58 +139,21 @@ namespace TwitchDownloaderCore
         }
 
         /* Due to Twitch changing the API to return only whole number offsets, renders have become less readable.
-         * To get around this we will disperse the offsets of comments on a given whole second across the second.
-         * For example, before any jittering:
-         *   the input a=1.0 b=2.0 c=2.0  d=2.0 e=2.0  f=3.0
-         *     becomes a=1.0 b=2.0 c=2.25 d=2.5 e=2.75 f=3.0
-         *
-         * The only drawback to this method is there will _never_ be multiple comments drawn on the same tick
-         * like in a real chat. The overall improved chat flow is still worth it regardless. */
+         * To get around this we can disperse comment offsets according to their creation date milliseconds to
+         * help bring back the better readability of comments coming in 1-by-1 */
         private static void DisperseCommentOffsets(List<Comment> comments)
         {
-            var rnd = new Random(comments.Count);
+            // Enumerating over a span is faster than a list
+            var commentSpan = CollectionsMarshal.AsSpan(comments);
 
-            for (int i = 0; i < comments.Count; i++)
+            foreach (var c in commentSpan)
             {
-                if (i == comments.Count - 1)
+                if (c.content_offset_seconds % 1 == 0 && c.created_at.Millisecond != 0)
                 {
-                    break;
-                }
-                if (comments[i + 1].content_offset_seconds != comments[i].content_offset_seconds)
-                {
-                    continue;
-                }
-                if (comments[i].content_offset_seconds % 1 != 0)
-                {
-                    continue;
-                }
-
-                int startIndex = i;
-                do
-                {
-                    i++;
-                    if (i == comments.Count - 1)
-                    {
-                        break;
-                    }
-                }
-                while (comments[i + 1].content_offset_seconds == comments[i].content_offset_seconds);
-
-                double scaleFactor = 1;
-                if (i < comments.Count - 1 &&
-                    comments[i + 1].content_offset_seconds - comments[i].content_offset_seconds < 1)
-                {
-                    // If there happens to be 2+ comments on a whole second in a chat with decimal comment offsets
-                    // we don't want to inadvertently rearrange the comment order
-                    scaleFactor = comments[i + 1].content_offset_seconds - comments[i].content_offset_seconds;
-                }
-
-                int commentsToUpdate = i - startIndex;
-                for (int c = 1; c <= commentsToUpdate; c++) // Start at 1 so we don't offset the first comment on the second
-                {
-                    double jitter = rnd.NextDouble() * 0.98 - 0.49; // Jitter the distributed comment offset between 0.51-1.49x
-                    double distributedOffset = (c + jitter) / (commentsToUpdate + 1); // Jitter must be addition to retain comment order
-                    comments[startIndex + c].content_offset_seconds += distributedOffset * scaleFactor;
+                    const int MILLIS_PER_HALF_SECOND = 500;
+                    const double MILLIS_PER_SECOND = 1000.0;
+                    // Finding the difference between the creation dates and offsets is inconsistent. This approximation looks better more often.
+                    c.content_offset_seconds += (c.created_at.Millisecond - MILLIS_PER_HALF_SECOND) / MILLIS_PER_SECOND;
                 }
             }
         }

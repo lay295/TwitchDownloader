@@ -644,7 +644,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="MessageDispersionTooltip" xml:space="preserve">
-    <value>En novembre 2022, une modification de l'API de Twitch a fait en sorte que les messages de chat ne se téléchargent plus que par secondes entières. S'il y a plusieurs messages sur une seule seconde, ils seront intelligemment répartis sur la seconde afin d'améliorer le flux de discussion.</value>
+    <value>En novembre 2022, une modification de l'API de Twitch a fait en sorte que les messages de chat ne se téléchargent plus que par secondes entières. Cette option utilise des métadonnées supplémentaires pour tenter de restaurer les messages au moment où ils ont été réellement envoyés. Il se peut que l'ordre des commentaires soit différent.</value>
   </data>
   <data name="ChatCompression" xml:space="preserve">
     <value>Compression:</value>
