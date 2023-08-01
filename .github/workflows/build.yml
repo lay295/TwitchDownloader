@@ -115,31 +115,31 @@ jobs:
     - name: Zip Windows CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/Windows/TwitchDownloaderCLI.exe
+        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/Windows"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-Windows-x64.zip
         
     - name: Zip Linux CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/Linux/TwitchDownloaderCLI
+        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/Linux"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-Linux-x64.zip
         
     - name: Zip LinuxAlpine CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxAlpine/TwitchDownloaderCLI
+        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxAlpine"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxAlpine-x64.zip
     
     - name: Zip LinuxArm CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm/TwitchDownloaderCLI
+        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm.zip
         
     - name: Zip LinuxArm64 CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm64/TwitchDownloaderCLI
+        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm64"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
     
     - name: Download URL
@@ -220,7 +220,7 @@ jobs:
     - name: Zip MacOS CLI
       uses: vimtor/action-zip@v1
       with:
-        files: TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOS/TwitchDownloaderCLI
+        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOS"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOS-x64.zip
     
     - name: Download URL
