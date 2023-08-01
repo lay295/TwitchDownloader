@@ -84,7 +84,7 @@
                         <CheckBox x:Name="checkTimestamp" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                         <CheckBox x:Name="checkSub" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                         <CheckBox x:Name="checkBadge" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
-                        <TextBox x:Name="textUpdateTime" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                        <TextBox x:Name="textUpdateTime" Text="0.5" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         <CheckBox x:Name="checkDispersion" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                         <CheckBox x:Name="checkAlternateMessageBackgrounds" HorizontalAlignment="Left" Margin="0,22,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                     </StackPanel>

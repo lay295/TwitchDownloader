@@ -24,7 +24,7 @@
       <Value Profile="(Default)">700</Value>
     </Setting>
     <Setting Name="UpdateTime" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">0.5</Value>
     </Setting>
     <Setting Name="FFZEmotes" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

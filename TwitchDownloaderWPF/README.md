@@ -170,7 +170,7 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Update Rate**: The time in seconds between drawing the next batch of comments. Lower numbers makes chat flow more readable but will marginally increase render times.
 
-**Dispersion**: In November 2022 a Twitch API change made chat messages download only in whole seconds. If dispersion is enabled and there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.
+**Dispersion**: In November 2022 a Twitch API change made chat messages download only in whole seconds. This option uses additional metadata to attempt to restore messages to when they were actually sent. This may result in a different comment order. Requires an update rate less than 1.0 for effective results.
 
 **Alternate Backgrounds**: Alternates the background color of every other chat message to help tell them apart.
 

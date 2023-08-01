@@ -256,7 +256,7 @@ File the program will output to.
 Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, Predictions = `32`, NoAudioVisual = `64`, PrimeGaming = `128`
 
 **--dispersion**
-(Default: `false`) In November 2022 a Twitch API change made chat messages download only in whole seconds. If there are multiple messages on a second, they will be intelligently distributed over the second to improve chat flow. Requires an update rate less than 1.0 for effective results.
+(Default: `false`) In November 2022 a Twitch API change made chat messages download only in whole seconds. This option uses additional metadata to attempt to restore messages to when they were actually sent. This may result in a different comment order. Requires an update rate less than 1.0 for effective results.
 
 **--alternate-backgrounds**
 (Default: `false`) Alternates the background color of every other chat message to help tell them apart.
