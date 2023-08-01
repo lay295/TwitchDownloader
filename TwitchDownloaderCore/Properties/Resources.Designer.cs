@@ -72,6 +72,16 @@ namespace TwitchDownloaderCore.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] copyright {
+            get {
+                object obj = ResourceManager.GetObject("copyright", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Inter {
             get {
                 object obj = ResourceManager.GetObject("Inter", resourceCulture);
@@ -95,6 +105,16 @@ namespace TwitchDownloaderCore.Properties {
         internal static byte[] noto_emoji_2_038 {
             get {
                 object obj = ResourceManager.GetObject("noto_emoji_2_038", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] third_party_licenses {
+            get {
+                object obj = ResourceManager.GetObject("third-party-licenses", resourceCulture);
                 return ((byte[])(obj));
             }
         }

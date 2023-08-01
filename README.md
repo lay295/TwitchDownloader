@@ -181,7 +181,20 @@ cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 
 [MIT](./LICENSE.txt)
 
-# Credits
-[Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google and contributors.
+# Third Party Credits
 
-[Twemoji](https://github.com/twitter/twemoji) © Twitter and contributors.
+Chat Renders are rendered with [SkiaSharp and HarfBuzzSharp](https://github.com/mono/SkiaSharp) © Microsoft Corporation.
+
+Chat Renders are encoded and Video Downloads are finalized with [FFmpeg](https://ffmpeg.org/) © The FFmpeg developers.
+
+Chat Renders may use [Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google and contributors.
+
+Chat Renders may use [Twemoji](https://github.com/twitter/twemoji) © Twitter and contributors.
+
+Bundled FFmpeg binaries are fetched from [gyan.dev](https://www.gyan.dev/ffmpeg/) © Gyan Doshi.
+
+FFmpeg binaries fetched are runtime are downloaded using [Xabe.FFmpeg.Downloader](https://github.com/tomaszzmuda/Xabe.FFmpeg) © Xabe.
+
+Chat Html exports utilize the _Inter_ typeface hosted by the [Google Fonts API](https://fonts.google.com/) © Google.
+
+For a full list of utilized external libraries, see [THIRD-PARTY-LICENSES.txt](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt).
