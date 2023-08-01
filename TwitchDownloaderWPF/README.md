@@ -228,9 +228,9 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Warning: modifying Ffmpeg arguments may cause pipe errors!**
 
-**Input Arguments**: The arguments for controlling the rendered input to ffmpeg.
+**Input Arguments**: The arguments for controlling the rendered input to FFmpeg.
 
-**Output Arguments**: The arguments for controlling the encoded output from ffmpeg.
+**Output Arguments**: The arguments for controlling the encoded output from FFmpeg.
 
 **Reset To Defaults**: Reset both of the Ffmpeg arguments to default.
 

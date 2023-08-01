@@ -133,4 +133,10 @@
   <data name="noto_emoji_2_038" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\noto-emoji-2.038.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="copyright" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\TD-License;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="third-party-licenses" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\THIRD-PARTY-LICENSES.txt;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

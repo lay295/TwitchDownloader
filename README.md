@@ -106,7 +106,7 @@ TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 ```
 sudo chmod +x TwitchDownloaderCLI
 ```
-6. a) If you do not have ffmpeg, you should install it via your distro package manager, however you can also get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+6. a) If you do not have FFmpeg, you should install it via your distro package manager, however you can also get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
@@ -126,7 +126,7 @@ sudo chmod +x ffmpeg
 ```
 chmod +x TwitchDownloaderCLI
 ```
-4. a) If you do not have ffmpeg, you can install it via [Homebrew package manager](https://brew.sh/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+4. a) If you do not have FFmpeg, you can install it via [Homebrew package manager](https://brew.sh/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
@@ -181,7 +181,20 @@ cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 
 [MIT](./LICENSE.txt)
 
-# Credits
-[Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google and contributors.
+# Third Party Credits
 
-[Twemoji](https://github.com/twitter/twemoji) © Twitter and contributors.
+Chat Renders are rendered with [SkiaSharp and HarfBuzzSharp](https://github.com/mono/SkiaSharp) © Microsoft Corporation.
+
+Chat Renders are encoded and Video Downloads are finalized with [FFmpeg](https://ffmpeg.org/) © The FFmpeg developers.
+
+Chat Renders may use [Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google and contributors.
+
+Chat Renders may use [Twemoji](https://github.com/twitter/twemoji) © Twitter and contributors.
+
+Bundled FFmpeg binaries are fetched from [gyan.dev](https://www.gyan.dev/ffmpeg/) © Gyan Doshi.
+
+FFmpeg binaries fetched are runtime are downloaded using [Xabe.FFmpeg.Downloader](https://github.com/tomaszzmuda/Xabe.FFmpeg) © Xabe.
+
+Chat Html exports utilize the _Inter_ typeface hosted by the [Google Fonts API](https://fonts.google.com/) © Google.
+
+For a full list of utilized external libraries, see [THIRD-PARTY-LICENSES.txt](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt).

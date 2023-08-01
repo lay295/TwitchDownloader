@@ -345,7 +345,7 @@ namespace TwitchDownloaderCore
                 int tc = i;
 
                 Progress<ProgressReport> taskProgress = null;
-                if (!downloadOptions.Quiet)
+                if (!downloadOptions.Silent)
                 {
                     taskProgress = new Progress<ProgressReport>(progressReport =>
                     {

@@ -19,6 +19,9 @@ namespace TwitchDownloaderCLI.Tools
 
         private static string[] Process(string[] args)
         {
+            if (args.Length == 0)
+                return args;
+
             args[0] = args[0].ToLower();
             return args;
         }

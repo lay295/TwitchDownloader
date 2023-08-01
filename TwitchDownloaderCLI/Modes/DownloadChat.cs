@@ -61,7 +61,7 @@ namespace TwitchDownloaderCLI.Modes
                 Compression = inputOptions.Compression,
                 TimeFormat = inputOptions.TimeFormat,
                 ConnectionCount = inputOptions.ChatConnections,
-                Quiet = inputOptions.Quiet,
+                Silent = inputOptions.Silent,
                 BttvEmotes = (bool)inputOptions.BttvEmotes!,
                 FfzEmotes = (bool)inputOptions.FfzEmotes!,
                 StvEmotes = (bool)inputOptions.StvEmotes!,

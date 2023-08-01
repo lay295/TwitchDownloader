@@ -13,8 +13,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -106,9 +105,4 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <PropertyGroup>
-    <PostBuildEvent></PostBuildEvent>
-    <AssemblyVersion></AssemblyVersion>
-    <FileVersion></FileVersion>
-  </PropertyGroup>
 </Project>
