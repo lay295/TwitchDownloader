@@ -101,6 +101,12 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 **--chat-connections**
 (Default: `4`) The number of parallel downloads for chat.
 
+**--silent**
+(Default: `false`) Suppresses progress console output.
+
+**--temp-path**
+Path to temporary folder for cache.
+
 
 ## Arguments for mode chatupdate
 <sup>Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format</sup>
