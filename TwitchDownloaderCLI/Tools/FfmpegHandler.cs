@@ -21,7 +21,7 @@ namespace TwitchDownloaderCLI.Tools
 
         private static void DownloadFfmpeg()
         {
-            Console.WriteLine("[INFO] - Downloading ffmpeg");
+            Console.WriteLine("[INFO] - Downloading FFmpeg");
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -41,7 +41,7 @@ namespace TwitchDownloaderCLI.Tools
             }
             catch
             {
-                Console.WriteLine("[ERROR] - Unable to update ffmpeg file permissions. Run 'sudo chmod +x ffmpeg' if further ffmpeg errors occur.");
+                Console.WriteLine("[ERROR] - Unable to update FFmpeg file permissions. Run 'sudo chmod +x ffmpeg' if further FFmpeg errors occur.");
             }
         }
 
@@ -52,7 +52,7 @@ namespace TwitchDownloaderCLI.Tools
                 return;
             }
 
-            Console.WriteLine("[ERROR] - Unable to find ffmpeg, exiting. You can download ffmpeg automatically with the command \"TwitchDownloaderCLI ffmpeg -d\"");
+            Console.WriteLine("[ERROR] - Unable to find FFmpeg, exiting. You can download FFmpeg automatically with the command \"TwitchDownloaderCLI ffmpeg -d\"");
             Environment.Exit(1);
         }
     }

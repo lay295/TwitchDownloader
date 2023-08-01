@@ -30,7 +30,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("oauth", HelpText = "OAuth access token to download subscriber only VODs. DO NOT SHARE THIS WITH ANYONE.")]
         public string Oauth { get; set; }
 
-        [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]
+        [Option("ffmpeg-path", HelpText = "Path to FFmpeg executable.")]
         public string FfmpegPath { get; set; }
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary caching folder.")]

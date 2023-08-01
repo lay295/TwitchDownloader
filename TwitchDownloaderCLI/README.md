@@ -44,7 +44,7 @@ Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b
 OAuth access token to download subscriber only VODs. <ins>**DO NOT SHARE YOUR OAUTH TOKEN WITH ANYONE.**</ins>
 
 **--ffmpeg-path**
-Path to ffmpeg executable.
+Path to FFmpeg executable.
 
 **--temp-path**
 Path to temporary folder for cache.
@@ -224,10 +224,10 @@ File the program will output to.
 (Default: `0.2`) Time in seconds to update chat render output.
 
 **--input-args**
-(Default: `-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -`) Input arguments for ffmpeg chat render.
+(Default: `-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -`) Input arguments for FFmpeg chat render.
 
 **--output-args**
-(Default: `-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"`) Output arguments for ffmpeg chat render.
+(Default: `-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"`) Output arguments for FFmpeg chat render.
 
 **--ignore-users**
 (Default: ` `) List of usernames to ignore when rendering, separated by commas. Not case-sensitive.
@@ -253,13 +253,13 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 (Default: `notocolor`) The emoji vendor used for rendering emojis. Valid values are: `twitter` / `twemoji`, `google` / `notocolor`, `none`.
 
 **--ffmpeg-path**
-(Default: ` `) Path to ffmpeg executable.
+(Default: ` `) Path to FFmpeg executable.
 
 **--temp-path**
 (Default: ` `) Path to temporary folder for cache.
 
 **--verbose-ffmpeg**
-(Default: `false`) Prints every message from ffmpeg.
+(Default: `false`) Prints every message from FFmpeg.
 
 **--skip-drive-waiting**
 (Default: `false`) Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives. Skipping can result in 1-5% render speed increases.
@@ -295,10 +295,10 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 (Default: `1.0`) Number to scale highlight indent size (sub messages).
 
 ## Arguments for mode ffmpeg
-<sup>Manage standalone ffmpeg</sup>
+<sup>Manage standalone FFmpeg</sup>
 
 **-d / --download**
-(Default: `false`) Downloads ffmpeg as a standalone file.
+(Default: `false`) Downloads FFmpeg as a standalone file.
 
 
 ## Arguments for mode cache

@@ -49,7 +49,7 @@ jobs:
     - name: Build Windows GUI
       run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
     
-    - name: Download Ffmpeg To Workspace
+    - name: Download FFmpeg To Workspace
       # You may pin to the exact commit or the version.
       # uses: carlosperate/download-file-action@e85e0aa6262f13571d17a4a39687b26981c583dc
       uses: carlosperate/download-file-action@v1.0.3
@@ -59,7 +59,7 @@ jobs:
         # New filename to rename the downloaded file
         file-name: ffmpeg.zip
         
-    - name: Bundle Ffmpeg
+    - name: Bundle FFmpeg
       run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64/ffmpeg.exe
       
     - name: Zip Windows GUI Release Asset

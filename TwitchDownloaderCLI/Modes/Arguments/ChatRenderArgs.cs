@@ -84,10 +84,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("update-rate", Default = 0.2, HelpText = "Time in seconds to update chat render output.")]
         public double UpdateRate { get; set; }
 
-        [Option("input-args", Default = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", HelpText = "Input arguments for ffmpeg chat render.")]
+        [Option("input-args", Default = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", HelpText = "Input arguments for FFmpeg chat render.")]
         public string InputArgs { get; set; }
 
-        [Option("output-args", Default = "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"", HelpText = "Output arguments for ffmpeg chat render.")]
+        [Option("output-args", Default = "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"", HelpText = "Output arguments for FFmpeg chat render.")]
         public string OutputArgs { get; set; }
 
         [Option("ignore-users", Default = "", HelpText = "List of usernames to ignore when rendering, separated by commas. Not case-sensitive.")]
@@ -111,13 +111,13 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("emoji-vendor", Default = "notocolor", HelpText = "The emoji vendor used for rendering emojis. Valid values are: 'twitter' / 'twemoji', 'google' / 'notocolor', and 'system' / 'none'.")]
         public string EmojiVendor { get; set; }
 
-        [Option("ffmpeg-path", HelpText = "Path to ffmpeg executable.")]
+        [Option("ffmpeg-path", HelpText = "Path to FFmpeg executable.")]
         public string FfmpegPath { get; set; }
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
 
-        [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from ffmpeg.")]
+        [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from FFmpeg.")]
         public bool LogFfmpegOutput { get; set; }
 
         [Option("skip-drive-waiting", Default = false, HelpText = "Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives.")]
