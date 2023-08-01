@@ -12,7 +12,6 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.TwitchTasks;
-using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloaderWPF
 {
@@ -246,7 +245,7 @@ namespace TwitchDownloaderWPF
             Title = downloaderType == DownloadType.Video
                 ? Translations.Strings.TitleVideoMassDownloader
                 : Translations.Strings.TitleClipMassDownloader;
-			AppSingleton.RequestTitleBarChange();
+            App.RequestTitleBarChange();
 		}
 
         private async void TextChannel_OnKeyDown(object sender, KeyEventArgs e)

@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace TwitchDownloaderWPF.Services
 {
-    public class DefaultThemeService
+    public static class DefaultThemeService
     {
         public static bool WriteIncludedThemes()
         {

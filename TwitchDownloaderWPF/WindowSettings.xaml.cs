@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
-using static TwitchDownloaderWPF.App;
 using MessageBox = System.Windows.MessageBox;
 
 namespace TwitchDownloaderWPF
@@ -108,7 +107,7 @@ namespace TwitchDownloaderWPF
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Title = Translations.Strings.TitleGlobalSettings;
-            AppSingleton.RequestTitleBarChange();
+            App.RequestTitleBarChange();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -143,7 +142,7 @@ namespace TwitchDownloaderWPF
             if (!((string)comboTheme.SelectedItem).Equals(Settings.Default.GuiTheme, StringComparison.OrdinalIgnoreCase))
             {
                 Settings.Default.GuiTheme = (string)comboTheme.SelectedItem;
-                AppSingleton.RequestAppThemeChange();
+                App.RequestAppThemeChange();
             }
         }
 
@@ -158,7 +157,7 @@ namespace TwitchDownloaderWPF
             if (selectedCulture != Settings.Default.GuiCulture)
             {
                 Settings.Default.GuiCulture = selectedCulture;
-                AppSingleton.RequestCultureChange();
+                App.RequestCultureChange();
                 Title = Translations.Strings.TitleGlobalSettings;
             }
         }

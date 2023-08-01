@@ -9,9 +9,7 @@ using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
-using TwitchDownloaderWPF.Translations;
 using TwitchDownloaderWPF.TwitchTasks;
-using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloaderWPF
 {
@@ -110,7 +108,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -194,7 +192,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -273,7 +271,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -320,7 +318,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -352,7 +350,7 @@ namespace TwitchDownloaderWPF
                     {
                         if (!Directory.Exists(folderPath))
                         {
-                            MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                             return;
                         }
 
@@ -386,7 +384,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show(Strings.InvaliFolderPathMessage, Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -585,7 +583,7 @@ namespace TwitchDownloaderWPF
         private void Window_loaded(object sender, RoutedEventArgs e)
         {
             Title = Translations.Strings.TitleEnqueueOptions;
-            AppSingleton.RequestTitleBarChange();
+            App.RequestTitleBarChange();
         }
     }
 }

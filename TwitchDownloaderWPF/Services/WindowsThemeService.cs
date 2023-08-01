@@ -2,6 +2,7 @@
 using System;
 using System.Management;
 using System.Security.Principal;
+using System.Windows;
 
 namespace TwitchDownloaderWPF.Services
 {
@@ -32,7 +33,7 @@ namespace TwitchDownloaderWPF.Services
         private void WindowsThemeService_EventArrived(object sender, EventArrivedEventArgs e)
         {
             var newWindowsTheme = GetWindowsTheme();
-            App.AppSingleton.Dispatcher.BeginInvoke(() => ThemeChanged?.Invoke(this, newWindowsTheme));
+            Application.Current.Dispatcher.BeginInvoke(() => ThemeChanged?.Invoke(this, newWindowsTheme));
         }
 
         public static string GetWindowsTheme()

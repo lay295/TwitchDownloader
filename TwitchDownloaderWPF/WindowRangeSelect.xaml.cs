@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloaderCore;
-using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloaderWPF
 {
@@ -87,7 +85,7 @@ namespace TwitchDownloaderWPF
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Title = Translations.Strings.TitleRenderRange;
-            AppSingleton.RequestTitleBarChange();
+            App.RequestTitleBarChange();
         }
     }
 }

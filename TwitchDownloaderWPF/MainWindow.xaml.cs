@@ -6,7 +6,6 @@ using System.Net;
 using System.Windows;
 using TwitchDownloaderWPF.Properties;
 using Xabe.FFmpeg.Downloader;
-using static TwitchDownloaderWPF.App;
 
 namespace TwitchDownloaderWPF
 {
@@ -60,7 +59,7 @@ namespace TwitchDownloaderWPF
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            AppSingleton.RequestAppThemeChange();
+            App.RequestAppThemeChange();
 
             Main.Content = pageVodDownload;
             if (Settings.Default.UpgradeRequired)
