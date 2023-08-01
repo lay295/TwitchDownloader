@@ -5,7 +5,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 {
 
     [Verb("chatdownload", HelpText = "Downloads the chat from a VOD or clip")]
-    public class ChatDownloadArgs
+    public class ChatDownloadArgs : ITwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD or clip to download that chat of.")]
         public string Id { get; set; }
@@ -45,5 +45,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
+
+        [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
+        public bool? ShowBanner { get; set; }
     }
 }
