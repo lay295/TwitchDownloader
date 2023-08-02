@@ -1,32 +1,51 @@
-This notice MUST be included UNMODIFIED with all copies and redistributions of
-the TwitchDownloaderCLI, TwitchDownloaderCore, or TwitchDownloaderWPF libraries
-unless explicit written permission from a maintainer is given.
+Definitions
 
-TwitchDownloaderCLI, TwitchDownloaderCore, and TwitchDownloaderWPF are provided
-free of charge under the MIT license.
+  - "TwitchDownloader"
+    Any of the TwitchDownloaderCLI, TwitchDownloaderCore, and TwitchDownloaderWPF
+    libraries.
 
-A copy of the MIT license can be found below.
+  - "You" (or "Your")
+    An individual or Legal Entity exercising permissions granted by this License.
 
-----------
+Notice
 
-The MIT License
+  This notice MUST be included UNMODIFIED with all copies, modifications, and
+  redistributions of the TwitchDownloader libraries unless explicit written
+  permission from a maintainer is given.
 
-Copyright (c) 2019 lay295 and contributors
+  The TwitchDownloader libraries are provided free of charge under the MIT
+  license. As per this license, you are permitted to utilize, modify,
+  and redistribute the TwitchDownloader libraries in any form under the
+  conditions:
+   - This notice is included with any source files; and
+   - This notice is included with any compiled binaries; and
+   - The third party licenses file is updated to reflect to any modifications
+     made.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+  TwitchDownloader utilizes several third party libraries and resources provided
+  under various licenses. The full list of third party components and licenses
+  can be found in the file THIRD-PARTY-LICENSES.txt.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+License
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+  The MIT License
+
+  Copyright (c) 2019 lay295 and contributors
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
