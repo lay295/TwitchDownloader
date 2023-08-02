@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using TwitchDownloaderCLI.Modes.Arguments;
+using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
 
 namespace TwitchDownloaderCLI.Tools
@@ -21,20 +22,26 @@ namespace TwitchDownloaderCLI.Tools
 
         private static void DownloadFfmpeg()
         {
-            Console.WriteLine("[INFO] - Downloading FFmpeg");
+            Console.Write("[INFO] - Downloading FFmpeg");
+
+            var progressHandler = new Progress<ProgressInfo>();
+            progressHandler.ProgressChanged += XabeProgressHandler.OnProgressReceived;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full).Wait();
+                FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full, progressHandler).GetAwaiter().GetResult();
                 return;
             }
 
-            FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official).Wait();
+            FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, progressHandler).GetAwaiter().GetResult();
+
+            Console.WriteLine();
+
             try
             {
                 var ffmpegFileInfo = new UnixFileInfo("ffmpeg")
                 {
-                    FileAccessPermissions = FileAccessPermissions.UserRead | FileAccessPermissions.UserWrite | FileAccessPermissions.GroupRead |  FileAccessPermissions.OtherRead |
+                    FileAccessPermissions = FileAccessPermissions.UserRead | FileAccessPermissions.UserWrite | FileAccessPermissions.GroupRead | FileAccessPermissions.OtherRead |
                                             FileAccessPermissions.UserExecute | FileAccessPermissions.GroupExecute | FileAccessPermissions.OtherExecute
                 };
                 ffmpegFileInfo.Refresh();
@@ -54,6 +61,15 @@ namespace TwitchDownloaderCLI.Tools
 
             Console.WriteLine("[ERROR] - Unable to find FFmpeg, exiting. You can download FFmpeg automatically with the command \"TwitchDownloaderCLI ffmpeg -d\"");
             Environment.Exit(1);
+        }
+    }
+
+    file static class XabeProgressHandler
+    {
+        public static void OnProgressReceived(object sender, ProgressInfo e)
+        {
+            var percent = (int)(e.DownloadedBytes / (double)e.TotalBytes * 100);
+            Console.Write($"\r[INFO] - Downloading FFmpeg {percent}%");
         }
     }
 }

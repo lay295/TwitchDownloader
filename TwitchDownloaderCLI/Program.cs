@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using CommandLine.Text;
 using TwitchDownloaderCLI.Modes;
@@ -77,9 +76,9 @@ namespace TwitchDownloaderCLI
             Environment.Exit(1);
         }
 
-        private static void WriteApplicationBanner(ITwitchDownloaderArgs argsBase, string[] args)
+        private static void WriteApplicationBanner(ITwitchDownloaderArgs args, string[] argsArray)
         {
-            if (argsBase.ShowBanner == false || args.Contains("--silent"))
+            if (args.ShowBanner == false || argsArray.Contains("--silent"))
             {
                 return;
             }
