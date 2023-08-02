@@ -126,9 +126,6 @@
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
     <value>Ha seleccionado un canal alfa (transparencia) para un contenedor/codec que no lo admite.\nElimine la transparencia o codifique con MOV y RLE/PRORES (el tamaño del archivo será grande).</value>
   </data>
-  <data name="ApplicationLanguage" xml:space="preserve">
-    <value>Idioma:</value>
-  </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Tema </value>
     <comment>Deje un espacio al final</comment>
@@ -301,7 +298,7 @@
     <value>Emotes FFZ:</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
-    <value>{title} {id} {date} {channel} {date_custom=""} {random_string}</value>
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {crop_start} {crop_end} {crop_start_custom=""} {crop_end_custom=""}</value>
     <comment>No traducir</comment>
   </data>
   <data name="FontColor" xml:space="preserve">
@@ -435,7 +432,7 @@
     <value>Seleccionar todo</value>
   </data>
   <data name="SelectedItems" xml:space="preserve">
-    <value>Selected Items:</value>
+    <value>Artículos seleccionados:</value>
   </data>
   <data name="SetChannel" xml:space="preserve">
     <value>Configurar canal</value>
@@ -546,8 +543,8 @@
   <data name="Update" xml:space="preserve">
     <value>Actualizar</value>
   </data>
-  <data name="UpdateTime" xml:space="preserve">
-    <value>Hora de actualización:</value>
+  <data name="UpdateRate" xml:space="preserve">
+    <value>Tasa de actualización:</value>
   </data>
   <data name="UrlList" xml:space="preserve">
     <value>Lista de URL</value>
@@ -591,17 +588,18 @@
   <data name="DownloadVideo" xml:space="preserve">
     <value>Descargar vídeo</value>
   </data>
-  <data name="LanguageLabel" xml:space="preserve">
-    <value>Idioma:</value>
+  <data name="ApplicationLanguage" xml:space="preserve">
+    <value>Idioma </value>
+    <comment>Dejar un espacio al final</comment>
   </data>
   <data name="RenderChat" xml:space="preserve">
     <value>Renderizar chat</value>
   </data>
-  <data name="AccentIndentScale" xml:space="preserve">
-    <value>Tamaño de acentuación:</value>
+  <data name="HighlightStrokeScale" xml:space="preserve">
+    <value>Resaltar escala de sangría:</value>
   </data>
-  <data name="AccentStrokeScale" xml:space="preserve">
-    <value>Tamaño de acento:</value>
+  <data name="HighlightStrokeScale" xml:space="preserve">
+    <value>Resaltar escala de trazos:</value>
   </data>
   <data name="BadgeScale" xml:space="preserve">
     <value>Tamaño de insignias:</value>
@@ -615,8 +613,8 @@
   <data name="EmoteSpacingScale" xml:space="preserve">
     <value>Escala de espaciado de los emoticonos:</value>
   </data>
-  <data name="LeftSpacingScale" xml:space="preserve">
-    <value>Escala de espaciado izquierda:</value>
+  <data name="SidePaddingScale" xml:space="preserve">
+    <value>Escala de relleno lateral:</value>
   </data>
   <data name="SectionHeightScale" xml:space="preserve">
     <value>Escala de altura de la sección:</value>
