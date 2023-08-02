@@ -64,9 +64,9 @@ namespace TwitchDownloaderCLI.Tools
         }
     }
 
-    file static class XabeProgressHandler
+    internal static class XabeProgressHandler
     {
-        public static void OnProgressReceived(object sender, ProgressInfo e)
+        internal static void OnProgressReceived(object sender, ProgressInfo e)
         {
             var percent = (int)(e.DownloadedBytes / (double)e.TotalBytes * 100);
             Console.Write($"\r[INFO] - Downloading FFmpeg {percent}%");
