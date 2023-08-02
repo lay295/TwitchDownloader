@@ -86,7 +86,6 @@
     <EmbeddedResource Update="Translations\Strings.es.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-    </EmbeddedResource>
     <EmbeddedResource Update="Translations\Strings.fr.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>

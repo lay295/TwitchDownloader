@@ -595,7 +595,7 @@
   <data name="RenderChat" xml:space="preserve">
     <value>Renderizar chat</value>
   </data>
-  <data name="HighlightStrokeScale" xml:space="preserve">
+  <data name="HighlightIndentScale" xml:space="preserve">
     <value>Resaltar escala de sangría:</value>
   </data>
   <data name="HighlightStrokeScale" xml:space="preserve">
