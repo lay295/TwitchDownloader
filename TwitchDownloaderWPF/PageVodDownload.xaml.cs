@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -76,7 +77,6 @@ namespace TwitchDownloaderWPF
             await GetVideoInfo();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0018:Inline variable declaration")]
         private async Task GetVideoInfo()
         {
             int videoId = ValidateUrl(textUrl.Text.Trim());
@@ -131,8 +131,7 @@ namespace TwitchDownloaderWPF
 
                         var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=") + 10;
                         var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
-                        int bandwidth = 0; // Cannot be inlined if we want default value of 0
-                        int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out bandwidth);
+                        int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
 
                         if (!videoQualties.ContainsKey(stringQuality))
                         {
@@ -234,14 +233,16 @@ namespace TwitchDownloaderWPF
             var cropEnd = checkEnd.IsChecked == true
                 ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value)
                 : vodLength;
+
             for (int i = 0; i < comboQuality.Items.Count; i++)
             {
                 var qualityWithSize = (string)comboQuality.Items[i];
                 var quality = GetQualityWithoutSize(qualityWithSize).ToString();
                 int bandwidth = videoQualties[quality].bandwidth;
 
-                var newVideoSize = EstimateVideoSize(bandwidth, cropStart, cropEnd);
-                comboQuality.Items[i] = $"{quality}{newVideoSize}";
+                var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth, cropStart, cropEnd);
+                var newVideoSize = VideoSizeEstimator.StringifyByteCount(sizeInBytes);
+                comboQuality.Items[i] = $"{quality} - {newVideoSize}";
             }
 
             comboQuality.SelectedIndex = selectedIndex;
@@ -249,40 +250,10 @@ namespace TwitchDownloaderWPF
 
         private static ReadOnlySpan<char> GetQualityWithoutSize(string qualityWithSize)
         {
-            int qualityIndex = qualityWithSize.LastIndexOf(" - ");
+            var qualityIndex = qualityWithSize.LastIndexOf(" - ", StringComparison.Ordinal);
             return qualityIndex == -1
                 ? qualityWithSize.AsSpan()
                 : qualityWithSize.AsSpan(0, qualityIndex);
-        }
-
-        // TODO: Move to Core to add support in CLI
-        private static string EstimateVideoSize(int bandwidth, TimeSpan startTime, TimeSpan endTime)
-        {
-            var sizeInBytes = EstimateVideoSizeBytes(bandwidth, startTime, endTime);
-
-            const long ONE_KIBIBYTE = 1024;
-            const long ONE_MEBIBYTE = 1_048_576;
-            const long ONE_GIBIBYTE = 1_073_741_824;
-
-            return sizeInBytes switch
-            {
-                < 1 => "",
-                < ONE_KIBIBYTE => $" - {sizeInBytes}B",
-                < ONE_MEBIBYTE => $" - {(float)sizeInBytes / ONE_KIBIBYTE:F1}KiB",
-                < ONE_GIBIBYTE => $" - {(float)sizeInBytes / ONE_MEBIBYTE:F1}MiB",
-                _ => $" - {(float)sizeInBytes / ONE_GIBIBYTE:F1}GiB",
-            };
-        }
-
-        private static long EstimateVideoSizeBytes(int bandwidth, TimeSpan startTime, TimeSpan endTime)
-        {
-            if (bandwidth < 1)
-                return 0;
-            if (endTime < startTime)
-                return 0;
-
-            var totalTime = endTime - startTime;
-            return (long)(bandwidth / 8d * totalTime.TotalSeconds);
         }
 
         private void OnProgressChanged(ProgressReport progress)

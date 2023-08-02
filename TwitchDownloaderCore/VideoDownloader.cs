@@ -55,8 +55,11 @@ namespace TwitchDownloaderCore
 
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(downloadOptions.Id);
 
-                string playlistUrl = await GetPlaylistUrl();
+                var (playlistUrl, bandwidth) = await GetPlaylistUrl();
                 string baseUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf('/') + 1);
+
+                var videoLength = TimeSpan.FromSeconds(videoInfoResponse.data.video.lengthSeconds);
+                CheckAvailableStorageSpace(bandwidth, videoLength);
 
                 List<KeyValuePair<string, double>> videoList = new List<KeyValuePair<string, double>>();
                 (List<string> videoPartsList, double vodAge) = await GetVideoPartsList(playlistUrl, videoList, cancellationToken);
@@ -128,6 +131,36 @@ namespace TwitchDownloaderCore
                 if (_shouldClearCache)
                 {
                     Cleanup(downloadFolder);
+                }
+            }
+        }
+
+        private void CheckAvailableStorageSpace(int bandwidth, TimeSpan videoLength)
+        {
+            var videoSizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth,
+                downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
+                downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : videoLength);
+            var tempFolderDrive = DriveHelper.GetOutputDrive(downloadOptions.TempFolder);
+            var destinationDrive = DriveHelper.GetOutputDrive(downloadOptions.Filename);
+
+            if (tempFolderDrive.Name == destinationDrive.Name)
+            {
+                if (tempFolderDrive.AvailableFreeSpace < videoSizeInBytes * 2)
+                {
+                    _progress.Report(new ProgressReport(ReportType.Log, $"The drive '{tempFolderDrive.Name}' may not have enough free space to complete the download."));
+                }
+            }
+            else
+            {
+                if (tempFolderDrive.AvailableFreeSpace < videoSizeInBytes)
+                {
+                    // More drive space is needed by the raw ts files due to repeat metadata, but the amount of metadata packets can vary between files so we won't bother.
+                    _progress.Report(new ProgressReport(ReportType.Log, $"The drive '{tempFolderDrive.Name}' may not have enough free space to complete the download."));
+                }
+
+                if (destinationDrive.AvailableFreeSpace < videoSizeInBytes)
+                {
+                    _progress.Report(new ProgressReport(ReportType.Log, $"The drive '{destinationDrive.Name}' may not have enough free space to complete finalization."));
                 }
             }
         }
@@ -478,7 +511,7 @@ namespace TwitchDownloaderCore
             return (videoParts, vodAge);
         }
 
-        private async Task<string> GetPlaylistUrl()
+        private async Task<(string url, int bandwidth)> GetPlaylistUrl()
         {
             GqlVideoTokenResponse accessToken = await TwitchHelper.GetVideoToken(downloadOptions.Id, downloadOptions.Oauth);
 
@@ -493,18 +526,22 @@ namespace TwitchDownloaderCore
                 throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
             }
 
-            List<KeyValuePair<string, string>> videoQualities = new List<KeyValuePair<string, string>>();
+            var videoQualities = new List<KeyValuePair<string, (string, int)>>();
 
             for (int i = 0; i < videoPlaylist.Length; i++)
             {
                 if (videoPlaylist[i].Contains("#EXT-X-MEDIA"))
                 {
                     string lastPart = videoPlaylist[i].Substring(videoPlaylist[i].IndexOf("NAME=\"") + 6);
-                    string stringQuality = lastPart.Substring(0, lastPart.IndexOf("\""));
+                    string stringQuality = lastPart.Substring(0, lastPart.IndexOf('"'));
+
+                    var bandwidthStartIndex = videoPlaylist[i + 1].IndexOf("BANDWIDTH=") + 10;
+                    var bandwidthEndIndex = videoPlaylist[i + 1].IndexOf(',') - bandwidthStartIndex;
+                    int.TryParse(videoPlaylist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
 
                     if (!videoQualities.Any(x => x.Key.Equals(stringQuality)))
                     {
-                        videoQualities.Add(new KeyValuePair<string, string>(stringQuality, videoPlaylist[i + 2]));
+                        videoQualities.Add(new KeyValuePair<string, (string, int)>(stringQuality, (videoPlaylist[i + 2], bandwidth)));
                     }
                 }
             }
