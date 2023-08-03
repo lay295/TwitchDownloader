@@ -23,7 +23,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
 
     public class VideoMoment
     {
-        public VideoMomentConnection moments { get; set; } // seemingly always blank. Probably needs Oauth in the request to be populated
+        public VideoMomentConnection moments { get; set; } // seemingly always blank. Oauth does not seem to make a difference
         public string id { get; set; }
         public int durationMilliseconds { get; set; }
         public int positionMilliseconds { get; set; }

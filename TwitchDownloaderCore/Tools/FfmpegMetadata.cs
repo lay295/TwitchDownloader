@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.TwitchObjects.Gql;
@@ -36,7 +37,7 @@ namespace TwitchDownloaderCore.Tools
 
         private static async Task SerializeChapters(StreamWriter sw, List<VideoMomentEdge> videoMomentEdges, double startOffsetSeconds)
         {
-            // Note: Ffmpeg automatically handles out of range chapters for us
+            // Note: FFmpeg automatically handles out of range chapters for us
             var startOffsetMillis = (int)(startOffsetSeconds * 1000);
             foreach (var momentEdge in videoMomentEdges)
             {
@@ -64,11 +65,17 @@ namespace TwitchDownloaderCore.Tools
                 return str;
             }
 
-            return str
+            if (str.AsSpan().IndexOfAny(@"=;#\") == -1)
+            {
+                return str;
+            }
+
+            return new StringBuilder(str)
                 .Replace("=", @"\=")
                 .Replace(";", @"\;")
                 .Replace("#", @"\#")
-                .Replace(@"\", @"\\");
+                .Replace(@"\", @"\\")
+                .ToString();
         }
     }
 }

@@ -27,6 +27,8 @@ namespace TwitchDownloaderWPF
         public string clipId = "";
         public DateTime currentVideoTime;
         public TimeSpan clipLength;
+        public int viewCount;
+        public string game;
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageClipDownload()
@@ -79,6 +81,8 @@ namespace TwitchDownloaderWPF
                 currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                 textTitle.Text = clipData.data.clip.title;
                 labelLength.Text = clipLength.ToString("c");
+                viewCount = taskClipInfo.Result.data.clip.viewCount;
+                game = taskClipInfo.Result.data.clip.game?.displayName ?? "Unknown";
 
                 foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
                 {
@@ -180,7 +184,7 @@ namespace TwitchDownloaderWPF
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "MP4 Files | *.mp4",
-                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, TimeSpan.Zero, clipLength)
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, TimeSpan.Zero, clipLength, viewCount.ToString(), game)
             };
             if (saveFileDialog.ShowDialog() != true)
             {

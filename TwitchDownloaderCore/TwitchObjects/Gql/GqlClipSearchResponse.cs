@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
+    public class ClipNodeGame
+    {
+        public string id { get; set; }
+        public string displayName { get; set; }
+    }
+
     public class ClipNode
     {
         public string id { get; set; }
@@ -13,6 +18,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public int durationSeconds { get; set; }
         public string thumbnailURL { get; set; }
         public int viewCount { get; set; }
+        public ClipNodeGame game { get; set; }
     }
 
     public class Edge

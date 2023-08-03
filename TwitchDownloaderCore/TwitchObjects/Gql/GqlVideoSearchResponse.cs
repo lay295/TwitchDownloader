@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
+    public class VideoNodeGame
+    {
+        public string id { get; set; }
+        public string displayName { get; set; }
+    }
+
     public class VideoNode
     {
         public string title { get; set; }
@@ -12,6 +17,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string previewThumbnailURL { get; set; }
         public DateTime createdAt { get; set; }
         public int viewCount { get; set; }
+        public VideoNodeGame game { get; set; }
     }
 
     public class VideoEdge

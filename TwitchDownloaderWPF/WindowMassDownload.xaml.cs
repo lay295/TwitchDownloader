@@ -78,6 +78,7 @@ namespace TwitchDownloaderWPF
                         data.Time = Settings.Default.UTCVideoTime ? video.node.createdAt : video.node.createdAt.ToLocalTime();
                         data.Views = video.node.viewCount;
                         data.Streamer = currentChannel;
+                        data.Game = video.node.game?.displayName ?? "Unknown";
                         try
                         {
                             var bitmapImage = new BitmapImage();
@@ -126,6 +127,7 @@ namespace TwitchDownloaderWPF
                         data.Time = Settings.Default.UTCVideoTime ? clip.node.createdAt : clip.node.createdAt.ToLocalTime();
                         data.Views = clip.node.viewCount;
                         data.Streamer = currentChannel;
+                        data.Game = clip.node.game?.displayName ?? "Unknown";
                         try
                         {
                             var bitmapImage = new BitmapImage();

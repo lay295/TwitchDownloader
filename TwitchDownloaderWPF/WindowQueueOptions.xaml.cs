@@ -198,7 +198,7 @@ namespace TwitchDownloaderWPF
 
                     ClipDownloadTask downloadTask = new ClipDownloadTask();
                     ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
-                    downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, clipPage.textTitle.Text, clipPage.clipId, clipPage.currentVideoTime, clipPage.textStreamer.Text, TimeSpan.Zero, clipPage.clipLength) + ".mp4");
+                    downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, clipPage.textTitle.Text, clipPage.clipId, clipPage.currentVideoTime, clipPage.textStreamer.Text, TimeSpan.Zero, clipPage.clipLength, clipPage.viewCount.ToString(), clipPage.game) + ".mp4");
                     downloadOptions.Id = clipPage.clipId;
                     downloadOptions.Quality = clipPage.comboQuality.Text;
                     downloadOptions.ThrottleKib = Settings.Default.DownloadThrottleEnabled
@@ -227,7 +227,7 @@ namespace TwitchDownloaderWPF
                             chatOptions.DownloadFormat = ChatFormat.Text;
                         chatOptions.TimeFormat = TimestampFormat.Relative;
                         chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
-                        chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text, TimeSpan.Zero, clipPage.clipLength) + "." + chatOptions.FileExtension);
+                        chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text, TimeSpan.Zero, clipPage.clipLength, clipPage.viewCount.ToString(), clipPage.game) + "." + chatOptions.FileExtension);
 
                         chatTask.DownloadOptions = chatOptions;
                         chatTask.Info.Title = clipPage.textTitle.Text;
@@ -279,8 +279,9 @@ namespace TwitchDownloaderWPF
                     ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
                     chatOptions.Id = chatPage.downloadId;
                     chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatOptions.Id, chatPage.currentVideoTime, chatPage.textStreamer.Text,
-                        chatOptions.CropBeginning ? TimeSpan.FromSeconds(chatOptions.CropBeginningTime) : TimeSpan.Zero,  chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatPage.vodLength
-                    ) + "." + chatOptions.FileExtension);
+                        chatOptions.CropBeginning ? TimeSpan.FromSeconds(chatOptions.CropBeginningTime) : TimeSpan.Zero,
+                        chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatPage.vodLength,
+                        chatPage.viewCount.ToString(), chatPage.game) + "." + chatOptions.FileExtension);
 
                     chatTask.DownloadOptions = chatOptions;
                     chatTask.Info.Title = chatPage.textTitle.Text;
@@ -326,8 +327,9 @@ namespace TwitchDownloaderWPF
                     ChatUpdateOptions chatOptions = MainWindow.pageChatUpdate.GetOptions(null);
                     chatOptions.InputFile = chatPage.InputFile;
                     chatOptions.OutputFile = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatPage.VideoId, chatPage.VideoCreatedAt, chatPage.textStreamer.Text,
-                        chatOptions.CropBeginning ? TimeSpan.FromSeconds(chatOptions.CropBeginningTime) : TimeSpan.Zero,  chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatPage.VideoLength
-                        ) + "." + chatOptions.FileExtension);
+                        chatOptions.CropBeginning ? TimeSpan.FromSeconds(chatOptions.CropBeginningTime) : TimeSpan.Zero,
+                        chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatPage.VideoLength,
+                        chatPage.ViewCount.ToString(), chatPage.Game) + "." + chatOptions.FileExtension);
 
                     chatTask.UpdateOptions = chatOptions;
                     chatTask.Info.Title = chatPage.textTitle.Text;
@@ -390,15 +392,16 @@ namespace TwitchDownloaderWPF
 
                     for (int i = 0; i < dataList.Count; i++)
                     {
+                        var taskData = dataList[i];
                         if ((bool)checkVideo.IsChecked)
                         {
-                            if (dataList[i].Id.All(Char.IsDigit))
+                            if (taskData.Id.All(Char.IsDigit))
                             {
                                 VodDownloadTask downloadTask = new VodDownloadTask();
                                 VideoDownloadOptions downloadOptions = new VideoDownloadOptions();
                                 downloadOptions.Oauth = Settings.Default.OAuth;
                                 downloadOptions.TempFolder = Settings.Default.TempPath;
-                                downloadOptions.Id = int.Parse(dataList[i].Id);
+                                downloadOptions.Id = int.Parse(taskData.Id);
                                 downloadOptions.FfmpegPath = "ffmpeg";
                                 downloadOptions.CropBeginning = false;
                                 downloadOptions.CropEnding = false;
@@ -406,12 +409,13 @@ namespace TwitchDownloaderWPF
                                 downloadOptions.ThrottleKib = Settings.Default.DownloadThrottleEnabled
                                     ? Settings.Default.MaximumBandwidthKib
                                     : -1;
-                                downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer,
-                                    downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,  downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(dataList[i].Length)
-                                    ) + ".mp4");
+                                downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
+                                    downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
+                                    downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(taskData.Length),
+                                taskData.Views.ToString(), taskData.Game) + ".mp4");
                                 downloadTask.DownloadOptions = downloadOptions;
-                                downloadTask.Info.Title = dataList[i].Title;
-                                downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
+                                downloadTask.Info.Title = taskData.Title;
+                                downloadTask.Info.Thumbnail = taskData.Thumbnail;
                                 downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                                 lock (PageQueue.taskLock)
@@ -423,15 +427,15 @@ namespace TwitchDownloaderWPF
                             {
                                 ClipDownloadTask downloadTask = new ClipDownloadTask();
                                 ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
-                                downloadOptions.Id = dataList[i].Id;
-                                downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer,
-                                    TimeSpan.Zero, TimeSpan.FromSeconds(dataList[i].Length)) + ".mp4");
+                                downloadOptions.Id = taskData.Id;
+                                downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
+                                    TimeSpan.Zero, TimeSpan.FromSeconds(taskData.Length), taskData.Views.ToString(), taskData.Game) + ".mp4");
                                 downloadOptions.ThrottleKib = Settings.Default.DownloadThrottleEnabled
                                     ? Settings.Default.MaximumBandwidthKib
                                     : -1;
                                 downloadTask.DownloadOptions = downloadOptions;
-                                downloadTask.Info.Title = dataList[i].Title;
-                                downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
+                                downloadTask.Info.Title = taskData.Title;
+                                downloadTask.Info.Thumbnail = taskData.Thumbnail;
                                 downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                                 lock (PageQueue.taskLock)
@@ -454,15 +458,16 @@ namespace TwitchDownloaderWPF
                             downloadOptions.Compression = RadioCompressionNone.IsChecked == true ? ChatCompression.None : ChatCompression.Gzip;
                             downloadOptions.EmbedData = (bool)checkEmbed.IsChecked;
                             downloadOptions.TimeFormat = TimestampFormat.Relative;
-                            downloadOptions.Id = dataList[i].Id;
+                            downloadOptions.Id = taskData.Id;
                             downloadOptions.CropBeginning = false;
                             downloadOptions.CropEnding = false;
-                            downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, dataList[i].Title, dataList[i].Id, dataList[i].Time, dataList[i].Streamer,
-                                downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,  downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(dataList[i].Length)
-                                ) + "." + downloadOptions.FileExtension);
+                            downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
+                                downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
+                                downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(taskData.Length),
+                                taskData.Views.ToString(), taskData.Game) + "." + downloadOptions.FileExtension);
                             downloadTask.DownloadOptions = downloadOptions;
-                            downloadTask.Info.Title = dataList[i].Title;
-                            downloadTask.Info.Thumbnail = dataList[i].Thumbnail;
+                            downloadTask.Info.Title = taskData.Title;
+                            downloadTask.Info.Thumbnail = taskData.Thumbnail;
                             downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                             lock (PageQueue.taskLock)
@@ -481,8 +486,8 @@ namespace TwitchDownloaderWPF
                                 }
                                 renderOptions.InputFile = downloadOptions.Filename;
                                 renderTask.DownloadOptions = renderOptions;
-                                renderTask.Info.Title = dataList[i].Title;
-                                renderTask.Info.Thumbnail = dataList[i].Thumbnail;
+                                renderTask.Info.Title = taskData.Title;
+                                renderTask.Info.Thumbnail = taskData.Thumbnail;
                                 renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
                                 renderTask.DependantTask = downloadTask;
 

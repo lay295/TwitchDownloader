@@ -753,7 +753,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {title} {id} {date} {channel} {date_custom=&quot;&quot;} {random_string} {crop_start} {crop_end} {crop_start_custom=&quot;&quot;} {crop_end_custom=&quot;&quot;}.
+        ///   Looks up a localized string similar to {title} {id} {date} {channel} {date_custom=&quot;&quot;} {random_string} {crop_start} {crop_end} {crop_start_custom=&quot;&quot;} {crop_end_custom=&quot;&quot;} {length} {length_custom=&quot;&quot;} {views} {game}.
         /// </summary>
         public static string FilenameTemplateParameters {
             get {
@@ -1536,7 +1536,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to crop_start_custom and crop_end_custom formattings are based on the.
+        ///   Looks up a localized string similar to crop_start_custom, crop_end_custom, and length_custom formattings are based on the.
         /// </summary>
         public static string TimeSpanCustomFormatting {
             get {
