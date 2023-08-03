@@ -748,10 +748,10 @@
     <value>Please cancel the task or wait for it to finish before removing it</value>
   </data>
   <data name="UnableToDownloadFfmpeg" xml:space="preserve">
-    <value>Unable to download ffmpeg</value>
+    <value>Unable to download FFmpeg</value>
   </data>
   <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
-    <value>Unable to download ffmpeg. Please manually download it from {0} and place the file at {1}</value>
+    <value>Unable to download FFmpeg. Please manually download it from {0} and place the file at {1}</value>
   </data>
   <data name="AlternateBackgroundColor" xml:space="preserve">
     <value>Alt Background Color:</value>

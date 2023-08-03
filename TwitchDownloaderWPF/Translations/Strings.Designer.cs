@@ -1707,7 +1707,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to download ffmpeg.
+        ///   Looks up a localized string similar to Unable to download FFmpeg.
         /// </summary>
         public static string UnableToDownloadFfmpeg {
             get {
@@ -1716,7 +1716,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to download ffmpeg. Please manually download it from {0} and place the file at {1}.
+        ///   Looks up a localized string similar to Unable to download FFmpeg. Please manually download it from {0} and place the file at {1}.
         /// </summary>
         public static string UnableToDownloadFfmpegFull {
             get {
