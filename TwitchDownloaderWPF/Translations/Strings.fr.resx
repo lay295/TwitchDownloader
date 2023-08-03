@@ -763,6 +763,6 @@
     <value>Alterne la couleur d'arrière-plan de tous les messages de chat impairs pour les différencier.</value>
   </data>
   <data name="EncodeClipMetadata" xml:space="preserve">
-    <value>Encode Metadata:</value>
+    <value>Inclure les métadonnées</value>
   </data>
 </root>
