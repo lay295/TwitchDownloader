@@ -17,6 +17,12 @@ namespace TwitchDownloaderWPF.Services
 
         public WindowsThemeService()
         {
+            // If windows version is before windows 10 or the windows 10 build is before 1809, it doesn't have the app theme registry key
+            if (Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < 17763)
+            {
+                return;
+            }
+
             var currentUser = WindowsIdentity.GetCurrent().User;
 
             if (currentUser is null)
