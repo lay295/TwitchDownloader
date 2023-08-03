@@ -90,7 +90,7 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            Version currentVersion = new Version("1.53.1");
+            Version currentVersion = new Version("1.53.2");
             Title = $"Twitch Downloader v{currentVersion}";
             AutoUpdater.InstalledVersion = currentVersion;
 #if !DEBUG
