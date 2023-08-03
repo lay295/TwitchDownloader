@@ -525,6 +525,7 @@ namespace TwitchDownloaderWPF
             if (e.Key == Key.Enter)
             {
                 await GetVideoInfo();
+                e.Handled = true;
             }
         }
     }

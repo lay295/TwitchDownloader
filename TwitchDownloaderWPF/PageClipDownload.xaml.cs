@@ -287,6 +287,7 @@ namespace TwitchDownloaderWPF
             if (e.Key == Key.Enter)
             {
                 await GetClipInfo();
+                e.Handled = true;
             }
         }
 

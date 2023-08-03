@@ -255,6 +255,7 @@ namespace TwitchDownloaderWPF
             if (e.Key == Key.Enter)
             {
                 await ChangeCurrentChannel();
+                e.Handled = true;
             }
         }
     }
