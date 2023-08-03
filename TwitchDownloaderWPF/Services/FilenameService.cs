@@ -22,16 +22,21 @@ namespace TwitchDownloaderWPF.Services
             return returnString;
         }
 
-        internal static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan cropStart, TimeSpan cropEnd)
+        internal static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan cropStart, TimeSpan cropEnd, string viewCount, string game)
         {
+            var videoLength = cropEnd - cropStart;
+
             var stringBuilder = new StringBuilder(template)
                 .Replace("{title}", RemoveInvalidFilenameChars(title))
                 .Replace("{id}", id)
                 .Replace("{channel}", RemoveInvalidFilenameChars(channel))
                 .Replace("{date}", date.ToString("Mdyy"))
-                .Replace("{random_string}", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()))
+                .Replace("{random_string}", Path.GetRandomFileName().Replace(".", ""))
                 .Replace("{crop_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropStart))
-                .Replace("{crop_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropEnd));
+                .Replace("{crop_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropEnd))
+                .Replace("{length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", videoLength))
+                .Replace("{views}", viewCount)
+                .Replace("{game}", game);
 
             if (template.Contains("{date_custom="))
             {
@@ -93,8 +98,28 @@ namespace TwitchDownloaderWPF.Services
                 }
             }
 
-            string fileName = stringBuilder.ToString();
-            string[] additionalSubfolders = GetTemplateSubfolders(ref fileName);
+            if (template.Contains("{length_custom="))
+            {
+                var lengthRegex = new Regex("{length_custom=\"(.*)\"}");
+                var lengthDone = false;
+                while (!lengthDone)
+                {
+                    var lengthMatch = lengthRegex.Match(stringBuilder.ToString());
+                    if (lengthMatch.Success)
+                    {
+                        var formatString = lengthMatch.Groups[1].Value;
+                        stringBuilder.Remove(lengthMatch.Groups[0].Index, lengthMatch.Groups[0].Length);
+                        stringBuilder.Insert(lengthMatch.Groups[0].Index, RemoveInvalidFilenameChars(videoLength.ToString(formatString)));
+                    }
+                    else
+                    {
+                        lengthDone = true;
+                    }
+                }
+            }
+
+            var fileName = stringBuilder.ToString();
+            var additionalSubfolders = GetTemplateSubfolders(ref fileName);
             return Path.Combine(Path.Combine(additionalSubfolders), RemoveInvalidFilenameChars(fileName));
         }
 

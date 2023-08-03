@@ -9,6 +9,12 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string displayName { get; set; }
     }
 
+    public class VideoGame
+    {
+        public string id { get; set; }
+        public string displayName { get; set; }
+    }
+
     public class VideoInfo
     {
         public string title { get; set; }
@@ -16,6 +22,8 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public DateTime createdAt { get; set; }
         public int lengthSeconds { get; set; }
         public VideoOwner owner { get; set; }
+        public int viewCount { get; set; }
+        public VideoGame game { get; set; }
     }
 
     public class VideoData

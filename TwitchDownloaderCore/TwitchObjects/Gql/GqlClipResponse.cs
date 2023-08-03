@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
@@ -15,6 +13,12 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string id { get; set; }
     }
 
+    public class ClipGame
+    {
+        public string id { get; set; }
+        public string displayName { get; set; }
+    }
+
     public class Clip
     {
         public string title { get; set; }
@@ -24,6 +28,8 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public ClipBroadcaster broadcaster { get; set; }
         public int? videoOffsetSeconds { get; set; }
         public ClipVideo video { get; set; }
+        public int viewCount { get; set; }
+        public ClipGame game { get; set; }
     }
 
     public class ClipData

@@ -12,6 +12,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public DateTime Time { get; set; }
         public int Length { get; set; }
         public int Views { get; set; }
+        public string Game { get; set; }
         public string LengthFormatted
         {
             get

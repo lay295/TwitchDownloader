@@ -34,6 +34,8 @@ namespace TwitchDownloaderWPF
         public int currentVideoId;
         public DateTime currentVideoTime;
         public TimeSpan vodLength;
+        public int viewCount;
+        public string game;
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageVodDownload()
@@ -170,6 +172,8 @@ namespace TwitchDownloaderWPF
                 numEndMinute.Value = vodLength.Minutes;
                 numEndSecond.Value = vodLength.Seconds;
                 labelLength.Text = vodLength.ToString("c");
+                viewCount = taskVideoInfo.Result.data.video.viewCount;
+                game = taskVideoInfo.Result.data.video.game?.displayName ?? "Unknown";
 
                 UpdateVideoSizeEstimates();
 
@@ -209,7 +213,8 @@ namespace TwitchDownloaderWPF
                     : -1,
                 Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
-                    checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength) + ".mp4"),
+                    checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
+                    viewCount.ToString(), game) + ".mp4"),
                 Oauth = TextOauth.Text,
                 Quality = GetQualityWithoutSize(comboQuality.Text).ToString(),
                 Id = currentVideoId,
@@ -407,7 +412,8 @@ namespace TwitchDownloaderWPF
                 Filter = "MP4 Files | *.mp4",
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
-                    checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength)
+                    checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
+                    viewCount.ToString(), game)
             };
             if (saveFileDialog.ShowDialog() == false)
             {

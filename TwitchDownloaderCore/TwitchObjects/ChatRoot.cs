@@ -198,6 +198,8 @@ namespace TwitchDownloaderCore.TwitchObjects
         public double start { get; set; }
         public double end { get; set; }
         public double length { get; set; } = -1;
+        public int viewCount { get; set; }
+        public string game { get; set; }
         public List<VideoChapter> chapters { get; set; } = new();
 
 #region DeprecatedProperties

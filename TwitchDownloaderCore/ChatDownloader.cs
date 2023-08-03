@@ -269,6 +269,8 @@ namespace TwitchDownloaderCore
             double videoEnd = 0.0;
             double videoDuration = 0.0;
             double videoTotalLength;
+            int viewCount;
+            string game;
             int connectionCount = downloadOptions.ConnectionCount;
 
             if (downloadType == DownloadType.Video)
@@ -286,6 +288,8 @@ namespace TwitchDownloaderCore
                 videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
                 videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : videoInfoResponse.data.video.lengthSeconds;
                 videoTotalLength = videoInfoResponse.data.video.lengthSeconds;
+                viewCount = videoInfoResponse.data.video.viewCount;
+                game = videoInfoResponse.data.video.game?.displayName ?? "Unknown";
 
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(int.Parse(videoId));
                 foreach (var responseChapter in videoChapterResponse.data.video.moments.edges)
@@ -325,6 +329,8 @@ namespace TwitchDownloaderCore
                 videoStart = (int)clipInfoResponse.data.clip.videoOffsetSeconds;
                 videoEnd = (int)clipInfoResponse.data.clip.videoOffsetSeconds + clipInfoResponse.data.clip.durationSeconds;
                 videoTotalLength = clipInfoResponse.data.clip.durationSeconds;
+                viewCount = clipInfoResponse.data.clip.viewCount;
+                game = clipInfoResponse.data.clip.game?.displayName ?? "Unknown";
                 connectionCount = 1;
             }
 
@@ -334,6 +340,8 @@ namespace TwitchDownloaderCore
             chatRoot.video.start = videoStart;
             chatRoot.video.end = videoEnd;
             chatRoot.video.length = videoTotalLength;
+            chatRoot.video.viewCount = viewCount;
+            chatRoot.video.game = game;
             videoDuration = videoEnd - videoStart;
 
             var tasks = new List<Task<List<Comment>>>();

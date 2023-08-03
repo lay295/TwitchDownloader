@@ -33,6 +33,8 @@ namespace TwitchDownloaderWPF
         public int streamerId;
         public DateTime currentVideoTime;
         public TimeSpan vodLength;
+        public int viewCount;
+        public string game;
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageChatDownload()
@@ -136,6 +138,8 @@ namespace TwitchDownloaderWPF
                     textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoTime.ToString(CultureInfo.CurrentCulture) : videoTime.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                     currentVideoTime = Settings.Default.UTCVideoTime ? videoTime : videoTime.ToLocalTime();
                     streamerId = int.Parse(videoInfo.data.video.owner.id);
+                    viewCount = videoInfo.data.video.viewCount;
+                    game = videoInfo.data.video.game?.displayName ?? "Unknown";
                     var urlTimeCodeMatch = Regex.Match(textUrl.Text, @"(?<=\?t=)\d+h\d+m\d+s");
                     if (urlTimeCodeMatch.Success)
                     {
@@ -469,7 +473,8 @@ namespace TwitchDownloaderWPF
 
             saveFileDialog.FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text,
                 checkCropStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
-                checkCropEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength);
+                checkCropEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
+                viewCount.ToString(), game);
 
             if (saveFileDialog.ShowDialog() != true)
             {
