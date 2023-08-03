@@ -380,7 +380,7 @@ Render a chat with custom video settings and message outlines
 
     TwitchDownloaderCLI chatrender -i chat.json -h 1440 -w 720 --framerate 60 --outline -o chat.mp4
 
-Render a chat with custom ffmpeg arguments
+Render a chat with custom FFmpeg arguments
 
     TwitchDownloaderCLI chatrender -i chat.json --output-args='-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"' -o chat.mp4
 

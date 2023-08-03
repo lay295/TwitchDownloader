@@ -282,7 +282,7 @@
     <value>Argumentos de entrada:</value>
   </data>
   <data name="FfmpegOptionsHyperlink" xml:space="preserve">
-    <value>Haz clic aquí para conocer las opciones de ffmpeg</value>
+    <value>Haz clic aquí para conocer las opciones de FFmpeg</value>
   </data>
   <data name="FfmpegOutputArguments" xml:space="preserve">
     <value>Argumentos de salida:</value>
@@ -748,10 +748,10 @@
     <value>Por favor, cancele la tarea o espere a que termine antes de eliminarla.</value>
   </data>
   <data name="UnableToDownloadFfmpeg" xml:space="preserve">
-    <value>No se puede descargar ffmpeg</value>
+    <value>No se puede descargar FFmpeg</value>
   </data>
   <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
-    <value>No se puede descargar ffmpeg. Por favor, descárguelo manualmente desde {0} y coloque el archivo en {1}.</value>
+    <value>No se puede descargar FFmpeg. Por favor, descárguelo manualmente desde {0} y coloque el archivo en {1}.</value>
   </data>
   <data name="AlternateBackgroundColor" xml:space="preserve">
     <value>Color de fondo alternativo:</value>

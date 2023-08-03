@@ -87,7 +87,7 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 1. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest version for Windows or [build from source](#building-from-source).
 2. Extract `TwitchDownloaderCLI.exe`.
 3. Browse to where you extracted the file in the terminal.
-4. If you do not have ffmpeg, you can install it via [Chocolatey package manager](https://community.chocolatey.org/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+4. If you do not have FFmpeg, you can install it via [Chocolatey package manager](https://community.chocolatey.org/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
 ```
 TwitchDownloaderCLI.exe ffmpeg --download
 ```
