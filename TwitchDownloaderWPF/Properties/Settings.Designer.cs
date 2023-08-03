@@ -885,5 +885,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["AlternateMessageBackgrounds"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EncodeClipMetadata {
+            get {
+                return ((bool)(this["EncodeClipMetadata"]));
+            }
+            set {
+                this["EncodeClipMetadata"] = value;
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -8,23 +8,72 @@ using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
     public sealed class ClipDownloader
     {
         private readonly ClipDownloadOptions downloadOptions;
-        private static HttpClient httpClient = new HttpClient();
+        private readonly IProgress<ProgressReport> _progress;
+        private static readonly HttpClient HttpClient = new();
 
-        public ClipDownloader(ClipDownloadOptions DownloadOptions)
+        public ClipDownloader(ClipDownloadOptions clipDownloadOptions, IProgress<ProgressReport> progress)
         {
-            downloadOptions = DownloadOptions;
+            downloadOptions = clipDownloadOptions;
+            _progress = progress;
+            downloadOptions.TempFolder = Path.Combine(
+                string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
+                "TwitchDownloader");
         }
 
-        public async Task DownloadAsync(CancellationToken cancellationToken = new())
+        public async Task DownloadAsync(CancellationToken cancellationToken)
         {
-            List<GqlClipTokenResponse> listLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
+            _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Fetching Clip Info"));
+
+            var downloadUrl = await GetDownloadUrl();
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var clipDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
+            if (!clipDirectory.Exists)
+            {
+                TwitchHelper.CreateDirectory(clipDirectory.FullName);
+            }
+
+            _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading Clip"));
+
+            if (!downloadOptions.EncodeMetadata)
+            {
+                await DownloadFileTaskAsync(downloadUrl, downloadOptions.Filename, downloadOptions.ThrottleKib, cancellationToken);
+                _progress.Report(new ProgressReport(100));
+                return;
+            }
+
+            if (!Directory.Exists(downloadOptions.TempFolder))
+            {
+                TwitchHelper.CreateDirectory(downloadOptions.TempFolder);
+            }
+
+            var tempFile = Path.Combine(downloadOptions.TempFolder, $"clip_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}_{Path.GetRandomFileName()}");
+            try
+            {
+                await DownloadFileTaskAsync(downloadUrl, tempFile, downloadOptions.ThrottleKib, cancellationToken);
+
+                _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Encoding Clip Metadata"));
+
+                await EncodeClipMetadata(tempFile, downloadOptions.Filename, cancellationToken);
+
+                _progress.Report(new ProgressReport(100));
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
+        }
+
+        private async Task<string> GetDownloadUrl()
+        {
+            var listLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
 
             if (listLinks[0].data.clip.playbackAccessToken is null)
             {
@@ -51,30 +100,58 @@ namespace TwitchDownloaderCore
                 downloadUrl = listLinks[0].data.clip.videoQualities.First().sourceURL;
             }
 
-            downloadUrl += "?sig=" + listLinks[0].data.clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(listLinks[0].data.clip.playbackAccessToken.value);
+            return downloadUrl + "?sig=" + listLinks[0].data.clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(listLinks[0].data.clip.playbackAccessToken.value);
+        }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var clipDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
-            if (!clipDirectory.Exists)
-            {
-                TwitchHelper.CreateDirectory(clipDirectory.FullName);
-            }
-
-            var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
-            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        private static async Task DownloadFileTaskAsync(string url, string destinationFile, int throttleKib, CancellationToken cancellationToken)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            using var response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            if (downloadOptions.ThrottleKib == -1)
+            if (throttleKib == -1)
             {
-                await using var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+                await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
                 await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await using var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), downloadOptions.ThrottleKib);
-                await using var fs = new FileStream(downloadOptions.Filename, FileMode.Create, FileAccess.Write, FileShare.Read);
+                await using var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), throttleKib);
+                await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
                 await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private async Task EncodeClipMetadata(string inputFile, string destinationFile, CancellationToken cancellationToken)
+        {
+            var metadataFile = $"{Path.GetFileNameWithoutExtension(inputFile)}_metadata{Path.GetExtension(inputFile)}";
+            var clipInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
+
+            try
+            {
+                await FfmpegMetadata.SerializeAsync(metadataFile, clipInfo.data.clip.broadcaster.displayName, downloadOptions.Id, clipInfo.data.clip.title, clipInfo.data.clip.createdAt,
+                    clipInfo.data.clip.viewCount, cancellationToken: cancellationToken);
+
+                var process = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = downloadOptions.FfmpegPath,
+                        Arguments = $"-i \"{inputFile}\" -i \"{metadataFile}\" -map_metadata 1 -c copy \"{destinationFile}\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardInput = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+
+                process.Start();
+                await process.WaitForExitAsync(cancellationToken);
+            }
+            finally
+            {
+                File.Delete(metadataFile);
             }
         }
     }

@@ -13,30 +13,36 @@ namespace TwitchDownloaderCore.Tools
     {
         private const string LINE_FEED = "\u000A";
 
-        public static async Task SerializeAsync(string filePath, string streamerName, double startOffsetSeconds, int videoId, string videoTitle, DateTime videoCreation, List<VideoMomentEdge> videoMomentEdges = default, CancellationToken cancellationToken = default)
+        public static async Task SerializeAsync(string filePath, string streamerName, string videoId, string videoTitle, DateTime videoCreation, int viewCount, double startOffsetSeconds = default, List<VideoMomentEdge> videoMomentEdges = default, CancellationToken cancellationToken = default)
         {
             await using var fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
-            await SerializeGlobalMetadata(sw, streamerName, videoId, videoTitle, videoCreation);
+            await SerializeGlobalMetadata(sw, streamerName, videoId, videoTitle, videoCreation, viewCount);
             await fs.FlushAsync(cancellationToken);
 
             await SerializeChapters(sw, videoMomentEdges, startOffsetSeconds);
             await fs.FlushAsync(cancellationToken);
         }
 
-        private static async Task SerializeGlobalMetadata(StreamWriter sw, string streamerName, int videoId, string videoTitle, DateTime videoCreation)
+        private static async Task SerializeGlobalMetadata(StreamWriter sw, string streamerName, string videoId, string videoTitle, DateTime videoCreation, int viewCount)
         {
             await sw.WriteLineAsync(";FFMETADATA1");
-            await sw.WriteLineAsync($"title={SanitizeKeyValue(videoTitle)} ({videoId})");
+            await sw.WriteLineAsync($"title={SanitizeKeyValue(videoTitle)} ({SanitizeKeyValue(videoId)})");
             await sw.WriteLineAsync($"artist={SanitizeKeyValue(streamerName)}");
             await sw.WriteLineAsync($"date={videoCreation:yyyy}"); // The 'date' key becomes 'year' in most formats
             await sw.WriteLineAsync(@$"comment=Originally aired: {SanitizeKeyValue(videoCreation.ToString("u"))}\");
-            await sw.WriteLineAsync($"Video id: {videoId}");
+            await sw.WriteLineAsync(@$"Video id: {SanitizeKeyValue(videoId)}\");
+            await sw.WriteLineAsync($"Views: {viewCount}");
         }
 
         private static async Task SerializeChapters(StreamWriter sw, List<VideoMomentEdge> videoMomentEdges, double startOffsetSeconds)
         {
+            if (videoMomentEdges is null)
+            {
+                return;
+            }
+
             // Note: FFmpeg automatically handles out of range chapters for us
             var startOffsetMillis = (int)(startOffsetSeconds * 1000);
             foreach (var momentEdge in videoMomentEdges)

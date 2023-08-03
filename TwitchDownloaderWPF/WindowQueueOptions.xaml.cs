@@ -204,6 +204,9 @@ namespace TwitchDownloaderWPF
                     downloadOptions.ThrottleKib = Settings.Default.DownloadThrottleEnabled
                         ? Settings.Default.MaximumBandwidthKib
                         : -1;
+                    downloadOptions.TempFolder = Settings.Default.TempPath;
+                    downloadOptions.EncodeMetadata = clipPage.CheckMetadata.IsChecked!.Value;
+                    downloadOptions.FfmpegPath = "ffmpeg";
                     downloadTask.DownloadOptions = downloadOptions;
                     downloadTask.Info.Title = clipPage.textTitle.Text;
                     downloadTask.Info.Thumbnail = clipPage.imgThumbnail.Source;
@@ -433,6 +436,9 @@ namespace TwitchDownloaderWPF
                                 downloadOptions.ThrottleKib = Settings.Default.DownloadThrottleEnabled
                                     ? Settings.Default.MaximumBandwidthKib
                                     : -1;
+                                downloadOptions.TempFolder = Settings.Default.TempPath;
+                                downloadOptions.EncodeMetadata = Settings.Default.EncodeClipMetadata;
+                                downloadOptions.FfmpegPath = "ffmpeg";
                                 downloadTask.DownloadOptions = downloadOptions;
                                 downloadTask.Info.Title = taskData.Title;
                                 downloadTask.Info.Thumbnail = taskData.Thumbnail;

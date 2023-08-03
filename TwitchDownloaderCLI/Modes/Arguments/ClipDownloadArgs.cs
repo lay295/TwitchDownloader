@@ -18,6 +18,15 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("bandwidth", Default = -1, HelpText = "The maximum bandwidth the clip downloader is allowed to use in kibibytes per second (KiB/s), or -1 for no maximum.")]
         public int ThrottleKib { get; set; }
 
+        [Option("encode-metadata", Default = true, HelpText = "Uses FFmpeg to add metadata to the clip output file.")]
+        public bool? EncodeMetadata { get; set; }
+
+        [Option("ffmpeg-path", HelpText = "Path to FFmpeg executable.")]
+        public string FfmpegPath { get; set; }
+
+        [Option("temp-path", Default = "", HelpText = "Path to temporary caching folder.")]
+        public string TempFolder { get; set; }
+
         [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
         public bool? ShowBanner { get; set; }
     }

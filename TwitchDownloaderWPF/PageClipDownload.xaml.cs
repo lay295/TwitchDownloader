@@ -90,9 +90,7 @@ namespace TwitchDownloaderWPF
                 }
 
                 comboQuality.SelectedIndex = 0;
-                comboQuality.IsEnabled = true;
-                SplitBtnDownload.IsEnabled = true;
-                btnGetInfo.IsEnabled = true;
+                SetEnabled(true);
             }
             catch (Exception ex)
             {
@@ -102,8 +100,8 @@ namespace TwitchDownloaderWPF
                 {
                     MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-                btnGetInfo.IsEnabled = true;
             }
+            btnGetInfo.IsEnabled = true;
         }
 
         private void UpdateActionButtons(bool isDownloading)
@@ -136,8 +134,31 @@ namespace TwitchDownloaderWPF
 
         private void Page_Initialized(object sender, EventArgs e)
         {
-            comboQuality.IsEnabled = false;
-            SplitBtnDownload.IsEnabled = false;
+            SetEnabled(false);
+            CheckMetadata.IsChecked = Settings.Default.EncodeClipMetadata;
+        }
+
+        private void SetEnabled(bool enabled)
+        {
+            comboQuality.IsEnabled = enabled;
+            SplitBtnDownload.IsEnabled = enabled;
+            CheckMetadata.IsEnabled = enabled;
+        }
+
+        private void OnProgressChanged(ProgressReport progress)
+        {
+            switch (progress.ReportType)
+            {
+                case ReportType.Percent:
+                    statusProgressBar.Value = (int)progress.Data;
+                    break;
+                case ReportType.NewLineStatus or ReportType.SameLineStatus:
+                    statusMessage.Text = (string)progress.Data;
+                    break;
+                case ReportType.Log:
+                    AppendLog((string)progress.Data);
+                    break;
+            }
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -191,8 +212,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            comboQuality.IsEnabled = false;
-            btnGetInfo.IsEnabled = false;
+            SetEnabled(false);
 
             ClipDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
             _cancellationTokenSource = new CancellationTokenSource();
@@ -202,7 +222,9 @@ namespace TwitchDownloaderWPF
             UpdateActionButtons(true);
             try
             {
-                await new ClipDownloader(downloadOptions).DownloadAsync(_cancellationTokenSource.Token);
+                var downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
+                await new ClipDownloader(downloadOptions, downloadProgress)
+                    .DownloadAsync(_cancellationTokenSource.Token);
 
                 statusMessage.Text = Translations.Strings.StatusDone;
                 SetImage("Images/ppHop.gif", true);
@@ -238,6 +260,9 @@ namespace TwitchDownloaderWPF
                 ThrottleKib = Settings.Default.DownloadThrottleEnabled
                     ? Settings.Default.MaximumBandwidthKib
                     : -1,
+                TempFolder = Settings.Default.TempPath,
+                EncodeMetadata = CheckMetadata.IsChecked!.Value,
+                FfmpegPath = "ffmpeg",
             };
         }
 
@@ -262,6 +287,15 @@ namespace TwitchDownloaderWPF
             if (e.Key == Key.Enter)
             {
                 await GetClipInfo();
+            }
+        }
+
+        private void CheckMetadata_OnCheckStateChanged(object sender, RoutedEventArgs e)
+        {
+            if (IsInitialized)
+            {
+                Settings.Default.EncodeClipMetadata = CheckMetadata.IsChecked!.Value;
+                Settings.Default.Save();
             }
         }
     }

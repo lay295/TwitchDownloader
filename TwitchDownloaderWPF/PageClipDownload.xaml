@@ -67,10 +67,12 @@
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock Text="{lex:Loc Length}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="{lex:Loc Quality}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock Text="{lex:Loc EncodeClipMetadata}" HorizontalAlignment="Right" Margin="0,17,0,0" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel>
                 <TextBlock x:Name="labelLength" Text="0:0:0" Margin="5,0,0,0" Foreground="{DynamicResource AppText}" />
                 <ComboBox x:Name="comboQuality" Margin="5,10,0,0" MinWidth="150" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <CheckBox x:Name="CheckMetadata" Margin="5,8,0,0" Checked="CheckMetadata_OnCheckStateChanged" Unchecked="CheckMetadata_OnCheckStateChanged" BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom">
