@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
+using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 
@@ -10,10 +12,18 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Download(ClipDownloadArgs inputOptions)
         {
+            if (inputOptions.EncodeMetadata == true)
+            {
+                FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
+            }
+
+            Progress<ProgressReport> progress = new();
+            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
+
             var downloadOptions = GetDownloadOptions(inputOptions);
 
-            ClipDownloader clipDownloader = new(downloadOptions);
-            clipDownloader.DownloadAsync().Wait();
+            ClipDownloader clipDownloader = new(downloadOptions, progress);
+            clipDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
         private static ClipDownloadOptions GetDownloadOptions(ClipDownloadArgs inputOptions)
@@ -37,7 +47,10 @@ namespace TwitchDownloaderCLI.Modes
                 Id = clipIdMatch.Value,
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,
-                ThrottleKib = inputOptions.ThrottleKib
+                ThrottleKib = inputOptions.ThrottleKib,
+                FfmpegPath = inputOptions.FfmpegPath,
+                EncodeMetadata = inputOptions.EncodeMetadata!.Value,
+                TempFolder = inputOptions.TempFolder
             };
 
             return downloadOptions;

@@ -57,6 +57,8 @@ To get started, input a valid link or ID to a clip. From there the the download 
 
 **Quality**: Selects the quality of the clip before downloading.
 
+**Encode Metadata**: Encodes clip metadata such as the airing date and clip ID into the final mp4 file using FFmpeg.
+
 **Download**: Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
 
 ### Chat Download

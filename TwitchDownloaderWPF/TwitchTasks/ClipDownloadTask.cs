@@ -56,9 +56,10 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            ClipDownloader downloader = new ClipDownloader(DownloadOptions);
+
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
+            ClipDownloader downloader = new ClipDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {

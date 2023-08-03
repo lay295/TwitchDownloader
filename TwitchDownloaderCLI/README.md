@@ -67,6 +67,15 @@ The quality the program will attempt to download, for example "1080p60", if not 
 **--bandwidth**
 (Default: `-1`) The maximum bandwidth the clip downloader is allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
 
+**--encode-metadata**
+(Default: `true`) Uses FFmpeg to add metadata to the clip output file.
+
+**--ffmpeg-path**
+Path to FFmpeg executable.
+
+**--temp-path**
+Path to temporary folder for cache.
+
 **--banner**
 (Default: `true`) Displays a banner containing version and copyright information.
 

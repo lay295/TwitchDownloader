@@ -762,4 +762,7 @@
   <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
     <value>Alternates the background color of every other chat message to help tell them apart.</value>
   </data>
+  <data name="EncodeClipMetadata" xml:space="preserve">
+    <value>Encode Metadata:</value>
+  </data>
 </root>

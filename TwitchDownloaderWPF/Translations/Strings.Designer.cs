@@ -654,6 +654,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Encode Metadata:.
+        /// </summary>
+        public static string EncodeClipMetadata {
+            get {
+                return ResourceManager.GetString("EncodeClipMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enqueue Download.
         /// </summary>
         public static string EnqueueDownload {
@@ -708,7 +717,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Click here to learn about Ffmpeg options.
+        ///   Looks up a localized string similar to Click here to learn about FFmpeg options.
         /// </summary>
         public static string FfmpegOptionsHyperlink {
             get {
@@ -1176,7 +1185,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ffmpeg.
+        ///   Looks up a localized string similar to FFmpeg.
         /// </summary>
         public static string RenderTabFfmpeg {
             get {
