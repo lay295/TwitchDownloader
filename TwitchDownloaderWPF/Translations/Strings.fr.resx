@@ -282,7 +282,7 @@
     <value>Input Arguments:</value>
   </data>
   <data name="FfmpegOptionsHyperlink" xml:space="preserve">
-    <value>Cliquez pour en savoir plus sur les arguments de Ffmpeg</value>
+    <value>Cliquez pour en savoir plus sur les arguments de FFmpeg</value>
   </data>
   <data name="FfmpegOutputArguments" xml:space="preserve">
     <value>Output Arguments:</value>
@@ -398,7 +398,7 @@
     <value>Codage</value>
   </data>
   <data name="RenderTabFfmpeg" xml:space="preserve">
-    <value>Ffmpeg</value>
+    <value>FFmpeg</value>
   </data>
   <data name="RenderTabGeneral" xml:space="preserve">
     <value>Général</value>

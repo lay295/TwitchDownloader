@@ -283,7 +283,7 @@
     <value>Giriş Argümanları:</value>
   </data>
   <data name="FfmpegOptionsHyperlink" xml:space="preserve">
-    <value>Ffmpeg seçenekleri hakkında bilgi edinmek için buraya tıklayın</value>
+    <value>FFmpeg seçenekleri hakkında bilgi edinmek için buraya tıklayın</value>
   </data>
   <data name="FfmpegOutputArguments" xml:space="preserve">
     <value>Çıktı Argümanları:</value>
@@ -399,7 +399,7 @@
     <value>Encoding</value>
   </data>
   <data name="RenderTabFfmpeg" xml:space="preserve">
-    <value>Ffmpeg</value>
+    <value>FFmpeg</value>
   </data>
   <data name="RenderTabGeneral" xml:space="preserve">
     <value>Genel</value>

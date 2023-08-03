@@ -12,7 +12,7 @@ A Windows WPF desktop application that implements the core functionality wrapped
       - [Rendering](#rendering)
       - [Scaling](#scaling)
       - [Encoding](#encoding)
-      - [Ffmpeg](#ffmpeg)
+      - [FFmpeg](#ffmpeg)
       - [Optimizing Render Speeds](#optimizing-render-speeds)
     - [Task Queue](#task-queue)
     - [Settings](#settings)
@@ -226,15 +226,15 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Sharpening**: Applies a sharpening filter to the rendered video. Slightly increases render time and file size. Works best with _Font Size_ 24 or larger.
 
-#### <ins>Ffmpeg</ins>
+#### <ins>FFmpeg</ins>
 
-**Warning: modifying Ffmpeg arguments may cause pipe errors!**
+**Warning: modifying FFmpeg arguments may cause pipe errors!**
 
 **Input Arguments**: The arguments for controlling the rendered input to FFmpeg.
 
 **Output Arguments**: The arguments for controlling the encoded output from FFmpeg.
 
-**Reset To Defaults**: Reset both of the Ffmpeg arguments to default.
+**Reset To Defaults**: Reset both of the FFmpeg arguments to default.
 
 #### <ins>Optimizing Render Speeds</ins>
 
@@ -336,7 +336,7 @@ An uncommon error can be characterized by a popup titled "Fatal Error" or an unf
 - Cannot access child value on Newtonsoft.Json.Linq.JValue.
 - Response status code does not indicate success: 404 (Not Found).
 - The pipe has been ended.
-   - An issue occurred with Ffmpeg. Reset the arguments to default and try again. If still no success create a new issue on the github.
+   - An issue occurred with FFmpeg. Reset the arguments to default and try again. If still no success create a new issue on the github.
 
 To help us find the origin of an error, please enable `Verbose Errors` in the [settings](#settings) and take a screen capture of the resulting popup titled "Verbose Error Output".
 

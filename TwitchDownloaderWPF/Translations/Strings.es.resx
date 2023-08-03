@@ -398,7 +398,7 @@
     <value>Codificación</value>
   </data>
   <data name="RenderTabFfmpeg" xml:space="preserve">
-    <value>Ffmpeg</value>
+    <value>FFmpeg</value>
   </data>
   <data name="RenderTabGeneral" xml:space="preserve">
     <value>General</value>

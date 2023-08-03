@@ -282,7 +282,7 @@
     <value>输入参数：</value>
   </data>
   <data name="FfmpegOptionsHyperlink" xml:space="preserve">
-    <value>点击了解Ffmpeg设定</value>
+    <value>点击了解FFmpeg设定</value>
   </data>
   <data name="FfmpegOutputArguments" xml:space="preserve">
     <value>输出参数：</value>
@@ -398,7 +398,7 @@
     <value>解码</value>
   </data>
   <data name="RenderTabFfmpeg" xml:space="preserve">
-    <value>Ffmpeg</value>
+    <value>FFmpeg</value>
   </data>
   <data name="RenderTabGeneral" xml:space="preserve">
     <value>通用</value>
