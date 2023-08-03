@@ -1,7 +1,6 @@
 ﻿using CommandLine;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -68,7 +67,7 @@ namespace TwitchDownloaderCLI
                     HelpText.AutoBuild(parserResult, builder =>
                     {
                         builder.MaximumDisplayWidth = parserSettings.MaximumDisplayWidth;
-                        builder.Copyright = GetManifestInfo().LegalCopyright!.Replace("\u00A9", "(c)");
+                        builder.Copyright = CopyrightInfo.Default.ToString()!.Replace("\u00A9", "(c)");
                         return builder;
                     }));
             }
@@ -83,14 +82,7 @@ namespace TwitchDownloaderCLI
                 return;
             }
 
-            var manifestInfo = GetManifestInfo();
-            Console.WriteLine($"{manifestInfo.ProductName} v{manifestInfo.ProductVersion} {manifestInfo.LegalCopyright!.Replace("\u00A9", "(c)")}");
-        }
-
-        private static FileVersionInfo GetManifestInfo()
-        {
-            var assemblyFileName = Path.GetFileName(Environment.ProcessPath)!;
-            return FileVersionInfo.GetVersionInfo(assemblyFileName);
+            Console.WriteLine($"{HeadingInfo.Default} {CopyrightInfo.Default.ToString()!.Replace("\u00A9", "(c)")}");
         }
     }
 }
