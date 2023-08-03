@@ -147,7 +147,7 @@
     <value>Lista de palabras o frases prohibidas - separadas por comas, no se tienen en cuenta los espacios entre comas, NO se distingue entre mayúsculas y minúsculas.</value>
   </data>
   <data name="Browse" xml:space="preserve">
-    <value>Visite</value>
+    <value>Ruta</value>
   </data>
   <data name="BttvEmotes" xml:space="preserve">
     <value>Emotes BTTV:</value>
@@ -198,7 +198,7 @@
     <value>Anchura:</value>
   </data>
   <data name="ClearCache" xml:space="preserve">
-    <value>Borrar caché</value>
+    <value>Vaciar</value>
   </data>
   <data name="ClearCacheConfirmation" xml:space="preserve">
     <value>¿Seguro que quieres borrar la caché? Sólo deberías hacerlo si el programa no funciona correctamente.</value>
@@ -764,6 +764,6 @@
     <value>Alterna el color de fondo de cada mensaje de chat para ayudar a distinguirlos.</value>
   </data>
   <data name="EncodeClipMetadata" xml:space="preserve">
-    <value>Inclure les métadonnées:</value>
+    <value>Codificar metadatos:</value>
   </data>
 </root>
