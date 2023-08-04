@@ -10,13 +10,13 @@ namespace TwitchDownloaderCore.Extensions
 
     public static class StreamExtensions
     {
-        // The default size from Stream.GetCopyBufferSize() is 81_920.
+        // The default size from Stream.GetCopyBufferSize() is 81,920.
         private const int STREAM_DEFAULT_BUFFER_LENGTH = 81_920;
 
         public static async Task ProgressCopyToAsync(this Stream source, Stream destination, long? sourceLength, IProgress<StreamCopyProgress> progress = null,
             CancellationToken cancellationToken = default)
         {
-            if (!sourceLength.HasValue)
+            if (!sourceLength.HasValue || progress is null)
             {
                 await source.CopyToAsync(destination, cancellationToken);
                 return;
@@ -24,22 +24,18 @@ namespace TwitchDownloaderCore.Extensions
 
             var rentedBuffer = ArrayPool<byte>.Shared.Rent(STREAM_DEFAULT_BUFFER_LENGTH);
             var buffer = rentedBuffer.AsMemory(0, STREAM_DEFAULT_BUFFER_LENGTH);
-            var totalBytesRead = 0L;
 
+            long totalBytesRead = 0;
             try
             {
-                var bytesRead = 0;
-                do
+                int bytesRead;
+                while ((bytesRead = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) != 0)
                 {
-                    bytesRead = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
-                    if (bytesRead == 0)
-                        continue;
-
                     await destination.WriteAsync(buffer[..bytesRead], cancellationToken).ConfigureAwait(false);
-                    totalBytesRead += bytesRead;
 
-                    progress?.Report(new StreamCopyProgress(sourceLength!.Value, totalBytesRead));
-                } while (bytesRead != 0);
+                    totalBytesRead += bytesRead;
+                    progress.Report(new StreamCopyProgress(sourceLength.Value, totalBytesRead));
+                }
             }
             finally
             {
