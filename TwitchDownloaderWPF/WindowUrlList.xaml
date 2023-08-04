@@ -4,19 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchDownloaderWPF"
-        xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
         lex:LocalizeDictionary.DesignCulture=""
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
         Title="Mass Download URL List" MinHeight="590" Height="600" MinWidth="485" Width="500" Loaded="Window_Loaded">
-	<Window.Resources>
-		<Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
-			<Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
-			<Setter Property="Template" Value="{StaticResource TextBoxExtendLeftTemplate}" />
-		</Style>
-	</Window.Resources>
 
 	<Grid Background="{DynamicResource AppBackground}">
 		<Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Center" VerticalAlignment="Bottom" MinWidth="110" Height="45" Margin="0,0,0,10" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
