@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 
@@ -40,12 +41,18 @@ namespace TwitchDownloaderCore
                 TwitchHelper.CreateDirectory(clipDirectory.FullName);
             }
 
-            _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading Clip"));
+            _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading Clip 0%"));
+
+            void DownloadProgressHandler(StreamCopyProgress streamProgress)
+            {
+                var percent = (int)(streamProgress.BytesCopied / (double)streamProgress.SourceLength * 100);
+                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading Clip {percent}%"));
+                _progress.Report(new ProgressReport(percent));
+            }
 
             if (!downloadOptions.EncodeMetadata)
             {
-                await DownloadFileTaskAsync(downloadUrl, downloadOptions.Filename, downloadOptions.ThrottleKib, cancellationToken);
-                _progress.Report(new ProgressReport(100));
+                await DownloadFileTaskAsync(downloadUrl, downloadOptions.Filename, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
                 return;
             }
 
@@ -57,12 +64,14 @@ namespace TwitchDownloaderCore
             var tempFile = Path.Combine(downloadOptions.TempFolder, $"clip_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}_{Path.GetRandomFileName()}");
             try
             {
-                await DownloadFileTaskAsync(downloadUrl, tempFile, downloadOptions.ThrottleKib, cancellationToken);
+                await DownloadFileTaskAsync(downloadUrl, tempFile, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
 
-                _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Encoding Clip Metadata"));
+                _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Encoding Clip Metadata 0%"));
+                _progress.Report(new ProgressReport(0));
 
                 await EncodeClipMetadata(tempFile, downloadOptions.Filename, cancellationToken);
 
+                _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Encoding Clip Metadata 100%"));
                 _progress.Report(new ProgressReport(100));
             }
             finally
@@ -103,22 +112,26 @@ namespace TwitchDownloaderCore
             return downloadUrl + "?sig=" + listLinks[0].data.clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(listLinks[0].data.clip.playbackAccessToken.value);
         }
 
-        private static async Task DownloadFileTaskAsync(string url, string destinationFile, int throttleKib, CancellationToken cancellationToken)
+        private static async Task DownloadFileTaskAsync(string url, string destinationFile, int throttleKib, IProgress<StreamCopyProgress> progress, CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             using var response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
+            var contentLength = response.Content.Headers.ContentLength;
+
             if (throttleKib == -1)
             {
                 await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
-                await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                await contentStream.ProgressCopyToAsync(fs, contentLength, progress, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await using var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), throttleKib);
                 await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
-                await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                await using var throttledStream = new ThrottledStream(contentStream, throttleKib);
+                await throttledStream.ProgressCopyToAsync(fs, contentLength, progress, cancellationToken).ConfigureAwait(false);
             }
         }
 
