@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
@@ -48,7 +49,7 @@ namespace TwitchDownloaderCLI.Modes
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,
                 ThrottleKib = inputOptions.ThrottleKib,
-                FfmpegPath = inputOptions.FfmpegPath,
+                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 EncodeMetadata = inputOptions.EncodeMetadata!.Value,
                 TempFolder = inputOptions.TempFolder
             };
