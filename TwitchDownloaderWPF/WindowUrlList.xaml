@@ -13,9 +13,8 @@
         Title="Mass Download URL List" MinHeight="590" Height="600" MinWidth="485" Width="500" Loaded="Window_Loaded">
 	<Window.Resources>
 		<Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
-			<Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
-			<!--<Setter Property="Template" Value="{StaticResource TextBoxExtendLeftTemplate}" />-->
-		</Style>
+            <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
+        </Style>
 	</Window.Resources>
 
     <Grid Background="{DynamicResource AppBackground}">
