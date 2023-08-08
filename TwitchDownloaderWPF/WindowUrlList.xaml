@@ -11,11 +11,11 @@
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
         Title="Mass Download URL List" MinHeight="590" Height="600" MinWidth="485" Width="500" Loaded="Window_Loaded">
-	<Window.Resources>
-		<Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+    <Window.Resources>
+        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
         </Style>
-	</Window.Resources>
+    </Window.Resources>
 
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.ColumnDefinitions>
