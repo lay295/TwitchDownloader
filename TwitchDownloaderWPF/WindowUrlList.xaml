@@ -18,9 +18,6 @@
     </Window.Resources>
 
     <Grid Background="{DynamicResource AppBackground}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="1*"/>
