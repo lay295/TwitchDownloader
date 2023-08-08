@@ -23,12 +23,12 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Center" VerticalAlignment="Bottom" MinWidth="110" Height="45" Margin="0,0,0,10" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-		<Label Content="{lex:Loc ListOfVodsClips}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-        <TextBox x:Name="textList" HorizontalAlignment="Left" AcceptsReturn="True" Height="454" Margin="10,41,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="466" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+        <Button Grid.Row="2" x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Center" VerticalAlignment="Bottom" MinWidth="110" Height="45" Margin="0,10,10,10" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <Label Grid.Row="0" Content="{lex:Loc ListOfVodsClips}" HorizontalAlignment="Left" Margin="10,10,10,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+        <TextBox Grid.Row="1" x:Name="textList" AcceptsReturn="True"  Margin="10,10,10,0" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" Text="" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
     </Grid>
 </Window>
