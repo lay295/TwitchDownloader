@@ -16,7 +16,6 @@
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
-            <Setter Property="Template" Value="{StaticResource TextBoxExtendLeftTemplate}" />
         </Style>
     </Window.Resources>
 
