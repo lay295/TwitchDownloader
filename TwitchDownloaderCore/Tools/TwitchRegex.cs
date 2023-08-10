@@ -45,20 +45,14 @@ namespace TwitchDownloaderCore.Tools
         /// <returns>A <see cref="Match"/> of the video/clip's id or <see langword="null"/>.</returns>
         public static Match MatchVideoOrClipId(string text)
         {
-            var videoIdMatch = VideoId.Match(text);
-            if (videoIdMatch.Success)
+            var videoIdMatch = MatchVideoId(text);
+            if (videoIdMatch is { Success: true })
             {
                 return videoIdMatch;
             }
 
-            var highlightIdMatch = HighlightId.Match(text);
-            if (highlightIdMatch.Success)
-            {
-                return highlightIdMatch;
-            }
-
-            var clipIdMatch = ClipId.Match(text);
-            if (clipIdMatch.Success && !clipIdMatch.Value.All(char.IsDigit))
+            var clipIdMatch = MatchClipId(text);
+            if (clipIdMatch is { Success: true })
             {
                 return clipIdMatch;
             }
