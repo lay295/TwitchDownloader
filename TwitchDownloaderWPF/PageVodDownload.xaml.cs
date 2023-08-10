@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -150,7 +149,7 @@ namespace TwitchDownloaderWPF
                 var videoCreatedAt = taskVideoInfo.Result.data.video.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
-                var urlTimeCodeMatch = Regex.Match(textUrl.Text, @"(?<=\?t=)\d+h\d+m\d+s");
+                var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
                 if (urlTimeCodeMatch.Success)
                 {
                     var time = TimeSpanExtensions.ParseTimeCode(urlTimeCodeMatch.ValueSpan);
@@ -296,8 +295,8 @@ namespace TwitchDownloaderWPF
 
         private static int ValidateUrl(string text)
         {
-            var vodIdMatch = Regex.Match(text, @"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?)");
-            if (vodIdMatch.Success && int.TryParse(vodIdMatch.ValueSpan, out var vodId))
+            var vodIdMatch = TwitchRegex.MatchVideoId(text);
+            if (vodIdMatch is {Success: true} && int.TryParse(vodIdMatch.ValueSpan, out var vodId))
             {
                 return vodId;
             }

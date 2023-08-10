@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +13,7 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -140,7 +140,7 @@ namespace TwitchDownloaderWPF
                     streamerId = int.Parse(videoInfo.data.video.owner.id);
                     viewCount = videoInfo.data.video.viewCount;
                     game = videoInfo.data.video.game?.displayName ?? "Unknown";
-                    var urlTimeCodeMatch = Regex.Match(textUrl.Text, @"(?<=\?t=)\d+h\d+m\d+s");
+                    var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
                     if (urlTimeCodeMatch.Success)
                     {
                         var time = TimeSpanExtensions.ParseTimeCode(urlTimeCodeMatch.ValueSpan);
@@ -224,8 +224,8 @@ namespace TwitchDownloaderWPF
 
         public static string ValidateUrl(string text)
         {
-            var vodClipIdMatch = Regex.Match(text, @"(?<=^|(?:clips\.)?twitch\.tv\/(?:videos|\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
-            return vodClipIdMatch.Success
+            var vodClipIdMatch = TwitchRegex.MatchVideoOrClipId(text);
+            return vodClipIdMatch is { Success: true }
                 ? vodClipIdMatch.Value
                 : null;
         }
