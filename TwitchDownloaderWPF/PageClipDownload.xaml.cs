@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -118,9 +118,8 @@ namespace TwitchDownloaderWPF
 
         private static string ValidateUrl(string text)
         {
-            var clipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
-            var clipIdMatch = clipIdRegex.Match(text);
-            return clipIdMatch.Success
+            var clipIdMatch = TwitchRegex.MatchClipId(text);
+            return clipIdMatch is { Success: true }
                 ? clipIdMatch.Value
                 : null;
         }
