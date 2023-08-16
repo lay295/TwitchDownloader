@@ -611,16 +611,16 @@ namespace TwitchDownloaderCore
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            const int thirtySeconds = 30;
+            const int sixtySeconds = 60;
             if (throttleKib == -1 || !response.Content.Headers.ContentLength.HasValue)
             {
-                cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(thirtySeconds));
+                cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(sixtySeconds));
             }
             else
             {
                 const double oneKibibyte = 1024d;
                 cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(Math.Max(
-                    thirtySeconds,
+                    sixtySeconds,
                     response.Content.Headers.ContentLength!.Value / oneKibibyte / throttleKib * 8 // Allow up to 8x the shortest download time given the thread bandwidth
                     )));
             }
