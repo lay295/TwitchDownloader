@@ -20,7 +20,7 @@ namespace TwitchDownloaderWPF.Services
 
         public WindowsThemeService()
         {
-            // If OS is older than Windows 10 1809 then it doesn't have the app theme registry key
+            // If the OS is older than Windows 10 1809 then it doesn't have the app theme registry key
             const int WINDOWS_1809_BUILD_NUMBER = 17763;
             if (Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < WINDOWS_1809_BUILD_NUMBER)
             {
