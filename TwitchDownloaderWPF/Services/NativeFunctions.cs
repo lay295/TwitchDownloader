@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace TwitchDownloaderWPF.Services
 {
+    [SupportedOSPlatform("windows")]
     public static class NativeFunctions
     {
         [DllImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute", PreserveSig = true)]

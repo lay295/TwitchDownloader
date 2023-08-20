@@ -2,11 +2,13 @@
 using System;
 using System.Management;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.Principal;
 using System.Windows;
 
 namespace TwitchDownloaderWPF.Services
 {
+    [SupportedOSPlatform("windows")]
     public class WindowsThemeService : ManagementEventWatcher
     {
         public event EventHandler<string> ThemeChanged;
