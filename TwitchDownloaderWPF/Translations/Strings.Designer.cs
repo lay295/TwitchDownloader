@@ -1466,9 +1466,9 @@ namespace TwitchDownloaderWPF.Translations {
         /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
-        public static string TaskError {
+        public static string TaskErrorButton {
             get {
-                return ResourceManager.GetString("TaskError", resourceCulture);
+                return ResourceManager.GetString("TaskErrorButton", resourceCulture);
             }
         }
         

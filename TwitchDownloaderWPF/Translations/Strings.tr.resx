@@ -471,7 +471,7 @@
   <data name="TaskCancel" xml:space="preserve">
     <value>İptal</value>
   </data>
-  <data name="TaskError" xml:space="preserve">
+  <data name="TaskErrorButton" xml:space="preserve">
     <value>Hata</value>
   </data>
   <data name="TaskQueue" xml:space="preserve">

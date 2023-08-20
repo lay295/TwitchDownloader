@@ -222,7 +222,7 @@ namespace TwitchDownloaderWPF
                 errorMessage = taskException.Exception.ToString();
             }
 
-            MessageBox.Show(errorMessage, Translations.Strings.TaskError, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void btnRemoveTask_Click(object sender, RoutedEventArgs e)

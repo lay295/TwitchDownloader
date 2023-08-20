@@ -470,7 +470,7 @@
   <data name="TaskCancel" xml:space="preserve">
     <value>Annulation</value>
   </data>
-  <data name="TaskError" xml:space="preserve">
+  <data name="TaskErrorButton" xml:space="preserve">
     <value>Erreur</value>
   </data>
   <data name="TaskQueue" xml:space="preserve">
