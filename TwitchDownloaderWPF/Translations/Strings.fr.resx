@@ -765,4 +765,10 @@
   <data name="EncodeClipMetadata" xml:space="preserve">
     <value>Inclure les métadonnées</value>
   </data>
+  <data name="MessageBoxTitleError" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
+  <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
+    <value>Impossible de démarrer l'observateur de thème de l'application Windows. Code d'erreur : {0}</value>
+  </data>
 </root>
