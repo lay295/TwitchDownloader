@@ -617,8 +617,11 @@ namespace TwitchDownloaderCore
             {
                 if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight)
                 {
-                    var colorString = highlightType is HighlightType.PayingForward ? "#26262C" : "#80808C";
-                    using var paint = new SKPaint { Color = SKColor.Parse(colorString) };
+                    var accentColor = highlightType is HighlightType.PayingForward
+                        ? new SKColor(0x26, 0x26, 0x2C, 0xFF) // #26262C (RRGGBB)
+                        : new SKColor(0x80, 0x80, 0x8C, 0xFF); // #80808C (RRGGBB)
+
+                    using var paint = new SKPaint { Color = accentColor };
                     finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
                 }
                 else if (highlightType is not HighlightType.None)
