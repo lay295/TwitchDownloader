@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
@@ -26,6 +27,7 @@ namespace TwitchDownloaderWPF.Services
             {
                 Directory.CreateDirectory("Themes");
             }
+
             if (!DefaultThemeService.WriteIncludedThemes())
             {
                 MessageBox.Show(Translations.Strings.ThemesFailedToWrite, Translations.Strings.ThemesFailedToWrite, MessageBoxButton.OK, MessageBoxImage.Information);
@@ -67,6 +69,7 @@ namespace TwitchDownloaderWPF.Services
             {
                 newTheme = WindowsThemeService.GetWindowsTheme();
             }
+
             ChangeThemePath(newTheme);
 
             var newSkin = _darkHandyControl ? SkinType.Dark : SkinType.Default;
@@ -78,6 +81,7 @@ namespace TwitchDownloaderWPF.Services
             }
         }
 
+        [SupportedOSPlatform("windows")]
         public void SetTitleBarTheme(WindowCollection windows)
         {
             // If windows 10 build is before 1903, it doesn't support dark title bars

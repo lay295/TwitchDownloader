@@ -1,11 +1,14 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Management;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.Principal;
 using System.Windows;
 
 namespace TwitchDownloaderWPF.Services
 {
+    [SupportedOSPlatform("windows")]
     public class WindowsThemeService : ManagementEventWatcher
     {
         public event EventHandler<string> ThemeChanged;
@@ -17,8 +20,9 @@ namespace TwitchDownloaderWPF.Services
 
         public WindowsThemeService()
         {
-            // If windows version is before windows 10 or the windows 10 build is before 1809, it doesn't have the app theme registry key
-            if (Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < 17763)
+            // If the OS is older than Windows 10 1809 then it doesn't have the app theme registry key
+            const int WINDOWS_1809_BUILD_NUMBER = 17763;
+            if (Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < WINDOWS_1809_BUILD_NUMBER)
             {
                 return;
             }
@@ -33,7 +37,14 @@ namespace TwitchDownloaderWPF.Services
             Query = new EventQuery(windowsQuery);
             EventArrived += WindowsThemeService_EventArrived;
 
-            Start();
+            try
+            {
+                Start();
+            }
+            catch (ExternalException e)
+            {
+                MessageBox.Show(string.Format(Translations.Strings.UnableToStartWindowsThemeWatcher, $"0x{e.ErrorCode:x8}"), Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void WindowsThemeService_EventArrived(object sender, EventArrivedEventArgs e)

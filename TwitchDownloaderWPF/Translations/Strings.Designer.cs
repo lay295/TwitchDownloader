@@ -1005,6 +1005,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string MessageBoxTitleError {
+            get {
+                return ResourceManager.GetString("MessageBoxTitleError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dispersion .
         /// </summary>
         public static string MessageDispersion {
@@ -1457,9 +1466,9 @@ namespace TwitchDownloaderWPF.Translations {
         /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
-        public static string TaskError {
+        public static string TaskErrorButton {
             get {
-                return ResourceManager.GetString("TaskError", resourceCulture);
+                return ResourceManager.GetString("TaskErrorButton", resourceCulture);
             }
         }
         
@@ -1802,6 +1811,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string UnableToParseLinkMessage {
             get {
                 return ResourceManager.GetString("UnableToParseLinkMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to start Windows application theme watcher. Error code: {0}.
+        /// </summary>
+        public static string UnableToStartWindowsThemeWatcher {
+            get {
+                return ResourceManager.GetString("UnableToStartWindowsThemeWatcher", resourceCulture);
             }
         }
         
