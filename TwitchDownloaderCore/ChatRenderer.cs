@@ -626,8 +626,8 @@ namespace TwitchDownloaderCore
                 else if (highlightType is not HighlightType.None)
                 {
                     const int OPAQUE_THRESHOLD = 245;
-                    if (renderOptions.BackgroundColor.Alpha >= OPAQUE_THRESHOLD ||
-                        (renderOptions.AlternateMessageBackgrounds && renderOptions.AlternateBackgroundColor.Alpha >= OPAQUE_THRESHOLD))
+                    if (!(renderOptions.BackgroundColor.Alpha < OPAQUE_THRESHOLD ||
+                        (renderOptions.AlternateMessageBackgrounds && renderOptions.AlternateBackgroundColor.Alpha < OPAQUE_THRESHOLD)))
                     {
                         // Draw the highlight background only if the message background is opaque enough
                         var backgroundColor = new SKColor(0x6B, 0x6B, 0x6E, 0x1A); // #1A6B6B6E (AARRGGBB)
