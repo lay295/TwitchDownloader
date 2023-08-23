@@ -28,7 +28,6 @@ namespace TwitchDownloaderCore
 
         private const string PURPLE = "#7B2CF2";
         private static readonly SKColor Purple = SKColor.Parse(PURPLE);
-        private static readonly SKColor HighlightBackground = SKColor.Parse("#1A6B6B6E");
         private static readonly string[] DefaultUsernameColors = { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
 
         private static readonly Regex RtlRegex = new("[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]", RegexOptions.Compiled);
@@ -617,15 +616,26 @@ namespace TwitchDownloaderCore
             {
                 if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight)
                 {
-                    var colorString = highlightType is HighlightType.PayingForward ? "#26262C" : "#80808C";
-                    using var paint = new SKPaint { Color = SKColor.Parse(colorString) };
+                    var accentColor = highlightType is HighlightType.PayingForward
+                        ? new SKColor(0x26, 0x26, 0x2C, 0xFF) // #26262C (RRGGBB)
+                        : new SKColor(0x80, 0x80, 0x8C, 0xFF); // #80808C (RRGGBB)
+
+                    using var paint = new SKPaint { Color = accentColor };
                     finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
                 }
                 else if (highlightType is not HighlightType.None)
                 {
-                    using var backgroundPaint = new SKPaint { Color = HighlightBackground };
+                    const int OPAQUE_THRESHOLD = 245;
+                    if (!(renderOptions.BackgroundColor.Alpha < OPAQUE_THRESHOLD ||
+                        (renderOptions.AlternateMessageBackgrounds && renderOptions.AlternateBackgroundColor.Alpha < OPAQUE_THRESHOLD)))
+                    {
+                        // Draw the highlight background only if the message background is opaque enough
+                        var backgroundColor = new SKColor(0x6B, 0x6B, 0x6E, 0x1A); // #1A6B6B6E (AARRGGBB)
+                        using var backgroundPaint = new SKPaint { Color = backgroundColor };
+                        finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
+                    }
+
                     using var accentPaint = new SKPaint { Color = Purple };
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
                     finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, accentPaint);
                 }
 
