@@ -471,7 +471,7 @@
   <data name="TaskCancel" xml:space="preserve">
     <value>İptal</value>
   </data>
-  <data name="TaskError" xml:space="preserve">
+  <data name="TaskErrorButton" xml:space="preserve">
     <value>Hata</value>
   </data>
   <data name="TaskQueue" xml:space="preserve">
@@ -765,5 +765,11 @@
   </data>
   <data name="EncodeClipMetadata" xml:space="preserve">
     <value>Encode Metadata:</value>
+  </data>
+  <data name="MessageBoxTitleError" xml:space="preserve">
+    <value>Hata</value>
+  </data>
+  <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
+    <value>Unable to start Windows application theme watcher. Error code: {0}</value>
   </data>
 </root>

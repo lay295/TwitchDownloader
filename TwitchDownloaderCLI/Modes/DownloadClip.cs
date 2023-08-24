@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Text.RegularExpressions;
+using System.IO;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -34,9 +35,8 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var clipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
-            var clipIdMatch = clipIdRegex.Match(inputOptions.Id);
-            if (!clipIdMatch.Success)
+            var clipIdMatch = TwitchRegex.MatchClipId(inputOptions.Id);
+            if (clipIdMatch is not { Success: true })
             {
                 Console.WriteLine("[ERROR] - Unable to parse Clip ID/URL.");
                 Environment.Exit(1);
@@ -48,7 +48,7 @@ namespace TwitchDownloaderCLI.Modes
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,
                 ThrottleKib = inputOptions.ThrottleKib,
-                FfmpegPath = inputOptions.FfmpegPath,
+                FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 EncodeMetadata = inputOptions.EncodeMetadata!.Value,
                 TempFolder = inputOptions.TempFolder
             };

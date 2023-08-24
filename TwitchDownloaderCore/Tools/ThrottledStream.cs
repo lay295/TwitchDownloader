@@ -50,6 +50,14 @@ namespace TwitchDownloaderCore.Tools
             return read;
         }
 
+        public override int Read(Span<byte> buffer)
+        {
+            var newCount = GetBytesToReturn(buffer.Length);
+            var read = BaseStream.Read(buffer[..newCount]);
+            Interlocked.Add(ref _totalBytesRead, read);
+            return read;
+        }
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             return BaseStream.Seek(offset, origin);
@@ -58,6 +66,8 @@ namespace TwitchDownloaderCore.Tools
         public override void SetLength(long value) { }
 
         public override void Write(byte[] buffer, int offset, int count) { }
+
+        public override void Write(ReadOnlySpan<byte> buffer) { }
 
         private int GetBytesToReturn(int count)
         {
