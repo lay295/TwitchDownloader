@@ -242,7 +242,7 @@ namespace TwitchDownloaderCore
             var allThreadsExited = false;
             var previousDoneCount = 0;
             var restartedThreads = 0;
-            var maxRestartedThreads = Math.Max(downloadOptions.DownloadThreads, 10);
+            var maxRestartedThreads = (int)Math.Max(downloadOptions.DownloadThreads * 1.5, 10);
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
