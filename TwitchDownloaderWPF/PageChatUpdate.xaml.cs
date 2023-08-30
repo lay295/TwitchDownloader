@@ -53,16 +53,34 @@ namespace TwitchDownloaderWPF
 
             textJson.Text = openFileDialog.FileName;
             InputFile = openFileDialog.FileName;
-            SetEnabled(true);
+            ChatJsonInfo = null;
+            SetEnabled(false);
 
             if (Path.GetExtension(InputFile)!.ToLower() is not ".json" and not ".gz")
             {
+                textJson.Text = "";
+                InputFile = "";
                 return;
             }
 
-            ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, true, false, CancellationToken.None);
-            ChatJsonInfo.comments.RemoveRange(1, ChatJsonInfo.comments.Count - 2);
-            GC.Collect();
+            try
+            {
+                ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, true, false, CancellationToken.None);
+                ChatJsonInfo.comments.RemoveRange(1, ChatJsonInfo.comments.Count - 2);
+                GC.Collect();
+            }
+            catch (Exception ex)
+            {
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+                return;
+            }
+
+            SetEnabled(true);
 
             var videoCreatedAt = ChatJsonInfo.video.created_at == default
                 ? ChatJsonInfo.comments[0].created_at - TimeSpan.FromSeconds(ChatJsonInfo.comments[0].content_offset_seconds)
