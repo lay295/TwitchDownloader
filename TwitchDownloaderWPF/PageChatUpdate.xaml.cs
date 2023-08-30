@@ -53,16 +53,35 @@ namespace TwitchDownloaderWPF
 
             textJson.Text = openFileDialog.FileName;
             InputFile = openFileDialog.FileName;
-            SetEnabled(true);
+            ChatJsonInfo = null;
+            imgThumbnail.Source = null;
+            SetEnabled(false);
 
             if (Path.GetExtension(InputFile)!.ToLower() is not ".json" and not ".gz")
             {
+                textJson.Text = "";
+                InputFile = "";
                 return;
             }
 
-            ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, true, false, CancellationToken.None);
-            ChatJsonInfo.comments.RemoveRange(1, ChatJsonInfo.comments.Count - 2);
-            GC.Collect();
+            try
+            {
+                ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, true, false, CancellationToken.None);
+                ChatJsonInfo.comments.RemoveRange(1, ChatJsonInfo.comments.Count - 2);
+                GC.Collect();
+            }
+            catch (Exception ex)
+            {
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+                return;
+            }
+
+            SetEnabled(true);
 
             var videoCreatedAt = ChatJsonInfo.video.created_at == default
                 ? ChatJsonInfo.comments[0].created_at - TimeSpan.FromSeconds(ChatJsonInfo.comments[0].content_offset_seconds)
@@ -92,83 +111,81 @@ namespace TwitchDownloaderWPF
             ViewCount = ChatJsonInfo.video.viewCount;
             Game = ChatJsonInfo.video.game ?? ChatJsonInfo.video.chapters.FirstOrDefault()?.gameDisplayName ?? "Unknown";
 
-            if (VideoId.All(char.IsDigit))
+            try
             {
-                GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(VideoId));
-                if (videoInfo.data.video == null)
+                if (VideoId.All(char.IsDigit))
                 {
-                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
-                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                    if (success)
+                    GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(VideoId));
+                    if (videoInfo.data.video == null)
                     {
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
+                        var (_, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                        imgThumbnail.Source = image;
+
+                        numStartHour.Maximum = 48;
+                        numEndHour.Maximum = 48;
+                    }
+                    else
+                    {
+                        VideoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
+                        labelLength.Text = VideoLength.ToString("c");
+                        numStartHour.Maximum = (int)VideoLength.TotalHours;
+                        numEndHour.Maximum = (int)VideoLength.TotalHours;
+                        ViewCount = videoInfo.data.video.viewCount;
+                        Game = videoInfo.data.video.game?.displayName;
+
+                        var thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
+                        var (success, image) = await ThumbnailService.TryGetThumb(thumbUrl);
+                        if (!success)
+                        {
+                            AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                            (_, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                        }
+
                         imgThumbnail.Source = image;
                     }
-                    numStartHour.Maximum = 48;
-                    numEndHour.Maximum = 48;
                 }
                 else
                 {
-                    VideoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
-                    labelLength.Text = VideoLength.ToString("c");
-                    numStartHour.Maximum = (int)VideoLength.TotalHours;
-                    numEndHour.Maximum = (int)VideoLength.TotalHours;
-                    ViewCount = videoInfo.data.video.viewCount;
-                    Game = videoInfo.data.video.game?.displayName;
-
-                    try
+                    if (VideoId != "-1")
                     {
-                        string thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
-                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
+                        numStartHour.Maximum = 0;
+                        numEndHour.Maximum = 0;
                     }
-                    catch
+
+                    GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
+                    if (videoInfo.data.clip.video == null)
                     {
-                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                        if (success)
+                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
+                        var (_, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                        imgThumbnail.Source = image;
+                    }
+                    else
+                    {
+                        VideoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
+                        labelLength.Text = VideoLength.ToString("c");
+                        ViewCount = videoInfo.data.clip.viewCount;
+                        Game = videoInfo.data.clip.game?.displayName;
+
+                        var thumbUrl = videoInfo.data.clip.thumbnailURL;
+                        var (success, image) = await ThumbnailService.TryGetThumb(thumbUrl);
+                        if (!success)
                         {
-                            imgThumbnail.Source = image;
+                            AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
+                            (_, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
                         }
+
+                        imgThumbnail.Source = image;
                     }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                if (VideoId != "-1")
+                MessageBox.Show(Translations.Strings.UnableToGetInfoMessage, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                if (Settings.Default.VerboseErrors)
                 {
-                    numStartHour.Maximum = 0;
-                    numEndHour.Maximum = 0;
-                }
-                GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
-                if (videoInfo.data.clip.video == null)
-                {
-                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
-                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                    if (success)
-                    {
-                        imgThumbnail.Source = image;
-                    }
-                }
-                else
-                {
-                    VideoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
-                    labelLength.Text = VideoLength.ToString("c");
-                    ViewCount = videoInfo.data.clip.viewCount;
-                    Game = videoInfo.data.clip.game?.displayName;
-
-                    try
-                    {
-                        string thumbUrl = videoInfo.data.clip.thumbnailURL;
-                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                    }
-                    catch
-                    {
-                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                        if (success)
-                        {
-                            imgThumbnail.Source = image;
-                        }
-                    }
+                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
