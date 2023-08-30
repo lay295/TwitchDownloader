@@ -611,6 +611,7 @@ namespace TwitchDownloaderCore
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
+            // Why are we setting a CTS CancelAfter timer? See lay295#265
             const int sixtySeconds = 60;
             if (throttleKib == -1 || !response.Content.Headers.ContentLength.HasValue)
             {
