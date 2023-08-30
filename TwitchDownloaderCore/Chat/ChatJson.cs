@@ -24,6 +24,8 @@ namespace TwitchDownloaderCore.Chat
         /// Asynchronously deserializes a chat json file.
         /// </summary>
         /// <returns>A <see cref="ChatRoot"/> representation the deserialized chat json file.</returns>
+        /// <exception cref="IOException">The file does not exist.</exception>
+        /// <exception cref="NotSupportedException">The file is not a valid chat format.</exception>
         public static async Task<ChatRoot> DeserializeAsync(string filePath, bool getComments = true, bool getEmbeds = true, CancellationToken cancellationToken = new())
         {
             ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
