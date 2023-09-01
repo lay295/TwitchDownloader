@@ -25,7 +25,7 @@ namespace TwitchDownloaderCLI.Tools
             Console.Write("[INFO] - Downloading FFmpeg");
 
             var progressHandler = new Progress<ProgressInfo>();
-            progressHandler.ProgressChanged += XabeProgressHandler.OnProgressReceived;
+            progressHandler.ProgressChanged += new XabeProgressHandler().OnProgressReceived;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -64,12 +64,19 @@ namespace TwitchDownloaderCLI.Tools
         }
     }
 
-    internal static class XabeProgressHandler
+    internal class XabeProgressHandler
     {
-        internal static void OnProgressReceived(object sender, ProgressInfo e)
+        private int _lastPercent = -1;
+
+        internal void OnProgressReceived(object sender, ProgressInfo e)
         {
             var percent = (int)(e.DownloadedBytes / (double)e.TotalBytes * 100);
-            Console.Write($"\r[INFO] - Downloading FFmpeg {percent}%");
+
+            if (percent > _lastPercent)
+            {
+                _lastPercent = percent;
+                Console.Write($"\r[INFO] - Downloading FFmpeg {percent}%");
+            }
         }
     }
 }
