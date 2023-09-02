@@ -319,82 +319,59 @@ namespace TwitchDownloaderCore
 
             if (bttv)
             {
-                if (!Directory.Exists(bttvFolder))
-                    TwitchHelper.CreateDirectory(bttvFolder);
-
-                var emoteResponseItemsQuery = from emote in emoteDataResponse.BTTV
-                    where !alreadyAdded.Contains(emote.Code)
-                    let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
-                    where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
-                    select emote;
-
-                foreach (var emote in emoteResponseItemsQuery)
-                {
-                    try
-                    {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
-                        if (emote.IsZeroWidth)
-                            newEmote.IsZeroWidth = true;
-                        returnList.Add(newEmote);
-                        alreadyAdded.Add(emote.Code);
-                    }
-                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
-                }
+                await FetchEmoteImages(comments, emoteDataResponse.BTTV, returnList, alreadyAdded, bttvFolder, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (ffz)
             {
-                if (!Directory.Exists(ffzFolder))
-                    TwitchHelper.CreateDirectory(ffzFolder);
-
-                var emoteResponseItemsQuery = from emote in emoteDataResponse.FFZ
-                    where !alreadyAdded.Contains(emote.Code)
-                    let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
-                    where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
-                    select emote;
-
-                foreach (var emote in emoteResponseItemsQuery)
-                {
-                    try
-                    {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
-                        returnList.Add(newEmote);
-                        alreadyAdded.Add(emote.Code);
-                    }
-                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
-                }
+                await FetchEmoteImages(comments, emoteDataResponse.FFZ, returnList, alreadyAdded, ffzFolder, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (stv)
             {
-                if (!Directory.Exists(stvFolder))
-                    TwitchHelper.CreateDirectory(stvFolder);
+                await FetchEmoteImages(comments, emoteDataResponse.STV, returnList, alreadyAdded, stvFolder, cancellationToken);
+            }
 
-                var emoteResponseItemsQuery = from emote in emoteDataResponse.STV
-                    where !alreadyAdded.Contains(emote.Code)
-                    let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
-                    where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
-                    select emote;
+            return returnList;
 
-                foreach (var emote in emoteResponseItemsQuery)
+            static async Task FetchEmoteImages(IReadOnlyCollection<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, ICollection<TwitchEmote> returnList,
+                ICollection<string> alreadyAdded, string cacheFolder, CancellationToken cancellationToken)
+            {
+                if (!Directory.Exists(cacheFolder))
+                    CreateDirectory(cacheFolder);
+
+                IEnumerable<EmoteResponseItem> emoteResponseQuery;
+                if (comments.Count == 0)
+                {
+                    emoteResponseQuery = emoteResponse;
+                }
+                else
+                {
+                    emoteResponseQuery = from emote in emoteResponse
+                        where !alreadyAdded.Contains(emote.Code)
+                        let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
+                        where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
+                        select emote;
+                }
+
+                foreach (var emote in emoteResponseQuery)
                 {
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
-                        if (emote.IsZeroWidth)
-                            newEmote.IsZeroWidth = true;
+                        var imageData = await GetImage(cacheFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken);
+                        var newEmote = new TwitchEmote(imageData, EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        newEmote.IsZeroWidth = emote.IsZeroWidth;
+
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emote.Code);
                     }
                     catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
             }
-
-            return returnList;
         }
 
         public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
