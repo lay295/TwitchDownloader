@@ -21,6 +21,7 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 	<EnableNETAnalyzers>false</EnableNETAnalyzers>
 	<Platforms>AnyCPU;x64</Platforms>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
