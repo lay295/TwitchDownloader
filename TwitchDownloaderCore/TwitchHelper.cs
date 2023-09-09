@@ -123,83 +123,87 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlClipSearchResponse>();
         }
 
-        public static async Task<EmoteResponse> GetThirdPartyEmoteData(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = new())
+        public static async Task<EmoteResponse> GetThirdPartyEmoteData(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            EmoteResponse emoteReponse = new();
+            EmoteResponse emoteResponse = new();
 
             if (getBttv)
             {
-                await GetBttvEmoteData(streamerId, emoteReponse.BTTV);
+                emoteResponse.BTTV = await GetBttvEmoteData(streamerId, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (getFfz)
             {
-                await GetFfzEmoteData(streamerId, emoteReponse.FFZ);
+                emoteResponse.FFZ = await GetFfzEmoteData(streamerId, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (getStv)
             {
-                await GetStvEmoteData(streamerId, emoteReponse.STV, allowUnlistedEmotes);
+                emoteResponse.STV = await GetStvEmoteData(streamerId, allowUnlistedEmotes, cancellationToken);
             }
 
-            return emoteReponse;
+            return emoteResponse;
         }
 
-        private static async Task GetBttvEmoteData(int streamerId, List<EmoteResponseItem> bttvResponse)
+        private static async Task<List<EmoteResponseItem>> GetBttvEmoteData(int streamerId, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.betterttv.net/3/cached/emotes/global", UriKind.Absolute));
-            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             globalEmoteResponse.EnsureSuccessStatusCode();
-            var BTTV = await globalEmoteResponse.Content.ReadFromJsonAsync<List<BTTVEmote>>();
+            var BTTV = await globalEmoteResponse.Content.ReadFromJsonAsync<List<BTTVEmote>>(cancellationToken: cancellationToken);
 
             //Channel might not have BTTV emotes
             try
             {
                 var channelEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://api.betterttv.net/3/cached/users/twitch/{streamerId}", UriKind.Absolute));
-                using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+                using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 channelEmoteResponse.EnsureSuccessStatusCode();
 
-                var bttvChannel = await channelEmoteResponse.Content.ReadFromJsonAsync<BTTVChannelEmoteResponse>();
+                var bttvChannel = await channelEmoteResponse.Content.ReadFromJsonAsync<BTTVChannelEmoteResponse>(cancellationToken: cancellationToken);
                 BTTV.AddRange(bttvChannel.channelEmotes);
                 BTTV.AddRange(bttvChannel.sharedEmotes);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 
+            var returnList = new List<EmoteResponseItem>();
             foreach (var emote in BTTV)
             {
                 string id = emote.id;
                 string name = emote.code;
                 string mime = emote.imageType;
                 string url = $"https://cdn.betterttv.net/emote/{id}/[scale]x";
-                bttvResponse.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = bttvZeroWidth.Contains(name) });
+                returnList.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = bttvZeroWidth.Contains(name) });
             }
+
+            return returnList;
         }
 
-        private static async Task GetFfzEmoteData(int streamerId, List<EmoteResponseItem> ffzResponse)
+        private static async Task<List<EmoteResponseItem>> GetFfzEmoteData(int streamerId, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.betterttv.net/3/cached/frankerfacez/emotes/global", UriKind.Absolute));
-            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             globalEmoteResponse.EnsureSuccessStatusCode();
-            var FFZ = await globalEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>();
+            var FFZ = await globalEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>(cancellationToken: cancellationToken);
 
             //Channel might not have FFZ emotes
             try
             {
                 var channelEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://api.betterttv.net/3/cached/frankerfacez/users/twitch/{streamerId}", UriKind.Absolute));
-                using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+                using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 channelEmoteResponse.EnsureSuccessStatusCode();
 
-                var channelEmotes = await channelEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>();
+                var channelEmotes = await channelEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>(cancellationToken: cancellationToken);
                 FFZ.AddRange(channelEmotes);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 
+            var returnList = new List<EmoteResponseItem>();
             foreach (var emote in FFZ)
             {
                 string id = emote.id.ToString();
@@ -208,26 +212,28 @@ namespace TwitchDownloaderCore
                 string url = emote.animated
                     ? $"https://cdn.betterttv.net/frankerfacez_emote/{id}/animated/[scale]"
                     : $"https://cdn.betterttv.net/frankerfacez_emote/{id}/[scale]";
-                ffzResponse.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url });
+                returnList.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url });
             }
+
+            return returnList;
         }
 
-        private static async Task GetStvEmoteData(int streamerId, List<EmoteResponseItem> stvResponse, bool allowUnlistedEmotes)
+        private static async Task<List<EmoteResponseItem>> GetStvEmoteData(int streamerId, bool allowUnlistedEmotes, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://7tv.io/v3/emote-sets/global", UriKind.Absolute));
-            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             globalEmoteResponse.EnsureSuccessStatusCode();
-            var globalEmoteObject = await globalEmoteResponse.Content.ReadFromJsonAsync<STVGlobalEmoteResponse>();
+            var globalEmoteObject = await globalEmoteResponse.Content.ReadFromJsonAsync<STVGlobalEmoteResponse>(cancellationToken: cancellationToken);
             var stvEmotes = globalEmoteObject.emotes;
 
             // Channel might not be registered on 7tv
             try
             {
                 var streamerEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://7tv.io/v3/users/twitch/{streamerId}", UriKind.Absolute));
-                using var streamerEmoteResponse = await httpClient.SendAsync(streamerEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+                using var streamerEmoteResponse = await httpClient.SendAsync(streamerEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 streamerEmoteResponse.EnsureSuccessStatusCode();
 
-                var streamerEmoteObject = await streamerEmoteResponse.Content.ReadFromJsonAsync<STVChannelEmoteResponse>();
+                var streamerEmoteObject = await streamerEmoteResponse.Content.ReadFromJsonAsync<STVChannelEmoteResponse>(cancellationToken: cancellationToken);
                 // Channel might not have emotes setup
                 if (streamerEmoteObject.emote_set?.emotes != null)
                 {
@@ -236,6 +242,7 @@ namespace TwitchDownloaderCore
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 
+            var returnList = new List<EmoteResponseItem>();
             foreach (var stvEmote in stvEmotes)
             {
                 STVData emoteData = stvEmote.data;
@@ -274,9 +281,11 @@ namespace TwitchDownloaderCore
                 }
                 if (allowUnlistedEmotes || emoteIsListed)
                 {
-                    stvResponse.Add(emoteResponse);
+                    returnList.Add(emoteResponse);
                 }
             }
+
+            return returnList;
         }
 
         public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = new())
