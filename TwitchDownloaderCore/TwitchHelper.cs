@@ -123,7 +123,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlClipSearchResponse>();
         }
 
-        public static async Task<EmoteResponse> GetThirdPartyEmoteData(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = default)
+        public static async Task<EmoteResponse> GetThirdPartyEmotesMetadata(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -131,27 +131,27 @@ namespace TwitchDownloaderCore
 
             if (getBttv)
             {
-                emoteResponse.BTTV = await GetBttvEmoteData(streamerId, cancellationToken);
+                emoteResponse.BTTV = await GetBttvEmotesMetadata(streamerId, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (getFfz)
             {
-                emoteResponse.FFZ = await GetFfzEmoteData(streamerId, cancellationToken);
+                emoteResponse.FFZ = await GetFfzEmotesMetadata(streamerId, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (getStv)
             {
-                emoteResponse.STV = await GetStvEmoteData(streamerId, allowUnlistedEmotes, cancellationToken);
+                emoteResponse.STV = await GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, cancellationToken);
             }
 
             return emoteResponse;
         }
 
-        private static async Task<List<EmoteResponseItem>> GetBttvEmoteData(int streamerId, CancellationToken cancellationToken)
+        private static async Task<List<EmoteResponseItem>> GetBttvEmotesMetadata(int streamerId, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.betterttv.net/3/cached/emotes/global", UriKind.Absolute));
             using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -184,7 +184,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        private static async Task<List<EmoteResponseItem>> GetFfzEmoteData(int streamerId, CancellationToken cancellationToken)
+        private static async Task<List<EmoteResponseItem>> GetFfzEmotesMetadata(int streamerId, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.betterttv.net/3/cached/frankerfacez/emotes/global", UriKind.Absolute));
             using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -218,7 +218,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        private static async Task<List<EmoteResponseItem>> GetStvEmoteData(int streamerId, bool allowUnlistedEmotes, CancellationToken cancellationToken)
+        private static async Task<List<EmoteResponseItem>> GetStvEmotesMetadata(int streamerId, bool allowUnlistedEmotes, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://7tv.io/v3/emote-sets/global", UriKind.Absolute));
             using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -324,7 +324,7 @@ namespace TwitchDownloaderCore
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
             string stvFolder = Path.Combine(cacheFolder, "stv");
 
-            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId, bttv, ffz, stv, allowUnlistedEmotes, cancellationToken);
+            EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, cancellationToken);
 
             if (bttv)
             {
