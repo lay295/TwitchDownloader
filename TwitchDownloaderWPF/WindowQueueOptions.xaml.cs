@@ -37,7 +37,7 @@ namespace TwitchDownloaderWPF
                 checkVideo.IsChecked = true;
                 checkVideo.IsEnabled = false;
             }
-            if (page is PageChatDownload)
+            if (page is PageChatDownload chatPage)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
                 checkChat.IsChecked = true;
@@ -50,7 +50,6 @@ namespace TwitchDownloaderWPF
                 RadioCompressionNone.Visibility = Visibility.Collapsed;
                 RadioCompressionGzip.Visibility = Visibility.Collapsed;
                 checkEmbed.Visibility = Visibility.Collapsed;
-                var chatPage = page as PageChatDownload;
                 if (chatPage.radioJson.IsChecked != true)
                 {
                     checkRender.IsChecked = false;

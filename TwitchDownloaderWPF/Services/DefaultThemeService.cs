@@ -15,6 +15,8 @@ namespace TwitchDownloaderWPF.Services
             foreach (var themeResourcePath in themeResourcePaths)
             {
                 using var themeStream = GetResourceStream(themeResourcePath);
+                if (themeStream is null) continue;
+
                 var themePathSplit = themeResourcePath.Split(".");
 
                 var themeName = themePathSplit[^2];
