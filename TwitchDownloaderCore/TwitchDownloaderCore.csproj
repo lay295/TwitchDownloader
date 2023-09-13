@@ -10,7 +10,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <LangVersion>default</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Nullable>enable</Nullable>
+    <!--TODO: <Nullable>enable</Nullable> once we have required keyword-->
   </PropertyGroup>
 
   <ItemGroup>

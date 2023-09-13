@@ -19,9 +19,9 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-	<EnableNETAnalyzers>false</EnableNETAnalyzers>
-	<Platforms>AnyCPU;x64</Platforms>
-    <Nullable>enable</Nullable>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <Platforms>AnyCPU;x64</Platforms>
+    <!--TODO: <Nullable>enable</Nullable> once we have required keyword-->
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
@@ -96,10 +96,10 @@
     <EmbeddedResource Update="Translations\Strings.tr.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-	  <EmbeddedResource Update="Translations\Strings.ru.resx">
+    <EmbeddedResource Update="Translations\Strings.ru.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-	<EmbeddedResource Update="Translations\Strings.zh.resx">
+    <EmbeddedResource Update="Translations\Strings.zh.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
