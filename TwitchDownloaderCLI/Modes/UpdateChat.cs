@@ -54,7 +54,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (Path.GetFullPath(inputOptions.InputFile!) == Path.GetFullPath(inputOptions.OutputFile!))
             {
-                Console.WriteLine("[WARNING] - Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanantly overwritten!");
+                Console.WriteLine("[WARNING] - Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanently overwritten!");
             }
 
             ChatUpdateOptions updateOptions = new()
