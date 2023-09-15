@@ -271,7 +271,7 @@ namespace TwitchDownloaderCore
             }
 
             // Adjust the crop parameter
-            double beginningCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negavite (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+            double beginningCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negative (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
             chatRoot.video.start = Math.Min(Math.Max(_updateOptions.CropBeginningTime, 0.0), beginningCropClamp);
         }
 
@@ -304,7 +304,7 @@ namespace TwitchDownloaderCore
             }
 
             // Adjust the crop parameter
-            double endingCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negavite (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+            double endingCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negative (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
             chatRoot.video.end = Math.Min(Math.Max(_updateOptions.CropEndingTime, 0.0), endingCropClamp);
         }
 

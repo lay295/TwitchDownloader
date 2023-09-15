@@ -18,7 +18,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class WindowQueueOptions : Window
     {
-        // This file is absolutely attrocious, but fixing it would mean rewriting the entire GUI in a more abstract form
+        // This file is absolutely atrocious, but fixing it would mean rewriting the entire GUI in a more abstract form
 
         List<TaskData> dataList;
 

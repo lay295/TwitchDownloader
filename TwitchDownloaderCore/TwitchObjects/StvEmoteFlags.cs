@@ -13,7 +13,7 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         // Content Flags
 
-        ContentSexual           = 1 << 16, // Sexually Suggesive
+        ContentSexual           = 1 << 16, // Sexually Suggestive
         ContentEpilepsy         = 1 << 17, // Rapid flashing
         ContentEdgy             = 1 << 18, // Edgy or distasteful, may be offensive to some users
         ContentTwitchDisallowed = 1 << 24, // Not allowed specifically on the Twitch platform
