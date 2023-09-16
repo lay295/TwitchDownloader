@@ -1,7 +1,9 @@
 ﻿using HandyControl.Data;
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using TwitchDownloaderWPF.Models;
@@ -11,6 +13,11 @@ namespace TwitchDownloaderWPF.Services
 {
     public class ThemeService
     {
+        private const int WINDOWS_1809_BUILD_NUMBER = 17763;
+        private const int WINDOWS_2004_INSIDER_BUILD_NUMBER = 18985;
+        private const int USE_IMMERSIVE_DARK_MODE_ATTRIBUTE_BEFORE_2004 = 19;
+        private const int USE_IMMERSIVE_DARK_MODE_ATTRIBUTE = 20;
+
         private bool _darkAppTitleBar = false;
         private bool _darkHandyControl = false;
 
@@ -77,7 +84,35 @@ namespace TwitchDownloaderWPF.Services
             }
         }
 
-        public void SetTitleBarTheme(WindowCollection windows) => WindowsThemeService.SetTitleBarTheme(windows, _darkAppTitleBar);
+        [SupportedOSPlatform("windows")]
+        public void SetTitleBarTheme(WindowCollection windows)
+        {
+            if (Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < WINDOWS_1809_BUILD_NUMBER)
+                return;
+
+            var shouldUseDarkTitleBar = Convert.ToInt32(_darkAppTitleBar);
+            var darkTitleBarAttribute = Environment.OSVersion.Version.Build < WINDOWS_2004_INSIDER_BUILD_NUMBER
+                ? USE_IMMERSIVE_DARK_MODE_ATTRIBUTE_BEFORE_2004
+                : USE_IMMERSIVE_DARK_MODE_ATTRIBUTE;
+
+            foreach (Window window in windows)
+            {
+                var windowHandle = new WindowInteropHelper(window).Handle;
+                NativeFunctions.SetWindowAttribute(windowHandle, darkTitleBarAttribute, ref shouldUseDarkTitleBar, sizeof(int));
+            }
+
+            Window wnd = new()
+            {
+                SizeToContent = SizeToContent.WidthAndHeight,
+                Top = int.MinValue + 1,
+                WindowStyle = WindowStyle.None
+            };
+            wnd.Show();
+            wnd.Close();
+            // Dark title bar is a bit buggy, requires window redraw (focus change, resize, transparency change) to fully apply.
+            // We *could* send a repaint message to win32.dll, but this solution works and is way easier.
+            // Win11 might not have this issue but Win10 does so please leave this
+        }
 
         private void ChangeThemePath(string newTheme)
         {

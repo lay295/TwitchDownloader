@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Principal;
 using System.Windows;
-using System.Windows.Interop;
 
 namespace TwitchDownloaderWPF.Services
 {
@@ -19,9 +18,6 @@ namespace TwitchDownloaderWPF.Services
         private const string LIGHT_THEME = "Light";
         private const string DARK_THEME = "Dark";
         private const int WINDOWS_1809_BUILD_NUMBER = 17763;
-        private const int WINDOWS_2004_INSIDER_BUILD_NUMBER = 18985;
-        private const int USE_IMMERSIVE_DARK_MODE_ATTRIBUTE_BEFORE_2004 = 19;
-        private const int USE_IMMERSIVE_DARK_MODE_ATTRIBUTE = 20;
 
         public WindowsThemeService()
         {
@@ -66,35 +62,6 @@ namespace TwitchDownloaderWPF.Services
             return windowsThemeValue > 0
                 ? LIGHT_THEME
                 : DARK_THEME;
-        }
-
-        public static void SetTitleBarTheme(WindowCollection windows, bool useDarkTitleBar)
-        {
-            if (Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < WINDOWS_1809_BUILD_NUMBER)
-                return;
-
-            var useDarkTitleBarInt = Convert.ToInt32(useDarkTitleBar);
-            var darkTitleBarAttribute = Environment.OSVersion.Version.Build < WINDOWS_2004_INSIDER_BUILD_NUMBER
-                ? USE_IMMERSIVE_DARK_MODE_ATTRIBUTE_BEFORE_2004
-                : USE_IMMERSIVE_DARK_MODE_ATTRIBUTE;
-
-            foreach (Window window in windows)
-            {
-                var windowHandle = new WindowInteropHelper(window).Handle;
-                NativeFunctions.SetWindowAttribute(windowHandle, darkTitleBarAttribute, ref useDarkTitleBarInt, sizeof(int));
-            }
-
-            Window wnd = new()
-            {
-                SizeToContent = SizeToContent.WidthAndHeight,
-                Top = int.MinValue + 1,
-                WindowStyle = WindowStyle.None
-            };
-            wnd.Show();
-            wnd.Close();
-            // Dark title bar is a bit buggy, requires window redraw (focus change, resize, transparency change) to fully apply.
-            // We *could* send a repaint message to win32.dll, but this solution works and is way easier.
-            // Win11 might not have this issue but Win10 does so please leave this
         }
     }
 }
