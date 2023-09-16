@@ -1,8 +1,6 @@
 ﻿using HandyControl.Data;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
@@ -13,8 +11,6 @@ namespace TwitchDownloaderWPF.Services
 {
     public class ThemeService
     {
-        private const int TITLEBAR_THEME_ATTRIBUTE = 20;
-
         private bool _darkAppTitleBar = false;
         private bool _darkHandyControl = false;
 
@@ -81,32 +77,7 @@ namespace TwitchDownloaderWPF.Services
             }
         }
 
-        [SupportedOSPlatform("windows")]
-        public void SetTitleBarTheme(WindowCollection windows)
-        {
-            // If windows 10 build is before 1903, it doesn't support dark title bars
-            if (Environment.OSVersion.Version.Build < 18362)
-            {
-                return;
-            }
-
-            foreach (Window window in windows)
-            {
-                var windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
-                NativeFunctions.SetWindowAttribute(windowHandle, TITLEBAR_THEME_ATTRIBUTE, ref _darkAppTitleBar, Marshal.SizeOf(_darkAppTitleBar));
-            }
-
-            Window wnd = new()
-            {
-                SizeToContent = SizeToContent.WidthAndHeight,
-                Top = int.MinValue + 1,
-                WindowStyle = WindowStyle.None
-            };
-            wnd.Show();
-            wnd.Close();
-            // Dark title bar is a bit buggy, requires window resize or focus change to fully apply
-            // Win11 might not have this issue but Win10 does so please leave this
-        }
+        public void SetTitleBarTheme(WindowCollection windows) => WindowsThemeService.SetTitleBarTheme(windows, _darkAppTitleBar);
 
         private void ChangeThemePath(string newTheme)
         {
