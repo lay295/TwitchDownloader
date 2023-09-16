@@ -17,15 +17,13 @@ namespace TwitchDownloaderWPF.Services
         private const string REGISTRY_KEY_NAME = "AppsUseLightTheme";
         private const string LIGHT_THEME = "Light";
         private const string DARK_THEME = "Dark";
+        private const int WINDOWS_1809_BUILD_NUMBER = 17763;
 
         public WindowsThemeService()
         {
             // If the OS is older than Windows 10 1809 then it doesn't have the app theme registry key
-            const int WINDOWS_1809_BUILD_NUMBER = 17763;
             if (Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < WINDOWS_1809_BUILD_NUMBER)
-            {
                 return;
-            }
 
             var currentUser = WindowsIdentity.GetCurrent().User;
 
