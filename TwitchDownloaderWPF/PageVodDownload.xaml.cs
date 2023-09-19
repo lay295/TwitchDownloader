@@ -29,7 +29,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageVodDownload : Page
     {
-        public Dictionary<string, (string url, int bandwidth)> videoQualties = new();
+        public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = new();
         public int currentVideoId;
         public DateTime currentVideoTime;
         public TimeSpan vodLength;
@@ -116,7 +116,7 @@ namespace TwitchDownloaderWPF
                 }
 
                 comboQuality.Items.Clear();
-                videoQualties.Clear();
+                videoQualities.Clear();
                 string[] playlist = await taskPlaylist;
                 if (playlist[0].Contains("vod_manifest_restricted"))
                 {
@@ -127,16 +127,16 @@ namespace TwitchDownloaderWPF
                 {
                     if (playlist[i].Contains("#EXT-X-MEDIA"))
                     {
-                        string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"") + 6);
+                        string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"", StringComparison.Ordinal) + 6);
                         string stringQuality = lastPart.Substring(0, lastPart.IndexOf('"'));
 
-                        var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=") + 10;
+                        var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=", StringComparison.Ordinal) + 10;
                         var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
                         int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
 
-                        if (!videoQualties.ContainsKey(stringQuality))
+                        if (!videoQualities.ContainsKey(stringQuality))
                         {
-                            videoQualties.Add(stringQuality, (playlist[i + 2], bandwidth));
+                            videoQualities.Add(stringQuality, (playlist[i + 2], bandwidth));
                             comboQuality.Items.Add(stringQuality);
                         }
                     }
@@ -242,7 +242,7 @@ namespace TwitchDownloaderWPF
             {
                 var qualityWithSize = (string)comboQuality.Items[i];
                 var quality = GetQualityWithoutSize(qualityWithSize).ToString();
-                int bandwidth = videoQualties[quality].bandwidth;
+                int bandwidth = videoQualities[quality].bandwidth;
 
                 var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth, cropStart, cropEnd);
                 var newVideoSize = VideoSizeEstimator.StringifyByteCount(sizeInBytes);

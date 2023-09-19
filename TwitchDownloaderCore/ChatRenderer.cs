@@ -387,7 +387,7 @@ namespace TwitchDownloaderCore
 
             if (renderOptions.LogFfmpegOutput && _progress != null)
             {
-                process.ErrorDataReceived += (s, e) =>
+                process.ErrorDataReceived += (_, e) =>
                 {
                     if (e.Data != null)
                     {
@@ -644,7 +644,6 @@ namespace TwitchDownloaderCore
                     finalCanvas.DrawBitmap(sectionImages[i].bitmap, 0, i * renderOptions.SectionHeight);
                     sectionImages[i].bitmap.Dispose();
                 }
-
             }
             sectionImages.Clear();
             finalBitmap.SetImmutable();
@@ -1306,9 +1305,9 @@ namespace TwitchDownloaderCore
             DrawText(userName, userPaint, true, sectionImages, ref drawPos, defaultPos, false);
         }
 
-        private static SKColor GenerateUserColor(SKColor userColor, SKColor background_color, ChatRenderOptions renderOptions)
+        private static SKColor GenerateUserColor(SKColor userColor, SKColor backgroundColor, ChatRenderOptions renderOptions)
         {
-            background_color.ToHsl(out _, out _, out float backgroundBrightness);
+            backgroundColor.ToHsl(out _, out _, out float backgroundBrightness);
             userColor.ToHsl(out float userHue, out float userSaturation, out float userBrightness);
 
             if (backgroundBrightness < 25 || renderOptions.Outline)

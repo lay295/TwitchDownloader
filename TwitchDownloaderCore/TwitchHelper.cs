@@ -1,5 +1,4 @@
-﻿using NeoSmart.Unicode;
-using SkiaSharp;
+﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +22,7 @@ namespace TwitchDownloaderCore
     public static class TwitchHelper
     {
         private static readonly HttpClient httpClient = new HttpClient();
-        private static readonly string[] bttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
+        private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
 
         public static async Task<GqlVideoResponse> GetVideoInfo(int videoId)
         {
@@ -178,7 +177,7 @@ namespace TwitchDownloaderCore
                 string name = emote.code;
                 string mime = emote.imageType;
                 string url = $"https://cdn.betterttv.net/emote/{id}/[scale]x";
-                returnList.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = bttvZeroWidth.Contains(name) });
+                returnList.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = BttvZeroWidth.Contains(name) });
             }
 
             return returnList;
@@ -550,8 +549,7 @@ namespace TwitchDownloaderCore
 
                     foreach (var (version, data) in badge.versions)
                     {
-                        string[] id_parts = data.url.Split('/');
-                        string id = id_parts[id_parts.Length - 2];
+                        string id = data.url.Split('/')[^2];
                         byte[] bytes = await GetImage(badgeFolder, data.url, id, "2", "png", cancellationToken);
                         versions.Add(version, new ChatBadgeData
                         {
@@ -637,7 +635,7 @@ namespace TwitchDownloaderCore
             return returnCache;
         }
 
-        public static async Task<List<CheerEmote>> GetBits(List<Comment> comments, string cacheFolder, string channel_id = "", EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
+        public static async Task<List<CheerEmote>> GetBits(List<Comment> comments, string cacheFolder, string channelId = "", EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<CheerEmote> returnList = new List<CheerEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -669,7 +667,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{cheerConfig{groups{nodes{id, prefix, tiers{bits}}, templateURL}},user(id:\\\"" + channel_id + "\\\"){cheer{cheerGroups{nodes{id,prefix,tiers{bits}},templateURL}}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{cheerConfig{groups{nodes{id, prefix, tiers{bits}}, templateURL}},user(id:\\\"" + channelId + "\\\"){cheer{cheerGroups{nodes{id,prefix,tiers{bits}},templateURL}}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var cheerResponseMessage = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -860,7 +858,7 @@ namespace TwitchDownloaderCore
             if (!Directory.Exists(cachePath))
                 CreateDirectory(cachePath);
 
-            string filePath = Path.Combine(cachePath, imageId + "_" + imageScale + "." + imageType);
+            string filePath = Path.Combine(cachePath!, imageId + "_" + imageScale + "." + imageType);
             if (File.Exists(filePath))
             {
                 try
@@ -906,7 +904,7 @@ namespace TwitchDownloaderCore
             //Let's save this image to the cache
             try
             {
-                using FileStream stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                await using var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                 await stream.WriteAsync(imageBytes, cancellationToken);
             }
             catch { }
@@ -928,5 +926,4 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
         }
     }
-
 }

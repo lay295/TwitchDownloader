@@ -2,7 +2,6 @@
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-
     [Verb("cache", HelpText = "Manage the working cache")]
     public class CacheArgs : ITwitchDownloaderArgs
     {

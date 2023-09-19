@@ -2,7 +2,6 @@
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-
     [Verb("clipdownload", HelpText = "Downloads a clip from Twitch")]
     public class ClipDownloadArgs : ITwitchDownloaderArgs
     {

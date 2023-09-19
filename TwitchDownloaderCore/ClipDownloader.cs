@@ -9,6 +9,7 @@ using System.Web;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
@@ -32,6 +33,7 @@ namespace TwitchDownloaderCore
             _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Fetching Clip Info"));
 
             var downloadUrl = await GetDownloadUrl();
+            var clipInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -69,7 +71,7 @@ namespace TwitchDownloaderCore
                 _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Encoding Clip Metadata 0%"));
                 _progress.Report(new ProgressReport(0));
 
-                await EncodeClipMetadata(tempFile, downloadOptions.Filename, cancellationToken);
+                await EncodeClipWithMetadata(tempFile, downloadOptions.Filename, clipInfo.data.clip, cancellationToken);
 
                 _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Encoding Clip Metadata 100%"));
                 _progress.Report(new ProgressReport(100));
@@ -135,15 +137,14 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task EncodeClipMetadata(string inputFile, string destinationFile, CancellationToken cancellationToken)
+        private async Task EncodeClipWithMetadata(string inputFile, string destinationFile, Clip clipMetadata, CancellationToken cancellationToken)
         {
-            var metadataFile = $"{Path.GetFileNameWithoutExtension(inputFile)}_metadata{Path.GetExtension(inputFile)}";
-            var clipInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
+            var metadataFile = $"{Path.GetFileName(inputFile)}_metadata.txt";
 
             try
             {
-                await FfmpegMetadata.SerializeAsync(metadataFile, clipInfo.data.clip.broadcaster.displayName, downloadOptions.Id, clipInfo.data.clip.title, clipInfo.data.clip.createdAt,
-                    clipInfo.data.clip.viewCount, cancellationToken: cancellationToken);
+                await FfmpegMetadata.SerializeAsync(metadataFile, clipMetadata.broadcaster.displayName, downloadOptions.Id, clipMetadata.title, clipMetadata.createdAt, clipMetadata.viewCount,
+                    cancellationToken: cancellationToken);
 
                 var process = new Process
                 {

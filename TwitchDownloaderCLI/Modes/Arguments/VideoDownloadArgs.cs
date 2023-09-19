@@ -2,7 +2,6 @@
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-
     [Verb("videodownload", HelpText = "Downloads a stream VOD from Twitch")]
     public class VideoDownloadArgs : ITwitchDownloaderArgs
     {

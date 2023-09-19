@@ -62,20 +62,20 @@ namespace TwitchDownloaderCLI.Tools
             Console.WriteLine("[ERROR] - Unable to find FFmpeg, exiting. You can download FFmpeg automatically with the command \"TwitchDownloaderCLI ffmpeg -d\"");
             Environment.Exit(1);
         }
-    }
 
-    internal class XabeProgressHandler
-    {
-        private int _lastPercent = -1;
-
-        internal void OnProgressReceived(object sender, ProgressInfo e)
+        private class XabeProgressHandler
         {
-            var percent = (int)(e.DownloadedBytes / (double)e.TotalBytes * 100);
+            private int _lastPercent = -1;
 
-            if (percent > _lastPercent)
+            internal void OnProgressReceived(object sender, ProgressInfo e)
             {
-                _lastPercent = percent;
-                Console.Write($"\r[INFO] - Downloading FFmpeg {percent}%");
+                var percent = (int)(e.DownloadedBytes / (double)e.TotalBytes * 100);
+
+                if (percent > _lastPercent)
+                {
+                    _lastPercent = percent;
+                    Console.Write($"\r[INFO] - Downloading FFmpeg {percent}%");
+                }
             }
         }
     }
