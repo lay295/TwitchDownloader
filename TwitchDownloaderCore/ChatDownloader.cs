@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
@@ -25,9 +24,6 @@ namespace TwitchDownloaderCore
             BaseAddress = new Uri("https://gql.twitch.tv/gql"),
             DefaultRequestHeaders = { { "Client-ID", "kd1unb4b3q4t58fwlpcbzcbnm76a8fp" } }
         };
-        private static readonly Regex BitsRegex = new(
-            @"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d?\d?\d?\d?\d?\d?(?=\s|$)",
-            RegexOptions.Compiled);
 
         private enum DownloadType
         {
@@ -231,7 +227,7 @@ namespace TwitchDownloaderCore
 
                 message.body = bodyStringBuilder.ToString();
 
-                var bitMatch = BitsRegex.Match(message.body);
+                var bitMatch = TwitchRegex.BitsRegex.Match(message.body);
                 if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
                 {
                     message.bits_spent = result;
