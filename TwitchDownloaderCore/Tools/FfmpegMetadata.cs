@@ -78,7 +78,7 @@ namespace TwitchDownloaderCore.Tools
                 return str;
             }
 
-            if (str.AsSpan().IndexOfAny(@"=;#\") == -1)
+            if (str.AsSpan().IndexOfAny(@$"=;#\{LINE_FEED}") == -1)
             {
                 return str;
             }
@@ -88,6 +88,7 @@ namespace TwitchDownloaderCore.Tools
                 .Replace(";", @"\;")
                 .Replace("#", @"\#")
                 .Replace(@"\", @"\\")
+                .Replace(LINE_FEED, $@"\{LINE_FEED}")
                 .ToString();
         }
     }
