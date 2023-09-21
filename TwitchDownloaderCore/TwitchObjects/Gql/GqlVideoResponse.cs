@@ -24,6 +24,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public VideoOwner owner { get; set; }
         public int viewCount { get; set; }
         public VideoGame game { get; set; }
+        public string description { get; set; }
     }
 
     public class VideoData
