@@ -279,6 +279,7 @@ namespace TwitchDownloaderCore
 
                 chatRoot.streamer.name = videoInfoResponse.data.video.owner.displayName;
                 chatRoot.streamer.id = int.Parse(videoInfoResponse.data.video.owner.id);
+                chatRoot.video.description = videoInfoResponse.data.video.description;
                 videoTitle = videoInfoResponse.data.video.title;
                 videoCreatedAt = videoInfoResponse.data.video.createdAt;
                 videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
