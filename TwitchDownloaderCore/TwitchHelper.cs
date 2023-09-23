@@ -785,7 +785,7 @@ namespace TwitchDownloaderCore
             var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             const int TWENTY_FOUR_HOURS_MILLIS = 86_400_000;
-            if (currentTime - downloadTime > TWENTY_FOUR_HOURS_MILLIS)
+            if (currentTime - downloadTime > TWENTY_FOUR_HOURS_MILLIS * 7)
             {
                 try
                 {
