@@ -50,14 +50,17 @@ namespace TwitchDownloaderWPF
             CheckThrottleEnabled.IsChecked = Settings.Default.DownloadThrottleEnabled;
             radioTimeFormatUTC.IsChecked = Settings.Default.UTCVideoTime;
 
-            // Setup theme dropdown
-            comboTheme.Items.Add("System"); // Cannot be localized
-            string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
-            foreach (string themeFile in themeFiles)
+            if (Directory.Exists("Themes"))
             {
-                comboTheme.Items.Add(Path.GetFileNameWithoutExtension(themeFile));
+                // Setup theme dropdown
+                comboTheme.Items.Add("System"); // Cannot be localized
+                string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
+                foreach (string themeFile in themeFiles)
+                {
+                    comboTheme.Items.Add(Path.GetFileNameWithoutExtension(themeFile));
+                }
+                comboTheme.SelectedItem = Settings.Default.GuiTheme;
             }
-            comboTheme.SelectedItem = Settings.Default.GuiTheme;
 
             // Setup culture dropdown
             foreach (var culture in AvailableCultures.All)

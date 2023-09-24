@@ -28,7 +28,12 @@ namespace TwitchDownloaderWPF.Services
         {
             if (!Directory.Exists("Themes"))
             {
-                Directory.CreateDirectory("Themes");
+                try
+                {
+                    Directory.CreateDirectory("Themes");
+                }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
             }
 
             if (!DefaultThemeService.WriteIncludedThemes())
@@ -116,6 +121,9 @@ namespace TwitchDownloaderWPF.Services
 
         private void ChangeThemePath(string newTheme)
         {
+            if (!Directory.Exists("Themes"))
+                return;
+
             var themeFiles = Directory.GetFiles("Themes", "*.xaml");
             var newThemeString = Path.Combine("Themes", $"{newTheme}.xaml");
 
