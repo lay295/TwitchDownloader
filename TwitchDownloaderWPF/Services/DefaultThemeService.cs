@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -25,11 +26,11 @@ namespace TwitchDownloaderWPF.Services
 
                 try
                 {
-                    using var fs = new FileStream(themeFullPath, FileMode.Create, FileAccess.Write, FileShare.Read, 4096);
+                    using var fs = new FileStream(themeFullPath, FileMode.Create, FileAccess.Write, FileShare.Read);
                     themeStream.CopyTo(fs);
                 }
                 catch (IOException) { }
-                catch (System.UnauthorizedAccessException) { }
+                catch (UnauthorizedAccessException) { }
                 catch (System.Security.SecurityException) { }
 
                 if (!File.Exists(themeFullPath))

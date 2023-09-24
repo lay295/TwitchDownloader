@@ -28,7 +28,12 @@ namespace TwitchDownloaderWPF.Services
         {
             if (!Directory.Exists("Themes"))
             {
-                Directory.CreateDirectory("Themes");
+                try
+                {
+                    Directory.CreateDirectory("Themes");
+                }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
             }
 
             if (!DefaultThemeService.WriteIncludedThemes())
@@ -116,6 +121,9 @@ namespace TwitchDownloaderWPF.Services
 
         private void ChangeThemePath(string newTheme)
         {
+            if (!Directory.Exists("Themes"))
+                return;
+
             var themeFiles = Directory.GetFiles("Themes", "*.xaml");
             var newThemeString = Path.Combine("Themes", $"{newTheme}.xaml");
 
@@ -124,13 +132,17 @@ namespace TwitchDownloaderWPF.Services
                 if (!newThemeString.Equals(themeFile, StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                var xmlReader = new XmlSerializer(typeof(ResourceDictionaryModel));
+                var xmlReader = new XmlSerializer(typeof(ThemeResourceDictionaryModel));
                 using var streamReader = new StreamReader(themeFile);
-                var themeValues = (ResourceDictionaryModel)xmlReader.Deserialize(streamReader)!;
+                var themeValues = (ThemeResourceDictionaryModel)xmlReader.Deserialize(streamReader)!;
 
                 foreach (var solidBrush in themeValues.SolidColorBrush)
                 {
-                    _wpfApplication.Resources[solidBrush.Key] = (SolidColorBrush)new BrushConverter().ConvertFrom(solidBrush.Color);
+                    try
+                    {
+                        _wpfApplication.Resources[solidBrush.Key] = (SolidColorBrush)new BrushConverter().ConvertFrom(solidBrush.Color);
+                    }
+                    catch (FormatException) { }
                 }
 
                 foreach (var boolean in themeValues.Boolean)
