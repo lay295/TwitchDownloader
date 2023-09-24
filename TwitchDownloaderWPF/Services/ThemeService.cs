@@ -138,7 +138,11 @@ namespace TwitchDownloaderWPF.Services
 
                 foreach (var solidBrush in themeValues.SolidColorBrush)
                 {
-                    _wpfApplication.Resources[solidBrush.Key] = (SolidColorBrush)new BrushConverter().ConvertFrom(solidBrush.Color);
+                    try
+                    {
+                        _wpfApplication.Resources[solidBrush.Key] = (SolidColorBrush)new BrushConverter().ConvertFrom(solidBrush.Color);
+                    }
+                    catch (FormatException) { }
                 }
 
                 foreach (var boolean in themeValues.Boolean)
