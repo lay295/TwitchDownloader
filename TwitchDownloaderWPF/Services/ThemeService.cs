@@ -132,9 +132,9 @@ namespace TwitchDownloaderWPF.Services
                 if (!newThemeString.Equals(themeFile, StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                var xmlReader = new XmlSerializer(typeof(ResourceDictionaryModel));
+                var xmlReader = new XmlSerializer(typeof(ThemeResourceDictionaryModel));
                 using var streamReader = new StreamReader(themeFile);
-                var themeValues = (ResourceDictionaryModel)xmlReader.Deserialize(streamReader)!;
+                var themeValues = (ThemeResourceDictionaryModel)xmlReader.Deserialize(streamReader)!;
 
                 foreach (var solidBrush in themeValues.SolidColorBrush)
                 {
