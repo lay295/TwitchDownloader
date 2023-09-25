@@ -18,6 +18,7 @@ namespace TwitchDownloaderCLI
         {
             // Set the working dir to the app dir in case we inherited a different working dir
             Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+            Environment.SetEnvironmentVariable("CURL_IMPERSONATE", "chrome110");
 
             var preParsedArgs = PreParseArgs.Parse(args, Path.GetFileName(Environment.ProcessPath));
 
@@ -27,7 +28,7 @@ namespace TwitchDownloaderCLI
                 config.HelpWriter = TextWriter.Null;
             });
 
-            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs);
+            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CurlArgs, CacheArgs>(preParsedArgs);
             parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
 
             CoreLicensor.EnsureFilesExist(AppContext.BaseDirectory);
@@ -40,6 +41,7 @@ namespace TwitchDownloaderCLI
                 .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
                 .WithParsed<ChatRenderArgs>(RenderChat.Render)
                 .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
+                .WithParsed<CurlArgs>(CurlHandler.ParseArgs)
                 .WithParsed<CacheArgs>(CacheHandler.ParseArgs);
         }
 

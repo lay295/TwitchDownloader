@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
 
 namespace TwitchDownloaderCore.Chat
 {

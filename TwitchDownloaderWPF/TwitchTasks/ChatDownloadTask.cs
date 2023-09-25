@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders;
 
 namespace TwitchDownloaderWPF.TwitchTasks
 {
@@ -56,13 +57,13 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            ChatDownloader downloader = new ChatDownloader(DownloadOptions);
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
+            TwitchChatDownloader downloader = new TwitchChatDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {
-                await downloader.DownloadAsync(progress, TokenSource.Token);
+                await downloader.DownloadAsync(TokenSource.Token);
                 if (TokenSource.IsCancellationRequested)
                 {
                     ChangeStatus(TwitchTaskStatus.Canceled);

@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders;
 
 namespace TwitchDownloaderCore
 {
@@ -310,8 +311,8 @@ namespace TwitchDownloaderCore
 
         private async Task AppendCommentSection(ChatDownloadOptions downloadOptions, string inputFile, CancellationToken cancellationToken = new())
         {
-            ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
-            await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
+            TwitchChatDownloader chatDownloader = new TwitchChatDownloader(downloadOptions, new Progress<ProgressReport>());
+            await chatDownloader.DownloadAsync(cancellationToken);
 
             ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, getEmbeds: false, cancellationToken);
 

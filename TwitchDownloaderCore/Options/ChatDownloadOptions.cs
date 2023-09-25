@@ -1,4 +1,5 @@
 ﻿using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Options
 {
@@ -34,5 +35,13 @@ namespace TwitchDownloaderCore.Options
             }
         }
         public string TempFolder { get; set; }
+        public VideoPlatform VideoPlatform { get; set; }
+        public ChatDownloadType DownloadType { get; set; }
+    }
+
+    public enum ChatDownloadType
+    {
+        Clip,
+        Video
     }
 }

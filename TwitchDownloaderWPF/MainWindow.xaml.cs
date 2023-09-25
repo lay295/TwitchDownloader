@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Windows;
 using TwitchDownloaderWPF.Properties;
 using Xabe.FFmpeg.Downloader;
@@ -20,6 +21,12 @@ namespace TwitchDownloaderWPF
         public static PageChatUpdate pageChatUpdate = new PageChatUpdate();
         public static PageChatRender pageChatRender = new PageChatRender();
         public static PageQueue pageQueue = new PageQueue();
+
+        [DllImport("Kernel32")]
+        public static extern void AllocConsole();
+
+        [DllImport("Kernel32")]
+        public static extern void FreeConsole();
 
         public MainWindow()
         {
@@ -69,6 +76,8 @@ namespace TwitchDownloaderWPF
                 Settings.Default.Save();
             }
 
+            Environment.SetEnvironmentVariable("CURL_IMPERSONATE", "chrome110");
+
             if (!File.Exists("ffmpeg.exe"))
             {
                 try
@@ -93,6 +102,7 @@ namespace TwitchDownloaderWPF
             Version currentVersion = new Version("1.53.2");
             Title = $"Twitch Downloader v{currentVersion}";
             AutoUpdater.InstalledVersion = currentVersion;
+            AllocConsole();
 #if !DEBUG
             if (AppContext.BaseDirectory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
             {

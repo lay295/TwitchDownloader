@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
 
 namespace TwitchDownloaderCore.Tools
 {

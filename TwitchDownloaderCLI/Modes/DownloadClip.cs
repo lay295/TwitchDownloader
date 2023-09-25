@@ -6,6 +6,8 @@ using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -23,7 +25,8 @@ namespace TwitchDownloaderCLI.Modes
 
             var downloadOptions = GetDownloadOptions(inputOptions);
 
-            ClipDownloader clipDownloader = new(downloadOptions, progress);
+            ClipDownloaderFactory downloadFactory = new ClipDownloaderFactory(progress);
+            IClipDownloader clipDownloader = downloadFactory.Create(downloadOptions);
             clipDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
@@ -35,23 +38,28 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var clipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
-            var clipIdMatch = clipIdRegex.Match(inputOptions.Id);
-            if (!clipIdMatch.Success)
+            bool success = UrlParse.TryParseClip(inputOptions.Id, out VideoPlatform videoPlatform, out string videoId);
+            if (!success)
             {
                 Console.WriteLine("[ERROR] - Unable to parse Clip ID/URL.");
                 Environment.Exit(1);
             }
 
+            if (videoPlatform == VideoPlatform.Kick)
+            {
+                CurlHandler.DetectCurl(inputOptions.CurlImpersonatePath);
+            }
+
             ClipDownloadOptions downloadOptions = new()
             {
-                Id = clipIdMatch.Value,
+                Id = videoId,
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,
                 ThrottleKib = inputOptions.ThrottleKib,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 EncodeMetadata = inputOptions.EncodeMetadata!.Value,
-                TempFolder = inputOptions.TempFolder
+                TempFolder = inputOptions.TempFolder,
+                VideoPlatform = videoPlatform,
             };
 
             return downloadOptions;

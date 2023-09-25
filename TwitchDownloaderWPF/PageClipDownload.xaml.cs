@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +13,10 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.VideoPlatforms.Interfaces;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
@@ -25,6 +29,7 @@ namespace TwitchDownloaderWPF
     public partial class PageClipDownload : Page
     {
         public string clipId = "";
+        public VideoPlatform platform;
         public DateTime currentVideoTime;
         public TimeSpan clipLength;
         public int viewCount;
@@ -43,26 +48,26 @@ namespace TwitchDownloaderWPF
 
         private async Task GetClipInfo()
         {
-            clipId = ValidateUrl(textUrl.Text.Trim());
-            if (string.IsNullOrWhiteSpace(clipId))
+            bool parseSuccess = UrlParse.TryParseClip(textUrl.Text.Trim(), out VideoPlatform videoPlatform, out string videoId);
+            
+            if (!parseSuccess || string.IsNullOrWhiteSpace(videoId))
             {
                 MessageBox.Show(Translations.Strings.InvalidClipLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidClipLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
+            clipId = videoId;
+            platform = videoPlatform;
+
             try
             {
                 btnGetInfo.IsEnabled = false;
                 comboQuality.Items.Clear();
-                Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
-                Task<List<GqlClipTokenResponse>> taskLinks = TwitchHelper.GetClipLinks(clipId);
-                await Task.WhenAll(taskClipInfo, taskLinks);
-
-                GqlClipResponse clipData = taskClipInfo.Result;
+                IVideoInfo clipInfo = await PlatformHelper.GetClipInfo(videoPlatform, clipId);
 
                 try
                 {
-                    string thumbUrl = clipData.data.clip.thumbnailURL;
+                    string thumbUrl = clipInfo.ThumbnailUrl;
                     imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
                 }
                 catch
@@ -74,19 +79,26 @@ namespace TwitchDownloaderWPF
                         imgThumbnail.Source = image;
                     }
                 }
-                clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
-                textStreamer.Text = clipData.data.clip.broadcaster.displayName;
-                var clipCreatedAt = clipData.data.clip.createdAt;
+                clipLength = TimeSpan.FromSeconds(clipInfo.Duration);
+                textStreamer.Text = clipInfo.StreamerName;
+                var clipCreatedAt = clipInfo.CreatedAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
-                textTitle.Text = clipData.data.clip.title;
+                textTitle.Text = clipInfo.Title;
                 labelLength.Text = clipLength.ToString("c");
-                viewCount = taskClipInfo.Result.data.clip.viewCount;
-                game = taskClipInfo.Result.data.clip.game?.displayName ?? "Unknown";
+                viewCount = clipInfo.ViewCount;
+                game = clipInfo.Game ?? "Unknown";
 
-                foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
+                if (videoPlatform == VideoPlatform.Twitch)
                 {
-                    comboQuality.Items.Add(new TwitchClip(quality.quality, quality.frameRate.ToString(), quality.sourceURL));
+                    foreach (var quality in clipInfo.VideoQualities)
+                    {
+                        comboQuality.Items.Add(new TwitchClip(quality.Quality, quality.Framerate.ToString(), quality.SourceUrl));
+                    }
+                }
+                else
+                {
+                    comboQuality.Items.Add(new TwitchClip("Source", "", ""));
                 }
 
                 comboQuality.SelectedIndex = 0;
@@ -114,15 +126,6 @@ namespace TwitchDownloaderWPF
             }
             SplitBtnDownload.Visibility = Visibility.Visible;
             BtnCancel.Visibility = Visibility.Collapsed;
-        }
-
-        private static string ValidateUrl(string text)
-        {
-            var clipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
-            var clipIdMatch = clipIdRegex.Match(text);
-            return clipIdMatch.Success
-                ? clipIdMatch.Value
-                : null;
         }
 
         private void AppendLog(string message)
@@ -223,7 +226,8 @@ namespace TwitchDownloaderWPF
             try
             {
                 var downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-                await new ClipDownloader(downloadOptions, downloadProgress)
+                ClipDownloaderFactory clipDownloaderFactory = new ClipDownloaderFactory(downloadProgress); 
+                await clipDownloaderFactory.Create(downloadOptions)
                     .DownloadAsync(_cancellationTokenSource.Token);
 
                 statusMessage.Text = Translations.Strings.StatusDone;
@@ -263,6 +267,7 @@ namespace TwitchDownloaderWPF
                 TempFolder = Settings.Default.TempPath,
                 EncodeMetadata = CheckMetadata.IsChecked!.Value,
                 FfmpegPath = "ffmpeg",
+                VideoPlatform = platform,
             };
         }
 
@@ -319,6 +324,7 @@ public class TwitchClip
         public string ToString()
     {
         //Only show framerate if it's not 30fps
+        if (quality == "Source") return quality;
         return $"{quality}p{(framerate == "30" ? "" : framerate)}";
     }
 }

@@ -23,6 +23,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("ffmpeg-path", HelpText = "Path to FFmpeg executable.")]
         public string FfmpegPath { get; set; }
+        [Option("curl-path", HelpText = "Path to curl-impersonate executable.")]
+        public string CurlImpersonatePath { get; set; }
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary caching folder.")]
         public string TempFolder { get; set; }

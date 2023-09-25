@@ -6,6 +6,8 @@ using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.VideoPlatforms.Interfaces;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -19,7 +21,8 @@ namespace TwitchDownloaderCLI.Modes
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
 
             var downloadOptions = GetDownloadOptions(inputOptions);
-            VideoDownloader videoDownloader = new(downloadOptions, progress);
+            VideoDownloaderFactory downloadFactory = new VideoDownloaderFactory(progress);
+            IVideoDownloader videoDownloader = downloadFactory.Create(downloadOptions);
             videoDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
@@ -43,7 +46,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 DownloadThreads = inputOptions.DownloadThreads,
                 ThrottleKib = inputOptions.ThrottleKib,
-                Id = int.Parse(vodIdMatch.ValueSpan),
+                Id = vodIdMatch.ValueSpan.ToString(),
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,

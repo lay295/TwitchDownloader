@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
 
 namespace TwitchDownloaderCore.Tools
 {
