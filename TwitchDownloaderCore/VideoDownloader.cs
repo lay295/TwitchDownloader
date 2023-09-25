@@ -98,7 +98,7 @@ namespace TwitchDownloaderCore
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 VideoInfo videoInfo = videoInfoResponse.data.video;
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
-                    videoInfo.description, startOffset, videoChapterResponse.data.video.moments.edges, cancellationToken);
+                    videoInfo.description.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), startOffset, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
                 var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
                 if (!finalizedFileDirectory.Exists)
