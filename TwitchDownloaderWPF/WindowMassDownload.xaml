@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchDownloaderWPF"
+        xmlns:task="clr-namespace:TwitchDownloaderWPF.TwitchTasks"
         xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
         lex:LocalizeDictionary.DesignCulture=""
@@ -34,7 +35,7 @@
         </StackPanel>
         <WrapPanel HorizontalAlignment="Left" Height="329" Margin="10,54,0,0" VerticalAlignment="Top" Width="772"/>
         <ScrollViewer x:Name="scrollDownload" VerticalScrollBarVisibility="Auto" Margin="10,41,10,45">
-            <ItemsControl x:Name="itemList" ItemsSource="{Binding videoList}">
+            <ItemsControl x:Name="itemList" ItemsSource="{Binding videoList}" d:DataContext="{d:DesignInstance local:WindowMassDownload}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -42,7 +43,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderThickness="1" CornerRadius="8" Margin="0,0,8,8" Padding="4" MouseUp="Border_MouseUp" Initialized="Border_Initialized" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+                        <Border BorderThickness="1" CornerRadius="8" Margin="0,0,8,8" Padding="4" MouseUp="Border_MouseUp" Initialized="Border_Initialized" d:DataContext="{d:DesignInstance task:TaskData}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
                             <StackPanel Orientation="Vertical" Width="220" Background="{DynamicResource AppElementBackground}">
                                 <Image Source="{Binding Thumbnail}" MaxHeight="90"></Image>
                                 <emoji:TextBlock TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppText}">
