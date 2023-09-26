@@ -182,13 +182,11 @@ namespace TwitchDownloaderWPF
 
         private void Border_Initialized(object sender, EventArgs e)
         {
-            Border border = (Border)sender;
-            if (border.DataContext != null)
+            if (sender is not Border border) return;
+
+            if (border.DataContext is TaskData taskData && selectedItems.Any(x => x.Id == taskData.Id))
             {
-                if (selectedItems.Any(x => x.Id == ((TaskData)border.DataContext).Id))
-                {
-                    border.Background = Brushes.LightBlue;
-                }
+                border.BorderBrush = Brushes.LightBlue;
             }
         }
 
@@ -197,8 +195,7 @@ namespace TwitchDownloaderWPF
             if (selectedItems.Count > 0)
             {
                 WindowQueueOptions queue = new WindowQueueOptions(selectedItems);
-                bool? queued = queue.ShowDialog();
-                if (queued != null && (bool)queued)
+                if (queue.ShowDialog().GetValueOrDefault())
                     this.Close();
             }
         }
@@ -217,18 +214,20 @@ namespace TwitchDownloaderWPF
             //I'm sure there is a much better way to do this. Could not find a way to iterate over each itemcontrol border
             foreach (var video in videoList)
             {
-                if (!selectedItems.Any(x => x.Id == video.Id))
+                if (selectedItems.All(x => x.Id != video.Id))
                 {
                     selectedItems.Add(video);
                 }
             }
 
-            List<TaskData> oldData = videoList.ToList();
+            // Remove and re-add all of the items to trigger Border_Initialized
+            var oldData = videoList.ToArray();
             videoList.Clear();
             foreach (var item in oldData)
             {
                 videoList.Add(item);
             }
+
             textCount.Text = selectedItems.Count.ToString();
         }
 
