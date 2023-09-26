@@ -64,7 +64,7 @@
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,7,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MaximumThreadBandwidth}" /><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MaximumThreadBandwidthTooltip}" /></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
-                <CheckBox x:Name="CheckThrottleEnabled" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="1, 6, 3, 3" Checked="CheckThrottleEnabled_Checked" Unchecked="CheckThrottleEnabled_Unchecked" BorderBrush="{DynamicResource AppElementBackground}" />
+                <CheckBox x:Name="CheckThrottleEnabled" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="1, 6, 3, 3" Checked="CheckThrottleEnabled_Checked" Unchecked="CheckThrottleEnabled_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" />
                 <hc:NumericUpDown x:Name="NumMaximumBandwidth" Value="4096" Minimum="1" Maximum="122070" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 <TextBlock Margin="3,7,0,0" Text="KiB/s" Foreground="{DynamicResource AppText}" />
             </StackPanel>
