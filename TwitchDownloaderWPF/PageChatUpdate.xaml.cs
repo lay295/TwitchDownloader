@@ -119,7 +119,7 @@ namespace TwitchDownloaderWPF
                     if (videoInfo.data.video == null)
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
-                        var (_, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out var image);
                         imgThumbnail.Source = image;
 
                         numStartHour.Maximum = 48;
@@ -135,11 +135,10 @@ namespace TwitchDownloaderWPF
                         Game = videoInfo.data.video.game?.displayName;
 
                         var thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
-                        var (success, image) = await ThumbnailService.TryGetThumb(thumbUrl);
-                        if (!success)
+                        if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                            (_, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                            _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                         }
 
                         imgThumbnail.Source = image;
@@ -157,7 +156,7 @@ namespace TwitchDownloaderWPF
                     if (videoInfo.data.clip.video == null)
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
-                        var (_, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out var image);
                         imgThumbnail.Source = image;
                     }
                     else
@@ -168,11 +167,10 @@ namespace TwitchDownloaderWPF
                         Game = videoInfo.data.clip.game?.displayName;
 
                         var thumbUrl = videoInfo.data.clip.thumbnailURL;
-                        var (success, image) = await ThumbnailService.TryGetThumb(thumbUrl);
-                        if (!success)
+                        if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                            (_, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
+                            _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                         }
 
                         imgThumbnail.Source = image;

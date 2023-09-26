@@ -7,10 +7,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.TwitchTasks;
 
 namespace TwitchDownloaderWPF
@@ -71,34 +71,27 @@ namespace TwitchDownloaderWPF
                 {
                     foreach (var video in res.data.user.videos.edges)
                     {
-                        TaskData data = new TaskData();
-                        data.Title = video.node.title;
-                        data.Length = video.node.lengthSeconds;
-                        data.Id = video.node.id;
-                        data.Time = Settings.Default.UTCVideoTime ? video.node.createdAt : video.node.createdAt.ToLocalTime();
-                        data.Views = video.node.viewCount;
-                        data.Streamer = currentChannel;
-                        data.Game = video.node.game?.displayName ?? "Unknown";
-                        try
+                        var thumbUrl = video.node.previewThumbnailURL;
+                        if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                         {
-                            var bitmapImage = new BitmapImage();
-                            bitmapImage.BeginInit();
-                            bitmapImage.UriSource = new Uri(video.node.previewThumbnailURL);
-                            bitmapImage.EndInit();
-                            data.Thumbnail = bitmapImage;
+                            _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out thumbnail);
                         }
-                        catch { }
-                        videoList.Add(data);
+
+                        videoList.Add(new TaskData
+                        {
+                            Title = video.node.title,
+                            Length = video.node.lengthSeconds,
+                            Id = video.node.id,
+                            Time = Settings.Default.UTCVideoTime ? video.node.createdAt : video.node.createdAt.ToLocalTime(),
+                            Views = video.node.viewCount,
+                            Streamer = currentChannel,
+                            Game = video.node.game?.displayName ?? "Unknown",
+                            Thumbnail = thumbnail
+                        });
                     }
 
-                    if (res.data.user.videos.pageInfo.hasNextPage)
-                        btnNext.IsEnabled = true;
-                    else
-                        btnNext.IsEnabled = false;
-                    if (res.data.user.videos.pageInfo.hasPreviousPage)
-                        btnPrev.IsEnabled = true;
-                    else
-                        btnPrev.IsEnabled = false;
+                    btnNext.IsEnabled = res.data.user.videos.pageInfo.hasNextPage;
+                    btnPrev.IsEnabled = res.data.user.videos.pageInfo.hasPreviousPage;
                     if (res.data.user.videos.pageInfo.hasNextPage)
                     {
                         string newCursor = res.data.user.videos.edges[0].cursor;
@@ -120,34 +113,27 @@ namespace TwitchDownloaderWPF
                 {
                     foreach (var clip in res.data.user.clips.edges)
                     {
-                        TaskData data = new TaskData();
-                        data.Title = clip.node.title;
-                        data.Length = clip.node.durationSeconds;
-                        data.Id = clip.node.slug;
-                        data.Time = Settings.Default.UTCVideoTime ? clip.node.createdAt : clip.node.createdAt.ToLocalTime();
-                        data.Views = clip.node.viewCount;
-                        data.Streamer = currentChannel;
-                        data.Game = clip.node.game?.displayName ?? "Unknown";
-                        try
+                        var thumbUrl = clip.node.thumbnailURL;
+                        if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                         {
-                            var bitmapImage = new BitmapImage();
-                            bitmapImage.BeginInit();
-                            bitmapImage.UriSource = new Uri(clip.node.thumbnailURL);
-                            bitmapImage.EndInit();
-                            data.Thumbnail = bitmapImage;
+                            _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out thumbnail);
                         }
-                        catch { }
-                        videoList.Add(data);
+
+                        videoList.Add(new TaskData
+                        {
+                            Title = clip.node.title,
+                            Length = clip.node.durationSeconds,
+                            Id = clip.node.slug,
+                            Time = Settings.Default.UTCVideoTime ? clip.node.createdAt : clip.node.createdAt.ToLocalTime(),
+                            Views = clip.node.viewCount,
+                            Streamer = currentChannel,
+                            Game = clip.node.game?.displayName ?? "Unknown",
+                            Thumbnail = thumbnail
+                        });
                     }
 
-                    if (res.data.user.clips.pageInfo.hasNextPage)
-                        btnNext.IsEnabled = true;
-                    else
-                        btnNext.IsEnabled = false;
-                    if (cursorIndex >= 0)
-                        btnPrev.IsEnabled = true;
-                    else
-                        btnPrev.IsEnabled = false;
+                    btnNext.IsEnabled = res.data.user.clips.pageInfo.hasNextPage;
+                    btnPrev.IsEnabled = cursorIndex >= 0;
                     if (res.data.user.clips.pageInfo.hasNextPage)
                     {
                         string newCursor = res.data.user.clips.edges.First(x => x.cursor != null).cursor;

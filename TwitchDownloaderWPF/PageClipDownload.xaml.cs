@@ -60,20 +60,14 @@ namespace TwitchDownloaderWPF
 
                 GqlClipResponse clipData = taskClipInfo.Result;
 
-                try
-                {
-                    string thumbUrl = clipData.data.clip.thumbnailURL;
-                    imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                }
-                catch
+                var thumbUrl = clipData.data.clip.thumbnailURL;
+                if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                 {
                     AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                    if (success)
-                    {
-                        imgThumbnail.Source = image;
-                    }
+                    _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                 }
+                imgThumbnail.Source = image;
+
                 clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                 textStreamer.Text = clipData.data.clip.broadcaster.displayName;
                 var clipCreatedAt = clipData.data.clip.createdAt;

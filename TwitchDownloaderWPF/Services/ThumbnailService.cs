@@ -1,5 +1,4 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Media.Imaging;
 
 namespace TwitchDownloaderWPF.Services
@@ -7,33 +6,42 @@ namespace TwitchDownloaderWPF.Services
     public static class ThumbnailService
     {
         public const string THUMBNAIL_MISSING_URL = @"https://vod-secure.twitch.tv/_404/404_processing_320x180.png";
-        private static readonly HttpClient HttpClient = new();
 
-        public static async Task<BitmapImage> GetThumb(string thumbUrl)
+        public static BitmapImage GetThumb(string thumbUrl, BitmapCacheOption cacheOption = BitmapCacheOption.OnLoad)
         {
-            if (string.IsNullOrWhiteSpace(thumbUrl))
-            {
-                return null;
-            }
+            ArgumentNullException.ThrowIfNull(thumbUrl);
 
-            BitmapImage img = new BitmapImage();
-            img.CacheOption = BitmapCacheOption.OnLoad;
+            var img = new BitmapImage { CacheOption = cacheOption };
             img.BeginInit();
-            img.StreamSource = await HttpClient.GetStreamAsync(thumbUrl);
+            img.UriSource = new Uri(thumbUrl);
             img.EndInit();
+            img.DownloadCompleted += static (sender, _) =>
+            {
+                if (sender is BitmapImage { CanFreeze: true } image)
+                {
+                    image.Freeze();
+                }
+            };
             return img;
         }
 
-        public static async Task<(bool success, BitmapImage image)> TryGetThumb(string thumbUrl)
+        public static bool TryGetThumb(string thumbUrl, out BitmapImage thumbnail)
         {
+            if (string.IsNullOrWhiteSpace(thumbUrl))
+            {
+                thumbnail = null;
+                return false;
+            }
+
             try
             {
-                var thumb = await GetThumb(thumbUrl);
-                return (thumb != null, thumb);
+                thumbnail = GetThumb(thumbUrl);
+                return thumbnail != null;
             }
             catch
             {
-                return (false, null);
+                thumbnail = null;
+                return false;
             }
         }
     }

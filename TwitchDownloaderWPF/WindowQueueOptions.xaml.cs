@@ -97,7 +97,7 @@ namespace TwitchDownloaderWPF
                 textFolder.Text = queueFolder;
         }
 
-        private async void btnQueue_Click(object sender, RoutedEventArgs e)
+        private void btnQueue_Click(object sender, RoutedEventArgs e)
         {
             if (parentPage != null)
             {
@@ -365,8 +365,7 @@ namespace TwitchDownloaderWPF
                         renderOptions.InputFile = fileName;
                         renderTask.DownloadOptions = renderOptions;
                         renderTask.Info.Title = Path.GetFileNameWithoutExtension(filePath);
-                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                        if (success)
+                        if (ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out var image))
                         {
                             renderTask.Info.Thumbnail = image;
                         }

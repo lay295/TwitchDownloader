@@ -117,20 +117,14 @@ namespace TwitchDownloaderWPF
                 {
                     GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(downloadId));
 
-                    try
-                    {
-                        string thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
-                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                    }
-                    catch
+                    var thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
+                    if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                        if (success)
-                        {
-                            imgThumbnail.Source = image;
-                        }
+                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                     }
+                    imgThumbnail.Source = image;
+
                     vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                     textTitle.Text = videoInfo.data.video.title;
                     textStreamer.Text = videoInfo.data.video.owner.displayName;
@@ -169,20 +163,14 @@ namespace TwitchDownloaderWPF
                     string clipId = downloadId;
                     GqlClipResponse clipInfo = await TwitchHelper.GetClipInfo(clipId);
 
-                    try
-                    {
-                        string thumbUrl = clipInfo.data.clip.thumbnailURL;
-                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                    }
-                    catch
+                    var thumbUrl = clipInfo.data.clip.thumbnailURL;
+                    if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                        if (success)
-                        {
-                            imgThumbnail.Source = image;
-                        }
+                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                     }
+                    imgThumbnail.Source = image;
+
                     TimeSpan clipLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
                     textStreamer.Text = clipInfo.data.clip.broadcaster.displayName;
                     var clipCreatedAt = clipInfo.data.clip.createdAt;

@@ -100,20 +100,14 @@ namespace TwitchDownloaderWPF
                 }
 
                 Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
-                try
-                {
-                    string thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
-                    imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                }
-                catch
+
+                var thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
+                if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                 {
                     AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                    if (success)
-                    {
-                        imgThumbnail.Source = image;
-                    }
+                    _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                 }
+                imgThumbnail.Source = image;
 
                 comboQuality.Items.Clear();
                 videoQualities.Clear();
