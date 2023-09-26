@@ -58,6 +58,8 @@ namespace TwitchDownloaderWPF
 
         private async Task UpdateList()
         {
+            if (StatusImage != null) StatusImage.Visibility = Visibility.Visible;
+
             if (downloaderType == DownloadType.Video)
             {
                 string currentCursor = "";
@@ -65,7 +67,7 @@ namespace TwitchDownloaderWPF
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, 100);
+                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, 50);
                 videoList.Clear();
                 if (res.data.user != null)
                 {
@@ -142,6 +144,8 @@ namespace TwitchDownloaderWPF
                     }
                 }
             }
+
+            if (StatusImage != null) StatusImage.Visibility = Visibility.Collapsed;
         }
 
         private void Border_MouseUp(object sender, MouseButtonEventArgs e)
