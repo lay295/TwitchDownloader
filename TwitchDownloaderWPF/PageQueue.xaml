@@ -37,7 +37,7 @@
                 <ItemsControl x:Name="queueList" ItemsSource="{Binding taskList}" Margin="0,10" d:DataContext="{d:DesignInstance local:PageQueue}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border BorderThickness="1" CornerRadius="8" Margin="8,8,8,8" Padding="4" d:DataContext="{d:DesignInstance task:ITwitchTask}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+                            <Border BorderThickness="1" CornerRadius="8" Margin="8,8,8,8" Padding="4" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
                                 <Grid Margin="1,1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto" />

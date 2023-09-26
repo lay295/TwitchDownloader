@@ -46,7 +46,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderThickness="1" CornerRadius="8" Margin="0,0,8,8" Padding="4" MouseUp="Border_MouseUp" Initialized="Border_Initialized" d:DataContext="{d:DesignInstance task:TaskData}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+                        <Border BorderThickness="1" CornerRadius="8" Margin="0,0,8,8" Padding="4" MouseUp="Border_MouseUp" Initialized="Border_Initialized" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
                             <StackPanel Orientation="Vertical" Width="220" Background="{DynamicResource AppElementBackground}">
                                 <Image Source="{Binding Thumbnail}" MaxHeight="90"></Image>
                                 <emoji:TextBlock TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppText}">
