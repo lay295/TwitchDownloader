@@ -20,24 +20,24 @@ namespace TwitchDownloaderWPF
     {
         // This file is absolutely atrocious, but fixing it would mean rewriting the entire GUI in a more abstract form
 
-        List<TaskData> dataList;
+        private readonly List<TaskData> _dataList;
+        private readonly Page _parentPage;
 
-        Page parentPage { get; set; }
         public WindowQueueOptions(Page page)
         {
-            parentPage = page;
+            _parentPage = page;
             InitializeComponent();
 
             string queueFolder = Settings.Default.QueueFolder;
             if (Directory.Exists(queueFolder))
                 textFolder.Text = queueFolder;
 
-            if (page is PageVodDownload || page is PageClipDownload)
+            if (page is PageVodDownload or PageClipDownload)
             {
                 checkVideo.IsChecked = true;
                 checkVideo.IsEnabled = false;
             }
-            if (page is PageChatDownload chatPage)
+            else if (page is PageChatDownload chatPage)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
                 checkChat.IsChecked = true;
@@ -50,13 +50,13 @@ namespace TwitchDownloaderWPF
                 RadioCompressionNone.Visibility = Visibility.Collapsed;
                 RadioCompressionGzip.Visibility = Visibility.Collapsed;
                 checkEmbed.Visibility = Visibility.Collapsed;
-                if (chatPage.radioJson.IsChecked != true)
+                if (!chatPage.radioJson.IsChecked.GetValueOrDefault())
                 {
                     checkRender.IsChecked = false;
                     checkRender.IsEnabled = false;
                 }
             }
-            if (page is PageChatUpdate)
+            else if (page is PageChatUpdate)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
                 checkChat.Visibility = Visibility.Collapsed;
@@ -70,7 +70,7 @@ namespace TwitchDownloaderWPF
                 checkEmbed.Visibility = Visibility.Collapsed;
                 checkRender.Visibility = Visibility.Collapsed;
             }
-            if (page is PageChatRender)
+            else if (page is PageChatRender)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
                 checkChat.Visibility = Visibility.Collapsed;
@@ -87,9 +87,9 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        public WindowQueueOptions(List<TaskData> DataList)
+        public WindowQueueOptions(List<TaskData> dataList)
         {
-            this.dataList = DataList;
+            _dataList = dataList;
             InitializeComponent();
 
             string queueFolder = Settings.Default.QueueFolder;
@@ -99,11 +99,10 @@ namespace TwitchDownloaderWPF
 
         private void btnQueue_Click(object sender, RoutedEventArgs e)
         {
-            if (parentPage != null)
+            if (_parentPage != null)
             {
-                if (parentPage is PageVodDownload)
+                if (_parentPage is PageVodDownload vodDownloadPage)
                 {
-                    PageVodDownload vodPage = (PageVodDownload)parentPage;
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
@@ -112,10 +111,10 @@ namespace TwitchDownloaderWPF
                     }
 
                     VodDownloadTask downloadTask = new VodDownloadTask();
-                    VideoDownloadOptions downloadOptions = vodPage.GetOptions(null, textFolder.Text);
+                    VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text);
                     downloadTask.DownloadOptions = downloadOptions;
-                    downloadTask.Info.Title = vodPage.textTitle.Text;
-                    downloadTask.Info.Thumbnail = vodPage.imgThumbnail.Source;
+                    downloadTask.Info.Title = vodDownloadPage.textTitle.Text;
+                    downloadTask.Info.Thumbnail = vodDownloadPage.imgThumbnail.Source;
                     downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                     lock (PageQueue.taskLock)
@@ -123,7 +122,7 @@ namespace TwitchDownloaderWPF
                         PageQueue.taskList.Add(downloadTask);
                     }
 
-                    if ((bool)checkChat.IsChecked)
+                    if (checkChat.IsChecked.GetValueOrDefault())
                     {
                         ChatDownloadTask chatTask = new ChatDownloadTask();
                         ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
@@ -134,7 +133,7 @@ namespace TwitchDownloaderWPF
                             chatOptions.DownloadFormat = ChatFormat.Html;
                         else
                             chatOptions.DownloadFormat = ChatFormat.Text;
-                        chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
+                        chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
                         chatOptions.Filename = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(downloadOptions.Filename) + "." + chatOptions.DownloadFormat);
 
                         if (downloadOptions.CropBeginning)
@@ -150,8 +149,8 @@ namespace TwitchDownloaderWPF
                         }
 
                         chatTask.DownloadOptions = chatOptions;
-                        chatTask.Info.Title = vodPage.textTitle.Text;
-                        chatTask.Info.Thumbnail = vodPage.imgThumbnail.Source;
+                        chatTask.Info.Title = vodDownloadPage.textTitle.Text;
+                        chatTask.Info.Thumbnail = vodDownloadPage.imgThumbnail.Source;
                         chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
@@ -159,19 +158,19 @@ namespace TwitchDownloaderWPF
                             PageQueue.taskList.Add(chatTask);
                         }
 
-                        if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == ChatFormat.Json)
+                        if (checkRender.IsChecked.GetValueOrDefault() && chatOptions.DownloadFormat == ChatFormat.Json)
                         {
                             ChatRenderTask renderTask = new ChatRenderTask();
                             ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), '.' + MainWindow.pageChatRender.comboFormat.Text.ToLower()));
-                            if (renderOptions.OutputFile.Trim() == downloadOptions.Filename.Trim())
+                            if (renderOptions.OutputFile.Trim() == downloadOptions.Filename!.Trim())
                             {
                                 //Just in case VOD and chat paths are the same. Like the previous defaults
                                 renderOptions.OutputFile = Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), " - CHAT." + MainWindow.pageChatRender.comboFormat.Text.ToLower());
                             }
                             renderOptions.InputFile = chatOptions.Filename;
                             renderTask.DownloadOptions = renderOptions;
-                            renderTask.Info.Title = vodPage.textTitle.Text;
-                            renderTask.Info.Thumbnail = vodPage.imgThumbnail.Source;
+                            renderTask.Info.Title = vodDownloadPage.textTitle.Text;
+                            renderTask.Info.Thumbnail = vodDownloadPage.imgThumbnail.Source;
                             renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
                             renderTask.DependantTask = chatTask;
 
@@ -185,9 +184,8 @@ namespace TwitchDownloaderWPF
                     this.Close();
                 }
 
-                if (parentPage is PageClipDownload)
+                if (_parentPage is PageClipDownload clipDownloadPage)
                 {
-                    PageClipDownload clipPage = (PageClipDownload)parentPage;
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
@@ -197,18 +195,18 @@ namespace TwitchDownloaderWPF
 
                     ClipDownloadTask downloadTask = new ClipDownloadTask();
                     ClipDownloadOptions downloadOptions = new ClipDownloadOptions();
-                    downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, clipPage.textTitle.Text, clipPage.clipId, clipPage.currentVideoTime, clipPage.textStreamer.Text, TimeSpan.Zero, clipPage.clipLength, clipPage.viewCount.ToString(), clipPage.game) + ".mp4");
-                    downloadOptions.Id = clipPage.clipId;
-                    downloadOptions.Quality = clipPage.comboQuality.Text;
+                    downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, clipDownloadPage.textTitle.Text, clipDownloadPage.clipId, clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, TimeSpan.Zero, clipDownloadPage.clipLength, clipDownloadPage.viewCount.ToString(), clipDownloadPage.game) + ".mp4");
+                    downloadOptions.Id = clipDownloadPage.clipId;
+                    downloadOptions.Quality = clipDownloadPage.comboQuality.Text;
                     downloadOptions.ThrottleKib = Settings.Default.DownloadThrottleEnabled
                         ? Settings.Default.MaximumBandwidthKib
                         : -1;
                     downloadOptions.TempFolder = Settings.Default.TempPath;
-                    downloadOptions.EncodeMetadata = clipPage.CheckMetadata.IsChecked!.Value;
+                    downloadOptions.EncodeMetadata = clipDownloadPage.CheckMetadata.IsChecked!.Value;
                     downloadOptions.FfmpegPath = "ffmpeg";
                     downloadTask.DownloadOptions = downloadOptions;
-                    downloadTask.Info.Title = clipPage.textTitle.Text;
-                    downloadTask.Info.Thumbnail = clipPage.imgThumbnail.Source;
+                    downloadTask.Info.Title = clipDownloadPage.textTitle.Text;
+                    downloadTask.Info.Thumbnail = clipDownloadPage.imgThumbnail.Source;
                     downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                     lock (PageQueue.taskLock)
@@ -216,7 +214,7 @@ namespace TwitchDownloaderWPF
                         PageQueue.taskList.Add(downloadTask);
                     }
 
-                    if ((bool)checkChat.IsChecked)
+                    if (checkChat.IsChecked.GetValueOrDefault())
                     {
                         ChatDownloadTask chatTask = new ChatDownloadTask();
                         ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
@@ -228,12 +226,12 @@ namespace TwitchDownloaderWPF
                         else
                             chatOptions.DownloadFormat = ChatFormat.Text;
                         chatOptions.TimeFormat = TimestampFormat.Relative;
-                        chatOptions.EmbedData = (bool)checkEmbed.IsChecked;
-                        chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipPage.currentVideoTime, clipPage.textStreamer.Text, TimeSpan.Zero, clipPage.clipLength, clipPage.viewCount.ToString(), clipPage.game) + "." + chatOptions.FileExtension);
+                        chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
+                        chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, TimeSpan.Zero, clipDownloadPage.clipLength, clipDownloadPage.viewCount.ToString(), clipDownloadPage.game) + "." + chatOptions.FileExtension);
 
                         chatTask.DownloadOptions = chatOptions;
-                        chatTask.Info.Title = clipPage.textTitle.Text;
-                        chatTask.Info.Thumbnail = clipPage.imgThumbnail.Source;
+                        chatTask.Info.Title = clipDownloadPage.textTitle.Text;
+                        chatTask.Info.Thumbnail = clipDownloadPage.imgThumbnail.Source;
                         chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
@@ -241,7 +239,7 @@ namespace TwitchDownloaderWPF
                             PageQueue.taskList.Add(chatTask);
                         }
 
-                        if ((bool)checkRender.IsChecked && chatOptions.DownloadFormat == ChatFormat.Json)
+                        if (checkRender.IsChecked.GetValueOrDefault() && chatOptions.DownloadFormat == ChatFormat.Json)
                         {
                             ChatRenderTask renderTask = new ChatRenderTask();
                             ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), '.' + MainWindow.pageChatRender.comboFormat.Text.ToLower()));
@@ -252,8 +250,8 @@ namespace TwitchDownloaderWPF
                             }
                             renderOptions.InputFile = chatOptions.Filename;
                             renderTask.DownloadOptions = renderOptions;
-                            renderTask.Info.Title = clipPage.textTitle.Text;
-                            renderTask.Info.Thumbnail = clipPage.imgThumbnail.Source;
+                            renderTask.Info.Title = clipDownloadPage.textTitle.Text;
+                            renderTask.Info.Thumbnail = clipDownloadPage.imgThumbnail.Source;
                             renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
                             renderTask.DependantTask = chatTask;
 
@@ -267,9 +265,8 @@ namespace TwitchDownloaderWPF
                     this.Close();
                 }
 
-                if (parentPage is PageChatDownload)
+                if (_parentPage is PageChatDownload chatDownloadPage)
                 {
-                    PageChatDownload chatPage = (PageChatDownload)parentPage;
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
@@ -279,15 +276,15 @@ namespace TwitchDownloaderWPF
 
                     ChatDownloadTask chatTask = new ChatDownloadTask();
                     ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
-                    chatOptions.Id = chatPage.downloadId;
-                    chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatOptions.Id, chatPage.currentVideoTime, chatPage.textStreamer.Text,
+                    chatOptions.Id = chatDownloadPage.downloadId;
+                    chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatDownloadPage.textTitle.Text, chatOptions.Id, chatDownloadPage.currentVideoTime, chatDownloadPage.textStreamer.Text,
                         chatOptions.CropBeginning ? TimeSpan.FromSeconds(chatOptions.CropBeginningTime) : TimeSpan.Zero,
-                        chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatPage.vodLength,
-                        chatPage.viewCount.ToString(), chatPage.game) + "." + chatOptions.FileExtension);
+                        chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatDownloadPage.vodLength,
+                        chatDownloadPage.viewCount.ToString(), chatDownloadPage.game) + "." + chatOptions.FileExtension);
 
                     chatTask.DownloadOptions = chatOptions;
-                    chatTask.Info.Title = chatPage.textTitle.Text;
-                    chatTask.Info.Thumbnail = chatPage.imgThumbnail.Source;
+                    chatTask.Info.Title = chatDownloadPage.textTitle.Text;
+                    chatTask.Info.Thumbnail = chatDownloadPage.imgThumbnail.Source;
                     chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                     lock (PageQueue.taskLock)
@@ -301,8 +298,8 @@ namespace TwitchDownloaderWPF
                         ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), '.' + MainWindow.pageChatRender.comboFormat.Text.ToLower()));
                         renderOptions.InputFile = chatOptions.Filename;
                         renderTask.DownloadOptions = renderOptions;
-                        renderTask.Info.Title = chatPage.textTitle.Text;
-                        renderTask.Info.Thumbnail = chatPage.imgThumbnail.Source;
+                        renderTask.Info.Title = chatDownloadPage.textTitle.Text;
+                        renderTask.Info.Thumbnail = chatDownloadPage.imgThumbnail.Source;
                         renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
                         renderTask.DependantTask = chatTask;
 
@@ -315,9 +312,8 @@ namespace TwitchDownloaderWPF
                     this.Close();
                 }
 
-                if (parentPage is PageChatUpdate)
+                if (_parentPage is PageChatUpdate chatUpdatePage)
                 {
-                    PageChatUpdate chatPage = (PageChatUpdate)parentPage;
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
@@ -327,15 +323,15 @@ namespace TwitchDownloaderWPF
 
                     ChatUpdateTask chatTask = new ChatUpdateTask();
                     ChatUpdateOptions chatOptions = MainWindow.pageChatUpdate.GetOptions(null);
-                    chatOptions.InputFile = chatPage.InputFile;
-                    chatOptions.OutputFile = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatPage.textTitle.Text, chatPage.VideoId, chatPage.VideoCreatedAt, chatPage.textStreamer.Text,
+                    chatOptions.InputFile = chatUpdatePage.InputFile;
+                    chatOptions.OutputFile = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatUpdatePage.textTitle.Text, chatUpdatePage.VideoId, chatUpdatePage.VideoCreatedAt, chatUpdatePage.textStreamer.Text,
                         chatOptions.CropBeginning ? TimeSpan.FromSeconds(chatOptions.CropBeginningTime) : TimeSpan.Zero,
-                        chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatPage.VideoLength,
-                        chatPage.ViewCount.ToString(), chatPage.Game) + "." + chatOptions.FileExtension);
+                        chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatUpdatePage.VideoLength,
+                        chatUpdatePage.ViewCount.ToString(), chatUpdatePage.Game) + "." + chatOptions.FileExtension);
 
                     chatTask.UpdateOptions = chatOptions;
-                    chatTask.Info.Title = chatPage.textTitle.Text;
-                    chatTask.Info.Thumbnail = chatPage.imgThumbnail.Source;
+                    chatTask.Info.Title = chatUpdatePage.textTitle.Text;
+                    chatTask.Info.Thumbnail = chatUpdatePage.imgThumbnail.Source;
                     chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                     lock (PageQueue.taskLock)
@@ -346,11 +342,10 @@ namespace TwitchDownloaderWPF
                     this.Close();
                 }
 
-                if (parentPage is PageChatRender)
+                if (_parentPage is PageChatRender chatRenderPage)
                 {
-                    PageChatRender renderPage = (PageChatRender)parentPage;
                     string folderPath = textFolder.Text;
-                    foreach (string fileName in renderPage.FileNames)
+                    foreach (string fileName in chatRenderPage.FileNames)
                     {
                         if (!Directory.Exists(folderPath))
                         {
@@ -359,7 +354,7 @@ namespace TwitchDownloaderWPF
                         }
 
                         ChatRenderTask renderTask = new ChatRenderTask();
-                        string fileFormat = renderPage.comboFormat.SelectedItem.ToString();
+                        string fileFormat = chatRenderPage.comboFormat.SelectedItem.ToString()!;
                         string filePath = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(fileName) + "." + fileFormat.ToLower());
                         ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(filePath);
                         renderOptions.InputFile = fileName;
@@ -382,7 +377,7 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                if (dataList.Count > 0)
+                if (_dataList.Count > 0)
                 {
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
@@ -391,12 +386,11 @@ namespace TwitchDownloaderWPF
                         return;
                     }
 
-                    for (int i = 0; i < dataList.Count; i++)
+                    foreach (var taskData in _dataList)
                     {
-                        var taskData = dataList[i];
-                        if ((bool)checkVideo.IsChecked)
+                        if (checkVideo.IsChecked.GetValueOrDefault())
                         {
-                            if (taskData.Id.All(Char.IsDigit))
+                            if (taskData.Id.All(char.IsDigit))
                             {
                                 VodDownloadTask downloadTask = new VodDownloadTask();
                                 VideoDownloadOptions downloadOptions = new VideoDownloadOptions();
@@ -413,7 +407,7 @@ namespace TwitchDownloaderWPF
                                 downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
                                     downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
                                     downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(taskData.Length),
-                                taskData.Views.ToString(), taskData.Game) + ".mp4");
+                                    taskData.Views.ToString(), taskData.Game) + ".mp4");
                                 downloadTask.DownloadOptions = downloadOptions;
                                 downloadTask.Info.Title = taskData.Title;
                                 downloadTask.Info.Thumbnail = taskData.Thumbnail;
@@ -449,7 +443,7 @@ namespace TwitchDownloaderWPF
                             }
                         }
 
-                        if ((bool)checkChat.IsChecked)
+                        if (checkChat.IsChecked.GetValueOrDefault())
                         {
                             ChatDownloadTask downloadTask = new ChatDownloadTask();
                             ChatDownloadOptions downloadOptions = new ChatDownloadOptions();
@@ -460,7 +454,7 @@ namespace TwitchDownloaderWPF
                             else
                                 downloadOptions.DownloadFormat = ChatFormat.Text;
                             downloadOptions.Compression = RadioCompressionNone.IsChecked == true ? ChatCompression.None : ChatCompression.Gzip;
-                            downloadOptions.EmbedData = (bool)checkEmbed.IsChecked;
+                            downloadOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
                             downloadOptions.TimeFormat = TimestampFormat.Relative;
                             downloadOptions.Id = taskData.Id;
                             downloadOptions.CropBeginning = false;
@@ -479,7 +473,7 @@ namespace TwitchDownloaderWPF
                                 PageQueue.taskList.Add(downloadTask);
                             }
 
-                            if ((bool)checkRender.IsChecked && downloadOptions.DownloadFormat == ChatFormat.Json)
+                            if (checkRender.IsChecked.GetValueOrDefault() && downloadOptions.DownloadFormat == ChatFormat.Json)
                             {
                                 ChatRenderTask renderTask = new ChatRenderTask();
                                 ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(downloadOptions.Filename.Replace(".gz", ""), '.' + MainWindow.pageChatRender.comboFormat.Text.ToLower()));
