@@ -238,7 +238,7 @@ namespace TwitchDownloaderWPF
                 ? Translations.Strings.TitleVideoMassDownloader
                 : Translations.Strings.TitleClipMassDownloader;
             App.RequestTitleBarChange();
-		}
+        }
 
         private async void TextChannel_OnKeyDown(object sender, KeyEventArgs e)
         {
