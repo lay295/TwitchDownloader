@@ -180,7 +180,7 @@ namespace TwitchDownloaderCore.Tools
                 return SKImage.FromBitmap(offlineBitmap);
             }
 
-            var taskIconBytes = TwitchHelper.GetImage(cachePath, GIFTED_MANY_ICON_URL, "gift-illus", "3", "png");
+            var taskIconBytes = PlatformHelper.GetImage(cachePath, GIFTED_MANY_ICON_URL, "gift-illus", "3", "png");
             taskIconBytes.Wait();
             using var ms = new MemoryStream(taskIconBytes.Result); // Illustration is 72x72
             using var codec = SKCodec.Create(ms);

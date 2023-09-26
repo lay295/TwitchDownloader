@@ -18,7 +18,7 @@ namespace TwitchDownloaderCore.Chat
             var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
             if (!outputDirectory.Exists)
             {
-                TwitchHelper.CreateDirectory(outputDirectory.FullName);
+                PlatformHelper.CreateDirectory(outputDirectory.FullName);
             }
 
             await using var sw = new StreamWriter(filePath);

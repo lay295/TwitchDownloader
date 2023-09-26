@@ -58,7 +58,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
 
                 if (Directory.Exists(downloadFolder))
                     Directory.Delete(downloadFolder, true);
-                TwitchHelper.CreateDirectory(downloadFolder);
+                PlatformHelper.CreateDirectory(downloadFolder);
 
                 _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading 0% [2/5]"));
 
@@ -94,7 +94,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                 var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
                 if (!finalizedFileDirectory.Exists)
                 {
-                    TwitchHelper.CreateDirectory(finalizedFileDirectory.FullName);
+                    PlatformHelper.CreateDirectory(finalizedFileDirectory.FullName);
                 }
 
                 int ffmpegExitCode;

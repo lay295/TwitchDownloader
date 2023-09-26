@@ -426,8 +426,8 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
                     newEmote.imageScale = emote.ImageScale;
                     newEmote.data = emote.ImageData;
                     newEmote.name = emote.Name;
-                    newEmote.width = emote.Width / emote.ImageScale;
-                    newEmote.height = emote.Height / emote.ImageScale;
+                    newEmote.width = (int)(emote.Width / emote.ImageScale);
+                    newEmote.height = (int)(emote.Height / emote.ImageScale);
                     chatRoot.embeddedData.thirdParty.Add(newEmote);
                 }
                 foreach (TwitchEmote emote in firstPartyEmotes)
@@ -436,8 +436,8 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
                     newEmote.id = emote.Id;
                     newEmote.imageScale = emote.ImageScale;
                     newEmote.data = emote.ImageData;
-                    newEmote.width = emote.Width / emote.ImageScale;
-                    newEmote.height = emote.Height / emote.ImageScale;
+                    newEmote.width = (int)(emote.Width / emote.ImageScale);
+                    newEmote.height = (int)(emote.Height / emote.ImageScale);
                     chatRoot.embeddedData.firstParty.Add(newEmote);
                 }
                 foreach (ChatBadge badge in twitchBadges)
@@ -459,8 +459,8 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
                         newEmote.imageScale = emotePair.Value.ImageScale;
                         newEmote.data = emotePair.Value.ImageData;
                         newEmote.name = emotePair.Value.Name;
-                        newEmote.width = emotePair.Value.Width / emotePair.Value.ImageScale;
-                        newEmote.height = emotePair.Value.Height / emotePair.Value.ImageScale;
+                        newEmote.width = (int)(emotePair.Value.Width / emotePair.Value.ImageScale);
+                        newEmote.height = (int)(emotePair.Value.Height / emotePair.Value.ImageScale);
                         newBit.tierList.Add(emotePair.Key, newEmote);
                     }
                     chatRoot.embeddedData.twitchBits.Add(newBit);

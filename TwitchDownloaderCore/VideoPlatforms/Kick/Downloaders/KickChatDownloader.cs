@@ -25,9 +25,10 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
         private readonly IProgress<ProgressReport> _progress;
 
         private static readonly HttpClient HttpClient = new();
-        private static readonly string emotePattern = @"\[emote:(\d+):([^\]]+)\]";
+        private static readonly string emotePattern = @"\[emote:(\d+):?([^\]]+)?\]";
 
         public int StreamerId { get; set; }
+        public int ChannelId { get; set; }
         public string VideoId { get; set; }
 
         public KickChatDownloader(ChatDownloadOptions chatDownloadOptions, IProgress<ProgressReport> progress)
@@ -136,7 +137,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                     }
                 };
 
-                newComment.message = new() { emoticons = new(), fragments = new(), user_badges = new() };
+                newComment.message = new() { fragments = new(), user_badges = new() };
 
                 List<KickStringInfo> stringsInfoList = new List<KickStringInfo>();
                 StringBuilder replacedStringBuilder = new StringBuilder();
@@ -156,8 +157,12 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                         replacedStringBuilder.Append(unmatchedString);
                     }
 
-                    string emoteName = match.Groups[2].Value;
+
                     int emoteId = int.Parse(match.Groups[1].Value);
+                    string emoteName = match.Groups[2].Value; // This can be null if emote name is not present
+
+                    // If emote name is not present, use a placeholder or leave it empty
+                    emoteName = emoteName ?? $"emote_{emoteId}";
 
                     stringsInfoList.Add(new KickStringInfo
                     {
@@ -166,7 +171,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                         EndIndex = replacedStringBuilder.Length + emoteName.Length,
                         EmoteId = emoteId
                     });
-                    replacedStringBuilder.Append(emoteName + " ");
+                    replacedStringBuilder.Append(emoteName);
 
                     lastMatchEnd = match.Index + match.Length;
                 }
@@ -190,10 +195,20 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
 
                 foreach (var fragment in stringsInfoList)
                 {
-                    newComment.message.fragments.Add(new Fragment() { text = fragment.Value, emoticon = new() { emoticon_id = fragment.EmoteId?.ToString() } });
+                    var newFragment = new Fragment() { text = fragment.Value };
+                    if (fragment.EmoteId != null)
+                    {
+                        newFragment.emoticon = new() { emoticon_id = fragment.EmoteId?.ToString() };
+                    }
+                    newComment.message.fragments.Add(newFragment);
 
                     if (fragment.EmoteId != null)
+                    {
+                        if (newComment.message.emoticons == null)
+                            newComment.message.emoticons = new();
+
                         newComment.message.emoticons.Add(new Emoticon2() { _id = fragment.EmoteId?.ToString(), begin = fragment.StartIndex, end = fragment.EndIndex });
+                    }
                 }
 
                 returnList.Add(newComment);
@@ -244,8 +259,9 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                 }
 
                 chatRoot.streamer.name = videoInfo.StreamerName;
-                chatRoot.streamer.id = videoInfo.livestream.channel.id;
-                StreamerId = videoInfo.livestream.channel.id;
+                StreamerId = videoInfo.livestream.channel.user_id;
+                ChannelId = videoInfo.livestream.channel_id;
+                chatRoot.streamer.id = StreamerId;
                 videoTitle = videoInfo.Title;
                 videoCreatedAt = videoInfo.CreatedAt;
                 videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
@@ -289,7 +305,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             chatRoot.video.game = game;
             videoDuration = videoEnd - videoStart;
 
-            int downloadChunks = 100;
+            int downloadChunks = Math.Max(1, (int)videoDuration);
             var tasks = new List<Func<Task<List<Comment>>>>();
             var percentages = new int[downloadChunks];
 
@@ -332,7 +348,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                 }
 
                 double start = videoStart + chunk * i;
-                tasks.Add(() => DownloadSection(StreamerId, videoCreatedAt, start, start + chunk, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
+                tasks.Add(() => DownloadSection(ChannelId, videoCreatedAt, start, start + chunk, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
             }
 
             /* Back to using a semaphore, at least for Kick chat downloading. 

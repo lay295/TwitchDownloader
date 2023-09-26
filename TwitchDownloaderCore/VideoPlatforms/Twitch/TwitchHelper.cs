@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 using TwitchDownloaderCore.VideoPlatforms.Twitch.Api;
 using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
@@ -175,7 +176,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
 
             if (getStv)
             {
-                await GetStvEmoteData(streamerId, emoteReponse.STV, allowUnlistedEmotes);
+                await PlatformHelper.GetStvEmoteData(streamerId, emoteReponse.STV, allowUnlistedEmotes, VideoPlatform.Twitch);
             }
 
             return emoteReponse;
@@ -242,72 +243,6 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             }
         }
 
-        private static async Task GetStvEmoteData(int streamerId, List<EmoteResponseItem> stvResponse, bool allowUnlistedEmotes)
-        {
-            var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://7tv.io/v3/emote-sets/global", UriKind.Absolute));
-            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
-            globalEmoteResponse.EnsureSuccessStatusCode();
-            var globalEmoteObject = await globalEmoteResponse.Content.ReadFromJsonAsync<STVGlobalEmoteResponse>();
-            var stvEmotes = globalEmoteObject.emotes;
-
-            // Channel might not be registered on 7tv
-            try
-            {
-                var streamerEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://7tv.io/v3/users/twitch/{streamerId}", UriKind.Absolute));
-                using var streamerEmoteResponse = await httpClient.SendAsync(streamerEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
-                streamerEmoteResponse.EnsureSuccessStatusCode();
-
-                var streamerEmoteObject = await streamerEmoteResponse.Content.ReadFromJsonAsync<STVChannelEmoteResponse>();
-                // Channel might not have emotes setup
-                if (streamerEmoteObject.emote_set?.emotes != null)
-                {
-                    stvEmotes.AddRange(streamerEmoteObject.emote_set.emotes);
-                }
-            }
-            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
-
-            foreach (var stvEmote in stvEmotes)
-            {
-                STVData emoteData = stvEmote.data;
-                STVHost emoteHost = emoteData.host;
-                List<STVFile> emoteFiles = emoteHost.files;
-                if (emoteFiles.Count == 0) // Sometimes there are no hosted files for the emote
-                {
-                    continue;
-                }
-                // TODO: Allow and prefer avif when SkiaSharp properly supports it
-                string emoteFormat = "";
-                foreach (var fileItem in emoteFiles)
-                {
-                    if (fileItem.format.Equals("webp", StringComparison.OrdinalIgnoreCase)) // Is the emote offered in webp?
-                    {
-                        emoteFormat = "webp";
-                        break;
-                    }
-                }
-                if (emoteFormat is "") // SkiaSharp does not yet properly support avif, only allow webp - see issue lay295#426
-                {
-                    continue;
-                }
-                string emoteUrl = $"https:{emoteHost.url}/[scale]x.{emoteFormat}";
-                StvEmoteFlags emoteFlags = emoteData.flags;
-                bool emoteIsListed = emoteData.listed;
-
-                EmoteResponseItem emoteResponse = new() { Id = stvEmote.id, Code = stvEmote.name, ImageType = emoteFormat, ImageUrl = emoteUrl };
-                if ((emoteFlags & StvEmoteFlags.ZeroWidth) == StvEmoteFlags.ZeroWidth)
-                {
-                    emoteResponse.IsZeroWidth = true;
-                }
-                if ((emoteFlags & StvEmoteFlags.ContentTwitchDisallowed) == StvEmoteFlags.ContentTwitchDisallowed || (emoteFlags & StvEmoteFlags.Private) == StvEmoteFlags.Private)
-                {
-                    continue;
-                }
-                if (allowUnlistedEmotes || emoteIsListed)
-                {
-                    stvResponse.Add(emoteResponse);
-                }
-            }
-        }
 
         public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = new())
         {
@@ -327,7 +262,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 {
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.ThirdParty, emoteData.imageScale, emoteData.id, emoteData.name);
+                        TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.TwitchThirdParty, emoteData.imageScale, emoteData.id, emoteData.name);
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emoteData.name);
                     }
@@ -350,7 +285,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             if (bttv)
             {
                 if (!Directory.Exists(bttvFolder))
-                    CreateDirectory(bttvFolder);
+                    PlatformHelper.CreateDirectory(bttvFolder);
 
                 var emoteResponseItemsQuery = from emote in emoteDataResponse.BTTV
                                               where !alreadyAdded.Contains(emote.Code)
@@ -362,7 +297,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 {
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        TwitchEmote newEmote = new TwitchEmote(await PlatformHelper.GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.TwitchThirdParty, 2, emote.Id, emote.Code);
                         if (emote.IsZeroWidth)
                             newEmote.IsZeroWidth = true;
                         returnList.Add(newEmote);
@@ -377,7 +312,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             if (ffz)
             {
                 if (!Directory.Exists(ffzFolder))
-                    CreateDirectory(ffzFolder);
+                    PlatformHelper.CreateDirectory(ffzFolder);
 
                 var emoteResponseItemsQuery = from emote in emoteDataResponse.FFZ
                                               where !alreadyAdded.Contains(emote.Code)
@@ -389,7 +324,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 {
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        TwitchEmote newEmote = new TwitchEmote(await PlatformHelper.GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.TwitchThirdParty, 2, emote.Id, emote.Code);
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emote.Code);
                     }
@@ -402,7 +337,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             if (stv)
             {
                 if (!Directory.Exists(stvFolder))
-                    CreateDirectory(stvFolder);
+                    PlatformHelper.CreateDirectory(stvFolder);
 
                 var emoteResponseItemsQuery = from emote in emoteDataResponse.STV
                                               where !alreadyAdded.Contains(emote.Code)
@@ -414,7 +349,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 {
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(await GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
+                        TwitchEmote newEmote = new TwitchEmote(await PlatformHelper.GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.TwitchThirdParty, 2, emote.Id, emote.Code);
                         if (emote.IsZeroWidth)
                             newEmote.IsZeroWidth = true;
                         returnList.Add(newEmote);
@@ -435,7 +370,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
 
             string emoteFolder = Path.Combine(cacheFolder, "emotes");
             if (!Directory.Exists(emoteFolder))
-                CreateDirectory(emoteFolder);
+                PlatformHelper.CreateDirectory(emoteFolder);
 
             // Load our embedded emotes
             if (embeddedData?.firstParty != null)
@@ -444,7 +379,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 {
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.FirstParty, emoteData.imageScale, emoteData.id, emoteData.name);
+                        TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.TwitchFirstParty, emoteData.imageScale, emoteData.id, emoteData.name);
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emoteData.id);
                     }
@@ -468,8 +403,8 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 {
                     try
                     {
-                        byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png", cancellationToken);
-                        TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
+                        byte[] bytes = await PlatformHelper.GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png", cancellationToken);
+                        TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.TwitchFirstParty, 2, id, id);
                         alreadyAdded.Add(id);
                         returnList.Add(newEmote);
                     }
@@ -581,7 +516,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
 
             string badgeFolder = Path.Combine(cacheFolder, "badges");
             if (!Directory.Exists(badgeFolder))
-                CreateDirectory(badgeFolder);
+                PlatformHelper.CreateDirectory(badgeFolder);
 
             foreach (var badge in badgesData)
             {
@@ -596,7 +531,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                     {
                         string[] id_parts = data.url.Split('/');
                         string id = id_parts[id_parts.Length - 2];
-                        byte[] bytes = await GetImage(badgeFolder, data.url, id, "2", "png", cancellationToken);
+                        byte[] bytes = await PlatformHelper.GetImage(badgeFolder, data.url, id, "2", "png", cancellationToken);
                         versions.Add(version, new ChatBadgeData
                         {
                             title = data.title,
@@ -624,7 +559,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             var emojiExtensions = new Regex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
 
             if (!Directory.Exists(emojiFolder))
-                CreateDirectory(emojiFolder);
+                PlatformHelper.CreateDirectory(emojiFolder);
 
             var emojiFiles = Directory.GetFiles(emojiFolder)
                 .Where(i => emojiExtensions.IsMatch(i)).ToArray();
@@ -695,7 +630,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                     CheerEmote newEmote = new CheerEmote() { prefix = data.prefix, tierList = tierList };
                     foreach (KeyValuePair<int, EmbedEmoteData> tier in data.tierList)
                     {
-                        TwitchEmote tierEmote = new TwitchEmote(tier.Value.data, EmoteProvider.FirstParty, tier.Value.imageScale, tier.Value.id, tier.Value.name);
+                        TwitchEmote tierEmote = new TwitchEmote(tier.Value.data, EmoteProvider.TwitchFirstParty, tier.Value.imageScale, tier.Value.id, tier.Value.name);
                         tierList.Add(new KeyValuePair<int, TwitchEmote>(tier.Key, tierEmote));
                     }
                     returnList.Add(newEmote);
@@ -722,7 +657,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
 
             string bitFolder = Path.Combine(cacheFolder, "bits");
             if (!Directory.Exists(bitFolder))
-                CreateDirectory(bitFolder);
+                PlatformHelper.CreateDirectory(bitFolder);
 
             if (cheerResponse?.data != null)
             {
@@ -764,7 +699,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                             {
                                 int minBits = tier.bits;
                                 string url = templateURL.Replace("PREFIX", node.prefix.ToLower()).Replace("BACKGROUND", "dark").Replace("ANIMATION", "animated").Replace("TIER", tier.bits.ToString()).Replace("SCALE.EXTENSION", "2.gif");
-                                TwitchEmote emote = new TwitchEmote(await GetImage(bitFolder, url, node.id + tier.bits, "2", "gif", cancellationToken), EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
+                                TwitchEmote emote = new TwitchEmote(await PlatformHelper.GetImage(bitFolder, url, node.id + tier.bits, "2", "gif", cancellationToken), EmoteProvider.TwitchFirstParty, 2, prefix + minBits, prefix + minBits);
                                 tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
                             }
                             returnList.Add(newEmote);
@@ -775,29 +710,6 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             }
 
             return returnList;
-        }
-
-        public static DirectoryInfo CreateDirectory(string path)
-        {
-            DirectoryInfo directoryInfo = Directory.CreateDirectory(path);
-
-            try
-            {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    SetDirectoryPermissions(path);
-                }
-            }
-            catch { }
-
-            return directoryInfo;
-        }
-
-        public static void SetDirectoryPermissions(string path)
-        {
-            var folderInfo = new Mono.Unix.UnixFileInfo(path);
-            folderInfo.FileAccessPermissions = Mono.Unix.FileAccessPermissions.AllPermissions;
-            folderInfo.Refresh();
         }
 
         /// <summary>
@@ -893,69 +805,6 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlUserInfoResponse>();
-        }
-
-        public static async Task<byte[]> GetImage(string cachePath, string imageUrl, string imageId, string imageScale, string imageType, CancellationToken cancellationToken = new())
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            byte[] imageBytes = null;
-
-            if (!Directory.Exists(cachePath))
-                CreateDirectory(cachePath);
-
-            string filePath = Path.Combine(cachePath, imageId + "_" + imageScale + "." + imageType);
-            if (File.Exists(filePath))
-            {
-                try
-                {
-                    await using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    byte[] bytes = new byte[stream.Length];
-                    stream.Seek(0, SeekOrigin.Begin);
-                    _ = await stream.ReadAsync(bytes, cancellationToken);
-
-                    //Check if image file is not corrupt
-                    if (bytes.Length > 0)
-                    {
-                        using SKImage image = SKImage.FromEncodedData(bytes);
-                        if (image != null)
-                        {
-                            imageBytes = bytes;
-                        }
-                        else
-                        {
-                            //Try to delete the corrupted image
-                            try
-                            {
-                                await stream.DisposeAsync();
-                                File.Delete(filePath);
-                            }
-                            catch { }
-                        }
-                    }
-                }
-                catch (IOException)
-                {
-                    //File being written to by parallel process? Maybe. Can just fallback to HTTP request.
-                }
-            }
-
-            // If fetching from cache failed
-            if (imageBytes != null)
-                return imageBytes;
-
-            // Fallback to HTTP request
-            imageBytes = await httpClient.GetByteArrayAsync(imageUrl, cancellationToken);
-
-            //Let's save this image to the cache
-            try
-            {
-                using FileStream stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-                await stream.WriteAsync(imageBytes, cancellationToken);
-            }
-            catch { }
-
-            return imageBytes;
         }
 
         public static async Task<GqlVideoChapterResponse> GetVideoChapters(int videoId)

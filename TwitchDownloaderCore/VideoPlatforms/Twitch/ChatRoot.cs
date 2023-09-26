@@ -220,7 +220,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
     public class EmbedEmoteData
     {
         public string id { get; set; }
-        public int imageScale { get; set; }
+        public double imageScale { get; set; }
         public byte[] data { get; set; }
         public string name { get; set; }
         public string url { get; set; }

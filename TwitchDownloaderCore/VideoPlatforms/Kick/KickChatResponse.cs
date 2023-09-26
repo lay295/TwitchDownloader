@@ -16,7 +16,15 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
     public class KickIdentity
     {
         public string color { get; set; }
-        public List<object> badges { get; set; }
+        public List<KickBadge> badges { get; set; }
+    }
+
+    public class KickBadge
+    {
+        public string type { get; set; }
+        public string text { get; set; }
+        public int count { get; set; }
+        public bool active { get; set; }
     }
 
     public class KickMessage

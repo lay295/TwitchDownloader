@@ -8,8 +8,9 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
 {
     public enum EmoteProvider
     {
-        FirstParty,
-        ThirdParty
+        TwitchFirstParty,
+        TwitchThirdParty,
+        KickFirstParty
     }
 
     [DebuggerDisplay("{Name}")]
@@ -24,14 +25,14 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
         public int TotalDuration { get; set; }
         public string Name { get; }
         public string Id { get; }
-        public int ImageScale { get; }
+        public double ImageScale { get; }
         public bool IsZeroWidth { get; set; } = false;
         public int FrameCount { get; }
         public int Height => EmoteFrames[0].Height;
         public int Width => EmoteFrames[0].Width;
         public SKImageInfo Info => EmoteFrames[0].Info;
 
-        public TwitchEmote(byte[] imageData, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName)
+        public TwitchEmote(byte[] imageData, EmoteProvider emoteProvider, double imageScale, string imageId, string imageName)
         {
             using MemoryStream ms = new MemoryStream(imageData);
             Codec = SKCodec.Create(ms, out var result);

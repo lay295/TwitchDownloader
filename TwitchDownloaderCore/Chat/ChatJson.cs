@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Twitch;
 
 namespace TwitchDownloaderCore.Chat
@@ -69,6 +70,11 @@ namespace TwitchDownloaderCore.Chat
             if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoElement))
             {
                 returnChatRoot.video = videoElement.Deserialize<Video>(options: _jsonSerializerOptions);
+            }
+
+            if (jsonDocument.RootElement.TryGetProperty("videoPlatform", out JsonElement platformElement))
+            {
+                returnChatRoot.videoPlatform = platformElement.Deserialize<VideoPlatform>(options: _jsonSerializerOptions);
             }
 
             if (getComments)
@@ -155,7 +161,7 @@ namespace TwitchDownloaderCore.Chat
             var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
             if (!outputDirectory.Exists)
             {
-                TwitchHelper.CreateDirectory(outputDirectory.FullName);
+                PlatformHelper.CreateDirectory(outputDirectory.FullName);
             }
 
             await using var fs = File.Create(filePath);

@@ -14,15 +14,21 @@ namespace TwitchDownloaderCore.Tools
     public static class CurlImpersonate
     {
         static CURLcode global = CurlNative.Init();
+
         public static string GetCurlReponse(string url)
         {
-            
+            string response = Encoding.UTF8.GetString(GetCurlReponseBytes(url));
+            return response;
+        }
+
+        public static byte[] GetCurlReponseBytes(string url)
+        {
             var easy = CurlNative.Easy.Init();
             try
             {
                 CurlNative.Easy.SetOpt(easy, CURLoption.URL, url);
                 CurlNative.Easy.SetOpt(easy, CURLoption.CAINFO, "curl-ca-bundle.crt");
-                CurlNative.Easy.SetOpt(easy, CURLoption.TIMEOUT_MS, 3000);
+                CurlNative.Easy.SetOpt(easy, CURLoption.TIMEOUT_MS, 30000);
 
                 var stream = new MemoryStream();
                 CurlNative.Easy.SetOpt(easy, CURLoption.WRITEFUNCTION, (data, size, nmemb, user) =>
@@ -35,8 +41,7 @@ namespace TwitchDownloaderCore.Tools
                 });
 
                 var result = CurlNative.Easy.Perform(easy);
-                string response = Encoding.UTF8.GetString(stream.ToArray());
-                return response;
+                return stream.ToArray();
             }
             finally
             {

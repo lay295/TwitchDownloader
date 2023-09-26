@@ -61,7 +61,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
         public bool is_mature { get; set; }
         public int viewer_count { get; set; }
         public string thumbnail { get; set; }
-        public Channel channel { get; set; }
+        public KickChannel channel { get; set; }
         public List<KickCategory> categories { get; set; }
     }
 
@@ -85,7 +85,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
 
         public DateTime CreatedAt => livestream.start_time;
 
-        public string StreamerName => livestream?.channel?.username;
+        public string StreamerName => livestream?.channel?.slug;
 
         public string Title => livestream?.session_title;
 

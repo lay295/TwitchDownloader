@@ -44,7 +44,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             var clipDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
             if (!clipDirectory.Exists)
             {
-                TwitchHelper.CreateDirectory(clipDirectory.FullName);
+                PlatformHelper.CreateDirectory(clipDirectory.FullName);
             }
 
             _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading Clip 0%"));
@@ -64,11 +64,11 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
 
             if (!Directory.Exists(downloadOptions.TempFolder))
             {
-                TwitchHelper.CreateDirectory(downloadOptions.TempFolder);
+                PlatformHelper.CreateDirectory(downloadOptions.TempFolder);
             }
 
             var tempDownloadFolder = Path.Combine(downloadOptions.TempFolder, $"clip_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}_{Path.GetRandomFileName()}");
-            TwitchHelper.CreateDirectory(tempDownloadFolder);
+            PlatformHelper.CreateDirectory(tempDownloadFolder);
             var tempFile = Path.Combine(tempDownloadFolder, $"clip_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}_{Path.GetRandomFileName()}");
             try
             {
