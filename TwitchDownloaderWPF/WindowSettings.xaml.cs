@@ -165,14 +165,9 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void CheckThrottleEnabled_Checked(object sender, RoutedEventArgs e)
+        private void CheckThrottleEnabled_CheckedChanged(object sender, RoutedEventArgs e)
         {
-            NumMaximumBandwidth.IsEnabled = true;
-        }
-
-        private void CheckThrottleEnabled_Unchecked(object sender, RoutedEventArgs e)
-        {
-            NumMaximumBandwidth.IsEnabled = false;
+            NumMaximumBandwidth.IsEnabled = CheckThrottleEnabled.IsChecked!.Value;
         }
     }
 }
