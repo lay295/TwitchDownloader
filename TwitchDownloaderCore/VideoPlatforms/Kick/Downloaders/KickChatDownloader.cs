@@ -97,7 +97,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                 comments.EnsureCapacity(Math.Min(0, comments.Capacity + convertedComments.Count));
                 foreach (var comment in convertedComments)
                 {
-                    if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
+                    if (latestMessage < videoEnd && comment.content_offset_seconds >= videoStart)
                         comments.Add(comment);
 
                     latestMessage = comment.content_offset_seconds;
@@ -305,7 +305,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             chatRoot.video.game = game;
             videoDuration = videoEnd - videoStart;
 
-            int downloadChunks = Math.Max(1, (int)videoDuration);
+            int downloadChunks = Math.Max(1, (int)videoDuration / 5);
             var tasks = new List<Func<Task<List<Comment>>>>();
             var percentages = new int[downloadChunks];
 

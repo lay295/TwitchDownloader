@@ -22,12 +22,6 @@ namespace TwitchDownloaderWPF
         public static PageChatRender pageChatRender = new PageChatRender();
         public static PageQueue pageQueue = new PageQueue();
 
-        [DllImport("Kernel32")]
-        public static extern void AllocConsole();
-
-        [DllImport("Kernel32")]
-        public static extern void FreeConsole();
-
         public MainWindow()
         {
             InitializeComponent();
@@ -102,7 +96,6 @@ namespace TwitchDownloaderWPF
             Version currentVersion = new Version("1.53.2");
             Title = $"Twitch Downloader v{currentVersion}";
             AutoUpdater.InstalledVersion = currentVersion;
-            AllocConsole();
 #if !DEBUG
             if (AppContext.BaseDirectory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
             {
