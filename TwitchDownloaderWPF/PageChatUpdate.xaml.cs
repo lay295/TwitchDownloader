@@ -268,22 +268,22 @@ namespace TwitchDownloaderWPF
         {
             ChatUpdateOptions options = new ChatUpdateOptions()
             {
-                EmbedMissing = (bool)checkEmbedMissing.IsChecked,
-                ReplaceEmbeds = (bool)checkReplaceEmbeds.IsChecked,
-                BttvEmotes = (bool)checkBttvEmbed.IsChecked,
-                FfzEmotes = (bool)checkFfzEmbed.IsChecked,
-                StvEmotes = (bool)checkStvEmbed.IsChecked,
+                EmbedMissing = checkEmbedMissing.IsChecked.GetValueOrDefault(),
+                ReplaceEmbeds = checkReplaceEmbeds.IsChecked.GetValueOrDefault(),
+                BttvEmotes = checkBttvEmbed.IsChecked.GetValueOrDefault(),
+                FfzEmotes = checkFfzEmbed.IsChecked.GetValueOrDefault(),
+                StvEmotes = checkStvEmbed.IsChecked.GetValueOrDefault(),
                 InputFile = textJson.Text,
                 OutputFile = outputFile,
                 CropBeginningTime = -1,
                 CropEndingTime = -1
             };
 
-            if ((bool)radioJson.IsChecked)
+            if (radioJson.IsChecked.GetValueOrDefault())
                 options.OutputFormat = ChatFormat.Json;
-            else if ((bool)radioHTML.IsChecked)
+            else if (radioHTML.IsChecked.GetValueOrDefault())
                 options.OutputFormat = ChatFormat.Html;
-            else if ((bool)radioText.IsChecked)
+            else if (radioText.IsChecked.GetValueOrDefault())
                 options.OutputFormat = ChatFormat.Text;
 
             if (radioCompressionNone.IsChecked == true)
@@ -304,11 +304,11 @@ namespace TwitchDownloaderWPF
                 options.CropEndingTime = (int)Math.Round(end.TotalSeconds);
             }
 
-            if ((bool)radioTimestampUTC.IsChecked)
+            if (radioTimestampUTC.IsChecked.GetValueOrDefault())
                 options.TextTimestampFormat = TimestampFormat.Utc;
-            else if ((bool)radioTimestampRelative.IsChecked)
+            else if (radioTimestampRelative.IsChecked.GetValueOrDefault())
                 options.TextTimestampFormat = TimestampFormat.Relative;
-            else if ((bool)radioTimestampNone.IsChecked)
+            else if (radioTimestampNone.IsChecked.GetValueOrDefault())
                 options.TextTimestampFormat = TimestampFormat.None;
 
             return options;
@@ -635,12 +635,12 @@ namespace TwitchDownloaderWPF
 
         private void checkStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropStart((bool)checkStart.IsChecked);
+            SetEnabledCropStart(checkStart.IsChecked.GetValueOrDefault());
         }
 
         private void checkEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropEnd((bool)checkEnd.IsChecked);
+            SetEnabledCropEnd(checkEnd.IsChecked.GetValueOrDefault());
         }
 
         private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e)

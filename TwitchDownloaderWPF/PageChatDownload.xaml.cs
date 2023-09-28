@@ -241,10 +241,10 @@ namespace TwitchDownloaderWPF
             else if (radioCompressionGzip.IsChecked == true)
                 options.Compression = ChatCompression.Gzip;
 
-            options.EmbedData = (bool)checkEmbed.IsChecked;
-            options.BttvEmotes = (bool)checkBttvEmbed.IsChecked;
-            options.FfzEmotes = (bool)checkFfzEmbed.IsChecked;
-            options.StvEmotes = (bool)checkStvEmbed.IsChecked;
+            options.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
+            options.BttvEmotes = checkBttvEmbed.IsChecked.GetValueOrDefault();
+            options.FfzEmotes = checkFfzEmbed.IsChecked.GetValueOrDefault();
+            options.StvEmotes = checkStvEmbed.IsChecked.GetValueOrDefault();
             options.Filename = filename;
             options.ConnectionCount = (int)numChatDownloadConnections.Value;
             return options;
@@ -561,12 +561,12 @@ namespace TwitchDownloaderWPF
 
         private void checkCropStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropStart((bool)checkCropStart.IsChecked);
+            SetEnabledCropStart(checkCropStart.IsChecked.GetValueOrDefault());
         }
 
         private void checkCropEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropEnd((bool)checkCropEnd.IsChecked);
+            SetEnabledCropEnd(checkCropEnd.IsChecked.GetValueOrDefault());
         }
 
 

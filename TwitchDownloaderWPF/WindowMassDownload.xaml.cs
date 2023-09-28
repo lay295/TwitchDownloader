@@ -22,15 +22,15 @@ namespace TwitchDownloaderWPF
     {
         public DownloadType downloaderType { get; set; }
         public ObservableCollection<TaskData> videoList { get; set; } = new ObservableCollection<TaskData>();
-        public List<TaskData> selectedItems = new List<TaskData>();
-        public List<string> cursorList = new List<string>();
+        public readonly List<TaskData> selectedItems = new List<TaskData>();
+        public readonly List<string> cursorList = new List<string>();
         public int cursorIndex = -1;
         public string currentChannel = "";
         public string period = "";
 
-        public WindowMassDownload(DownloadType Type)
+        public WindowMassDownload(DownloadType type)
         {
-            downloaderType = Type;
+            downloaderType = type;
             InitializeComponent();
             itemList.ItemsSource = videoList;
             if (downloaderType == DownloadType.Video)
@@ -150,16 +150,18 @@ namespace TwitchDownloaderWPF
 
         private void Border_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            Border border = sender as Border;
-            if (selectedItems.Any(x => x.Id == ((TaskData)border.DataContext).Id))
+            if (sender is not Border border) return;
+            if (border.DataContext is not TaskData taskData) return;
+
+            if (selectedItems.Any(x => x.Id == taskData.Id))
             {
                 border.Background = Brushes.Transparent;
-                selectedItems.RemoveAll(x => x.Id == ((TaskData)border.DataContext).Id);
+                selectedItems.RemoveAll(x => x.Id == taskData.Id);
             }
             else
             {
                 border.Background = Brushes.LightBlue;
-                selectedItems.Add((TaskData)border.DataContext);
+                selectedItems.Add(taskData);
             }
             textCount.Text = selectedItems.Count.ToString();
         }
@@ -183,8 +185,9 @@ namespace TwitchDownloaderWPF
         private void Border_Initialized(object sender, EventArgs e)
         {
             if (sender is not Border border) return;
+            if (border.DataContext is not TaskData taskData) return;
 
-            if (border.DataContext is TaskData taskData && selectedItems.Any(x => x.Id == taskData.Id))
+            if (selectedItems.Any(x => x.Id == taskData.Id))
             {
                 border.BorderBrush = Brushes.LightBlue;
             }

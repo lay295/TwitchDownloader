@@ -119,11 +119,11 @@ namespace TwitchDownloaderWPF
             Settings.Default.TemplateClip = textClipTemplate.Text;
             Settings.Default.TemplateChat = textChatTemplate.Text;
             Settings.Default.TempPath = textTempPath.Text;
-            Settings.Default.HideDonation = (bool)checkDonation.IsChecked;
-            Settings.Default.VerboseErrors = (bool)checkVerboseErrors.IsChecked;
+            Settings.Default.HideDonation = checkDonation.IsChecked.GetValueOrDefault();
+            Settings.Default.VerboseErrors = checkVerboseErrors.IsChecked.GetValueOrDefault();
             Settings.Default.MaximumBandwidthKib = (int)NumMaximumBandwidth.Value;
-            Settings.Default.UTCVideoTime = (bool)radioTimeFormatUTC.IsChecked;
-            Settings.Default.DownloadThrottleEnabled = (bool)CheckThrottleEnabled.IsChecked;
+            Settings.Default.UTCVideoTime = radioTimeFormatUTC.IsChecked.GetValueOrDefault();
+            Settings.Default.DownloadThrottleEnabled = CheckThrottleEnabled.IsChecked.GetValueOrDefault();
             Settings.Default.Save();
         }
 
@@ -167,7 +167,7 @@ namespace TwitchDownloaderWPF
 
         private void CheckThrottleEnabled_CheckedChanged(object sender, RoutedEventArgs e)
         {
-            NumMaximumBandwidth.IsEnabled = CheckThrottleEnabled.IsChecked!.Value;
+            NumMaximumBandwidth.IsEnabled = CheckThrottleEnabled.IsChecked.GetValueOrDefault();
         }
     }
 }

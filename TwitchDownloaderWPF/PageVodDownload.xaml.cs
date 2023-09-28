@@ -49,8 +49,8 @@ namespace TwitchDownloaderWPF
             checkEnd.IsEnabled = isEnabled;
             SplitBtnDownload.IsEnabled = isEnabled;
             MenuItemEnqueue.IsEnabled = isEnabled;
-            SetEnabledCropStart(isEnabled & (bool)checkStart.IsChecked);
-            SetEnabledCropEnd(isEnabled & (bool)checkEnd.IsChecked);
+            SetEnabledCropStart(isEnabled & checkStart.IsChecked.GetValueOrDefault());
+            SetEnabledCropEnd(isEnabled & checkEnd.IsChecked.GetValueOrDefault());
         }
 
         private void SetEnabledCropStart(bool isEnabled)
@@ -211,9 +211,9 @@ namespace TwitchDownloaderWPF
                 Oauth = TextOauth.Text,
                 Quality = GetQualityWithoutSize(comboQuality.Text).ToString(),
                 Id = currentVideoId,
-                CropBeginning = (bool)checkStart.IsChecked,
+                CropBeginning = checkStart.IsChecked.GetValueOrDefault(),
                 CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds),
-                CropEnding = (bool)checkEnd.IsChecked,
+                CropEnding = checkEnd.IsChecked.GetValueOrDefault(),
                 CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds),
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath
@@ -300,7 +300,7 @@ namespace TwitchDownloaderWPF
 
         public bool ValidateInputs()
         {
-            if ((bool)checkStart.IsChecked)
+            if (checkStart.IsChecked.GetValueOrDefault())
             {
                 var beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
                 if (beginTime.TotalSeconds >= vodLength.TotalSeconds)
@@ -308,7 +308,7 @@ namespace TwitchDownloaderWPF
                     return false;
                 }
 
-                if ((bool)checkEnd.IsChecked)
+                if (checkEnd.IsChecked.GetValueOrDefault())
                 {
                     var endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
                     if (endTime.TotalSeconds < beginTime.TotalSeconds)
@@ -375,14 +375,14 @@ namespace TwitchDownloaderWPF
 
         private void checkStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropStart((bool)checkStart.IsChecked);
+            SetEnabledCropStart(checkStart.IsChecked.GetValueOrDefault());
 
             UpdateVideoSizeEstimates();
         }
 
         private void checkEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropEnd((bool)checkEnd.IsChecked);
+            SetEnabledCropEnd(checkEnd.IsChecked.GetValueOrDefault());
 
             UpdateVideoSizeEstimates();
         }

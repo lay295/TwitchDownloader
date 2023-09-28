@@ -202,7 +202,7 @@ namespace TwitchDownloaderWPF
 
         private void btnTaskError_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button { DataContext: ITwitchTask task }))
+            if (sender is not Button { DataContext: ITwitchTask task })
             {
                 return;
             }
@@ -225,7 +225,7 @@ namespace TwitchDownloaderWPF
 
         private void btnRemoveTask_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button { DataContext: ITwitchTask task }))
+            if (sender is not Button { DataContext: ITwitchTask task })
             {
                 return;
             }
