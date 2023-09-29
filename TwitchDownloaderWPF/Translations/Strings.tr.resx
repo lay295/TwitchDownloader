@@ -740,36 +740,36 @@
     <value>C# standart TimeSpan biçim dizeleri</value>
   </data>
   <data name="UnknownErrorOccurred" xml:space="preserve">
-    <value>An unknown error occurred</value>
+    <value>Bilinmeyen bir hata oluştu</value>
   </data>
   <data name="TaskCouldNotBeRemoved" xml:space="preserve">
-    <value>The task could not be removed</value>
+    <value>Görev kaldırılamadı</value>
   </data>
   <data name="CancelTaskBeforeRemoving" xml:space="preserve">
-    <value>Please cancel the task or wait for it to finish before removing it</value>
+    <value>Lütfen görevi iptal edin veya kaldırmadan önce bitmesini bekleyin</value>
   </data>
   <data name="UnableToDownloadFfmpeg" xml:space="preserve">
-    <value>Unable to download FFmpeg</value>
+    <value>FFmpeg indirilemiyor</value>
   </data>
   <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
-    <value>Unable to download FFmpeg. Please manually download it from {0} and place the file at {1}</value>
+    <value>FFmpeg indirilemiyor. Lütfen {0} adresinden manuel olarak indirin ve dosyayı {1} konumuna yerleştirin.</value>
   </data>
   <data name="AlternateBackgroundColor" xml:space="preserve">
-    <value>Alt Background Color:</value>
+    <value>Alternatif Arka Plan Rengi:</value>
   </data>
   <data name="AlternateMessageBackgrounds" xml:space="preserve">
     <value>Alternatif Arka Planlar </value><comment>Leave a trailing space</comment>
   </data>
   <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
-    <value>Alternates the background color of every other chat message to help tell them apart.</value>
+    <value>Diğer sohbet mesajlarının arka plan rengini değiştirerek onları birbirinden ayırmaya yardımcı olur.</value>
   </data>
   <data name="EncodeClipMetadata" xml:space="preserve">
-    <value>Encode Metadata:</value>
+    <value>Meta Verileri Kodlayın:</value>
   </data>
   <data name="MessageBoxTitleError" xml:space="preserve">
     <value>Hata</value>
   </data>
   <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
-    <value>Unable to start Windows application theme watcher. Error code: {0}</value>
+    <value>Windows uygulama teması izleyicisi başlatılamıyor. Hata kodu: {0}</value>
   </data>
 </root>
