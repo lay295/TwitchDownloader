@@ -189,7 +189,7 @@ namespace TwitchDownloaderWPF
 
             if (selectedItems.Any(x => x.Id == taskData.Id))
             {
-                border.BorderBrush = Brushes.LightBlue;
+                border.Background = Brushes.LightBlue;
             }
         }
 
