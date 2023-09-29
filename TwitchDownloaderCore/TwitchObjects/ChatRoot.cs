@@ -193,6 +193,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     public class Video
     {
         public string title { get; set; }
+        public string description { get; set; }
         public string id { get; set; }
         public DateTime created_at { get; set; }
         public double start { get; set; }

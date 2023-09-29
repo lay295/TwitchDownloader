@@ -24,6 +24,11 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public VideoOwner owner { get; set; }
         public int viewCount { get; set; }
         public VideoGame game { get; set; }
+        /// <remarks>
+        /// Some values, such as newlines, are repeated twice for some reason.
+        /// This can be filtered out with: <code>.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd()</code>
+        /// </remarks>
+        public string description { get; set; }
     }
 
     public class VideoData

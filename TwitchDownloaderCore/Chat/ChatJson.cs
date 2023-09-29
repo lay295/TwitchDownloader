@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Chat
@@ -24,6 +25,8 @@ namespace TwitchDownloaderCore.Chat
         /// Asynchronously deserializes a chat json file.
         /// </summary>
         /// <returns>A <see cref="ChatRoot"/> representation the deserialized chat json file.</returns>
+        /// <exception cref="IOException">The file does not exist.</exception>
+        /// <exception cref="NotSupportedException">The file is not a valid chat format.</exception>
         public static async Task<ChatRoot> DeserializeAsync(string filePath, bool getComments = true, bool getEmbeds = true, CancellationToken cancellationToken = new())
         {
             ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
@@ -142,6 +145,19 @@ namespace TwitchDownloaderCore.Chat
                 chatRoot.video.length = TimeSpanExtensions.ParseTimeCode(chatRoot.video.duration).TotalSeconds;
                 chatRoot.video.end = chatRoot.video.length;
                 chatRoot.video.duration = null;
+            }
+
+            // Fix incorrect bits_spent value on chats between v5 shutdown and the lay295#520 fix
+            if (chatRoot.comments.All(c => c.message.bits_spent == 0))
+            {
+                foreach (var comment in chatRoot.comments)
+                {
+                    var bitMatch = TwitchRegex.BitsRegex.Match(comment.message.body);
+                    if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
+                    {
+                        comment.message.bits_spent = result;
+                    }
+                }
             }
         }
 

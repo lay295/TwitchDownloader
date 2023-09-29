@@ -48,6 +48,4 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public ClipSearchData data { get; set; }
         public Extensions extensions { get; set; }
     }
-
-
 }

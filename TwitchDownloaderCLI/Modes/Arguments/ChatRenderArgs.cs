@@ -2,7 +2,6 @@
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-
     [Verb("chatrender", HelpText = "Renders a chat JSON as a video")]
     public class ChatRenderArgs : ITwitchDownloaderArgs
     {

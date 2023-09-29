@@ -30,7 +30,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <TextBox x:Name="textChannel" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="194" Margin="0,6,0,0" KeyDown="TextChannel_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-        <Button x:Name="btnChannel" Content="{lex:Loc SetChannel}" HorizontalAlignment="Left" Margin="3,6,0,0" VerticalAlignment="Top" MinWidth="84" Height="30" Click="btnChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="btnChannel" Content="{lex:Loc SetChannel}" HorizontalAlignment="Left" Margin="3,6,0,0" VerticalAlignment="Top" MinWidth="84" Height="30" Click="btnChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <WrapPanel HorizontalAlignment="Left" Height="329" Margin="10,54,0,0" VerticalAlignment="Top" Width="772"/>
         <ScrollViewer x:Name="scrollDownload" VerticalScrollBarVisibility="Auto" Margin="10,41,10,45">
@@ -47,7 +47,7 @@
                                 <Image Source="{Binding Thumbnail}" MaxHeight="90"></Image>
                                 <emoji:TextBlock TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppText}">
                                     <emoji:TextBlock.Text>
-                                        <MultiBinding StringFormat="{}[{0:d}] - {1}">
+                                        <MultiBinding StringFormat="[{0:d}] - {1}">
                                             <Binding Path="Time" />
                                             <Binding Path="Title" />
                                         </MultiBinding>

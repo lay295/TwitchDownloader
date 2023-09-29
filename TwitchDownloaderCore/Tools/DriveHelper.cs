@@ -9,13 +9,10 @@ namespace TwitchDownloaderCore.Tools
     {
         public static DriveInfo GetOutputDrive(string outputPath)
         {
-            // Cannot instantiate a null DriveInfo
-            DriveInfo outputDrive = DriveInfo.GetDrives()[0];
+            var outputDrive = DriveInfo.GetDrives()[0];
 
-            // Get the name of the drive we are writing to
             foreach (var drive in DriveInfo.GetDrives())
             {
-                // If our output path starts with the drive name
                 if (outputPath.StartsWith(drive.Name))
                 {
                     // In Linux, the root drive is '/' while mounted drives are located in '/mnt/' or '/run/media/'
@@ -34,7 +31,7 @@ namespace TwitchDownloaderCore.Tools
 
         public static async Task WaitForDrive(DriveInfo drive, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            int driveNotReadyCount = 0;
+            var driveNotReadyCount = 0;
             while (!drive.IsReady)
             {
                 progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Waiting for output drive ({(driveNotReadyCount + 1) / 2f:F1}s)"));

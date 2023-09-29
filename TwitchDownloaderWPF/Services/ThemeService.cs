@@ -1,9 +1,9 @@
 ﻿using HandyControl.Data;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using TwitchDownloaderWPF.Models;
@@ -13,7 +13,10 @@ namespace TwitchDownloaderWPF.Services
 {
     public class ThemeService
     {
-        private const int TITLEBAR_THEME_ATTRIBUTE = 20;
+        private const int WINDOWS_1809_BUILD_NUMBER = 17763;
+        private const int WINDOWS_2004_INSIDER_BUILD_NUMBER = 18985;
+        private const int USE_IMMERSIVE_DARK_MODE_ATTRIBUTE_BEFORE_2004 = 19;
+        private const int USE_IMMERSIVE_DARK_MODE_ATTRIBUTE = 20;
 
         private bool _darkAppTitleBar = false;
         private bool _darkHandyControl = false;
@@ -25,7 +28,12 @@ namespace TwitchDownloaderWPF.Services
         {
             if (!Directory.Exists("Themes"))
             {
-                Directory.CreateDirectory("Themes");
+                try
+                {
+                    Directory.CreateDirectory("Themes");
+                }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
             }
 
             if (!DefaultThemeService.WriteIncludedThemes())
@@ -84,16 +92,18 @@ namespace TwitchDownloaderWPF.Services
         [SupportedOSPlatform("windows")]
         public void SetTitleBarTheme(WindowCollection windows)
         {
-            // If windows 10 build is before 1903, it doesn't support dark title bars
-            if (Environment.OSVersion.Version.Build < 18362)
-            {
+            if (Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < WINDOWS_1809_BUILD_NUMBER)
                 return;
-            }
+
+            var shouldUseDarkTitleBar = Convert.ToInt32(_darkAppTitleBar);
+            var darkTitleBarAttribute = Environment.OSVersion.Version.Build < WINDOWS_2004_INSIDER_BUILD_NUMBER
+                ? USE_IMMERSIVE_DARK_MODE_ATTRIBUTE_BEFORE_2004
+                : USE_IMMERSIVE_DARK_MODE_ATTRIBUTE;
 
             foreach (Window window in windows)
             {
-                var windowHandle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
-                NativeFunctions.SetWindowAttribute(windowHandle, TITLEBAR_THEME_ATTRIBUTE, ref _darkAppTitleBar, Marshal.SizeOf(_darkAppTitleBar));
+                var windowHandle = new WindowInteropHelper(window).Handle;
+                NativeFunctions.SetWindowAttribute(windowHandle, darkTitleBarAttribute, ref shouldUseDarkTitleBar, sizeof(int));
             }
 
             Window wnd = new()
@@ -104,12 +114,16 @@ namespace TwitchDownloaderWPF.Services
             };
             wnd.Show();
             wnd.Close();
-            // Dark title bar is a bit buggy, requires window resize or focus change to fully apply
+            // Dark title bar is a bit buggy, requires window redraw (focus change, resize, transparency change) to fully apply.
+            // We *could* send a repaint message to win32.dll, but this solution works and is way easier.
             // Win11 might not have this issue but Win10 does so please leave this
         }
 
         private void ChangeThemePath(string newTheme)
         {
+            if (!Directory.Exists("Themes"))
+                return;
+
             var themeFiles = Directory.GetFiles("Themes", "*.xaml");
             var newThemeString = Path.Combine("Themes", $"{newTheme}.xaml");
 
@@ -118,13 +132,17 @@ namespace TwitchDownloaderWPF.Services
                 if (!newThemeString.Equals(themeFile, StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                var xmlReader = new XmlSerializer(typeof(ResourceDictionaryModel));
+                var xmlReader = new XmlSerializer(typeof(ThemeResourceDictionaryModel));
                 using var streamReader = new StreamReader(themeFile);
-                var themeValues = (ResourceDictionaryModel)xmlReader.Deserialize(streamReader)!;
+                var themeValues = (ThemeResourceDictionaryModel)xmlReader.Deserialize(streamReader)!;
 
                 foreach (var solidBrush in themeValues.SolidColorBrush)
                 {
-                    _wpfApplication.Resources[solidBrush.Key] = (SolidColorBrush)new BrushConverter().ConvertFrom(solidBrush.Color);
+                    try
+                    {
+                        _wpfApplication.Resources[solidBrush.Key] = (SolidColorBrush)new BrushConverter().ConvertFrom(solidBrush.Color);
+                    }
+                    catch (FormatException) { }
                 }
 
                 foreach (var boolean in themeValues.Boolean)

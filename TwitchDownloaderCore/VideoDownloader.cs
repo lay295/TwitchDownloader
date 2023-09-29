@@ -56,7 +56,7 @@ namespace TwitchDownloaderCore
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(downloadOptions.Id);
 
                 var (playlistUrl, bandwidth) = await GetPlaylistUrl();
-                string baseUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf('/') + 1);
+                var baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
 
                 var videoLength = TimeSpan.FromSeconds(videoInfoResponse.data.video.lengthSeconds);
                 CheckAvailableStorageSpace(bandwidth, videoLength);
@@ -96,8 +96,9 @@ namespace TwitchDownloaderCore
                 double seekDuration = Math.Round(downloadOptions.CropEndingTime - seekTime);
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
-                await FfmpegMetadata.SerializeAsync(metadataPath, videoInfoResponse.data.video.owner.displayName, downloadOptions.Id.ToString(), videoInfoResponse.data.video.title,
-                    videoInfoResponse.data.video.createdAt, videoInfoResponse.data.video.viewCount, startOffset, videoChapterResponse.data.video.moments.edges, cancellationToken);
+                VideoInfo videoInfo = videoInfoResponse.data.video;
+                await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
+                    videoInfo.description.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), startOffset, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
                 var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
                 if (!finalizedFileDirectory.Exists)
@@ -165,7 +166,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(List<string> videoPartsList, string baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartsAsync(List<string> videoPartsList, Uri baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
         {
             var partCount = videoPartsList.Count;
             var videoPartsQueue = new ConcurrentQueue<string>(videoPartsList);
@@ -181,33 +182,68 @@ namespace TwitchDownloaderCore
             LogDownloadThreadExceptions(downloadExceptions);
         }
 
-        private Task StartNewDownloadThread(ConcurrentQueue<string> videoPartsQueue, string baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
+        private Task StartNewDownloadThread(ConcurrentQueue<string> videoPartsQueue, Uri baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
         {
-            return Task.Factory.StartNew(state =>
-                {
-                    var (partQueue, rootUrl, cacheFolder, videoAge, throttleKib, cancelToken) =
-                        (Tuple<ConcurrentQueue<string>, string, string, double, int, CancellationToken>)state;
+            return Task.Factory.StartNew(
+                ExecuteDownloadThread,
+                new Tuple<ConcurrentQueue<string>, HttpClient, Uri, string, double, int, CancellationToken>(
+                    videoPartsQueue, _httpClient, baseUrl, downloadFolder, vodAge, downloadOptions.ThrottleKib, cancellationToken),
+                cancellationToken,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Current);
 
-                    while (!partQueue.IsEmpty)
+            static void ExecuteDownloadThread(object state)
+            {
+                var (partQueue, httpClient, rootUrl, cacheFolder, videoAge, throttleKib, cancelToken) =
+                    (Tuple<ConcurrentQueue<string>, HttpClient, Uri, string, double, int, CancellationToken>)state;
+
+                using var cts = new CancellationTokenSource();
+                cancelToken.Register(PropagateCancel, cts);
+
+                while (!partQueue.IsEmpty)
+                {
+                    cancelToken.ThrowIfCancellationRequested();
+
+                    string videoPart = null;
+                    try
                     {
-                        if (partQueue.TryDequeue(out var request))
+                        if (partQueue.TryDequeue(out videoPart))
                         {
-                            DownloadVideoPartAsync(rootUrl, request, cacheFolder, videoAge, throttleKib, cancelToken).GetAwaiter().GetResult();
+                            DownloadVideoPartAsync(httpClient, rootUrl, videoPart, cacheFolder, videoAge, throttleKib, cts).GetAwaiter().GetResult();
+                        }
+                    }
+                    catch
+                    {
+                        if (videoPart != null && !cancelToken.IsCancellationRequested)
+                        {
+                            // Requeue the video part now instead of deferring to the verifier since we already know it's bad
+                            partQueue.Enqueue(videoPart);
                         }
 
-                        Task.Delay(77, cancelToken).GetAwaiter().GetResult();
+                        throw;
                     }
-                }, new Tuple<ConcurrentQueue<string>, string, string, double, int, CancellationToken>(
-                    videoPartsQueue, baseUrl, downloadFolder, vodAge, downloadOptions.ThrottleKib, cancellationToken),
-                cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+
+                    const int aPrimeNumber = 71;
+                    Thread.Sleep(aPrimeNumber);
+                }
+            }
+
+            static void PropagateCancel(object tokenSourceToCancel)
+            {
+                try
+                {
+                    ((CancellationTokenSource)tokenSourceToCancel)?.Cancel();
+                }
+                catch (ObjectDisposedException) { }
+            }
         }
 
-        private async Task<Dictionary<int, Exception>> WaitForDownloadThreads(Task[] tasks, ConcurrentQueue<string> videoPartsQueue, string baseUrl, string downloadFolder, double vodAge, int partCount, CancellationToken cancellationToken)
+        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(Task[] tasks, ConcurrentQueue<string> videoPartsQueue, Uri baseUrl, string downloadFolder, double vodAge, int partCount, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
             var previousDoneCount = 0;
             var restartedThreads = 0;
-            var maxRestartedThreads = Math.Max(downloadOptions.DownloadThreads, 10);
+            var maxRestartedThreads = (int)Math.Max(downloadOptions.DownloadThreads * 1.5, 10);
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
@@ -249,17 +285,17 @@ namespace TwitchDownloaderCore
                 throw new AggregateException("The download thread restart limit was reached.", downloadExceptions.Values);
             }
 
-            return downloadExceptions;
+            return downloadExceptions.Values;
         }
 
-        private void LogDownloadThreadExceptions(Dictionary<int, Exception> downloadExceptions)
+        private void LogDownloadThreadExceptions(IReadOnlyCollection<Exception> downloadExceptions)
         {
             if (downloadExceptions.Count == 0)
                 return;
 
             var culpritList = new List<string>();
             var sb = new StringBuilder();
-            foreach (var downloadException in downloadExceptions.Values)
+            foreach (var downloadException in downloadExceptions)
             {
                 var ex = downloadException switch
                 {
@@ -289,7 +325,7 @@ namespace TwitchDownloaderCore
             _progress.Report(new ProgressReport(ReportType.Log, sb.ToString()));
         }
 
-        private async Task VerifyDownloadedParts(List<string> videoParts, string baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
+        private async Task VerifyDownloadedParts(List<string> videoParts, Uri baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
         {
             var failedParts = new List<string>();
             var partCount = videoParts.Count;
@@ -408,34 +444,35 @@ namespace TwitchDownloaderCore
             // Apparently it is possible for the percent to not be within the range of 0-100. lay295#716
             if (percent is < 0 or > 100)
             {
-                progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video... [4/4]"));
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video... [5/5]"));
                 progress.Report(new ProgressReport(0));
             }
             else
             {
-                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [4/4]"));
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [5/5]"));
                 progress.Report(new ProgressReport(percent));
             }
         }
 
-        private async Task DownloadVideoPartAsync(string baseUrl, string videoPartName, string downloadFolder, double vodAge, int throttleKib, CancellationToken cancellationToken)
+        /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
+        private static async Task DownloadVideoPartAsync(HttpClient httpClient, Uri baseUrl, string videoPartName, string downloadFolder, double vodAge, int throttleKib, CancellationTokenSource cancellationTokenSource)
         {
             bool tryUnmute = vodAge < 24;
             int errorCount = 0;
             int timeoutCount = 0;
             while (true)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
                 try
                 {
                     if (tryUnmute && videoPartName.Contains("-muted"))
                     {
-                        await DownloadFileTaskAsync(baseUrl + videoPartName.Replace("-muted", ""), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, cancellationToken);
+                        await DownloadFileAsync(httpClient, new Uri(baseUrl, videoPartName.Replace("-muted", "")), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, cancellationTokenSource);
                     }
                     else
                     {
-                        await DownloadFileTaskAsync(baseUrl + videoPartName, Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, cancellationToken);
+                        await DownloadFileAsync(httpClient, new Uri(baseUrl, videoPartName), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, cancellationTokenSource);
                     }
 
                     return;
@@ -446,21 +483,23 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException)
                 {
-                    if (++errorCount > 10)
+                    const int maxRetries = 10;
+                    if (++errorCount > maxRetries)
                     {
-                        throw new HttpRequestException($"Video part {videoPartName} failed after 10 retries");
+                        throw new HttpRequestException($"Video part {videoPartName} failed after {maxRetries} retries");
                     }
 
-                    await Task.Delay(1_000 * errorCount, cancellationToken);
+                    await Task.Delay(1_000 * errorCount, cancellationTokenSource.Token);
                 }
                 catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
                 {
-                    if (++timeoutCount > 3)
+                    const int maxRetries = 3;
+                    if (++timeoutCount > maxRetries)
                     {
-                        throw new HttpRequestException($"Video part {videoPartName} timed out 3 times");
+                        throw new HttpRequestException($"Video part {videoPartName} timed out {maxRetries} times");
                     }
 
-                    await Task.Delay(5_000 * timeoutCount, cancellationToken);
+                    await Task.Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
                 }
             }
         }
@@ -558,16 +597,35 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Downloads the requested <paramref name="url"/> to the <paramref name="destinationFile"/> without storing it in memory.
         /// </summary>
+        /// <param name="httpClient">The <see cref="HttpClient"/> to perform the download operation.</param>
         /// <param name="url">The url of the file to download.</param>
         /// <param name="destinationFile">The path to the file where download will be saved.</param>
         /// <param name="throttleKib">The maximum download speed in kibibytes per second, or -1 for no maximum.</param>
-        /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-        private async Task DownloadFileTaskAsync(string url, string destinationFile, int throttleKib, CancellationToken cancellationToken = default)
+        /// <param name="cancellationTokenSource">A <see cref="CancellationTokenSource"/> containing a <see cref="CancellationToken"/> to cancel the operation.</param>
+        /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
+        private static async Task DownloadFileAsync(HttpClient httpClient, Uri url, string destinationFile, int throttleKib, CancellationTokenSource cancellationTokenSource = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            var cancellationToken = cancellationTokenSource?.Token ?? CancellationToken.None;
+
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
+
+            // Why are we setting a CTS CancelAfter timer? See lay295#265
+            const int sixtySeconds = 60;
+            if (throttleKib == -1 || !response.Content.Headers.ContentLength.HasValue)
+            {
+                cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(sixtySeconds));
+            }
+            else
+            {
+                const double oneKibibyte = 1024d;
+                cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(Math.Max(
+                    sixtySeconds,
+                    response.Content.Headers.ContentLength!.Value / oneKibibyte / throttleKib * 8 // Allow up to 8x the shortest download time given the thread bandwidth
+                    )));
+            }
 
             switch (throttleKib)
             {
@@ -581,13 +639,14 @@ namespace TwitchDownloaderCore
                 {
                     try
                     {
-                        await using var throttledStream = new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), throttleKib);
+                        await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                        await using var throttledStream = new ThrottledStream(contentStream, throttleKib);
                         await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
                         await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
                     }
                     catch (IOException e) when (e.Message.Contains("EOF"))
                     {
-                        // The throttled stream throws when it reads an unexpected EOF, try again without the limiter
+                        // If we get an exception for EOF, it may be related to the throttler. Try again without it.
                         // TODO: Log this somehow
                         await Task.Delay(2_000, cancellationToken);
                         goto case -1;
@@ -595,6 +654,10 @@ namespace TwitchDownloaderCore
                     break;
                 }
             }
+
+            // Reset the cts timer so it can be reused for the next download on this thread.
+            // Is there a friendlier way to do this? Yes. Does it involve creating and destroying 4,000 CancellationTokenSources that are almost never cancelled? Also Yes.
+            cancellationTokenSource?.CancelAfter(TimeSpan.FromMilliseconds(uint.MaxValue - 1));
         }
 
         private async Task CombineVideoParts(string downloadFolder, List<string> videoParts, CancellationToken cancellationToken)

@@ -224,7 +224,7 @@ namespace TwitchDownloaderWPF
 
         private void btnSelectAll_Click(object sender, RoutedEventArgs e)
         {
-            //I'm sure there is a much better way to do this. Could not find a way to itterate over each itemcontrol border
+            //I'm sure there is a much better way to do this. Could not find a way to iterate over each itemcontrol border
             foreach (var video in videoList)
             {
                 if (!selectedItems.Any(x => x.Id == video.Id))

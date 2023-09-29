@@ -3,7 +3,6 @@ using TwitchDownloaderCore.Chat;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-
     [Verb("chatdownload", HelpText = "Downloads the chat from a VOD or clip")]
     public class ChatDownloadArgs : ITwitchDownloaderArgs
     {
@@ -21,16 +20,16 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option('e', "ending", HelpText = "Time in seconds to crop ending.")]
         public double CropEndingTime { get; set; }
-        
+
         [Option('E', "embed-images", Default = false, HelpText = "Embed first party emotes, badges, and cheermotes into the chat download for offline rendering.")]
         public bool EmbedData { get; set; }
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download. Requires -E / --embed-images!")]
         public bool? BttvEmotes { get; set; }
-        
+
         [Option("ffz", Default = true, HelpText = "Enable FFZ embedding in chat download. Requires -E / --embed-images!")]
         public bool? FfzEmotes { get; set; }
-        
+
         [Option("stv", Default = true, HelpText = "Enable 7TV embedding in chat download. Requires -E / --embed-images!")]
         public bool? StvEmotes { get; set; }
 

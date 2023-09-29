@@ -53,7 +53,7 @@ Downloads a clip from Twitch.
 ![Figure 2.1](Images/clipExample.png)
 <br><sup>*Figure 2.1*</sup>
 
-To get started, input a valid link or ID to a clip. From there the the download options will unlock, allowing you to customize the job.
+To get started, input a valid link or ID to a clip. From there the download options will unlock, allowing you to customize the job.
 
 **Quality**: Selects the quality of the clip before downloading.
 
