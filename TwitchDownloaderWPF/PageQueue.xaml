@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:TwitchDownloaderWPF"
+      xmlns:task="clr-namespace:TwitchDownloaderWPF.TwitchTasks"
       xmlns:lex="http://wpflocalizeextension.codeplex.com"
       lex:LocalizeDictionary.DesignCulture=""
       lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
@@ -32,8 +33,8 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" Grid.RowSpan="2" BorderThickness="1" BorderBrush="{DynamicResource AppElementBorder}" Margin="0,0,0,10">
-            <ScrollViewer  VerticalScrollBarVisibility="Auto">
-                <ItemsControl x:Name="queueList" ItemsSource="{Binding taskList}" Margin="0,10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="queueList" ItemsSource="{Binding taskList}" Margin="0,10" d:DataContext="{d:DesignInstance local:PageQueue}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="1" CornerRadius="8" Margin="8,8,8,8" Padding="4" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
