@@ -771,4 +771,7 @@
   <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
     <value>Impossible de démarrer l'observateur de thème de l'application Windows. Code d'erreur : {0}</value>
   </data>
+  <data name="LabelVideosPerPage" xml:space="preserve">
+    <value>Vidéos par page:</value>
+  </data>
 </root>

@@ -942,6 +942,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Videos per page:.
+        /// </summary>
+        public static string LabelVideosPerPage {
+            get {
+                return ResourceManager.GetString("LabelVideosPerPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Length:.
         /// </summary>
         public static string Length {
