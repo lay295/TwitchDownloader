@@ -27,6 +27,7 @@ namespace TwitchDownloaderWPF
         public int cursorIndex = -1;
         public string currentChannel = "";
         public string period = "";
+        public int videoCount = 50;
 
         public WindowMassDownload(DownloadType type)
         {
@@ -35,8 +36,8 @@ namespace TwitchDownloaderWPF
             itemList.ItemsSource = videoList;
             if (downloaderType == DownloadType.Video)
             {
-                comboSort.Visibility = Visibility.Hidden;
-                labelSort.Visibility = Visibility.Hidden;
+                ComboSortByDate.Visibility = Visibility.Hidden;
+                LabelSort.Visibility = Visibility.Hidden;
             }
             btnNext.IsEnabled = false;
             btnPrev.IsEnabled = false;
@@ -60,6 +61,17 @@ namespace TwitchDownloaderWPF
         {
             if (StatusImage != null) StatusImage.Visibility = Visibility.Visible;
 
+            if (string.IsNullOrWhiteSpace(currentChannel))
+            {
+                // Pretend we are doing something so the status icon has time to show
+                await Task.Delay(50);
+                videoList.Clear();
+                cursorList.Clear();
+                cursorIndex = -1;
+                if (StatusImage != null) StatusImage.Visibility = Visibility.Hidden;
+                return;
+            }
+
             if (downloaderType == DownloadType.Video)
             {
                 string currentCursor = "";
@@ -67,7 +79,7 @@ namespace TwitchDownloaderWPF
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, 50);
+                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, videoCount);
                 videoList.Clear();
                 if (res.data.user != null)
                 {
@@ -109,7 +121,7 @@ namespace TwitchDownloaderWPF
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlClipSearchResponse res = await TwitchHelper.GetGqlClips(currentChannel, period, currentCursor, 50);
+                GqlClipSearchResponse res = await TwitchHelper.GetGqlClips(currentChannel, period, currentCursor, videoCount);
                 videoList.Clear();
                 if (res.data.user != null)
                 {
@@ -145,7 +157,7 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            if (StatusImage != null) StatusImage.Visibility = Visibility.Collapsed;
+            if (StatusImage != null) StatusImage.Visibility = Visibility.Hidden;
         }
 
         private void Border_MouseUp(object sender, MouseButtonEventArgs e)
@@ -203,9 +215,9 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private async void comboSort_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ComboSortByDate_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            period = ((ComboBoxItem)comboSort.SelectedItem).Tag.ToString();
+            period = ((ComboBoxItem)ComboSortByDate.SelectedItem).Tag.ToString();
             videoList.Clear();
             cursorList.Clear();
             cursorIndex = -1;
@@ -249,6 +261,15 @@ namespace TwitchDownloaderWPF
                 await ChangeCurrentChannel();
                 e.Handled = true;
             }
+        }
+
+        private async void ComboVideoCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            videoCount = int.Parse((string)((ComboBoxItem)ComboVideoCount.SelectedValue).Content);
+            videoList.Clear();
+            cursorList.Clear();
+            cursorIndex = -1;
+            await UpdateList();
         }
     }
 }
