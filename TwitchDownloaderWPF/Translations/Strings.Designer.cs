@@ -1383,6 +1383,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Downloading FFmpeg {0}%.
+        /// </summary>
+        public static string StatusDownloaderFFmpeg {
+            get {
+                return ResourceManager.GetString("StatusDownloaderFFmpeg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Downloading.
         /// </summary>
         public static string StatusDownloading {

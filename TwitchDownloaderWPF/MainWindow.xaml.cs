@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Windows;
 using TwitchDownloaderWPF.Properties;
+using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
 
 namespace TwitchDownloaderWPF
@@ -69,11 +70,16 @@ namespace TwitchDownloaderWPF
                 Settings.Default.Save();
             }
 
+            var currentVersion = Version.Parse("1.53.2");
+            Title = $"Twitch Downloader v{currentVersion}";
+
+            // TODO: extract FFmpeg handling to a dedicated service
             if (!File.Exists("ffmpeg.exe"))
             {
+                var oldTitle = Title;
                 try
                 {
-                    await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full);
+                    await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full, new FfmpegDownloadProgress());
                 }
                 catch (Exception ex)
                 {
@@ -88,10 +94,10 @@ namespace TwitchDownloaderWPF
                         MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
+
+                Title = oldTitle;
             }
 
-            Version currentVersion = new Version("1.53.2");
-            Title = $"Twitch Downloader v{currentVersion}";
             AutoUpdater.InstalledVersion = currentVersion;
 #if !DEBUG
             if (AppContext.BaseDirectory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
@@ -101,6 +107,33 @@ namespace TwitchDownloaderWPF
             }
             AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
 #endif
+        }
+
+        private class FfmpegDownloadProgress : IProgress<ProgressInfo>
+        {
+            private int _lastPercent = -1;
+
+            public void Report(ProgressInfo value)
+            {
+                var percent = (int)(value.DownloadedBytes / (double)value.TotalBytes * 100);
+
+                if (percent > _lastPercent)
+                {
+                    var window = Application.Current.MainWindow;
+                    if (window is null) return;
+
+                    _lastPercent = percent;
+
+                    var oldTitle = window.Title;
+                    if (oldTitle.IndexOf('-') == -1) oldTitle += " -";
+
+                    window.Title = string.Concat(
+                        oldTitle.AsSpan(0, oldTitle.IndexOf('-')),
+                        "- ",
+                        string.Format(Translations.Strings.StatusDownloaderFFmpeg, percent.ToString())
+                    );
+                }
+            }
         }
     }
 }
