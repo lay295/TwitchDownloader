@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -814,7 +815,7 @@ namespace TwitchDownloaderCore
                 DrawRegularMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
             }
 
-            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, out TwitchEmote twitchEmote)
+            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, [NotNullWhen(true)] out TwitchEmote twitchEmote)
             {
                 // Enumerating over a span is faster than a list
                 var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
@@ -827,7 +828,7 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                twitchEmote = default;
+                twitchEmote = null;
                 return false;
             }
         }
@@ -1076,7 +1077,7 @@ namespace TwitchDownloaderCore
                 DrawText(fragmentString, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
             }
 
-            static bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, out CheerEmote cheerEmote)
+            static bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, [NotNullWhen(true)] out CheerEmote cheerEmote)
             {
                 // Enumerating over a span is faster than a list
                 var cheerEmoteListSpan = CollectionsMarshal.AsSpan(cheerEmoteList);
@@ -1089,7 +1090,7 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                cheerEmote = default;
+                cheerEmote = null;
                 return false;
             }
         }
@@ -1125,7 +1126,7 @@ namespace TwitchDownloaderCore
                 DrawText(fragment.text, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
             }
 
-            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteId, out TwitchEmote twitchEmote)
+            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteId, [NotNullWhen(true)] out TwitchEmote twitchEmote)
             {
                 // Enumerating over a span is faster than a list
                 var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
@@ -1138,7 +1139,7 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                twitchEmote = default;
+                twitchEmote = null;
                 return false;
             }
         }

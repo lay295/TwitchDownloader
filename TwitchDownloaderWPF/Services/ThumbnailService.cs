@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Media.Imaging;
 
 namespace TwitchDownloaderWPF.Services
@@ -7,6 +8,7 @@ namespace TwitchDownloaderWPF.Services
     {
         public const string THUMBNAIL_MISSING_URL = @"https://vod-secure.twitch.tv/_404/404_processing_320x180.png";
 
+        /// <exception cref="ArgumentNullException">The <paramref name="thumbUrl"/> was <see langword="null"/></exception>
         public static BitmapImage GetThumb(string thumbUrl, BitmapCacheOption cacheOption = BitmapCacheOption.OnLoad)
         {
             ArgumentNullException.ThrowIfNull(thumbUrl);
@@ -25,7 +27,7 @@ namespace TwitchDownloaderWPF.Services
             return img;
         }
 
-        public static bool TryGetThumb(string thumbUrl, out BitmapImage thumbnail)
+        public static bool TryGetThumb(string thumbUrl, [NotNullWhen(true)] out BitmapImage thumbnail)
         {
             if (string.IsNullOrWhiteSpace(thumbUrl))
             {
