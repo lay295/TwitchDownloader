@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchDownloaderWPF"
-        xmlns:task="clr-namespace:TwitchDownloaderWPF.TwitchTasks"
         xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
         lex:LocalizeDictionary.DesignCulture=""
@@ -22,8 +21,8 @@
 
     <Grid Background="{DynamicResource AppBackground}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Label x:Name="labelSort" Content="{lex:Loc Sort}" Margin="10,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-            <ComboBox SelectedIndex="2" x:Name="comboSort" Margin="5,6,0,0" MinWidth="120" SelectionChanged="comboSort_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+            <Label x:Name="LabelSort" Content="{lex:Loc Sort}" Margin="6,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <ComboBox SelectedIndex="2" x:Name="ComboSortByDate" Margin="5,6,0,0" MinWidth="120" SelectionChanged="ComboSortByDate_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                 <ComboBoxItem Content="{lex:Loc TopTwentyFourHours}" Tag="LAST_DAY"/>
                 <ComboBoxItem Content="{lex:Loc TopSevenDays}" Tag="LAST_WEEK"/>
                 <ComboBoxItem Content="{lex:Loc TopThirtyDays}" Tag="LAST_MONTH"/>
@@ -31,11 +30,18 @@
             </ComboBox>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
-            <TextBox x:Name="textChannel" Height="23" TextWrapping="Wrap" Text="" Width="194" Margin="0,6,0,0" KeyDown="TextChannel_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+            <Image x:Name="StatusImage" gif:ImageBehavior.AnimatedSource="Images/ppOverheat.gif" MaxWidth="50" Margin="0, 6, 6, 0" Visibility="Hidden" />
+            <TextBox x:Name="textChannel" Height="23" Text="" MinWidth="194" MaxWidth="300" Margin="0,6,0,0" KeyDown="TextChannel_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             <Button x:Name="btnChannel" Content="{lex:Loc SetChannel}" Margin="3,6,0,0" MinWidth="84" Height="30" Click="btnChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-            <Image x:Name="StatusImage" gif:ImageBehavior.AnimatedSource="Images/ppOverheat.gif" MaxWidth="50" Margin="0, 6, 6, 0" Visibility="Collapsed" />
+            <Label x:Name="LabelVideoCount" Content="{lex:Loc LabelVideosPerPage}" Margin="6,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <ComboBox SelectedIndex="1" x:Name="ComboVideoCount" Margin="5,6,6,0" MinWidth="70" SelectionChanged="ComboVideoCount_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                <ComboBoxItem Content="16" />
+                <ComboBoxItem Content="30" />
+                <ComboBoxItem Content="50" />
+                <ComboBoxItem Content="100" />
+            </ComboBox>
         </StackPanel>
         <ScrollViewer x:Name="scrollDownload" VerticalScrollBarVisibility="Auto" Margin="10,41,10,45">
             <ItemsControl x:Name="itemList" ItemsSource="{Binding videoList}" d:DataContext="{d:DesignInstance local:WindowMassDownload}">
