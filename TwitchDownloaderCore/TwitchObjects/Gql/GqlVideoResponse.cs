@@ -26,7 +26,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public VideoGame game { get; set; }
         /// <remarks>
         /// Some values, such as newlines, are repeated twice for some reason.
-        /// This can be filtered out with: <code>.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd()</code>
+        /// This can be filtered out with: <code>description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd()</code>
         /// </remarks>
         public string description { get; set; }
     }
