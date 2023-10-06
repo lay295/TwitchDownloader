@@ -70,7 +70,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.Save();
             }
 
-            var currentVersion = Version.Parse("1.53.2");
+            var currentVersion = Version.Parse("1.53.3");
             Title = $"Twitch Downloader v{currentVersion}";
 
             // TODO: extract FFmpeg handling to a dedicated service
