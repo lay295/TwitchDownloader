@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <Version>1.53.2</Version>
-    <Copyright>Copyright © 2019 lay295 and contributors</Copyright>
+    <Copyright>Copyright © lay295 and contributors</Copyright>
     <Description>Download and render Twitch VODs, clips, and chats</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Platforms>AnyCPU;x64</Platforms>
