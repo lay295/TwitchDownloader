@@ -773,9 +773,9 @@
     <value>No se puede iniciar el observador de temas de la aplicación de Windows. Código de error: {0}</value>
   </data>
   <data name="LabelVideosPerPage" xml:space="preserve">
-    <value>Videos per page:</value>
+    <value>Vídeos por página:</value>
   </data>
   <data name="StatusDownloaderFFmpeg" xml:space="preserve">
-    <value>Downloading FFmpeg {0}%</value>
+    <value>Descarga FFmpeg {0}%</value>
   </data>
 </root>
