@@ -9,7 +9,8 @@
         lex:LocalizeDictionary.DesignCulture=""
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
-		xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
+        xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         Title="Mass Downloader" MinHeight="250" Height="700" MinWidth="775" Width="1100" Loaded="Window_Loaded">
     <Window.Resources>
@@ -19,22 +20,31 @@
     </Window.Resources>
 
     <Grid Background="{DynamicResource AppBackground}">
-        <StackPanel Orientation="Horizontal">
-            <Label x:Name="labelSort" Content="{lex:Loc Sort}" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-            <ComboBox SelectedIndex="2" x:Name="comboSort" HorizontalAlignment="Left" Margin="5,6,0,0" VerticalAlignment="Top" MinWidth="120" SelectionChanged="comboSort_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Label x:Name="LabelSort" Content="{lex:Loc Sort}" Margin="6,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <ComboBox SelectedIndex="2" x:Name="ComboSortByDate" Margin="5,6,0,0" MinWidth="120" SelectionChanged="ComboSortByDate_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                 <ComboBoxItem Content="{lex:Loc TopTwentyFourHours}" Tag="LAST_DAY"/>
                 <ComboBoxItem Content="{lex:Loc TopSevenDays}" Tag="LAST_WEEK"/>
                 <ComboBoxItem Content="{lex:Loc TopThirtyDays}" Tag="LAST_MONTH"/>
                 <ComboBoxItem Content="{lex:Loc TopAllTime}" Tag="ALL_TIME"/>
             </ComboBox>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBox x:Name="textChannel" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="194" Margin="0,6,0,0" KeyDown="TextChannel_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-            <Button x:Name="btnChannel" Content="{lex:Loc SetChannel}" HorizontalAlignment="Left" Margin="3,6,0,0" VerticalAlignment="Top" MinWidth="84" Height="30" Click="btnChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
+            <Image x:Name="StatusImage" gif:ImageBehavior.AnimatedSource="Images/ppOverheat.gif" MaxWidth="50" Margin="0, 6, 6, 0" Visibility="Hidden" />
+            <TextBox x:Name="textChannel" Height="23" Text="" MinWidth="194" MaxWidth="300" Margin="0,6,0,0" KeyDown="TextChannel_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+            <Button x:Name="btnChannel" Content="{lex:Loc SetChannel}" Margin="3,6,0,0" MinWidth="84" Height="30" Click="btnChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
-        <WrapPanel HorizontalAlignment="Left" Height="329" Margin="10,54,0,0" VerticalAlignment="Top" Width="772"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <Label x:Name="LabelVideoCount" Content="{lex:Loc LabelVideosPerPage}" Margin="6,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <ComboBox SelectedIndex="1" x:Name="ComboVideoCount" Margin="5,6,6,0" MinWidth="70" SelectionChanged="ComboVideoCount_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                <ComboBoxItem Content="16" />
+                <ComboBoxItem Content="30" />
+                <ComboBoxItem Content="50" />
+                <ComboBoxItem Content="100" />
+            </ComboBox>
+        </StackPanel>
         <ScrollViewer x:Name="scrollDownload" VerticalScrollBarVisibility="Auto" Margin="10,41,10,45">
-            <ItemsControl x:Name="itemList" ItemsSource="{Binding videoList}">
+            <ItemsControl x:Name="itemList" ItemsSource="{Binding videoList}" d:DataContext="{d:DesignInstance local:WindowMassDownload}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -63,14 +73,14 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        <StackPanel Orientation="Horizontal">
-            <Label HorizontalAlignment="Left" Margin="10,0,0,3" VerticalAlignment="Bottom" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" >
+            <Label Margin="10,0,0,3" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                 <TextBlock>
                 <Run Text="{lex:Loc SelectedItems}"/>
                 <Run x:Name="textCount" Text="0"/>
                 </TextBlock>
             </Label>
-            <Button x:Name="btnSelectAll" Content="{lex:Loc SelectAll}" HorizontalAlignment="Left" Margin="5,0,0,3" VerticalAlignment="Bottom" MinWidth="80" Height="30" Click="btnSelectAll_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="btnSelectAll" Content="{lex:Loc SelectAll}" Margin="5,0,0,3" MinWidth="80" Height="30" Click="btnSelectAll_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <Button x:Name="btnPrev" Content="&lt;-" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="0,0,80,4" Click="btnPrev_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         <Button x:Name="btnNext" Content="->" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="34" Margin="80,0,0,4" Click="btnNext_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>

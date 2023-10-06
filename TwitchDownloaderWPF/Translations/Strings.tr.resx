@@ -772,4 +772,7 @@
   <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
     <value>Windows uygulama teması izleyicisi başlatılamıyor. Hata kodu: {0}</value>
   </data>
+  <data name="LabelVideosPerPage" xml:space="preserve">
+    <value>Videos per page:</value>
+  </data>
 </root>

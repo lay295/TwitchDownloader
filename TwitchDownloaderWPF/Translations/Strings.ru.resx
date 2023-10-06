@@ -771,4 +771,7 @@
   <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
     <value>Unable to start Windows application theme watcher. Error code: {0}</value>
   </data>
+  <data name="LabelVideosPerPage" xml:space="preserve">
+    <value>Videos per page:</value>
+  </data>
 </root>

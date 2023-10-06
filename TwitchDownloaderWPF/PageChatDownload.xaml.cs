@@ -117,20 +117,14 @@ namespace TwitchDownloaderWPF
                 {
                     GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(downloadId));
 
-                    try
-                    {
-                        string thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
-                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                    }
-                    catch
+                    var thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
+                    if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                        if (success)
-                        {
-                            imgThumbnail.Source = image;
-                        }
+                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                     }
+                    imgThumbnail.Source = image;
+
                     vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                     textTitle.Text = videoInfo.data.video.title;
                     textStreamer.Text = videoInfo.data.video.owner.displayName;
@@ -169,20 +163,14 @@ namespace TwitchDownloaderWPF
                     string clipId = downloadId;
                     GqlClipResponse clipInfo = await TwitchHelper.GetClipInfo(clipId);
 
-                    try
-                    {
-                        string thumbUrl = clipInfo.data.clip.thumbnailURL;
-                        imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                    }
-                    catch
+                    var thumbUrl = clipInfo.data.clip.thumbnailURL;
+                    if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                        if (success)
-                        {
-                            imgThumbnail.Source = image;
-                        }
+                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                     }
+                    imgThumbnail.Source = image;
+
                     TimeSpan clipLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
                     textStreamer.Text = clipInfo.data.clip.broadcaster.displayName;
                     var clipCreatedAt = clipInfo.data.clip.createdAt;
@@ -253,10 +241,10 @@ namespace TwitchDownloaderWPF
             else if (radioCompressionGzip.IsChecked == true)
                 options.Compression = ChatCompression.Gzip;
 
-            options.EmbedData = (bool)checkEmbed.IsChecked;
-            options.BttvEmotes = (bool)checkBttvEmbed.IsChecked;
-            options.FfzEmotes = (bool)checkFfzEmbed.IsChecked;
-            options.StvEmotes = (bool)checkStvEmbed.IsChecked;
+            options.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
+            options.BttvEmotes = checkBttvEmbed.IsChecked.GetValueOrDefault();
+            options.FfzEmotes = checkFfzEmbed.IsChecked.GetValueOrDefault();
+            options.StvEmotes = checkStvEmbed.IsChecked.GetValueOrDefault();
             options.Filename = filename;
             options.ConnectionCount = (int)numChatDownloadConnections.Value;
             return options;
@@ -573,12 +561,12 @@ namespace TwitchDownloaderWPF
 
         private void checkCropStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropStart((bool)checkCropStart.IsChecked);
+            SetEnabledCropStart(checkCropStart.IsChecked.GetValueOrDefault());
         }
 
         private void checkCropEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropEnd((bool)checkCropEnd.IsChecked);
+            SetEnabledCropEnd(checkCropEnd.IsChecked.GetValueOrDefault());
         }
 
 

@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -204,7 +202,7 @@ namespace TwitchDownloaderWPF
 
         private void btnTaskError_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button { DataContext: ITwitchTask task }))
+            if (sender is not Button { DataContext: ITwitchTask task })
             {
                 return;
             }
@@ -227,7 +225,7 @@ namespace TwitchDownloaderWPF
 
         private void btnRemoveTask_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button { DataContext: ITwitchTask task }))
+            if (sender is not Button { DataContext: ITwitchTask task })
             {
                 return;
             }

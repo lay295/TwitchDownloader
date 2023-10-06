@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.TwitchTasks;
 
 namespace TwitchDownloaderWPF
@@ -58,7 +58,7 @@ namespace TwitchDownloaderWPF
 
             foreach (var id in idList)
             {
-                if (id.All(Char.IsDigit))
+                if (id.All(char.IsDigit))
                 {
                     Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(int.Parse(id));
                     taskVideoList.Add(task);
@@ -77,73 +77,76 @@ namespace TwitchDownloaderWPF
                 await Task.WhenAll(taskVideoList.ToArray());
             }
             catch { }
+
+            foreach (var task in taskVideoList)
+            {
+                if (!task.IsCompleted)
+                    continue;
+
+                string id = taskDict[task.Id];
+                if (!task.IsFaulted)
+                {
+                    var videoInfo = task.Result.data.video;
+                    var thumbUrl = videoInfo.thumbnailURLs.FirstOrDefault();
+                    if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
+                    {
+                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out thumbnail);
+                    }
+
+                    dataList.Add(new TaskData
+                    {
+                        Id = id,
+                        Thumbnail = thumbnail,
+                        Title = videoInfo.title,
+                        Streamer = videoInfo.owner.displayName,
+                        Time = Settings.Default.UTCVideoTime ? videoInfo.createdAt : videoInfo.createdAt.ToLocalTime(),
+                        Views = videoInfo.viewCount,
+                        Game = videoInfo.game?.displayName ?? "Unknown",
+                        Length = videoInfo.lengthSeconds
+                    });
+                }
+                else
+                {
+                    errorList.Add(idDict[id]);
+                }
+            }
+
             try
             {
                 await Task.WhenAll(taskClipList.ToArray());
             }
             catch { }
 
-            for (int i = 0; i < taskVideoList.Count; i++)
+            foreach (var task in taskClipList)
             {
-                if (taskVideoList[i].IsCompleted)
-                {
-                    string id = taskDict[taskVideoList[i].Id];
-                    if (!taskVideoList[i].IsFaulted)
-                    {
-                        GqlVideoResponse data = taskVideoList[i].Result;
-                        TaskData newData = new TaskData();
-                        newData.Id = id;
-                        try
-                        {
-                            string thumbUrl = data.data.video.thumbnailURLs.FirstOrDefault();
-                            var bitmapImage = new BitmapImage();
-                            bitmapImage.BeginInit();
-                            bitmapImage.UriSource = new Uri(thumbUrl);
-                            bitmapImage.EndInit();
-                            newData.Thumbnail = bitmapImage;
-                        }
-                        catch { }
-                        newData.Title = data.data.video.title;
-                        newData.Streamer = data.data.video.owner.displayName;
-                        newData.Time = Settings.Default.UTCVideoTime ? data.data.video.createdAt : data.data.video.createdAt.ToLocalTime();
-                        dataList.Add(newData);
-                    }
-                    else
-                    {
-                        errorList.Add(idDict[id]);
-                    }
-                }
-            }
+                if (!task.IsCompleted)
+                    continue;
 
-            for (int i = 0; i < taskClipList.Count; i++)
-            {
-                if (taskClipList[i].IsCompleted)
+                string id = taskDict[task.Id];
+                if (!task.IsFaulted)
                 {
-                    string id = taskDict[taskClipList[i].Id];
-                    if (!taskClipList[i].IsFaulted)
+                    var clipInfo = task.Result.data.clip;
+                    var thumbUrl = clipInfo.thumbnailURL;
+                    if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                     {
-                        GqlClipResponse data = taskClipList[i].Result;
-                        TaskData newData = new TaskData();
-                        newData.Id = id;
-                        try
-                        {
-                            string thumbUrl = data.data.clip.thumbnailURL;
-                            var bitmapImage = new BitmapImage();
-                            bitmapImage.BeginInit();
-                            bitmapImage.UriSource = new Uri(thumbUrl);
-                            bitmapImage.EndInit();
-                            newData.Thumbnail = bitmapImage;
-                        }
-                        catch { }
-                        newData.Title = data.data.clip.title;
-                        newData.Streamer = data.data.clip.broadcaster.displayName;
-                        newData.Time = Settings.Default.UTCVideoTime ? data.data.clip.createdAt : data.data.clip.createdAt.ToLocalTime();
-                        dataList.Add(newData);
+                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out thumbnail);
                     }
-                    else
+
+                    dataList.Add(new TaskData
                     {
-                        errorList.Add(idDict[id]);
-                    }
+                        Id = id,
+                        Thumbnail = thumbnail,
+                        Title = clipInfo.title,
+                        Streamer = clipInfo.broadcaster.displayName,
+                        Time = Settings.Default.UTCVideoTime ? clipInfo.createdAt : clipInfo.createdAt.ToLocalTime(),
+                        Views = clipInfo.viewCount,
+                        Game = clipInfo.game?.displayName ?? "Unknown",
+                        Length = clipInfo.durationSeconds
+                    });
+                }
+                else
+                {
+                    errorList.Add(idDict[id]);
                 }
             }
 
@@ -154,8 +157,7 @@ namespace TwitchDownloaderWPF
             }
 
             WindowQueueOptions queue = new WindowQueueOptions(dataList);
-            bool? queued = queue.ShowDialog();
-            if (queued != null && (bool)queued)
+            if (queue.ShowDialog().GetValueOrDefault())
                 this.Close();
 
             btnQueue.IsEnabled = true;
