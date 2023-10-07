@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
@@ -66,7 +67,20 @@ namespace TwitchDownloaderCore.Chat
 
             if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerElement))
             {
-                returnChatRoot.streamer = streamerElement.Deserialize<Streamer>(options: _jsonSerializerOptions);
+                if (returnChatRoot.FileInfo.Version > new ChatRootVersion(1, 0, 0))
+                {
+                    returnChatRoot.streamer = streamerElement.Deserialize<Streamer>(options: _jsonSerializerOptions);
+                }
+                else
+                {
+                    var legacyStreamer = streamerElement.Deserialize<LegacyStreamer>(options: _jsonSerializerOptions);
+                    returnChatRoot.streamer = legacyStreamer.id.ValueKind switch
+                    {
+                        JsonValueKind.Number => new Streamer { name = legacyStreamer.name, id = legacyStreamer.id.GetInt32() },
+                        JsonValueKind.String => new Streamer { name = legacyStreamer.name, id = int.Parse(legacyStreamer.id.GetString()!) },
+                        _ => null // Fallback to UpgradeChatJson()
+                    };
+                }
             }
 
             if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoElement))
