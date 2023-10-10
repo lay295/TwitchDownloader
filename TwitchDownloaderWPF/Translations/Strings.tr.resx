@@ -773,9 +773,9 @@
     <value>Windows uygulama teması izleyicisi başlatılamıyor. Hata kodu: {0}</value>
   </data>
   <data name="LabelVideosPerPage" xml:space="preserve">
-    <value>Videos per page:</value>
+    <value>Sayfa başına video:</value>
   </data>
   <data name="StatusDownloaderFFmpeg" xml:space="preserve">
-    <value>Downloading FFmpeg {0}%</value>
+    <value>FFmpeg İndiriliyor {0}%</value>
   </data>
 </root>
