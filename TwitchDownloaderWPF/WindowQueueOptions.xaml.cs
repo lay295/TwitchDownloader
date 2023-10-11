@@ -252,7 +252,9 @@ namespace TwitchDownloaderWPF
                             chatOptions.DownloadFormat = ChatFormat.Text;
                         chatOptions.TimeFormat = TimestampFormat.Relative;
                         chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
-                        chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id, clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, TimeSpan.Zero, clipDownloadPage.clipLength, clipDownloadPage.viewCount.ToString(), clipDownloadPage.game) + "." + chatOptions.FileExtension);
+                        chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id,
+                            clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, TimeSpan.Zero, clipDownloadPage.clipLength,
+                            clipDownloadPage.viewCount.ToString(), clipDownloadPage.game) + "." + chatOptions.FileExtension);
 
                         ChatDownloadTask chatTask = new ChatDownloadTask
                         {
@@ -313,7 +315,7 @@ namespace TwitchDownloaderWPF
 
                     ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
                     chatOptions.Id = chatDownloadPage.downloadId;
-                    chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatDownloadPage.textTitle.Text, chatOptions.Id, chatDownloadPage.currentVideoTime, chatDownloadPage.textStreamer.Text,
+                    chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatDownloadPage.textTitle.Text, chatOptions.Id,chatDownloadPage.currentVideoTime, chatDownloadPage.textStreamer.Text,
                         chatOptions.CropBeginning ? TimeSpan.FromSeconds(chatOptions.CropBeginningTime) : TimeSpan.Zero,
                         chatOptions.CropEnding ? TimeSpan.FromSeconds(chatOptions.CropEndingTime) : chatDownloadPage.vodLength,
                         chatDownloadPage.viewCount.ToString(), chatDownloadPage.game) + "." + chatOptions.FileExtension);
@@ -533,16 +535,16 @@ namespace TwitchDownloaderWPF
                         CropBeginning = false,
                         CropEnding = false
                     };
-                    downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
-                        downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
-                        downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(taskData.Length),
-                        taskData.Views.ToString(), taskData.Game) + "." + downloadOptions.FileExtension);
                     if (radioJson.IsChecked == true)
                         downloadOptions.DownloadFormat = ChatFormat.Json;
                     else if (radioHTML.IsChecked == true)
                         downloadOptions.DownloadFormat = ChatFormat.Html;
                     else
                         downloadOptions.DownloadFormat = ChatFormat.Text;
+                    downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
+                        downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
+                        downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(taskData.Length),
+                        taskData.Views.ToString(), taskData.Game) + "." + downloadOptions.FileExtension);
 
                     ChatDownloadTask downloadTask = new ChatDownloadTask
                     {
