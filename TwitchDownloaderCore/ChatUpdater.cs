@@ -8,6 +8,7 @@ using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
@@ -36,9 +37,12 @@ namespace TwitchDownloaderCore
 
             // Dynamic step count setup
             int currentStep = 0;
-            int totalSteps = 1;
+            int totalSteps = 2;
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding) totalSteps++;
             if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds) totalSteps++;
+
+            currentStep++;
+            await UpdateVideoInfo(totalSteps, currentStep, progress, cancellationToken);
 
             // If we are editing the chat crop
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding)
@@ -74,6 +78,76 @@ namespace TwitchDownloaderCore
             }
         }
 
+        private async Task UpdateVideoInfo(int totalSteps, int currentStep, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        {
+            progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Updating Video Info [{currentStep}/{totalSteps}]"));
+            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
+
+            if (chatRoot.video.id.All(char.IsDigit))
+            {
+                var videoId = int.Parse(chatRoot.video.id);
+                VideoInfo videoInfo = null;
+                try
+                {
+                    videoInfo = (await TwitchHelper.GetVideoInfo(videoId)).data.video;
+                }
+                catch { /* Eat the exception */ }
+
+                if (videoInfo is null)
+                {
+                    progress.Report(new ProgressReport(ReportType.SameLineStatus, "Unable to fetch video info, deleted/expired VOD possibly?"));
+                    return;
+                }
+
+                chatRoot.video.title = videoInfo.title;
+                chatRoot.video.description = videoInfo.description;
+                chatRoot.video.created_at = videoInfo.createdAt;
+                chatRoot.video.length = videoInfo.lengthSeconds;
+                chatRoot.video.viewCount = videoInfo.viewCount;
+                chatRoot.video.game = videoInfo.game.displayName;
+
+                var chaptersInfo = (await TwitchHelper.GetVideoChapters(videoId)).data.video.moments.edges;
+                foreach (var responseChapter in chaptersInfo)
+                {
+                    chatRoot.video.chapters.Add(new VideoChapter
+                    {
+                        id = responseChapter.node.id,
+                        startMilliseconds = responseChapter.node.positionMilliseconds,
+                        lengthMilliseconds = responseChapter.node.durationMilliseconds,
+                        _type = responseChapter.node._type,
+                        description = responseChapter.node.description,
+                        subDescription = responseChapter.node.subDescription,
+                        thumbnailUrl = responseChapter.node.thumbnailURL,
+                        gameId = responseChapter.node.details.game?.id,
+                        gameDisplayName = responseChapter.node.details.game?.displayName,
+                        gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL
+                    });
+                }
+            }
+            else
+            {
+                var clipId = chatRoot.video.id;
+                Clip clipInfo = null;
+                try
+                {
+                    clipInfo = (await TwitchHelper.GetClipInfo(clipId)).data.clip;
+                }
+                catch { /* Eat the exception */ }
+
+                if (clipInfo is null)
+                {
+                    progress.Report(new ProgressReport(ReportType.SameLineStatus, "Unable to fetch clip info, deleted possibly?"));
+                    return;
+                }
+
+                chatRoot.video.title = clipInfo.title;
+                chatRoot.video.created_at = clipInfo.createdAt;
+                chatRoot.video.length = clipInfo.durationSeconds;
+                chatRoot.video.viewCount = clipInfo.viewCount;
+                chatRoot.video.game = clipInfo.game.displayName;
+            }
+        }
+
         private async Task UpdateChatCrop(int totalSteps, int currentStep, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Updating Chat Crop [{currentStep}/{totalSteps}]"));
@@ -82,7 +156,7 @@ namespace TwitchDownloaderCore
             bool cropTaskVodExpired = false;
             var cropTaskProgress = new Progress<ProgressReport>(report =>
             {
-                if (((string)report.Data).ToLower().Contains("vod is expired"))
+                if (((string)report.Data).Contains("vod is expired", StringComparison.OrdinalIgnoreCase))
                 {
                     // If the user is moving both crops in one command, we only want to propagate a 'vod expired/id corrupt' report once
                     if (cropTaskVodExpired)
