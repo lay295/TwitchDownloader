@@ -413,6 +413,7 @@ namespace TwitchDownloaderCore
             {
                 Id = videoId,
                 DownloadFormat = ChatFormat.Json, // json is required to parse as a new chatroot object
+                Compression = ChatCompression.Gzip,
                 Filename = tempFile,
                 CropBeginning = true,
                 CropBeginningTime = sectionStart,
