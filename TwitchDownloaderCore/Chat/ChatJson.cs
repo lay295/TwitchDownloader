@@ -244,12 +244,11 @@ namespace TwitchDownloaderCore.Chat
                     await JsonSerializer.SerializeAsync(fs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
                 case ChatCompression.Gzip:
-                    await using (var gs = new GZipStream(fs, CompressionLevel.SmallestSize))
-                    {
-                        await JsonSerializer.SerializeAsync(gs, chatRoot, _jsonSerializerOptions, cancellationToken);
-                    }
-
+                {
+                    await using var gs = new GZipStream(fs, CompressionLevel.SmallestSize);
+                    await JsonSerializer.SerializeAsync(gs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
+                }
                 default:
                     throw new NotSupportedException($"{compression} is not a supported chat compression.");
             }
