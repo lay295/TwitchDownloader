@@ -14,7 +14,8 @@
   </p>
 </p>
 
-[**Readme in Spanish**](README_es.md)
+[**Readme in Spanish**](README_es.md)  
+[**Readme in Turkish**](README_tr.md)
 
 ## Chat Render Example
 
