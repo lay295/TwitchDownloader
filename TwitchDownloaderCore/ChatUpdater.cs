@@ -60,7 +60,7 @@ namespace TwitchDownloaderCore
 
             // Finally save the output to file!
             progress.Report(new ProgressReport(ReportType.NewLineStatus, $"Writing Output File [{++currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(totalSteps / currentStep));
+            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
 
             switch (_updateOptions.OutputFormat)
             {
@@ -81,9 +81,7 @@ namespace TwitchDownloaderCore
         private async Task UpdateChatCrop(int totalSteps, int currentStep, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Updating Chat Crop [{currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(totalSteps / currentStep));
-
-            chatRoot.video ??= new Video();
+            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
 
             bool cropTaskVodExpired = false;
             var cropTaskProgress = new Progress<ProgressReport>(report =>
@@ -145,7 +143,7 @@ namespace TwitchDownloaderCore
         private async Task UpdateEmbeds(int currentStep, int totalSteps, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport(ReportType.NewLineStatus, $"Updating Embeds [{currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(totalSteps / currentStep));
+            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
 
             chatRoot.embeddedData ??= new EmbeddedData();
 
