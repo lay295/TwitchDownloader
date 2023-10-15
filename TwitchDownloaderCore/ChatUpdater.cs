@@ -14,6 +14,7 @@ namespace TwitchDownloaderCore
     public sealed class ChatUpdater
     {
         public ChatRoot chatRoot { get; internal set; } = new();
+        private readonly object _cropChatRootLock = new();
 
         private readonly ChatUpdateOptions _updateOptions;
 
@@ -23,11 +24,6 @@ namespace TwitchDownloaderCore
             _updateOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(_updateOptions.TempFolder) ? Path.GetTempPath() : _updateOptions.TempFolder,
                 "TwitchDownloader");
-        }
-
-        private static class SharedObjects
-        {
-            internal static object CropChatRootLock = new();
         }
 
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
@@ -323,7 +319,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            lock (SharedObjects.CropChatRootLock)
+            lock (_cropChatRootLock)
             {
                 foreach (var comment in chatRoot.comments)
                 {
