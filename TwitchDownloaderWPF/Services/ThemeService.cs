@@ -103,7 +103,13 @@ namespace TwitchDownloaderWPF.Services
             foreach (Window window in windows)
             {
                 var windowHandle = new WindowInteropHelper(window).Handle;
-                NativeFunctions.SetWindowAttribute(windowHandle, darkTitleBarAttribute, ref shouldUseDarkTitleBar, sizeof(int));
+                if (windowHandle == IntPtr.Zero)
+                    continue;
+
+                unsafe
+                {
+                    _ = NativeFunctions.SetWindowAttribute(windowHandle, darkTitleBarAttribute, &shouldUseDarkTitleBar, sizeof(int));
+                }
             }
 
             Window wnd = new()

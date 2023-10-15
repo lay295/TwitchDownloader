@@ -21,6 +21,7 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
     <Platforms>AnyCPU;x64</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!--TODO: <Nullable>enable</Nullable> once we have required keyword-->
   </PropertyGroup>
   <PropertyGroup>
