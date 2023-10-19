@@ -1654,7 +1654,7 @@ namespace TwitchDownloaderCore
 
         public async Task<ChatRoot> ParseJsonAsync(CancellationToken cancellationToken = new())
         {
-            chatRoot = await ChatJson.DeserializeAsync(renderOptions.InputFile, true, true, cancellationToken);
+            chatRoot = await ChatJson.DeserializeAsync(renderOptions.InputFile, true, false, true, cancellationToken);
             return chatRoot;
         }
 

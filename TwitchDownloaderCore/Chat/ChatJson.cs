@@ -28,7 +28,7 @@ namespace TwitchDownloaderCore.Chat
         /// <returns>A <see cref="ChatRoot"/> representation the deserialized chat json file.</returns>
         /// <exception cref="IOException">The file does not exist.</exception>
         /// <exception cref="NotSupportedException">The file is not a valid chat format.</exception>
-        public static async Task<ChatRoot> DeserializeAsync(string filePath, bool getComments = true, bool getEmbeds = true, CancellationToken cancellationToken = new())
+        public static async Task<ChatRoot> DeserializeAsync(string filePath, bool getComments = true, bool onlyFirstAndLastComments = false, bool getEmbeds = true, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
 
@@ -92,7 +92,9 @@ namespace TwitchDownloaderCore.Chat
             {
                 if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsElement))
                 {
-                    returnChatRoot.comments = commentsElement.Deserialize<List<Comment>>(options: _jsonSerializerOptions);
+                    returnChatRoot.comments = onlyFirstAndLastComments
+                        ? commentsElement.DeserializeFirstAndLastFromList<Comment>(options: _jsonSerializerOptions)
+                        : commentsElement.Deserialize<List<Comment>>(options: _jsonSerializerOptions);
                 }
             }
 

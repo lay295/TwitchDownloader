@@ -381,7 +381,7 @@ namespace TwitchDownloaderCore
             ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
             await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
 
-            ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, getEmbeds: false, cancellationToken);
+            ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, onlyFirstAndLastComments: false, getEmbeds: false, cancellationToken);
 
             // Append the new comment section
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
@@ -430,7 +430,7 @@ namespace TwitchDownloaderCore
 
         public async Task<ChatRoot> ParseJsonAsync(CancellationToken cancellationToken = new())
         {
-            chatRoot = await ChatJson.DeserializeAsync(_updateOptions.InputFile, true, true, cancellationToken);
+            chatRoot = await ChatJson.DeserializeAsync(_updateOptions.InputFile, true, false, true, cancellationToken);
             return chatRoot;
         }
     }
