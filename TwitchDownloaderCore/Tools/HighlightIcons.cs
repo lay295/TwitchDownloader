@@ -128,12 +128,12 @@ namespace TwitchDownloaderCore.Tools
         {
             return highlightType switch
             {
-                HighlightType.SubscribedTier => _subscribedTierIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
-                HighlightType.SubscribedPrime => _subscribedPrimeIcon ??= GenerateSvgIcon(highlightType, _purple, fontSize),
-                HighlightType.GiftedSingle => _giftSingleIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
+                HighlightType.SubscribedTier => _subscribedTierIcon ??= GenerateSvgIcon(SUBSCRIBED_TIER_ICON_SVG, textColor, fontSize),
+                HighlightType.SubscribedPrime => _subscribedPrimeIcon ??= GenerateSvgIcon(SUBSCRIBED_PRIME_ICON_SVG, _purple, fontSize),
+                HighlightType.GiftedSingle => _giftSingleIcon ??= GenerateSvgIcon(GIFTED_SINGLE_ICON_SVG, textColor, fontSize),
                 HighlightType.GiftedMany => _giftManyIcon ??= GenerateGiftedManyIcon(fontSize, _cachePath, _offline),
-                HighlightType.GiftedAnonymous => _giftAnonymousIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
-                HighlightType.BitBadgeTierNotification => _bitBadgeTierNotificationIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
+                HighlightType.GiftedAnonymous => _giftAnonymousIcon ??= GenerateSvgIcon(GIFTED_ANONYMOUS_ICON_SVG, textColor, fontSize),
+                HighlightType.BitBadgeTierNotification => _bitBadgeTierNotificationIcon ??= GenerateSvgIcon(BIT_BADGE_TIER_NOTIFICATION_ICON_SVG, textColor, fontSize),
                 _ => null
             };
         }
@@ -164,20 +164,12 @@ namespace TwitchDownloaderCore.Tools
             return SKImage.FromBitmap(resizedBitmap);
         }
 
-        private static SKImage GenerateSvgIcon(HighlightType highlightType, SKColor iconColor, double fontSize)
+        private static SKImage GenerateSvgIcon(string iconSvgString, SKColor iconColor, double fontSize)
         {
             using var tempBitmap = new SKBitmap(72, 72); // Icon SVG strings are scaled for 72x72
             using var tempCanvas = new SKCanvas(tempBitmap);
 
-            using var iconPath = SKPath.ParseSvgPathData(highlightType switch
-            {
-                HighlightType.SubscribedTier => SUBSCRIBED_TIER_ICON_SVG,
-                HighlightType.SubscribedPrime => SUBSCRIBED_PRIME_ICON_SVG,
-                HighlightType.GiftedSingle => GIFTED_SINGLE_ICON_SVG,
-                HighlightType.GiftedAnonymous => GIFTED_ANONYMOUS_ICON_SVG,
-                HighlightType.BitBadgeTierNotification => BIT_BADGE_TIER_NOTIFICATION_ICON_SVG,
-                _ => throw new NotSupportedException("The requested icon svg path does not exist.")
-            });
+            using var iconPath = SKPath.ParseSvgPathData(iconSvgString);
             iconPath.FillType = SKPathFillType.EvenOdd;
 
             var iconPaint = new SKPaint
