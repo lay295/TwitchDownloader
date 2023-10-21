@@ -121,49 +121,15 @@ namespace TwitchDownloaderCore.Tools
         /// <remarks>The icon returned is NOT a copy and should not be manually disposed.</remarks>
         public SKImage GetHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
         {
-            // Return the needed icon from cache or generate if null
             return highlightType switch
             {
-                HighlightType.SubscribedTier => _subscribedTierIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
-                HighlightType.SubscribedPrime => _subscribedPrimeIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
-                HighlightType.GiftedSingle => _giftSingleIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
-                HighlightType.GiftedMany => _giftManyIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
-                HighlightType.GiftedAnonymous => _giftAnonymousIcon ?? GenerateHighlightIcon(highlightType, textColor, fontSize),
+                HighlightType.SubscribedTier => _subscribedTierIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
+                HighlightType.SubscribedPrime => _subscribedPrimeIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
+                HighlightType.GiftedSingle => _giftSingleIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
+                HighlightType.GiftedMany => _giftManyIcon ??= GenerateGiftedManyIcon(fontSize, _cachePath, _offline),
+                HighlightType.GiftedAnonymous => _giftAnonymousIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
                 _ => null
             };
-        }
-
-        private SKImage GenerateHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
-        {
-            // Generate the needed icon
-            var returnIcon = highlightType is HighlightType.GiftedMany
-                ? GenerateGiftedManyIcon(fontSize, _cachePath, _offline)
-                : GenerateSvgIcon(highlightType, _purple, textColor, fontSize);
-
-            // Cache the icon
-            switch (highlightType)
-            {
-                case HighlightType.SubscribedTier:
-                    _subscribedTierIcon = returnIcon;
-                    break;
-                case HighlightType.SubscribedPrime:
-                    _subscribedPrimeIcon = returnIcon;
-                    break;
-                case HighlightType.GiftedSingle:
-                    _giftSingleIcon = returnIcon;
-                    break;
-                case HighlightType.GiftedMany:
-                    _giftManyIcon = returnIcon;
-                    break;
-                case HighlightType.GiftedAnonymous:
-                    _giftAnonymousIcon = returnIcon;
-                    break;
-                default:
-                    throw new NotSupportedException("The requested highlight icon does not exist.");
-            }
-
-            // Return the generated icon
-            return returnIcon;
         }
 
         private static SKImage GenerateGiftedManyIcon(double fontSize, string cachePath, bool offline)
@@ -192,7 +158,7 @@ namespace TwitchDownloaderCore.Tools
             return SKImage.FromBitmap(resizedBitmap);
         }
 
-        private static SKImage GenerateSvgIcon(HighlightType highlightType, SKColor purple, SKColor textColor, double fontSize)
+        private SKImage GenerateSvgIcon(HighlightType highlightType, SKColor textColor, double fontSize)
         {
             using var tempBitmap = new SKBitmap(72, 72); // Icon SVG strings are scaled for 72x72
             using var tempCanvas = new SKCanvas(tempBitmap);
@@ -212,7 +178,7 @@ namespace TwitchDownloaderCore.Tools
                 Color = highlightType switch
                 {
                     HighlightType.SubscribedTier => textColor,
-                    HighlightType.SubscribedPrime => purple,
+                    HighlightType.SubscribedPrime => _purple,
                     HighlightType.GiftedSingle => textColor,
                     HighlightType.GiftedAnonymous => textColor,
                     _ => throw new NotSupportedException("The requested icon color does not exist.")
