@@ -18,6 +18,7 @@ namespace TwitchDownloaderCore.Tools
         PayingForward,
         ChannelPointHighlight,
         Raid,
+        BitBadgeTierNotification,
         Unknown
     }
 
@@ -30,6 +31,7 @@ namespace TwitchDownloaderCore.Tools
         private const string GIFTED_SINGLE_ICON_SVG = "m 55.187956,23.24523 h 6.395987 V 42.433089 H 58.38595 V 61.620947 H 13.614042 V 42.433089 H 10.416049 V 23.24523 h 6.395987 v -3.859957 c 0,-8.017328 9.689919,-12.0307888 15.359963,-6.363975 0.418936,0.418935 0.796298,0.879444 1.125692,1.371934 l 2.702305,4.055034 2.702305,-4.055034 a 8.9863623,8.9863139 0 0 1 1.125692,-1.371934 c 5.666845,-5.6668138 15.359963,-1.653353 15.359963,6.363975 z M 23.208023,19.385273 v 3.859957 h 8.301992 l -3.536982,-5.305444 a 2.6031666,2.6031528 0 0 0 -4.76501,1.445487 z m 25.583946,0 v 3.859957 h -8.301991 l 3.536983,-5.305444 a 2.6031666,2.6031528 0 0 1 4.765008,1.442286 z m 6.395987,10.255909 v 6.395951 H 39.19799 v -6.395951 z m -3.197992,25.58381 V 42.433089 H 39.19799 V 55.224992 Z M 32.802003,29.641182 v 6.395951 H 16.812036 v -6.395951 z m 0,12.791907 H 20.010028 v 12.791903 h 12.791975 z";
         private const string GIFTED_MANY_ICON_URL = "https://static-cdn.jtvnw.net/subs-image-assets/gift-illus.png";
         private const string GIFTED_ANONYMOUS_ICON_SVG = "m 54.571425,64.514958 a 4.3531428,4.2396967 0 0 1 -1.273998,-0.86096 l -1.203426,-1.172067 a 7.0051428,6.822584 0 0 0 -9.90229,0 c -3.417139,3.328092 -8.962569,3.328092 -12.383427,0 l -0.159707,-0.155553 a 7.1871427,6.9998405 0 0 0 -9.854005,-0.28216 l -1.894286,1.635103 a 4.9362858,4.8076423 0 0 1 -3.276,1.215474 H 10 V 32.337399 a 26.000001,25.322423 0 0 1 52,0 v 32.557396 h -5.627146 c -0.627714,0 -1.240569,-0.133847 -1.801429,-0.379837 z M 35.999996,14.249955 A 18.571428,18.087444 0 0 0 17.428572,32.337399 v 22.515245 a 14.619428,14.238435 0 0 1 17.471998,2.358609 l 0.163448,0.155554 c 0.516285,0.50645 1.355715,0.50645 1.875712,0 a 14.437428,14.061179 0 0 1 17.631712,-2.11623 V 32.337399 A 18.571428,18.087444 0 0 0 35.999996,14.249955 Z M 24.857142,35.954887 a 3.7142855,3.6174889 0 1 1 7.42857,0 3.7142855,3.6174889 0 0 1 -7.42857,0 z m 18.571432,-3.617488 a 3.7142859,3.6174892 0 1 0 0,7.234978 3.7142859,3.6174892 0 0 0 0,-7.234978 z";
+        private const string BIT_BADGE_TIER_NOTIFICATION_ICON_SVG = "M 14.242705,42.37453 36,11.292679 57.757295,42.37453 36,61.023641 Z M 22.566425,41.323963 36,22.13092 49.433577,41.317747 46.79162,43.580506 36,39.266345 25.205273,43.586723 22.566425,41.320854 Z";
 
         private static readonly Regex SubMessageRegex = new(@"^(subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d{1,3} months(?:, currently on a \d{1,3} month streak)?! )(.+)$", RegexOptions.Compiled);
         private static readonly Regex GiftAnonymousRegex = new(@"^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d", RegexOptions.Compiled);
@@ -39,6 +41,7 @@ namespace TwitchDownloaderCore.Tools
         private SKImage _giftSingleIcon;
         private SKImage _giftManyIcon;
         private SKImage _giftAnonymousIcon;
+        private SKImage _bitBadgeTierNotificationIcon;
 
         private readonly string _cachePath;
         private readonly SKColor _purple;
@@ -102,6 +105,9 @@ namespace TwitchDownloaderCore.Tools
                 }
             }
 
+            if (bodySpan.Equals("bits badge tier notification ", StringComparison.Ordinal))
+                return HighlightType.BitBadgeTierNotification;
+
             if (char.IsDigit(bodySpan[0]) && bodySpan.Contains("have joined!", StringComparison.Ordinal))
             {
                 // TODO: use bodySpan when .NET 7
@@ -127,6 +133,7 @@ namespace TwitchDownloaderCore.Tools
                 HighlightType.GiftedSingle => _giftSingleIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
                 HighlightType.GiftedMany => _giftManyIcon ??= GenerateGiftedManyIcon(fontSize, _cachePath, _offline),
                 HighlightType.GiftedAnonymous => _giftAnonymousIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
+                HighlightType.BitBadgeTierNotification => _bitBadgeTierNotificationIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
                 _ => null
             };
         }
@@ -168,6 +175,7 @@ namespace TwitchDownloaderCore.Tools
                 HighlightType.SubscribedPrime => SUBSCRIBED_PRIME_ICON_SVG,
                 HighlightType.GiftedSingle => GIFTED_SINGLE_ICON_SVG,
                 HighlightType.GiftedAnonymous => GIFTED_ANONYMOUS_ICON_SVG,
+                HighlightType.BitBadgeTierNotification => BIT_BADGE_TIER_NOTIFICATION_ICON_SVG,
                 _ => throw new NotSupportedException("The requested icon svg path does not exist.")
             });
             iconPath.FillType = SKPathFillType.EvenOdd;
@@ -180,6 +188,7 @@ namespace TwitchDownloaderCore.Tools
                     HighlightType.SubscribedPrime => _purple,
                     HighlightType.GiftedSingle => textColor,
                     HighlightType.GiftedAnonymous => textColor,
+                    HighlightType.BitBadgeTierNotification => textColor,
                     _ => throw new NotSupportedException("The requested icon color does not exist.")
                 },
                 IsAntialias = true,
@@ -274,6 +283,7 @@ namespace TwitchDownloaderCore.Tools
                     _giftSingleIcon?.Dispose();
                     _giftManyIcon?.Dispose();
                     _giftAnonymousIcon?.Dispose();
+                    _bitBadgeTierNotificationIcon?.Dispose();
 
                     // Set the root references to null to explicitly tell the garbage collector that the resources have been disposed
                     _subscribedTierIcon = null;
@@ -281,6 +291,7 @@ namespace TwitchDownloaderCore.Tools
                     _giftSingleIcon = null;
                     _giftManyIcon = null;
                     _giftAnonymousIcon = null;
+                    _bitBadgeTierNotificationIcon = null;
                 }
             }
             finally

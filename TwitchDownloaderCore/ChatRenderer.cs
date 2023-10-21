@@ -703,6 +703,9 @@ namespace TwitchDownloaderCore
                 case HighlightType.SubscribedPrime:
                     DrawSubscribeMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
+                case HighlightType.BitBadgeTierNotification:
+                    DrawBitsBadgeTierMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    break;
                 case HighlightType.GiftedMany:
                 case HighlightType.GiftedSingle:
                 case HighlightType.GiftedAnonymous:
@@ -734,7 +737,7 @@ namespace TwitchDownloaderCore
             drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
             defaultPos.X = drawPos.X;
 
-            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, PURPLE);
+            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, Purple);
             AddImageSection(sectionImages, ref drawPos, defaultPos);
 
             // Remove the commenter's name from the resub message
@@ -762,6 +765,41 @@ namespace TwitchDownloaderCore
             drawPos = customMessagePos;
             defaultPos = customMessagePos;
             DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
+        }
+
+        private void DrawBitsBadgeTierMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        {
+            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+
+            canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
+            drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
+            defaultPos.X = drawPos.X;
+
+            if (comment.message.fragments.Count == 1)
+            {
+                DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, messageFont.Color);
+
+                var bitsBadgeVersion = comment.message.user_badges.FirstOrDefault(x => x._id == "bits")?.version;
+                if (bitsBadgeVersion is not null)
+                {
+                    comment.message.body = bitsBadgeVersion.Length > 3
+                        ? $"just earned a new {bitsBadgeVersion.AsSpan(0, bitsBadgeVersion.Length - 3)}K Bits badge!"
+                        : $"just earned a new {bitsBadgeVersion} Bits badge!";
+                }
+                else
+                {
+                    comment.message.body = "just earned a new Bits badge!";
+                }
+
+                comment.message.fragments[0].text = comment.message.body;
+            }
+            else
+            {
+                // This should never be possible, but just in case.
+                DrawUsername(comment, sectionImages, ref drawPos, defaultPos, true, messageFont.Color);
+            }
+
+            DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
         private void DrawGiftMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
