@@ -129,7 +129,7 @@ namespace TwitchDownloaderCore.Tools
             return highlightType switch
             {
                 HighlightType.SubscribedTier => _subscribedTierIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
-                HighlightType.SubscribedPrime => _subscribedPrimeIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
+                HighlightType.SubscribedPrime => _subscribedPrimeIcon ??= GenerateSvgIcon(highlightType, _purple, fontSize),
                 HighlightType.GiftedSingle => _giftSingleIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
                 HighlightType.GiftedMany => _giftManyIcon ??= GenerateGiftedManyIcon(fontSize, _cachePath, _offline),
                 HighlightType.GiftedAnonymous => _giftAnonymousIcon ??= GenerateSvgIcon(highlightType, textColor, fontSize),
@@ -164,7 +164,7 @@ namespace TwitchDownloaderCore.Tools
             return SKImage.FromBitmap(resizedBitmap);
         }
 
-        private SKImage GenerateSvgIcon(HighlightType highlightType, SKColor textColor, double fontSize)
+        private static SKImage GenerateSvgIcon(HighlightType highlightType, SKColor iconColor, double fontSize)
         {
             using var tempBitmap = new SKBitmap(72, 72); // Icon SVG strings are scaled for 72x72
             using var tempCanvas = new SKCanvas(tempBitmap);
@@ -180,22 +180,14 @@ namespace TwitchDownloaderCore.Tools
             });
             iconPath.FillType = SKPathFillType.EvenOdd;
 
-            var iconColor = new SKPaint
+            var iconPaint = new SKPaint
             {
-                Color = highlightType switch
-                {
-                    HighlightType.SubscribedTier => textColor,
-                    HighlightType.SubscribedPrime => _purple,
-                    HighlightType.GiftedSingle => textColor,
-                    HighlightType.GiftedAnonymous => textColor,
-                    HighlightType.BitBadgeTierNotification => textColor,
-                    _ => throw new NotSupportedException("The requested icon color does not exist.")
-                },
+                Color = iconColor,
                 IsAntialias = true,
                 LcdRenderText = true
             };
 
-            tempCanvas.DrawPath(iconPath, iconColor);
+            tempCanvas.DrawPath(iconPath, iconPaint);
             var newSize = (int)(fontSize / 0.6); // 20*20px @ 12pt font
             var imageInfo = new SKImageInfo(newSize, newSize);
             var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
