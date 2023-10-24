@@ -1,0 +1,780 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Accept" xml:space="preserve">
+    <value>Прийняти</value>
+  </data>
+  <data name="AddToQueue" xml:space="preserve">
+    <value>Додати в чергу</value>
+  </data>
+  <data name="AlphaNotSupportedByCodec" xml:space="preserve">
+    <value>Ви вибрали альфа-канал (прозорість) для контейнера/кодека, який його не підтримує. Видаліть прозорість або закодуйте за допомогою MOV + RLE/PRORES або WEBM + VP8/VP9</value>
+  </data>
+  <data name="ApplicationTheme" xml:space="preserve">
+    <value>Тема </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ApplicationThemeTooltip" xml:space="preserve">
+    <value>Натисніть, щоб дізнатися, як створити власну тему!</value>
+  </data>
+  <data name="AvailableParameters" xml:space="preserve">
+    <value>Доступні параметри:</value>
+  </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>Колір фону:</value>
+  </data>
+  <data name="BannedWordsList" xml:space="preserve">
+    <value>Заборонені слова </value>
+    <comment>Leaving a trailing space</comment>
+  </data>
+  <data name="BannedWordsListTooltip" xml:space="preserve">
+    <value>Список заборонених слів або фраз - через кому, пробіли навколо ком ігноруються, НЕ враховує регістр.</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Огляд</value>
+  </data>
+  <data name="BttvEmotes" xml:space="preserve">
+    <value>BTTV смайлики:</value>
+  </data>
+  <data name="CacheFolder" xml:space="preserve">
+    <value>Тека кешу:</value>
+  </data>
+  <data name="TemplateChats" xml:space="preserve">
+    <value>Чати:</value>
+  </data>
+  <data name="ChatBadgeFilter" xml:space="preserve">
+    <value>Фільтр значків у чаті:</value>
+  </data>
+  <data name="ChatBadges" xml:space="preserve">
+    <value>значки у чаті:</value>
+  </data>
+  <data name="ChatCrop" xml:space="preserve">
+    <value>Обрізати:</value>
+  </data>
+  <data name="ChatDownload" xml:space="preserve">
+    <value>Завантаження чату</value>
+  </data>
+  <data name="ChatDownloads" xml:space="preserve">
+    <value>Завантаження чатів</value>
+  </data>
+  <data name="ChatFont" xml:space="preserve">
+    <value>Шрифт:</value>
+  </data>
+  <data name="ChatFontSize" xml:space="preserve">
+    <value>Розмір шрифту:</value>
+  </data>
+  <data name="ChatHeight" xml:space="preserve">
+    <value>Висота:</value>
+  </data>
+  <data name="ChatRender" xml:space="preserve">
+    <value>Промальовування чату</value>
+  </data>
+  <data name="ChatRenders" xml:space="preserve">
+    <value>Промальовування чатів</value>
+  </data>
+  <data name="ChatUpdate" xml:space="preserve">
+    <value>Оновлення чату</value>
+  </data>
+  <data name="ChatUpdater" xml:space="preserve">
+    <value>Оновлення чату</value>
+  </data>
+  <data name="ChatWidth" xml:space="preserve">
+    <value>Ширина:</value>
+  </data>
+  <data name="ClearCache" xml:space="preserve">
+    <value>Очистити</value>
+  </data>
+  <data name="ClearCacheConfirmation" xml:space="preserve">
+    <value>Ви впевнені, що хочете очистити кеш?\nВам слід робити це лише у випадку, якщо програма працює некоректно</value>
+  </data>
+  <data name="ClipDownload" xml:space="preserve">
+    <value>Завантаження кліпів</value>
+  </data>
+  <data name="ClipDownloads" xml:space="preserve">
+    <value>Завантаження кліпів</value>
+  </data>
+  <data name="ClipLinkId" xml:space="preserve">
+    <value>Посилання/ІН(ID) кліпу:</value>
+  </data>
+  <data name="TemplateClips" xml:space="preserve">
+    <value>Кліпи:</value>
+  </data>
+  <data name="CropEnd" xml:space="preserve">
+    <value>Кінець</value>
+  </data>
+  <data name="CropStart" xml:space="preserve">
+    <value>Початок</value>
+  </data>
+  <data name="CropVideo" xml:space="preserve">
+    <value>Обрізати відео:</value>
+  </data>
+  <data name="DateCustomFormatting" xml:space="preserve">
+    <value>форматування date_custom базується на</value>
+  </data>
+  <data name="DateCustomFormattingHyperlink" xml:space="preserve">
+    <value>Стандартні рядки формату дати та часу як у C#</value>
+  </data>
+  <data name="DeleteConfirmation" xml:space="preserve">
+    <value>Підтвердити видалення</value>
+  </data>
+  <data name="DonateTooltip" xml:space="preserve">
+    <value>Часто користуєтеся програмою і хочете мене підтримати? Пригостіть мене кавою :)</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Завантажити</value>
+  </data>
+  <data name="DownloadConnections" xml:space="preserve">
+    <value>З'єднання:</value>
+  </data>
+  <data name="DownloadFilenameTemplates" xml:space="preserve">
+    <value>Завантажити шаблони назв файлів:</value>
+  </data>
+  <data name="DownloadFormat" xml:space="preserve">
+    <value>Формат завантаження:</value>
+  </data>
+  <data name="DownloadThreads" xml:space="preserve">
+    <value>Потоків завантаження:</value>
+  </data>
+  <data name="EmbedImages" xml:space="preserve">
+    <value>Вбудовані зображення </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="EmbedImagesTooltip" xml:space="preserve">
+    <value>Вбудувати смайлики, значки та смайлики за бітси у файл завантаження - щоб потім відтворювати в автономному режимі. Корисно для архівування, розмір файлу буде більшим.</value>
+  </data>
+  <data name="EmbedMissing" xml:space="preserve">
+    <value>Вбудовані відсутні </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="EmbedMissingTooltip" xml:space="preserve">
+    <value>Вбудовує відсутні смайлики, значки та смайлики за бітси. Вже вбудовані зображення залишаться недоторканими.</value>
+  </data>
+  <data name="EnqueueDownload" xml:space="preserve">
+    <value>В чергу завантаження</value>
+  </data>
+  <data name="EnqueueRender" xml:space="preserve">
+    <value>В чергу промальовування</value>
+  </data>
+  <data name="EnqueueUpdate" xml:space="preserve">
+    <value>В чергу оновлення</value>
+  </data>
+  <data name="ErrorLog" xml:space="preserve">
+    <value>ПОМИЛКА: </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="FfmpegInputArguments" xml:space="preserve">
+    <value>Вхідні аргументи:</value>
+  </data>
+  <data name="FfmpegOptionsHyperlink" xml:space="preserve">
+    <value>Натисніть тут, щоб дізнатися про можливості FFmpeg</value>
+  </data>
+  <data name="FfmpegOutputArguments" xml:space="preserve">
+    <value>Вихідні аргументи:</value>
+  </data>
+  <data name="FfmpegParameters" xml:space="preserve">
+    <value>{fps} {height} {width} {max_int} {save_path}</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="FfmpegReset" xml:space="preserve">
+    <value>Скинути до типових</value>
+  </data>
+  <data name="FfzEmotes" xml:space="preserve">
+    <value>FFZ смайлики:</value>
+  </data>
+  <data name="FilenameTemplateParameters" xml:space="preserve">
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {crop_start} {crop_end} {crop_start_custom=""} {crop_end_custom=""} {length} {length_custom=""} {views} {game}</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="FontColor" xml:space="preserve">
+    <value>Колір шрифту:</value>
+  </data>
+  <data name="GenerateMask" xml:space="preserve">
+    <value>Генерувати маску:</value>
+  </data>
+  <data name="GetInfo" xml:space="preserve">
+    <value>Отримати довідку</value>
+  </data>
+  <data name="HideDonationButton" xml:space="preserve">
+    <value>Сховати кнопку пожертв:</value>
+  </data>
+  <data name="IgnoreUsersList" xml:space="preserve">
+    <value>Список ігнорованих користувачів </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="IgnoreUsersListTooltip" xml:space="preserve">
+    <value>Список імен користувачів - через кому, пробіли навколо ком ігноруються, НЕ враховує регістр.</value>
+  </data>
+  <data name="InvalidClipLinkId" xml:space="preserve">
+    <value>Не правильне посилання/ІН(ID) кліпу:</value>
+  </data>
+  <data name="InvalidClipLinkIdMessage" xml:space="preserve">
+    <value>Будь ласка, введіть дійсне посилання/ІН(ID) кліпу\nПриклад:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
+  </data>
+  <data name="InvalidCropInputs" xml:space="preserve">
+    <value>Неправильне вхідне значення</value>
+  </data>
+  <data name="InvalidStartEndTime" xml:space="preserve">
+    <value>Неправильне значення початку або закінчення</value>
+  </data>
+  <data name="InvalidVideoLinkId" xml:space="preserve">
+    <value>Не правильне Посилання/ІН(ID) відео:</value>
+  </data>
+  <data name="InvalidVideoLinkIdMessage" xml:space="preserve">
+    <value>Будь ласка, введіть дійсне посилання/ІН(ID) відео\nПриклад:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
+  </data>
+  <data name="JsonFile" xml:space="preserve">
+    <value>JSON файл:</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Довжина:</value>
+  </data>
+  <data name="ListOfVodsClips" xml:space="preserve">
+    <value>Список відео/кліпів(по одному на рядок)</value>
+  </data>
+  <data name="LogHeader" xml:space="preserve">
+    <value>Журнал:</value>
+  </data>
+  <data name="MassDownloads" xml:space="preserve">
+    <value>Масове завантаження</value>
+  </data>
+  <data name="Oauth" xml:space="preserve">
+    <value>OAuth (необов'язково) </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="OAuthTooltip" xml:space="preserve">
+    <value>Потрібен тільки для відео які доступні для підписників. Усі сторонні токени OAuth не працюватимуть. Натисніть, щоб переглянути відео на YouTube про те, як отримати токен.</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>Офлайн </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="OfflineTooltip" xml:space="preserve">
+    <value>Промальовувати чат, використовуючи тільки ресурси, вбудовані в json-файл чату.</value>
+  </data>
+  <data name="Outline" xml:space="preserve">
+    <value>Обрис:</value>
+  </data>
+  <data name="ParallelTaskLimits" xml:space="preserve">
+    <value>Обмеження паралельних завдань</value>
+  </data>
+  <data name="PartialRender" xml:space="preserve">
+    <value>Часткове промальовування</value>
+  </data>
+  <data name="Quality" xml:space="preserve">
+    <value>Якість:</value>
+  </data>
+  <data name="Render" xml:space="preserve">
+    <value>Промальовування</value>
+  </data>
+  <data name="RenderFfmpegWarning" xml:space="preserve">
+    <value>Це тільки для досвідчених користувачів. Якщо ви отримуєте помилку "кінець", це може бути пов'язано з наступними причинами.</value>
+  </data>
+  <data name="RenderFileFormat" xml:space="preserve">
+    <value>Формат файлу:</value>
+  </data>
+  <data name="RenderFramerate" xml:space="preserve">
+    <value>Кадрова частота:</value>
+  </data>
+  <data name="RenderCodec" xml:space="preserve">
+    <value>Кодек:</value>
+  </data>
+  <data name="RenderTabEncoding" xml:space="preserve">
+    <value>Кодування</value>
+  </data>
+  <data name="RenderTabFfmpeg" xml:space="preserve">
+    <value>FFmpeg</value>
+  </data>
+  <data name="RenderTabGeneral" xml:space="preserve">
+    <value>Основні</value>
+  </data>
+  <data name="RenderTabPreview" xml:space="preserve">
+    <value>Предперегляд</value>
+  </data>
+  <data name="RenderTabRendering" xml:space="preserve">
+    <value>Промальовування</value>
+  </data>
+  <data name="RenderTabScaling" xml:space="preserve">
+    <value>Масштабування</value>
+  </data>
+  <data name="RenderWidthHeightMustBeEven" xml:space="preserve">
+    <value>Ширина і висота повинні бути рівними</value>
+  </data>
+  <data name="ReplaceEmbeds" xml:space="preserve">
+    <value>Замінити вбудовані </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ReplaceEmbedsTooltip" xml:space="preserve">
+    <value>Замініть у файлі всі вбудовані смайлики, значки та смайлиик за бітси. Всі вбудовані зображення будуть замінені!</value>
+  </data>
+  <data name="SearchClips" xml:space="preserve">
+    <value>Пошук кліпу</value>
+  </data>
+  <data name="SearchVods" xml:space="preserve">
+    <value>Пошук відео</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Вибрати усі</value>
+  </data>
+  <data name="SelectedItems" xml:space="preserve">
+    <value>Вибрано:</value>
+  </data>
+  <data name="SetChannel" xml:space="preserve">
+    <value>Задати канал</value>
+  </data>
+  <data name="Sort" xml:space="preserve">
+    <value>Сортувати:</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="StatusDownloading" xml:space="preserve">
+    <value>Завантаження</value>
+  </data>
+  <data name="StatusError" xml:space="preserve">
+    <value>ПОМИЛКА</value>
+  </data>
+  <data name="StatusIdle" xml:space="preserve">
+    <value>Не працює</value>
+  </data>
+  <data name="StatusRendering" xml:space="preserve">
+    <value>Промальовування</value>
+  </data>
+  <data name="StatusUpdating" xml:space="preserve">
+    <value>Оновлення</value>
+  </data>
+  <data name="Streamer" xml:space="preserve">
+    <value>Стрімер:</value>
+  </data>
+  <data name="StvEmotes" xml:space="preserve">
+    <value>7TV смайлики:</value>
+  </data>
+  <data name="SubMessages" xml:space="preserve">
+    <value>Повідоалення підписників:</value>
+  </data>
+  <data name="TaskCancel" xml:space="preserve">
+    <value>Відмінити</value>
+  </data>
+  <data name="TaskErrorButton" xml:space="preserve">
+    <value>Помилка</value>
+  </data>
+  <data name="TaskQueue" xml:space="preserve">
+    <value>Черга завдань</value>
+  </data>
+  <data name="ThirdPartyEmotes" xml:space="preserve">
+    <value>Постачальник смайликів </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
+    <value>Також вбудуйте у файл смайлики сторонніх розробників. Розмір файлу буде значно більшим.</value>
+  </data>
+  <data name="TimestampFormat" xml:space="preserve">
+    <value>Формат позначки часу:</value>
+  </data>
+  <data name="TimestampNone" xml:space="preserve">
+    <value>Нема</value>
+  </data>
+  <data name="TimestampRelative" xml:space="preserve">
+    <value>Відносно</value>
+  </data>
+  <data name="Timestamps" xml:space="preserve">
+    <value>Мітки часу:</value>
+  </data>
+  <data name="TimestampUtc" xml:space="preserve">
+    <value>UTC</value>
+  </data>
+  <data name="TopAllTime" xml:space="preserve">
+    <value>Найкращі за весь час</value>
+  </data>
+  <data name="TopSevenDays" xml:space="preserve">
+    <value>Найкращі за 7 днів</value>
+  </data>
+  <data name="TopThirtyDays" xml:space="preserve">
+    <value>Найкращі за 30 днів</value>
+  </data>
+  <data name="TopTwentyFourHours" xml:space="preserve">
+    <value>Найкращі за 24 години</value>
+  </data>
+  <data name="UnableToFindThumbnail" xml:space="preserve">
+    <value>Не вдалося знайти мініатюру</value>
+  </data>
+  <data name="UnableToGetClipInfo" xml:space="preserve">
+    <value>Не вдалося отримати інформацію про кліп. Будь ласка, перевірте ІН(ID) кліпу та спробуйте ще раз.</value>
+  </data>
+  <data name="UnableToGetInfo" xml:space="preserve">
+    <value>Не вдалося отримати інформацію</value>
+  </data>
+  <data name="UnableToGetInfoMessage" xml:space="preserve">
+    <value>Не вдається отримати інформацію про відео/кліп. Будь ласка, перевірте посилання та спробуйте ще раз</value>
+  </data>
+  <data name="UnableToGetVideoInfo" xml:space="preserve">
+    <value>Не вдається отримати інформацію про відео. Будь ласка, переконайтеся, що посилання/ІН(ID) правильні та спробуйте ще раз.</value>
+  </data>
+  <data name="UnableToParseInputs" xml:space="preserve">
+    <value>Не вдається розібрати вхідні дані</value>
+  </data>
+  <data name="UnableToParseInputsMessage" xml:space="preserve">
+    <value>Будь ласка, перевірте правильність введених даних</value>
+  </data>
+  <data name="UnableToParseLink" xml:space="preserve">
+    <value>Не вдалося розібрати посилання</value>
+  </data>
+  <data name="UnableToParseLinkMessage" xml:space="preserve">
+    <value>Будь ласка, перевірте посилання відео/кліп</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Невідомо</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Оновлення</value>
+  </data>
+  <data name="UpdateRate" xml:space="preserve">
+    <value>Частота оновлення:</value>
+  </data>
+  <data name="UrlList" xml:space="preserve">
+    <value>Перелік посилань</value>
+  </data>
+  <data name="VerboseErrorOutput" xml:space="preserve">
+    <value>Розгорнутий вивід помилки</value>
+  </data>
+  <data name="VerboseErrors" xml:space="preserve">
+    <value>Розгорнуті помилки:</value>
+  </data>
+  <data name="VideoCreatedAt" xml:space="preserve">
+    <value>Створено:</value>
+  </data>
+  <data name="VideoTitle" xml:space="preserve">
+    <value>Назва:</value>
+  </data>
+  <data name="VodClipLink" xml:space="preserve">
+    <value>Посилання на кліп/відео:</value>
+  </data>
+  <data name="VodDownload" xml:space="preserve">
+    <value>Завантаження відео</value>
+  </data>
+  <data name="VodDownloads" xml:space="preserve">
+    <value>Завантаження відео</value>
+  </data>
+  <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
+    <value>Термін придатності відео закінчився або ІН(ID) невірний</value>
+  </data>
+  <data name="VodLinkId" xml:space="preserve">
+    <value>Посилання/ІН(ID) на відео:</value>
+  </data>
+  <data name="TemplateVods" xml:space="preserve">
+    <value>Відео:</value>
+  </data>
+  <data name="DownloadChat" xml:space="preserve">
+    <value>Завантажити чат</value>
+  </data>
+  <data name="DownloadFolder" xml:space="preserve">
+    <value>Тека завантажень:</value>
+  </data>
+  <data name="DownloadVideo" xml:space="preserve">
+    <value>Завантажити відео</value>
+  </data>
+  <data name="ApplicationLanguage" xml:space="preserve">
+    <value>Мова </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="RenderChat" xml:space="preserve">
+    <value>Промальовування чату</value>
+  </data>
+  <data name="HighlightIndentScale" xml:space="preserve">
+    <value>Розмір відступів:</value>
+  </data>
+  <data name="HighlightStrokeScale" xml:space="preserve">
+    <value>Розмір штрихів:</value>
+  </data>
+  <data name="BadgeScale" xml:space="preserve">
+    <value>Розмір значків:</value>
+  </data>
+  <data name="EmojiScale" xml:space="preserve">
+    <value>Розмір типових смайликів:</value>
+  </data>
+  <data name="EmoteScale" xml:space="preserve">
+    <value>Розмір смайликів від постачальників:</value>
+  </data>
+  <data name="EmoteSpacingScale" xml:space="preserve">
+    <value>Розмір відступів між смайликами:</value>
+  </data>
+  <data name="SidePaddingScale" xml:space="preserve">
+    <value>Розмір відступів:</value>
+  </data>
+  <data name="SectionHeightScale" xml:space="preserve">
+    <value>Розмір вистоти секції:</value>
+  </data>
+  <data name="VerticalSpacingScale" xml:space="preserve">
+    <value>Розмір вертикального відступу:</value>
+  </data>
+  <data name="WordSpacingScale" xml:space="preserve">
+    <value>Міжрядковий інтервал:</value>
+  </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>Файл не знайдено: </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="FatalError" xml:space="preserve">
+    <value>Критична помилка</value>
+  </data>
+  <data name="ThemeNotFound" xml:space="preserve">
+    <value>Тему не знайдено</value>
+  </data>
+  <data name="ThemeNotFoundMessage" xml:space="preserve">
+    <value>{theme} не знайдено. Повертаємо тему до системної</value>
+    <comment>Do not translate {theme}</comment>
+  </data>
+  <data name="MessageDispersion" xml:space="preserve">
+    <value>Розсіювання </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="MessageDispersionTooltip" xml:space="preserve">
+    <value>У листопаді 2022 року в API Twitch було внесено зміни, завдяки яким повідомлення чату завантажуються лише за цілі секунди. Ця опція використовує додаткові метадані, щоб спробувати відновити повідомлення до моменту, коли вони були фактично надіслані. Це може призвести до зміни порядку повідомлень.</value>
+  </data>
+  <data name="ChatCompression" xml:space="preserve">
+    <value>Стиснення:</value>
+  </data>
+  <data name="ChatCompressionNone" xml:space="preserve">
+    <value>Немає</value>
+  </data>
+  <data name="ChatCompressionGzip" xml:space="preserve">
+    <value>Gzip</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="ThemesFailedToWrite" xml:space="preserve">
+    <value>Деякі з включених тем не вдалося записати.</value>
+  </data>
+  <data name="TitleGlobalSettings" xml:space="preserve">
+    <value>Загальні налаштування</value>
+  </data>
+  <data name="TitleEnqueueOptions" xml:space="preserve">
+    <value>Налаштування черги</value>
+  </data>
+  <data name="TitleRenderRange" xml:space="preserve">
+    <value>Виберіть діапазон промальовування (у секундах)</value>
+  </data>
+  <data name="TitleUrlList" xml:space="preserve">
+    <value>Список посилань для масового завантаження</value>
+  </data>
+  <data name="TitleVideoMassDownloader" xml:space="preserve">
+    <value>Масове завантаження відео</value>
+  </data>
+  <data name="TitleClipMassDownloader" xml:space="preserve">
+    <value>Масове завантаження кліпів</value>
+  </data>
+  <data name="ApplicationLanguageTooltip" xml:space="preserve">
+    <value>TwitchDownloaderWPF недоступно на вашій рідній мові? Натисніть, щоб дізнатися, як допомогти з перекладом!</value>
+  </data>
+  <data name="InvalidFolderPath" xml:space="preserve">
+    <value>Неправильний шлях до папки</value>
+  </data>
+  <data name="InvaliFolderPathMessage" xml:space="preserve">
+    <value>Папка не існує</value>
+  </data>
+  <data name="StatusCanceled" xml:space="preserve">
+    <value>Скасовано</value>
+  </data>
+  <data name="StatusCanceling" xml:space="preserve">
+    <value>Скасування</value>
+  </data>
+  <data name="MaximumThreadBandwidth" xml:space="preserve">
+    <value>Максимальна пропускна здатність </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
+    <value>Максимальна пропускна здатність, яку дозволяється використовувати новим потокам завантаження, в кілабайтах на секунду.</value>
+  </data>
+  <data name="RenderImageSharpening" xml:space="preserve">
+    <value>Різкість:</value>
+  </data>
+  <data name="TimestampLocal" xml:space="preserve">
+    <value>Локальний</value>
+  </data>
+  <data name="SettingsTimeFormat" xml:space="preserve">
+    <value>Формат часу:</value>
+  </data>
+  <data name="NoJsonFilesSelected" xml:space="preserve">
+    <value>JSON не обрано</value>
+  </data>
+  <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
+    <value>Недостатній доступ. Може знадобитися OAuth.</value>
+  </data>
+  <data name="EmojiVendor" xml:space="preserve">
+    <value>Постачальник типових смайликів:</value>
+  </data>
+  <data name="EmojiVendorNotoColor" xml:space="preserve">
+    <value>Ґуґл</value>
+  </data>
+  <data name="EmojiVendorTwemoji" xml:space="preserve">
+    <value>Твіттер</value>
+  </data>
+  <data name="EmojiVendorNone" xml:space="preserve">
+    <value>Ніхто</value>
+  </data>
+  <data name="MaskWithNoAlpha" xml:space="preserve">
+    <value>Ви вибрали генерування маски з непрозорим тлом. Зменшіть альфа кольору фону або вимкніть генерацію маски.</value>
+  </data>
+  <data name="OutlineScale" xml:space="preserve">
+    <value>Розмір обрису:</value>
+  </data>
+  <data name="TimeSpanCustomFormatting" xml:space="preserve">
+    <value>crop_start_custom, crop_end_custom, та length_custom форматування базуються на</value>
+  </data>
+  <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
+    <value>C# стандартні рядки форматування TimeSpan</value>
+  </data>
+  <data name="UnknownErrorOccurred" xml:space="preserve">
+    <value>Виникла невідома помилка</value>
+  </data>
+  <data name="TaskCouldNotBeRemoved" xml:space="preserve">
+    <value>Завдання не вдалося видалити</value>
+  </data>
+  <data name="CancelTaskBeforeRemoving" xml:space="preserve">
+    <value>Будь ласка, скасуйте завдання або дочекайтеся його завершення, перш ніж видалити</value>
+  </data>
+  <data name="UnableToDownloadFfmpeg" xml:space="preserve">
+    <value>Не вдається завантажити FFmpeg</value>
+  </data>
+  <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
+    <value>Не вдалося завантажити FFmpeg. Будь ласка, завантажте його вручну з {0} та розмістіть файл у {1}</value>
+  </data>
+  <data name="AlternateBackgroundColor" xml:space="preserve">
+    <value>Альтернативний колір тла:</value>
+  </data>
+  <data name="AlternateMessageBackgrounds" xml:space="preserve">
+    <value>Альтернативне тло </value><comment>Leave a trailing space</comment>
+  </data>
+  <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
+    <value>Змінює колір тла кожного іншого повідомлення чату, щоб допомогти відрізнити їх.</value>
+  </data>
+  <data name="EncodeClipMetadata" xml:space="preserve">
+    <value>Кодування метаданих:</value>
+  </data>
+  <data name="MessageBoxTitleError" xml:space="preserve">
+    <value>Помилка</value>
+  </data>
+  <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
+    <value>Не вдається запустити переглядач тем програм для Windows. Код помилки: {0}</value>
+  </data>
+  <data name="LabelVideosPerPage" xml:space="preserve">
+    <value>Відео на сторінку:</value>
+  </data>
+  <data name="StatusDownloaderFFmpeg" xml:space="preserve">
+    <value>Завантаження FFmpeg {0}%</value>
+  </data>
+</root>
