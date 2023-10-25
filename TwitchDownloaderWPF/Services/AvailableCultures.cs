@@ -39,7 +39,7 @@ namespace TwitchDownloaderWPF.Services
                 Polish = new Culture("pl-PL", "Polski"),
                 Russian = new Culture("ru-RU", "Русский"),
                 Turkish = new Culture("tr-TR", "Türkçe"),
-                Ukrainian = new Culture("uk-ua", "Українська")
+                Ukrainian = new Culture("uk-ua", "Українська"),
                 SimplifiedChinese = new Culture("zh-CN", "简体中文")
             };
         }
