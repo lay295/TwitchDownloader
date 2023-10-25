@@ -30,7 +30,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{video(id:\\\"" + videoId + "\\\"){title,thumbnailURLs(height:180,width:320),createdAt,lengthSeconds,owner{id,displayName},viewCount,game{id,displayName},description}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{video(id:\\\"" + videoId + "\\\"){title,thumbnailURLs(height:180,width:320),createdAt,lengthSeconds,owner{id,displayName},viewCount,game{id,displayName,boxArtURL},description}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -912,6 +912,7 @@ namespace TwitchDownloaderCore
             return imageBytes;
         }
 
+        /// <remarks>When a given video has only 1 chapter, data.video.moments.edges will be empty.</remarks>
         public static async Task<GqlVideoChapterResponse> GetVideoChapters(int videoId)
         {
             var request = new HttpRequestMessage()
@@ -924,6 +925,39 @@ namespace TwitchDownloaderCore
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
+        }
+
+        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(int videoId, VideoInfo videoInfo)
+        {
+            var chapterResponse = await GetVideoChapters(videoId);
+
+            // Video has only 1 chapter, generate a bogus video chapter with the information we have available.
+            if (chapterResponse.data.video.moments.edges.Count == 0)
+            {
+                chapterResponse.data.video.moments.edges.Add(new VideoMomentEdge
+                {
+                    node = new VideoMoment
+                    {
+                        id = "",
+                        _type = "GAME_CHANGE",
+                        positionMilliseconds = 0,
+                        durationMilliseconds = videoInfo.lengthSeconds * 1000,
+                        description = videoInfo.game?.displayName ?? "Unknown",
+                        subDescription = "",
+                        details = new GameChangeMomentDetails
+                        {
+                            game = new Game
+                            {
+                                id = videoInfo.game?.id ?? "-1",
+                                displayName = videoInfo.game?.displayName ?? "Unknown",
+                                boxArtURL = videoInfo.game?.boxArtURL.Replace("{width}", "40").Replace("{height}", "53") ?? ""
+                            }
+                        }
+                    }
+                });
+            }
+
+            return chapterResponse;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
     {
         public string id { get; set; }
         public string displayName { get; set; }
+        public string boxArtURL { get; set; }
     }
 
     public class VideoInfo
