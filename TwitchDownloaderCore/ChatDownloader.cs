@@ -288,7 +288,7 @@ namespace TwitchDownloaderCore
                 viewCount = videoInfoResponse.data.video.viewCount;
                 game = videoInfoResponse.data.video.game?.displayName ?? "Unknown";
 
-                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(int.Parse(videoId));
+                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(int.Parse(videoId), videoInfoResponse.data.video);
                 foreach (var responseChapter in videoChapterResponse.data.video.moments.edges)
                 {
                     chatRoot.video.chapters.Add(new VideoChapter
