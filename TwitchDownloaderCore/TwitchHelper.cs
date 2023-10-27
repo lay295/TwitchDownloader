@@ -72,7 +72,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{clip(slug:\\\"" + clipId + "\\\"){title,thumbnailURL,createdAt,durationSeconds,broadcaster{id,displayName},videoOffsetSeconds,video{id},viewCount,game{id,displayName}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{clip(slug:\\\"" + clipId + "\\\"){title,thumbnailURL,createdAt,durationSeconds,broadcaster{id,displayName},videoOffsetSeconds,video{id},viewCount,game{id,displayName,boxArtURL}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -934,30 +934,47 @@ namespace TwitchDownloaderCore
             // Video has only 1 chapter, generate a bogus video chapter with the information we have available.
             if (chapterResponse.data.video.moments.edges.Count == 0)
             {
-                chapterResponse.data.video.moments.edges.Add(new VideoMomentEdge
-                {
-                    node = new VideoMoment
-                    {
-                        id = "",
-                        _type = "GAME_CHANGE",
-                        positionMilliseconds = 0,
-                        durationMilliseconds = videoInfo.lengthSeconds * 1000,
-                        description = videoInfo.game?.displayName ?? "Unknown",
-                        subDescription = "",
-                        details = new GameChangeMomentDetails
-                        {
-                            game = new Game
-                            {
-                                id = videoInfo.game?.id ?? "-1",
-                                displayName = videoInfo.game?.displayName ?? "Unknown",
-                                boxArtURL = videoInfo.game?.boxArtURL.Replace("{width}", "40").Replace("{height}", "53") ?? ""
-                            }
-                        }
-                    }
-                });
+                chapterResponse.data.video.moments.edges.Add(
+                    GenerateVideoMomentEdge(0, videoInfo.lengthSeconds, videoInfo.game?.id, videoInfo.game?.displayName, videoInfo.game?.displayName, videoInfo.game?.boxArtURL
+                    ));
             }
 
             return chapterResponse;
+        }
+
+        public static VideoMomentEdge GenerateClipChapter(Clip clipInfo)
+        {
+            return GenerateVideoMomentEdge(0, clipInfo.durationSeconds, clipInfo.game?.id, clipInfo.game?.displayName, clipInfo.game?.displayName, clipInfo.game?.boxArtURL);
+        }
+
+        private static VideoMomentEdge GenerateVideoMomentEdge(int startSeconds, int lengthSeconds, string gameId = null, string gameDisplayName = null, string gameDescription = null, string gameBoxArtUrl = null)
+        {
+            gameId ??= "-1";
+            gameDisplayName ??= "Unknown";
+            gameDescription ??= "Unknown";
+            gameBoxArtUrl ??= "";
+
+            return new VideoMomentEdge
+            {
+                node = new VideoMoment
+                {
+                    id = "",
+                    _type = "GAME_CHANGE",
+                    positionMilliseconds = startSeconds,
+                    durationMilliseconds = lengthSeconds * 1000,
+                    description = gameDescription,
+                    subDescription = "",
+                    details = new GameChangeMomentDetails
+                    {
+                        game = new Game
+                        {
+                            id = gameId,
+                            displayName = gameDisplayName,
+                            boxArtURL = gameBoxArtUrl.Replace("{width}", "40").Replace("{height}", "53")
+                        }
+                    }
+                }
+            };
         }
     }
 }
