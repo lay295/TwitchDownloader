@@ -28,7 +28,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                     return $"{time.Minutes:D2}:{time.Seconds:D2}";
                 }
 
-                return $"{time.Seconds:D2}s";
+                return $"{time.Seconds:D1}s";
             }
         }
     }
