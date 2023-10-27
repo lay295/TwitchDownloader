@@ -776,4 +776,13 @@
   <data name="StatusDownloaderFFmpeg" xml:space="preserve">
     <value>Downloading FFmpeg {0}%</value>
   </data>
+  <data name="CopyVideoIDToClipboard" xml:space="preserve">
+    <value>Copy ID to clipboard</value>
+  </data>
+  <data name="CopyVideoURLToClipboard" xml:space="preserve">
+    <value>Copy URL to clipboard</value>
+  </data>
+  <data name="OpenVideoInBrowser" xml:space="preserve">
+    <value>Open in browser</value>
+  </data>
 </root>

@@ -56,17 +56,17 @@
                         <Border BorderThickness="1" CornerRadius="8" Margin="0,0,8,8" Padding="4" MouseLeftButtonUp="Border_OnMouseLeftButtonUp" Initialized="Border_Initialized" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
                             <Border.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Copy ID to clipboard" Click="MenuItemCopyVideoID_OnClick" Foreground="{DynamicResource AppText}">
+                                    <MenuItem Header="{lex:Loc CopyVideoIDToClipboard}" Click="MenuItemCopyVideoID_OnClick" Foreground="{DynamicResource AppText}">
                                         <MenuItem.Icon>
                                             <fa:SvgAwesome Icon="Solid_Copy" Foreground="{DynamicResource AppText}" />
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Copy URL to clipboard" Click="MenuItemCopyVideoUrl_OnClick" Foreground="{DynamicResource AppText}">
+                                    <MenuItem Header="{lex:Loc CopyVideoURLToClipboard}" Click="MenuItemCopyVideoUrl_OnClick" Foreground="{DynamicResource AppText}">
                                         <MenuItem.Icon>
                                             <fa:SvgAwesome Icon="Solid_Link" Foreground="{DynamicResource AppText}" />
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Open in browser" Click="MenuItemOpenInBrowser_OnClick" Foreground="{DynamicResource AppText}">
+                                    <MenuItem Header="{lex:Loc OpenVideoInBrowser}" Click="MenuItemOpenInBrowser_OnClick" Foreground="{DynamicResource AppText}">
                                         <MenuItem.Icon>
                                             <fa:SvgAwesome Icon="Solid_ExternalLinkAlt" Foreground="{DynamicResource AppText}" />
                                         </MenuItem.Icon>
