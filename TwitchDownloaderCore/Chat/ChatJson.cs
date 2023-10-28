@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.Serialization;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
@@ -44,20 +45,9 @@ namespace TwitchDownloaderCore.Chat
                 AllowTrailingCommas = true
             };
 
-            await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            switch (Path.GetExtension(filePath).ToLower())
+            await using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                case ".gz":
-                    await using (var gs = new GZipStream(fs, CompressionMode.Decompress))
-                    {
-                        jsonDocument = await JsonDocument.ParseAsync(gs, deserializationOptions, cancellationToken);
-                    }
-                    break;
-                case ".json":
-                    jsonDocument = await JsonDocument.ParseAsync(fs, deserializationOptions, cancellationToken);
-                    break;
-                default:
-                    throw new NotSupportedException(Path.GetFileName(filePath) + " is not a valid chat format");
+                jsonDocument = await GetJsonDocumentAsync(fs, filePath, deserializationOptions, cancellationToken);
             }
 
             if (jsonDocument.RootElement.TryGetProperty("FileInfo", out JsonElement fileInfoElement))
@@ -131,7 +121,66 @@ namespace TwitchDownloaderCore.Chat
             return returnChatRoot;
         }
 
-        private static async ValueTask UpgradeChatJson(ChatRoot chatRoot)
+        private static async Task<JsonDocument> GetJsonDocumentAsync(Stream stream, string filePath, JsonDocumentOptions deserializationOptions, CancellationToken cancellationToken = default)
+        {
+            if (!stream.CanSeek)
+            {
+                // We aren't able to verify the file type. Pretend it's JSON.
+                return await JsonDocument.ParseAsync(stream, deserializationOptions, cancellationToken);
+            }
+
+            const int RENT_LENGTH = 4;
+            var rentedBuffer = ArrayPool<byte>.Shared.Rent(RENT_LENGTH);
+            try
+            {
+                if (await stream.ReadAsync(rentedBuffer.AsMemory(0, RENT_LENGTH), cancellationToken) != RENT_LENGTH)
+                {
+                    throw new EndOfStreamException($"{Path.GetFileName(filePath)} is not a valid chat format.");
+                }
+
+                stream.Seek(-RENT_LENGTH, SeekOrigin.Current);
+
+                // TODO: use list patterns when .NET 7+
+                // https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
+                switch (rentedBuffer[0], rentedBuffer[1], rentedBuffer[2], rentedBuffer[3])
+                {
+                    case (0x1F, 0x8B, _, _): // https://docs.fileformat.com/compression/gz/#gz-file-header
+                    {
+                        await using var gs = new GZipStream(stream, CompressionMode.Decompress);
+                        return await GetJsonDocumentAsync(gs, filePath, deserializationOptions, cancellationToken);
+                    }
+                    case (0x00, 0x00, 0xFE, 0xFF): // UTF-32 BE
+                    case (0xFF, 0xFE, 0x00, 0x00): // UTF-32 LE
+                    {
+                        using var sr = new StreamReader(stream, Encoding.UTF32);
+                        var jsonString = await sr.ReadToEndAsync();
+                        return JsonDocument.Parse(jsonString.AsMemory(), deserializationOptions);
+                    }
+                    case (0xFE, 0xFF, _, _): // UTF-16 BE
+                    case (0xFF, 0xFE, _, _): // UTF-16 LE
+                    {
+                        using var sr = new StreamReader(stream, Encoding.Unicode);
+                        var jsonString = await sr.ReadToEndAsync();
+                        return JsonDocument.Parse(jsonString.AsMemory(), deserializationOptions);
+                    }
+                    case (0xEF, 0xBB, 0xBF, _): // UTF-8
+                    case ((byte)'{', _, _, _): // Starts with a '{', probably JSON
+                    {
+                        return await JsonDocument.ParseAsync(stream, deserializationOptions, cancellationToken);
+                    }
+                    default:
+                    {
+                        throw new NotSupportedException($"{Path.GetFileName(filePath)} is not a valid chat format.");
+                    }
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(rentedBuffer);
+            }
+        }
+
+        private static async Task UpgradeChatJson(ChatRoot chatRoot)
         {
             const int MAX_STREAM_LENGTH = 172_800; // 48 hours in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
             chatRoot.video ??= new Video
@@ -195,11 +244,11 @@ namespace TwitchDownloaderCore.Chat
                     await JsonSerializer.SerializeAsync(fs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
                 case ChatCompression.Gzip:
-                    await using (var gs = new GZipStream(fs, CompressionLevel.SmallestSize))
-                    {
-                        await JsonSerializer.SerializeAsync(gs, chatRoot, _jsonSerializerOptions, cancellationToken);
-                    }
+                {
+                    await using var gs = new GZipStream(fs, CompressionLevel.SmallestSize);
+                    await JsonSerializer.SerializeAsync(gs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
+                }
                 default:
                     throw new NotSupportedException($"{compression} is not a supported chat compression.");
             }
