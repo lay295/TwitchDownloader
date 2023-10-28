@@ -97,6 +97,9 @@
     <EmbeddedResource Update="Translations\Strings.tr.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
+        <EmbeddedResource Update="Translations\Strings.uk.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Translations\Strings.ru.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>

@@ -288,7 +288,8 @@ namespace TwitchDownloaderCore
                 viewCount = videoInfoResponse.data.video.viewCount;
                 game = videoInfoResponse.data.video.game?.displayName ?? "Unknown";
 
-                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(int.Parse(videoId));
+                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(int.Parse(videoId), videoInfoResponse.data.video);
+                chatRoot.video.chapters.EnsureCapacity(videoChapterResponse.data.video.moments.edges.Count);
                 foreach (var responseChapter in videoChapterResponse.data.video.moments.edges)
                 {
                     chatRoot.video.chapters.Add(new VideoChapter
@@ -329,6 +330,21 @@ namespace TwitchDownloaderCore
                 viewCount = clipInfoResponse.data.clip.viewCount;
                 game = clipInfoResponse.data.clip.game?.displayName ?? "Unknown";
                 connectionCount = 1;
+
+                var clipChapter = TwitchHelper.GenerateClipChapter(clipInfoResponse.data.clip);
+                chatRoot.video.chapters.Add(new VideoChapter
+                {
+                    id = clipChapter.node.id,
+                    startMilliseconds = clipChapter.node.positionMilliseconds,
+                    lengthMilliseconds = clipChapter.node.durationMilliseconds,
+                    _type = clipChapter.node._type,
+                    description = clipChapter.node.description,
+                    subDescription = clipChapter.node.subDescription,
+                    thumbnailUrl = clipChapter.node.thumbnailURL,
+                    gameId = clipChapter.node.details.game?.id,
+                    gameDisplayName = clipChapter.node.details.game?.displayName,
+                    gameBoxArtUrl = clipChapter.node.details.game?.boxArtURL
+                });
             }
 
             chatRoot.video.id = videoId;

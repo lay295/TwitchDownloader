@@ -14,7 +14,7 @@ namespace TwitchDownloaderCore.Tools
         private const string LINE_FEED = "\u000A";
 
         public static async Task SerializeAsync(string filePath, string streamerName, string videoId, string videoTitle, DateTime videoCreation, int viewCount, string videoDescription = null,
-            double startOffsetSeconds = 0, List<VideoMomentEdge> videoMomentEdges = null, CancellationToken cancellationToken = default)
+            double startOffsetSeconds = 0, IEnumerable<VideoMomentEdge> videoMomentEdges = null, CancellationToken cancellationToken = default)
         {
             await using var fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
@@ -43,7 +43,7 @@ namespace TwitchDownloaderCore.Tools
             await sw.WriteLineAsync(@$"Views: {viewCount}");
         }
 
-        private static async Task SerializeChapters(StreamWriter sw, List<VideoMomentEdge> videoMomentEdges, double startOffsetSeconds)
+        private static async Task SerializeChapters(StreamWriter sw, IEnumerable<VideoMomentEdge> videoMomentEdges, double startOffsetSeconds)
         {
             if (videoMomentEdges is null)
             {
