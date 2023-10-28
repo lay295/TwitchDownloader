@@ -106,7 +106,7 @@ namespace TwitchDownloaderCore
                 chatRoot.video.viewCount = videoInfo.viewCount;
                 chatRoot.video.game = videoInfo.game.displayName;
 
-                var chaptersInfo = (await TwitchHelper.GetVideoChapters(videoId)).data.video.moments.edges;
+                var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo)).data.video.moments.edges;
                 foreach (var responseChapter in chaptersInfo)
                 {
                     chatRoot.video.chapters.Add(new VideoChapter
@@ -145,6 +145,21 @@ namespace TwitchDownloaderCore
                 chatRoot.video.length = clipInfo.durationSeconds;
                 chatRoot.video.viewCount = clipInfo.viewCount;
                 chatRoot.video.game = clipInfo.game.displayName;
+
+                var clipChapter = TwitchHelper.GenerateClipChapter(clipInfo);
+                chatRoot.video.chapters.Add(new VideoChapter
+                {
+                    id = clipChapter.node.id,
+                    startMilliseconds = clipChapter.node.positionMilliseconds,
+                    lengthMilliseconds = clipChapter.node.durationMilliseconds,
+                    _type = clipChapter.node._type,
+                    description = clipChapter.node.description,
+                    subDescription = clipChapter.node.subDescription,
+                    thumbnailUrl = clipChapter.node.thumbnailURL,
+                    gameId = clipChapter.node.details.game?.id,
+                    gameDisplayName = clipChapter.node.details.game?.displayName,
+                    gameBoxArtUrl = clipChapter.node.details.game?.boxArtURL
+                });
             }
         }
 
