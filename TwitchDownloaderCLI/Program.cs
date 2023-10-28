@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,13 +24,14 @@ namespace TwitchDownloaderCLI
                 config.HelpWriter = TextWriter.Null;
             });
 
-            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs);
+            var parserResult = parser.ParseArguments<TsMergeArgs, VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs);
             parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
 
             CoreLicensor.EnsureFilesExist(AppContext.BaseDirectory);
             WriteApplicationBanner((ITwitchDownloaderArgs)parserResult.Value, args);
 
             parserResult
+                .WithParsed<TsMergeArgs>(MergeTS.Merge)
                 .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
                 .WithParsed<ClipDownloadArgs>(DownloadClip.Download)
                 .WithParsed<ChatDownloadArgs>(DownloadChat.Download)
