@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -160,7 +161,7 @@ namespace TwitchDownloaderWPF
             if (StatusImage != null) StatusImage.Visibility = Visibility.Hidden;
         }
 
-        private void Border_MouseUp(object sender, MouseButtonEventArgs e)
+        private void Border_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (sender is not Border border) return;
             if (border.DataContext is not TaskData taskData) return;
@@ -270,6 +271,44 @@ namespace TwitchDownloaderWPF
             cursorList.Clear();
             cursorIndex = -1;
             await UpdateList();
+        }
+
+        private void MenuItemCopyVideoID_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: TaskData taskData }) return;
+
+            var id = taskData.Id;
+            Clipboard.SetText(id);
+
+            e.Handled = true;
+        }
+
+        private void MenuItemCopyVideoUrl_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: TaskData taskData }) return;
+
+            var id = taskData.Id;
+            var url = id.All(char.IsDigit)
+                ? $"https://twitch.tv/videos/{id}"
+                : $"https://clips.twitch.tv/{id}";
+
+            Clipboard.SetText(url);
+
+            e.Handled = true;
+        }
+
+        private void MenuItemOpenInBrowser_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: TaskData taskData }) return;
+
+            var id = taskData.Id;
+            var url = id.All(char.IsDigit)
+                ? $"https://twitch.tv/videos/{id}"
+                : $"https://clips.twitch.tv/{id}";
+
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+
+            e.Handled = true;
         }
     }
 }
