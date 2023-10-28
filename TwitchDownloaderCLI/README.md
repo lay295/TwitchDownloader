@@ -2,6 +2,7 @@
 A cross platform command line tool that can do the main functions of the GUI program, which can download VODs/Clips/Chats and render chats.
 
 - [TwitchDownloaderCLI](#twitchdownloadercli)
+  - [Arguments for mode tsmerge](#arguments-for-mode-tsmerge)
   - [Arguments for mode videodownload](#arguments-for-mode-videodownload)
   - [Arguments for mode clipdownload](#arguments-for-mode-clipdownload)
   - [Arguments for mode chatdownload](#arguments-for-mode-chatdownload)
@@ -13,6 +14,18 @@ A cross platform command line tool that can do the main functions of the GUI pro
   - [Additional Notes](#additional-notes)
 
 ---
+
+## Arguments for mode tsmerge
+<sup>Concatenates (not binary) .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) parts into another file</sup>
+
+**-l / --inputlist (REQUIRED)**
+Path to input list file in text format (one part per line).
+
+**-o / --output (REQUIRED)**
+File the program will output to.
+
+**--banner**
+(Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode videodownload
 <sup>Downloads a stream VOD or highlight from Twitch</sup>
@@ -348,6 +361,10 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 ## Example Commands
 <sup>Examples of typical use cases</sup>
 
+Concatenate several ts parts into another, keeping all streams well formatted
+
+    TwitchDownloaderCLI tsmerge -l list.txt -o output.ts
+
 Download a VOD with defaults
 
     TwitchDownloaderCLI videodownload --id 612942303 -o video.mp4
@@ -395,3 +412,5 @@ Default true boolean flags must be assigned: `--default-true-flag=false`. Defaul
 For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 
 Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
+
+The list file for tsmerge can contain relative or absolute paths, but the format differs from Windows to Linux/UNIX/MacOS (like drive paths or "/" instead of "\" to separate directories).
