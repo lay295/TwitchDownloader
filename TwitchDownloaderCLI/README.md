@@ -1,5 +1,6 @@
 # TwitchDownloaderCLI
 A cross platform command line tool that can do the main functions of the GUI program, which can download VODs/Clips/Chats and render chats.
+Also can concatenate/combine/merge Transport Stream files, either those parts downloaded with the CLI itself or from another source.
 
 - [TwitchDownloaderCLI](#twitchdownloadercli)
   - [Arguments for mode tsmerge](#arguments-for-mode-tsmerge)
