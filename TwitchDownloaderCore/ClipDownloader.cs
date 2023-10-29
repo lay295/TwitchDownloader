@@ -71,7 +71,8 @@ namespace TwitchDownloaderCore
                 _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Encoding Clip Metadata 0%"));
                 _progress.Report(new ProgressReport(0));
 
-                await EncodeClipWithMetadata(tempFile, downloadOptions.Filename, clipInfo.data.clip, cancellationToken);
+                var clipChapter = TwitchHelper.GenerateClipChapter(clipInfo.data.clip);
+                await EncodeClipWithMetadata(tempFile, downloadOptions.Filename, clipInfo.data.clip, clipChapter, cancellationToken);
 
                 _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Encoding Clip Metadata 100%"));
                 _progress.Report(new ProgressReport(100));
@@ -137,14 +138,14 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task EncodeClipWithMetadata(string inputFile, string destinationFile, Clip clipMetadata, CancellationToken cancellationToken)
+        private async Task EncodeClipWithMetadata(string inputFile, string destinationFile, Clip clipMetadata, VideoMomentEdge clipChapter, CancellationToken cancellationToken)
         {
             var metadataFile = $"{Path.GetFileName(inputFile)}_metadata.txt";
 
             try
             {
                 await FfmpegMetadata.SerializeAsync(metadataFile, clipMetadata.broadcaster.displayName, downloadOptions.Id, clipMetadata.title, clipMetadata.createdAt, clipMetadata.viewCount,
-                    cancellationToken: cancellationToken);
+                    videoMomentEdges: new[] { clipChapter }, cancellationToken: cancellationToken);
 
                 var process = new Process
                 {

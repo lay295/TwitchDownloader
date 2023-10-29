@@ -27,8 +27,7 @@ namespace TwitchDownloaderCore
         public bool Disposed { get; private set; } = false;
         public ChatRoot chatRoot { get; private set; } = new ChatRoot();
 
-        private const string PURPLE = "#7B2CF2";
-        private static readonly SKColor Purple = SKColor.Parse(PURPLE);
+        private static readonly SKColor Purple = SKColor.Parse("#7B2CF2");
         private static readonly string[] DefaultUsernameColors = { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
 
         private static readonly Regex RtlRegex = new("[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]", RegexOptions.Compiled);
@@ -704,6 +703,9 @@ namespace TwitchDownloaderCore
                 case HighlightType.SubscribedPrime:
                     DrawSubscribeMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
+                case HighlightType.BitBadgeTierNotification:
+                    DrawBitsBadgeTierMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    break;
                 case HighlightType.GiftedMany:
                 case HighlightType.GiftedSingle:
                 case HighlightType.GiftedAnonymous:
@@ -735,7 +737,7 @@ namespace TwitchDownloaderCore
             drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
             defaultPos.X = drawPos.X;
 
-            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, PURPLE);
+            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, Purple);
             AddImageSection(sectionImages, ref drawPos, defaultPos);
 
             // Remove the commenter's name from the resub message
@@ -763,6 +765,41 @@ namespace TwitchDownloaderCore
             drawPos = customMessagePos;
             defaultPos = customMessagePos;
             DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
+        }
+
+        private void DrawBitsBadgeTierMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        {
+            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+
+            canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
+            drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
+            defaultPos.X = drawPos.X;
+
+            if (comment.message.fragments.Count == 1)
+            {
+                DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, messageFont.Color);
+
+                var bitsBadgeVersion = comment.message.user_badges.FirstOrDefault(x => x._id == "bits")?.version;
+                if (bitsBadgeVersion is not null)
+                {
+                    comment.message.body = bitsBadgeVersion.Length > 3
+                        ? $"just earned a new {bitsBadgeVersion.AsSpan(0, bitsBadgeVersion.Length - 3)}K Bits badge!"
+                        : $"just earned a new {bitsBadgeVersion} Bits badge!";
+                }
+                else
+                {
+                    comment.message.body = "just earned a new Bits badge!";
+                }
+
+                comment.message.fragments[0].text = comment.message.body;
+            }
+            else
+            {
+                // This should never be possible, but just in case.
+                DrawUsername(comment, sectionImages, ref drawPos, defaultPos, true, messageFont.Color);
+            }
+
+            DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
         private void DrawGiftMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
@@ -1291,22 +1328,25 @@ namespace TwitchDownloaderCore
             return measure.Width;
         }
 
-        private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, string colorOverride = null)
+        private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null)
         {
-            SKColor userColor = SKColor.Parse(colorOverride ?? comment.message.user_color ?? DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
+            var userColor = colorOverride ?? SKColor.Parse(comment.message.user_color ?? DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
             if (colorOverride is null)
-                userColor = GenerateUserColor(userColor, renderOptions.BackgroundColor, renderOptions);
+                userColor = AdjustColorVisibility(userColor, renderOptions.BackgroundColor, renderOptions);
 
             using SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
                 ? GetFallbackFont(comment.commenter.display_name.First(IsNotAscii)).Clone()
                 : nameFont.Clone();
 
             userPaint.Color = userColor;
-            string userName = comment.commenter.display_name + (appendColon ? ":" : "");
+            var userName = appendColon
+                ? comment.commenter.display_name + ":"
+                : comment.commenter.display_name;
+
             DrawText(userName, userPaint, true, sectionImages, ref drawPos, defaultPos, false);
         }
 
-        private static SKColor GenerateUserColor(SKColor userColor, SKColor backgroundColor, ChatRenderOptions renderOptions)
+        private static SKColor AdjustColorVisibility(SKColor userColor, SKColor backgroundColor, ChatRenderOptions renderOptions)
         {
             backgroundColor.ToHsl(out _, out _, out float backgroundBrightness);
             userColor.ToHsl(out float userHue, out float userSaturation, out float userBrightness);
@@ -1654,7 +1694,7 @@ namespace TwitchDownloaderCore
 
         public async Task<ChatRoot> ParseJsonAsync(CancellationToken cancellationToken = new())
         {
-            chatRoot = await ChatJson.DeserializeAsync(renderOptions.InputFile, true, true, cancellationToken);
+            chatRoot = await ChatJson.DeserializeAsync(renderOptions.InputFile, true, false, true, cancellationToken);
             return chatRoot;
         }
 

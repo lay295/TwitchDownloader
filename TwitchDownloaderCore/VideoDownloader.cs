@@ -53,7 +53,7 @@ namespace TwitchDownloaderCore
                     throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
                 }
 
-                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(downloadOptions.Id);
+                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(downloadOptions.Id, videoInfoResponse.data.video);
 
                 var (playlistUrl, bandwidth) = await GetPlaylistUrl();
                 var baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
@@ -98,7 +98,7 @@ namespace TwitchDownloaderCore
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 VideoInfo videoInfo = videoInfoResponse.data.video;
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
-                    videoInfo.description.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), startOffset, videoChapterResponse.data.video.moments.edges, cancellationToken);
+                    videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), startOffset, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
                 var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
                 if (!finalizedFileDirectory.Exists)
@@ -223,8 +223,8 @@ namespace TwitchDownloaderCore
                         throw;
                     }
 
-                    const int aPrimeNumber = 71;
-                    Thread.Sleep(aPrimeNumber);
+                    const int A_PRIME_NUMBER = 71;
+                    Thread.Sleep(A_PRIME_NUMBER);
                 }
             }
 

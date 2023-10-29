@@ -66,8 +66,7 @@ namespace TwitchDownloaderWPF
 
             try
             {
-                ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, true, false, CancellationToken.None);
-                ChatJsonInfo.comments.RemoveRange(1, ChatJsonInfo.comments.Count - 2);
+                ChatJsonInfo = await ChatJson.DeserializeAsync(InputFile, true, true, false, CancellationToken.None);
                 GC.Collect();
             }
             catch (Exception ex)

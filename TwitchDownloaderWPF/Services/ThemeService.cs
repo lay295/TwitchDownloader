@@ -103,7 +103,13 @@ namespace TwitchDownloaderWPF.Services
             foreach (Window window in windows)
             {
                 var windowHandle = new WindowInteropHelper(window).Handle;
-                NativeFunctions.SetWindowAttribute(windowHandle, darkTitleBarAttribute, ref shouldUseDarkTitleBar, sizeof(int));
+                if (windowHandle == IntPtr.Zero)
+                    continue;
+
+                unsafe
+                {
+                    _ = NativeFunctions.SetWindowAttribute(windowHandle, darkTitleBarAttribute, &shouldUseDarkTitleBar, sizeof(int));
+                }
             }
 
             Window wnd = new()
@@ -135,12 +141,13 @@ namespace TwitchDownloaderWPF.Services
                 var xmlReader = new XmlSerializer(typeof(ThemeResourceDictionaryModel));
                 using var streamReader = new StreamReader(themeFile);
                 var themeValues = (ThemeResourceDictionaryModel)xmlReader.Deserialize(streamReader)!;
+                var brushConverter = new BrushConverter();
 
                 foreach (var solidBrush in themeValues.SolidColorBrush)
                 {
                     try
                     {
-                        _wpfApplication.Resources[solidBrush.Key] = (SolidColorBrush)new BrushConverter().ConvertFrom(solidBrush.Color);
+                        _wpfApplication.Resources[solidBrush.Key] = (SolidColorBrush)brushConverter.ConvertFrom(solidBrush.Color);
                     }
                     catch (FormatException) { }
                 }
