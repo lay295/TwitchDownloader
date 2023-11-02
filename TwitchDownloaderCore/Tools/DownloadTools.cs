@@ -439,11 +439,7 @@ namespace TwitchDownloaderCore.Tools
             int partCount = videoParts.Count;
             int doneCount = 0;
 
-#if DEBUG
             await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.Read);
-#else
-            await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None);
-#endif
             foreach (var part in videoParts)
             {
                 await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);

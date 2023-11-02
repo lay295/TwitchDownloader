@@ -84,7 +84,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                         string downloadPath = Path.Combine(tempDownloadFolder, Path.GetFileName(downloadUrls[i].DownloadUrl)!);
                         await DownloadTools.DownloadFileAsync(downloadUrls[i].DownloadUrl, downloadPath, downloadOptions.ThrottleKib, null, cancellationToken);
 
-                        await using (var fs = File.Open(downloadPath, FileMode.Open, FileAccess.Read, FileShare.None))
+                        await using (var fs = File.Open(downloadPath, FileMode.Open, FileAccess.Read, FileShare.Read))
                         {
                             fs.Seek(downloadUrls[i].StartByteOffset, SeekOrigin.Begin);
                             await fs.CopyBytesToAsync(outputStream, downloadUrls[i].ByteRangeLength, cancellationToken);
