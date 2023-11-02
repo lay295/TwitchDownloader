@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
@@ -12,13 +10,10 @@ namespace TwitchDownloaderCore.Tools
     {
         public static DriveInfo GetOutputDrive(string outputPath)
         {
-            // Cannot instantiate a null DriveInfo
-            DriveInfo outputDrive = DriveInfo.GetDrives()[0];
+            var outputDrive = DriveInfo.GetDrives()[0];
 
-            // Get the name of the drive we are writing to
             foreach (var drive in DriveInfo.GetDrives())
             {
-                // If our output path starts with the drive name
                 if (outputPath.StartsWith(drive.Name))
                 {
                     // In Linux, the root drive is '/' while mounted drives are located in '/mnt/' or '/run/media/'
@@ -37,7 +32,7 @@ namespace TwitchDownloaderCore.Tools
 
         public static async Task WaitForDrive(DriveInfo drive, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            int driveNotReadyCount = 0;
+            var driveNotReadyCount = 0;
             while (!drive.IsReady)
             {
                 progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Waiting for output drive ({(driveNotReadyCount + 1) / 2f:F1}s)"));
@@ -55,8 +50,8 @@ namespace TwitchDownloaderCore.Tools
             var videoSizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth,
                 downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
                 downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : videoLength);
-            var tempFolderDrive = DriveHelper.GetOutputDrive(downloadOptions.TempFolder);
-            var destinationDrive = DriveHelper.GetOutputDrive(downloadOptions.Filename);
+            var tempFolderDrive = GetOutputDrive(downloadOptions.TempFolder);
+            var destinationDrive = GetOutputDrive(downloadOptions.Filename);
 
             if (tempFolderDrive.Name == destinationDrive.Name)
             {

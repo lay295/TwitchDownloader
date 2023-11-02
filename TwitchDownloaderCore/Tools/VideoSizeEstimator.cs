@@ -31,6 +31,5 @@ namespace TwitchDownloaderCore.Tools
             var totalTime = endTime - startTime;
             return (long)(bandwidth / 8d * totalTime.TotalSeconds);
         }
-
     }
 }

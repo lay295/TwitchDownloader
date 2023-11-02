@@ -1,14 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
-using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
-using TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -32,9 +30,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var vodClipIdRegex = new Regex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:videos|\S+\/clip)?\/?)[\w-]+?(?=$|\?)");
-            var vodClipIdMatch = vodClipIdRegex.Match(inputOptions.Id);
-            if (!vodClipIdMatch.Success)
+            if (!UrlParse.TryParseVideoOrClipId(inputOptions.Id, out var videoPlatform, out var videoType, out var videoId))
             {
                 Console.WriteLine("[ERROR] - Unable to parse Vod/Clip ID/URL.");
                 Environment.Exit(1);
@@ -51,7 +47,9 @@ namespace TwitchDownloaderCLI.Modes
                     ".txt" or ".text" or "" => ChatFormat.Text,
                     _ => throw new NotSupportedException($"{fileExtension} is not a valid chat file extension.")
                 },
-                Id = vodClipIdMatch.Value,
+                Id = videoId,
+                VideoPlatform = videoPlatform,
+                VideoType = videoType,
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,

@@ -11,8 +11,8 @@ namespace TwitchDownloaderCore.Tools
     {
         public readonly Stream BaseStream;
         public readonly int MaximumBytesPerSecond;
-        private readonly Stopwatch _watch = Stopwatch.StartNew();
-        private long _totalBytesRead = 0;
+        private Stopwatch _watch;
+        private long _totalBytesRead;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ThrottledStream"/> class
@@ -78,6 +78,8 @@ namespace TwitchDownloaderCore.Tools
         {
             if (MaximumBytesPerSecond <= 0)
                 return count;
+
+            _watch ??= Stopwatch.StartNew();
 
             var canSend = (long)(_watch.ElapsedMilliseconds * (MaximumBytesPerSecond / 1000.0));
 

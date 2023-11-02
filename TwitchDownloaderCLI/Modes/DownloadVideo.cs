@@ -1,13 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
-using TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -34,9 +33,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var vodIdRegex = new Regex(@"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?)");
-            var vodIdMatch = vodIdRegex.Match(inputOptions.Id);
-            if (!vodIdMatch.Success)
+            if (UrlParse.TryParseVod(inputOptions.Id, out var videoPlatform, out var videoId))
             {
                 Console.WriteLine("[ERROR] - Unable to parse Vod ID/URL.");
                 Environment.Exit(1);
@@ -46,7 +43,8 @@ namespace TwitchDownloaderCLI.Modes
             {
                 DownloadThreads = inputOptions.DownloadThreads,
                 ThrottleKib = inputOptions.ThrottleKib,
-                Id = vodIdMatch.ValueSpan.ToString(),
+                Id = videoId,
+                VideoPlatform = videoPlatform,
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,

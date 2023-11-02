@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using TwitchDownloaderCore.Tools;
 
@@ -10,6 +11,13 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
     {
         public string name { get; set; }
         public int id { get; set; }
+    }
+
+    public class LegacyStreamer
+    {
+        public string name { get; set; }
+        /// <remarks>Some old chats use a string instead of an integer.</remarks>
+        public JsonElement id { get; set; }
     }
 
     [DebuggerDisplay("{display_name}")]
@@ -194,6 +202,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
     public class Video
     {
         public string title { get; set; }
+        public string description { get; set; }
         public string id { get; set; }
         public DateTime created_at { get; set; }
         public double start { get; set; }

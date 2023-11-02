@@ -41,8 +41,15 @@ namespace TwitchDownloaderWPF.Behaviors
             var caretPos = textBox.CaretIndex;
             var text = textBox.Text;
 
-            var start = text.LastIndexOf('\n', caretPos, caretPos);
-            var end = text.IndexOf('\n', caretPos);
+            var start = -1;
+            var end = -1;
+
+            // CaretIndex can be negative for some reason.
+            if (caretPos >= 0)
+            {
+                start = text.LastIndexOf('\n', caretPos, caretPos);
+                end = text.IndexOf('\n', caretPos);
+            }
 
             if (start == -1)
             {

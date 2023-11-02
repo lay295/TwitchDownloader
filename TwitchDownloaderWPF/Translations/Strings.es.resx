@@ -470,7 +470,7 @@
   <data name="TaskCancel" xml:space="preserve">
     <value>Cancelar</value>
   </data>
-  <data name="TaskError" xml:space="preserve">
+  <data name="TaskErrorButton" xml:space="preserve">
     <value>Error</value>
   </data>
   <data name="TaskQueue" xml:space="preserve">
@@ -765,5 +765,26 @@
   </data>
   <data name="EncodeClipMetadata" xml:space="preserve">
     <value>Codificar metadatos:</value>
+  </data>
+  <data name="MessageBoxTitleError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
+    <value>No se puede iniciar el observador de temas de la aplicación de Windows. Código de error: {0}</value>
+  </data>
+  <data name="LabelVideosPerPage" xml:space="preserve">
+    <value>Vídeos por página:</value>
+  </data>
+  <data name="StatusDownloaderFFmpeg" xml:space="preserve">
+    <value>Descarga FFmpeg {0}%</value>
+  </data>
+  <data name="CopyVideoIDToClipboard" xml:space="preserve">
+    <value>Copy ID to clipboard</value>
+  </data>
+  <data name="CopyVideoURLToClipboard" xml:space="preserve">
+    <value>Copy URL to clipboard</value>
+  </data>
+  <data name="OpenVideoInBrowser" xml:space="preserve">
+    <value>Open in browser</value>
   </data>
 </root>

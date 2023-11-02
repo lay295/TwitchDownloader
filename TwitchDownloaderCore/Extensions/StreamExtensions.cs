@@ -42,5 +42,28 @@ namespace TwitchDownloaderCore.Extensions
                 ArrayPool<byte>.Shared.Return(rentedBuffer);
             }
         }
+
+        public static async Task CopyBytesToAsync(this Stream source, Stream destination, long byteCount, CancellationToken cancellationToken = default)
+        {
+            var rentedBuffer = ArrayPool<byte>.Shared.Rent(STREAM_DEFAULT_BUFFER_LENGTH);
+
+            try
+            {
+                long totalBytesRead = 0;
+                while (totalBytesRead < byteCount)
+                {
+                    var bytesToCopy = (int)Math.Min(byteCount - totalBytesRead, STREAM_DEFAULT_BUFFER_LENGTH);
+
+                    var bytesRead = await source.ReadAsync(rentedBuffer, 0, bytesToCopy, cancellationToken).ConfigureAwait(false);
+                    await destination.WriteAsync(rentedBuffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+
+                    totalBytesRead += bytesRead;
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(rentedBuffer);
+            }
+        }
     }
 }

@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,9 +17,6 @@ using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
-using TwitchDownloaderCore.VideoPlatforms.Twitch;
-using TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders;
-using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
@@ -33,7 +28,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageVodDownload : Page
     {
-        public Dictionary<string, (string url, int bandwidth)> videoQualities = new();
+        public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = new();
         public string currentVideoId;
         public VideoPlatform platform;
         public DateTime currentVideoTime;
@@ -54,8 +49,8 @@ namespace TwitchDownloaderWPF
             checkEnd.IsEnabled = isEnabled;
             SplitBtnDownload.IsEnabled = isEnabled;
             MenuItemEnqueue.IsEnabled = isEnabled;
-            SetEnabledCropStart(isEnabled & (bool)checkStart.IsChecked);
-            SetEnabledCropEnd(isEnabled & (bool)checkEnd.IsChecked);
+            SetEnabledCropStart(isEnabled & checkStart.IsChecked.GetValueOrDefault());
+            SetEnabledCropEnd(isEnabled & checkEnd.IsChecked.GetValueOrDefault());
         }
 
         private void SetEnabledCropStart(bool isEnabled)
@@ -102,26 +97,19 @@ namespace TwitchDownloaderWPF
                 {
                     videoInfo = await PlatformHelper.GetVideoInfo(videoPlatform, videoId, TextOauth.Text);
                 }
-                catch (NullReferenceException ex) 
+                catch (NullReferenceException ex)
                 {
                     if (ex.Message.Contains("Insufficient access"))
                         throw new NullReferenceException(Translations.Strings.InsufficientAccessMayNeedOauth);
                 }
 
-                try
-                {
-                    string thumbUrl = videoInfo.ThumbnailUrl;
-                    imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                }
-                catch
+                var thumbUrl = videoInfo!.ThumbnailUrl;
+                if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                 {
                     AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                    if (success)
-                    {
-                        imgThumbnail.Source = image;
-                    }
+                    _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                 }
+                imgThumbnail.Source = image;
 
                 comboQuality.Items.Clear();
                 videoQualities.Clear();
@@ -135,7 +123,7 @@ namespace TwitchDownloaderWPF
                         comboQuality.Items.Add(videoQuality.Quality);
                     }
                 }
-                
+
                 comboQuality.SelectedIndex = 0;
 
                 vodLength = TimeSpan.FromSeconds(videoInfo.Duration);
@@ -144,7 +132,7 @@ namespace TwitchDownloaderWPF
                 var videoCreatedAt = videoInfo.CreatedAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
-                var urlTimeCodeMatch = Regex.Match(textUrl.Text, @"(?<=\?t=)\d+h\d+m\d+s");
+                var urlTimeCodeMatch = UrlParse.UrlTimeCode.Match(textUrl.Text);
                 if (urlTimeCodeMatch.Success)
                 {
                     var time = TimeSpanExtensions.ParseTimeCode(urlTimeCodeMatch.ValueSpan);
@@ -212,9 +200,9 @@ namespace TwitchDownloaderWPF
                 Oauth = TextOauth.Text,
                 Quality = GetQualityWithoutSize(comboQuality.Text).ToString(),
                 Id = currentVideoId,
-                CropBeginning = (bool)checkStart.IsChecked,
+                CropBeginning = checkStart.IsChecked.GetValueOrDefault(),
                 CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds),
-                CropEnding = (bool)checkEnd.IsChecked,
+                CropEnding = checkEnd.IsChecked.GetValueOrDefault(),
                 CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds),
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath,
@@ -289,20 +277,9 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private static int ValidateUrl(string text)
-        {
-            var vodIdMatch = Regex.Match(text, @"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?)");
-            if (vodIdMatch.Success && int.TryParse(vodIdMatch.ValueSpan, out var vodId))
-            {
-                return vodId;
-            }
-
-            return -1;
-        }
-
         public bool ValidateInputs()
         {
-            if ((bool)checkStart.IsChecked)
+            if (checkStart.IsChecked.GetValueOrDefault())
             {
                 var beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
                 if (beginTime.TotalSeconds >= vodLength.TotalSeconds)
@@ -310,7 +287,7 @@ namespace TwitchDownloaderWPF
                     return false;
                 }
 
-                if ((bool)checkEnd.IsChecked)
+                if (checkEnd.IsChecked.GetValueOrDefault())
                 {
                     var endTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
                     if (endTime.TotalSeconds < beginTime.TotalSeconds)
@@ -377,14 +354,14 @@ namespace TwitchDownloaderWPF
 
         private void checkStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropStart((bool)checkStart.IsChecked);
+            SetEnabledCropStart(checkStart.IsChecked.GetValueOrDefault());
 
             UpdateVideoSizeEstimates();
         }
 
         private void checkEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropEnd((bool)checkEnd.IsChecked);
+            SetEnabledCropEnd(checkEnd.IsChecked.GetValueOrDefault());
 
             UpdateVideoSizeEstimates();
         }

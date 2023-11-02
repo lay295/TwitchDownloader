@@ -9,12 +9,14 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Twitch;
 using TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 
 namespace TwitchDownloaderCore
 {
     public sealed class ChatUpdater
     {
         public ChatRoot chatRoot { get; internal set; } = new();
+        private readonly object _cropChatRootLock = new();
 
         private readonly ChatUpdateOptions _updateOptions;
 
@@ -24,11 +26,6 @@ namespace TwitchDownloaderCore
             _updateOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(_updateOptions.TempFolder) ? Path.GetTempPath() : _updateOptions.TempFolder,
                 "TwitchDownloader");
-        }
-
-        private static class SharedObjects
-        {
-            internal static object CropChatRootLock = new();
         }
 
         public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
@@ -41,9 +38,12 @@ namespace TwitchDownloaderCore
 
             // Dynamic step count setup
             int currentStep = 0;
-            int totalSteps = 1;
+            int totalSteps = 2;
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding) totalSteps++;
             if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds) totalSteps++;
+
+            currentStep++;
+            await UpdateVideoInfo(totalSteps, currentStep, progress, cancellationToken);
 
             // If we are editing the chat crop
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding)
@@ -61,7 +61,7 @@ namespace TwitchDownloaderCore
 
             // Finally save the output to file!
             progress.Report(new ProgressReport(ReportType.NewLineStatus, $"Writing Output File [{++currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(totalSteps / currentStep));
+            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
 
             switch (_updateOptions.OutputFormat)
             {
@@ -79,17 +79,100 @@ namespace TwitchDownloaderCore
             }
         }
 
+        private async Task UpdateVideoInfo(int totalSteps, int currentStep, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        {
+            progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Updating Video Info [{currentStep}/{totalSteps}]"));
+            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
+
+            if (chatRoot.video.id.All(char.IsDigit))
+            {
+                var videoId = int.Parse(chatRoot.video.id);
+                VideoInfo videoInfo = null;
+                try
+                {
+                    videoInfo = (await TwitchHelper.GetVideoInfo(videoId)).data.video;
+                }
+                catch { /* Eat the exception */ }
+
+                if (videoInfo is null)
+                {
+                    progress.Report(new ProgressReport(ReportType.SameLineStatus, "Unable to fetch video info, deleted/expired VOD possibly?"));
+                    return;
+                }
+
+                chatRoot.video.title = videoInfo.title;
+                chatRoot.video.description = videoInfo.description;
+                chatRoot.video.created_at = videoInfo.createdAt;
+                chatRoot.video.length = videoInfo.lengthSeconds;
+                chatRoot.video.viewCount = videoInfo.viewCount;
+                chatRoot.video.game = videoInfo.game.displayName;
+
+                var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo)).data.video.moments.edges;
+                foreach (var responseChapter in chaptersInfo)
+                {
+                    chatRoot.video.chapters.Add(new VideoChapter
+                    {
+                        id = responseChapter.node.id,
+                        startMilliseconds = responseChapter.node.positionMilliseconds,
+                        lengthMilliseconds = responseChapter.node.durationMilliseconds,
+                        _type = responseChapter.node._type,
+                        description = responseChapter.node.description,
+                        subDescription = responseChapter.node.subDescription,
+                        thumbnailUrl = responseChapter.node.thumbnailURL,
+                        gameId = responseChapter.node.details.game?.id,
+                        gameDisplayName = responseChapter.node.details.game?.displayName,
+                        gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL
+                    });
+                }
+            }
+            else
+            {
+                var clipId = chatRoot.video.id;
+                Clip clipInfo = null;
+                try
+                {
+                    clipInfo = (await TwitchHelper.GetClipInfo(clipId)).data.clip;
+                }
+                catch { /* Eat the exception */ }
+
+                if (clipInfo is null)
+                {
+                    progress.Report(new ProgressReport(ReportType.SameLineStatus, "Unable to fetch clip info, deleted possibly?"));
+                    return;
+                }
+
+                chatRoot.video.title = clipInfo.title;
+                chatRoot.video.created_at = clipInfo.createdAt;
+                chatRoot.video.length = clipInfo.durationSeconds;
+                chatRoot.video.viewCount = clipInfo.viewCount;
+                chatRoot.video.game = clipInfo.game.displayName;
+
+                var clipChapter = TwitchHelper.GenerateClipChapter(clipInfo);
+                chatRoot.video.chapters.Add(new VideoChapter
+                {
+                    id = clipChapter.node.id,
+                    startMilliseconds = clipChapter.node.positionMilliseconds,
+                    lengthMilliseconds = clipChapter.node.durationMilliseconds,
+                    _type = clipChapter.node._type,
+                    description = clipChapter.node.description,
+                    subDescription = clipChapter.node.subDescription,
+                    thumbnailUrl = clipChapter.node.thumbnailURL,
+                    gameId = clipChapter.node.details.game?.id,
+                    gameDisplayName = clipChapter.node.details.game?.displayName,
+                    gameBoxArtUrl = clipChapter.node.details.game?.boxArtURL
+                });
+            }
+        }
+
         private async Task UpdateChatCrop(int totalSteps, int currentStep, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Updating Chat Crop [{currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(totalSteps / currentStep));
-
-            chatRoot.video ??= new Video();
+            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
 
             bool cropTaskVodExpired = false;
             var cropTaskProgress = new Progress<ProgressReport>(report =>
             {
-                if (((string)report.Data).ToLower().Contains("vod is expired"))
+                if (((string)report.Data).Contains("vod is expired", StringComparison.OrdinalIgnoreCase))
                 {
                     // If the user is moving both crops in one command, we only want to propagate a 'vod expired/id corrupt' report once
                     if (cropTaskVodExpired)
@@ -146,7 +229,7 @@ namespace TwitchDownloaderCore
         private async Task UpdateEmbeds(int currentStep, int totalSteps, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
             progress.Report(new ProgressReport(ReportType.NewLineStatus, $"Updating Embeds [{currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(totalSteps / currentStep));
+            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
 
             chatRoot.embeddedData ??= new EmbeddedData();
 
@@ -272,7 +355,7 @@ namespace TwitchDownloaderCore
             }
 
             // Adjust the crop parameter
-            double beginningCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negavite (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+            double beginningCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negative (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
             chatRoot.video.start = Math.Min(Math.Max(_updateOptions.CropBeginningTime, 0.0), beginningCropClamp);
         }
 
@@ -305,7 +388,7 @@ namespace TwitchDownloaderCore
             }
 
             // Adjust the crop parameter
-            double endingCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negavite (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+            double endingCropClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negative (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
             chatRoot.video.end = Math.Min(Math.Max(_updateOptions.CropEndingTime, 0.0), endingCropClamp);
         }
 
@@ -314,7 +397,7 @@ namespace TwitchDownloaderCore
             TwitchChatDownloader chatDownloader = new TwitchChatDownloader(downloadOptions, new Progress<ProgressReport>());
             await chatDownloader.DownloadAsync(cancellationToken);
 
-            ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, getEmbeds: false, cancellationToken);
+            ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, onlyFirstAndLastComments: false, getEmbeds: false, cancellationToken);
 
             // Append the new comment section
             SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
@@ -326,7 +409,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            lock (SharedObjects.CropChatRootLock)
+            lock (_cropChatRootLock)
             {
                 foreach (var comment in chatRoot.comments)
                 {
@@ -346,6 +429,7 @@ namespace TwitchDownloaderCore
             {
                 Id = videoId,
                 DownloadFormat = ChatFormat.Json, // json is required to parse as a new chatroot object
+                Compression = ChatCompression.Gzip,
                 Filename = tempFile,
                 CropBeginning = true,
                 CropBeginningTime = sectionStart,
@@ -362,7 +446,7 @@ namespace TwitchDownloaderCore
 
         public async Task<ChatRoot> ParseJsonAsync(CancellationToken cancellationToken = new())
         {
-            chatRoot = await ChatJson.DeserializeAsync(_updateOptions.InputFile, true, true, cancellationToken);
+            chatRoot = await ChatJson.DeserializeAsync(_updateOptions.InputFile, true, false, true, cancellationToken);
             return chatRoot;
         }
     }

@@ -14,7 +14,8 @@
   </p>
 </p>
 
-[**Readme in Spanish**](README_es.md)
+[**Readme in Spanish**](README_es.md)  
+[**Readme in Turkish**](README_tr.md)
 
 ## Chat Render Example
 
@@ -159,6 +160,7 @@ cd TwitchDownloader
 ```
 dotnet restore
 ```
+- Non-Windows devices may need to explicitly specify a project to restore, i.e. `dotnet restore TwitchDownloaderCLI`
 4. a) Build the GUI:
 ```
 dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false

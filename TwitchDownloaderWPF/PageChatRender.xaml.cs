@@ -96,13 +96,13 @@ namespace TwitchDownloaderWPF
                 InputFile = textJson.Text,
                 BackgroundColor = backgroundColor,
                 AlternateBackgroundColor = altBackgroundColor,
-                AlternateMessageBackgrounds = (bool)checkAlternateMessageBackgrounds.IsChecked,
+                AlternateMessageBackgrounds = checkAlternateMessageBackgrounds.IsChecked.GetValueOrDefault(),
                 ChatHeight = int.Parse(textHeight.Text),
                 ChatWidth = int.Parse(textWidth.Text),
-                BttvEmotes = (bool)checkBTTV.IsChecked,
-                FfzEmotes = (bool)checkFFZ.IsChecked,
-                StvEmotes = (bool)checkSTV.IsChecked,
-                Outline = (bool)checkOutline.IsChecked,
+                BttvEmotes = checkBTTV.IsChecked.GetValueOrDefault(),
+                FfzEmotes = checkFFZ.IsChecked.GetValueOrDefault(),
+                StvEmotes = checkSTV.IsChecked.GetValueOrDefault(),
+                Outline = checkOutline.IsChecked.GetValueOrDefault(),
                 Font = (string)comboFont.SelectedItem,
                 FontSize = numFontSize.Value,
                 UpdateRate = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture),
@@ -118,22 +118,22 @@ namespace TwitchDownloaderWPF
                 VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture),
                 IgnoreUsersArray = textIgnoreUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 BannedWordsArray = textBannedWordsList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
-                Timestamp = (bool)checkTimestamp.IsChecked,
+                Timestamp = checkTimestamp.IsChecked.GetValueOrDefault(),
                 MessageColor = messageColor,
                 Framerate = int.Parse(textFramerate.Text),
                 InputArgs = CheckRenderSharpening.IsChecked == true ? textFfmpegInput.Text + " -filter_complex \"smartblur=lr=1:ls=-1.0\"" : textFfmpegInput.Text,
                 OutputArgs = textFfmpegOutput.Text,
                 MessageFontStyle = SKFontStyle.Normal,
                 UsernameFontStyle = SKFontStyle.Bold,
-                GenerateMask = (bool)checkMask.IsChecked,
+                GenerateMask = checkMask.IsChecked.GetValueOrDefault(),
                 OutlineSize = 4 * double.Parse(textOutlineScale.Text, CultureInfo.CurrentCulture),
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath,
-                SubMessages = (bool)checkSub.IsChecked,
-                ChatBadges = (bool)checkBadge.IsChecked,
-                Offline = (bool)checkOffline.IsChecked,
+                SubMessages = checkSub.IsChecked.GetValueOrDefault(),
+                ChatBadges = checkBadge.IsChecked.GetValueOrDefault(),
+                Offline = checkOffline.IsChecked.GetValueOrDefault(),
                 AllowUnlistedEmotes = true,
-                DisperseCommentOffsets = (bool)checkDispersion.IsChecked,
+                DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault(),
                 LogFfmpegOutput = true
             };
             if (RadioEmojiNotoColor.IsChecked == true)
@@ -287,29 +287,29 @@ namespace TwitchDownloaderWPF
         public void SaveSettings()
         {
             Settings.Default.Font = comboFont.SelectedItem.ToString();
-            Settings.Default.Outline = (bool)checkOutline.IsChecked;
-            Settings.Default.Timestamp = (bool)checkTimestamp.IsChecked;
-            Settings.Default.BackgroundColorR = colorBackground.SelectedColor.Value.R;
-            Settings.Default.BackgroundColorG = colorBackground.SelectedColor.Value.G;
-            Settings.Default.BackgroundColorB = colorBackground.SelectedColor.Value.B;
-            Settings.Default.BackgroundColorA = colorBackground.SelectedColor.Value.A;
-            Settings.Default.AlternateBackgroundColorR = colorAlternateBackground.SelectedColor.Value.R;
-            Settings.Default.AlternateBackgroundColorG = colorAlternateBackground.SelectedColor.Value.G;
-            Settings.Default.AlternateBackgroundColorB = colorAlternateBackground.SelectedColor.Value.B;
-            Settings.Default.AlternateBackgroundColorA = colorAlternateBackground.SelectedColor.Value.A;
-            Settings.Default.FFZEmotes = (bool)checkFFZ.IsChecked;
-            Settings.Default.BTTVEmotes = (bool)checkBTTV.IsChecked;
-            Settings.Default.STVEmotes = (bool)checkSTV.IsChecked;
-            Settings.Default.FontColorR = colorFont.SelectedColor.Value.R;
-            Settings.Default.FontColorG = colorFont.SelectedColor.Value.G;
-            Settings.Default.FontColorB = colorFont.SelectedColor.Value.B;
-            Settings.Default.GenerateMask = (bool)checkMask.IsChecked;
-            Settings.Default.ChatRenderSharpening = (bool)CheckRenderSharpening.IsChecked;
-            Settings.Default.SubMessages = (bool)checkSub.IsChecked;
-            Settings.Default.ChatBadges = (bool)checkBadge.IsChecked;
-            Settings.Default.Offline = (bool)checkOffline.IsChecked;
-            Settings.Default.DisperseCommentOffsets = (bool)checkDispersion.IsChecked;
-            Settings.Default.AlternateMessageBackgrounds = (bool)checkAlternateMessageBackgrounds.IsChecked;
+            Settings.Default.Outline = checkOutline.IsChecked.GetValueOrDefault();
+            Settings.Default.Timestamp = checkTimestamp.IsChecked.GetValueOrDefault();
+            Settings.Default.BackgroundColorR = colorBackground.SelectedColor.GetValueOrDefault().R;
+            Settings.Default.BackgroundColorG = colorBackground.SelectedColor.GetValueOrDefault().G;
+            Settings.Default.BackgroundColorB = colorBackground.SelectedColor.GetValueOrDefault().B;
+            Settings.Default.BackgroundColorA = colorBackground.SelectedColor.GetValueOrDefault().A;
+            Settings.Default.AlternateBackgroundColorR = colorAlternateBackground.SelectedColor.GetValueOrDefault().R;
+            Settings.Default.AlternateBackgroundColorG = colorAlternateBackground.SelectedColor.GetValueOrDefault().G;
+            Settings.Default.AlternateBackgroundColorB = colorAlternateBackground.SelectedColor.GetValueOrDefault().B;
+            Settings.Default.AlternateBackgroundColorA = colorAlternateBackground.SelectedColor.GetValueOrDefault().A;
+            Settings.Default.FFZEmotes = checkFFZ.IsChecked.GetValueOrDefault();
+            Settings.Default.BTTVEmotes = checkBTTV.IsChecked.GetValueOrDefault();
+            Settings.Default.STVEmotes = checkSTV.IsChecked.GetValueOrDefault();
+            Settings.Default.FontColorR = colorFont.SelectedColor.GetValueOrDefault().R;
+            Settings.Default.FontColorG = colorFont.SelectedColor.GetValueOrDefault().G;
+            Settings.Default.FontColorB = colorFont.SelectedColor.GetValueOrDefault().B;
+            Settings.Default.GenerateMask = checkMask.IsChecked.GetValueOrDefault();
+            Settings.Default.ChatRenderSharpening = CheckRenderSharpening.IsChecked.GetValueOrDefault();
+            Settings.Default.SubMessages = checkSub.IsChecked.GetValueOrDefault();
+            Settings.Default.ChatBadges = checkBadge.IsChecked.GetValueOrDefault();
+            Settings.Default.Offline = checkOffline.IsChecked.GetValueOrDefault();
+            Settings.Default.DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault();
+            Settings.Default.AlternateMessageBackgrounds = checkAlternateMessageBackgrounds.IsChecked.GetValueOrDefault();
             if (comboFormat.SelectedItem != null)
             {
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
@@ -376,21 +376,21 @@ namespace TwitchDownloaderWPF
 
             try
             {
-                int.Parse(textHeight.Text);
-                int.Parse(textWidth.Text);
-                double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture);
-                int.Parse(textFramerate.Text);
-                double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture);
-                double.Parse(textOutlineScale.Text, CultureInfo.CurrentCulture);
+                _ = int.Parse(textHeight.Text);
+                _ = int.Parse(textWidth.Text);
+                _ = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture);
+                _ = int.Parse(textFramerate.Text);
+                _ = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textEmoteSpaceScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textOutlineScale.Text, CultureInfo.CurrentCulture);
             }
             catch (Exception ex)
             {

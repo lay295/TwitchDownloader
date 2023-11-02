@@ -1,13 +1,10 @@
 ﻿using CurlThin.Enums;
 using CurlThin;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.Buffers;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace TwitchDownloaderCore.Tools
 {
@@ -15,13 +12,13 @@ namespace TwitchDownloaderCore.Tools
     {
         static CURLcode global = CurlNative.Init();
 
-        public static string GetCurlReponse(string url)
+        public static string GetCurlResponse(string url)
         {
-            string response = Encoding.UTF8.GetString(GetCurlReponseBytes(url));
+            string response = Encoding.UTF8.GetString(GetCurlResponseBytes(url));
             return response;
         }
 
-        public static byte[] GetCurlReponseBytes(string url)
+        public static byte[] GetCurlResponseBytes(string url)
         {
             var easy = CurlNative.Easy.Init();
             try
@@ -34,9 +31,18 @@ namespace TwitchDownloaderCore.Tools
                 CurlNative.Easy.SetOpt(easy, CURLoption.WRITEFUNCTION, (data, size, nmemb, user) =>
                 {
                     var length = (int)size * (int)nmemb;
-                    var buffer = new byte[length];
-                    Marshal.Copy(data, buffer, 0, length);
-                    stream.Write(buffer, 0, length);
+
+                    var buffer = ArrayPool<byte>.Shared.Rent(length);
+                    try
+                    {
+                        Marshal.Copy(data, buffer, 0, length);
+                        stream.Write(buffer, 0, length);
+                    }
+                    finally
+                    {
+                        ArrayPool<byte>.Shared.Return(buffer);
+                    }
+
                     return (UIntPtr)length;
                 });
 

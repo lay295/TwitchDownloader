@@ -55,10 +55,10 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
                     throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
                 }
 
-                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(int.Parse(downloadOptions.Id));
+                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(int.Parse(downloadOptions.Id), videoInfoResponse.data.video);
 
                 var (playlistUrl, bandwidth) = await GetPlaylistUrl();
-                string baseUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf('/') + 1);
+                var baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
 
                 var videoLength = TimeSpan.FromSeconds(videoInfoResponse.data.video.lengthSeconds);
                 DriveHelper.CheckAvailableStorageSpace(downloadOptions, bandwidth, videoLength, _progress);
@@ -72,11 +72,11 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
 
                 _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading 0% [2/5]"));
 
-                await DownloadTools.DownloadVideoPartsAsync(downloadOptions, videoPartsList, baseUrl, downloadFolder, vodAge, _progress, cancellationToken);
+                await DownloadTools.DownloadVideoPartsAsync(downloadOptions, videoPartsList, baseUrl, downloadFolder, vodAge, 2, 5, _progress, cancellationToken);
 
                 _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Verifying Parts 0% [3/5]" });
 
-                await DownloadTools.VerifyDownloadedParts(downloadOptions, videoPartsList, baseUrl, downloadFolder, vodAge, _progress, cancellationToken);
+                await DownloadTools.VerifyDownloadedParts(downloadOptions, videoPartsList, baseUrl, downloadFolder, vodAge, 3, 5, _progress, cancellationToken);
 
                 _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Combining Parts 0% [4/5]" });
 
@@ -98,8 +98,9 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
                 double seekDuration = Math.Round(downloadOptions.CropEndingTime - seekTime);
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
-                await FfmpegMetadata.SerializeAsync(metadataPath, videoInfoResponse.data.video.owner.displayName, downloadOptions.Id.ToString(), videoInfoResponse.data.video.title,
-                    videoInfoResponse.data.video.createdAt, videoInfoResponse.data.video.viewCount, startOffset, videoChapterResponse.data.video.moments.edges, cancellationToken);
+                VideoInfo videoInfo = videoInfoResponse.data.video;
+                await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id, videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
+                    videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), startOffset, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
                 var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
                 if (!finalizedFileDirectory.Exists)
@@ -204,12 +205,12 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
             {
                 if (videoPlaylist[i].Contains("#EXT-X-MEDIA"))
                 {
-                    string lastPart = videoPlaylist[i].Substring(videoPlaylist[i].IndexOf("NAME=\"") + 6);
+                    string lastPart = videoPlaylist[i].Substring(videoPlaylist[i].IndexOf("NAME=\"", StringComparison.Ordinal) + 6);
                     string stringQuality = lastPart.Substring(0, lastPart.IndexOf('"'));
 
-                    var bandwidthStartIndex = videoPlaylist[i + 1].IndexOf("BANDWIDTH=") + 10;
+                    var bandwidthStartIndex = videoPlaylist[i + 1].IndexOf("BANDWIDTH=", StringComparison.Ordinal) + 10;
                     var bandwidthEndIndex = videoPlaylist[i + 1].IndexOf(',') - bandwidthStartIndex;
-                    int.TryParse(videoPlaylist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
+                    int.TryParse(videoPlaylist[i + 1].AsSpan(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
 
                     if (!videoQualities.Any(x => x.Key.Equals(stringQuality)))
                     {

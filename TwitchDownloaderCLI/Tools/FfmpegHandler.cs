@@ -1,7 +1,10 @@
 ﻿using Mono.Unix;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
@@ -24,8 +27,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             Console.Write("[INFO] - Downloading FFmpeg");
 
-            var progressHandler = new Progress<ProgressInfo>();
-            progressHandler.ProgressChanged += XabeProgressHandler.OnProgressReceived;
+            using var progressHandler = new XabeProgressHandler();
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -62,14 +64,42 @@ namespace TwitchDownloaderCLI.Tools
             Console.WriteLine("[ERROR] - Unable to find FFmpeg, exiting. You can download FFmpeg automatically with the command \"TwitchDownloaderCLI ffmpeg -d\"");
             Environment.Exit(1);
         }
-    }
 
-    internal static class XabeProgressHandler
-    {
-        internal static void OnProgressReceived(object sender, ProgressInfo e)
+        private sealed class XabeProgressHandler : IProgress<ProgressInfo>, IDisposable
         {
-            var percent = (int)(e.DownloadedBytes / (double)e.TotalBytes * 100);
-            Console.Write($"\r[INFO] - Downloading FFmpeg {percent}%");
+            private int _lastPercent = -1;
+            private readonly ConcurrentQueue<int> _percentQueue = new();
+            private readonly Timer _timer;
+
+            public XabeProgressHandler()
+            {
+                _timer = new Timer(Callback, _percentQueue, 0, 100);
+
+                static void Callback(object state)
+                {
+                    if (state is not ConcurrentQueue<int> { IsEmpty: false } queue) return;
+
+                    var currentPercent = queue.Max();
+                    Console.Write($"\r[INFO] - Downloading FFmpeg {currentPercent}%");
+                }
+            }
+
+            public void Report(ProgressInfo value)
+            {
+                var percent = (int)(value.DownloadedBytes / (double)value.TotalBytes * 100);
+
+                if (percent > _lastPercent)
+                {
+                    _lastPercent = percent;
+                    _percentQueue.Enqueue(percent);
+                }
+            }
+
+            public void Dispose()
+            {
+                _timer?.Dispose();
+                _percentQueue.Clear();
+            }
         }
     }
 }

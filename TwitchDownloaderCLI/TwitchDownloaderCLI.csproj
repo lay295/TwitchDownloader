@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>1.53.2</Version>
-    <Copyright>Copyright © 2019 lay295 and contributors</Copyright>
+    <Version>1.53.4</Version>
+    <Copyright>Copyright © lay295 and contributors</Copyright>
     <Description>Download and render Twitch VODs, clips, and chats</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Platforms>AnyCPU;x64</Platforms>
@@ -16,7 +16,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.3" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.6" />
   </ItemGroup>
 

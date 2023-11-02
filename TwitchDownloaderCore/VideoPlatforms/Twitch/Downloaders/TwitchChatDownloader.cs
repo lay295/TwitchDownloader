@@ -12,7 +12,6 @@ using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
-using TwitchDownloaderCore.VideoPlatforms.Twitch;
 using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 
 namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
@@ -27,15 +26,10 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
             BaseAddress = new Uri("https://gql.twitch.tv/gql"),
             DefaultRequestHeaders = { { "Client-ID", "kd1unb4b3q4t58fwlpcbzcbnm76a8fp" } }
         };
-        private static readonly Regex BitsRegex = new(
+
+        public static readonly Regex BitsRegex = new(
             @"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d?\d?\d?\d?\d?\d?(?=\s|$)",
             RegexOptions.Compiled);
-
-        private enum DownloadType
-        {
-            Clip,
-            Video
-        }
 
         public TwitchChatDownloader(ChatDownloadOptions chatDownloadOptions, IProgress<ProgressReport> progress)
         {
@@ -255,8 +249,6 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
                 throw new NullReferenceException("Null or empty video/clip ID");
             }
 
-            DownloadType downloadType = downloadOptions.Id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
-
             ChatRoot chatRoot = new()
             {
                 FileInfo = new ChatRootInfo { Version = ChatRootVersion.CurrentVersion, CreatedAt = DateTime.Now },
@@ -277,7 +269,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
             string game;
             int connectionCount = downloadOptions.ConnectionCount;
 
-            if (downloadType == DownloadType.Video)
+            if (downloadOptions.VideoType == VideoType.Video)
             {
                 GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(int.Parse(videoId));
                 if (videoInfoResponse.data.video == null)
@@ -287,6 +279,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
 
                 chatRoot.streamer.name = videoInfoResponse.data.video.owner.displayName;
                 chatRoot.streamer.id = int.Parse(videoInfoResponse.data.video.owner.id);
+                chatRoot.video.description = videoInfoResponse.data.video.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
                 videoTitle = videoInfoResponse.data.video.title;
                 videoCreatedAt = videoInfoResponse.data.video.createdAt;
                 videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
@@ -295,7 +288,8 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
                 viewCount = videoInfoResponse.data.video.viewCount;
                 game = videoInfoResponse.data.video.game?.displayName ?? "Unknown";
 
-                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetVideoChapters(int.Parse(videoId));
+                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(int.Parse(videoId), videoInfoResponse.data.video);
+                chatRoot.video.chapters.EnsureCapacity(videoChapterResponse.data.video.moments.edges.Count);
                 foreach (var responseChapter in videoChapterResponse.data.video.moments.edges)
                 {
                     chatRoot.video.chapters.Add(new VideoChapter
@@ -336,6 +330,21 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
                 viewCount = clipInfoResponse.data.clip.viewCount;
                 game = clipInfoResponse.data.clip.game?.displayName ?? "Unknown";
                 connectionCount = 1;
+
+                var clipChapter = TwitchHelper.GenerateClipChapter(clipInfoResponse.data.clip);
+                chatRoot.video.chapters.Add(new VideoChapter
+                {
+                    id = clipChapter.node.id,
+                    startMilliseconds = clipChapter.node.positionMilliseconds,
+                    lengthMilliseconds = clipChapter.node.durationMilliseconds,
+                    _type = clipChapter.node._type,
+                    description = clipChapter.node.description,
+                    subDescription = clipChapter.node.subDescription,
+                    thumbnailUrl = clipChapter.node.thumbnailURL,
+                    gameId = clipChapter.node.details.game?.id,
+                    gameDisplayName = clipChapter.node.details.game?.displayName,
+                    gameBoxArtUrl = clipChapter.node.details.game?.boxArtURL
+                });
             }
 
             chatRoot.video.id = videoId;

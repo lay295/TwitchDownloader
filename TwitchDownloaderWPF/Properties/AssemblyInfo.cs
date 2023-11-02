@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TwitchDownloader")]
-[assembly: AssemblyCopyright("Copyright © 2019 lay295 and contributors")]
+[assembly: AssemblyCopyright("Copyright © lay295 and contributors")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

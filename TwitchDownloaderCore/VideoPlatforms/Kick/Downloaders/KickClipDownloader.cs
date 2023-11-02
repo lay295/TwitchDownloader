@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -58,7 +59,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
 
             if (!downloadOptions.EncodeMetadata && alreadyEncoded)
             {
-                await DownloadTools.DownloadClipFileTaskAsync(response.VideoUrl, downloadOptions.Filename, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
+                await DownloadTools.DownloadFileAsync(response.VideoUrl, downloadOptions.Filename, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
                 return;
             }
 
@@ -80,14 +81,12 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                     await using var outputStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None);
                     for (int i = 0; i < downloadUrls.Count; i++)
                     {
-                        string downloadPath = Path.Combine(tempDownloadFolder, Path.GetFileName(downloadUrls[i].DownloadUrl));
-                        await DownloadTools.DownloadClipFileTaskAsync(downloadUrls[i].DownloadUrl, downloadPath, downloadOptions.ThrottleKib, null, cancellationToken);
+                        string downloadPath = Path.Combine(tempDownloadFolder, Path.GetFileName(downloadUrls[i].DownloadUrl)!);
+                        await DownloadTools.DownloadFileAsync(downloadUrls[i].DownloadUrl, downloadPath, downloadOptions.ThrottleKib, null, cancellationToken);
                         await using (var fs = File.Open(downloadPath, FileMode.Open, FileAccess.Read, FileShare.None))
                         {
                             fs.Seek(downloadUrls[i].StartByteOffset, SeekOrigin.Begin);
-                            byte[] buffer = new byte[downloadUrls[i].ByteRangeLength + 1];
-                            await fs.ReadAsync(buffer, 0, downloadUrls[i].ByteRangeLength);
-                            await outputStream.WriteAsync(buffer, cancellationToken);
+                            await fs.CopyBytesToAsync(outputStream, downloadUrls[i].ByteRangeLength, cancellationToken);
                         }
                         var percent = (int)((i+1) / (double)downloadUrls.Count * 100);
                         _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading Clip {percent}%"));
@@ -96,7 +95,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                 }
                 else
                 {
-                    await DownloadTools.DownloadClipFileTaskAsync(response.VideoUrl, tempFile, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
+                    await DownloadTools.DownloadFileAsync(response.VideoUrl, tempFile, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
                 }
 
                 _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Encoding Clip Metadata 0%"));
@@ -109,7 +108,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             }
             finally
             {
-                File.Delete(tempFile);
+                Directory.Delete(tempDownloadFolder, true);
             }
         }
 
