@@ -78,16 +78,24 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                     string playlistData = await KickHelper.GetPlaylistData(response.VideoUrl);
                     List<KickClipSegment> downloadUrls = KickHelper.GetDownloadUrls(response.VideoUrl, playlistData);
 
-                    await using var outputStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None);
+                    await using var outputStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.Read);
                     for (int i = 0; i < downloadUrls.Count; i++)
                     {
                         string downloadPath = Path.Combine(tempDownloadFolder, Path.GetFileName(downloadUrls[i].DownloadUrl)!);
                         await DownloadTools.DownloadFileAsync(downloadUrls[i].DownloadUrl, downloadPath, downloadOptions.ThrottleKib, null, cancellationToken);
+
                         await using (var fs = File.Open(downloadPath, FileMode.Open, FileAccess.Read, FileShare.None))
                         {
                             fs.Seek(downloadUrls[i].StartByteOffset, SeekOrigin.Begin);
                             await fs.CopyBytesToAsync(outputStream, downloadUrls[i].ByteRangeLength, cancellationToken);
                         }
+
+                        try
+                        {
+                            File.Delete(downloadPath);
+                        }
+                        catch { /* Oh well, it should get cleaned up later */ }
+
                         var percent = (int)((i+1) / (double)downloadUrls.Count * 100);
                         _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading Clip {percent}%"));
                         _progress.Report(new ProgressReport(percent));

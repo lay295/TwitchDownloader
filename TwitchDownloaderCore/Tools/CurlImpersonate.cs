@@ -40,7 +40,7 @@ namespace TwitchDownloaderCore.Tools
                     }
                     finally
                     {
-                        Array.Fill(buffer, (byte)0); // Clean the buffer in case we were working with sensitive information.
+                        Array.Clear(buffer); // Clear the buffer in case we were working with sensitive information.
                         ArrayPool<byte>.Shared.Return(buffer);
                     }
 
