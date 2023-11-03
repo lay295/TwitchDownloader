@@ -10,8 +10,6 @@ namespace TwitchDownloaderCore.Tools
 {
     public static class CurlImpersonate
     {
-        static CURLcode global = CurlNative.Init();
-
         public static string GetCurlResponse(string url)
         {
             string response = Encoding.UTF8.GetString(GetCurlResponseBytes(url));
@@ -21,6 +19,7 @@ namespace TwitchDownloaderCore.Tools
         public static byte[] GetCurlResponseBytes(string url)
         {
             var easy = CurlNative.Easy.Init();
+
             try
             {
                 CurlNative.Easy.SetOpt(easy, CURLoption.URL, url);
@@ -47,12 +46,20 @@ namespace TwitchDownloaderCore.Tools
                     return (UIntPtr)length;
                 });
 
-                var result = CurlNative.Easy.Perform(easy);
+                var resultCode = CurlNative.Easy.Perform(easy);
                 return stream.ToArray();
             }
             finally
             {
-                easy.Dispose();
+                // The author of CurlThin fixed a finalizer issue with a hack that resulted in SafeEasyHandles never actually cleaning themselves up, even when calling Dispose().
+                // See https://github.com/stil/CurlThin/issues/15 for more details
+                var handle = easy.DangerousGetHandle();
+                if (handle != IntPtr.Zero)
+                {
+                    CurlNative.Easy.Cleanup(handle);
+                    easy.Dispose();
+                    GC.SuppressFinalize(easy);
+                }
             }
         }
     }
