@@ -59,7 +59,6 @@ namespace TwitchDownloaderCore.Tools
                     CurlNative.Easy.Cleanup(handle);
                     easy.SetHandleAsInvalid();
                     easy.Dispose();
-                    GC.SuppressFinalize(easy);
                 }
             }
         }
