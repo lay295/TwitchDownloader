@@ -10,6 +10,9 @@ namespace TwitchDownloaderCore.Tools
 {
     public static class CurlImpersonate
     {
+        // Ideally, this class would be a singleton so we can call CurlNative.Cleanup() when shutting down.
+        private static readonly CURLcode Global = CurlNative.Init();
+
         public static string GetCurlResponse(string url)
         {
             string response = Encoding.UTF8.GetString(GetCurlResponseBytes(url));
@@ -46,7 +49,7 @@ namespace TwitchDownloaderCore.Tools
                     return (UIntPtr)length;
                 });
 
-                var resultCode = CurlNative.Easy.Perform(easy);
+                var result = CurlNative.Easy.Perform(easy);
                 return stream.ToArray();
             }
             finally
