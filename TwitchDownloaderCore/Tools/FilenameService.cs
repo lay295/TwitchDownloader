@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderCore.Tools
 {
@@ -40,81 +41,25 @@ namespace TwitchDownloaderCore.Tools
             if (template.Contains("{date_custom="))
             {
                 var dateRegex = new Regex("{date_custom=\"(.*)\"}");
-                var dateDone = false;
-                while (!dateDone)
-                {
-                    var dateMatch = dateRegex.Match(stringBuilder.ToString());
-                    if (dateMatch.Success)
-                    {
-                        var formatString = dateMatch.Groups[1].Value;
-                        stringBuilder.Remove(dateMatch.Groups[0].Index, dateMatch.Groups[0].Length);
-                        stringBuilder.Insert(dateMatch.Groups[0].Index, RemoveInvalidFilenameChars(date.ToString(formatString)));
-                    }
-                    else
-                    {
-                        dateDone = true;
-                    }
-                }
+                ReplaceCustomWithFormattable(stringBuilder, dateRegex, date);
             }
 
             if (template.Contains("{crop_start_custom="))
             {
                 var cropStartRegex = new Regex("{crop_start_custom=\"(.*)\"}");
-                var cropStartDone = false;
-                while (!cropStartDone)
-                {
-                    var cropStartMatch = cropStartRegex.Match(stringBuilder.ToString());
-                    if (cropStartMatch.Success)
-                    {
-                        var formatString = cropStartMatch.Groups[1].Value;
-                        stringBuilder.Remove(cropStartMatch.Groups[0].Index, cropStartMatch.Groups[0].Length);
-                        stringBuilder.Insert(cropStartMatch.Groups[0].Index, RemoveInvalidFilenameChars(cropStart.ToString(formatString)));
-                    }
-                    else
-                    {
-                        cropStartDone = true;
-                    }
-                }
+                ReplaceCustomWithFormattable(stringBuilder, cropStartRegex, cropStart);
             }
 
             if (template.Contains("{crop_end_custom="))
             {
                 var cropEndRegex = new Regex("{crop_end_custom=\"(.*)\"}");
-                var cropEndDone = false;
-                while (!cropEndDone)
-                {
-                    var cropEndMatch = cropEndRegex.Match(stringBuilder.ToString());
-                    if (cropEndMatch.Success)
-                    {
-                        var formatString = cropEndMatch.Groups[1].Value;
-                        stringBuilder.Remove(cropEndMatch.Groups[0].Index, cropEndMatch.Groups[0].Length);
-                        stringBuilder.Insert(cropEndMatch.Groups[0].Index, RemoveInvalidFilenameChars(cropEnd.ToString(formatString)));
-                    }
-                    else
-                    {
-                        cropEndDone = true;
-                    }
-                }
+                ReplaceCustomWithFormattable(stringBuilder, cropEndRegex, cropEnd);
             }
 
             if (template.Contains("{length_custom="))
             {
                 var lengthRegex = new Regex("{length_custom=\"(.*)\"}");
-                var lengthDone = false;
-                while (!lengthDone)
-                {
-                    var lengthMatch = lengthRegex.Match(stringBuilder.ToString());
-                    if (lengthMatch.Success)
-                    {
-                        var formatString = lengthMatch.Groups[1].Value;
-                        stringBuilder.Remove(lengthMatch.Groups[0].Index, lengthMatch.Groups[0].Length);
-                        stringBuilder.Insert(lengthMatch.Groups[0].Index, RemoveInvalidFilenameChars(videoLength.ToString(formatString)));
-                    }
-                    else
-                    {
-                        lengthDone = true;
-                    }
-                }
+                ReplaceCustomWithFormattable(stringBuilder, lengthRegex, videoLength);
             }
 
             var fileName = stringBuilder.ToString();
@@ -122,19 +67,24 @@ namespace TwitchDownloaderCore.Tools
             return Path.Combine(Path.Combine(additionalSubfolders), RemoveInvalidFilenameChars(fileName));
         }
 
-        private static string RemoveInvalidFilenameChars(string filename)
+        private static void ReplaceCustomWithFormattable(StringBuilder sb, Regex regex, IFormattable formattable, IFormatProvider formatProvider = null)
         {
-            if (string.IsNullOrWhiteSpace(filename))
+            do
             {
-                return filename;
-            }
+                // There's probably a better way to do this that doesn't require calling ToString()
+                // However we need .NET7+ for span support in the regex matcher.
+                var match = regex.Match(sb.ToString());
+                if (!match.Success)
+                    break;
 
-            if (filename.IndexOfAny(Path.GetInvalidFileNameChars()) == -1)
-            {
-                return filename;
-            }
-
-            return string.Join('_', filename.Split(Path.GetInvalidFileNameChars()));
+                var formatString = match.Groups[1].Value;
+                sb.Remove(match.Groups[0].Index, match.Groups[0].Length);
+                sb.Insert(match.Groups[0].Index, RemoveInvalidFilenameChars(formattable.ToString(formatString, formatProvider)));
+            } while (true);
         }
+
+        private static readonly char[] FilenameInvalidChars = Path.GetInvalidFileNameChars();
+
+        private static string RemoveInvalidFilenameChars(string filename) => filename.ReplaceAny(FilenameInvalidChars, '_');
     }
 }
