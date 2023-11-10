@@ -36,7 +36,7 @@ namespace TwitchDownloaderCore.Tools
                 .Replace("{crop_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropEnd))
                 .Replace("{length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", videoLength))
                 .Replace("{views}", viewCount)
-                .Replace("{game}", game);
+                .Replace("{game}", RemoveInvalidFilenameChars(game));
 
             if (template.Contains("{date_custom="))
             {
