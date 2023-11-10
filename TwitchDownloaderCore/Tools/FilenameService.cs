@@ -2,9 +2,8 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using TwitchDownloaderCore.Tools;
 
-namespace TwitchDownloaderWPF.Services
+namespace TwitchDownloaderCore.Tools
 {
     public static class FilenameService
     {
@@ -22,7 +21,7 @@ namespace TwitchDownloaderWPF.Services
             return returnString;
         }
 
-        internal static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan cropStart, TimeSpan cropEnd, string viewCount, string game)
+        public static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan cropStart, TimeSpan cropEnd, string viewCount, string game)
         {
             var videoLength = cropEnd - cropStart;
 
