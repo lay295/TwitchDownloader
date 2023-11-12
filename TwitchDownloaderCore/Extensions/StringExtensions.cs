@@ -6,7 +6,7 @@ namespace TwitchDownloaderCore.Extensions
     {
         public static string ReplaceAny(this string str, ReadOnlySpan<char> oldChars, char newChar)
         {
-            if (string.IsNullOrWhiteSpace(str))
+            if (string.IsNullOrEmpty(str))
             {
                 return str;
             }
