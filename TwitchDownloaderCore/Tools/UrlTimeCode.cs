@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace TwitchDownloaderCore.Extensions
+namespace TwitchDownloaderCore.Tools
 {
-    public static class TimeSpanExtensions
+    public static class UrlTimeCode
     {
         /// <summary>
         /// Converts the span representation of a time interval in the format of '2d21h11m9s' to its <see cref="TimeSpan"/> equivalent.
         /// </summary>
         /// <param name="input">A span containing the characters that represent the time interval to convert.</param>
         /// <returns>The <see cref="TimeSpan"/> equivalent to the time interval contained in the <paramref name="input"/> span.</returns>
-        public static TimeSpan ParseTimeCode(ReadOnlySpan<char> input)
+        public static TimeSpan Parse(ReadOnlySpan<char> input)
         {
             var dayIndex = input.IndexOf('d');
             var hourIndex = input.IndexOf('h');

@@ -49,76 +49,121 @@ namespace TwitchDownloaderCore.Tools
             if (timeSpan.Days == 0)
             {
                 var newFormat = format.Length <= 256 ? stackalloc char[format.Length] : new char[format.Length];
-                if (!format.AsSpan().TryReplaceNonEscaped(newFormat, out var charsWritten, 'H', 'h'))
+                if (!format.AsSpan().TryReplaceNonEscaped(newFormat, 'H', 'h'))
                 {
-                    throw new Exception("Failed to generate ToString() compatible format. This should not have been possible.");
+                    throw new FormatException($"Invalid character escaping in the format string: {format}");
                 }
 
                 // If the format contains more than 2 sequential unescaped h's, it will throw a format exception. If so, we can fallback to our parser.
                 if (newFormat.IndexOf("hhh") == -1)
                 {
-                    return HandleOtherFormats(newFormat[..charsWritten].ToString(), timeSpan, formatProvider);
+                    return HandleOtherFormats(newFormat.ToString(), timeSpan, formatProvider);
                 }
             }
 
-            var sb = new StringBuilder(format.Length);
+            return HandleBigHFormat(format.AsSpan(), timeSpan);
+        }
+
+        private static string HandleBigHFormat(ReadOnlySpan<char> format, TimeSpan timeSpan)
+        {
+            var formatLength = format.Length;
+            var sb = new StringBuilder(formatLength);
             var regularFormatCharStart = -1;
             var bigHStart = -1;
-            var formatSpan = format.AsSpan();
-            for (var i = 0; i < formatSpan.Length; i++)
+            for (var i = 0; i < formatLength; i++)
             {
-                var readChar = formatSpan[i];
+                var readChar = format[i];
 
                 if (readChar == 'H')
                 {
                     if (bigHStart == -1)
-                    {
                         bigHStart = i;
-                    }
 
                     if (regularFormatCharStart != -1)
                     {
-                        AppendRegularFormat(sb, timeSpan, format, regularFormatCharStart, i - regularFormatCharStart);
+                        var formatEnd = i - regularFormatCharStart;
+                        AppendRegularFormat(sb, timeSpan, format.Slice(regularFormatCharStart, formatEnd));
                         regularFormatCharStart = -1;
                     }
                 }
                 else
                 {
                     if (regularFormatCharStart == -1)
-                    {
                         regularFormatCharStart = i;
-                    }
 
                     if (bigHStart != -1)
                     {
-                        AppendBigHFormat(sb, timeSpan, i - bigHStart);
+                        var bigHCount = i - bigHStart;
+                        AppendBigHFormat(sb, timeSpan, bigHCount);
                         bigHStart = -1;
                     }
 
-                    // If the current char is an escape we can skip the next char
-                    if (readChar == '\\' && i + 1 < formatSpan.Length)
+                    switch (readChar)
                     {
-                        i++;
+                        // If the current char is an escape we can skip the next char
+                        case '\\' when i + 1 < formatLength:
+                            i++;
+                            continue;
+                        // If the current char is a quote we can skip the next quote, if it exists
+                        case '\'' when i + 1 < formatLength:
+                        case '\"' when i + 1 < formatLength:
+                        {
+                            i = FindCloseQuoteMark(format, i, formatLength, readChar);
+
+                            if (i == -1)
+                            {
+                                throw new FormatException($"Invalid character escaping in the format string: {format}");
+                            }
+
+                            continue;
+                        }
                     }
                 }
             }
 
             if (regularFormatCharStart != -1)
             {
-                AppendRegularFormat(sb, timeSpan, format, regularFormatCharStart, formatSpan.Length - regularFormatCharStart);
+                var formatEnd = format.Length - regularFormatCharStart;
+                AppendRegularFormat(sb, timeSpan, format.Slice(regularFormatCharStart, formatEnd));
             }
             else if (bigHStart != -1)
             {
-                AppendBigHFormat(sb, timeSpan, formatSpan.Length - bigHStart);
+                var bigHCount = format.Length - bigHStart;
+                AppendBigHFormat(sb, timeSpan, bigHCount);
             }
 
             return sb.ToString();
         }
 
-        private static void AppendRegularFormat(StringBuilder sb, TimeSpan timeSpan, string formatString, int start, int length)
+        private static int FindCloseQuoteMark(ReadOnlySpan<char> format, int openQuoteIndex, int endIndex, char readChar)
+        {
+            var i = openQuoteIndex + 1;
+            var quoteFound = false;
+            while (i < endIndex)
+            {
+                var readCharQuote = format[i];
+                i++;
+
+                if (readCharQuote == '\\')
+                {
+                    i++;
+                    continue;
+                }
+
+                if (readCharQuote == readChar)
+                {
+                    i--;
+                    quoteFound = true;
+                    break;
+                }
+            }
+
+            return quoteFound ? i : -1;
+        }
+
+        private static void AppendRegularFormat(StringBuilder sb, TimeSpan timeSpan, ReadOnlySpan<char> format)
         {
             Span<char> destination = stackalloc char[256];
-            var format = formatString.AsSpan(start, length);
 
             if (timeSpan.TryFormat(destination, out var charsWritten, format))
             {
@@ -132,7 +177,8 @@ namespace TwitchDownloaderCore.Tools
 
         private static void AppendBigHFormat(StringBuilder sb, TimeSpan timeSpan, int count)
         {
-            Span<char> destination = stackalloc char[8];
+            const int TIMESPAN_MAX_HOURS_LENGTH = 9; // The maximum integer hours a TimeSpan can hold is 256204778.
+            Span<char> destination = stackalloc char[TIMESPAN_MAX_HOURS_LENGTH];
             Span<char> format = stackalloc char[count];
             format.Fill('0');
 

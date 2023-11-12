@@ -146,7 +146,7 @@ namespace TwitchDownloaderWPF
                 var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
                 if (urlTimeCodeMatch.Success)
                 {
-                    var time = TimeSpanExtensions.ParseTimeCode(urlTimeCodeMatch.ValueSpan);
+                    var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
                     checkStart.IsChecked = true;
                     numStartHour.Value = time.Hours;
                     numStartMinute.Value = time.Minutes;
