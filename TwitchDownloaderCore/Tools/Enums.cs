@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace TwitchDownloaderCore.Tools
 {
     public enum VideoType
@@ -6,6 +8,7 @@ namespace TwitchDownloaderCore.Tools
         Clip
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum VideoPlatform
     {
         Twitch,
