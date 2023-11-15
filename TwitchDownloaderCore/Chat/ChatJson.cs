@@ -213,7 +213,7 @@ namespace TwitchDownloaderCore.Chat
 
             if (chatRoot.video.duration is not null)
             {
-                chatRoot.video.length = TimeSpanExtensions.ParseTimeCode(chatRoot.video.duration).TotalSeconds;
+                chatRoot.video.length = UrlTimeCode.Parse(chatRoot.video.duration).TotalSeconds;
                 chatRoot.video.end = chatRoot.video.length;
                 chatRoot.video.duration = null;
             }

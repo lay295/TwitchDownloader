@@ -136,7 +136,7 @@ namespace TwitchDownloaderWPF
                     var urlTimeCodeMatch = UrlParse.UrlTimeCode.Match(textUrl.Text);
                     if (urlTimeCodeMatch.Success)
                     {
-                        var time = TimeSpanExtensions.ParseTimeCode(urlTimeCodeMatch.ValueSpan);
+                        var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
                         checkCropStart.IsChecked = true;
                         numStartHour.Value = time.Hours;
                         numStartMinute.Value = time.Minutes;

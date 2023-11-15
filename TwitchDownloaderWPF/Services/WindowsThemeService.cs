@@ -41,7 +41,13 @@ namespace TwitchDownloaderWPF.Services
             }
             catch (ExternalException e)
             {
-                MessageBox.Show(string.Format(Translations.Strings.UnableToStartWindowsThemeWatcher, $"0x{e.ErrorCode:x8}"), Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(Translations.Strings.UnableToStartWindowsThemeWatcher, $"0x{e.ErrorCode:x8}"), Translations.Strings.MessageBoxTitleError,
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (ManagementException e)
+            {
+                MessageBox.Show(string.Format(Translations.Strings.UnableToStartWindowsThemeWatcher, $"{e.ErrorCode} (0x{(int)e.ErrorCode:x8})"), Translations.Strings.MessageBoxTitleError,
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
