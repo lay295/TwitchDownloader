@@ -1,5 +1,4 @@
-﻿using NeoSmart.Unicode;
-using SkiaSharp;
+﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +7,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -24,22 +22,22 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
     public static class TwitchHelper
     {
         private static readonly HttpClient httpClient = new HttpClient();
-        private static readonly string[] bttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
+        private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
 
-        public static async Task<GqlVideoResponse> GetVideoInfo(int videoId, string Oauth = null)
+        public static async Task<GqlVideoResponse> GetVideoInfo(int videoId, string oauth = null)
         {
             var request = new HttpRequestMessage()
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{video(id:\\\"" + videoId + "\\\"){title,thumbnailURLs(height:180,width:320),createdAt,lengthSeconds,owner{id,displayName},viewCount,game{id,displayName}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{video(id:\\\"" + videoId + "\\\"){title,thumbnailURLs(height:180,width:320),createdAt,lengthSeconds,owner{id,displayName},viewCount,game{id,displayName,boxArtURL},description}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             GqlVideoResponse res = await response.Content.ReadFromJsonAsync<GqlVideoResponse>();
 
-            GqlVideoTokenResponse accessToken = await TwitchHelper.GetVideoToken(videoId, Oauth);
+            GqlVideoTokenResponse accessToken = await TwitchHelper.GetVideoToken(videoId, oauth);
             if (accessToken is null)
             {
                 throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
@@ -56,12 +54,12 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             {
                 if (playlist[i].Contains("#EXT-X-MEDIA"))
                 {
-                    string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"") + 6);
+                    string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"", StringComparison.Ordinal) + 6);
                     string stringQuality = lastPart.Substring(0, lastPart.IndexOf('"'));
 
-                    var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=") + 10;
+                    var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=", StringComparison.Ordinal) + 10;
                     var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
-                    int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
+                    int.TryParse(playlist[i + 1].AsSpan(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
 
                     res.VideoQualities.Add(new VideoQuality { Quality = stringQuality, SourceUrl = playlist[i + 2], Bandwidth = bandwidth });
                 }
@@ -104,7 +102,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{clip(slug:\\\"" + clipId + "\\\"){title,thumbnailURL,createdAt,durationSeconds,broadcaster{id,displayName},videoOffsetSeconds,video{id},viewCount,game{id,displayName}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{clip(slug:\\\"" + clipId + "\\\"){title,thumbnailURL,createdAt,durationSeconds,broadcaster{id,displayName},videoOffsetSeconds,video{id},viewCount,game{id,displayName,boxArtURL}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -154,83 +152,87 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             return await response.Content.ReadFromJsonAsync<GqlClipSearchResponse>();
         }
 
-        public static async Task<EmoteResponse> GetThirdPartyEmoteData(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = new())
+        public static async Task<EmoteResponse> GetThirdPartyEmotesMetadata(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            EmoteResponse emoteReponse = new();
+            EmoteResponse emoteResponse = new();
 
             if (getBttv)
             {
-                await GetBttvEmoteData(streamerId, emoteReponse.BTTV);
+                emoteResponse.BTTV = await GetBttvEmotesMetadata(streamerId, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (getFfz)
             {
-                await GetFfzEmoteData(streamerId, emoteReponse.FFZ);
+                emoteResponse.FFZ = await GetFfzEmotesMetadata(streamerId, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (getStv)
             {
-                await PlatformHelper.GetStvEmoteData(streamerId, emoteReponse.STV, allowUnlistedEmotes, VideoPlatform.Twitch);
+                emoteResponse.STV = await PlatformHelper.GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, VideoPlatform.Twitch, cancellationToken);
             }
 
-            return emoteReponse;
+            return emoteResponse;
         }
 
-        private static async Task GetBttvEmoteData(int streamerId, List<EmoteResponseItem> bttvResponse)
+        private static async Task<List<EmoteResponseItem>> GetBttvEmotesMetadata(int streamerId, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.betterttv.net/3/cached/emotes/global", UriKind.Absolute));
-            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             globalEmoteResponse.EnsureSuccessStatusCode();
-            var BTTV = await globalEmoteResponse.Content.ReadFromJsonAsync<List<BTTVEmote>>();
+            var BTTV = await globalEmoteResponse.Content.ReadFromJsonAsync<List<BTTVEmote>>(cancellationToken: cancellationToken);
 
             //Channel might not have BTTV emotes
             try
             {
                 var channelEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://api.betterttv.net/3/cached/users/twitch/{streamerId}", UriKind.Absolute));
-                using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+                using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 channelEmoteResponse.EnsureSuccessStatusCode();
 
-                var bttvChannel = await channelEmoteResponse.Content.ReadFromJsonAsync<BTTVChannelEmoteResponse>();
+                var bttvChannel = await channelEmoteResponse.Content.ReadFromJsonAsync<BTTVChannelEmoteResponse>(cancellationToken: cancellationToken);
                 BTTV.AddRange(bttvChannel.channelEmotes);
                 BTTV.AddRange(bttvChannel.sharedEmotes);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 
+            var returnList = new List<EmoteResponseItem>();
             foreach (var emote in BTTV)
             {
                 string id = emote.id;
                 string name = emote.code;
                 string mime = emote.imageType;
                 string url = $"https://cdn.betterttv.net/emote/{id}/[scale]x";
-                bttvResponse.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = bttvZeroWidth.Contains(name) });
+                returnList.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url, IsZeroWidth = BttvZeroWidth.Contains(name) });
             }
+
+            return returnList;
         }
 
-        private static async Task GetFfzEmoteData(int streamerId, List<EmoteResponseItem> ffzResponse)
+        private static async Task<List<EmoteResponseItem>> GetFfzEmotesMetadata(int streamerId, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.betterttv.net/3/cached/frankerfacez/emotes/global", UriKind.Absolute));
-            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             globalEmoteResponse.EnsureSuccessStatusCode();
-            var FFZ = await globalEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>();
+            var FFZ = await globalEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>(cancellationToken: cancellationToken);
 
             //Channel might not have FFZ emotes
             try
             {
                 var channelEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://api.betterttv.net/3/cached/frankerfacez/users/twitch/{streamerId}", UriKind.Absolute));
-                using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+                using var channelEmoteResponse = await httpClient.SendAsync(channelEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 channelEmoteResponse.EnsureSuccessStatusCode();
 
-                var channelEmotes = await channelEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>();
+                var channelEmotes = await channelEmoteResponse.Content.ReadFromJsonAsync<List<FFZEmote>>(cancellationToken: cancellationToken);
                 FFZ.AddRange(channelEmotes);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 
+            var returnList = new List<EmoteResponseItem>();
             foreach (var emote in FFZ)
             {
                 string id = emote.id.ToString();
@@ -239,8 +241,10 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 string url = emote.animated
                     ? $"https://cdn.betterttv.net/frankerfacez_emote/{id}/animated/[scale]"
                     : $"https://cdn.betterttv.net/frankerfacez_emote/{id}/[scale]";
-                ffzResponse.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url });
+                returnList.Add(new EmoteResponseItem() { Id = id, Code = name, ImageType = mime, ImageUrl = url });
             }
+
+            return returnList;
         }
 
 
@@ -280,86 +284,62 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
             string stvFolder = Path.Combine(cacheFolder, "stv");
 
-            EmoteResponse emoteDataResponse = await GetThirdPartyEmoteData(streamerId, bttv, ffz, stv, allowUnlistedEmotes, cancellationToken);
+            EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, cancellationToken);
 
             if (bttv)
             {
-                if (!Directory.Exists(bttvFolder))
-                    PlatformHelper.CreateDirectory(bttvFolder);
-
-                var emoteResponseItemsQuery = from emote in emoteDataResponse.BTTV
-                                              where !alreadyAdded.Contains(emote.Code)
-                                              let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
-                                              where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
-                                              select emote;
-
-                foreach (var emote in emoteResponseItemsQuery)
-                {
-                    try
-                    {
-                        TwitchEmote newEmote = new TwitchEmote(await PlatformHelper.GetImage(bttvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.TwitchThirdParty, 2, emote.Id, emote.Code);
-                        if (emote.IsZeroWidth)
-                            newEmote.IsZeroWidth = true;
-                        returnList.Add(newEmote);
-                        alreadyAdded.Add(emote.Code);
-                    }
-                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
-                }
+                await FetchEmoteImages(comments, emoteDataResponse.BTTV, returnList, alreadyAdded, bttvFolder, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (ffz)
             {
-                if (!Directory.Exists(ffzFolder))
-                    PlatformHelper.CreateDirectory(ffzFolder);
-
-                var emoteResponseItemsQuery = from emote in emoteDataResponse.FFZ
-                                              where !alreadyAdded.Contains(emote.Code)
-                                              let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
-                                              where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
-                                              select emote;
-
-                foreach (var emote in emoteResponseItemsQuery)
-                {
-                    try
-                    {
-                        TwitchEmote newEmote = new TwitchEmote(await PlatformHelper.GetImage(ffzFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.TwitchThirdParty, 2, emote.Id, emote.Code);
-                        returnList.Add(newEmote);
-                        alreadyAdded.Add(emote.Code);
-                    }
-                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
-                }
+                await FetchEmoteImages(comments, emoteDataResponse.FFZ, returnList, alreadyAdded, ffzFolder, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (stv)
             {
-                if (!Directory.Exists(stvFolder))
-                    PlatformHelper.CreateDirectory(stvFolder);
+                await FetchEmoteImages(comments, emoteDataResponse.STV, returnList, alreadyAdded, stvFolder, cancellationToken);
+            }
 
-                var emoteResponseItemsQuery = from emote in emoteDataResponse.STV
-                                              where !alreadyAdded.Contains(emote.Code)
-                                              let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
-                                              where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
-                                              select emote;
+            return returnList;
 
-                foreach (var emote in emoteResponseItemsQuery)
+            static async Task FetchEmoteImages(IReadOnlyCollection<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, ICollection<TwitchEmote> returnList,
+                ICollection<string> alreadyAdded, string cacheFolder, CancellationToken cancellationToken)
+            {
+                if (!Directory.Exists(cacheFolder))
+                    PlatformHelper.CreateDirectory(cacheFolder);
+
+                IEnumerable<EmoteResponseItem> emoteResponseQuery;
+                if (comments.Count == 0)
+                {
+                    emoteResponseQuery = emoteResponse;
+                }
+                else
+                {
+                    emoteResponseQuery = from emote in emoteResponse
+                                         where !alreadyAdded.Contains(emote.Code)
+                                         let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
+                                         where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
+                                         select emote;
+                }
+
+                foreach (var emote in emoteResponseQuery)
                 {
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(await PlatformHelper.GetImage(stvFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken), EmoteProvider.TwitchThirdParty, 2, emote.Id, emote.Code);
-                        if (emote.IsZeroWidth)
-                            newEmote.IsZeroWidth = true;
+                        var imageData = await PlatformHelper.GetImage(cacheFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken);
+                        var newEmote = new TwitchEmote(imageData, EmoteProvider.TwitchThirdParty, 2, emote.Id, emote.Code);
+                        newEmote.IsZeroWidth = emote.IsZeroWidth;
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emote.Code);
                     }
                     catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
                 }
             }
-
-            return returnList;
         }
 
         public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
@@ -529,8 +509,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
 
                     foreach (var (version, data) in badge.versions)
                     {
-                        string[] id_parts = data.url.Split('/');
-                        string id = id_parts[id_parts.Length - 2];
+                        string id = data.url.Split('/')[^2];
                         byte[] bytes = await PlatformHelper.GetImage(badgeFolder, data.url, id, "2", "png", cancellationToken);
                         versions.Add(version, new ChatBadgeData
                         {
@@ -616,7 +595,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             return returnCache;
         }
 
-        public static async Task<List<CheerEmote>> GetBits(List<Comment> comments, string cacheFolder, string channel_id = "", EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
+        public static async Task<List<CheerEmote>> GetBits(List<Comment> comments, string cacheFolder, string channelId = "", EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<CheerEmote> returnList = new List<CheerEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -648,7 +627,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{cheerConfig{groups{nodes{id, prefix, tiers{bits}}, templateURL}},user(id:\\\"" + channel_id + "\\\"){cheer{cheerGroups{nodes{id,prefix,tiers{bits}},templateURL}}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{cheerConfig{groups{nodes{id, prefix, tiers{bits}}, templateURL}},user(id:\\\"" + channelId + "\\\"){cheer{cheerGroups{nodes{id,prefix,tiers{bits}},templateURL}}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var cheerResponseMessage = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -722,8 +701,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 return;
             }
 
-            // Let's delete any video download cache folders older than 24 hours
-            var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
+            var videoFolderRegex = new Regex(@"[A-z\d]+_(\d+)$", RegexOptions.RightToLeft);
             var directories = Directory.GetDirectories(cacheFolder);
             var directoriesDeleted = (from directory in directories
                                       let videoFolderMatch = videoFolderRegex.Match(directory)
@@ -743,7 +721,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             const int TWENTY_FOUR_HOURS_MILLIS = 86_400_000;
-            if (currentTime - downloadTime > TWENTY_FOUR_HOURS_MILLIS)
+            if (currentTime - downloadTime > TWENTY_FOUR_HOURS_MILLIS * 7)
             {
                 try
                 {
@@ -820,6 +798,55 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
         }
-    }
 
+        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(int videoId, VideoInfo videoInfo)
+        {
+            var chapterResponse = await GetVideoChapters(videoId);
+
+            // Video has only 1 chapter, generate a bogus video chapter with the information we have available.
+            if (chapterResponse.data.video.moments.edges.Count == 0)
+            {
+                chapterResponse.data.video.moments.edges.Add(
+                    GenerateVideoMomentEdge(0, videoInfo.lengthSeconds, videoInfo.game?.id, videoInfo.game?.displayName, videoInfo.game?.displayName, videoInfo.game?.boxArtURL
+                    ));
+            }
+
+            return chapterResponse;
+        }
+
+        public static VideoMomentEdge GenerateClipChapter(Clip clipInfo)
+        {
+            return GenerateVideoMomentEdge(0, clipInfo.durationSeconds, clipInfo.game?.id, clipInfo.game?.displayName, clipInfo.game?.displayName, clipInfo.game?.boxArtURL);
+        }
+
+        private static VideoMomentEdge GenerateVideoMomentEdge(int startSeconds, int lengthSeconds, string gameId = null, string gameDisplayName = null, string gameDescription = null, string gameBoxArtUrl = null)
+        {
+            gameId ??= "-1";
+            gameDisplayName ??= "Unknown";
+            gameDescription ??= "Unknown";
+            gameBoxArtUrl ??= "";
+
+            return new VideoMomentEdge
+            {
+                node = new VideoMoment
+                {
+                    id = "",
+                    _type = "GAME_CHANGE",
+                    positionMilliseconds = startSeconds,
+                    durationMilliseconds = lengthSeconds * 1000,
+                    description = gameDescription,
+                    subDescription = "",
+                    details = new GameChangeMomentDetails
+                    {
+                        game = new Game
+                        {
+                            id = gameId,
+                            displayName = gameDisplayName,
+                            boxArtURL = gameBoxArtUrl.Replace("{width}", "40").Replace("{height}", "53")
+                        }
+                    }
+                }
+            };
+        }
+    }
 }

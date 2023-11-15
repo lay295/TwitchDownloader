@@ -470,7 +470,7 @@
   <data name="TaskCancel" xml:space="preserve">
     <value>Отмена</value>
   </data>
-  <data name="TaskError" xml:space="preserve">
+  <data name="TaskErrorButton" xml:space="preserve">
     <value>Ошибка</value>
   </data>
   <data name="TaskQueue" xml:space="preserve">
@@ -764,5 +764,26 @@
   </data>
   <data name="EncodeClipMetadata" xml:space="preserve">
     <value>Encode Metadata:</value>
+  </data>
+  <data name="MessageBoxTitleError" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
+    <value>Unable to start Windows application theme watcher. Error code: {0}</value>
+  </data>
+  <data name="LabelVideosPerPage" xml:space="preserve">
+    <value>Videos per page:</value>
+  </data>
+  <data name="StatusDownloaderFFmpeg" xml:space="preserve">
+    <value>Downloading FFmpeg {0}%</value>
+  </data>
+  <data name="CopyVideoIDToClipboard" xml:space="preserve">
+    <value>Copy ID to clipboard</value>
+  </data>
+  <data name="CopyVideoURLToClipboard" xml:space="preserve">
+    <value>Copy URL to clipboard</value>
+  </data>
+  <data name="OpenVideoInBrowser" xml:space="preserve">
+    <value>Open in browser</value>
   </data>
 </root>

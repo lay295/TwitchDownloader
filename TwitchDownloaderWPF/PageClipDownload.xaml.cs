@@ -1,10 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,8 +12,6 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
-using TwitchDownloaderCore.VideoPlatforms.Twitch;
-using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
@@ -49,7 +44,7 @@ namespace TwitchDownloaderWPF
         private async Task GetClipInfo()
         {
             bool parseSuccess = UrlParse.TryParseClip(textUrl.Text.Trim(), out VideoPlatform videoPlatform, out string videoId);
-            
+
             if (!parseSuccess || string.IsNullOrWhiteSpace(videoId))
             {
                 MessageBox.Show(Translations.Strings.InvalidClipLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidClipLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -65,20 +60,14 @@ namespace TwitchDownloaderWPF
                 comboQuality.Items.Clear();
                 IVideoInfo clipInfo = await PlatformHelper.GetClipInfo(videoPlatform, clipId);
 
-                try
-                {
-                    string thumbUrl = clipInfo.ThumbnailUrl;
-                    imgThumbnail.Source = await ThumbnailService.GetThumb(thumbUrl);
-                }
-                catch
+                var thumbUrl = clipInfo.ThumbnailUrl;
+                if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                 {
                     AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                    var (success, image) = await ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL);
-                    if (success)
-                    {
-                        imgThumbnail.Source = image;
-                    }
+                    _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                 }
+                imgThumbnail.Source = image;
+
                 clipLength = TimeSpan.FromSeconds(clipInfo.Duration);
                 textStreamer.Text = clipInfo.StreamerName;
                 var clipCreatedAt = clipInfo.CreatedAt;
@@ -226,7 +215,7 @@ namespace TwitchDownloaderWPF
             try
             {
                 var downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-                ClipDownloaderFactory clipDownloaderFactory = new ClipDownloaderFactory(downloadProgress); 
+                ClipDownloaderFactory clipDownloaderFactory = new ClipDownloaderFactory(downloadProgress);
                 await clipDownloaderFactory.Create(downloadOptions)
                     .DownloadAsync(_cancellationTokenSource.Token);
 

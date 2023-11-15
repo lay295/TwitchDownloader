@@ -1,9 +1,8 @@
 ﻿using CommandLine;
-using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-
     [Verb("chatupdate", HelpText = "Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format.")]
     public class ChatUpdateArgs : ITwitchDownloaderArgs
     {

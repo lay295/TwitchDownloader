@@ -20,7 +20,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
         private static readonly HttpClient HttpClient = new();
         public static async Task<KickClipResponse> GetClipInfo(string clipId)
         {
-            string response = await Task.Run(() => CurlImpersonate.GetCurlReponse($"https://kick.com/api/v2/clips/{clipId}"));
+            string response = await Task.Run(() => CurlImpersonate.GetCurlResponse($"https://kick.com/api/v2/clips/{clipId}"));
             KickClipResponse clipResponse = JsonSerializer.Deserialize<KickClipResponse>(response);
 
             if (clipResponse.clip == null)
@@ -97,7 +97,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
 
         public static async Task<KickVideoResponse> GetVideoInfo(string videoId)
         {
-            string response = await Task.Run(() => CurlImpersonate.GetCurlReponse($"https://kick.com/api/v1/video/{videoId}"));
+            string response = await Task.Run(() => CurlImpersonate.GetCurlResponse($"https://kick.com/api/v1/video/{videoId}"));
             KickVideoResponse videoResponse = JsonSerializer.Deserialize<KickVideoResponse>(response);
 
             if (videoResponse.id == 0)
@@ -114,12 +114,12 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
             {
                 if (playlist[i].Contains("#EXT-X-MEDIA"))
                 {
-                    string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"") + 6);
+                    string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"", StringComparison.Ordinal) + 6);
                     string stringQuality = lastPart.Substring(0, lastPart.IndexOf('"'));
 
-                    var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=") + 10;
-                    var bandwidthEndIndex = playlist[i + 1].Substring(bandwidthStartIndex).IndexOf(',');
-                    int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
+                    var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=", StringComparison.Ordinal) + 10;
+                    var bandwidthEndIndex = playlist[i + 1].AsSpan(bandwidthStartIndex).IndexOf(',');
+                    int.TryParse(playlist[i + 1].AsSpan(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
 
                     videoResponse.VideoQualities.Add(new VideoQuality { Quality = stringQuality, SourceUrl = baseUrl + playlist[i + 2], Bandwidth = bandwidth });
                 }
@@ -254,14 +254,14 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            EmoteResponse emoteReponse = new();
+            EmoteResponse emoteResponse = new();
 
             if (getStv)
             {
-                await PlatformHelper.GetStvEmoteData(streamerId, emoteReponse.STV, allowUnlistedEmotes, VideoPlatform.Kick);
+                emoteResponse.STV = await PlatformHelper.GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, VideoPlatform.Kick, cancellationToken);
             }
 
-            return emoteReponse;
+            return emoteResponse;
         }
     }
 }

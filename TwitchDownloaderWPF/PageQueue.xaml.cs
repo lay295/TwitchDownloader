@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderWPF.Properties;
 using System.Diagnostics;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderWPF
 {
@@ -175,13 +174,13 @@ namespace TwitchDownloaderWPF
 
         private void btnVods_Click(object sender, RoutedEventArgs e)
         {
-            WindowMassDownload window = new WindowMassDownload(DownloadType.Video);
+            WindowMassDownload window = new WindowMassDownload(VideoType.Video);
             window.ShowDialog();
         }
 
         private void btnClips_Click(object sender, RoutedEventArgs e)
         {
-            WindowMassDownload window = new WindowMassDownload(DownloadType.Clip);
+            WindowMassDownload window = new WindowMassDownload(VideoType.Clip);
             window.ShowDialog();
         }
 
@@ -204,7 +203,7 @@ namespace TwitchDownloaderWPF
 
         private void btnTaskError_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button { DataContext: ITwitchTask task }))
+            if (sender is not Button { DataContext: ITwitchTask task })
             {
                 return;
             }
@@ -222,12 +221,12 @@ namespace TwitchDownloaderWPF
                 errorMessage = taskException.Exception.ToString();
             }
 
-            MessageBox.Show(errorMessage, Translations.Strings.TaskError, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void btnRemoveTask_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button { DataContext: ITwitchTask task }))
+            if (sender is not Button { DataContext: ITwitchTask task })
             {
                 return;
             }

@@ -2,7 +2,6 @@
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-
     [Verb("ffmpeg", HelpText = "Manage standalone ffmpeg")]
     public class FfmpegArgs : ITwitchDownloaderArgs
     {

@@ -19,8 +19,10 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-	<EnableNETAnalyzers>false</EnableNETAnalyzers>
-	<Platforms>AnyCPU;x64</Platforms>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <Platforms>AnyCPU;x64</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!--TODO: <Nullable>enable</Nullable> once we have required keyword-->
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
@@ -62,7 +64,7 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.10.0" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.6" />
-    <PackageReference Include="Autoupdater.NET.Official" Version="1.8.3" />
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.8.4" />
     <PackageReference Include="Emoji.Wpf" Version="0.3.4" />
     <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
   </ItemGroup>
@@ -95,31 +97,34 @@
     <EmbeddedResource Update="Translations\Strings.tr.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-	  <EmbeddedResource Update="Translations\Strings.ru.resx">
+        <EmbeddedResource Update="Translations\Strings.uk.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-	<EmbeddedResource Update="Translations\Strings.zh.resx">
+    <EmbeddedResource Update="Translations\Strings.ru.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Translations\Strings.zh.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-	<ItemGroup>
-		<None Include="$(SolutionDir)Curl-Impersonate\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Curl-Impersonate\" />
-	</ItemGroup>
-	<ItemGroup>
-	  <None Update="Curl-Impersonate\curl-ca-bundle.crt">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Curl-Impersonate\libcurl.a">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Curl-Impersonate\libcurl.dll">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Curl-Impersonate\libcurldll.a">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="xcopy /s /d /y &quot;$(ProjectDir)\Curl-Impersonate\*.*&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)Curl-Impersonate\&quot;" />
-	</Target>
+  <ItemGroup>
+    <None Include="$(SolutionDir)Curl-Impersonate\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Curl-Impersonate\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Curl-Impersonate\curl-ca-bundle.crt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Curl-Impersonate\libcurl.a">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Curl-Impersonate\libcurl.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Curl-Impersonate\libcurldll.a">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /s /d /y &quot;$(ProjectDir)\Curl-Impersonate\*.*&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)Curl-Impersonate\&quot;" />
+  </Target>
 </Project>

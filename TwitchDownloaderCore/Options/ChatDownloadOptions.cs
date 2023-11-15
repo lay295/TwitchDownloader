@@ -36,12 +36,6 @@ namespace TwitchDownloaderCore.Options
         }
         public string TempFolder { get; set; }
         public VideoPlatform VideoPlatform { get; set; }
-        public ChatDownloadType DownloadType { get; set; }
-    }
-
-    public enum ChatDownloadType
-    {
-        Clip,
-        Video
+        public VideoType VideoType { get; set; }
     }
 }

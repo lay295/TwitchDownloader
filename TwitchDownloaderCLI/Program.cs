@@ -12,12 +12,10 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI
 {
-    class Program
+    internal static class Program
     {
         private static void Main(string[] args)
         {
-            // Set the working dir to the app dir in case we inherited a different working dir
-            Directory.SetCurrentDirectory(AppContext.BaseDirectory);
             Environment.SetEnvironmentVariable("CURL_IMPERSONATE", "chrome110");
 
             var preParsedArgs = PreParseArgs.Parse(args, Path.GetFileName(Environment.ProcessPath));

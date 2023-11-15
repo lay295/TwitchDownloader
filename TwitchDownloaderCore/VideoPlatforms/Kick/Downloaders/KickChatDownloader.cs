@@ -14,8 +14,6 @@ using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 using TwitchDownloaderCore.VideoPlatforms.Twitch;
 using System.Text.Json;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
-using System.Globalization;
 
 namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
 {
@@ -69,7 +67,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                     }
 
                     string formattedTime = dateTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-                    string response = await Task.Run(() => CurlImpersonate.GetCurlReponse($"https://kick.com/api/v2/channels/{streamerId}/messages?start_time={formattedTime}"));
+                    string response = await Task.Run(() => CurlImpersonate.GetCurlResponse($"https://kick.com/api/v2/channels/{streamerId}/messages?start_time={formattedTime}"));
                     chatResponse = JsonSerializer.Deserialize<KickChatResponse>(response);
                     Console.WriteLine(formattedTime);
 
@@ -229,8 +227,6 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                 throw new NotImplementedException("Kick chat download as HTML is not currently supported");
             }
 
-            bool vodParsed = UrlParse.TryParseVod(downloadOptions.Id, out VideoPlatform videoPlatformVod, out string vodId);
-
             ChatRoot chatRoot = new()
             {
                 FileInfo = new ChatRootInfo { Version = ChatRootVersion.CurrentVersion, CreatedAt = DateTime.Now },
@@ -250,7 +246,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             int viewCount;
             string game;
 
-            if (downloadOptions.DownloadType == ChatDownloadType.Video)
+            if (downloadOptions.VideoType == VideoType.Video)
             {
                 KickVideoResponse videoInfo = await KickHelper.GetVideoInfo(videoId);
                 if (videoInfo.id == 0)
@@ -272,7 +268,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             }
             else
             {
-                throw new NotImplementedException();
+                throw new NotImplementedException("Downloading chats from Kick clips is not implemented.");
                 GqlClipResponse clipInfoResponse = await TwitchHelper.GetClipInfo(videoId);
                 if (clipInfoResponse.data.clip.video == null || clipInfoResponse.data.clip.videoOffsetSeconds == null)
                 {
@@ -369,6 +365,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             if (downloadOptions.EmbedData && downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html)
             {
                 //TODO: Implement emote embeds
+                _progress.Report(new ProgressReport(ReportType.Log, "Emote embeds are not yet implemented for Kick chats."));
             }
 
             _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Writing output file"));
@@ -388,7 +385,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             }
         }
 
-        static async Task<List<Comment>[]> RunTasksWithLimitedConcurrency(int degreeOfParallelism, List<Func<Task<List<Comment>>>> tasks)
+        private static async Task<List<Comment>[]> RunTasksWithLimitedConcurrency(int degreeOfParallelism, List<Func<Task<List<Comment>>>> tasks)
         {
             var semaphore = new SemaphoreSlim(degreeOfParallelism);
             var taskList = new List<Task<List<Comment>>>();

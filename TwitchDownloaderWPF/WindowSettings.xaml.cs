@@ -50,14 +50,17 @@ namespace TwitchDownloaderWPF
             CheckThrottleEnabled.IsChecked = Settings.Default.DownloadThrottleEnabled;
             radioTimeFormatUTC.IsChecked = Settings.Default.UTCVideoTime;
 
-            // Setup theme dropdown
-            comboTheme.Items.Add("System"); // Cannot be localized
-            string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
-            foreach (string themeFile in themeFiles)
+            if (Directory.Exists("Themes"))
             {
-                comboTheme.Items.Add(Path.GetFileNameWithoutExtension(themeFile));
+                // Setup theme dropdown
+                comboTheme.Items.Add("System"); // Cannot be localized
+                string[] themeFiles = Directory.GetFiles("Themes", "*.xaml");
+                foreach (string themeFile in themeFiles)
+                {
+                    comboTheme.Items.Add(Path.GetFileNameWithoutExtension(themeFile));
+                }
+                comboTheme.SelectedItem = Settings.Default.GuiTheme;
             }
-            comboTheme.SelectedItem = Settings.Default.GuiTheme;
 
             // Setup culture dropdown
             foreach (var culture in AvailableCultures.All)
@@ -116,11 +119,11 @@ namespace TwitchDownloaderWPF
             Settings.Default.TemplateClip = textClipTemplate.Text;
             Settings.Default.TemplateChat = textChatTemplate.Text;
             Settings.Default.TempPath = textTempPath.Text;
-            Settings.Default.HideDonation = (bool)checkDonation.IsChecked;
-            Settings.Default.VerboseErrors = (bool)checkVerboseErrors.IsChecked;
+            Settings.Default.HideDonation = checkDonation.IsChecked.GetValueOrDefault();
+            Settings.Default.VerboseErrors = checkVerboseErrors.IsChecked.GetValueOrDefault();
             Settings.Default.MaximumBandwidthKib = (int)NumMaximumBandwidth.Value;
-            Settings.Default.UTCVideoTime = (bool)radioTimeFormatUTC.IsChecked;
-            Settings.Default.DownloadThrottleEnabled = (bool)CheckThrottleEnabled.IsChecked;
+            Settings.Default.UTCVideoTime = radioTimeFormatUTC.IsChecked.GetValueOrDefault();
+            Settings.Default.DownloadThrottleEnabled = CheckThrottleEnabled.IsChecked.GetValueOrDefault();
             Settings.Default.Save();
         }
 
@@ -162,14 +165,9 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void CheckThrottleEnabled_Checked(object sender, RoutedEventArgs e)
+        private void CheckThrottleEnabled_CheckedChanged(object sender, RoutedEventArgs e)
         {
-            NumMaximumBandwidth.IsEnabled = true;
-        }
-
-        private void CheckThrottleEnabled_Unchecked(object sender, RoutedEventArgs e)
-        {
-            NumMaximumBandwidth.IsEnabled = false;
+            NumMaximumBandwidth.IsEnabled = CheckThrottleEnabled.IsChecked.GetValueOrDefault();
         }
     }
 }

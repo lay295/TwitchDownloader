@@ -2,12 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Tools;
@@ -19,9 +17,9 @@ using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public class PlatformHelper
+    public static class PlatformHelper
     {
-        private static readonly HttpClient httpClient = new HttpClient();
+        private static readonly HttpClient HttpClient = new();
         public static async Task<IVideoInfo> GetClipInfo(VideoPlatform videoPlatform, string clipId)
         {
             if (videoPlatform == VideoPlatform.Twitch)
@@ -44,11 +42,11 @@ namespace TwitchDownloaderCore
             throw new NotImplementedException();
         }
 
-        public static async Task<IVideoInfo> GetVideoInfo(VideoPlatform videoPlatform, string videoId, string Oauth = "")
+        public static async Task<IVideoInfo> GetVideoInfo(VideoPlatform videoPlatform, string videoId, string oauth = "")
         {
             if (videoPlatform == VideoPlatform.Twitch)
             {
-                return await TwitchHelper.GetVideoInfo(int.Parse(videoId));
+                return await TwitchHelper.GetVideoInfo(int.Parse(videoId), oauth);
             }
 
             if (videoPlatform == VideoPlatform.Kick)
@@ -91,12 +89,12 @@ namespace TwitchDownloaderCore
             if (!Directory.Exists(cachePath))
                 PlatformHelper.CreateDirectory(cachePath);
 
-            string filePath = Path.Combine(cachePath, imageId + "_" + imageScale + "." + imageType);
+            string filePath = Path.Combine(cachePath!, $"{imageId}_{imageScale}.{imageType}");
             if (File.Exists(filePath))
             {
                 try
                 {
-                    await using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    await using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     byte[] bytes = new byte[stream.Length];
                     stream.Seek(0, SeekOrigin.Begin);
                     _ = await stream.ReadAsync(bytes, cancellationToken);
@@ -134,40 +132,40 @@ namespace TwitchDownloaderCore
             // Fallback to HTTP request
             if (imageUrl.Contains("kick.com"))
             {
-                imageBytes = CurlImpersonate.GetCurlReponseBytes(imageUrl);
+                imageBytes = CurlImpersonate.GetCurlResponseBytes(imageUrl);
             }
             else
             {
-                imageBytes = await httpClient.GetByteArrayAsync(imageUrl, cancellationToken);
+                imageBytes = await HttpClient.GetByteArrayAsync(imageUrl, cancellationToken);
             }
 
             //Let's save this image to the cache
             try
             {
-                using FileStream stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-                await stream.WriteAsync(imageBytes, cancellationToken);
+                await using var fs = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                await fs.WriteAsync(imageBytes, cancellationToken);
             }
             catch { }
 
             return imageBytes;
         }
 
-        public static async Task GetStvEmoteData(int streamerId, List<EmoteResponseItem> stvResponse, bool allowUnlistedEmotes, VideoPlatform videoPlatform)
+        public static async Task<List<EmoteResponseItem>> GetStvEmotesMetadata(int streamerId, bool allowUnlistedEmotes, VideoPlatform videoPlatform, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://7tv.io/v3/emote-sets/global", UriKind.Absolute));
-            using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var globalEmoteResponse = await HttpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             globalEmoteResponse.EnsureSuccessStatusCode();
-            var globalEmoteObject = await globalEmoteResponse.Content.ReadFromJsonAsync<STVGlobalEmoteResponse>();
+            var globalEmoteObject = await globalEmoteResponse.Content.ReadFromJsonAsync<STVGlobalEmoteResponse>(cancellationToken: cancellationToken);
             var stvEmotes = globalEmoteObject.emotes;
 
             // Channel might not be registered on 7tv
             try
             {
-                var streamerEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://7tv.io/v3/users/{Enum.GetName(videoPlatform).ToLower()}/{streamerId}", UriKind.Absolute));
-                using var streamerEmoteResponse = await httpClient.SendAsync(streamerEmoteRequest, HttpCompletionOption.ResponseHeadersRead);
+                var streamerEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://7tv.io/v3/users/{Enum.GetName(videoPlatform)!.ToLower()}/{streamerId}", UriKind.Absolute));
+                using var streamerEmoteResponse = await HttpClient.SendAsync(streamerEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 streamerEmoteResponse.EnsureSuccessStatusCode();
 
-                var streamerEmoteObject = await streamerEmoteResponse.Content.ReadFromJsonAsync<STVChannelEmoteResponse>();
+                var streamerEmoteObject = await streamerEmoteResponse.Content.ReadFromJsonAsync<STVChannelEmoteResponse>(cancellationToken: cancellationToken);
                 // Channel might not have emotes setup
                 if (streamerEmoteObject.emote_set?.emotes != null)
                 {
@@ -176,6 +174,7 @@ namespace TwitchDownloaderCore
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 
+            var returnList = new List<EmoteResponseItem>();
             foreach (var stvEmote in stvEmotes)
             {
                 STVData emoteData = stvEmote.data;
@@ -214,9 +213,11 @@ namespace TwitchDownloaderCore
                 }
                 if (allowUnlistedEmotes || emoteIsListed)
                 {
-                    stvResponse.Add(emoteResponse);
+                    returnList.Add(emoteResponse);
                 }
             }
+
+            return returnList;
         }
     }
 }

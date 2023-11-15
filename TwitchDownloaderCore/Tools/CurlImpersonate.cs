@@ -1,29 +1,28 @@
 ﻿using CurlThin.Enums;
 using CurlThin;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.Buffers;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace TwitchDownloaderCore.Tools
 {
     public static class CurlImpersonate
     {
-        static CURLcode global = CurlNative.Init();
+        // Ideally, this class would be a singleton so we can call CurlNative.Cleanup() when shutting down.
+        private static readonly CURLcode Global = CurlNative.Init();
 
-        public static string GetCurlReponse(string url)
+        public static string GetCurlResponse(string url)
         {
-            string response = Encoding.UTF8.GetString(GetCurlReponseBytes(url));
+            string response = Encoding.UTF8.GetString(GetCurlResponseBytes(url));
             return response;
         }
 
-        public static byte[] GetCurlReponseBytes(string url)
+        public static byte[] GetCurlResponseBytes(string url)
         {
             var easy = CurlNative.Easy.Init();
+
             try
             {
                 CurlNative.Easy.SetOpt(easy, CURLoption.URL, url);
@@ -34,9 +33,19 @@ namespace TwitchDownloaderCore.Tools
                 CurlNative.Easy.SetOpt(easy, CURLoption.WRITEFUNCTION, (data, size, nmemb, user) =>
                 {
                     var length = (int)size * (int)nmemb;
-                    var buffer = new byte[length];
-                    Marshal.Copy(data, buffer, 0, length);
-                    stream.Write(buffer, 0, length);
+
+                    var buffer = ArrayPool<byte>.Shared.Rent(length);
+                    try
+                    {
+                        Marshal.Copy(data, buffer, 0, length);
+                        stream.Write(buffer, 0, length);
+                    }
+                    finally
+                    {
+                        Array.Clear(buffer); // Clear the buffer in case we were working with sensitive information.
+                        ArrayPool<byte>.Shared.Return(buffer);
+                    }
+
                     return (UIntPtr)length;
                 });
 
@@ -45,7 +54,15 @@ namespace TwitchDownloaderCore.Tools
             }
             finally
             {
-                easy.Dispose();
+                // The author of CurlThin fixed a finalizer issue with a hack that resulted in SafeEasyHandles never actually cleaning themselves up, even when calling Dispose().
+                // See https://github.com/stil/CurlThin/issues/15 for more details
+                var handle = easy.DangerousGetHandle();
+                if (handle != IntPtr.Zero)
+                {
+                    CurlNative.Easy.Cleanup(handle);
+                    easy.SetHandleAsInvalid();
+                    easy.Dispose();
+                }
             }
         }
     }

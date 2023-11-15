@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Twitch;
 using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.TwitchTasks;
 
 namespace TwitchDownloaderWPF
@@ -20,23 +22,24 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class WindowMassDownload : Window
     {
-        public DownloadType downloaderType { get; set; }
+        public VideoType downloaderType { get; set; }
         public ObservableCollection<TaskData> videoList { get; set; } = new ObservableCollection<TaskData>();
-        public List<TaskData> selectedItems = new List<TaskData>();
-        public List<string> cursorList = new List<string>();
+        public readonly List<TaskData> selectedItems = new List<TaskData>();
+        public readonly List<string> cursorList = new List<string>();
         public int cursorIndex = -1;
         public string currentChannel = "";
         public string period = "";
+        public int videoCount = 50;
 
-        public WindowMassDownload(DownloadType Type)
+        public WindowMassDownload(VideoType type)
         {
-            downloaderType = Type;
+            downloaderType = type;
             InitializeComponent();
             itemList.ItemsSource = videoList;
-            if (downloaderType == DownloadType.Video)
+            if (downloaderType == VideoType.Video)
             {
-                comboSort.Visibility = Visibility.Hidden;
-                labelSort.Visibility = Visibility.Hidden;
+                ComboSortByDate.Visibility = Visibility.Hidden;
+                LabelSort.Visibility = Visibility.Hidden;
             }
             btnNext.IsEnabled = false;
             btnPrev.IsEnabled = false;
@@ -58,47 +61,53 @@ namespace TwitchDownloaderWPF
 
         private async Task UpdateList()
         {
-            if (downloaderType == DownloadType.Video)
+            if (StatusImage != null) StatusImage.Visibility = Visibility.Visible;
+
+            if (string.IsNullOrWhiteSpace(currentChannel))
+            {
+                // Pretend we are doing something so the status icon has time to show
+                await Task.Delay(50);
+                videoList.Clear();
+                cursorList.Clear();
+                cursorIndex = -1;
+                if (StatusImage != null) StatusImage.Visibility = Visibility.Hidden;
+                return;
+            }
+
+            if (downloaderType == VideoType.Video)
             {
                 string currentCursor = "";
                 if (cursorList.Count > 0 && cursorIndex >= 0)
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, 100);
+                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, videoCount);
                 videoList.Clear();
                 if (res.data.user != null)
                 {
                     foreach (var video in res.data.user.videos.edges)
                     {
-                        TaskData data = new TaskData();
-                        data.Title = video.node.title;
-                        data.Length = video.node.lengthSeconds;
-                        data.Id = video.node.id;
-                        data.Time = Settings.Default.UTCVideoTime ? video.node.createdAt : video.node.createdAt.ToLocalTime();
-                        data.Views = video.node.viewCount;
-                        data.Streamer = currentChannel;
-                        data.Game = video.node.game?.displayName ?? "Unknown";
-                        try
+                        var thumbUrl = video.node.previewThumbnailURL;
+                        if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                         {
-                            var bitmapImage = new BitmapImage();
-                            bitmapImage.BeginInit();
-                            bitmapImage.UriSource = new Uri(video.node.previewThumbnailURL);
-                            bitmapImage.EndInit();
-                            data.Thumbnail = bitmapImage;
+                            _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out thumbnail);
                         }
-                        catch { }
-                        videoList.Add(data);
+
+                        videoList.Add(new TaskData
+                        {
+                            Title = video.node.title,
+                            Length = video.node.lengthSeconds,
+                            Id = video.node.id,
+                            Time = Settings.Default.UTCVideoTime ? video.node.createdAt : video.node.createdAt.ToLocalTime(),
+                            Views = video.node.viewCount,
+                            Streamer = currentChannel,
+                            Game = video.node.game?.displayName ?? "Unknown",
+                            Thumbnail = thumbnail
+                        });
                     }
 
-                    if (res.data.user.videos.pageInfo.hasNextPage)
-                        btnNext.IsEnabled = true;
-                    else
-                        btnNext.IsEnabled = false;
-                    if (res.data.user.videos.pageInfo.hasPreviousPage)
-                        btnPrev.IsEnabled = true;
-                    else
-                        btnPrev.IsEnabled = false;
+                    btnNext.IsEnabled = res.data.user.videos.pageInfo.hasNextPage;
+                    btnPrev.IsEnabled = res.data.user.videos.pageInfo.hasPreviousPage;
                     if (res.data.user.videos.pageInfo.hasNextPage)
                     {
                         string newCursor = res.data.user.videos.edges[0].cursor;
@@ -114,40 +123,33 @@ namespace TwitchDownloaderWPF
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlClipSearchResponse res = await TwitchHelper.GetGqlClips(currentChannel, period, currentCursor, 50);
+                GqlClipSearchResponse res = await TwitchHelper.GetGqlClips(currentChannel, period, currentCursor, videoCount);
                 videoList.Clear();
                 if (res.data.user != null)
                 {
                     foreach (var clip in res.data.user.clips.edges)
                     {
-                        TaskData data = new TaskData();
-                        data.Title = clip.node.title;
-                        data.Length = clip.node.durationSeconds;
-                        data.Id = clip.node.slug;
-                        data.Time = Settings.Default.UTCVideoTime ? clip.node.createdAt : clip.node.createdAt.ToLocalTime();
-                        data.Views = clip.node.viewCount;
-                        data.Streamer = currentChannel;
-                        data.Game = clip.node.game?.displayName ?? "Unknown";
-                        try
+                        var thumbUrl = clip.node.thumbnailURL;
+                        if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                         {
-                            var bitmapImage = new BitmapImage();
-                            bitmapImage.BeginInit();
-                            bitmapImage.UriSource = new Uri(clip.node.thumbnailURL);
-                            bitmapImage.EndInit();
-                            data.Thumbnail = bitmapImage;
+                            _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out thumbnail);
                         }
-                        catch { }
-                        videoList.Add(data);
+
+                        videoList.Add(new TaskData
+                        {
+                            Title = clip.node.title,
+                            Length = clip.node.durationSeconds,
+                            Id = clip.node.slug,
+                            Time = Settings.Default.UTCVideoTime ? clip.node.createdAt : clip.node.createdAt.ToLocalTime(),
+                            Views = clip.node.viewCount,
+                            Streamer = currentChannel,
+                            Game = clip.node.game?.displayName ?? "Unknown",
+                            Thumbnail = thumbnail
+                        });
                     }
 
-                    if (res.data.user.clips.pageInfo.hasNextPage)
-                        btnNext.IsEnabled = true;
-                    else
-                        btnNext.IsEnabled = false;
-                    if (cursorIndex >= 0)
-                        btnPrev.IsEnabled = true;
-                    else
-                        btnPrev.IsEnabled = false;
+                    btnNext.IsEnabled = res.data.user.clips.pageInfo.hasNextPage;
+                    btnPrev.IsEnabled = cursorIndex >= 0;
                     if (res.data.user.clips.pageInfo.hasNextPage)
                     {
                         string newCursor = res.data.user.clips.edges.First(x => x.cursor != null).cursor;
@@ -156,20 +158,24 @@ namespace TwitchDownloaderWPF
                     }
                 }
             }
+
+            if (StatusImage != null) StatusImage.Visibility = Visibility.Hidden;
         }
 
-        private void Border_MouseUp(object sender, MouseButtonEventArgs e)
+        private void Border_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Border border = sender as Border;
-            if (selectedItems.Any(x => x.Id == ((TaskData)border.DataContext).Id))
+            if (sender is not Border border) return;
+            if (border.DataContext is not TaskData taskData) return;
+
+            if (selectedItems.Any(x => x.Id == taskData.Id))
             {
                 border.Background = Brushes.Transparent;
-                selectedItems.RemoveAll(x => x.Id == ((TaskData)border.DataContext).Id);
+                selectedItems.RemoveAll(x => x.Id == taskData.Id);
             }
             else
             {
                 border.Background = Brushes.LightBlue;
-                selectedItems.Add((TaskData)border.DataContext);
+                selectedItems.Add(taskData);
             }
             textCount.Text = selectedItems.Count.ToString();
         }
@@ -192,13 +198,12 @@ namespace TwitchDownloaderWPF
 
         private void Border_Initialized(object sender, EventArgs e)
         {
-            Border border = (Border)sender;
-            if (border.DataContext != null)
+            if (sender is not Border border) return;
+            if (border.DataContext is not TaskData taskData) return;
+
+            if (selectedItems.Any(x => x.Id == taskData.Id))
             {
-                if (selectedItems.Any(x => x.Id == ((TaskData)border.DataContext).Id))
-                {
-                    border.Background = Brushes.LightBlue;
-                }
+                border.Background = Brushes.LightBlue;
             }
         }
 
@@ -207,15 +212,14 @@ namespace TwitchDownloaderWPF
             if (selectedItems.Count > 0)
             {
                 WindowQueueOptions queue = new WindowQueueOptions(selectedItems);
-                bool? queued = queue.ShowDialog();
-                if (queued != null && (bool)queued)
+                if (queue.ShowDialog().GetValueOrDefault())
                     this.Close();
             }
         }
 
-        private async void comboSort_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ComboSortByDate_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            period = ((ComboBoxItem)comboSort.SelectedItem).Tag.ToString();
+            period = ((ComboBoxItem)ComboSortByDate.SelectedItem).Tag.ToString();
             videoList.Clear();
             cursorList.Clear();
             cursorIndex = -1;
@@ -224,31 +228,33 @@ namespace TwitchDownloaderWPF
 
         private void btnSelectAll_Click(object sender, RoutedEventArgs e)
         {
-            //I'm sure there is a much better way to do this. Could not find a way to itterate over each itemcontrol border
+            //I'm sure there is a much better way to do this. Could not find a way to iterate over each itemcontrol border
             foreach (var video in videoList)
             {
-                if (!selectedItems.Any(x => x.Id == video.Id))
+                if (selectedItems.All(x => x.Id != video.Id))
                 {
                     selectedItems.Add(video);
                 }
             }
 
-            List<TaskData> oldData = videoList.ToList();
+            // Remove and re-add all of the items to trigger Border_Initialized
+            var oldData = videoList.ToArray();
             videoList.Clear();
             foreach (var item in oldData)
             {
                 videoList.Add(item);
             }
+
             textCount.Text = selectedItems.Count.ToString();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Title = downloaderType == DownloadType.Video
+            Title = downloaderType == VideoType.Video
                 ? Translations.Strings.TitleVideoMassDownloader
                 : Translations.Strings.TitleClipMassDownloader;
             App.RequestTitleBarChange();
-		}
+        }
 
         private async void TextChannel_OnKeyDown(object sender, KeyEventArgs e)
         {
@@ -257,6 +263,53 @@ namespace TwitchDownloaderWPF
                 await ChangeCurrentChannel();
                 e.Handled = true;
             }
+        }
+
+        private async void ComboVideoCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            videoCount = int.Parse((string)((ComboBoxItem)ComboVideoCount.SelectedValue).Content);
+            videoList.Clear();
+            cursorList.Clear();
+            cursorIndex = -1;
+            await UpdateList();
+        }
+
+        private void MenuItemCopyVideoID_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: TaskData taskData }) return;
+
+            var id = taskData.Id;
+            Clipboard.SetText(id);
+
+            e.Handled = true;
+        }
+
+        private void MenuItemCopyVideoUrl_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: TaskData taskData }) return;
+
+            var id = taskData.Id;
+            var url = id.All(char.IsDigit)
+                ? $"https://twitch.tv/videos/{id}"
+                : $"https://clips.twitch.tv/{id}";
+
+            Clipboard.SetText(url);
+
+            e.Handled = true;
+        }
+
+        private void MenuItemOpenInBrowser_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: TaskData taskData }) return;
+
+            var id = taskData.Id;
+            var url = id.All(char.IsDigit)
+                ? $"https://twitch.tv/videos/{id}"
+                : $"https://clips.twitch.tv/{id}";
+
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+
+            e.Handled = true;
         }
     }
 }

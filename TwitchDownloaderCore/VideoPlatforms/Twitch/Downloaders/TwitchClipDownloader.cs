@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -10,6 +9,7 @@ using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 
 namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
 {
@@ -32,6 +32,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
             _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Fetching Clip Info"));
 
             var downloadUrl = await GetDownloadUrl();
+            var clipInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -52,7 +53,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
 
             if (!downloadOptions.EncodeMetadata)
             {
-                await DownloadTools.DownloadClipFileTaskAsync(downloadUrl, downloadOptions.Filename, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
+                await DownloadTools.DownloadFileAsync(downloadUrl, downloadOptions.Filename, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
                 return;
             }
 
@@ -64,12 +65,13 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
             var tempFile = Path.Combine(downloadOptions.TempFolder, $"clip_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}_{Path.GetRandomFileName()}");
             try
             {
-                await DownloadTools.DownloadClipFileTaskAsync(downloadUrl, tempFile, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
+                await DownloadTools.DownloadFileAsync(downloadUrl, tempFile, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
 
                 _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Encoding Clip Metadata 0%"));
                 _progress.Report(new ProgressReport(0));
 
-                await EncodeClipMetadata(tempFile, downloadOptions.Filename, cancellationToken);
+                var clipChapter = TwitchHelper.GenerateClipChapter(clipInfo.data.clip);
+                await EncodeClipWithMetadata(tempFile, downloadOptions.Filename, clipInfo.data.clip, clipChapter, cancellationToken);
 
                 _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Encoding Clip Metadata 100%"));
                 _progress.Report(new ProgressReport(100));
@@ -98,7 +100,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
 
             foreach (var quality in listLinks[0].data.clip.videoQualities)
             {
-                if (quality.quality + "p" + (quality.frameRate.ToString() == "30" ? "" : quality.frameRate.ToString()) == downloadOptions.Quality)
+                if (quality.quality + "p" + (quality.frameRate == 30 ? "" : quality.frameRate.ToString()) == downloadOptions.Quality)
                 {
                     downloadUrl = quality.sourceURL;
                 }
@@ -112,15 +114,14 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
             return downloadUrl + "?sig=" + listLinks[0].data.clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(listLinks[0].data.clip.playbackAccessToken.value);
         }
 
-        private async Task EncodeClipMetadata(string inputFile, string destinationFile, CancellationToken cancellationToken)
+        private async Task EncodeClipWithMetadata(string inputFile, string destinationFile, Clip clipMetadata, VideoMomentEdge clipChapter, CancellationToken cancellationToken)
         {
-            var metadataFile = $"{Path.GetFileNameWithoutExtension(inputFile)}_metadata{Path.GetExtension(inputFile)}";
-            var clipInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
+            var metadataFile = $"{Path.GetFileName(inputFile)}_metadata.txt";
 
             try
             {
-                await FfmpegMetadata.SerializeAsync(metadataFile, clipInfo.data.clip.broadcaster.displayName, downloadOptions.Id, clipInfo.data.clip.title, clipInfo.data.clip.createdAt,
-                    clipInfo.data.clip.viewCount, cancellationToken: cancellationToken);
+                await FfmpegMetadata.SerializeAsync(metadataFile, clipMetadata.broadcaster.displayName, downloadOptions.Id, clipMetadata.title, clipMetadata.createdAt, clipMetadata.viewCount,
+                    videoMomentEdges: new[] { clipChapter }, cancellationToken: cancellationToken);
 
                 var process = new Process
                 {

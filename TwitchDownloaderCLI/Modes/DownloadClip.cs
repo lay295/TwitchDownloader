@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -38,8 +37,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            bool success = UrlParse.TryParseClip(inputOptions.Id, out VideoPlatform videoPlatform, out string videoId);
-            if (!success)
+            if (!UrlParse.TryParseClip(inputOptions.Id, out var videoPlatform, out var videoId))
             {
                 Console.WriteLine("[ERROR] - Unable to parse Clip ID/URL.");
                 Environment.Exit(1);
