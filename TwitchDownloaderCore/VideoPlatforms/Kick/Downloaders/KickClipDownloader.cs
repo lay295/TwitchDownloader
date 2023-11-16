@@ -120,11 +120,6 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             }
         }
 
-        private Action<StreamCopyProgress> DownloadProgressHandler(int i)
-        {
-            throw new NotImplementedException();
-        }
-
         private async Task EncodeClipMetadata(string inputFile, string destinationFile, KickClipResponse clipInfo, CancellationToken cancellationToken)
         {
             var metadataFile = $"{Path.GetFileNameWithoutExtension(inputFile)}_metadata{Path.GetExtension(inputFile)}";

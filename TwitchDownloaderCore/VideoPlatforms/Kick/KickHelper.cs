@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 using TwitchDownloaderCore.VideoPlatforms.Twitch;
-using TwitchDownloaderCore.VideoPlatforms.Twitch.Api;
 
 namespace TwitchDownloaderCore.VideoPlatforms.Kick
 {
@@ -87,7 +86,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
                 }
             }
 
-            if (!string.IsNullOrEmpty(latestSegment.DownloadUrl))
+            if (!string.IsNullOrEmpty(latestSegment?.DownloadUrl))
             {
                 returnList.Add(latestSegment);
             }
