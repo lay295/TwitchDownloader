@@ -38,7 +38,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             GqlVideoResponse res = await response.Content.ReadFromJsonAsync<GqlVideoResponse>();
 
             GqlVideoTokenResponse accessToken = await TwitchHelper.GetVideoToken(videoId, oauth);
-            if (accessToken is null)
+            if (accessToken.data.videoPlaybackAccessToken is null)
             {
                 throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
             }
