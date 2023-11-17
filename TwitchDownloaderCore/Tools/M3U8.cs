@@ -15,7 +15,7 @@ namespace TwitchDownloaderCore.Tools
             Stream.ExtStreamInfo currentExtStreamInfo = null;
 
             Metadata.Builder metadataBuilder = new();
-            DateTime currentExtProgramDateTime = default;
+            DateTimeOffset currentExtProgramDateTime = default;
             Range currentExtByteRange = default;
             Stream.ExtPartInfo currentExtPartInfo = null;
 
@@ -71,7 +71,7 @@ namespace TwitchDownloaderCore.Tools
                 }
                 else if (workingSlice.StartsWith(PROGRAM_DATE_TIME_KEY))
                 {
-                    currentExtProgramDateTime = ParsingHelpers.ParseDateTime(workingSlice, PROGRAM_DATE_TIME_KEY);
+                    currentExtProgramDateTime = ParsingHelpers.ParseDateTimeOffset(workingSlice, PROGRAM_DATE_TIME_KEY);
                 }
                 else if (workingSlice.StartsWith(BYTE_RANGE_KEY))
                 {
@@ -210,7 +210,7 @@ namespace TwitchDownloaderCore.Tools
                 IsPlaylist = path.EndsWith(".m3u8");
             }
 
-            public Stream(ExtPartInfo partInfo, DateTime programDateTime, Range byteRange, string path)
+            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, Range byteRange, string path)
             {
                 MediaInfo = null;
                 StreamInfo = null;
@@ -221,7 +221,7 @@ namespace TwitchDownloaderCore.Tools
                 IsPlaylist = path.EndsWith(".m3u8");
             }
 
-            public Stream(ExtMediaInfo mediaInfo, ExtStreamInfo streamInfo, ExtPartInfo partInfo, DateTime programDateTime, Range byteRange, string path)
+            public Stream(ExtMediaInfo mediaInfo, ExtStreamInfo streamInfo, ExtPartInfo partInfo, DateTimeOffset programDateTime, Range byteRange, string path)
             {
                 MediaInfo = mediaInfo;
                 StreamInfo = streamInfo;
@@ -235,7 +235,7 @@ namespace TwitchDownloaderCore.Tools
             public ExtMediaInfo MediaInfo { get; }
             public ExtStreamInfo StreamInfo { get; }
             public ExtPartInfo PartInfo { get; }
-            public DateTime ProgramDateTime { get; }
+            public DateTimeOffset ProgramDateTime { get; }
             public Range ByteRange { get; }
             public string Path { get; }
             public bool IsPlaylist { get; }
@@ -586,7 +586,7 @@ namespace TwitchDownloaderCore.Tools
                 return Stream.ExtStreamInfo.StreamResolution.Parse(temp);
             }
 
-            public static DateTime ParseDateTime(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
+            public static DateTimeOffset ParseDateTimeOffset(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
             {
                 var temp = text[keyName.Length..];
 

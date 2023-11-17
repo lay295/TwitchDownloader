@@ -77,23 +77,23 @@ namespace TwitchDownloaderTests
                 "\n#EXT-X-TWITCH-PREFETCH:https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/nop-123QRS_456.ts" +
                 "\n#EXT-X-TWITCH-PREFETCH:https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/tuv-789WXY_012.ts";
 
-            var streamValues = new (DateTime programDateTime, decimal duration, bool isLive, string path)[]
+            var streamValues = new (DateTimeOffset programDateTime, decimal duration, bool isLive, string path)[]
             {
-                (DateTime.Parse("2023-09-17T02:31:48.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/abc-123DEF_456.ts"),
-                (DateTime.Parse("2023-09-17T02:31:50.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/ghi-789JKL_012.ts"),
-                (DateTime.Parse("2023-09-17T02:31:52.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/mno-345PQR_678.ts"),
-                (DateTime.Parse("2023-09-17T02:31:54.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/stu-901VWX_234.ts"),
-                (DateTime.Parse("2023-09-17T02:31:56.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/yza-567BCD_890.ts"),
-                (DateTime.Parse("2023-09-17T02:31:58.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/efg-123hij_456.ts"),
-                (DateTime.Parse("2023-09-17T02:32:00.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/klm-789nop_012.ts"),
-                (DateTime.Parse("2023-09-17T02:32:02.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/qrs-345TUV_678.ts"),
-                (DateTime.Parse("2023-09-17T02:32:04.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/wxy-901ZAB_234.ts"),
-                (DateTime.Parse("2023-09-17T02:32:06.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/cde-567FGH_890.ts"),
-                (DateTime.Parse("2023-09-17T02:32:08.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/ijk-123lmn_456.ts"),
-                (DateTime.Parse("2023-09-17T02:32:10.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/opq-789RST_012.ts"),
-                (DateTime.Parse("2023-09-17T02:32:12.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/uvx-345YZA_678.ts"),
-                (DateTime.Parse("2023-09-17T02:32:14.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/bcd-901EFG_234.ts"),
-                (DateTime.Parse("2023-09-17T02:32:16.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/hij-567KLM_890.ts")
+                (DateTimeOffset.Parse("2023-09-17T02:31:48.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/abc-123DEF_456.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:31:50.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/ghi-789JKL_012.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:31:52.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/mno-345PQR_678.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:31:54.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/stu-901VWX_234.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:31:56.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/yza-567BCD_890.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:31:58.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/efg-123hij_456.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:32:00.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/klm-789nop_012.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:32:02.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/qrs-345TUV_678.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:32:04.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/wxy-901ZAB_234.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:32:06.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/cde-567FGH_890.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:32:08.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/ijk-123lmn_456.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:32:10.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/opq-789RST_012.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:32:12.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/uvx-345YZA_678.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:32:14.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/bcd-901EFG_234.ts"),
+                (DateTimeOffset.Parse("2023-09-17T02:32:16.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/hij-567KLM_890.ts")
             };
 
             var m3u8 = M3U8.Parse(ExampleM3U8Twitch);
@@ -237,39 +237,39 @@ namespace TwitchDownloaderTests
                 "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:03.97Z\n#EXT-X-BYTERANGE:1768140@3175696\n#EXTINF:2.000,\n506.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:05.97Z\n#EXT-X-BYTERANGE:1519040@4943836\n#EXTINF:2.000,\n506.ts" +
                 "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:07.97Z\n#EXT-X-BYTERANGE:1506068@6462876\n#EXTINF:2.000,\n506.ts\n#EXT-X-ENDLIST";
 
-            var streamValues = new (DateTime programDateTime, Range byteRange, string path)[]
+            var streamValues = new (DateTimeOffset programDateTime, Range byteRange, string path)[]
             {
-                (DateTime.Parse("2023-11-16T05:34:07.97Z"), new Range(1601196, 6470396), "500.ts"),
-                (DateTime.Parse("2023-11-16T05:34:09.97Z"), new Range(1588224, 0), "501.ts"),
-                (DateTime.Parse("2023-11-16T05:34:11.97Z"), new Range(1579200, 1588224), "501.ts"),
-                (DateTime.Parse("2023-11-16T05:34:13.97Z"), new Range(1646128, 3167424), "501.ts"),
-                (DateTime.Parse("2023-11-16T05:34:15.97Z"), new Range(1587472, 4813552), "501.ts"),
-                (DateTime.Parse("2023-11-16T05:34:17.97Z"), new Range(1594052, 6401024), "501.ts"),
-                (DateTime.Parse("2023-11-16T05:34:19.97Z"), new Range(1851236, 0), "502.ts"),
-                (DateTime.Parse("2023-11-16T05:34:21.97Z"), new Range(1437448, 1851236), "502.ts"),
-                (DateTime.Parse("2023-11-16T05:34:23.97Z"), new Range(1535960, 3288684), "502.ts"),
-                (DateTime.Parse("2023-11-16T05:34:25.97Z"), new Range(1568672, 4824644), "502.ts"),
-                (DateTime.Parse("2023-11-16T05:34:27.97Z"), new Range(1625824, 6393316), "502.ts"),
-                (DateTime.Parse("2023-11-16T05:34:29.97Z"), new Range(1583524, 0), "503.ts"),
-                (DateTime.Parse("2023-11-16T05:34:31.97Z"), new Range(1597060, 1583524), "503.ts"),
-                (DateTime.Parse("2023-11-16T05:34:33.97Z"), new Range(1642368, 3180584), "503.ts"),
-                (DateTime.Parse("2023-11-16T05:34:35.97Z"), new Range(1556076, 4822952), "503.ts"),
-                (DateTime.Parse("2023-11-16T05:34:37.97Z"), new Range(1669252, 6379028), "503.ts"),
-                (DateTime.Parse("2023-11-16T05:34:39.97Z"), new Range(1544984, 0), "504.ts"),
-                (DateTime.Parse("2023-11-16T05:34:41.97Z"), new Range(1601384, 1544984), "504.ts"),
-                (DateTime.Parse("2023-11-16T05:34:43.97Z"), new Range(1672260, 3146368), "504.ts"),
-                (DateTime.Parse("2023-11-16T05:34:45.97Z"), new Range(1623192, 4818628), "504.ts"),
-                (DateTime.Parse("2023-11-16T05:34:47.97Z"), new Range(1526748, 6441820), "504.ts"),
-                (DateTime.Parse("2023-11-16T05:34:49.97Z"), new Range(1731668, 0), "505.ts"),
-                (DateTime.Parse("2023-11-16T05:34:51.97Z"), new Range(1454368, 1731668), "505.ts"),
-                (DateTime.Parse("2023-11-16T05:34:53.97Z"), new Range(1572432, 3186036), "505.ts"),
-                (DateTime.Parse("2023-11-16T05:34:55.97Z"), new Range(1625824, 4758468), "505.ts"),
-                (DateTime.Parse("2023-11-16T05:34:57.97Z"), new Range(1616988, 6384292), "505.ts"),
-                (DateTime.Parse("2023-11-16T05:34:59.97Z"), new Range(1632028, 0), "506.ts"),
-                (DateTime.Parse("2023-11-16T05:35:01.97Z"), new Range(1543668, 1632028), "506.ts"),
-                (DateTime.Parse("2023-11-16T05:35:03.97Z"), new Range(1768140, 3175696), "506.ts"),
-                (DateTime.Parse("2023-11-16T05:35:05.97Z"), new Range(1519040, 4943836), "506.ts"),
-                (DateTime.Parse("2023-11-16T05:35:07.97Z"), new Range(1506068, 6462876), "506.ts")
+                (DateTimeOffset.Parse("2023-11-16T05:34:07.97Z"), new Range(1601196, 6470396), "500.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:09.97Z"), new Range(1588224, 0), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:11.97Z"), new Range(1579200, 1588224), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:13.97Z"), new Range(1646128, 3167424), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:15.97Z"), new Range(1587472, 4813552), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:17.97Z"), new Range(1594052, 6401024), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:19.97Z"), new Range(1851236, 0), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:21.97Z"), new Range(1437448, 1851236), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:23.97Z"), new Range(1535960, 3288684), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:25.97Z"), new Range(1568672, 4824644), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:27.97Z"), new Range(1625824, 6393316), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:29.97Z"), new Range(1583524, 0), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:31.97Z"), new Range(1597060, 1583524), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:33.97Z"), new Range(1642368, 3180584), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:35.97Z"), new Range(1556076, 4822952), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:37.97Z"), new Range(1669252, 6379028), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:39.97Z"), new Range(1544984, 0), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:41.97Z"), new Range(1601384, 1544984), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:43.97Z"), new Range(1672260, 3146368), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:45.97Z"), new Range(1623192, 4818628), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:47.97Z"), new Range(1526748, 6441820), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:49.97Z"), new Range(1731668, 0), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:51.97Z"), new Range(1454368, 1731668), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:53.97Z"), new Range(1572432, 3186036), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:55.97Z"), new Range(1625824, 4758468), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:57.97Z"), new Range(1616988, 6384292), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:59.97Z"), new Range(1632028, 0), "506.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:35:01.97Z"), new Range(1543668, 1632028), "506.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:35:03.97Z"), new Range(1768140, 3175696), "506.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:35:05.97Z"), new Range(1519040, 4943836), "506.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:35:07.97Z"), new Range(1506068, 6462876), "506.ts")
             };
 
             var m3u8 = M3U8.Parse(ExampleM3U8Kick);
