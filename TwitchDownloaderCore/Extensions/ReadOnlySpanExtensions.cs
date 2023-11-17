@@ -9,6 +9,9 @@ namespace TwitchDownloaderCore.Extensions
         {
             const string ESCAPE_CHARS = @"\'""";
 
+            if (oldChar is '\\' or '\'' or '\"')
+                return false;
+
             if (destination.Length < str.Length)
                 return false;
 
