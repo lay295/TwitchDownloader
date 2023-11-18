@@ -28,6 +28,7 @@ namespace TwitchDownloaderTests
 
             Assert.Equal(3u, m3u8.FileMetadata.Version);
             Assert.Equal(10u, m3u8.FileMetadata.StreamTargetDuration);
+            Assert.Equal("2023-09-23T17:37:06", m3u8.FileMetadata.UnparsedValues.FirstOrDefault(x => x.Key == "#ID3-EQUIV-TDTG:").Value);
             Assert.Equal(M3U8.Metadata.PlaylistType.Event, m3u8.FileMetadata.Type);
             Assert.Equal(0u, m3u8.FileMetadata.MediaSequence);
             Assert.Equal(0m, m3u8.FileMetadata.TwitchElapsedSeconds);
@@ -201,7 +202,7 @@ namespace TwitchDownloaderTests
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",VIDEO=\"audio_only\"", 220328, "mp4a.40.2", 0, 0, "audio_only", 0)]
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\",FRAME-RATE=29.998", 708016, "avc1.4D001E,mp4a.40.2", 640, 360, "360p30", 29.998)]
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\",FRAME-RATE=29.998", 288409, "avc1.4D000C,mp4a.40.2", 284, 160, "160p30", 29.998)]
-        public void CorrectlyParsesTwitchM3U8StreamInfo(string streamInfoString, uint bandwidth, string codecs, uint videoWidth, uint videoHeight, string video, decimal framerate)
+        public void CorrectlyParsesTwitchM3U8StreamInfo(string streamInfoString, int bandwidth, string codecs, uint videoWidth, uint videoHeight, string video, decimal framerate)
         {
             var streamInfo = M3U8.Stream.ExtStreamInfo.Parse(streamInfoString);
 
@@ -237,39 +238,39 @@ namespace TwitchDownloaderTests
                 "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:03.97Z\n#EXT-X-BYTERANGE:1768140@3175696\n#EXTINF:2.000,\n506.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:05.97Z\n#EXT-X-BYTERANGE:1519040@4943836\n#EXTINF:2.000,\n506.ts" +
                 "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:07.97Z\n#EXT-X-BYTERANGE:1506068@6462876\n#EXTINF:2.000,\n506.ts\n#EXT-X-ENDLIST";
 
-            var streamValues = new (DateTimeOffset programDateTime, Range byteRange, string path)[]
+            var streamValues = new (DateTimeOffset programDateTime, M3U8.Stream.ExtByteRange byteRange, string path)[]
             {
-                (DateTimeOffset.Parse("2023-11-16T05:34:07.97Z"), new Range(1601196, 6470396), "500.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:09.97Z"), new Range(1588224, 0), "501.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:11.97Z"), new Range(1579200, 1588224), "501.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:13.97Z"), new Range(1646128, 3167424), "501.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:15.97Z"), new Range(1587472, 4813552), "501.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:17.97Z"), new Range(1594052, 6401024), "501.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:19.97Z"), new Range(1851236, 0), "502.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:21.97Z"), new Range(1437448, 1851236), "502.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:23.97Z"), new Range(1535960, 3288684), "502.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:25.97Z"), new Range(1568672, 4824644), "502.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:27.97Z"), new Range(1625824, 6393316), "502.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:29.97Z"), new Range(1583524, 0), "503.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:31.97Z"), new Range(1597060, 1583524), "503.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:33.97Z"), new Range(1642368, 3180584), "503.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:35.97Z"), new Range(1556076, 4822952), "503.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:37.97Z"), new Range(1669252, 6379028), "503.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:39.97Z"), new Range(1544984, 0), "504.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:41.97Z"), new Range(1601384, 1544984), "504.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:43.97Z"), new Range(1672260, 3146368), "504.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:45.97Z"), new Range(1623192, 4818628), "504.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:47.97Z"), new Range(1526748, 6441820), "504.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:49.97Z"), new Range(1731668, 0), "505.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:51.97Z"), new Range(1454368, 1731668), "505.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:53.97Z"), new Range(1572432, 3186036), "505.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:55.97Z"), new Range(1625824, 4758468), "505.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:57.97Z"), new Range(1616988, 6384292), "505.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:34:59.97Z"), new Range(1632028, 0), "506.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:35:01.97Z"), new Range(1543668, 1632028), "506.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:35:03.97Z"), new Range(1768140, 3175696), "506.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:35:05.97Z"), new Range(1519040, 4943836), "506.ts"),
-                (DateTimeOffset.Parse("2023-11-16T05:35:07.97Z"), new Range(1506068, 6462876), "506.ts")
+                (DateTimeOffset.Parse("2023-11-16T05:34:07.97Z"), (1601196, 6470396), "500.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:09.97Z"), (1588224, 0), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:11.97Z"), (1579200, 1588224), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:13.97Z"), (1646128, 3167424), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:15.97Z"), (1587472, 4813552), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:17.97Z"), (1594052, 6401024), "501.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:19.97Z"), (1851236, 0), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:21.97Z"), (1437448, 1851236), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:23.97Z"), (1535960, 3288684), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:25.97Z"), (1568672, 4824644), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:27.97Z"), (1625824, 6393316), "502.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:29.97Z"), (1583524, 0), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:31.97Z"), (1597060, 1583524), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:33.97Z"), (1642368, 3180584), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:35.97Z"), (1556076, 4822952), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:37.97Z"), (1669252, 6379028), "503.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:39.97Z"), (1544984, 0), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:41.97Z"), (1601384, 1544984), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:43.97Z"), (1672260, 3146368), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:45.97Z"), (1623192, 4818628), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:47.97Z"), (1526748, 6441820), "504.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:49.97Z"), (1731668, 0), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:51.97Z"), (1454368, 1731668), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:53.97Z"), (1572432, 3186036), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:55.97Z"), (1625824, 4758468), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:57.97Z"), (1616988, 6384292), "505.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:34:59.97Z"), (1632028, 0), "506.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:35:01.97Z"), (1543668, 1632028), "506.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:35:03.97Z"), (1768140, 3175696), "506.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:35:05.97Z"), (1519040, 4943836), "506.ts"),
+                (DateTimeOffset.Parse("2023-11-16T05:35:07.97Z"), (1506068, 6462876), "506.ts")
             };
 
             var m3u8 = M3U8.Parse(ExampleM3U8Kick);
@@ -366,7 +367,7 @@ namespace TwitchDownloaderTests
         [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1335600,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\"", 1335600, "avc1.4D401F,mp4a.40.2", 852, 480, "480p30")]
         [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=630000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\"", 630000, "avc1.4D401F,mp4a.40.2", 640, 360, "360p30")]
         [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=230000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\"", 230000, "avc1.4D401F,mp4a.40.2", 284, 160, "160p30")]
-        public void CorrectlyParsesKickM3U8StreamInfo(string streamInfoString, uint bandwidth, string codecs, uint videoWidth, uint videoHeight, string video)
+        public void CorrectlyParsesKickM3U8StreamInfo(string streamInfoString, int bandwidth, string codecs, uint videoWidth, uint videoHeight, string video)
         {
             var streamInfo = M3U8.Stream.ExtStreamInfo.Parse(streamInfoString);
 
