@@ -13,7 +13,6 @@ using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 using TwitchDownloaderCore.VideoPlatforms.Kick;
 using TwitchDownloaderCore.VideoPlatforms.Twitch;
 using TwitchDownloaderCore.VideoPlatforms.Twitch.Api;
-using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 
 namespace TwitchDownloaderCore
 {
@@ -24,14 +23,7 @@ namespace TwitchDownloaderCore
         {
             if (videoPlatform == VideoPlatform.Twitch)
             {
-                IVideoInfo clipInfo = await TwitchHelper.GetClipInfo(clipId);
-                List<GqlClipTokenResponse> clipResponse = await TwitchHelper.GetClipLinks(clipId);
-                clipInfo.VideoQualities = new List<VideoQuality>();
-                foreach (var clip in clipResponse[0].data.clip.videoQualities)
-                {
-                    clipInfo.VideoQualities.Add(new VideoQuality { Quality = clip.quality, Framerate = clip.frameRate, SourceUrl = clip.sourceURL });
-                }
-                return clipInfo;
+                return await TwitchHelper.GetClipInfo(clipId);
             }
 
             if (videoPlatform == VideoPlatform.Kick)
@@ -52,6 +44,21 @@ namespace TwitchDownloaderCore
             if (videoPlatform == VideoPlatform.Kick)
             {
                 return await KickHelper.GetVideoInfo(videoId);
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public static Task<M3U8> GetQualitiesPlaylist(VideoPlatform videoPlatform, IVideoInfo videoInfo)
+        {
+            if (videoPlatform == VideoPlatform.Twitch)
+            {
+                return TwitchHelper.GetVideoQualitiesPlaylist((TwitchVideoInfo)videoInfo);
+            }
+
+            if (videoPlatform == VideoPlatform.Kick)
+            {
+                return KickHelper.GetQualitiesPlaylist((KickVideoResponse)videoInfo);
             }
 
             throw new NotImplementedException();

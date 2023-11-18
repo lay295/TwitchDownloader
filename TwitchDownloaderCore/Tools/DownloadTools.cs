@@ -43,11 +43,11 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        public static async Task DownloadVideoPartsAsync(VideoDownloadOptions downloadOptions, List<string> videoPartsList, Uri baseUrl, string downloadFolder, double vodAge, int currentStep,
+        public static async Task DownloadVideoPartsAsync(VideoDownloadOptions downloadOptions, IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, double vodAge, int currentStep,
             int totalSteps, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            var partCount = videoPartsList.Count;
-            var videoPartsQueue = new ConcurrentQueue<string>(videoPartsList);
+            var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
+            var videoPartsQueue = new ConcurrentQueue<string>(playlist.Take(videoListCrop).Select(x => x.Path));
             var downloadTasks = new Task[downloadOptions.DownloadThreads];
 
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
@@ -61,49 +61,42 @@ namespace TwitchDownloaderCore.Tools
             LogDownloadThreadExceptions(downloadExceptions, progress);
         }
 
-        public static List<KeyValuePair<string, double>> GenerateCroppedVideoList(List<KeyValuePair<string, double>> videoList, VideoDownloadOptions downloadOptions)
+        public static Range GetStreamListCrop(IList<M3U8.Stream> streamList, VideoDownloadOptions downloadOptions)
         {
-            List<KeyValuePair<string, double>> returnList = new List<KeyValuePair<string, double>>(videoList);
-            TimeSpan startCrop = TimeSpan.FromSeconds(downloadOptions.CropBeginningTime);
-            TimeSpan endCrop = TimeSpan.FromSeconds(downloadOptions.CropEndingTime);
+            var startCrop = TimeSpan.FromSeconds(downloadOptions.CropBeginningTime);
+            var endCrop = TimeSpan.FromSeconds(downloadOptions.CropEndingTime);
 
+            var startIndex = 0;
             if (downloadOptions.CropBeginning)
             {
-                double startTime = 0;
-                for (int i = 0; i < returnList.Count; i++)
+                var startTime = 0m;
+                var cropTotalSeconds = (decimal)startCrop.TotalSeconds;
+                foreach (var videoPart in streamList)
                 {
-                    if (startTime + returnList[i].Value < startCrop.TotalSeconds)
-                    {
-                        startTime += returnList[i].Value;
-                        returnList.RemoveAt(i);
-                        i--;
-                    }
-                    else
-                    {
+                    if (startTime + videoPart.PartInfo.Duration > cropTotalSeconds)
                         break;
-                    }
+
+                    startIndex++;
+                    startTime += videoPart.PartInfo.Duration;
                 }
             }
 
+            var endIndex = streamList.Count;
             if (downloadOptions.CropEnding)
             {
-                double endTime = videoList.Sum(x => x.Value);
-
-                for (int i = returnList.Count - 1; i >= 0; i--)
+                var endTime = streamList.Sum(x => x.PartInfo.Duration);
+                var cropTotalSeconds = (decimal)endCrop.TotalSeconds;
+                for (var i = streamList.Count - 1; i >= 0; i--)
                 {
-                    if (endTime - returnList[i].Value > endCrop.TotalSeconds)
-                    {
-                        endTime -= returnList[i].Value;
-                        returnList.RemoveAt(i);
-                    }
-                    else
-                    {
+                    if (endTime - streamList[i].PartInfo.Duration < cropTotalSeconds)
                         break;
-                    }
+
+                    endIndex--;
+                    endTime -= streamList[i].PartInfo.Duration;
                 }
             }
 
-            return returnList;
+            return new Range(startIndex, endIndex);
         }
 
         public static void LogDownloadThreadExceptions(IReadOnlyCollection<Exception> downloadExceptions, IProgress<ProgressReport> progress)
@@ -368,34 +361,43 @@ namespace TwitchDownloaderCore.Tools
             cancellationTokenSource?.CancelAfter(TimeSpan.FromMilliseconds(uint.MaxValue - 1));
         }
 
-        public static async Task VerifyDownloadedParts(VideoDownloadOptions downloadOptions, List<string> videoParts, Uri baseUrl, string downloadFolder, double vodAge, int currentStep, int totalSteps,
+        public static async Task VerifyDownloadedParts(VideoDownloadOptions downloadOptions, IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, double vodAge, int currentStep, int totalSteps,
             IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            var failedParts = VerifyTransportStreams(videoParts, downloadFolder, currentStep, totalSteps, progress, cancellationToken);
+            var failedParts = VerifyTransportStreams(playlist, videoListCrop, downloadFolder, currentStep, totalSteps, progress, cancellationToken);
 
             if (failedParts.Count != 0)
             {
-                if (failedParts.Count == videoParts.Count)
+                if (failedParts.Count == videoListCrop.End.Value - videoListCrop.Start.Value)
                 {
                     // Every video part returned corrupted, probably a false positive.
                     return;
                 }
 
-                progress.Report(new ProgressReport(ReportType.Log, $"The following parts will be redownloaded: {string.Join(", ", failedParts)}"));
-                await DownloadVideoPartsAsync(downloadOptions, failedParts, baseUrl, downloadFolder, vodAge, 3, 5, progress, cancellationToken);
+                if (failedParts.Count <= 100)
+                {
+                    var failedPartPaths = failedParts.Select(x => x.Path).ToArray();
+                    progress.Report(new ProgressReport(ReportType.Log, $"The following parts will be redownloaded: {string.Join(", ", failedPartPaths)}"));
+                }
+                else
+                {
+                    progress.Report(new ProgressReport(ReportType.Log, $"{failedParts.Count} parts will be redownloaded."));
+                }
+
+                await DownloadVideoPartsAsync(downloadOptions, failedParts, videoListCrop, baseUrl, downloadFolder, vodAge, 3, 5, progress, cancellationToken);
             }
         }
 
         /// <returns>A list transport streams that failed to verify.</returns>
-        public static List<string> VerifyTransportStreams(List<string> videoParts, string downloadFolder, int currentStep, int totalSteps, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        public static List<M3U8.Stream> VerifyTransportStreams(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, string downloadFolder, int currentStep, int totalSteps, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
         {
-            var failedParts = new List<string>();
-            var partCount = videoParts.Count;
+            var failedParts = new List<M3U8.Stream>();
+            var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var doneCount = 0;
 
-            foreach (var part in videoParts)
+            foreach (var part in playlist.Take(videoListCrop))
             {
-                var filePath = Path.Combine(downloadFolder, RemoveQueryString(part));
+                var filePath = Path.Combine(downloadFolder, RemoveQueryString(part.Path));
                 if (!VerifyTransportStream(filePath))
                 {
                     failedParts.Add(part);
@@ -431,20 +433,21 @@ namespace TwitchDownloaderCore.Tools
             return true;
         }
 
-        public static async Task CombineVideoParts(string downloadFolder, List<string> videoParts, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        public static async Task CombineVideoParts(string downloadFolder, IEnumerable<M3U8.Stream> playlist, Range videoListCrop, int currentStep, int totalSteps, IProgress<ProgressReport> progress,
+            CancellationToken cancellationToken)
         {
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(downloadFolder);
             string outputFile = Path.Combine(downloadFolder, "output.ts");
 
-            int partCount = videoParts.Count;
+            int partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             int doneCount = 0;
 
             await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.Read);
-            foreach (var part in videoParts)
+            foreach (var part in playlist.Take(videoListCrop))
             {
                 await DriveHelper.WaitForDrive(outputDrive, progress, cancellationToken);
 
-                string partFile = Path.Combine(downloadFolder, RemoveQueryString(part));
+                string partFile = Path.Combine(downloadFolder, RemoveQueryString(part.Path));
                 if (File.Exists(partFile))
                 {
                     await using (var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -461,14 +464,14 @@ namespace TwitchDownloaderCore.Tools
 
                 doneCount++;
                 int percent = (int)(doneCount / (double)partCount * 100);
-                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Combining Parts {percent}% [4/5]"));
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Combining Parts {percent}% [{currentStep}/{totalSteps}]"));
                 progress.Report(new ProgressReport(percent));
 
                 cancellationToken.ThrowIfCancellationRequested();
             }
         }
 
-        public static int RunFfmpegVideoCopy(VideoDownloadOptions downloadOptions, string downloadFolder, string metadataPath, double seekTime, double startOffset, double seekDuration, IProgress<ProgressReport> progress)
+        public static int RunFfmpegVideoCopy(VideoDownloadOptions downloadOptions, string downloadFolder, string metadataPath, double startOffset, double seekDuration, IProgress<ProgressReport> progress)
         {
             var process = new Process
             {
@@ -477,7 +480,7 @@ namespace TwitchDownloaderCore.Tools
                     FileName = downloadOptions.FfmpegPath,
                     Arguments = string.Format(
                         "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i \"{1}\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.CropEnding ? "-t {4} " : "") + "-c copy \"{5}\"",
-                        Path.Combine(downloadFolder, "output.ts"), metadataPath, (seekTime - startOffset).ToString(CultureInfo.InvariantCulture), int.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
+                        Path.Combine(downloadFolder, "output.ts"), metadataPath, startOffset.ToString(CultureInfo.InvariantCulture), int.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardInput = false,

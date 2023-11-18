@@ -13,7 +13,6 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using TwitchDownloaderCore;
-using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
@@ -93,17 +92,21 @@ namespace TwitchDownloaderWPF
             try
             {
                 IVideoInfo videoInfo = null;
+                M3U8 videoPlaylist = null;
                 try
                 {
                     videoInfo = await PlatformHelper.GetVideoInfo(videoPlatform, videoId, TextOauth.Text);
+                    videoPlaylist = await PlatformHelper.GetQualitiesPlaylist(videoPlatform, videoInfo);
                 }
                 catch (NullReferenceException ex)
                 {
                     if (ex.Message.Contains("Insufficient access"))
                         throw new NullReferenceException(Translations.Strings.InsufficientAccessMayNeedOauth);
+
+                    throw;
                 }
 
-                var thumbUrl = videoInfo!.ThumbnailUrl;
+                var thumbUrl = videoInfo.ThumbnailUrl;
                 if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                 {
                     AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
@@ -115,12 +118,12 @@ namespace TwitchDownloaderWPF
                 videoQualities.Clear();
 
                 //Add video qualities to combo quality
-                foreach (var videoQuality in videoInfo.VideoQualities)
+                foreach (var stream in videoPlaylist.Streams)
                 {
-                    if (!videoQualities.ContainsKey(videoQuality.Quality))
+                    if (!videoQualities.ContainsKey(stream.MediaInfo.Name))
                     {
-                        videoQualities.Add(videoQuality.Quality, (videoQuality.SourceUrl, videoQuality.Bandwidth));
-                        comboQuality.Items.Add(videoQuality.Quality);
+                        videoQualities.Add(stream.MediaInfo.Name, (stream.Path, stream.StreamInfo.Bandwidth));
+                        comboQuality.Items.Add(stream.MediaInfo.Name);
                     }
                 }
 

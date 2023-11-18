@@ -79,22 +79,14 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
         public string source { get; set; }
         public KickLivestream livestream { get; set; }
 
+        public string Id => id.ToString();
         public string ThumbnailUrl => livestream?.thumbnail;
-
         public DateTime CreatedAt => livestream.start_time;
-
         public string StreamerName => livestream?.channel?.slug;
-
         public string Title => livestream?.session_title;
-
         public int Duration => livestream?.duration == null ? 0 : livestream.duration / 1000;
-
         public int ViewCount => livestream?.viewer_count ?? 0;
-
-        public string Game => livestream?.categories?.FirstOrDefault().name;
-
-        public string VideoUrl => null;
-        public List<VideoQuality> VideoQualities { get; set; }
+        public string Game => livestream?.categories?.FirstOrDefault()?.name;
     }
 
     public class KickUser

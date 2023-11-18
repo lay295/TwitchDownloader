@@ -62,25 +62,15 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
     public class KickClipResponse : IVideoInfo
     {
         public Clip clip { get; set; }
-
         public string message { get; set; }
-
+        public string Id => clip.id;
         public string ThumbnailUrl => clip?.thumbnail_url;
-
         public DateTime CreatedAt => clip?.created_at ?? DateTime.MinValue;
-
         public string StreamerName => clip?.channel?.username;
-
         public string Title => clip?.title;
-
         public int Duration => clip?.duration ?? 0;
-
         public int ViewCount => clip?.views ?? 0;
-
         public string Game => clip?.category?.name;
-
         public string VideoUrl => clip?.video_url;
-
-        public List<VideoQuality> VideoQualities { get; set; }
     }
 }

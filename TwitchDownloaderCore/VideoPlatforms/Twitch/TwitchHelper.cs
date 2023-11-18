@@ -13,7 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 using TwitchDownloaderCore.VideoPlatforms.Twitch.Api;
 using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 
@@ -24,7 +23,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
         private static readonly HttpClient httpClient = new HttpClient();
         private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
 
-        public static async Task<GqlVideoResponse> GetVideoInfo(int videoId, string oauth = null)
+        public static async Task<TwitchVideoInfo> GetVideoInfo(int videoId, string oauth = null)
         {
             var request = new HttpRequestMessage()
             {
@@ -35,7 +34,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            GqlVideoResponse res = await response.Content.ReadFromJsonAsync<GqlVideoResponse>();
+            GqlVideoResponse videoResponse = await response.Content.ReadFromJsonAsync<GqlVideoResponse>();
 
             GqlVideoTokenResponse accessToken = await TwitchHelper.GetVideoToken(videoId, oauth);
             if (accessToken.data.videoPlaybackAccessToken is null)
@@ -43,29 +42,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
             }
 
-            string[] playlist = await TwitchHelper.GetVideoPlaylist(videoId, accessToken.data.videoPlaybackAccessToken.value, accessToken.data.videoPlaybackAccessToken.signature);
-            if (playlist[0].Contains("vod_manifest_restricted"))
-            {
-                throw new NullReferenceException("Insufficient access. OAuth may be required.");
-            }
-            res.VideoQualities = new List<VideoQuality>();
-
-            for (int i = 0; i < playlist.Length; i++)
-            {
-                if (playlist[i].Contains("#EXT-X-MEDIA"))
-                {
-                    string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"", StringComparison.Ordinal) + 6);
-                    string stringQuality = lastPart.Substring(0, lastPart.IndexOf('"'));
-
-                    var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=", StringComparison.Ordinal) + 10;
-                    var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
-                    int.TryParse(playlist[i + 1].AsSpan(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
-
-                    res.VideoQualities.Add(new VideoQuality { Quality = stringQuality, SourceUrl = playlist[i + 2], Bandwidth = bandwidth });
-                }
-            }
-
-            return res;
+            return new TwitchVideoInfo(videoResponse, accessToken, videoId.ToString());
         }
 
         public static async Task<GqlVideoTokenResponse> GetVideoToken(int videoId, string authToken)
@@ -84,7 +61,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             return await response.Content.ReadFromJsonAsync<GqlVideoTokenResponse>();
         }
 
-        public static async Task<string[]> GetVideoPlaylist(int videoId, string token, string sig)
+        public static async Task<string> GetVideoPlaylist(int videoId, string token, string sig)
         {
             var request = new HttpRequestMessage()
             {
@@ -92,11 +69,24 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
                 Method = HttpMethod.Get
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-            string playlist = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
-            return playlist.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
         }
 
-        public static async Task<GqlClipResponse> GetClipInfo(object clipId)
+        public static async Task<M3U8> GetVideoQualitiesPlaylist(TwitchVideoInfo videoInfo)
+        {
+            var playlistString = await TwitchHelper.GetVideoPlaylist(int.Parse(videoInfo.Id), videoInfo.GqlVideoTokenResponse.data.videoPlaybackAccessToken.value, videoInfo.GqlVideoTokenResponse.data.videoPlaybackAccessToken.signature);
+            if (playlistString.Contains("vod_manifest_restricted"))
+            {
+                throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
+            }
+
+            return M3U8.Parse(playlistString);
+        }
+
+        public static async Task<GqlClipResponse> GetClipInfo(string clipId)
         {
             var request = new HttpRequestMessage()
             {
@@ -107,7 +97,10 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<GqlClipResponse>();
+
+            var gqlClipResponse = await response.Content.ReadFromJsonAsync<GqlClipResponse>();
+            gqlClipResponse.Id = clipId;
+            return gqlClipResponse;
         }
 
         public static async Task<List<GqlClipTokenResponse>> GetClipLinks(string clipId)

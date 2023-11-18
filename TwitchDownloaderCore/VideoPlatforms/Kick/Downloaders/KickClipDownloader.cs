@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Buffers;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
-using TwitchDownloaderCore.VideoPlatforms.Twitch;
 
 namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
 {
@@ -20,7 +14,6 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
     {
         private readonly ClipDownloadOptions downloadOptions;
         private readonly IProgress<ProgressReport> _progress;
-        private static readonly HttpClient HttpClient = new();
 
         public KickClipDownloader(ClipDownloadOptions clipDownloadOptions, IProgress<ProgressReport> progress)
         {
@@ -75,19 +68,21 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             {
                 if (!alreadyEncoded)
                 {
-                    string playlistData = await KickHelper.GetPlaylistData(response.VideoUrl);
-                    List<KickClipSegment> downloadUrls = KickHelper.GetDownloadUrls(response.VideoUrl, playlistData);
+                    string playlistData = await KickHelper.GetString(response.VideoUrl);
+                    string baseUrl = response.VideoUrl[..(response.VideoUrl.LastIndexOf('/') + 1)];
+                    var playlist = M3U8.Parse(playlistData, baseUrl);
 
                     await using var outputStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.Read);
-                    for (int i = 0; i < downloadUrls.Count; i++)
+                    for (int i = 0; i < playlist.Streams.Length; i++)
                     {
-                        string downloadPath = Path.Combine(tempDownloadFolder, Path.GetFileName(downloadUrls[i].DownloadUrl)!);
-                        await DownloadTools.DownloadFileAsync(downloadUrls[i].DownloadUrl, downloadPath, downloadOptions.ThrottleKib, null, cancellationToken);
+                        var videoPart = playlist.Streams[i];
+                        string downloadPath = Path.Combine(tempDownloadFolder, Path.GetFileName(videoPart.Path)!);
+                        await DownloadTools.DownloadFileAsync(videoPart.Path, downloadPath, downloadOptions.ThrottleKib, null, cancellationToken);
 
                         await using (var fs = File.Open(downloadPath, FileMode.Open, FileAccess.Read, FileShare.Read))
                         {
-                            fs.Seek(downloadUrls[i].StartByteOffset, SeekOrigin.Begin);
-                            await fs.CopyBytesToAsync(outputStream, downloadUrls[i].ByteRangeLength, cancellationToken);
+                            fs.Seek(videoPart.ByteRange.Start, SeekOrigin.Begin);
+                            await fs.CopyBytesToAsync(outputStream, videoPart.ByteRange.Length, cancellationToken);
                         }
 
                         try
@@ -96,7 +91,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                         }
                         catch { /* Oh well, it should get cleaned up later */ }
 
-                        var percent = (int)((i+1) / (double)downloadUrls.Count * 100);
+                        var percent = (int)((i+1) / (double)playlist.Streams.Length * 100);
                         _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading Clip {percent}%"));
                         _progress.Report(new ProgressReport(percent));
                     }
@@ -116,6 +111,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             }
             finally
             {
+                await Task.Delay(300, CancellationToken.None); // Wait a bit for any download threads to be killed.
                 Directory.Delete(tempDownloadFolder, true);
             }
         }

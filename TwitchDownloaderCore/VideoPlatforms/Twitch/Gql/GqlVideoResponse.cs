@@ -32,26 +32,9 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Gql
         public VideoInfo video { get; set; }
     }
 
-    public class GqlVideoResponse : IVideoInfo
+    public class GqlVideoResponse
     {
         public VideoData data { get; set; }
         public Extensions extensions { get; set; }
-
-        public string ThumbnailUrl => data?.video?.thumbnailURLs?.FirstOrDefault();
-
-        public DateTime CreatedAt => data?.video?.createdAt ?? DateTime.MinValue;
-
-        public string StreamerName => data?.video?.owner?.displayName;
-
-        public string Title => data?.video?.title;
-
-        public int Duration => data?.video?.lengthSeconds ?? 0;
-
-        public int ViewCount => data?.video?.viewCount ?? 0;
-
-        public string Game => data?.video?.game?.displayName;
-
-        public string VideoUrl => null;
-        public List<VideoQuality> VideoQualities { get; set; }
     }
 }

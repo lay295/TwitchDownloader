@@ -271,7 +271,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
 
             if (downloadOptions.VideoType == VideoType.Video)
             {
-                GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(int.Parse(videoId));
+                GqlVideoResponse videoInfoResponse = (await TwitchHelper.GetVideoInfo(int.Parse(videoId))).GqlVideoResponse;
                 if (videoInfoResponse.data.video == null)
                 {
                     throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");

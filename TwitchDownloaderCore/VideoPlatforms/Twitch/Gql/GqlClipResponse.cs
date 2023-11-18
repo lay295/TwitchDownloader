@@ -37,14 +37,13 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Gql
     {
         public ClipData data { get; set; }
         public Extensions extensions { get; set; }
-        public string ThumbnailUrl { get => data?.clip?.thumbnailURL; }
-        public DateTime CreatedAt { get => data?.clip?.createdAt ?? DateTime.MinValue; }
-        public string StreamerName { get => data?.clip?.broadcaster?.displayName; }
-        public string Title { get => data?.clip?.title; }
-        public int Duration { get => data?.clip?.durationSeconds ?? 0; }
-        public int ViewCount { get => data?.clip?.viewCount ?? 0; }
-        public string Game { get => data?.clip?.game?.displayName; }
-        public string VideoUrl { get => null; }
-        public List<VideoQuality> VideoQualities { get; set; }
+        public string Id { get; set; }
+        public string ThumbnailUrl => data?.clip?.thumbnailURL;
+        public DateTime CreatedAt => data?.clip?.createdAt ?? DateTime.MinValue;
+        public string StreamerName => data?.clip?.broadcaster?.displayName;
+        public string Title => data?.clip?.title;
+        public int Duration => data?.clip?.durationSeconds ?? 0;
+        public int ViewCount => data?.clip?.viewCount ?? 0;
+        public string Game => data?.clip?.game?.displayName;
     }
 }

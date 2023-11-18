@@ -90,7 +90,7 @@ namespace TwitchDownloaderCore
                 VideoInfo videoInfo = null;
                 try
                 {
-                    videoInfo = (await TwitchHelper.GetVideoInfo(videoId)).data.video;
+                    videoInfo = (await TwitchHelper.GetVideoInfo(videoId)).GqlVideoResponse.data.video;
                 }
                 catch { /* Eat the exception */ }
 

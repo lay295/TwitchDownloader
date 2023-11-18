@@ -52,14 +52,14 @@ namespace TwitchDownloaderWPF
             }
 
             Dictionary<int, string> taskDict = new Dictionary<int, string>();
-            List<Task<GqlVideoResponse>> taskVideoList = new List<Task<GqlVideoResponse>>();
+            List<Task<TwitchVideoInfo>> taskVideoList = new List<Task<TwitchVideoInfo>>();
             List<Task<GqlClipResponse>> taskClipList = new List<Task<GqlClipResponse>>();
 
             foreach (var id in idList)
             {
                 if (id.All(char.IsDigit))
                 {
-                    Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(int.Parse(id));
+                    Task<TwitchVideoInfo> task = TwitchHelper.GetVideoInfo(int.Parse(id));
                     taskVideoList.Add(task);
                     taskDict[task.Id] = id;
                 }
@@ -85,7 +85,7 @@ namespace TwitchDownloaderWPF
                 string id = taskDict[task.Id];
                 if (!task.IsFaulted)
                 {
-                    var videoInfo = task.Result.data.video;
+                    var videoInfo = task.Result.GqlVideoResponse.data.video;
                     var thumbUrl = videoInfo.thumbnailURLs.FirstOrDefault();
                     if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                     {
