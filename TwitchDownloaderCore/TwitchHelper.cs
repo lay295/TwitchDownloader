@@ -58,7 +58,7 @@ namespace TwitchDownloaderCore
         {
             var request = new HttpRequestMessage()
             {
-                RequestUri = new Uri($"http://usher.ttvnw.net/vod/{videoId}?nauth={token}&nauthsig={sig}&allow_source=true&player=twitchweb"),
+                RequestUri = new Uri($"http://usher.ttvnw.net/vod/{videoId}?nauth={token}&nauthsig={sig}&allow_audio_only=true&allow_source=true&player=twitchweb"),
                 Method = HttpMethod.Get
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
