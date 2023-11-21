@@ -80,7 +80,7 @@ namespace TwitchDownloaderWPF
 
                 foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
                 {
-                    comboQuality.Items.Add(new TwitchClip(quality.quality, quality.frameRate.ToString(), quality.sourceURL));
+                    comboQuality.Items.Add(new TwitchClip(quality.quality, Math.Round(quality.frameRate).ToString("F0"), quality.sourceURL));
                 }
 
                 comboQuality.SelectedIndex = 0;
