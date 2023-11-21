@@ -84,7 +84,7 @@ namespace TwitchDownloaderWPF
                     var twitchClipInfo = await TwitchHelper.GetClipLinks(clipId);
                     foreach (var quality in twitchClipInfo[0].data.clip.videoQualities)
                     {
-                        comboQuality.Items.Add(new TwitchClip(quality.quality, quality.frameRate.ToString(), quality.sourceURL));
+                        comboQuality.Items.Add(new TwitchClip(quality.quality, Math.Round(quality.frameRate).ToString("F0"), quality.sourceURL));
                     }
                 }
                 else
