@@ -57,8 +57,8 @@ namespace TwitchDownloaderCLI.Modes
                 Filename = inputOptions.OutputFile,
                 Quality = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
                 {
-                    ".mp4" => inputOptions.Quality,
-                    ".m4a" => "Audio",
+                    ".m4a" when videoPlatform is VideoPlatform.Twitch => "Audio",
+                    ".mp4" or ".m4a" => inputOptions.Quality,
                     _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
                 },
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
