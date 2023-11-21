@@ -39,6 +39,14 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
+            if (!Path.HasExtension(inputOptions.OutputFile) && inputOptions.Quality is { Length: > 0 })
+            {
+                if (char.IsDigit(inputOptions.Quality[0]))
+                    inputOptions.OutputFile += ".mp4";
+                else if (char.ToLower(inputOptions.Quality[0]) is 'a')
+                    inputOptions.OutputFile += ".m4a";
+            }
+
             VideoDownloadOptions downloadOptions = new()
             {
                 DownloadThreads = inputOptions.DownloadThreads,
@@ -47,7 +55,12 @@ namespace TwitchDownloaderCLI.Modes
                 VideoPlatform = videoPlatform,
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
-                Quality = inputOptions.Quality,
+                Quality = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
+                {
+                    ".mp4" => inputOptions.Quality,
+                    ".m4a" => "Audio",
+                    _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
+                },
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,

@@ -8,7 +8,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD to download.")]
         public string Id { get; set; }
 
-        [Option('o', "output", Required = true, HelpText = "Path to output file.")]
+        [Option('o', "output", Required = true, HelpText = "Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4 and .m4a.")]
         public string OutputFile { get; set; }
 
         [Option('q', "quality", HelpText = "The quality the program will attempt to download.")]

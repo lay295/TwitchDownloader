@@ -615,11 +615,11 @@ namespace TwitchDownloaderCore
             var finalBitmapInfo = finalBitmap.Info;
             using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
             {
-                if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight)
+                if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight or HighlightType.WatchStreak)
                 {
                     var accentColor = highlightType is HighlightType.PayingForward
-                        ? new SKColor(0x26, 0x26, 0x2C, 0xFF) // #26262C (RRGGBB)
-                        : new SKColor(0x80, 0x80, 0x8C, 0xFF); // #80808C (RRGGBB)
+                        ? new SKColor(0xFF26262C) // AARRGGBB
+                        : new SKColor(0xFF80808C); // AARRGGBB
 
                     using var paint = new SKPaint { Color = accentColor };
                     finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
@@ -631,7 +631,7 @@ namespace TwitchDownloaderCore
                         (renderOptions.AlternateMessageBackgrounds && renderOptions.AlternateBackgroundColor.Alpha < OPAQUE_THRESHOLD)))
                     {
                         // Draw the highlight background only if the message background is opaque enough
-                        var backgroundColor = new SKColor(0x6B, 0x6B, 0x6E, 0x1A); // #1A6B6B6E (AARRGGBB)
+                        var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
                         using var backgroundPaint = new SKPaint { Color = backgroundColor };
                         finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
                     }
@@ -706,6 +706,9 @@ namespace TwitchDownloaderCore
                     break;
                 case HighlightType.BitBadgeTierNotification:
                     DrawBitsBadgeTierMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    break;
+                case HighlightType.WatchStreak:
+                    DrawWatchStreakMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.GiftedMany:
                 case HighlightType.GiftedSingle:
@@ -801,6 +804,45 @@ namespace TwitchDownloaderCore
             }
 
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
+        }
+
+        private void DrawWatchStreakMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        {
+            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+            canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
+
+            Point customMessagePos = drawPos;
+            drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
+            defaultPos.X = drawPos.X;
+
+            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, Purple);
+            AddImageSection(sectionImages, ref drawPos, defaultPos);
+
+            // Remove the commenter's name from the watch streak message
+            comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 1)..];
+            if (comment.message.fragments[0].text.Equals(comment.commenter.display_name, StringComparison.OrdinalIgnoreCase))
+            {
+                // This is necessary for sub messages. We'll keep it around just in case.
+                comment.message.fragments.RemoveAt(0);
+            }
+            else
+            {
+                comment.message.fragments[0].text = comment.message.fragments[0].text[(comment.commenter.display_name.Length + 1)..];
+            }
+
+            var (streakMessage, customMessage) = HighlightIcons.SplitWatchStreakComment(comment);
+            DrawMessage(streakMessage, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
+
+            // Return if there is no custom message to draw
+            if (customMessage is null)
+            {
+                return;
+            }
+
+            AddImageSection(sectionImages, ref drawPos, defaultPos);
+            drawPos = customMessagePos;
+            defaultPos = customMessagePos;
+            DrawNonAccentedMessage(customMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
         }
 
         private void DrawGiftMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
