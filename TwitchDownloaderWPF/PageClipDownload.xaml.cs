@@ -44,7 +44,7 @@ namespace TwitchDownloaderWPF
 
         private async Task GetClipInfo()
         {
-            bool parseSuccess = UrlParse.TryParseClip(textUrl.Text.Trim(), out VideoPlatform videoPlatform, out string videoId);
+            bool parseSuccess = IdParse.TryParseClip(textUrl.Text.Trim(), out VideoPlatform videoPlatform, out string videoId);
 
             if (!parseSuccess || string.IsNullOrWhiteSpace(videoId))
             {

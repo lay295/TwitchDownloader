@@ -34,7 +34,7 @@ namespace TwitchDownloaderWPF
 
             foreach (var url in urlList)
             {
-                if (UrlParse.TryParseVideoOrClipId(url, out _, out _, out var id))
+                if (IdParse.TryParseVideoOrClipId(url, out _, out _, out var id))
                 {
                     invalidList.Add(url);
                 }

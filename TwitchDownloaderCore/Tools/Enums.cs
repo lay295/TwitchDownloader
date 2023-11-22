@@ -4,6 +4,7 @@ namespace TwitchDownloaderCore.Tools
 {
     public enum VideoType
     {
+        Unknown,
         Video,
         Clip
     }
@@ -11,6 +12,7 @@ namespace TwitchDownloaderCore.Tools
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum VideoPlatform
     {
+        Unknown,
         Twitch,
         Kick,
         Youtube

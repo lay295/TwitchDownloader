@@ -37,7 +37,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            if (!UrlParse.TryParseClip(inputOptions.Id, out var videoPlatform, out var videoId))
+            if (!IdParse.TryParseClip(inputOptions.Id, out var videoPlatform, out var videoId))
             {
                 Console.WriteLine("[ERROR] - Unable to parse Clip ID/URL.");
                 Environment.Exit(1);

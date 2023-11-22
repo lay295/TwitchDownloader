@@ -79,7 +79,7 @@ namespace TwitchDownloaderWPF
 
         private async Task GetVideoInfo()
         {
-            bool parseSuccess = UrlParse.TryParseVod(textUrl.Text.Trim(), out VideoPlatform videoPlatform, out string videoId);
+            bool parseSuccess = IdParse.TryParseVod(textUrl.Text.Trim(), out VideoPlatform videoPlatform, out string videoId);
             if (!parseSuccess)
             {
                 MessageBox.Show(Translations.Strings.InvalidVideoLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidVideoLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -135,7 +135,7 @@ namespace TwitchDownloaderWPF
                 var videoCreatedAt = videoInfo.CreatedAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
-                var urlTimeCodeMatch = UrlParse.UrlTimeCode.Match(textUrl.Text);
+                var urlTimeCodeMatch = UrlTimeCode.TimeCodeRegex.Match(textUrl.Text);
                 if (urlTimeCodeMatch.Success)
                 {
                     var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);

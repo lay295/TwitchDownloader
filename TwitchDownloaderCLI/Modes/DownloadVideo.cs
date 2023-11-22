@@ -33,7 +33,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            if (UrlParse.TryParseVod(inputOptions.Id, out var videoPlatform, out var videoId))
+            if (IdParse.TryParseVod(inputOptions.Id, out var videoPlatform, out var videoId))
             {
                 Console.WriteLine("[ERROR] - Unable to parse Vod ID/URL.");
                 Environment.Exit(1);

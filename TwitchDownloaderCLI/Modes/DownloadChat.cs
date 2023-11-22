@@ -2,8 +2,8 @@
 using System.IO;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
+using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
-using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
@@ -30,7 +30,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            if (!UrlParse.TryParseVideoOrClipId(inputOptions.Id, out var videoPlatform, out var videoType, out var videoId))
+            if (!IdParse.TryParseVideoOrClipId(inputOptions.Id, out var videoPlatform, out var videoType, out var videoId))
             {
                 Console.WriteLine("[ERROR] - Unable to parse Vod/Clip ID/URL.");
                 Environment.Exit(1);

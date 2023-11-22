@@ -103,7 +103,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            if (!UrlParse.TryParseVideoOrClipId(textUrl.Text.Trim(), out platform, out videoType, out downloadId))
+            if (!IdParse.TryParseVideoOrClipId(textUrl.Text.Trim(), out platform, out videoType, out downloadId))
             {
                 MessageBox.Show(Translations.Strings.InvalidVideoLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidVideoLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -133,7 +133,7 @@ namespace TwitchDownloaderWPF
                     currentVideoTime = Settings.Default.UTCVideoTime ? videoTime : videoTime.ToLocalTime();
                     viewCount = videoInfo.ViewCount;
                     game = videoInfo.Game ?? "Unknown";
-                    var urlTimeCodeMatch = UrlParse.UrlTimeCode.Match(textUrl.Text);
+                    var urlTimeCodeMatch = UrlTimeCode.TimeCodeRegex.Match(textUrl.Text);
                     if (urlTimeCodeMatch.Success)
                     {
                         var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
