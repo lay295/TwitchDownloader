@@ -86,22 +86,23 @@ namespace TwitchDownloaderCore
         private async Task<string> GetDownloadUrl()
         {
             var listLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
+            var clip = listLinks[0].data.clip;
 
-            if (listLinks[0].data.clip.playbackAccessToken is null)
+            if (clip.playbackAccessToken is null)
             {
                 throw new NullReferenceException("Invalid Clip, deleted possibly?");
             }
 
-            if (listLinks[0].data.clip.videoQualities is null || listLinks[0].data.clip.videoQualities.Count == 0)
+            if (clip.videoQualities is null || clip.videoQualities.Length == 0)
             {
                 throw new NullReferenceException("Clip has no video qualities, deleted possibly?");
             }
 
             string downloadUrl = "";
 
-            foreach (var quality in listLinks[0].data.clip.videoQualities)
+            foreach (var quality in clip.videoQualities)
             {
-                if (quality.quality + "p" + (quality.frameRate.ToString() == "30" ? "" : quality.frameRate.ToString()) == downloadOptions.Quality)
+                if (quality.quality + "p" + (Math.Round(quality.frameRate) == 30 ? "" : Math.Round(quality.frameRate).ToString("F0")) == downloadOptions.Quality)
                 {
                     downloadUrl = quality.sourceURL;
                 }
@@ -109,10 +110,10 @@ namespace TwitchDownloaderCore
 
             if (downloadUrl == "")
             {
-                downloadUrl = listLinks[0].data.clip.videoQualities.First().sourceURL;
+                downloadUrl = clip.videoQualities.First().sourceURL;
             }
 
-            return downloadUrl + "?sig=" + listLinks[0].data.clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(listLinks[0].data.clip.playbackAccessToken.value);
+            return downloadUrl + "?sig=" + clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(clip.playbackAccessToken.value);
         }
 
         private static async Task DownloadFileTaskAsync(string url, string destinationFile, int throttleKib, IProgress<StreamCopyProgress> progress, CancellationToken cancellationToken)
