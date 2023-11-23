@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
@@ -10,13 +9,6 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public string name { get; set; }
         public int id { get; set; }
-    }
-
-    public class LegacyStreamer
-    {
-        public string name { get; set; }
-        /// <remarks>Some old chats use a string instead of an integer.</remarks>
-        public JsonElement id { get; set; }
     }
 
     [DebuggerDisplay("{display_name}")]
