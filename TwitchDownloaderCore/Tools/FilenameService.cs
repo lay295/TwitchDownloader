@@ -40,25 +40,25 @@ namespace TwitchDownloaderCore.Tools
 
             if (template.Contains("{date_custom="))
             {
-                var dateRegex = new Regex("{date_custom=\"(.*)\"}");
+                var dateRegex = new Regex("{date_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, dateRegex, date);
             }
 
             if (template.Contains("{crop_start_custom="))
             {
-                var cropStartRegex = new Regex("{crop_start_custom=\"(.*)\"}");
+                var cropStartRegex = new Regex("{crop_start_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, cropStartRegex, cropStart);
             }
 
             if (template.Contains("{crop_end_custom="))
             {
-                var cropEndRegex = new Regex("{crop_end_custom=\"(.*)\"}");
+                var cropEndRegex = new Regex("{crop_end_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, cropEndRegex, cropEnd);
             }
 
             if (template.Contains("{length_custom="))
             {
-                var lengthRegex = new Regex("{length_custom=\"(.*)\"}");
+                var lengthRegex = new Regex("{length_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, lengthRegex, videoLength);
             }
 
