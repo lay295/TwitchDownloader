@@ -30,7 +30,7 @@ namespace TwitchDownloaderCore.Tools
                 .Replace("{title}", RemoveInvalidFilenameChars(title))
                 .Replace("{id}", id)
                 .Replace("{channel}", RemoveInvalidFilenameChars(channel))
-                .Replace("{date}", date.ToString("Mdyy"))
+                .Replace("{date}", date.ToString("M-d-yy"))
                 .Replace("{random_string}", Path.GetRandomFileName().Replace(".", ""))
                 .Replace("{crop_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropStart))
                 .Replace("{crop_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropEnd))
