@@ -99,7 +99,7 @@
             <Button Grid.Column="0" x:Name="BtnResetSettings" Content="{lex:Loc ButtonRestoreDefaultSettings}" HorizontalAlignment="Left" Click="BtnResetSettings_OnClick" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="BtnSaveSettings" Margin="2,0,2,0" MinWidth="50" Content="{lex:Loc ButtonSaveSettings}" Click="BtnSaveSettings_OnClick" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
-                <Button x:Name="BtnCancelSettings" Margin="2,0,2, 0" MinWidth="50" Content="{lex:Loc ButtonCancelSettingsChanges}" Click="BtnCancelSettings_OnClick" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
+                <Button x:Name="BtnCancelSettings" Margin="2,0,0, 0" MinWidth="50" Content="{lex:Loc ButtonCancelSettingsChanges}" Click="BtnCancelSettings_OnClick" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
             </StackPanel>
         </Grid>
     </Grid>
