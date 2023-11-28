@@ -91,7 +91,7 @@ namespace TwitchDownloaderCore.Tools
                 if (bodyWithoutName.StartsWith(" is paying forward the Gift they got from"))
                     return HighlightType.PayingForward;
 
-                if (bodyWithoutName.Contains(" consecutive streams this month and sparked a watch streak!", StringComparison.Ordinal))
+                if (bodyWithoutName.EndsWith(" consecutive streams this month and sparked a watch streak! "))
                     return HighlightType.WatchStreak;
 
                 if (bodyWithoutName.StartsWith(" converted from a"))
@@ -116,7 +116,7 @@ namespace TwitchDownloaderCore.Tools
             if (bodySpan.Equals("bits badge tier notification ", StringComparison.Ordinal))
                 return HighlightType.BitBadgeTierNotification;
 
-            if (char.IsDigit(bodySpan[0]) && bodySpan.Contains("have joined!", StringComparison.Ordinal))
+            if (char.IsDigit(bodySpan[0]) && bodySpan.EndsWith(" have joined! "))
             {
                 // TODO: use bodySpan when .NET 7
                 if (Regex.IsMatch(comment.message.body, $@"^\d+ raiders from {comment.commenter.display_name} have joined!"))
