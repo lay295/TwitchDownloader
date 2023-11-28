@@ -8,20 +8,6 @@ namespace TwitchDownloaderCore.Tools
 {
     public static class FilenameService
     {
-        private static string[] GetTemplateSubfolders(ref string fullPath)
-        {
-            var returnString = fullPath.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
-            fullPath = returnString[^1];
-            Array.Resize(ref returnString, returnString.Length - 1);
-
-            for (var i = 0; i < returnString.Length; i++)
-            {
-                returnString[i] = RemoveInvalidFilenameChars(returnString[i]);
-            }
-
-            return returnString;
-        }
-
         public static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan cropStart, TimeSpan cropEnd, string viewCount, string game)
         {
             var videoLength = cropEnd - cropStart;
@@ -30,8 +16,8 @@ namespace TwitchDownloaderCore.Tools
                 .Replace("{title}", RemoveInvalidFilenameChars(title))
                 .Replace("{id}", id)
                 .Replace("{channel}", RemoveInvalidFilenameChars(channel))
-                .Replace("{date}", date.ToString("Mdyy"))
-                .Replace("{random_string}", Path.GetRandomFileName().Replace(".", ""))
+                .Replace("{date}", date.ToString("M-d-yy"))
+                .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
                 .Replace("{crop_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropStart))
                 .Replace("{crop_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropEnd))
                 .Replace("{length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", videoLength))
@@ -40,25 +26,25 @@ namespace TwitchDownloaderCore.Tools
 
             if (template.Contains("{date_custom="))
             {
-                var dateRegex = new Regex("{date_custom=\"(.*)\"}");
+                var dateRegex = new Regex("{date_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, dateRegex, date);
             }
 
             if (template.Contains("{crop_start_custom="))
             {
-                var cropStartRegex = new Regex("{crop_start_custom=\"(.*)\"}");
+                var cropStartRegex = new Regex("{crop_start_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, cropStartRegex, cropStart);
             }
 
             if (template.Contains("{crop_end_custom="))
             {
-                var cropEndRegex = new Regex("{crop_end_custom=\"(.*)\"}");
+                var cropEndRegex = new Regex("{crop_end_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, cropEndRegex, cropEnd);
             }
 
             if (template.Contains("{length_custom="))
             {
-                var lengthRegex = new Regex("{length_custom=\"(.*)\"}");
+                var lengthRegex = new Regex("{length_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, lengthRegex, videoLength);
             }
 
@@ -81,6 +67,20 @@ namespace TwitchDownloaderCore.Tools
                 sb.Remove(match.Groups[0].Index, match.Groups[0].Length);
                 sb.Insert(match.Groups[0].Index, RemoveInvalidFilenameChars(formattable.ToString(formatString, formatProvider)));
             } while (true);
+        }
+
+        private static string[] GetTemplateSubfolders(ref string fullPath)
+        {
+            var returnString = fullPath.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+            fullPath = returnString[^1];
+            Array.Resize(ref returnString, returnString.Length - 1);
+
+            for (var i = 0; i < returnString.Length; i++)
+            {
+                returnString[i] = RemoveInvalidFilenameChars(returnString[i]);
+            }
+
+            return returnString;
         }
 
         private static readonly char[] FilenameInvalidChars = Path.GetInvalidFileNameChars();

@@ -210,7 +210,11 @@ namespace TwitchDownloaderWPF
         {
             if (selectedItems.Count > 0)
             {
-                WindowQueueOptions queue = new WindowQueueOptions(selectedItems);
+                var queue = new WindowQueueOptions(selectedItems)
+                {
+                    Owner = this,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
                 if (queue.ShowDialog().GetValueOrDefault())
                     this.Close();
             }
