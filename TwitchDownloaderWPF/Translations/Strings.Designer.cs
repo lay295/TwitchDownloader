@@ -1302,6 +1302,33 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restore Settings Confirmation.
+        /// </summary>
+        public static string ResetSettingsConfirmation {
+            get {
+                return ResourceManager.GetString("ResetSettingsConfirmation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to reset all settings to their default values?.
+        /// </summary>
+        public static string ResetSettingsConfirmationMessage {
+            get {
+                return ResourceManager.GetString("ResetSettingsConfirmationMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please restart {0}.
+        /// </summary>
+        public static string RestartTheApplication {
+            get {
+                return ResourceManager.GetString("RestartTheApplication", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search Clips.
         /// </summary>
         public static string SearchClips {
@@ -1550,6 +1577,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string TemplateVods {
             get {
                 return ResourceManager.GetString("TemplateVods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The application must be restarted for changes to take effect..
+        /// </summary>
+        public static string TheApplicationMustBeRestartedMessage {
+            get {
+                return ResourceManager.GetString("TheApplicationMustBeRestartedMessage", resourceCulture);
             }
         }
         

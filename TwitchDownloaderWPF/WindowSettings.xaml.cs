@@ -198,11 +198,11 @@ namespace TwitchDownloaderWPF
 
         private void BtnResetSettings_OnClick(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Are you sure you want to reset all settings to their default values?", "Restore Settings Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (MessageBox.Show(Translations.Strings.ResetSettingsConfirmationMessage, Translations.Strings.ResetSettingsConfirmationMessage, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 Settings.Default.Reset();
                 Settings.Default.Save();
-                MessageBox.Show("The application must be restarted for changes to take effect.", $"Please restart {nameof(TwitchDownloaderWPF)}", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)), MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
