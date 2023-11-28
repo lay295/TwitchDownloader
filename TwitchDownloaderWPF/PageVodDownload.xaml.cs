@@ -363,7 +363,11 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            WindowSettings settings = new WindowSettings();
+            var settings = new WindowSettings
+            {
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -474,7 +478,11 @@ namespace TwitchDownloaderWPF
 
             if (ValidateInputs())
             {
-                WindowQueueOptions queueOptions = new WindowQueueOptions(this);
+                var queueOptions = new WindowQueueOptions(this)
+                {
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
                 queueOptions.ShowDialog();
             }
             else
