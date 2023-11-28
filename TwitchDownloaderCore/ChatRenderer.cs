@@ -1479,14 +1479,15 @@ namespace TwitchDownloaderCore
             }
 
             sectionImageCanvas.DrawText(formattedTimestamp, drawPos.X, drawPos.Y, messageFont);
-            var textWidth =
-                timestamp.TotalHours >= 1
-                    ? timestamp.TotalHours >= 10
-                        ? renderOptions.TimestampWidths[3]
-                        : renderOptions.TimestampWidths[2]
-                    : timestamp.Minutes >= 10
-                        ? renderOptions.TimestampWidths[1]
-                        : renderOptions.TimestampWidths[0];
+
+            // We use pre-defined widths so all timestamps have the same defaultPos regardless of individual character width
+            var textWidth = timestamp.Ticks switch
+            {
+                >= 10 * TimeSpan.TicksPerHour => renderOptions.TimestampWidths[3],
+                >= 1 * TimeSpan.TicksPerHour => renderOptions.TimestampWidths[2],
+                >= 10 * TimeSpan.TicksPerMinute => renderOptions.TimestampWidths[1],
+                _ => renderOptions.TimestampWidths[0]
+            };
             drawPos.X += textWidth + renderOptions.WordSpacing * 2;
             defaultPos.X = drawPos.X;
 
