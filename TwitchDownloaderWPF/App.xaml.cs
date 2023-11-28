@@ -31,7 +31,10 @@ namespace TwitchDownloaderWPF
             var windowsThemeService = new WindowsThemeService();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
-            MainWindow = new MainWindow();
+            MainWindow = new MainWindow
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
+            };
             MainWindow.Show();
         }
 
