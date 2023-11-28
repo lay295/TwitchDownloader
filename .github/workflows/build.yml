@@ -216,12 +216,20 @@ jobs:
       run: dotnet restore TwitchDownloaderCLI
     - name: Build MacOS CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=None -p:DebugSymbols=false
+    - name: Build MacOSArm64 CLI
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOSArm64 -p:DebugType=None -p:DebugSymbols=false
       
     - name: Zip MacOS CLI
       uses: vimtor/action-zip@v1
       with:
         files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOS"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOS-x64.zip
+
+    - name: Zip MacOSArm64 CLI
+      uses: vimtor/action-zip@v1
+      with:
+        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOSArm64"
+        dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOSArm64.zip
     
     - name: Download URL
       uses: actions/download-artifact@v2
@@ -242,4 +250,14 @@ jobs:
         upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOS-x64.zip
         asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOS-x64.zip
+        asset_content_type: application/zip
+
+    - name: Upload MacOSArm64 CLI Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.url.outputs.content }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOSArm64.zip
+        asset_name: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOSArm64.zip
         asset_content_type: application/zip
