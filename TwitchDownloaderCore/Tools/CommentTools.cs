@@ -15,7 +15,7 @@ namespace TwitchDownloaderCore.Tools
                 return -1;
             }
 
-            if (y is null) return -1;
+            if (y is null) return 1;
 
             // In the off chance that it causes problems with old chats, we will first compare offsets before comparing creation dates.
             var xOffset = x.content_offset_seconds;

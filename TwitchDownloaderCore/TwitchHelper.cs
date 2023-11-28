@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Api;
 using TwitchDownloaderCore.TwitchObjects.Gql;
@@ -80,7 +81,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlClipResponse>();
         }
 
-        public static async Task<List<GqlClipTokenResponse>> GetClipLinks(string clipId)
+        public static async Task<GqlClipTokenResponse[]> GetClipLinks(string clipId)
         {
             var request = new HttpRequestMessage()
             {
@@ -91,7 +92,10 @@ namespace TwitchDownloaderCore
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<GqlClipTokenResponse>>();
+
+            var gqlClipTokenResponses = await response.Content.ReadFromJsonAsync<GqlClipTokenResponse[]>();
+            Array.Sort(gqlClipTokenResponses[0].data.clip.videoQualities, new ClipQualityComparer());
+            return gqlClipTokenResponses;
         }
 
         public static async Task<GqlVideoSearchResponse> GetGqlVideos(string channelName, string cursor = "", int limit = 50)
