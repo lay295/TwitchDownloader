@@ -34,8 +34,8 @@
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical">
             <WrapPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,9,3,3" Text="{lex:Loc CacheFolder}" Foreground="{DynamicResource AppText}"/>
-                <Button x:Name="BtnClearCache" Margin="2" MinWidth="50" Content="{lex:Loc ClearCache}" Click="btnClearCache_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}"/>
-                <Button x:Name="BtnTempBrowse" Margin="2" MinWidth="50" Content="{lex:Loc Browse}" Click="btnTempBrowse_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
+                <Button x:Name="BtnClearCache" Margin="2" MinWidth="50" Content="{lex:Loc ClearCache}" Click="BtnClearCache_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}"/>
+                <Button x:Name="BtnTempBrowse" Margin="2" MinWidth="50" Content="{lex:Loc Browse}" Click="BtnTempBrowse_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
                 <TextBox x:Name="TextTempPath" Margin="2" MinWidth="250" MaxWidth="400" TextChanged="TextTempPath_OnTextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">

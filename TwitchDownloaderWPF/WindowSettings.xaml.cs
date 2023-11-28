@@ -25,7 +25,7 @@ namespace TwitchDownloaderWPF
             InitializeComponent();
         }
 
-        private void btnTempBrowse_Click(object sender, RoutedEventArgs e)
+        private void BtnTempBrowse_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
             if (dialog.ShowDialog(this).GetValueOrDefault())
@@ -73,7 +73,7 @@ namespace TwitchDownloaderWPF
                 ComboLocale.Items.Add(culture.NativeName);
             }
             var currentCulture = Settings.Default.GuiCulture;
-            var selectedIndex = AvailableCultures.All.Select((item, index) => new { item, index })
+            var selectedIndex = AvailableCultures.All.Select((item, index) => (item, index))
                 .Where(x => x.item.Code == currentCulture)
                 .Select(x => x.index)
                 .DefaultIfEmpty(-1)
@@ -85,7 +85,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void btnClearCache_Click(object sender, RoutedEventArgs e)
+        private void BtnClearCache_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult messageBoxResult = MessageBox.Show(Translations.Strings.ClearCacheConfirmation.Replace(@"\n", Environment.NewLine), Translations.Strings.DeleteConfirmation, MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
