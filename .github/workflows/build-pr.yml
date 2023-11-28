@@ -165,7 +165,7 @@ jobs:
         name: TwitchDownloaderCLI-MacOS-x64.zip
         path: TwitchDownloaderCLI-MacOS-x64.zip
 
-    - name: Upload MacOS CLI Artifact Asset
+    - name: Upload MacOSArm64 CLI Artifact Asset
       uses: actions/upload-artifact@v3
       with:
         name: TwitchDownloaderCLI-MacOSArm64.zip
