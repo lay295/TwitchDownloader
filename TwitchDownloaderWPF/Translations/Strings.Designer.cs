@@ -213,6 +213,33 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string ButtonCancelSettingsChanges {
+            get {
+                return ResourceManager.GetString("ButtonCancelSettingsChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore Defaults.
+        /// </summary>
+        public static string ButtonRestoreDefaultSettings {
+            get {
+                return ResourceManager.GetString("ButtonRestoreDefaultSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string ButtonSaveSettings {
+            get {
+                return ResourceManager.GetString("ButtonSaveSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cache Folder:.
         /// </summary>
         public static string CacheFolder {

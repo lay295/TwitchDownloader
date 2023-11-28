@@ -798,4 +798,13 @@
   <data name="RestartTheApplication" xml:space="preserve">
     <value>Please restart {0}</value><comment>{0] is the name of the application.</comment>
   </data>
+  <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
+    <value>Restore Defaults</value>
+  </data>
+  <data name="ButtonSaveSettings" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="ButtonCancelSettingsChanges" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
 </root>
