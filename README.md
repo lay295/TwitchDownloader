@@ -87,7 +87,10 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 
 1. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest version for Windows or [build from source](#building-from-source).
 2. Extract `TwitchDownloaderCLI.exe`.
-3. Browse to where you extracted the file in the terminal.
+3. Browse to where you extracted the executable:
+```
+cd C:\folder\containing\TwitchDownloaderCLI
+```
 4. If you do not have FFmpeg, you can install it via [Chocolatey package manager](https://community.chocolatey.org/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
 ```
 TwitchDownloaderCLI.exe ffmpeg --download
@@ -103,39 +106,51 @@ TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 2. Ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 3. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for Linux, grab the [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/) for Arch Linux, or [build from source](#building-from-source).
 4. Extract `TwitchDownloaderCLI`.
-5. Browse to where you extracted the file and give it executable rights in the terminal:
+5. Browse to where you extracted the binary:
+```
+cd directory/containing/TwitchDownloaderCLI
+```
+6. Give the binary executable rights:
 ```
 sudo chmod +x TwitchDownloaderCLI
 ```
-6. a) If you do not have FFmpeg, you should install it via your distro package manager, however you can also get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+7. a) If you do not have FFmpeg, you should install it system-wide via your distro package manager, however you can also get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
-6. b) If downloaded as a standalone file, you must also give it executable rights with:
+7. b) If downloaded as a standalone file, you must also give it executable rights with:
 ```
 sudo chmod +x ffmpeg
 ```
-7. You can now start using the downloader, for example:
+8. You can now start using the downloader, for example:
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
 
 ## MacOS – Getting started
-1. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for MacOS or [build from source](#building-from-source).
-2. Extract `TwitchDownloaderCLI`.
-3. Browse to where you extracted the file and give it executable rights in the terminal:
+1. If your device has an Apple Silicon M-series processor, ensure that you download the arm64 binary, however if you would like to use the x64 binary on Apple Silicon it must be run via a terminal session running under Rosetta 2:
+```
+arch -x86_64 zsh
+```
+2. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for MacOS or [build from source](#building-from-source).
+3. Extract `TwitchDownloaderCLI`.
+4. Browse to where you extracted the binary:
+```
+cd directory/containing/TwitchDownloaderCLI
+```
+5. Give the binary executable rights in the terminal:
 ```
 chmod +x TwitchDownloaderCLI
 ```
-4. a) If you do not have FFmpeg, you can install it via [Homebrew package manager](https://brew.sh/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+6. a) If you do not have FFmpeg, you can install it system-wide via the [Homebrew package manager](https://brew.sh/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
-4. b) If downloaded as a standalone file, you must also give it executable rights with:
+6. b) If downloaded as a standalone file, you must also give it executable rights with:
 ```
 chmod +x ffmpeg
 ```
-5. You can now start using the downloader, for example:
+7. You can now start using the downloader, for example:
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
@@ -169,7 +184,7 @@ dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -
 ```
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile> -p:DebugType=None -p:DebugSymbols=false
 ```
-- Applicable Profiles: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`
+- Applicable Profiles: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
 5. a) Navigate to the GUI build folder:
 ```
 cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
