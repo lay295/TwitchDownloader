@@ -6,7 +6,7 @@
       <Value Profile="(Default)">4</Value>
     </Setting>
     <Setting Name="Font" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Arial</Value>
+      <Value Profile="(Default)">Inter Embedded</Value>
     </Setting>
     <Setting Name="FontSize" Type="System.Single" Scope="User">
       <Value Profile="(Default)">24</Value>
@@ -24,7 +24,7 @@
       <Value Profile="(Default)">700</Value>
     </Setting>
     <Setting Name="UpdateTime" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0.5</Value>
+      <Value Profile="(Default)">0.1</Value>
     </Setting>
     <Setting Name="FFZEmotes" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -192,7 +192,7 @@
       <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="DisperseCommentOffsets" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="GuiCulture" Type="System.String" Scope="User">
       <Value Profile="(Default)">en-US</Value>
@@ -223,3 +223,4 @@
     </Setting>
   </Settings>
 </SettingsFile>
+
