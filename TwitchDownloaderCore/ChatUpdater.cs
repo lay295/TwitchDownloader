@@ -40,7 +40,8 @@ namespace TwitchDownloaderCore
             int currentStep = 0;
             int totalSteps = 2;
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding) totalSteps++;
-            if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds) totalSteps++;
+            if (_updateOptions.OutputFormat is ChatFormat.Json or ChatFormat.Html
+                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)) totalSteps++;
 
             currentStep++;
             await UpdateVideoInfo(totalSteps, currentStep, progress, cancellationToken);
@@ -53,7 +54,8 @@ namespace TwitchDownloaderCore
             }
 
             // If we are updating/replacing embeds
-            if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)
+            if (_updateOptions.OutputFormat is ChatFormat.Json or ChatFormat.Html
+                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds))
             {
                 currentStep++;
                 await UpdateEmbeds(currentStep, totalSteps, progress, cancellationToken);

@@ -72,7 +72,7 @@ namespace TwitchDownloaderWPF
 
             Environment.SetEnvironmentVariable("CURL_IMPERSONATE", "chrome110");
 
-            var currentVersion = Version.Parse("1.53.4");
+            var currentVersion = Version.Parse("1.53.5");
             Title = $"Twitch Downloader v{currentVersion}";
 
             // TODO: extract FFmpeg handling to a dedicated service

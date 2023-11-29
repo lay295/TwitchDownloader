@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-
-namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Gql
+﻿namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Gql
 {
     public class ClipToken
     {
         public string id { get; set; }
         public PlaybackAccessToken playbackAccessToken { get; set; }
-        public List<GqlVideoQuality> videoQualities { get; set; }
+        public GqlVideoQuality[] videoQualities { get; set; }
         public string __typename { get; set; }
     }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using TwitchDownloaderCore.Tools;
 
@@ -11,13 +10,6 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
     {
         public string name { get; set; }
         public int id { get; set; }
-    }
-
-    public class LegacyStreamer
-    {
-        public string name { get; set; }
-        /// <remarks>Some old chats use a string instead of an integer.</remarks>
-        public JsonElement id { get; set; }
     }
 
     [DebuggerDisplay("{display_name}")]
@@ -213,13 +205,13 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
         public List<VideoChapter> chapters { get; set; } = new();
 
         #region DeprecatedProperties
-        /// <summary>Deprecated. Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21.</summary>
+        [Obsolete("Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21.")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string duration { get; set; } = null;
-        /// <summary>Deprecated. Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21.</summary>
+        [Obsolete("Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21.")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string user_id { get; set; } = null;
-        /// <summary>Deprecated. Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21.</summary>
+        [Obsolete("Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21.")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string user_name { get; set; } = null;
         #endregion

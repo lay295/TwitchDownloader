@@ -120,7 +120,11 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            WindowSettings settings = new WindowSettings();
+            var settings = new WindowSettings
+            {
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -168,19 +172,31 @@ namespace TwitchDownloaderWPF
 
         private void btnUrlList_Click(object sender, RoutedEventArgs e)
         {
-            WindowUrlList window = new WindowUrlList();
+            var window = new WindowUrlList
+            {
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             window.ShowDialog();
         }
 
         private void btnVods_Click(object sender, RoutedEventArgs e)
         {
-            WindowMassDownload window = new WindowMassDownload(VideoType.Video);
+            var window = new WindowMassDownload(VideoType.Video)
+            {
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             window.ShowDialog();
         }
 
         private void btnClips_Click(object sender, RoutedEventArgs e)
         {
-            WindowMassDownload window = new WindowMassDownload(VideoType.Clip);
+            var window = new WindowMassDownload(VideoType.Clip)
+            {
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             window.ShowDialog();
         }
 

@@ -155,7 +155,11 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            WindowQueueOptions queue = new WindowQueueOptions(dataList);
+            var queue = new WindowQueueOptions(dataList)
+            {
+                Owner = this,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             if (queue.ShowDialog().GetValueOrDefault())
                 this.Close();
 
