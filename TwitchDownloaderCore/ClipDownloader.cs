@@ -63,7 +63,7 @@ namespace TwitchDownloaderCore
                 TwitchHelper.CreateDirectory(downloadOptions.TempFolder);
             }
 
-            var tempFile = Path.Combine(downloadOptions.TempFolder, $"clip_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}_{Path.GetRandomFileName()}");
+            var tempFile = Path.Combine(downloadOptions.TempFolder, $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}.mp4");
             try
             {
                 await DownloadFileTaskAsync(downloadUrl, tempFile, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
@@ -73,6 +73,12 @@ namespace TwitchDownloaderCore
 
                 var clipChapter = TwitchHelper.GenerateClipChapter(clipInfo.data.clip);
                 await EncodeClipWithMetadata(tempFile, downloadOptions.Filename, clipInfo.data.clip, clipChapter, cancellationToken);
+
+                if (!File.Exists(downloadOptions.Filename))
+                {
+                    File.Move(tempFile, downloadOptions.Filename);
+                    throw new FileNotFoundException("Unable to serialize metadata (is FFmpeg missing?). The download has been completed without custom metadata.");
+                }
 
                 _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Encoding Clip Metadata 100%"));
                 _progress.Report(new ProgressReport(100));
@@ -163,6 +169,12 @@ namespace TwitchDownloaderCore
                 };
 
                 process.Start();
+
+                // If the process has exited before we call WaitForExitAsync, the thread locks up.
+                // This was probably not intended by the .NET team, but it's an issue regardless.
+                if (process.HasExited)
+                    return;
+
                 await process.WaitForExitAsync(cancellationToken);
             }
             finally

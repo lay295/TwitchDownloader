@@ -1470,7 +1470,17 @@ namespace TwitchDownloaderCore
             var timestamp = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
 
             const int MAX_TIMESTAMP_LENGTH = 8; // 48:00:00
-            var formattedTimestamp = FormatTimestamp(stackalloc char[MAX_TIMESTAMP_LENGTH], timestamp);
+            Span<char> timestampStackSpace = stackalloc char[MAX_TIMESTAMP_LENGTH];
+            ReadOnlySpan<char> formattedTimestamp = timestamp.Ticks switch
+            {
+                >= 24 * TimeSpan.TicksPerHour => TimeSpanHFormat.ReusableInstance.Format(@"HH\:mm\:ss", timestamp),
+                >= 1 * TimeSpan.TicksPerHour => timestamp.TryFormat(timestampStackSpace, out var charsWritten, @"h\:mm\:ss")
+                    ? timestampStackSpace[..charsWritten]
+                    : timestamp.ToString(@"h\:mm\:ss"),
+                _ => timestamp.TryFormat(timestampStackSpace, out var charsWritten, @"m\:ss")
+                    ? timestampStackSpace[..charsWritten]
+                    : timestamp.ToString(@"m\:ss")
+            };
 
             if (renderOptions.Outline)
             {
@@ -1479,37 +1489,17 @@ namespace TwitchDownloaderCore
             }
 
             sectionImageCanvas.DrawText(formattedTimestamp, drawPos.X, drawPos.Y, messageFont);
-            var textWidth =
-                timestamp.TotalHours >= 1
-                    ? timestamp.TotalHours >= 10
-                        ? renderOptions.TimestampWidths[3]
-                        : renderOptions.TimestampWidths[2]
-                    : timestamp.Minutes >= 10
-                        ? renderOptions.TimestampWidths[1]
-                        : renderOptions.TimestampWidths[0];
+
+            // We use pre-defined widths so all timestamps have the same defaultPos regardless of individual character width
+            var textWidth = timestamp.Ticks switch
+            {
+                >= 10 * TimeSpan.TicksPerHour => renderOptions.TimestampWidths[3],
+                >= 1 * TimeSpan.TicksPerHour => renderOptions.TimestampWidths[2],
+                >= 10 * TimeSpan.TicksPerMinute => renderOptions.TimestampWidths[1],
+                _ => renderOptions.TimestampWidths[0]
+            };
             drawPos.X += textWidth + renderOptions.WordSpacing * 2;
             defaultPos.X = drawPos.X;
-
-            static ReadOnlySpan<char> FormatTimestamp(Span<char> stackSpace, TimeSpan timespan)
-            {
-                if (timespan.TotalHours >= 1)
-                {
-                    if (timespan.TotalHours >= 24)
-                    {
-                        return TimeSpanHFormat.ReusableInstance.Format(@"HH\:mm\:ss", timespan);
-                    }
-
-                    return timespan.TryFormat(stackSpace, out var charsWritten, @"h\:mm\:ss")
-                        ? stackSpace[..charsWritten]
-                        : timespan.ToString(@"h\:mm\:ss");
-                }
-                else
-                {
-                    return timespan.TryFormat(stackSpace, out var charsWritten, @"m\:ss")
-                        ? stackSpace[..charsWritten]
-                        : timespan.ToString(@"m\:ss");
-                }
-            }
         }
 
         private void AddImageSection(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos)

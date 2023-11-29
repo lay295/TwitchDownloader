@@ -170,6 +170,7 @@ namespace TwitchDownloaderCore.Chat
             }
         }
 
+#pragma warning disable CS0618
         private static async Task UpgradeChatJson(ChatRoot chatRoot)
         {
             const int MAX_STREAM_LENGTH = 172_800; // 48 hours in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
@@ -213,6 +214,7 @@ namespace TwitchDownloaderCore.Chat
                 }
             }
         }
+#pragma warning restore CS0618
 
         /// <summary>
         /// Asynchronously serializes a chat json file.
