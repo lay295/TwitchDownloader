@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchDownloaderCore", "Twi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchDownloaderCLI", "TwitchDownloaderCLI\TwitchDownloaderCLI.csproj", "{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchDownloaderTests", "TwitchDownloaderTests\TwitchDownloaderTests.csproj", "{FE8F0DC2-6750-4956-9208-9CEE9B524184}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchDownloaderCore.Tests", "TwitchDownloaderCore.Tests\TwitchDownloaderCore.Tests.csproj", "{FE8F0DC2-6750-4956-9208-9CEE9B524184}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
