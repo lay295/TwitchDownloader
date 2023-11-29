@@ -157,7 +157,7 @@ jobs:
       uses: vimtor/action-zip@v1
       with:
         files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOSArm64"
-        dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOSArm64.zip
+        dest: TwitchDownloaderCLI-MacOSArm64.zip
 
     - name: Upload MacOS CLI Artifact Asset
       uses: actions/upload-artifact@v3
