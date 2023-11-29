@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
@@ -20,6 +20,7 @@ namespace TwitchDownloaderCore.Chat
         private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
             AllowTrailingCommas = true
         };
 
@@ -57,20 +58,7 @@ namespace TwitchDownloaderCore.Chat
 
             if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerElement))
             {
-                if (returnChatRoot.FileInfo.Version > new ChatRootVersion(1, 0, 0))
-                {
-                    returnChatRoot.streamer = streamerElement.Deserialize<Streamer>(options: _jsonSerializerOptions);
-                }
-                else
-                {
-                    var legacyStreamer = streamerElement.Deserialize<LegacyStreamer>(options: _jsonSerializerOptions);
-                    returnChatRoot.streamer = legacyStreamer.id.ValueKind switch
-                    {
-                        JsonValueKind.Number => new Streamer { name = legacyStreamer.name, id = legacyStreamer.id.GetInt32() },
-                        JsonValueKind.String => new Streamer { name = legacyStreamer.name, id = int.Parse(legacyStreamer.id.GetString()!) },
-                        _ => null // Fallback to UpgradeChatJson()
-                    };
-                }
+                returnChatRoot.streamer = streamerElement.Deserialize<Streamer>(options: _jsonSerializerOptions);
             }
 
             if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoElement))
@@ -182,6 +170,7 @@ namespace TwitchDownloaderCore.Chat
             }
         }
 
+#pragma warning disable CS0618
         private static async Task UpgradeChatJson(ChatRoot chatRoot)
         {
             const int MAX_STREAM_LENGTH = 172_800; // 48 hours in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
@@ -207,7 +196,7 @@ namespace TwitchDownloaderCore.Chat
 
             if (chatRoot.video.duration is not null)
             {
-                chatRoot.video.length = TimeSpanExtensions.ParseTimeCode(chatRoot.video.duration).TotalSeconds;
+                chatRoot.video.length = UrlTimeCode.Parse(chatRoot.video.duration).TotalSeconds;
                 chatRoot.video.end = chatRoot.video.length;
                 chatRoot.video.duration = null;
             }
@@ -225,6 +214,7 @@ namespace TwitchDownloaderCore.Chat
                 }
             }
         }
+#pragma warning restore CS0618
 
         /// <summary>
         /// Asynchronously serializes a chat json file.

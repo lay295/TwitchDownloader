@@ -585,9 +585,9 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            if (downloadOptions.Quality != null && videoQualities.Any(x => x.Key.StartsWith(downloadOptions.Quality)))
+            if (downloadOptions.Quality != null && videoQualities.Any(x => x.Key.StartsWith(downloadOptions.Quality, StringComparison.OrdinalIgnoreCase)))
             {
-                return videoQualities.Last(x => x.Key.StartsWith(downloadOptions.Quality)).Value;
+                return videoQualities.Last(x => x.Key.StartsWith(downloadOptions.Quality, StringComparison.OrdinalIgnoreCase)).Value;
             }
 
             // Unable to find specified quality, defaulting to highest quality

@@ -55,7 +55,7 @@ namespace TwitchDownloaderWPF
                 btnGetInfo.IsEnabled = false;
                 comboQuality.Items.Clear();
                 Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
-                Task<List<GqlClipTokenResponse>> taskLinks = TwitchHelper.GetClipLinks(clipId);
+                Task<GqlClipTokenResponse[]> taskLinks = TwitchHelper.GetClipLinks(clipId);
                 await Task.WhenAll(taskClipInfo, taskLinks);
 
                 GqlClipResponse clipData = taskClipInfo.Result;
@@ -80,7 +80,7 @@ namespace TwitchDownloaderWPF
 
                 foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
                 {
-                    comboQuality.Items.Add(new TwitchClip(quality.quality, quality.frameRate.ToString(), quality.sourceURL));
+                    comboQuality.Items.Add(new TwitchClip(quality.quality, Math.Round(quality.frameRate).ToString("F0"), quality.sourceURL));
                 }
 
                 comboQuality.SelectedIndex = 0;
@@ -178,7 +178,11 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            WindowSettings settings = new WindowSettings();
+            var settings = new WindowSettings
+            {
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -271,7 +275,11 @@ namespace TwitchDownloaderWPF
 
         private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e)
         {
-            WindowQueueOptions queueOptions = new WindowQueueOptions(this);
+            var queueOptions = new WindowQueueOptions(this)
+            {
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             queueOptions.ShowDialog();
         }
 

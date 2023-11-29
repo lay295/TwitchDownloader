@@ -614,11 +614,11 @@ namespace TwitchDownloaderCore
             var finalBitmapInfo = finalBitmap.Info;
             using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
             {
-                if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight)
+                if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight or HighlightType.WatchStreak)
                 {
                     var accentColor = highlightType is HighlightType.PayingForward
-                        ? new SKColor(0x26, 0x26, 0x2C, 0xFF) // #26262C (RRGGBB)
-                        : new SKColor(0x80, 0x80, 0x8C, 0xFF); // #80808C (RRGGBB)
+                        ? new SKColor(0xFF26262C) // AARRGGBB
+                        : new SKColor(0xFF80808C); // AARRGGBB
 
                     using var paint = new SKPaint { Color = accentColor };
                     finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
@@ -630,7 +630,7 @@ namespace TwitchDownloaderCore
                         (renderOptions.AlternateMessageBackgrounds && renderOptions.AlternateBackgroundColor.Alpha < OPAQUE_THRESHOLD)))
                     {
                         // Draw the highlight background only if the message background is opaque enough
-                        var backgroundColor = new SKColor(0x6B, 0x6B, 0x6E, 0x1A); // #1A6B6B6E (AARRGGBB)
+                        var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
                         using var backgroundPaint = new SKPaint { Color = backgroundColor };
                         finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
                     }
@@ -705,6 +705,9 @@ namespace TwitchDownloaderCore
                     break;
                 case HighlightType.BitBadgeTierNotification:
                     DrawBitsBadgeTierMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    break;
+                case HighlightType.WatchStreak:
+                    DrawWatchStreakMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.GiftedMany:
                 case HighlightType.GiftedSingle:
@@ -800,6 +803,45 @@ namespace TwitchDownloaderCore
             }
 
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
+        }
+
+        private void DrawWatchStreakMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        {
+            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+            canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
+
+            Point customMessagePos = drawPos;
+            drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
+            defaultPos.X = drawPos.X;
+
+            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, Purple);
+            AddImageSection(sectionImages, ref drawPos, defaultPos);
+
+            // Remove the commenter's name from the watch streak message
+            comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 1)..];
+            if (comment.message.fragments[0].text.Equals(comment.commenter.display_name, StringComparison.OrdinalIgnoreCase))
+            {
+                // This is necessary for sub messages. We'll keep it around just in case.
+                comment.message.fragments.RemoveAt(0);
+            }
+            else
+            {
+                comment.message.fragments[0].text = comment.message.fragments[0].text[(comment.commenter.display_name.Length + 1)..];
+            }
+
+            var (streakMessage, customMessage) = HighlightIcons.SplitWatchStreakComment(comment);
+            DrawMessage(streakMessage, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
+
+            // Return if there is no custom message to draw
+            if (customMessage is null)
+            {
+                return;
+            }
+
+            AddImageSection(sectionImages, ref drawPos, defaultPos);
+            drawPos = customMessagePos;
+            defaultPos = customMessagePos;
+            DrawNonAccentedMessage(customMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
         }
 
         private void DrawGiftMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
@@ -1428,7 +1470,17 @@ namespace TwitchDownloaderCore
             var timestamp = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
 
             const int MAX_TIMESTAMP_LENGTH = 8; // 48:00:00
-            var formattedTimestamp = FormatTimestamp(stackalloc char[MAX_TIMESTAMP_LENGTH], timestamp);
+            Span<char> timestampStackSpace = stackalloc char[MAX_TIMESTAMP_LENGTH];
+            ReadOnlySpan<char> formattedTimestamp = timestamp.Ticks switch
+            {
+                >= 24 * TimeSpan.TicksPerHour => TimeSpanHFormat.ReusableInstance.Format(@"HH\:mm\:ss", timestamp),
+                >= 1 * TimeSpan.TicksPerHour => timestamp.TryFormat(timestampStackSpace, out var charsWritten, @"h\:mm\:ss")
+                    ? timestampStackSpace[..charsWritten]
+                    : timestamp.ToString(@"h\:mm\:ss"),
+                _ => timestamp.TryFormat(timestampStackSpace, out var charsWritten, @"m\:ss")
+                    ? timestampStackSpace[..charsWritten]
+                    : timestamp.ToString(@"m\:ss")
+            };
 
             if (renderOptions.Outline)
             {
@@ -1437,37 +1489,17 @@ namespace TwitchDownloaderCore
             }
 
             sectionImageCanvas.DrawText(formattedTimestamp, drawPos.X, drawPos.Y, messageFont);
-            var textWidth =
-                timestamp.TotalHours >= 1
-                    ? timestamp.TotalHours >= 10
-                        ? renderOptions.TimestampWidths[3]
-                        : renderOptions.TimestampWidths[2]
-                    : timestamp.Minutes >= 10
-                        ? renderOptions.TimestampWidths[1]
-                        : renderOptions.TimestampWidths[0];
+
+            // We use pre-defined widths so all timestamps have the same defaultPos regardless of individual character width
+            var textWidth = timestamp.Ticks switch
+            {
+                >= 10 * TimeSpan.TicksPerHour => renderOptions.TimestampWidths[3],
+                >= 1 * TimeSpan.TicksPerHour => renderOptions.TimestampWidths[2],
+                >= 10 * TimeSpan.TicksPerMinute => renderOptions.TimestampWidths[1],
+                _ => renderOptions.TimestampWidths[0]
+            };
             drawPos.X += textWidth + renderOptions.WordSpacing * 2;
             defaultPos.X = drawPos.X;
-
-            static ReadOnlySpan<char> FormatTimestamp(Span<char> stackSpace, TimeSpan timespan)
-            {
-                if (timespan.TotalHours >= 1)
-                {
-                    if (timespan.TotalHours >= 24)
-                    {
-                        return TimeSpanHFormat.ReusableInstance.Format(@"HH\:mm\:ss", timespan);
-                    }
-
-                    return timespan.TryFormat(stackSpace, out var charsWritten, @"h\:mm\:ss")
-                        ? stackSpace[..charsWritten]
-                        : timespan.ToString(@"h\:mm\:ss");
-                }
-                else
-                {
-                    return timespan.TryFormat(stackSpace, out var charsWritten, @"m\:ss")
-                        ? stackSpace[..charsWritten]
-                        : timespan.ToString(@"m\:ss");
-                }
-            }
         }
 
         private void AddImageSection(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos)

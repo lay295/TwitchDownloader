@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchDownloaderCore", "Twi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchDownloaderCLI", "TwitchDownloaderCLI\TwitchDownloaderCLI.csproj", "{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchDownloaderCore.Tests", "TwitchDownloaderCore.Tests\TwitchDownloaderCore.Tests.csproj", "{FE8F0DC2-6750-4956-9208-9CEE9B524184}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,14 @@ Global
 		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Release|x64.ActiveCfg = Release|x64
 		{F14A9B02-36A4-4FFF-9AD0-7475E2CF2D5C}.Release|x64.Build.0 = Release|x64
+		{FE8F0DC2-6750-4956-9208-9CEE9B524184}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE8F0DC2-6750-4956-9208-9CEE9B524184}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE8F0DC2-6750-4956-9208-9CEE9B524184}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FE8F0DC2-6750-4956-9208-9CEE9B524184}.Debug|x64.Build.0 = Debug|Any CPU
+		{FE8F0DC2-6750-4956-9208-9CEE9B524184}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE8F0DC2-6750-4956-9208-9CEE9B524184}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE8F0DC2-6750-4956-9208-9CEE9B524184}.Release|x64.ActiveCfg = Release|Any CPU
+		{FE8F0DC2-6750-4956-9208-9CEE9B524184}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

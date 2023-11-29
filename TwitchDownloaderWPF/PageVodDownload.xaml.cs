@@ -146,7 +146,7 @@ namespace TwitchDownloaderWPF
                 var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
                 if (urlTimeCodeMatch.Success)
                 {
-                    var time = TimeSpanExtensions.ParseTimeCode(urlTimeCodeMatch.ValueSpan);
+                    var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
                     checkStart.IsChecked = true;
                     numStartHour.Value = time.Hours;
                     numStartMinute.Value = time.Minutes;
@@ -207,7 +207,7 @@ namespace TwitchDownloaderWPF
                 Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    viewCount.ToString(), game) + ".mp4"),
+                    viewCount.ToString(), game) + (comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? ".m4a" : ".mp4")),
                 Oauth = TextOauth.Text,
                 Quality = GetQualityWithoutSize(comboQuality.Text).ToString(),
                 Id = currentVideoId,
@@ -363,7 +363,11 @@ namespace TwitchDownloaderWPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            WindowSettings settings = new WindowSettings();
+            var settings = new WindowSettings
+            {
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
@@ -402,7 +406,7 @@ namespace TwitchDownloaderWPF
 
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                Filter = "MP4 Files | *.mp4",
+                Filter = comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? "M4A Files | *.m4a" : "MP4 Files | *.mp4",
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
@@ -474,7 +478,11 @@ namespace TwitchDownloaderWPF
 
             if (ValidateInputs())
             {
-                WindowQueueOptions queueOptions = new WindowQueueOptions(this);
+                var queueOptions = new WindowQueueOptions(this)
+                {
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
                 queueOptions.ShowDialog();
             }
             else

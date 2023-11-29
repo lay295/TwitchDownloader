@@ -768,7 +768,7 @@
     <value>Error</value>
   </data>
   <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
-    <value>Unable to start Windows application theme watcher. Error code: {0}</value>
+    <value>Unable to start Windows application theme watcher. Real-time Windows theme synchronization has been disabled. Error code: {0}</value>
   </data>
   <data name="LabelVideosPerPage" xml:space="preserve">
     <value>Videos per page:</value>
@@ -784,5 +784,26 @@
   </data>
   <data name="OpenVideoInBrowser" xml:space="preserve">
     <value>Open in browser</value>
+  </data>
+  <data name="ResetSettingsConfirmationMessage" xml:space="preserve">
+    <value>Are you sure you want to reset all settings to their default values?</value>
+  </data>
+  <data name="ResetSettingsConfirmation" xml:space="preserve">
+    <value>Restore Settings Confirmation</value>
+  </data>
+  <data name="TheApplicationMustBeRestartedMessage" xml:space="preserve">
+    <value>The application must be restarted for changes to take effect.</value>
+  </data>
+  <data name="RestartTheApplication" xml:space="preserve">
+    <value>Please restart {0}</value><comment>{0} is the name of the application.</comment>
+  </data>
+  <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
+    <value>Restore Defaults</value>
+  </data>
+  <data name="ButtonSaveSettings" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="ButtonCancelSettingsChanges" xml:space="preserve">
+    <value>Cancel</value>
   </data>
 </root>
