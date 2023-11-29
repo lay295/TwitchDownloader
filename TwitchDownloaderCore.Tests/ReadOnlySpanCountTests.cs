@@ -1,6 +1,6 @@
 ﻿using TwitchDownloaderCore.Extensions;
 
-namespace TwitchDownloaderTests
+namespace TwitchDownloaderCore.Tests
 {
     public class ReadOnlySpanCountTests
     {

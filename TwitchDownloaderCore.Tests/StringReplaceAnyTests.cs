@@ -1,6 +1,6 @@
 using TwitchDownloaderCore.Extensions;
 
-namespace TwitchDownloaderTests
+namespace TwitchDownloaderCore.Tests
 {
     // ReSharper disable StringLiteralTypo
     public class StringReplaceAnyTests

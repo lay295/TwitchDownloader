@@ -1,6 +1,6 @@
 ﻿using TwitchDownloaderCore.Tools;
 
-namespace TwitchDownloaderTests
+namespace TwitchDownloaderCore.Tests
 {
     // ReSharper disable StringLiteralTypo
     public class IdParseTests

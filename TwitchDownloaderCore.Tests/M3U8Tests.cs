@@ -1,6 +1,6 @@
 ﻿using TwitchDownloaderCore.Tools;
 
-namespace TwitchDownloaderTests
+namespace TwitchDownloaderCore.Tests
 {
     public class M3U8Tests
     {
