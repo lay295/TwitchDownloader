@@ -797,7 +797,7 @@
     <value>The application must be restarted for changes to take effect.</value>
   </data>
   <data name="RestartTheApplication" xml:space="preserve">
-    <value>Please restart {0}</value><comment>{0] is the name of the application.</comment>
+    <value>Please restart {0}</value><comment>{0} is the name of the application.</comment>
   </data>
   <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
     <value>Restore Defaults</value>
