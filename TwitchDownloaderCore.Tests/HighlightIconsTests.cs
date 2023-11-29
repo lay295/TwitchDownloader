@@ -151,21 +151,15 @@ namespace TwitchDownloaderCore.Tests
         [Fact]
         public void CorrectlyIdentifiesAnonymousGiftSub()
         {
+            const string COMMENTER_STRING =
+                "{\"display_name\":\"AnAnonymousGifter\",\"_id\":\"274598607\",\"name\":\"ananonymousgifter\",\"type\":\"user\",\"bio\":\"?????????????????????????????\",\"created_at\":\"2018-11-12T21:57:31.811529Z\",\"updated_at\":\"2022-04-18T21:57:27.392173Z\",\"logo\":\"https://static-cdn.jtvnw.net/jtv_user_pictures/ae7b05c6-c924-44ab-8203-475a2d3e488c-profile_image-300x300.png\"}";
             const string MESSAGE_STRING =
                 "{\"body\":\"An anonymous user gifted a Tier 1 sub to viewer8!  \",\"bits_spent\":0,\"fragments\":[{\"text\":\"An anonymous user gifted a Tier 1 sub to viewer8!  \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":null,\"emoticons\":[]}";
             const HighlightType EXPECTED_TYPE = HighlightType.GiftedAnonymous;
 
+            var commenter = JsonSerializer.Deserialize<Commenter>(COMMENTER_STRING)!;
             var message = JsonSerializer.Deserialize<Message>(MESSAGE_STRING)!;
-            var comment = CreateCommentWithCommenterAndMessage(new Commenter
-            {
-                display_name = "AnAnonymousGifter",
-                _id = "274598607",
-                name = "ananonymousgifter",
-                bio = "?????????????????????????????",
-                created_at = DateTime.Parse("2018-11-12T21:57:31.811529Z"),
-                updated_at = DateTime.Parse("2022-04-18T21:57:27.392173Z"),
-                logo = "https://static-cdn.jtvnw.net/jtv_user_pictures/ae7b05c6-c924-44ab-8203-475a2d3e488c-profile_image-300x300.png"
-            }, message);
+            var comment = CreateCommentWithCommenterAndMessage(commenter, message);
 
             var actualType = HighlightIcons.GetHighlightType(comment);
 
