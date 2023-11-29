@@ -41,13 +41,13 @@ namespace TwitchDownloaderCore.Tests
         [Theory]
         // SubscribedTier no custom message
         [InlineData(
-            "{\"body\":\"viewer8 subscribed at Tier 1. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 subscribed at Tier 1. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",
             HighlightType.SubscribedTier)]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",
             HighlightType.SubscribedTier)]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months, currently on a 3 month streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months, currently on a 3 month streak! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months, currently on a 3 month streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months, currently on a 3 month streak! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",
             HighlightType.SubscribedTier)]
         // SubscribedTier custom message
         [InlineData(
@@ -61,13 +61,13 @@ namespace TwitchDownloaderCore.Tests
             HighlightType.SubscribedTier)]
         // SubscribedPrime no custom message
         [InlineData(
-            "{\"body\":\"viewer8 subscribed with Prime. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 subscribed with Prime. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"emoticons\":[]}",
             HighlightType.SubscribedPrime)]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 2 months! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 2 months! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 2 months! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 2 months! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"emoticons\":[]}",
             HighlightType.SubscribedPrime)]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"emoticons\":[]}",
             HighlightType.SubscribedPrime)]
         // SubscribedPrime custom message
         [InlineData(
@@ -81,62 +81,62 @@ namespace TwitchDownloaderCore.Tests
             HighlightType.SubscribedPrime)]
         // Converted
         [InlineData(
-            "{\"body\":\"viewer8 converted from a Prime sub to a Tier 1 sub! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 converted from a Prime sub to a Tier 1 sub! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 converted from a Prime sub to a Tier 1 sub! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 converted from a Prime sub to a Tier 1 sub! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"emoticons\":[]}",
             HighlightType.SubscribedTier)]
         [InlineData(
-            "{\"body\":\"viewer8 converted from a Tier 1 sub to a Tier 2 sub! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 converted from a Tier 2 sub to a Tier 3 sub! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 converted from a Tier 1 sub to a Tier 2 sub! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 converted from a Tier 2 sub to a Tier 3 sub! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"emoticons\":[]}",
             HighlightType.SubscribedTier)]
         [InlineData(
-            "{\"body\":\"viewer8 converted from a Tier 1 sub to a Tier 3 sub! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 converted from a Tier 1 sub to a Tier 3 sub! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 converted from a Tier 1 sub to a Tier 3 sub! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 converted from a Tier 1 sub to a Tier 3 sub! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"emoticons\":[]}",
             HighlightType.SubscribedTier)]
         [InlineData(
-            "{\"body\":\"viewer8 converted from a Tier 1 sub to a Prime sub! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 converted from a Tier 1 sub to a Prime sub! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 converted from a Tier 1 sub to a Prime sub! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 converted from a Tier 1 sub to a Prime sub! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"emoticons\":[]}",
             HighlightType.SubscribedPrime)]
         // GiftedMany
         [InlineData(
-            "{\"body\":\"viewer8 is gifting 5 Tier 1 Subs to streamer8's community! They've gifted a total of 349 in the channel! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is gifting 5 Tier 1 Subs to streamer8's community! They've gifted a total of 349 in the channel! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"6\"},{\"_id\":\"bits\",\"version\":\"50000\"}],\"user_color\":\"#DAA520\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 is gifting 5 Tier 1 Subs to streamer8's community! They've gifted a total of 349 in the channel! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is gifting 5 Tier 1 Subs to streamer8's community! They've gifted a total of 349 in the channel! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"6\"},{\"_id\":\"bits\",\"version\":\"50000\"}],\"user_color\":\"#DAA520\",\"emoticons\":[]}",
             HighlightType.GiftedMany)]
         // GiftedSingle
         [InlineData(
-            "{\"body\":\"viewer8 gifted a Tier 1 sub to viewer9! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 gifted a Tier 1 sub to viewer9! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"6\"},{\"_id\":\"bits\",\"version\":\"50000\"}],\"user_color\":\"#DAA520\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 gifted a Tier 1 sub to viewer9! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 gifted a Tier 1 sub to viewer9! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"6\"},{\"_id\":\"bits\",\"version\":\"50000\"}],\"user_color\":\"#DAA520\",\"emoticons\":[]}",
             HighlightType.GiftedSingle)]
         // GiftedAnonymous
         // Special case, in separate method.
         // ContinuingGift
         [InlineData(
-            "{\"body\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"}],\"user_color\":\"#8A2BE2\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"}],\"user_color\":\"#8A2BE2\",\"emoticons\":[]}",
             HighlightType.ContinuingGift)]
         // PayingForward
         [InlineData(
-            "{\"body\":\"viewer8 is paying forward the Gift they got from an anonymous gifter to the community! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is paying forward the Gift they got from an anonymous gifter to the community! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 is paying forward the Gift they got from an anonymous gifter to the community! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is paying forward the Gift they got from an anonymous gifter to the community! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"emoticons\":[]}",
             HighlightType.PayingForward)]
         // ChannelPointHighlight
         // Not yet supported
         // Raid
         [InlineData(
-            "{\"body\":\"5180 raiders from viewer8 have joined! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"5180 raiders from viewer8 have joined! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"moderator\",\"version\":\"1\"},{\"_id\":\"partner\",\"version\":\"1\"}],\"user_color\":\"#8A2BE2\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"5180 raiders from viewer8 have joined! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"5180 raiders from viewer8 have joined! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"moderator\",\"version\":\"1\"},{\"_id\":\"partner\",\"version\":\"1\"}],\"user_color\":\"#8A2BE2\",\"emoticons\":[]}",
             HighlightType.Raid)]
         // BitBadgeTierNotification
         [InlineData(
-            "{\"body\":\"bits badge tier notification \",\"bits_spent\":0,\"fragments\":[{\"text\":\"bits badge tier notification \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"6\"},{\"_id\":\"bits\",\"version\":\"1000\"}],\"user_color\":\"#9E1A67\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"bits badge tier notification \",\"bits_spent\":0,\"fragments\":[{\"text\":\"bits badge tier notification \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"6\"},{\"_id\":\"bits\",\"version\":\"1000\"}],\"user_color\":\"#9E1A67\",\"emoticons\":[]}",
             HighlightType.BitBadgeTierNotification)]
         // WatchStreak no custom message
         [InlineData(
-            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#008000\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#008000\",\"emoticons\":[]}",
             HighlightType.WatchStreak)]
         // WatchStreak custom message
         [InlineData(
-            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",
             HighlightType.WatchStreak)]
         [InlineData(
-            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[{\"_id\":\"425618\",\"begin\":84,\"end\":88}]}",
+            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[{\"_id\":\"425618\",\"begin\":84,\"end\":88}]}",
             HighlightType.WatchStreak)]
         // Regular messages
         [InlineData(
-            "{\"body\":\"Hi\",\"bits_spent\":0,\"fragments\":[{\"text\":\"Hi\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#5F9EA0\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"Hi\",\"bits_spent\":0,\"fragments\":[{\"text\":\"Hi\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#5F9EA0\",\"emoticons\":[]}",
             HighlightType.None)]
         [InlineData(
-            "{\"body\":\"\",\"bits_spent\":0,\"fragments\":[{\"text\":\"\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#5F9EA0\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"\",\"bits_spent\":0,\"fragments\":[{\"text\":\"\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#5F9EA0\",\"emoticons\":[]}",
             HighlightType.None)]
         public void CorrectlyIdentifiesHighlightTypes(string messageString, HighlightType expectedType)
         {
@@ -152,7 +152,7 @@ namespace TwitchDownloaderCore.Tests
         public void CorrectlyIdentifiesAnonymousGiftSub()
         {
             const string MESSAGE_STRING =
-                "{\"body\":\"An anonymous user gifted a Tier 1 sub to viewer8!  \",\"bits_spent\":0,\"fragments\":[{\"text\":\"An anonymous user gifted a Tier 1 sub to viewer8!  \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":null,\"user_notice_params\":null,\"emoticons\":[]}";
+                "{\"body\":\"An anonymous user gifted a Tier 1 sub to viewer8!  \",\"bits_spent\":0,\"fragments\":[{\"text\":\"An anonymous user gifted a Tier 1 sub to viewer8!  \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":null,\"emoticons\":[]}";
             const HighlightType EXPECTED_TYPE = HighlightType.GiftedAnonymous;
 
             var message = JsonSerializer.Deserialize<Message>(MESSAGE_STRING)!;
@@ -174,17 +174,17 @@ namespace TwitchDownloaderCore.Tests
 
         [Theory]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed at Tier 1. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[]}")]
+            "{\"body\":\"viewer8 subscribed at Tier 1. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[]}")]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed at Tier 2. They've subscribed for 3 months! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 2. They've subscribed for 3 months! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[]}")]
+            "{\"body\":\"viewer8 subscribed at Tier 2. They've subscribed for 3 months! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 2. They've subscribed for 3 months! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[]}")]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed at Tier 3. They've subscribed for 3 months, currently on a 3 month streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 3. They've subscribed for 3 months, currently on a 3 month streak! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[]}")]
+            "{\"body\":\"viewer8 subscribed at Tier 3. They've subscribed for 3 months, currently on a 3 month streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 3. They've subscribed for 3 months, currently on a 3 month streak! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[]}")]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed with Prime. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"user_notice_params\":null,\"emoticons\":[]}")]
+            "{\"body\":\"viewer8 subscribed with Prime. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"emoticons\":[]}")]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 2 months! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 2 months! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"user_notice_params\":null,\"emoticons\":[]}")]
+            "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 2 months! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 2 months! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"emoticons\":[]}")]
         [InlineData(
-            "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"user_notice_params\":null,\"emoticons\":[]}")]
+            "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"emoticons\":[]}")]
         public void DoesNotSplitSubCommentWithoutCustomMessage(string messageString)
         {
             var message = JsonSerializer.Deserialize<Message>(messageString)!;
@@ -232,7 +232,7 @@ namespace TwitchDownloaderCore.Tests
         public void DoesNotSplitWatchStreakWithoutCustomMessage()
         {
             const string MESSAGE_STRING =
-                "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#008000\",\"user_notice_params\":null,\"emoticons\":[]}";
+                "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#008000\",\"emoticons\":[]}";
 
             var message = JsonSerializer.Deserialize<Message>(MESSAGE_STRING)!;
             var comment = CreateCommentWithMessage("viewer8", "viewer8", message);
@@ -245,10 +245,10 @@ namespace TwitchDownloaderCore.Tests
 
         [Theory]
         [InlineData(
-            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[]}",
+            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",
             "viewer8 watched 3 consecutive streams this month and sparked a watch streak! ", "me too!")]
         [InlineData(
-            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"user_notice_params\":null,\"emoticons\":[{\"_id\":\"425618\",\"begin\":84,\"end\":88}]}",
+            "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[{\"_id\":\"425618\",\"begin\":84,\"end\":88}]}",
             "viewer8 watched 3 consecutive streams this month and sparked a watch streak! ", "me too LUL")]
         public void CorrectlySplitsWatchStreakWithCustomMessage(string messageString, string subMessageString, string customMessageString)
         {
