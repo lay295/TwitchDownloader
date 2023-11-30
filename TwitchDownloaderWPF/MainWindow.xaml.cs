@@ -3,8 +3,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
 
@@ -96,6 +99,23 @@ namespace TwitchDownloaderWPF
                 }
 
                 Title = oldTitle;
+            }
+
+            // Flash the window taskbar icon if it is not in the foreground. This is to mitigate a problem where
+            // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
+            var currentWindow = new WindowInteropHelper(this).Handle;
+            var foregroundWindow = NativeFunctions.GetForegroundWindow();
+            if (currentWindow != foregroundWindow)
+            {
+                var flashInfo = new NativeFunctions.FlashWInfo
+                {
+                    StructSize = (uint)Marshal.SizeOf<NativeFunctions.FlashWInfo>(),
+                    WindowHandle = new WindowInteropHelper(this).Handle,
+                    Flags = NativeFunctions.FlashWInfo.FLASHW_TRAY,
+                    FlashCount = uint.MaxValue,
+                    Timeout = 0
+                };
+                NativeFunctions.FlashWindowEx(flashInfo);
             }
 
             AutoUpdater.InstalledVersion = currentVersion;
