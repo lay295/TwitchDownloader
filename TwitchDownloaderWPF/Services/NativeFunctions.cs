@@ -14,6 +14,7 @@ namespace TwitchDownloaderWPF.Services
         public static extern IntPtr GetForegroundWindow();
 
         [DllImport("user32.dll", EntryPoint = "FlashWindowEx", PreserveSig = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool FlashWindowEx(FlashWInfo info);
 
         // https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-flashwinfo

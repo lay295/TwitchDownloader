@@ -116,7 +116,8 @@ namespace TwitchDownloaderWPF.Services
             {
                 SizeToContent = SizeToContent.WidthAndHeight,
                 Top = int.MinValue + 1,
-                WindowStyle = WindowStyle.None
+                WindowStyle = WindowStyle.None,
+                ShowInTaskbar = false
             };
             wnd.Show();
             wnd.Close();
