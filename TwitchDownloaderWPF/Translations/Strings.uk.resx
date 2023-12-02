@@ -162,7 +162,7 @@
     <value>Фільтр значків у чаті:</value>
   </data>
   <data name="ChatBadges" xml:space="preserve">
-    <value>значки у чаті:</value>
+    <value>Значки у чаті:</value>
   </data>
   <data name="ChatCrop" xml:space="preserve">
     <value>Обрізати:</value>
@@ -210,7 +210,7 @@
     <value>Завантаження кліпів</value>
   </data>
   <data name="ClipLinkId" xml:space="preserve">
-    <value>Посилання/ІН(ID) кліпу:</value>
+    <value>Посилання/ID кліпу:</value>
   </data>
   <data name="TemplateClips" xml:space="preserve">
     <value>Кліпи:</value>
@@ -259,7 +259,7 @@
     <value>Вбудувати смайлики, значки та смайлики за бітси у файл завантаження - щоб потім відтворювати в автономному режимі. Корисно для архівування, розмір файлу буде більшим.</value>
   </data>
   <data name="EmbedMissing" xml:space="preserve">
-    <value>Вбудовані відсутні </value>
+    <value>Завантажити відсутні </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedMissingTooltip" xml:space="preserve">
@@ -321,10 +321,10 @@
     <value>Список імен користувачів - через кому, пробіли навколо ком ігноруються, НЕ враховує регістр.</value>
   </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
-    <value>Не правильне посилання/ІН(ID) кліпу:</value>
+    <value>Не правильне посилання/ID кліпу:</value>
   </data>
   <data name="InvalidClipLinkIdMessage" xml:space="preserve">
-    <value>Будь ласка, введіть дійсне посилання/ІН(ID) кліпу\nПриклад:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
+    <value>Будь ласка, введіть дійсне посилання/ID кліпу\nПриклад:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
   </data>
   <data name="InvalidCropInputs" xml:space="preserve">
     <value>Неправильне вхідне значення</value>
@@ -333,10 +333,10 @@
     <value>Неправильне значення початку або закінчення</value>
   </data>
   <data name="InvalidVideoLinkId" xml:space="preserve">
-    <value>Не правильне Посилання/ІН(ID) відео:</value>
+    <value>Не правильне Посилання/ID відео:</value>
   </data>
   <data name="InvalidVideoLinkIdMessage" xml:space="preserve">
-    <value>Будь ласка, введіть дійсне посилання/ІН(ID) відео\nПриклад:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
+    <value>Будь ласка, введіть дійсне посилання/ID відео\nПриклад:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
   </data>
   <data name="JsonFile" xml:space="preserve">
     <value>JSON файл:</value>
@@ -365,13 +365,13 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="OfflineTooltip" xml:space="preserve">
-    <value>Промальовувати чат, використовуючи тільки ресурси, вбудовані в json-файл чату.</value>
+    <value>Промальовувати чат використовуючи тільки ресурси, що вбудовані в json-файл чату.</value>
   </data>
   <data name="Outline" xml:space="preserve">
     <value>Обрис:</value>
   </data>
   <data name="ParallelTaskLimits" xml:space="preserve">
-    <value>Обмеження паралельних завдань</value>
+    <value>Паралельних завдань</value>
   </data>
   <data name="PartialRender" xml:space="preserve">
     <value>Часткове промальовування</value>
@@ -416,7 +416,7 @@
     <value>Ширина і висота повинні бути рівними</value>
   </data>
   <data name="ReplaceEmbeds" xml:space="preserve">
-    <value>Замінити вбудовані </value>
+    <value>Оновити смайли </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ReplaceEmbedsTooltip" xml:space="preserve">
@@ -465,10 +465,10 @@
     <value>7TV смайлики:</value>
   </data>
   <data name="SubMessages" xml:space="preserve">
-    <value>Повідоалення підписників:</value>
+    <value>Повід. про підписників:</value>
   </data>
   <data name="TaskCancel" xml:space="preserve">
-    <value>Відмінити</value>
+    <value>Скасувати</value>
   </data>
   <data name="TaskErrorButton" xml:space="preserve">
     <value>Помилка</value>
@@ -514,7 +514,7 @@
     <value>Не вдалося знайти мініатюру</value>
   </data>
   <data name="UnableToGetClipInfo" xml:space="preserve">
-    <value>Не вдалося отримати інформацію про кліп. Будь ласка, перевірте ІН(ID) кліпу та спробуйте ще раз.</value>
+    <value>Не вдалося отримати інформацію про кліп. Будь ласка, перевірте ID кліпу та спробуйте ще раз.</value>
   </data>
   <data name="UnableToGetInfo" xml:space="preserve">
     <value>Не вдалося отримати інформацію</value>
@@ -523,7 +523,7 @@
     <value>Не вдається отримати інформацію про відео/кліп. Будь ласка, перевірте посилання та спробуйте ще раз</value>
   </data>
   <data name="UnableToGetVideoInfo" xml:space="preserve">
-    <value>Не вдається отримати інформацію про відео. Будь ласка, переконайтеся, що посилання/ІН(ID) правильні та спробуйте ще раз.</value>
+    <value>Не вдається отримати інформацію про відео. Будь ласка, переконайтеся, що посилання/ID правильні та спробуйте ще раз.</value>
   </data>
   <data name="UnableToParseInputs" xml:space="preserve">
     <value>Не вдається розібрати вхідні дані</value>
@@ -571,10 +571,10 @@
     <value>Завантаження відео</value>
   </data>
   <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
-    <value>Термін придатності відео закінчився або ІН(ID) невірний</value>
+    <value>Термін придатності відео закінчився або ID невірний</value>
   </data>
   <data name="VodLinkId" xml:space="preserve">
-    <value>Посилання/ІН(ID) на відео:</value>
+    <value>Посилання/ID на відео:</value>
   </data>
   <data name="TemplateVods" xml:space="preserve">
     <value>Відео:</value>
@@ -678,7 +678,7 @@
     <value>Масове завантаження кліпів</value>
   </data>
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
-    <value>TwitchDownloaderWPF недоступно на вашій рідній мові? Натисніть, щоб дізнатися, як допомогти з перекладом!</value>
+    <value>TwitchDownloaderWPF недоступно на вашій мові? Натисніть тут, щоб дізнатися, як допомогти з перекладом!</value>
   </data>
   <data name="InvalidFolderPath" xml:space="preserve">
     <value>Неправильний шлях до папки</value>
@@ -754,10 +754,10 @@
     <value>Не вдалося завантажити FFmpeg. Будь ласка, завантажте його вручну з {0} та розмістіть файл у {1}</value>
   </data>
   <data name="AlternateBackgroundColor" xml:space="preserve">
-    <value>Альтернативний колір тла:</value>
+    <value>Колір тла чату:</value>
   </data>
   <data name="AlternateMessageBackgrounds" xml:space="preserve">
-    <value>Альтернативне тло </value><comment>Leave a trailing space</comment>
+    <value>Альтер. тло </value><comment>Leave a trailing space</comment>
   </data>
   <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
     <value>Змінює колір тла кожного іншого повідомлення чату, щоб допомогти відрізнити їх.</value>
@@ -778,33 +778,33 @@
     <value>Завантаження FFmpeg {0}%</value>
   </data>
   <data name="CopyVideoIDToClipboard" xml:space="preserve">
-    <value>Copy ID to clipboard</value>
+    <value>Копіювати ID до буферу</value>
   </data>
   <data name="CopyVideoURLToClipboard" xml:space="preserve">
-    <value>Copy URL to clipboard</value>
+    <value>Копіювати посилання до буферу</value>
   </data>
   <data name="OpenVideoInBrowser" xml:space="preserve">
-    <value>Open in browser</value>
+    <value>Відкрити у браузері</value>
   </data>
   <data name="ResetSettingsConfirmationMessage" xml:space="preserve">
-    <value>Are you sure you want to restore all settings to their default values?</value>
+    <value>Ви впевнені, що хочете відновити всі налаштування до типових?</value>
   </data>
   <data name="ResetSettingsConfirmation" xml:space="preserve">
-    <value>Restore Settings Confirmation</value>
+    <value>Підтвердити скидання</value>
   </data>
   <data name="TheApplicationMustBeRestartedMessage" xml:space="preserve">
-    <value>The application must be restarted for changes to take effect.</value>
+    <value>Щоб зміни набули чинності, необхідно перезапустити застосунок.</value>
   </data>
   <data name="RestartTheApplication" xml:space="preserve">
-    <value>Please restart {0}</value><comment>{0} is the name of the application.</comment>
+    <value>Будь ласка перезапустіть {0}</value><comment>{0} is the name of the application.</comment>
   </data>
   <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
-    <value>Restore Defaults</value>
+    <value>Скинути до типових</value>
   </data>
   <data name="ButtonSaveSettings" xml:space="preserve">
-    <value>Save</value>
+    <value>Зберігти</value>
   </data>
   <data name="ButtonCancelSettingsChanges" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Скинути</value>
   </data>
 </root>
