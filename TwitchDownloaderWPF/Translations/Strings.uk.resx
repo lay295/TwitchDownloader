@@ -805,6 +805,6 @@
     <value>Зберігти</value>
   </data>
   <data name="ButtonCancelSettingsChanges" xml:space="preserve">
-    <value>Скинути</value>
+    <value>Скасувати</value>
   </data>
 </root>
