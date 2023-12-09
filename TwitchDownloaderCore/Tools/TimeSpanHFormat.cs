@@ -6,7 +6,6 @@ namespace TwitchDownloaderCore.Tools
 {
     /// <summary>Adds an 'H' parameter to <see cref="TimeSpan"/> string formatting. The 'H' parameter is equivalent to flooring <see cref="TimeSpan"/>.<see cref="TimeSpan.TotalHours"/>.</summary>
     /// <remarks>
-    /// This formatter only supports escaping 'H's via '\'.
     /// For optimal memory performance, resulting strings split about any 'H' parameters should be less than 256.
     /// </remarks>
     public class TimeSpanHFormat : IFormatProvider, ICustomFormatter

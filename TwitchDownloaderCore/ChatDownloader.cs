@@ -151,7 +151,7 @@ namespace TwitchDownloaderCore
                     content_offset_seconds = oldComment.contentOffsetSeconds,
                     commenter = new Commenter
                     {
-                        display_name = oldComment.commenter.displayName,
+                        display_name = oldComment.commenter.displayName.Trim(),
                         _id = oldComment.commenter.id,
                         name = oldComment.commenter.login
                     }

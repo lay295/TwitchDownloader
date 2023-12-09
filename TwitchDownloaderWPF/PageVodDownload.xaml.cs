@@ -14,7 +14,6 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using TwitchDownloaderCore;
-using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
@@ -99,8 +98,6 @@ namespace TwitchDownloaderWPF
                     throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
                 }
 
-                Task<string[]> taskPlaylist = TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
-
                 var thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
                 if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                 {
@@ -111,8 +108,9 @@ namespace TwitchDownloaderWPF
 
                 comboQuality.Items.Clear();
                 videoQualities.Clear();
-                string[] playlist = await taskPlaylist;
-                if (playlist[0].Contains("vod_manifest_restricted"))
+
+                var playlist = await TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
+                if (playlist[0].Contains("vod_manifest_restricted") || playlist[0].Contains("unauthorized_entitlements"))
                 {
                     throw new NullReferenceException(Translations.Strings.InsufficientAccessMayNeedOauth);
                 }
