@@ -61,7 +61,10 @@ namespace TwitchDownloaderWPF
 
         private async Task UpdateList()
         {
-            if (StatusImage != null) StatusImage.Visibility = Visibility.Visible;
+            if (!IsInitialized)
+                return;
+
+            StatusImage.Visibility = Visibility.Visible;
 
             if (string.IsNullOrWhiteSpace(currentChannel))
             {
@@ -70,7 +73,7 @@ namespace TwitchDownloaderWPF
                 videoList.Clear();
                 cursorList.Clear();
                 cursorIndex = -1;
-                if (StatusImage != null) StatusImage.Visibility = Visibility.Hidden;
+                StatusImage.Visibility = Visibility.Hidden;
                 return;
             }
 
@@ -159,7 +162,7 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            if (StatusImage != null) StatusImage.Visibility = Visibility.Hidden;
+            StatusImage.Visibility = Visibility.Hidden;
         }
 
         private void Border_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)

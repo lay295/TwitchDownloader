@@ -3,8 +3,12 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
 
@@ -72,7 +76,7 @@ namespace TwitchDownloaderWPF
 
             Environment.SetEnvironmentVariable("CURL_IMPERSONATE", "chrome110");
 
-            var currentVersion = Version.Parse("1.53.5");
+            var currentVersion = Version.Parse("1.53.6");
             Title = $"Twitch Downloader v{currentVersion}";
 
             // TODO: extract FFmpeg handling to a dedicated service
@@ -100,6 +104,10 @@ namespace TwitchDownloaderWPF
                 Title = oldTitle;
             }
 
+            // Flash the window taskbar icon if it is not in the foreground. This is to mitigate a problem where
+            // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
+            await FlashWindowIfNotForeground(TimeSpan.FromSeconds(3));
+
             AutoUpdater.InstalledVersion = currentVersion;
 #if !DEBUG
             if (AppContext.BaseDirectory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
@@ -109,6 +117,36 @@ namespace TwitchDownloaderWPF
             }
             AutoUpdater.Start("https://downloader-update.twitcharchives.workers.dev");
 #endif
+        }
+
+        private async Task FlashWindowIfNotForeground(TimeSpan flashDuration)
+        {
+            var currentWindow = new WindowInteropHelper(this).Handle;
+            var foregroundWindow = NativeFunctions.GetForegroundWindow();
+            if (currentWindow == foregroundWindow)
+                return;
+
+            var flashWInfo = new NativeFunctions.FlashWInfo
+            {
+                StructSize = (uint)Marshal.SizeOf<NativeFunctions.FlashWInfo>(),
+                WindowHandle = currentWindow,
+                Flags = NativeFunctions.FlashWInfo.FLASHW_TRAY,
+                FlashCount = uint.MaxValue,
+                Timeout = 0
+            };
+            _ = NativeFunctions.FlashWindowEx(flashWInfo);
+
+            await Task.Delay(flashDuration);
+
+            var stopFlashWInfo = new NativeFunctions.FlashWInfo
+            {
+                StructSize = (uint)Marshal.SizeOf<NativeFunctions.FlashWInfo>(),
+                WindowHandle = currentWindow,
+                Flags = NativeFunctions.FlashWInfo.FLASHW_STOP,
+                FlashCount = 0,
+                Timeout = 0
+            };
+            _ = NativeFunctions.FlashWindowEx(stopFlashWInfo);
         }
 
         private class FfmpegDownloadProgress : IProgress<ProgressInfo>

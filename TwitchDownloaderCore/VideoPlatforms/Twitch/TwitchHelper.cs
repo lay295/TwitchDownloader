@@ -78,7 +78,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
         public static async Task<M3U8> GetVideoQualitiesPlaylist(TwitchVideoInfo videoInfo)
         {
             var playlistString = await TwitchHelper.GetVideoPlaylist(int.Parse(videoInfo.Id), videoInfo.GqlVideoTokenResponse.data.videoPlaybackAccessToken.value, videoInfo.GqlVideoTokenResponse.data.videoPlaybackAccessToken.signature);
-            if (playlistString.Contains("vod_manifest_restricted"))
+            if (playlistString.Contains("vod_manifest_restricted") || playlistString.Contains("unauthorized_entitlements"))
             {
                 throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
             }

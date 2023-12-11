@@ -786,7 +786,7 @@
     <value>Open in browser</value>
   </data>
   <data name="ResetSettingsConfirmationMessage" xml:space="preserve">
-    <value>Are you sure you want to reset all settings to their default values?</value>
+    <value>Are you sure you want to restore all settings to their default values?</value>
   </data>
   <data name="ResetSettingsConfirmation" xml:space="preserve">
     <value>Restore Settings Confirmation</value>

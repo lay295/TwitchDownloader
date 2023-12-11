@@ -61,7 +61,6 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
     <PackageReference Include="System.Management" Version="8.0.0" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.10.0" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.6" />
     <PackageReference Include="Autoupdater.NET.Official" Version="1.8.4" />
