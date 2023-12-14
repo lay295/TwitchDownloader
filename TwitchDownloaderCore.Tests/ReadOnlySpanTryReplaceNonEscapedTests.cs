@@ -91,5 +91,16 @@ namespace TwitchDownloaderCore.Tests
 
             Assert.False(success);
         }
+
+        [Fact]
+        public void DoesNotSupportReplacingEscapeChars()
+        {
+            ReadOnlySpan<char> str = "\"SORRY FOR\" TRAFFIC NaM.\"";
+            var destination = new char[str.Length];
+
+            var success = str.TryReplaceNonEscaped(destination, '\"', 'W');
+
+            Assert.False(success);
+        }
     }
 }
