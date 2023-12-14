@@ -908,7 +908,7 @@ namespace TwitchDownloaderCore
             //Let's save this image to the cache
             try
             {
-                await using var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                await using var stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                 await stream.WriteAsync(imageBytes, cancellationToken);
             }
             catch { }

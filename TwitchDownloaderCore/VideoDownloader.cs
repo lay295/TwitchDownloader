@@ -369,7 +369,7 @@ namespace TwitchDownloaderCore
                 return false;
             }
 
-            using var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.None);
+            using var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.Read);
             var fileLength = fs.Length;
             if (fileLength == 0 || fileLength % TS_PACKET_LENGTH != 0)
             {
@@ -668,7 +668,7 @@ namespace TwitchDownloaderCore
             int partCount = videoParts.Count;
             int doneCount = 0;
 
-            await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None);
+            await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.Read);
             foreach (var part in videoParts)
             {
                 await DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken);
