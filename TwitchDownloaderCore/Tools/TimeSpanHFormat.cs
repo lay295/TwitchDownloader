@@ -6,7 +6,7 @@ namespace TwitchDownloaderCore.Tools
 {
     /// <summary>Adds an 'H' parameter to <see cref="TimeSpan"/> string formatting. The 'H' parameter is equivalent to flooring <see cref="TimeSpan"/>.<see cref="TimeSpan.TotalHours"/>.</summary>
     /// <remarks>
-    /// For optimal memory performance, resulting strings split about any 'H' parameters should be less than 256.
+    /// For optimal memory performance, resulting strings split about any 'H' parameters should be less than 256 chars in length.
     /// </remarks>
     public class TimeSpanHFormat : IFormatProvider, ICustomFormatter
     {
@@ -36,7 +36,7 @@ namespace TwitchDownloaderCore.Tools
         {
             if (string.IsNullOrEmpty(format))
             {
-                return "";
+                return timeSpan.ToString(format, formatProvider);
             }
 
             if (!format.Contains('H'))
@@ -100,14 +100,14 @@ namespace TwitchDownloaderCore.Tools
                     switch (readChar)
                     {
                         // If the current char is an escape we can skip the next char
-                        case '\\' when i + 1 < formatLength:
+                        case '\\':
                             i++;
                             continue;
                         // If the current char is a quote we can skip the next quote, if it exists
-                        case '\'' when i + 1 < formatLength:
-                        case '\"' when i + 1 < formatLength:
+                        case '\'':
+                        case '\"':
                         {
-                            i = FindCloseQuoteMark(format, i, formatLength, readChar);
+                            i = FindCloseQuoteChar(format, i, formatLength, readChar);
 
                             if (i == -1)
                             {
@@ -134,30 +134,28 @@ namespace TwitchDownloaderCore.Tools
             return sb.ToString();
         }
 
-        private static int FindCloseQuoteMark(ReadOnlySpan<char> format, int openQuoteIndex, int endIndex, char readChar)
+        private static int FindCloseQuoteChar(ReadOnlySpan<char> destination, int openQuoteIndex, int endIndex, char openQuoteChar)
         {
             var i = openQuoteIndex + 1;
-            var quoteFound = false;
             while (i < endIndex)
             {
-                var readCharQuote = format[i];
+                var readChar = destination[i];
                 i++;
 
-                if (readCharQuote == '\\')
+                if (readChar == '\\')
                 {
                     i++;
                     continue;
                 }
 
-                if (readCharQuote == readChar)
+                if (readChar == openQuoteChar)
                 {
                     i--;
-                    quoteFound = true;
-                    break;
+                    return i;
                 }
             }
 
-            return quoteFound ? i : -1;
+            return -1;
         }
 
         private static void AppendRegularFormat(StringBuilder sb, TimeSpan timeSpan, ReadOnlySpan<char> format)
@@ -178,16 +176,17 @@ namespace TwitchDownloaderCore.Tools
         {
             const int TIMESPAN_MAX_HOURS_LENGTH = 9; // The maximum integer hours a TimeSpan can hold is 256204778.
             Span<char> destination = stackalloc char[TIMESPAN_MAX_HOURS_LENGTH];
-            Span<char> format = stackalloc char[count];
-            format.Fill('0');
 
-            if (((int)timeSpan.TotalHours).TryFormat(destination, out var charsWritten, format))
+            if (((uint)timeSpan.TotalHours).TryFormat(destination, out var charsWritten))
             {
+                sb.Append('0', Math.Max(0, count - charsWritten));
                 sb.Append(destination[..charsWritten]);
             }
             else
             {
-                sb.Append(((int)timeSpan.TotalHours).ToString(format.ToString()));
+                var foo = ((uint)timeSpan.TotalHours).ToString();
+                sb.Append('0', Math.Max(0, count - foo.Length));
+                sb.Append(foo);
             }
         }
 
