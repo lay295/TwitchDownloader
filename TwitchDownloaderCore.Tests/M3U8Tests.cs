@@ -2,6 +2,7 @@
 
 namespace TwitchDownloaderCore.Tests
 {
+    // ReSharper disable StringLiteralTypo
     public class M3U8Tests
     {
         [Fact]
@@ -39,7 +40,7 @@ namespace TwitchDownloaderCore.Tests
             {
                 var stream = m3u8.Streams[i];
                 Assert.Equal(10, stream.PartInfo.Duration);
-                Assert.Equal(false, stream.PartInfo.Live);
+                Assert.False(stream.PartInfo.Live);
                 Assert.Equal($"{i}.ts", stream.Path);
             }
         }
@@ -285,7 +286,7 @@ namespace TwitchDownloaderCore.Tests
             {
                 var stream = m3u8.Streams[i];
                 Assert.Equal(2, stream.PartInfo.Duration);
-                Assert.Equal(false, stream.PartInfo.Live);
+                Assert.False(stream.PartInfo.Live);
                 Assert.Equal(streamValues[i].programDateTime, stream.ProgramDateTime);
                 Assert.Equal(streamValues[i].byteRange, stream.ByteRange);
                 Assert.Equal(streamValues[i].path, stream.Path);
@@ -375,6 +376,48 @@ namespace TwitchDownloaderCore.Tests
             Assert.Equal(codecs, streamInfo.Codecs);
             Assert.Equal((videoWidth, videoHeight), streamInfo.Resolution);
             Assert.Equal(video, streamInfo.Video);
+        }
+
+        [Theory]
+        [InlineData(100, 200, "100@200")]
+        [InlineData(100, 200, "#EXT-X-BYTERANGE:100@200")]
+        public void CorrectlyParsesByteRange(uint start, uint length, string byteRangeString)
+        {
+            var expected = new M3U8.Stream.ExtByteRange(start, length);
+
+            var actual = M3U8.Stream.ExtByteRange.Parse(byteRangeString);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData("429496729500@1")]
+        [InlineData("1@429496729500")]
+        [InlineData("42949672950000")]
+        public void CorrectlyThrowsFormatExceptionForBadByteRangeString(string byteRangeString)
+        {
+            Assert.Throws<FormatException>(() => M3U8.Stream.ExtByteRange.Parse(byteRangeString));
+        }
+
+        [Theory]
+        [InlineData(100, 200, "100x200")]
+        [InlineData(100, 200, "RESOLUTION=100x200")]
+        public void CorrectlyParsesResolution(uint start, uint length, string byteRangeString)
+        {
+            var expected = new M3U8.Stream.ExtStreamInfo.StreamResolution(start, length);
+
+            var actual = M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(byteRangeString);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData("429496729500x1")]
+        [InlineData("1x429496729500")]
+        [InlineData("42949672950000")]
+        public void CorrectlyThrowsFormatExceptionForBadResolutionString(string byteRangeString)
+        {
+            Assert.Throws<FormatException>(() => M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(byteRangeString));
         }
     }
 }
