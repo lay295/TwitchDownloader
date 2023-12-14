@@ -9,6 +9,9 @@ namespace TwitchDownloaderCore.Extensions
         {
             const string ESCAPE_CHARS = @"\'""";
 
+            if (oldChar is '\\' or '\'' or '\"')
+                return false;
+
             if (destination.Length < str.Length)
                 return false;
 
@@ -40,7 +43,7 @@ namespace TwitchDownloaderCore.Extensions
                     case '\'':
                     case '\"':
                     {
-                        i = FindCloseQuoteMark(destination, i, lastIndex, readChar);
+                        i = FindCloseQuoteChar(destination, i, lastIndex, readChar);
 
                         if (i == -1)
                         {
@@ -65,30 +68,28 @@ namespace TwitchDownloaderCore.Extensions
             return true;
         }
 
-        private static int FindCloseQuoteMark(ReadOnlySpan<char> destination, int openQuoteIndex, int endIndex, char readChar)
+        private static int FindCloseQuoteChar(ReadOnlySpan<char> destination, int openQuoteIndex, int endIndex, char openQuoteChar)
         {
             var i = openQuoteIndex + 1;
-            var quoteFound = false;
             while (i < endIndex)
             {
-                var readCharQuote = destination[i];
+                var readChar = destination[i];
                 i++;
 
-                if (readCharQuote == '\\')
+                if (readChar == '\\')
                 {
                     i++;
                     continue;
                 }
 
-                if (readCharQuote == readChar)
+                if (readChar == openQuoteChar)
                 {
                     i--;
-                    quoteFound = true;
-                    break;
+                    return i;
                 }
             }
 
-            return quoteFound ? i : -1;
+            return -1;
         }
     }
 }
