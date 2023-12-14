@@ -2,16 +2,16 @@
 
 namespace TwitchDownloaderCore.Tests
 {
-    public class ReadOnlySpanUnEscapedIndexOfTests
+    public class ReadOnlySpanUnEscapedIndexOfAnyTests
     {
         [Fact]
         public void CorrectlyFindsNextIndexWithoutEscapes()
         {
             ReadOnlySpan<char> str = "SORRY FOR TRAFFIC NaM";
-            const char CHAR_TO_FIND = 'a';
+            const string CHARS_TO_FIND = "abc";
             const int CHAR_INDEX = 19;
 
-            var actual = str.UnEscapedIndexOf(CHAR_TO_FIND);
+            var actual = str.UnEscapedIndexOfAny(CHARS_TO_FIND);
 
             Assert.Equal(CHAR_INDEX, actual);
         }
@@ -20,10 +20,10 @@ namespace TwitchDownloaderCore.Tests
         public void DoesNotFindAnIndexWhenNotPresent()
         {
             ReadOnlySpan<char> str = "SORRY FOR TRAFFIC NaM";
-            const char CHAR_TO_FIND = 'L';
+            const string CHARS_TO_FIND = "LP";
             const int CHAR_INDEX = -1;
 
-            var actual = str.UnEscapedIndexOf(CHAR_TO_FIND);
+            var actual = str.UnEscapedIndexOfAny(CHARS_TO_FIND);
 
             Assert.Equal(CHAR_INDEX, actual);
         }
@@ -32,10 +32,10 @@ namespace TwitchDownloaderCore.Tests
         public void CorrectlyFindsNextIndexWithBackslashEscapes()
         {
             ReadOnlySpan<char> str = @"SORRY \FOR TRAFFIC NaM";
-            const char CHAR_TO_FIND = 'F';
-            const int CHAR_INDEX = 14;
+            const string CHARS_TO_FIND = "FT";
+            const int CHAR_INDEX = 11;
 
-            var actual = str.UnEscapedIndexOf(CHAR_TO_FIND);
+            var actual = str.UnEscapedIndexOfAny(CHARS_TO_FIND);
 
             Assert.Equal(CHAR_INDEX, actual);
         }
@@ -43,11 +43,11 @@ namespace TwitchDownloaderCore.Tests
         [Fact]
         public void DoesNotFindIndexWithBackslashEscapes()
         {
-            ReadOnlySpan<char> str = @"SORRY \FOR TRA\F\FIC NaM";
-            const char CHAR_TO_FIND = 'F';
+            ReadOnlySpan<char> str = @"SORRY \FOR TRA\F\F\IC NaM";
+            const string CHARS_TO_FIND = "FI";
             const int CHAR_INDEX = -1;
 
-            var actual = str.UnEscapedIndexOf(CHAR_TO_FIND);
+            var actual = str.UnEscapedIndexOfAny(CHARS_TO_FIND);
 
             Assert.Equal(CHAR_INDEX, actual);
         }
@@ -56,10 +56,10 @@ namespace TwitchDownloaderCore.Tests
         public void CorrectlyFindsNextIndexWithUnrelatedQuoteEscapes()
         {
             ReadOnlySpan<char> str = "SORRY FOR \"TRAFFIC\" NaM";
-            const char CHAR_TO_FIND = 'a';
+            const string CHARS_TO_FIND = "abc";
             const int CHAR_INDEX = 21;
 
-            var actual = str.UnEscapedIndexOf(CHAR_TO_FIND);
+            var actual = str.UnEscapedIndexOfAny(CHARS_TO_FIND);
 
             Assert.Equal(CHAR_INDEX, actual);
         }
@@ -68,10 +68,10 @@ namespace TwitchDownloaderCore.Tests
         public void CorrectlyFindsNextIndexWithQuoteEscapes()
         {
             ReadOnlySpan<char> str = "SORRY \"FOR\" TRAFFIC NaM";
-            const char CHAR_TO_FIND = 'F';
+            const string CHARS_TO_FIND = "FM";
             const int CHAR_INDEX = 15;
 
-            var actual = str.UnEscapedIndexOf(CHAR_TO_FIND);
+            var actual = str.UnEscapedIndexOfAny(CHARS_TO_FIND);
 
             Assert.Equal(CHAR_INDEX, actual);
         }
@@ -80,24 +80,24 @@ namespace TwitchDownloaderCore.Tests
         public void DoesNotFindAnIndexWithQuoteEscapes()
         {
             ReadOnlySpan<char> str = "SORRY \"FOR\" \"TRAFFIC\" NaM";
-            const char CHAR_TO_FIND = 'F';
+            const string CHARS_TO_FIND = "FA";
             const int CHAR_INDEX = -1;
 
-            var actual = str.UnEscapedIndexOf(CHAR_TO_FIND);
+            var actual = str.UnEscapedIndexOfAny(CHARS_TO_FIND);
 
             Assert.Equal(CHAR_INDEX, actual);
         }
 
         [Theory]
-        [InlineData('\\')]
-        [InlineData('\'')]
-        [InlineData('\"')]
-        public void Throws_WhenEscapeCharIsPassed(char charToFind)
+        [InlineData("abc\\")]
+        [InlineData("abc\'")]
+        [InlineData("abc\"")]
+        public void Throws_WhenEscapeCharIsPassed(string charsToFind)
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 ReadOnlySpan<char> str = "SO\\R\\RY \'FOR\' \"TRAFFIC\" NaM";
-                str.UnEscapedIndexOf(charToFind);
+                str.UnEscapedIndexOfAny(charsToFind);
             });
         }
 
@@ -106,9 +106,9 @@ namespace TwitchDownloaderCore.Tests
         {
             Assert.Throws<FormatException>(() =>
             {
-                const char CHAR_TO_FIND = 'F';
+                const string CHARS_TO_FIND = "FT";
                 ReadOnlySpan<char> str = "SORRY \"FOR TRAFFIC NaM";
-                str.UnEscapedIndexOf(CHAR_TO_FIND);
+                str.UnEscapedIndexOfAny(CHARS_TO_FIND);
             });
         }
     }
