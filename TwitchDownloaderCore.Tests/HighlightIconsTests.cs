@@ -12,7 +12,7 @@ namespace TwitchDownloaderCore.Tests
             return new Comment
             {
                 _id = Guid.NewGuid().ToString(),
-                created_at = DateTime.Today,
+                created_at = DateTime.UtcNow,
                 channel_id = Random.Shared.Next(10_000_000, 99_999_999).ToString(),
                 content_type = "video",
                 content_id = Random.Shared.NextInt64(10_000_000, 99_999_999_999).ToString(),
@@ -31,8 +31,8 @@ namespace TwitchDownloaderCore.Tests
                     _id = Random.Shared.Next(10_000_000, 99_999_999).ToString(),
                     name = viewerName,
                     bio = "I am a test user.",
-                    created_at = DateTime.Today,
-                    updated_at = DateTime.Today,
+                    created_at = DateTime.UtcNow,
+                    updated_at = DateTime.UtcNow,
                     logo = @"https://vod-secure.twitch.tv/_404/404_processing_320x180.png"
                 },
                 message);
@@ -51,9 +51,6 @@ namespace TwitchDownloaderCore.Tests
             HighlightType.SubscribedTier)]
         // SubscribedTier custom message
         [InlineData(
-            "{\"body\":\"viewer8 subscribed at Tier 1. Hello LUL LUL LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. Hello \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}},{\"text\":\" \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}},{\"text\":\" \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[{\"_id\":\"425618\",\"begin\":100,\"end\":104},{\"_id\":\"425618\",\"begin\":104,\"end\":108},{\"_id\":\"425618\",\"begin\":108,\"end\":112}]}",
-            HighlightType.SubscribedTier)]
-        [InlineData(
             "{\"body\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months! Hello LUL LUL LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. They've subscribed for 3 months! Hello \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}},{\"text\":\" \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}},{\"text\":\" \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[{\"_id\":\"425618\",\"begin\":100,\"end\":104},{\"_id\":\"425618\",\"begin\":104,\"end\":108},{\"_id\":\"425618\",\"begin\":108,\"end\":112}]}",
             HighlightType.SubscribedTier)]
         [InlineData(
@@ -70,9 +67,6 @@ namespace TwitchDownloaderCore.Tests
             "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 8 months, currently on a 8 month streak! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"premium\",\"version\":\"1\"}],\"user_color\":\"#FF69B4\",\"emoticons\":[]}",
             HighlightType.SubscribedPrime)]
         // SubscribedPrime custom message
-        [InlineData(
-            "{\"body\":\"viewer8 subscribed with Prime. Hello LUL LUL LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. Hello \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}},{\"text\":\" \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}},{\"text\":\" \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[{\"_id\":\"425618\",\"begin\":100,\"end\":104},{\"_id\":\"425618\",\"begin\":104,\"end\":108},{\"_id\":\"425618\",\"begin\":108,\"end\":112}]}",
-            HighlightType.SubscribedPrime)]
         [InlineData(
             "{\"body\":\"viewer8 subscribed with Prime. They've subscribed for 3 months! Hello LUL LUL LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed with Prime. They've subscribed for 3 months! Hello \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}},{\"text\":\" \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}},{\"text\":\" \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[{\"_id\":\"425618\",\"begin\":100,\"end\":104},{\"_id\":\"425618\",\"begin\":104,\"end\":108},{\"_id\":\"425618\",\"begin\":108,\"end\":112}]}",
             HighlightType.SubscribedPrime)]
@@ -131,6 +125,13 @@ namespace TwitchDownloaderCore.Tests
         [InlineData(
             "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[{\"_id\":\"425618\",\"begin\":84,\"end\":88}]}",
             HighlightType.WatchStreak)]
+        // Charity donation
+        [InlineData(
+            "{\"body\":\"viewer8: Donated USD 20 to support Guide Dog Foundation for the Blind, Inc. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8: Donated USD 20 to support Guide Dog Foundation for the Blind, Inc. \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",
+            HighlightType.CharityDonation)]
+        [InlineData(
+            "{\"body\":\"viewer8: Donated USD 5 to support Alveus Sanctuary \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8: Donated USD 5 to support Alveus Sanctuary \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",
+            HighlightType.CharityDonation)]
         // Regular messages
         [InlineData(
             "{\"body\":\"Hi\",\"bits_spent\":0,\"fragments\":[{\"text\":\"Hi\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#5F9EA0\",\"emoticons\":[]}",
