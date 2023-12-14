@@ -1,14 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderCore.Tools
 {
     // https://en.wikipedia.org/wiki/M3U
+    // ReSharper disable StringLiteralTypo
     public sealed record M3U8(M3U8.Metadata FileMetadata, M3U8.Stream[] Streams)
     {
-        public static M3U8 Parse(ReadOnlySpan<char> text, ReadOnlySpan<char> baseUrl = default)
+        public static M3U8 Parse(ReadOnlySpan<char> text, string basePath = "")
         {
+            if (!ParsingHelpers.TryParseM3UHeader(ref text))
+            {
+                throw new FormatException("Invalid playlist, M3U header is missing.");
+            }
+
             var streams = new List<Stream>();
 
             Stream.ExtMediaInfo currentExtMediaInfo = null;
@@ -21,6 +29,7 @@ namespace TwitchDownloaderCore.Tools
 
             var textStart = -1;
             var textEnd = text.Length;
+            var lineEnd = -1;
             var iterations = 0;
             var maxIterations = text.Count('\n') + 1;
             do
@@ -28,19 +37,19 @@ namespace TwitchDownloaderCore.Tools
                 textStart++;
                 iterations++;
                 if (iterations > maxIterations)
-                    throw new Exception("Infinite loop detected.");
+                    throw new Exception("Infinite loop encountered while decoding M3U8 playlist.");
 
                 if (textStart >= textEnd)
                     break;
 
                 var workingSlice = text[textStart..];
-                var lineEnd = workingSlice.IndexOf('\n');
+                lineEnd = workingSlice.IndexOf('\n');
                 if (lineEnd != -1)
                     workingSlice = workingSlice[..lineEnd];
 
                 if (workingSlice[0] != '#')
                 {
-                    var path = string.Concat(baseUrl, workingSlice);
+                    var path = Path.Combine(basePath, workingSlice.ToString());
                     streams.Add(new Stream(currentExtMediaInfo, currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
                     currentExtMediaInfo = null;
                     currentExtStreamInfo = null;
@@ -51,7 +60,6 @@ namespace TwitchDownloaderCore.Tools
                     if (lineEnd == -1)
                         break;
 
-                    textStart += lineEnd;
                     continue;
                 }
 
@@ -75,7 +83,7 @@ namespace TwitchDownloaderCore.Tools
                 }
                 else if (workingSlice.StartsWith(BYTE_RANGE_KEY))
                 {
-                    currentByteRange = Stream.ExtByteRange.Parse(workingSlice[BYTE_RANGE_KEY.Length..]);
+                    currentByteRange = Stream.ExtByteRange.Parse(workingSlice);
                 }
                 else if (workingSlice.StartsWith(PART_INFO_KEY))
                 {
@@ -93,8 +101,7 @@ namespace TwitchDownloaderCore.Tools
                 if (lineEnd == -1)
                     break;
 
-                textStart += lineEnd;
-            } while (textStart < textEnd);
+            } while ((textStart += lineEnd) < textEnd);
 
             return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
         }
@@ -119,8 +126,9 @@ namespace TwitchDownloaderCore.Tools
             public decimal TwitchElapsedSeconds { get; private set; }
             public decimal TwitchTotalSeconds { get; private set; }
 
-            // Other headers that we don't have specific fields for. Useful for debugging.
-            public List<KeyValuePair<string, string>> UnparsedValues { get; } = new();
+            // Other headers that we don't have dedicated properties for. Useful for debugging.
+            private readonly List<KeyValuePair<string, string>> _unparsedValues = new();
+            public IReadOnlyList<KeyValuePair<string, string>> UnparsedValues => _unparsedValues;
 
             public sealed class Builder
             {
@@ -129,9 +137,19 @@ namespace TwitchDownloaderCore.Tools
                 public Builder ParseAndAppend(ReadOnlySpan<char> text)
                 {
                     text = text.Trim();
+
+                    if (!text.IsEmpty)
+                    {
+                        ParseAndAppendCore(text);
+                    }
+
+                    return this;
+                }
+
+                private void ParseAndAppendCore(ReadOnlySpan<char> text)
+                {
                     _metadata ??= new Metadata();
 
-                    const string EXTM3U_HEADER = "#EXTM3U";
                     const string TARGET_VERSION_KEY = "#EXT-X-VERSION:";
                     const string TARGET_DURATION_KEY = "#EXT-X-TARGETDURATION:";
                     const string PLAYLIST_TYPE_KEY = "#EXT-X-PLAYLIST-TYPE:";
@@ -140,11 +158,7 @@ namespace TwitchDownloaderCore.Tools
                     const string TWITCH_ELAPSED_SECS_KEY = "#EXT-X-TWITCH-ELAPSED-SECS:";
                     const string TWITCH_TOTAL_SECS_KEY = "#EXT-X-TWITCH-TOTAL-SECS:";
                     const string TWITCH_INFO_KEY = "#EXT-X-TWITCH-INFO:";
-                    if (text.StartsWith(EXTM3U_HEADER))
-                    {
-                        // Do nothing.
-                    }
-                    else if (text.StartsWith(TARGET_VERSION_KEY))
+                    if (text.StartsWith(TARGET_VERSION_KEY))
                     {
                         _metadata.Version = ParsingHelpers.ParseUIntValue(text, TARGET_VERSION_KEY);
                     }
@@ -188,16 +202,14 @@ namespace TwitchDownloaderCore.Tools
                         if (colonIndex != -1)
                         {
                             var kvp = new KeyValuePair<string, string>(text[..(colonIndex + 1)].ToString(), text[(colonIndex + 1)..].ToString());
-                            _metadata.UnparsedValues.Add(kvp);
+                            _metadata._unparsedValues.Add(kvp);
                         }
                         else
                         {
                             var kvp = new KeyValuePair<string, string>("", text.ToString());
-                            _metadata.UnparsedValues.Add(kvp);
+                            _metadata._unparsedValues.Add(kvp);
                         }
                     }
-
-                    return this;
                 }
 
                 public Metadata ToMetadata()
@@ -213,24 +225,59 @@ namespace TwitchDownloaderCore.Tools
 
             public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ExtByteRange byteRange, string path) : this(null, null, partInfo, programDateTime, byteRange, path) { }
 
-            public bool IsPlaylist { get; } = Path.AsSpan().EndsWith(".m3u8");
+            public bool IsPlaylist { get; } = Path.AsSpan().EndsWith(".m3u8") || Path.AsSpan().EndsWith(".m3u");
 
-            public override string ToString() => $"{MediaInfo}{Environment.NewLine}{StreamInfo}{Environment.NewLine}{PartInfo}{Environment.NewLine}{ProgramDateTime:O}{Environment.NewLine}{ByteRange}{Environment.NewLine}{Path}";
+            public override string ToString()
+            {
+                var sb = new StringBuilder();
+
+                if (MediaInfo != null)
+                    sb.AppendLine(MediaInfo.ToString());
+
+                if (StreamInfo != null)
+                    sb.AppendLine(StreamInfo.ToString());
+
+                if (PartInfo != null)
+                    sb.AppendLine(PartInfo.ToString());
+
+                if (ProgramDateTime != default)
+                {
+                    sb.Append("#EXT-X-PROGRAM-DATE-TIME:");
+                    sb.AppendLine(ProgramDateTime.ToString("O"));
+                }
+
+                if (ByteRange != default)
+                    sb.AppendLine(ByteRange.ToString());
+
+                if (!string.IsNullOrEmpty(Path))
+                    sb.AppendLine(Path);
+
+                if (sb.Length == 0)
+                    return "";
+
+                sb.Append("#EXT-X-ENDLIST");
+                return sb.ToString();
+            }
 
             public readonly record struct ExtByteRange(uint Start, uint Length)
             {
                 public static implicit operator ExtByteRange((uint start, uint length) tuple) => new(tuple.start, tuple.length);
-                public override string ToString() => $"{Start}@{Length}";
+                public override string ToString() => $"#EXT-X-BYTERANGE:{Start}@{Length}";
 
                 public static ExtByteRange Parse(ReadOnlySpan<char> text)
                 {
-                    text = text.Trim();
+                    if (text.StartsWith("#EXT-X-BYTERANGE:"))
+                        text = text[17..];
+
                     var separatorIndex = text.IndexOf('@');
                     if (separatorIndex == -1)
-                        return default;
+                        throw new FormatException($"Unable to parse ByteRange from {text}.");
 
-                    _ = uint.TryParse(text[..separatorIndex], out var start);
-                    _ = uint.TryParse(text[(separatorIndex + 1)..], out var end);
+                    if (!uint.TryParse(text[..separatorIndex], out var start))
+                        throw new FormatException($"Unable to parse ByteRange from {text}.");
+
+                    if (!uint.TryParse(text[(separatorIndex + 1)..], out var end))
+                        throw new FormatException($"Unable to parse ByteRange from {text}.");
 
                     return new ExtByteRange(start, end);
                 }
@@ -269,7 +316,7 @@ namespace TwitchDownloaderCore.Tools
                         return b ? "YES" : "NO";
                     }
 
-                    return $"TYPE={Type.ToString().ToUpper()},GROUP-ID={GroupId},NAME=\"{Name}\",AUTOSELECT={BooleanToWord(AutoSelect)},DEFAULT={BooleanToWord(Default)}";
+                    return $"#EXT-X-MEDIA:TYPE={Type.ToString().ToUpper()},GROUP-ID=\"{GroupId}\",NAME=\"{Name}\",AUTOSELECT={BooleanToWord(AutoSelect)},DEFAULT={BooleanToWord(Default)}";
                 }
 
                 public static ExtMediaInfo Parse(ReadOnlySpan<char> text)
@@ -286,11 +333,7 @@ namespace TwitchDownloaderCore.Tools
                     const string KEY_DEFAULT = "DEFAULT=";
                     do
                     {
-                        while (!text.IsEmpty && char.IsWhiteSpace(text[0]))
-                        {
-                            // Some online examples of M3U8 playlists has spaces between keys. Just in case this becomes a problem, let's account for that.
-                            text = text[1..];
-                        }
+                        text = text.TrimStart();
 
                         if (text.StartsWith(KEY_TYPE))
                         {
@@ -340,14 +383,18 @@ namespace TwitchDownloaderCore.Tools
 
                     public static StreamResolution Parse(ReadOnlySpan<char> text)
                     {
+                        if (text.StartsWith("RESOLUTION="))
+                            text = text[11..];
+
                         var separatorIndex = text.IndexOfAny("x");
                         if (separatorIndex == -1 || separatorIndex == text.Length)
-                            return default;
+                            throw new FormatException($"Unable to parse Resolution from {text}.");
 
-                        var widthSpan = text[..separatorIndex];
-                        var heightSpan = text[(separatorIndex + 1)..];
-                        _ = uint.TryParse(widthSpan, out var width);
-                        _ = uint.TryParse(heightSpan, out var height);
+                        if (!uint.TryParse(text[..separatorIndex], out var width))
+                            throw new FormatException($"Unable to parse Resolution from {text}.");
+
+                        if (!uint.TryParse(text[(separatorIndex + 1)..], out var height))
+                            throw new FormatException($"Unable to parse Resolution from {text}.");
 
                         return new StreamResolution(width, height);
                     }
@@ -372,7 +419,7 @@ namespace TwitchDownloaderCore.Tools
                 public string Video { get; private set; }
                 public decimal Framerate { get; private set; }
 
-                public override string ToString() => $"PROGRAM-ID={ProgramId},BANDWIDTH={Bandwidth},CODECS=\"{Codecs}\",RESOLUTION={Resolution},VIDEO=\"{Video}\",FRAME-RATE={Framerate}";
+                public override string ToString() => $"#EXT-X-STREAM-INF:PROGRAM-ID={ProgramId},BANDWIDTH={Bandwidth},CODECS=\"{Codecs}\",RESOLUTION={Resolution},VIDEO=\"{Video}\",FRAME-RATE={Framerate}";
 
                 public static ExtStreamInfo Parse(ReadOnlySpan<char> text)
                 {
@@ -389,11 +436,7 @@ namespace TwitchDownloaderCore.Tools
                     const string KEY_FRAMERATE = "FRAME-RATE=";
                     do
                     {
-                        while (!text.IsEmpty && char.IsWhiteSpace(text[0]))
-                        {
-                            // Some online examples of M3U8 playlists has spaces between keys. Just in case this becomes a problem, let's account for that.
-                            text = text[1..];
-                        }
+                        text = text.TrimStart();
 
                         if (text.StartsWith(KEY_PROGRAM_ID))
                         {
@@ -444,7 +487,7 @@ namespace TwitchDownloaderCore.Tools
                 public decimal Duration { get; private set; }
                 public bool Live { get; private set; }
 
-                public override string ToString() => $"{Duration},{(Live ? "live" : "")}";
+                public override string ToString() => $"#EXTINF:{Duration},{(Live ? "live" : "")}";
 
                 public static ExtPartInfo Parse(ReadOnlySpan<char> text)
                 {
@@ -455,11 +498,7 @@ namespace TwitchDownloaderCore.Tools
 
                     do
                     {
-                        while (!text.IsEmpty && char.IsWhiteSpace(text[0]))
-                        {
-                            // Some online examples of M3U8 playlists has spaces between keys. Just in case this becomes a problem, let's account for that.
-                            text = text[1..];
-                        }
+                        text = text.TrimStart();
 
                         if (!text.IsEmpty && char.IsDigit(text[0]))
                         {
@@ -484,6 +523,18 @@ namespace TwitchDownloaderCore.Tools
 
         private static class ParsingHelpers
         {
+            public static bool TryParseM3UHeader(ref ReadOnlySpan<char> text)
+            {
+                const string M3U_HEADER = "#EXTM3U";
+                if (!text.StartsWith(M3U_HEADER))
+                {
+                    return false;
+                }
+
+                text = text[7..].TrimStart(" \r\n");
+                return true;
+            }
+
             public static string ParseStringValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
             {
                 var temp = text[keyName.Length..];
@@ -495,7 +546,9 @@ namespace TwitchDownloaderCore.Tools
 
                 var closeQuote = temp.IndexOf('"');
                 if (closeQuote == -1)
+                {
                     throw new FormatException("Expected close quote was not found.");
+                }
 
                 return temp[..closeQuote].ToString();
             }
@@ -503,82 +556,81 @@ namespace TwitchDownloaderCore.Tools
             public static int ParseIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
             {
                 var temp = text[keyName.Length..];
+                temp = temp[..NextKeyStart(temp)];
 
-                var nextKey = temp.IndexOfAny(",\r\n");
-                if (nextKey == -1)
-                    nextKey = temp.Length; // This might be the last value
+                if (int.TryParse(temp, out var intValue))
+                    return intValue;
 
-                temp = temp[..nextKey];
-                if (!int.TryParse(temp, out var intValue))
-                    throw new FormatException($"Unable to parse integer from: {text}");
-
-                return intValue;
+                throw new FormatException($"Unable to parse integer from: {text}");
             }
 
             public static uint ParseUIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
             {
                 var temp = text[keyName.Length..];
+                temp = temp[..NextKeyStart(temp)];
 
-                var nextKey = temp.IndexOfAny(",\r\n");
-                if (nextKey == -1)
-                    nextKey = temp.Length; // This might be the last value
+                if (uint.TryParse(temp, out var uIntValue))
+                    return uIntValue;
 
-                temp = temp[..nextKey];
-                if (!uint.TryParse(temp, out var uIntValue))
-                    throw new FormatException($"Unable to parse integer from: {text}");
-
-                return uIntValue;
+                throw new FormatException($"Unable to parse integer from: {text}");
             }
 
             public static decimal ParseDecimalValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
             {
                 var temp = text[keyName.Length..];
+                temp = temp[..NextKeyStart(temp)];
 
-                var nextKey = temp.IndexOfAny(",\r\n");
-                if (nextKey == -1)
-                    nextKey = temp.Length; // This might be the last value
+                if (decimal.TryParse(temp, out var decimalValue))
+                    return decimalValue;
 
-                temp = temp[..nextKey];
-                if (!decimal.TryParse(temp, out var doubleValue))
-                    throw new FormatException($"Unable to parse decimal from: {text}");
-
-                return doubleValue;
+                throw new FormatException($"Unable to parse decimal from: {text}");
             }
 
             public static bool ParseBooleanValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
             {
                 var temp = text[keyName.Length..];
-                bool? result = null;
 
                 if (temp.StartsWith("NO"))
-                    result = false;
-                else if (temp.StartsWith("YES"))
-                    result = true;
+                    return false;
 
-                if (!result.HasValue)
-                    throw new FormatException($"Unable to parse boolean from: {text}");
+                if (temp.StartsWith("YES"))
+                    return true;
 
-                return result.Value;
+                temp = temp[..NextKeyStart(temp)];
+
+                if (bool.TryParse(temp, out var booleanValue))
+                    return booleanValue;
+
+                throw new FormatException($"Unable to parse boolean from: {text}");
             }
 
             public static Stream.ExtStreamInfo.StreamResolution ParseResolution(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
             {
                 var temp = text[keyName.Length..];
-                var nextKey = temp.IndexOfAny(",\r\n");
-                if (nextKey == -1)
-                    nextKey = temp.Length; // This might be the last value
+                temp = temp[..NextKeyStart(temp)];
 
-                temp = temp[..nextKey];
                 return Stream.ExtStreamInfo.StreamResolution.Parse(temp);
             }
 
             public static DateTimeOffset ParseDateTimeOffset(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
             {
                 var temp = text[keyName.Length..];
+                temp = temp[..NextKeyStart(temp)];
 
-                _ = DateTime.TryParse(temp, out var dateTime);
+                if (DateTimeOffset.TryParse(temp, out var dateTimeOffset))
+                    return dateTimeOffset;
 
-                return dateTime;
+                throw new FormatException($"Unable to parse DateTimeOffset from: {text}");
+            }
+
+            private static Index NextKeyStart(ReadOnlySpan<char> text)
+            {
+                var nextKey = text.UnEscapedIndexOfAny(",\r\n");
+                return nextKey switch
+                {
+                    -1 => text.Length, // This is probably the last value
+                    _ => nextKey
+                };
             }
         }
     }
