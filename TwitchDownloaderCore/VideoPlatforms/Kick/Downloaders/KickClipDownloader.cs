@@ -61,9 +61,9 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                 PlatformHelper.CreateDirectory(downloadOptions.TempFolder);
             }
 
-            var tempDownloadFolder = Path.Combine(downloadOptions.TempFolder, $"clip_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}_{Path.GetRandomFileName()}");
+            var tempDownloadFolder = Path.Combine(downloadOptions.TempFolder, $"clip_{DateTimeOffset.UtcNow.Ticks}_{Path.GetRandomFileName()}");
             PlatformHelper.CreateDirectory(tempDownloadFolder);
-            var tempFile = Path.Combine(tempDownloadFolder, $"clip_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}_{Path.GetRandomFileName()}");
+            var tempFile = Path.Combine(tempDownloadFolder, $"clip_{DateTimeOffset.UtcNow.Ticks}_{Path.GetRandomFileName()}");
             try
             {
                 if (!alreadyEncoded)
