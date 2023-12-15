@@ -10,9 +10,81 @@ namespace TwitchDownloaderCore.Tools
     // ReSharper disable StringLiteralTypo
     public sealed record M3U8(M3U8.Metadata FileMetadata, M3U8.Stream[] Streams)
     {
+        public static M3U8 Parse(System.IO.Stream stream, Encoding streamEncoding, string basePath = "")
+        {
+            var sr = new StreamReader(stream, streamEncoding);
+            if (!ParsingHelpers.TryParseM3UHeader(sr.ReadLine(), out _))
+            {
+                throw new FormatException("Invalid playlist, M3U header is missing.");
+            }
+
+            var streams = new List<Stream>();
+
+            Stream.ExtMediaInfo currentExtMediaInfo = null;
+            Stream.ExtStreamInfo currentExtStreamInfo = null;
+
+            Metadata.Builder metadataBuilder = new();
+            DateTimeOffset currentExtProgramDateTime = default;
+            Stream.ExtByteRange currentByteRange = default;
+            Stream.ExtPartInfo currentExtPartInfo = null;
+
+            while (sr.ReadLine() is { } line)
+            {
+                if (line[0] != '#')
+                {
+                    var path = Path.Combine(basePath, line);
+                    streams.Add(new Stream(currentExtMediaInfo, currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
+                    currentExtMediaInfo = null;
+                    currentExtStreamInfo = null;
+                    currentExtProgramDateTime = default;
+                    currentByteRange = default;
+                    currentExtPartInfo = null;
+
+                    continue;
+                }
+
+                const string MEDIA_INFO_KEY = "#EXT-X-MEDIA:";
+                const string STREAM_INFO_KEY = "#EXT-X-STREAM-INF:";
+                const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
+                const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
+                const string PART_INFO_KEY = "#EXTINF:";
+                const string END_LIST_KEY = "#EXT-X-ENDLIST";
+                if (line.StartsWith(MEDIA_INFO_KEY))
+                {
+                    currentExtMediaInfo = Stream.ExtMediaInfo.Parse(line);
+                }
+                else if (line.StartsWith(STREAM_INFO_KEY))
+                {
+                    currentExtStreamInfo = Stream.ExtStreamInfo.Parse(line);
+                }
+                else if (line.StartsWith(PROGRAM_DATE_TIME_KEY))
+                {
+                    currentExtProgramDateTime = ParsingHelpers.ParseDateTimeOffset(line, PROGRAM_DATE_TIME_KEY);
+                }
+                else if (line.StartsWith(BYTE_RANGE_KEY))
+                {
+                    currentByteRange = Stream.ExtByteRange.Parse(line);
+                }
+                else if (line.StartsWith(PART_INFO_KEY))
+                {
+                    currentExtPartInfo = Stream.ExtPartInfo.Parse(line);
+                }
+                else if (line.StartsWith(END_LIST_KEY))
+                {
+                    break;
+                }
+                else
+                {
+                    metadataBuilder.ParseAndAppend(line);
+                }
+            }
+
+            return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
+        }
+
         public static M3U8 Parse(ReadOnlySpan<char> text, string basePath = "")
         {
-            if (!ParsingHelpers.TryParseM3UHeader(ref text))
+            if (!ParsingHelpers.TryParseM3UHeader(text, out text))
             {
                 throw new FormatException("Invalid playlist, M3U header is missing.");
             }
@@ -523,15 +595,16 @@ namespace TwitchDownloaderCore.Tools
 
         private static class ParsingHelpers
         {
-            public static bool TryParseM3UHeader(ref ReadOnlySpan<char> text)
+            public static bool TryParseM3UHeader(ReadOnlySpan<char> text, out ReadOnlySpan<char> textWithoutHeader)
             {
                 const string M3U_HEADER = "#EXTM3U";
                 if (!text.StartsWith(M3U_HEADER))
                 {
+                    textWithoutHeader = default;
                     return false;
                 }
 
-                text = text[7..].TrimStart(" \r\n");
+                textWithoutHeader = text[7..].TrimStart(" \r\n");
                 return true;
             }
 

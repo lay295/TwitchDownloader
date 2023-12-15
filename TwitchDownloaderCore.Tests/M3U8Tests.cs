@@ -1,12 +1,15 @@
-﻿using TwitchDownloaderCore.Tools;
+﻿using System.Text;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Tests
 {
     // ReSharper disable StringLiteralTypo
     public class M3U8Tests
     {
-        [Fact]
-        public void CorrectlyParsesTwitchM3U8OfTransportStreams()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CorrectlyParsesTwitchM3U8OfTransportStreams(bool useStream)
         {
             const string ExampleM3U8Twitch =
                 "#EXTM3U" +
@@ -25,7 +28,17 @@ namespace TwitchDownloaderCore.Tests
                 "\n#EXTINF:10.000,\n40.ts\n#EXTINF:10.000,\n41.ts\n#EXTINF:10.000,\n42.ts\n#EXTINF:10.000,\n43.ts\n#EXTINF:10.000,\n44.ts\n#EXTINF:10.000,\n45.ts\n#EXTINF:10.000,\n46.ts\n#EXTINF:10.000,\n47.ts" +
                 "\n#EXTINF:10.000,\n48.ts\n#EXTINF:10.000,\n49.ts\n#EXT-X-ENDLIST";
 
-            var m3u8 = M3U8.Parse(ExampleM3U8Twitch);
+            M3U8 m3u8;
+            if (useStream)
+            {
+                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Twitch);
+                using var ms = new MemoryStream(bytes);
+                m3u8 = M3U8.Parse(ms, Encoding.Unicode);
+            }
+            else
+            {
+                m3u8 = M3U8.Parse(ExampleM3U8Twitch);
+            }
 
             Assert.Equal(3u, m3u8.FileMetadata.Version);
             Assert.Equal(10u, m3u8.FileMetadata.StreamTargetDuration);
@@ -45,8 +58,10 @@ namespace TwitchDownloaderCore.Tests
             }
         }
 
-        [Fact]
-        public void CorrectlyParsesTwitchM3U8OfLiveStreams()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CorrectlyParsesTwitchM3U8OfLiveStreams(bool useStream)
         {
             const string ExampleM3U8Twitch =
                 "#EXTM3U" +
@@ -98,7 +113,17 @@ namespace TwitchDownloaderCore.Tests
                 (DateTimeOffset.Parse("2023-09-17T02:32:16.242Z"), 2.000m, true, "https://video-edge-foo.bar.abs.hls.ttvnw.net/v1/segment/hij-567KLM_890.ts")
             };
 
-            var m3u8 = M3U8.Parse(ExampleM3U8Twitch);
+            M3U8 m3u8;
+            if (useStream)
+            {
+                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Twitch);
+                using var ms = new MemoryStream(bytes);
+                m3u8 = M3U8.Parse(ms, Encoding.Unicode);
+            }
+            else
+            {
+                m3u8 = M3U8.Parse(ExampleM3U8Twitch);
+            }
 
             Assert.Equal(3u, m3u8.FileMetadata.Version);
             Assert.Equal(5u, m3u8.FileMetadata.StreamTargetDuration);
@@ -120,8 +145,10 @@ namespace TwitchDownloaderCore.Tests
             }
         }
 
-        [Fact]
-        public void CorrectlyParsesTwitchM3U8OfPlaylists()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CorrectlyParsesTwitchM3U8OfPlaylists(bool useStream)
         {
             const string ExampleM3U8Twitch =
                 "#EXTM3U" +
@@ -167,7 +194,17 @@ namespace TwitchDownloaderCore.Tests
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/160p30/index-dvr.m3u8")
             };
 
-            var m3u8 = M3U8.Parse(ExampleM3U8Twitch);
+            M3U8 m3u8;
+            if (useStream)
+            {
+                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Twitch);
+                using var ms = new MemoryStream(bytes);
+                m3u8 = M3U8.Parse(ms, Encoding.Unicode);
+            }
+            else
+            {
+                m3u8 = M3U8.Parse(ExampleM3U8Twitch);
+            }
 
             Assert.Equal(streams.Length, m3u8.Streams.Length);
             Assert.Equivalent(streams[0], m3u8.Streams[0], true);
@@ -214,8 +251,10 @@ namespace TwitchDownloaderCore.Tests
             Assert.Equal(framerate, streamInfo.Framerate);
         }
 
-        [Fact]
-        public void CorrectlyParsesKickM3U8OfTransportStreams()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CorrectlyParsesKickM3U8OfTransportStreams(bool useStream)
         {
             const string ExampleM3U8Kick =
                 "#EXTM3U" +
@@ -274,7 +313,17 @@ namespace TwitchDownloaderCore.Tests
                 (DateTimeOffset.Parse("2023-11-16T05:35:07.97Z"), (1506068, 6462876), "506.ts")
             };
 
-            var m3u8 = M3U8.Parse(ExampleM3U8Kick);
+            M3U8 m3u8;
+            if (useStream)
+            {
+                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Kick);
+                using var ms = new MemoryStream(bytes);
+                m3u8 = M3U8.Parse(ms, Encoding.Unicode);
+            }
+            else
+            {
+                m3u8 = M3U8.Parse(ExampleM3U8Kick);
+            }
 
             Assert.Equal(4u, m3u8.FileMetadata.Version);
             Assert.Equal(2u, m3u8.FileMetadata.StreamTargetDuration);
@@ -293,8 +342,10 @@ namespace TwitchDownloaderCore.Tests
             }
         }
 
-        [Fact]
-        public void CorrectlyParsesKickM3U8OfPlaylists()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CorrectlyParsesKickM3U8OfPlaylists(bool useStream)
         {
             const string ExampleM3U8Kick =
                 "#EXTM3U" +
@@ -335,7 +386,17 @@ namespace TwitchDownloaderCore.Tests
                     "160p30/playlist.m3u8")
             };
 
-            var m3u8 = M3U8.Parse(ExampleM3U8Kick);
+            M3U8 m3u8;
+            if (useStream)
+            {
+                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Kick);
+                using var ms = new MemoryStream(bytes);
+                m3u8 = M3U8.Parse(ms, Encoding.Unicode);
+            }
+            else
+            {
+                m3u8 = M3U8.Parse(ExampleM3U8Kick);
+            }
 
             Assert.Equal(streams.Length, m3u8.Streams.Length);
             Assert.Equivalent(streams[0], m3u8.Streams[0], true);
