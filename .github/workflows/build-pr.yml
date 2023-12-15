@@ -144,17 +144,29 @@ jobs:
       run: dotnet restore TwitchDownloaderCLI
     - name: Build MacOS CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=None -p:DebugSymbols=false
-      
+    - name: Build MacOSArm64 CLI
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOSArm64 -p:DebugType=None -p:DebugSymbols=false
+
     - name: Zip MacOS CLI
       uses: vimtor/action-zip@v1
       with:
         files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOS"
         dest: TwitchDownloaderCLI-MacOS-x64.zip
 
+    - name: Zip MacOSArm64 CLI
+      uses: vimtor/action-zip@v1
+      with:
+        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOSArm64"
+        dest: TwitchDownloaderCLI-MacOSArm64.zip
+
     - name: Upload MacOS CLI Artifact Asset
       uses: actions/upload-artifact@v3
       with:
         name: TwitchDownloaderCLI-MacOS-x64.zip
         path: TwitchDownloaderCLI-MacOS-x64.zip
-    
 
+    - name: Upload MacOSArm64 CLI Artifact Asset
+      uses: actions/upload-artifact@v3
+      with:
+        name: TwitchDownloaderCLI-MacOSArm64.zip
+        path: TwitchDownloaderCLI-MacOSArm64.zip
