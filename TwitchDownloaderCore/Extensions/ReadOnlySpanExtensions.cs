@@ -91,5 +91,123 @@ namespace TwitchDownloaderCore.Extensions
 
             return -1;
         }
+
+        public static int UnEscapedIndexOf(this ReadOnlySpan<char> str, char character)
+        {
+            if (character is '\\' or '\'' or '\"')
+                throw new ArgumentOutOfRangeException("Escape characters are not supported.", nameof(character));
+
+            var firstIndex = str.IndexOf(character);
+            if (firstIndex == -1)
+                return firstIndex;
+
+            var firstEscapeIndex = str.IndexOfAny(@"\'""");
+            if (firstEscapeIndex == -1 || firstEscapeIndex > firstIndex)
+                return firstIndex;
+
+            var length = str.Length;
+            for (var i = firstEscapeIndex; i < length; i++)
+            {
+                var readChar = str[i];
+
+                switch (readChar)
+                {
+                    case '\\':
+                        i++;
+                        break;
+                    case '\'':
+                    case '\"':
+                    {
+                        var closeQuoteMark = FindCloseQuoteChar(str, i, length, readChar);
+                        if (closeQuoteMark == -1)
+                            throw new FormatException($"Unbalanced quote mark at {i}.");
+
+                        i = closeQuoteMark;
+
+                        break;
+                    }
+                    default:
+                    {
+                        if (readChar == character)
+                        {
+                            return i;
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public static int UnEscapedIndexOfAny(this ReadOnlySpan<char> str, ReadOnlySpan<char> characters)
+        {
+            const string ESCAPE_CHARS = @"\'""";
+
+            if (characters.IndexOfAny(ESCAPE_CHARS) != -1)
+                throw new ArgumentOutOfRangeException("Escape characters are not supported.", nameof(characters));
+
+            var firstIndex = str.IndexOfAny(characters);
+            if (firstIndex == -1)
+                return firstIndex;
+
+            var firstEscapeIndex = str.IndexOfAny(ESCAPE_CHARS);
+            if (firstEscapeIndex == -1 || firstEscapeIndex > firstIndex)
+                return firstIndex;
+
+            var length = str.Length;
+            for (var i = firstEscapeIndex; i < length; i++)
+            {
+                var readChar = str[i];
+
+                switch (readChar)
+                {
+                    case '\\':
+                        i++;
+                        break;
+                    case '\'':
+                    case '\"':
+                    {
+                        var closeQuoteMark = FindCloseQuoteChar(str, i, length, readChar);
+                        if (closeQuoteMark == -1)
+                            throw new FormatException($"Unbalanced quote mark at {i}.");
+
+                        i = closeQuoteMark;
+
+                        break;
+                    }
+                    default:
+                    {
+                        if (characters.Contains(readChar))
+                        {
+                            return i;
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public static int Count(this ReadOnlySpan<char> str, char character)
+        {
+            if (str.IsEmpty)
+                return -1;
+
+            var count = 0;
+            var temp = str;
+            int index;
+
+            while ((index = temp.IndexOf(character)) != -1)
+            {
+                count++;
+                temp = temp[(index + 1)..];
+            }
+
+            return count == 0 ? -1 : count;
+        }
     }
 }
