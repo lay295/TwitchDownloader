@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlVideoTokenResponse>();
         }
 
-        public static async Task<string[]> GetVideoPlaylist(int videoId, string token, string sig)
+        public static async Task<string> GetVideoPlaylist(int videoId, string token, string sig)
         {
             var request = new HttpRequestMessage()
             {
@@ -63,8 +63,10 @@ namespace TwitchDownloaderCore
                 Method = HttpMethod.Get
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-            string playlist = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
-            return playlist.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
         }
 
         public static async Task<GqlClipResponse> GetClipInfo(object clipId)
@@ -908,7 +910,7 @@ namespace TwitchDownloaderCore
             //Let's save this image to the cache
             try
             {
-                await using var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                await using var stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                 await stream.WriteAsync(imageBytes, cancellationToken);
             }
             catch { }

@@ -109,30 +109,24 @@ namespace TwitchDownloaderWPF
                 comboQuality.Items.Clear();
                 videoQualities.Clear();
 
-                var playlist = await TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
-                if (playlist[0].Contains("vod_manifest_restricted") || playlist[0].Contains("unauthorized_entitlements"))
+                var playlistString = await TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
+                if (playlistString.Contains("vod_manifest_restricted") || playlistString.Contains("unauthorized_entitlements"))
                 {
                     throw new NullReferenceException(Translations.Strings.InsufficientAccessMayNeedOauth);
                 }
 
-                for (int i = 0; i < playlist.Length; i++)
+                var videoPlaylist = M3U8.Parse(playlistString);
+
+                //Add video qualities to combo quality
+                foreach (var stream in videoPlaylist.Streams)
                 {
-                    if (playlist[i].Contains("#EXT-X-MEDIA"))
+                    if (!videoQualities.ContainsKey(stream.MediaInfo.Name))
                     {
-                        string lastPart = playlist[i].Substring(playlist[i].IndexOf("NAME=\"", StringComparison.Ordinal) + 6);
-                        string stringQuality = lastPart.Substring(0, lastPart.IndexOf('"'));
-
-                        var bandwidthStartIndex = playlist[i + 1].IndexOf("BANDWIDTH=", StringComparison.Ordinal) + 10;
-                        var bandwidthEndIndex = playlist[i + 1].IndexOf(',') - bandwidthStartIndex;
-                        int.TryParse(playlist[i + 1].Substring(bandwidthStartIndex, bandwidthEndIndex), out var bandwidth);
-
-                        if (!videoQualities.ContainsKey(stringQuality))
-                        {
-                            videoQualities.Add(stringQuality, (playlist[i + 2], bandwidth));
-                            comboQuality.Items.Add(stringQuality);
-                        }
+                        videoQualities.Add(stream.MediaInfo.Name, (stream.Path, stream.StreamInfo.Bandwidth));
+                        comboQuality.Items.Add(stream.MediaInfo.Name);
                     }
                 }
+
                 comboQuality.SelectedIndex = 0;
 
                 vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
