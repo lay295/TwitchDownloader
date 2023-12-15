@@ -1,5 +1,5 @@
 ﻿using CommandLine;
-using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
