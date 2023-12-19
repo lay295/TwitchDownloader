@@ -44,39 +44,9 @@ namespace TwitchDownloaderCore.Tools
                     continue;
                 }
 
-                const string MEDIA_INFO_KEY = "#EXT-X-MEDIA:";
-                const string STREAM_INFO_KEY = "#EXT-X-STREAM-INF:";
-                const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
-                const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
-                const string PART_INFO_KEY = "#EXTINF:";
-                const string END_LIST_KEY = "#EXT-X-ENDLIST";
-                if (line.StartsWith(MEDIA_INFO_KEY))
-                {
-                    currentExtMediaInfo = Stream.ExtMediaInfo.Parse(line);
-                }
-                else if (line.StartsWith(STREAM_INFO_KEY))
-                {
-                    currentExtStreamInfo = Stream.ExtStreamInfo.Parse(line);
-                }
-                else if (line.StartsWith(PROGRAM_DATE_TIME_KEY))
-                {
-                    currentExtProgramDateTime = ParsingHelpers.ParseDateTimeOffset(line, PROGRAM_DATE_TIME_KEY);
-                }
-                else if (line.StartsWith(BYTE_RANGE_KEY))
-                {
-                    currentByteRange = Stream.ExtByteRange.Parse(line);
-                }
-                else if (line.StartsWith(PART_INFO_KEY))
-                {
-                    currentExtPartInfo = Stream.ExtPartInfo.Parse(line);
-                }
-                else if (line.StartsWith(END_LIST_KEY))
+                if (!ParseM3U8Key(line, metadataBuilder, ref currentExtMediaInfo, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
                 {
                     break;
-                }
-                else
-                {
-                    metadataBuilder.ParseAndAppend(line);
                 }
             }
 
@@ -136,47 +106,59 @@ namespace TwitchDownloaderCore.Tools
                     continue;
                 }
 
-                const string MEDIA_INFO_KEY = "#EXT-X-MEDIA:";
-                const string STREAM_INFO_KEY = "#EXT-X-STREAM-INF:";
-                const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
-                const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
-                const string PART_INFO_KEY = "#EXTINF:";
-                const string END_LIST_KEY = "#EXT-X-ENDLIST";
-                if (workingSlice.StartsWith(MEDIA_INFO_KEY))
-                {
-                    currentExtMediaInfo = Stream.ExtMediaInfo.Parse(workingSlice);
-                }
-                else if (workingSlice.StartsWith(STREAM_INFO_KEY))
-                {
-                    currentExtStreamInfo = Stream.ExtStreamInfo.Parse(workingSlice);
-                }
-                else if (workingSlice.StartsWith(PROGRAM_DATE_TIME_KEY))
-                {
-                    currentExtProgramDateTime = ParsingHelpers.ParseDateTimeOffset(workingSlice, PROGRAM_DATE_TIME_KEY);
-                }
-                else if (workingSlice.StartsWith(BYTE_RANGE_KEY))
-                {
-                    currentByteRange = Stream.ExtByteRange.Parse(workingSlice);
-                }
-                else if (workingSlice.StartsWith(PART_INFO_KEY))
-                {
-                    currentExtPartInfo = Stream.ExtPartInfo.Parse(workingSlice);
-                }
-                else if (workingSlice.StartsWith(END_LIST_KEY))
+                if (!ParseM3U8Key(workingSlice, metadataBuilder, ref currentExtMediaInfo, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
                 {
                     break;
-                }
-                else
-                {
-                    metadataBuilder.ParseAndAppend(workingSlice);
                 }
 
                 if (lineEnd == -1)
+                {
                     break;
-
+                }
             } while ((textStart += lineEnd) < textEnd);
 
             return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
+        }
+
+        private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtMediaInfo extMediaInfo, ref Stream.ExtStreamInfo extStreamInfo,
+            ref DateTimeOffset extProgramDateTime, ref Stream.ExtByteRange byteRange, ref Stream.ExtPartInfo extPartInfo)
+        {
+            const string MEDIA_INFO_KEY = "#EXT-X-MEDIA:";
+            const string STREAM_INFO_KEY = "#EXT-X-STREAM-INF:";
+            const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
+            const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
+            const string PART_INFO_KEY = "#EXTINF:";
+            const string END_LIST_KEY = "#EXT-X-ENDLIST";
+            if (text.StartsWith(MEDIA_INFO_KEY))
+            {
+                extMediaInfo = Stream.ExtMediaInfo.Parse(text);
+            }
+            else if (text.StartsWith(STREAM_INFO_KEY))
+            {
+                extStreamInfo = Stream.ExtStreamInfo.Parse(text);
+            }
+            else if (text.StartsWith(PROGRAM_DATE_TIME_KEY))
+            {
+                extProgramDateTime = ParsingHelpers.ParseDateTimeOffset(text, PROGRAM_DATE_TIME_KEY);
+            }
+            else if (text.StartsWith(BYTE_RANGE_KEY))
+            {
+                byteRange = Stream.ExtByteRange.Parse(text);
+            }
+            else if (text.StartsWith(PART_INFO_KEY))
+            {
+                extPartInfo = Stream.ExtPartInfo.Parse(text);
+            }
+            else if (text.StartsWith(END_LIST_KEY))
+            {
+                return false;
+            }
+            else
+            {
+                metadataBuilder.ParseAndAppend(text);
+            }
+
+            return true;
         }
 
         public sealed record Metadata
