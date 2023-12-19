@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
@@ -116,14 +117,16 @@ namespace TwitchDownloaderWPF
                 }
 
                 var videoPlaylist = M3U8.Parse(playlistString);
+                videoPlaylist.SortStreamsByQuality();
 
                 //Add video qualities to combo quality
                 foreach (var stream in videoPlaylist.Streams)
                 {
-                    if (!videoQualities.ContainsKey(stream.MediaInfo.Name))
+                    var userFriendlyName = stream.GetResolutionFramerateString();
+                    if (!videoQualities.ContainsKey(userFriendlyName))
                     {
-                        videoQualities.Add(stream.MediaInfo.Name, (stream.Path, stream.StreamInfo.Bandwidth));
-                        comboQuality.Items.Add(stream.MediaInfo.Name);
+                        videoQualities.Add(userFriendlyName, (stream.Path, stream.StreamInfo.Bandwidth));
+                        comboQuality.Items.Add(userFriendlyName);
                     }
                 }
 
