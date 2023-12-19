@@ -3,7 +3,7 @@ using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Tools
 {
-    internal class SortedCommentComparer : IComparer<Comment>
+    internal class CommentOffsetComparer : IComparer<Comment>
     {
         // Modified from double.CompareTo
         // ReSharper disable once CompareOfFloatsByEqualityOperator

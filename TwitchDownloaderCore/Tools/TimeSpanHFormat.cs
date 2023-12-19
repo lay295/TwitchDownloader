@@ -184,9 +184,9 @@ namespace TwitchDownloaderCore.Tools
             }
             else
             {
-                var foo = ((uint)timeSpan.TotalHours).ToString();
-                sb.Append('0', Math.Max(0, count - foo.Length));
-                sb.Append(foo);
+                var hourString = ((uint)timeSpan.TotalHours).ToString();
+                sb.Append('0', Math.Max(0, count - hourString.Length));
+                sb.Append(hourString);
             }
         }
 
