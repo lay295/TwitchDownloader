@@ -198,11 +198,45 @@ namespace TwitchDownloaderWPF
 
         private void BtnResetSettings_OnClick(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translations.Strings.ResetSettingsConfirmationMessage, Translations.Strings.ResetSettingsConfirmationMessage, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (MessageBox.Show(Translations.Strings.ResetSettingsConfirmationMessage, Translations.Strings.ResetSettingsConfirmation, MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+                MessageBoxResult.Yes)
             {
                 Settings.Default.Reset();
+                Settings.Default.UpgradeRequired = false;
                 Settings.Default.Save();
-                MessageBox.Show(Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)), MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // TODO: Don't require restarting the application to apply
+                var commandLine = Environment.CommandLine;
+                var arguments = Environment.GetCommandLineArgs();
+                var fileName = arguments.FirstOrDefault(commandLine.StartsWith, "");
+
+                if (fileName.EndsWith(".exe"))
+                {
+                    if (MessageBox.Show(Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
+                            MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
+                    {
+                        // Create a cmd window that waits 2 seconds before restarting the application
+                        var process = new Process
+                        {
+                            StartInfo = new ProcessStartInfo
+                            {
+                                FileName = "cmd.exe",
+                                Arguments = $"/C choice /C Y /N /D Y /T 2 & START \"\" \"{fileName}\"",
+                                WindowStyle = ProcessWindowStyle.Hidden,
+                                CreateNoWindow = true,
+                                WorkingDirectory = Environment.CurrentDirectory
+                            }
+                        };
+
+                        process.Start();
+                        Application.Current.Shutdown();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
         }
 

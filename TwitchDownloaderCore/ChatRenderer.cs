@@ -709,6 +709,9 @@ namespace TwitchDownloaderCore
                 case HighlightType.WatchStreak:
                     DrawWatchStreakMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
+                case HighlightType.CharityDonation:
+                    DrawCharityDonationMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    break;
                 case HighlightType.GiftedMany:
                 case HighlightType.GiftedSingle:
                 case HighlightType.GiftedAnonymous:
@@ -842,6 +845,24 @@ namespace TwitchDownloaderCore
             drawPos = customMessagePos;
             defaultPos = customMessagePos;
             DrawNonAccentedMessage(customMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
+        }
+
+        private void DrawCharityDonationMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        {
+            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+            canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
+
+            drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
+            defaultPos.X = drawPos.X;
+
+            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, false, Purple);
+            AddImageSection(sectionImages, ref drawPos, defaultPos);
+
+            // Remove the commenter's name from the charity donation message
+            comment.message.body = comment.message.body[(comment.commenter.display_name.Length + 2)..];
+            comment.message.fragments[0].text = comment.message.fragments[0].text[(comment.commenter.display_name.Length + 2)..];
+
+            DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
         private void DrawGiftMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)

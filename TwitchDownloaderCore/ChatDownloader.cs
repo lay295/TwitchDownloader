@@ -151,7 +151,7 @@ namespace TwitchDownloaderCore
                     content_offset_seconds = oldComment.contentOffsetSeconds,
                     commenter = new Commenter
                     {
-                        display_name = oldComment.commenter.displayName,
+                        display_name = oldComment.commenter.displayName.Trim(),
                         _id = oldComment.commenter.id,
                         name = oldComment.commenter.login
                     }
@@ -410,7 +410,7 @@ namespace TwitchDownloaderCore
                 sortedComments.AddRange(commentTask.Result);
             }
 
-            sortedComments.Sort(new SortedCommentComparer());
+            sortedComments.Sort(new CommentOffsetComparer());
 
             chatRoot.comments = sortedComments.DistinctBy(x => x._id).ToList();
 

@@ -1338,7 +1338,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Are you sure you want to reset all settings to their default values?.
+        ///   Looks up a localized string similar to Are you sure you want to restore all settings to their default values?.
         /// </summary>
         public static string ResetSettingsConfirmationMessage {
             get {

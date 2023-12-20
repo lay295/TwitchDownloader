@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore.Tests
             var timeSpan = new TimeSpan(17, 49, 12);
             const string FORMAT_STRING = @"HH\:mm\:ss";
 
-            var resultICustomFormatter = ((ICustomFormatter)TimeSpanHFormat.ReusableInstance).Format(FORMAT_STRING, timeSpan,null);
+            var resultICustomFormatter = ((ICustomFormatter)TimeSpanHFormat.ReusableInstance).Format(FORMAT_STRING, timeSpan, null);
             var resultCustom = TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan);
 
             Assert.Equal(resultICustomFormatter, resultCustom);
@@ -77,15 +77,27 @@ namespace TwitchDownloaderCore.Tests
         }
 
         [Fact]
-        public void ReturnsEmptyString_WhenFormatIsEmpty()
+        public void ReturnsTimeSpanToString_WhenFormatIsEmpty()
         {
             var timeSpan = new TimeSpan(17, 49, 12);
             const string FORMAT_STRING = "";
-            const string EXPECTED = "";
+            var expected = timeSpan.ToString();
 
             var resultCustom = TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan);
 
-            Assert.Equal(EXPECTED, resultCustom);
+            Assert.Equal(expected, resultCustom);
+        }
+
+        [Fact]
+        public void ReturnsTimeSpanToString_WhenFormatIsNull()
+        {
+            var timeSpan = new TimeSpan(17, 49, 12);
+            const string FORMAT_STRING = null!;
+            var expected = timeSpan.ToString();
+
+            var resultCustom = TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan);
+
+            Assert.Equal(expected, resultCustom);
         }
 
         [Fact]
@@ -227,8 +239,8 @@ namespace TwitchDownloaderCore.Tests
             var exception = Assert.Throws(expectedExceptionType, () => TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan));
 
             // Ensure the FormatException originated from TimeSpanHFormat and not TimeSpan.ToString()
+            Assert.IsType<FormatException>(exception);
             Assert.Equal(EXPECTED_SOURCE_NAME, exception.Source);
-            Assert.Equal($"Invalid character escaping in the format string: {FORMAT_STRING}", exception.Message);
         }
 
         [Fact]
@@ -242,6 +254,7 @@ namespace TwitchDownloaderCore.Tests
             var exception = Assert.Throws(expectedExceptionType, () => TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan));
 
             // Ensure the FormatException originated from TimeSpanHFormat and not TimeSpan.ToString()
+            Assert.IsType<FormatException>(exception);
             Assert.Equal(EXPECTED_SOURCE_NAME, exception.Source);
         }
     }

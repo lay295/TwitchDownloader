@@ -20,6 +20,7 @@ namespace TwitchDownloaderCore.Tools
         Raid,
         BitBadgeTierNotification,
         WatchStreak,
+        CharityDonation,
         Unknown
     }
 
@@ -34,11 +35,12 @@ namespace TwitchDownloaderCore.Tools
         private const string GIFTED_ANONYMOUS_ICON_SVG = "m 54.571425,64.514958 a 4.3531428,4.2396967 0 0 1 -1.273998,-0.86096 l -1.203426,-1.172067 a 7.0051428,6.822584 0 0 0 -9.90229,0 c -3.417139,3.328092 -8.962569,3.328092 -12.383427,0 l -0.159707,-0.155553 a 7.1871427,6.9998405 0 0 0 -9.854005,-0.28216 l -1.894286,1.635103 a 4.9362858,4.8076423 0 0 1 -3.276,1.215474 H 10 V 32.337399 a 26.000001,25.322423 0 0 1 52,0 v 32.557396 h -5.627146 c -0.627714,0 -1.240569,-0.133847 -1.801429,-0.379837 z M 35.999996,14.249955 A 18.571428,18.087444 0 0 0 17.428572,32.337399 v 22.515245 a 14.619428,14.238435 0 0 1 17.471998,2.358609 l 0.163448,0.155554 c 0.516285,0.50645 1.355715,0.50645 1.875712,0 a 14.437428,14.061179 0 0 1 17.631712,-2.11623 V 32.337399 A 18.571428,18.087444 0 0 0 35.999996,14.249955 Z M 24.857142,35.954887 a 3.7142855,3.6174889 0 1 1 7.42857,0 3.7142855,3.6174889 0 0 1 -7.42857,0 z m 18.571432,-3.617488 a 3.7142859,3.6174892 0 1 0 0,7.234978 3.7142859,3.6174892 0 0 0 0,-7.234978 z";
         private const string BIT_BADGE_TIER_NOTIFICATION_ICON_SVG = "M 14.242705,42.37453 36,11.292679 57.757295,42.37453 36,61.023641 Z M 22.566425,41.323963 36,22.13092 49.433577,41.317747 46.79162,43.580506 36,39.266345 25.205273,43.586723 22.566425,41.320854 Z";
         private const string WATCH_STREAK_ICON_SVG = "M 38.84325,21.169078 33.156748,14.060989 21.215093,27.992844 a 21.267516,21.267402 0 0 0 -5.11785,13.846557 c 0,9.752298 7.961102,17.713358 17.713453,17.713358 H 38.50206 A 17.400696,17.400602 0 0 0 55.902755,42.152157 c 0,-5.288419 -1.848114,-10.406242 -5.231581,-14.500501 L 41.686501,16.904225 Z m -13.306415,10.519973 7.619913,-9.098354 5.686502,7.108089 2.843251,-4.264854 4.606066,5.885497 a 16.945776,16.945684 0 0 1 3.923686,10.832728 c 0,5.91393 -4.407039,10.804296 -10.121973,11.600401 1.02357,-1.336321 1.592221,-2.985397 1.592221,-4.719771 0,-1.478483 -0.511786,-2.900101 -1.421626,-4.065827 l -4.264877,-5.316851 -4.264876,5.316851 c -0.90984,1.137294 -1.421625,2.587344 -1.421625,4.065827 0,1.705941 0.56865,3.355018 1.535355,4.662906 A 12.026952,12.026887 0 0 1 21.783744,41.839401 c 0,-3.72464 1.336328,-7.335548 3.753091,-10.15035 z";
+        private const string CHARITY_DONATION_ICON_SVG = "M 14.211579,29.774743 23.549474,11.09897 H 48.450526 L 57.788421,29.774743 47.345541,42.829108 60.901052,60.90103 H 39.112633 L 36,57.010242 32.887368,60.90103 h -21.78842 l 13.55551,-18.071922 z m 13.185107,-12.450515 -3.112631,6.225256 h 23.43189 l -3.112632,-6.225256 z m 2.378051,12.450515 2.334473,3.112628 -3.598202,4.796559 -6.32798,-7.909187 z m 10.20943,22.255295 2.119703,2.645734 h 6.346656 l -5.12028,-6.829109 -3.342966,4.180262 z  M 23.549474,54.675772 42.225261,29.774743 h 7.59171 L 29.89613,54.675772 Z";
         private const string CHANNEL_POINT_ICON_SVG = "m 34.074833,10.317667 a 25.759205,25.759174 0 0 0 -23.83413,25.686052 25.759298,25.759267 0 0 0 51.518594,0 25.759205,25.759174 0 0 0 -27.684464,-25.686052 z m 0.329458,6.432744 a 19.319404,19.319381 0 0 1 20.915597,19.253308 19.319888,19.319865 0 0 1 -38.639776,0 19.319404,19.319381 0 0 1 17.724179,-19.253308 z M 36,23.124918 v 6.439401 a 6.4398012,6.4397935 0 0 1 6.439407,6.4394 H 48.88048 A 12.879602,12.879587 0 0 0 36,23.124918 Z";
 
-        private static readonly Regex SubMessageRegex = new(@"^(subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d{1,3} months(?:, currently on a \d{1,3} month streak)?! )(.+)$", RegexOptions.Compiled);
+        private static readonly Regex SubMessageRegex = new(@"^((?:\w+ )?subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d{1,3} months(?:, currently on a \d{1,3} month streak)?! )(.+)$", RegexOptions.Compiled);
         private static readonly Regex GiftAnonymousRegex = new(@"^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d", RegexOptions.Compiled);
-        private static readonly Regex WatchStreakRegex = new(@"^(watched \d+ consecutive streams this month and sparked a watch streak! )(.*)$", RegexOptions.Compiled);
+        private static readonly Regex WatchStreakRegex = new(@"^((?:\w+ )?watched \d+ consecutive streams this month and sparked a watch streak! )(.+)$", RegexOptions.Compiled);
 
         private SKImage _subscribedTierIcon;
         private SKImage _subscribedPrimeIcon;
@@ -47,6 +49,7 @@ namespace TwitchDownloaderCore.Tools
         private SKImage _giftAnonymousIcon;
         private SKImage _bitBadgeTierNotificationIcon;
         private SKImage _watchStreakIcon;
+        private SKImage _charityDonationIcon;
 
         private readonly string _cachePath;
         private readonly SKColor _purple;
@@ -91,8 +94,11 @@ namespace TwitchDownloaderCore.Tools
                 if (bodyWithoutName.StartsWith(" is paying forward the Gift they got from"))
                     return HighlightType.PayingForward;
 
-                if (bodyWithoutName.EndsWith(" consecutive streams this month and sparked a watch streak! "))
+                if (bodyWithoutName.Contains(" consecutive streams this month and sparked a watch streak! ", StringComparison.Ordinal))
                     return HighlightType.WatchStreak;
+
+                if (bodyWithoutName.StartsWith(": Donated ") && bodyWithoutName[10..].Contains(" to support ", StringComparison.Ordinal))
+                    return HighlightType.CharityDonation;
 
                 if (bodyWithoutName.StartsWith(" converted from a"))
                 {
@@ -119,7 +125,7 @@ namespace TwitchDownloaderCore.Tools
             if (char.IsDigit(bodySpan[0]) && bodySpan.EndsWith(" have joined! "))
             {
                 // TODO: use bodySpan when .NET 7
-                if (Regex.IsMatch(comment.message.body, $@"^\d+ raiders from {comment.commenter.display_name} have joined!"))
+                if (Regex.IsMatch(comment.message.body, $@"^\d+ raiders from {comment.commenter.display_name} have joined! "))
                     return HighlightType.Raid;
             }
 
@@ -143,6 +149,7 @@ namespace TwitchDownloaderCore.Tools
                 HighlightType.GiftedAnonymous => _giftAnonymousIcon ??= GenerateSvgIcon(GIFTED_ANONYMOUS_ICON_SVG, textColor, fontSize),
                 HighlightType.BitBadgeTierNotification => _bitBadgeTierNotificationIcon ??= GenerateSvgIcon(BIT_BADGE_TIER_NOTIFICATION_ICON_SVG, textColor, fontSize),
                 HighlightType.WatchStreak => _watchStreakIcon ??= GenerateSvgIcon(WATCH_STREAK_ICON_SVG, textColor, fontSize),
+                HighlightType.CharityDonation => _charityDonationIcon ??= GenerateSvgIcon(CHARITY_DONATION_ICON_SVG, textColor, fontSize),
                 _ => null
             };
         }

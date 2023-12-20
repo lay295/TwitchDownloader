@@ -23,15 +23,14 @@ namespace TwitchDownloaderCore.Extensions
             }
 
             var rentedBuffer = ArrayPool<byte>.Shared.Rent(STREAM_DEFAULT_BUFFER_LENGTH);
-            var buffer = rentedBuffer.AsMemory(0, STREAM_DEFAULT_BUFFER_LENGTH);
 
             long totalBytesRead = 0;
             try
             {
                 int bytesRead;
-                while ((bytesRead = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) != 0)
+                while ((bytesRead = await source.ReadAsync(rentedBuffer, 0, rentedBuffer.Length, cancellationToken).ConfigureAwait(false)) != 0)
                 {
-                    await destination.WriteAsync(buffer[..bytesRead], cancellationToken).ConfigureAwait(false);
+                    await destination.WriteAsync(rentedBuffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
 
                     totalBytesRead += bytesRead;
                     progress.Report(new StreamCopyProgress(sourceLength.Value, totalBytesRead));
@@ -39,7 +38,7 @@ namespace TwitchDownloaderCore.Extensions
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(rentedBuffer);
+                ArrayPool<byte>.Shared.Return(rentedBuffer, true);
             }
         }
     }
