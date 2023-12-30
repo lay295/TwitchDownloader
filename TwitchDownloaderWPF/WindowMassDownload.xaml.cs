@@ -49,13 +49,13 @@ namespace TwitchDownloaderWPF
             await ChangeCurrentChannel();
         }
 
-        private async Task ChangeCurrentChannel()
+        private Task ChangeCurrentChannel()
         {
             currentChannel = textChannel.Text;
             videoList.Clear();
             cursorList.Clear();
             cursorIndex = -1;
-            await UpdateList();
+            return UpdateList();
         }
 
         private async Task UpdateList()
