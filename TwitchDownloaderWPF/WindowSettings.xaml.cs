@@ -202,6 +202,7 @@ namespace TwitchDownloaderWPF
                 MessageBoxResult.Yes)
             {
                 Settings.Default.Reset();
+                Settings.Default.UpgradeRequired = false;
                 Settings.Default.Save();
 
                 // TODO: Don't require restarting the application to apply

@@ -23,7 +23,7 @@ namespace TwitchDownloaderCLI
             var parser = new Parser(config =>
             {
                 config.CaseInsensitiveEnumValues = true;
-                config.HelpWriter = TextWriter.Null;
+                config.HelpWriter = null; // Use null instead of TextWriter.Null due to how CommandLine works internally
             });
 
             var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CurlArgs, CacheArgs>(preParsedArgs);

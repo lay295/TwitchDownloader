@@ -38,8 +38,7 @@ namespace TwitchDownloaderCore.Extensions
             }
             finally
             {
-                Array.Clear(rentedBuffer); // Clear the buffer in case we were working with sensitive information.
-                ArrayPool<byte>.Shared.Return(rentedBuffer);
+                ArrayPool<byte>.Shared.Return(rentedBuffer, true);
             }
         }
 
@@ -62,8 +61,7 @@ namespace TwitchDownloaderCore.Extensions
             }
             finally
             {
-                Array.Clear(rentedBuffer); // Clear the buffer in case we were working with sensitive information.
-                ArrayPool<byte>.Shared.Return(rentedBuffer);
+                ArrayPool<byte>.Shared.Return(rentedBuffer, true);
             }
         }
     }

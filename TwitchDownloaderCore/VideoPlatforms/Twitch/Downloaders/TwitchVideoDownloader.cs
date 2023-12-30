@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
@@ -148,17 +149,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders
         {
             var m3u8 = await TwitchHelper.GetVideoQualitiesPlaylist(videoInfo);
 
-            for (var i = m3u8.Streams.Length - 1; i >= 0; i--)
-            {
-                var m3u8Stream = m3u8.Streams[i];
-                if (m3u8Stream.MediaInfo.Name.StartsWith(downloadOptions.Quality, StringComparison.OrdinalIgnoreCase))
-                {
-                    return m3u8.Streams[i];
-                }
-            }
-
-            // Unable to find specified quality, default to highest quality
-            return m3u8.Streams[0];
+            return m3u8.GetStreamOfQuality(downloadOptions.Quality);
         }
     }
 }

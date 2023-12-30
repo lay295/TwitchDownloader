@@ -1,5 +1,4 @@
-﻿using TwitchDownloaderCore.Chat;
-using TwitchDownloaderCore.Tools;
+﻿using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Options
 {

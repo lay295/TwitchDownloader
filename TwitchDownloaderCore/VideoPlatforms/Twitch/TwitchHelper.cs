@@ -792,7 +792,13 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
+
+            var chapterResponse = await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
+            chapterResponse.data.video.moments ??= new VideoMomentConnection
+            {
+                edges = new List<VideoMomentEdge>()
+            };
+            return chapterResponse;
         }
 
         public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(int videoId, VideoInfo videoInfo)

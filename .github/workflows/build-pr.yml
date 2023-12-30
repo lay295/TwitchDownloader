@@ -22,7 +22,7 @@ jobs:
     - name: Restore Dependencies
       run: dotnet restore TwitchDownloaderWPF
     - name: Build Windows GUI
-      run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=Portable
     
     - name: Download FFmpeg To Workspace
       # You may pin to the exact commit or the version.
@@ -61,15 +61,15 @@ jobs:
     - name: Restore Dependencies
       run: dotnet restore TwitchDownloaderCLI
     - name: Build Windows CLI
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows -p:DebugType=Portable
     - name: Build Linux CLI
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Linux -p:DebugType=None -p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Linux -p:DebugType=Portable
     - name: Build LinuxAlpine CLI
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine -p:DebugType=None -p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxAlpine -p:DebugType=Portable
     - name: Build LinuxArm CLI
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm -p:DebugType=None -p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm -p:DebugType=Portable
     - name: Build LinuxArm64 CLI
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm64 -p:DebugType=None -p:DebugSymbols=false
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm64 -p:DebugType=Portable
         
     - name: Zip Windows CLI
       uses: vimtor/action-zip@v1
@@ -143,18 +143,30 @@ jobs:
     - name: Restore Dependencies
       run: dotnet restore TwitchDownloaderCLI
     - name: Build MacOS CLI
-      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=None -p:DebugSymbols=false
-      
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=Portable
+    - name: Build MacOSArm64 CLI
+      run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOSArm64 -p:DebugType=Portable
+
     - name: Zip MacOS CLI
       uses: vimtor/action-zip@v1
       with:
         files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOS"
         dest: TwitchDownloaderCLI-MacOS-x64.zip
 
+    - name: Zip MacOSArm64 CLI
+      uses: vimtor/action-zip@v1
+      with:
+        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOSArm64"
+        dest: TwitchDownloaderCLI-MacOSArm64.zip
+
     - name: Upload MacOS CLI Artifact Asset
       uses: actions/upload-artifact@v3
       with:
         name: TwitchDownloaderCLI-MacOS-x64.zip
         path: TwitchDownloaderCLI-MacOS-x64.zip
-    
 
+    - name: Upload MacOSArm64 CLI Artifact Asset
+      uses: actions/upload-artifact@v3
+      with:
+        name: TwitchDownloaderCLI-MacOSArm64.zip
+        path: TwitchDownloaderCLI-MacOSArm64.zip

@@ -8,7 +8,7 @@ namespace TwitchDownloaderCore.Tools
         // Note: The oldest VODs use 8-digit IDs (like 47560181). Currently, VODs use 10-digit, but we will support up to 11 for the future proofing.
         // The shortest word I have seen in the clip slugs was 3 characters long, so we can assume slugs must have a minimum of 9 characters
         private static readonly Regex TwitchVideoId = new(@"(?<=^|twitch\.tv\/videos\/)\d{8,11}(?=$|\?|\s)", RegexOptions.Compiled);
-        private static readonly Regex TwitchHighlightId = new(@"(?<=^|twitch\.tv\/\w+\/video\/)\d{8,11}(?=$|\?|\s)", RegexOptions.Compiled);
+        private static readonly Regex TwitchHighlightId = new(@"(?<=^|twitch\.tv\/\w+\/v(?:ideo)?\/)\d{8,11}(?=$|\?|\s)", RegexOptions.Compiled);
         private static readonly Regex TwitchClipId = new(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\w+\/clip\/)?)[\w-]{9,}(?=$|\?|\s)", RegexOptions.Compiled);
 
         // Kick clip IDs (excluding clip_) are currently, and seem to always have been, 26 digits long

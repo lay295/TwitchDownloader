@@ -402,7 +402,7 @@ namespace TwitchDownloaderCore
             ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, onlyFirstAndLastComments: false, getEmbeds: false, cancellationToken);
 
             // Append the new comment section
-            SortedSet<Comment> commentsSet = new SortedSet<Comment>(new SortedCommentComparer());
+            SortedSet<Comment> commentsSet = new SortedSet<Comment>(new CommentOffsetComparer());
             foreach (var comment in newChatRoot.comments)
             {
                 if (comment.content_offset_seconds < downloadOptions.CropEndingTime && comment.content_offset_seconds >= downloadOptions.CropBeginningTime)

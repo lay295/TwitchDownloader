@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
@@ -120,10 +121,11 @@ namespace TwitchDownloaderWPF
                 //Add video qualities to combo quality
                 foreach (var stream in videoPlaylist.Streams)
                 {
-                    if (!videoQualities.ContainsKey(stream.MediaInfo.Name))
+                    var userFriendlyName = stream.GetResolutionFramerateString();
+                    if (!videoQualities.ContainsKey(userFriendlyName))
                     {
-                        videoQualities.Add(stream.MediaInfo.Name, (stream.Path, stream.StreamInfo.Bandwidth));
-                        comboQuality.Items.Add(stream.MediaInfo.Name);
+                        videoQualities.Add(userFriendlyName, (stream.Path, stream.StreamInfo.Bandwidth));
+                        comboQuality.Items.Add(userFriendlyName);
                     }
                 }
 
@@ -225,26 +227,33 @@ namespace TwitchDownloaderWPF
                 ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value)
                 : vodLength;
 
-            for (int i = 0; i < comboQuality.Items.Count; i++)
+            for (var i = 0; i < comboQuality.Items.Count; i++)
             {
                 var qualityWithSize = (string)comboQuality.Items[i];
-                var quality = GetQualityWithoutSize(qualityWithSize).ToString();
-                int bandwidth = videoQualities[quality].bandwidth;
+                var quality = GetQualityWithoutSize(qualityWithSize);
+                var bandwidth = videoQualities[quality].bandwidth;
 
                 var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth, cropStart, cropEnd);
-                var newVideoSize = VideoSizeEstimator.StringifyByteCount(sizeInBytes);
-                comboQuality.Items[i] = $"{quality} - {newVideoSize}";
+                if (sizeInBytes == 0)
+                {
+                    comboQuality.Items[i] = quality;
+                }
+                else
+                {
+                    var newVideoSize = VideoSizeEstimator.StringifyByteCount(sizeInBytes);
+                    comboQuality.Items[i] = $"{quality} - {newVideoSize}";
+                }
             }
 
             comboQuality.SelectedIndex = selectedIndex;
         }
 
-        private static ReadOnlySpan<char> GetQualityWithoutSize(string qualityWithSize)
+        private static string GetQualityWithoutSize(string qualityWithSize)
         {
             var qualityIndex = qualityWithSize.LastIndexOf(" - ", StringComparison.Ordinal);
             return qualityIndex == -1
-                ? qualityWithSize.AsSpan()
-                : qualityWithSize.AsSpan(0, qualityIndex);
+                ? qualityWithSize
+                : qualityWithSize[..qualityIndex];
         }
 
         private void OnProgressChanged(ProgressReport progress)

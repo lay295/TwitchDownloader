@@ -29,6 +29,7 @@ namespace TwitchDownloaderCore.Tests
         [InlineData("https://www.twitch.tv/videos/6834869128", "6834869128", VideoPlatform.Twitch)] // Current VODs - 10
         [InlineData("https://www.twitch.tv/videos/11987163407", "11987163407", VideoPlatform.Twitch)] // Future VODs - 11
         [InlineData("https://www.twitch.tv/kitboga/video/2865132173", "2865132173", VideoPlatform.Twitch)] // Alternate highlight URL
+        [InlineData("https://www.twitch.tv/kitboga/v/2865132173", "2865132173", VideoPlatform.Twitch)] // Alternate highlight URL
         public void CorrectlyParsesVodLink(string link, string expectedId, VideoPlatform expectedPlatform)
         {
             var success = IdParse.TryParseVod(link, out var videoPlatform, out var videoId);
@@ -96,6 +97,7 @@ namespace TwitchDownloaderCore.Tests
         [InlineData("https://www.twitch.tv/videos/6834869128", "6834869128", VideoType.Video, VideoPlatform.Twitch)] // Current VODs - 10
         [InlineData("https://www.twitch.tv/videos/11987163407", "11987163407", VideoType.Video, VideoPlatform.Twitch)] // Future VODs - 11
         [InlineData("https://www.twitch.tv/kitboga/video/2865132173", "2865132173", VideoType.Video, VideoPlatform.Twitch)] // Alternate highlight URL
+        [InlineData("https://www.twitch.tv/kitboga/v/2865132173", "2865132173", VideoType.Video, VideoPlatform.Twitch)] // Alternate VOD URL
         [InlineData("https://kick.com/streamer8?clip=clip_F786F81SF785610534215S23D0", "clip_F786F81SF785610534215S23D0", VideoType.Clip, VideoPlatform.Kick)]
         [InlineData("https://www.twitch.tv/streamer8/clip/SpineyPieTwitchRPGNurturing", "SpineyPieTwitchRPGNurturing", VideoType.Clip, VideoPlatform.Twitch)]
         [InlineData("https://www.twitch.tv/streamer8/clip/FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf", "FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf", VideoType.Clip, VideoPlatform.Twitch)]

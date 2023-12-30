@@ -39,7 +39,14 @@ namespace TwitchDownloaderCore.Chat
                 else if (timeFormat == TimestampFormat.Relative)
                 {
                     var time = TimeSpan.FromSeconds(comment.content_offset_seconds);
-                    await sw.WriteLineAsync(string.Create(TimeSpanHFormat.ReusableInstance, @$"[{time:H\:mm\:ss}] {username}: {message}"));
+                    if (time.Ticks < 24 * TimeSpan.TicksPerHour)
+                    {
+                        await sw.WriteLineAsync(@$"[{time:h\:mm\:ss}] {username}: {message}");
+                    }
+                    else
+                    {
+                        await sw.WriteLineAsync(string.Create(TimeSpanHFormat.ReusableInstance, @$"[{time:H\:mm\:ss}] {username}: {message}"));
+                    }
                 }
                 else if (timeFormat == TimestampFormat.None)
                 {
