@@ -123,17 +123,13 @@ namespace TwitchDownloaderCore.Tools
         private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtMediaInfo extMediaInfo, ref Stream.ExtStreamInfo extStreamInfo,
             ref DateTimeOffset extProgramDateTime, ref Stream.ExtByteRange byteRange, ref Stream.ExtPartInfo extPartInfo)
         {
-            const string MEDIA_INFO_KEY = "#EXT-X-MEDIA:";
-            const string STREAM_INFO_KEY = "#EXT-X-STREAM-INF:";
             const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
-            const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
-            const string PART_INFO_KEY = "#EXTINF:";
             const string END_LIST_KEY = "#EXT-X-ENDLIST";
-            if (text.StartsWith(MEDIA_INFO_KEY))
+            if (text.StartsWith(Stream.ExtMediaInfo.MEDIA_INFO_KEY))
             {
                 extMediaInfo = Stream.ExtMediaInfo.Parse(text);
             }
-            else if (text.StartsWith(STREAM_INFO_KEY))
+            else if (text.StartsWith(Stream.ExtStreamInfo.STREAM_INFO_KEY))
             {
                 extStreamInfo = Stream.ExtStreamInfo.Parse(text);
             }
@@ -141,11 +137,11 @@ namespace TwitchDownloaderCore.Tools
             {
                 extProgramDateTime = ParsingHelpers.ParseDateTimeOffset(text, PROGRAM_DATE_TIME_KEY);
             }
-            else if (text.StartsWith(BYTE_RANGE_KEY))
+            else if (text.StartsWith(Stream.ExtByteRange.BYTE_RANGE_KEY))
             {
                 byteRange = Stream.ExtByteRange.Parse(text);
             }
-            else if (text.StartsWith(PART_INFO_KEY))
+            else if (text.StartsWith(Stream.ExtPartInfo.PART_INFO_KEY))
             {
                 extPartInfo = Stream.ExtPartInfo.Parse(text);
             }
@@ -316,12 +312,13 @@ namespace TwitchDownloaderCore.Tools
 
             public readonly record struct ExtByteRange(uint Start, uint Length)
             {
-                public static implicit operator ExtByteRange((uint start, uint length) tuple) => new(tuple.start, tuple.length);
-                public override string ToString() => $"#EXT-X-BYTERANGE:{Start}@{Length}";
+                internal const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
+
+                public override string ToString() => $"{BYTE_RANGE_KEY}{Start}@{Length}";
 
                 public static ExtByteRange Parse(ReadOnlySpan<char> text)
                 {
-                    if (text.StartsWith("#EXT-X-BYTERANGE:"))
+                    if (text.StartsWith(BYTE_RANGE_KEY))
                         text = text[17..];
 
                     var separatorIndex = text.IndexOf('@');
@@ -336,6 +333,8 @@ namespace TwitchDownloaderCore.Tools
 
                     return new ExtByteRange(start, end);
                 }
+
+                public static implicit operator ExtByteRange((uint start, uint length) tuple) => new(tuple.start, tuple.length);
             }
 
             public sealed class ExtMediaInfo
@@ -346,6 +345,8 @@ namespace TwitchDownloaderCore.Tools
                     Video,
                     Audio
                 }
+
+                internal const string MEDIA_INFO_KEY = "#EXT-X-MEDIA:";
 
                 private ExtMediaInfo() { }
 
@@ -366,7 +367,7 @@ namespace TwitchDownloaderCore.Tools
 
                 public override string ToString()
                 {
-                    var sb = new StringBuilder("#EXT-X-MEDIA:");
+                    var sb = new StringBuilder(MEDIA_INFO_KEY);
 
                     if (Type != MediaType.Unknown)
                     {
@@ -408,7 +409,7 @@ namespace TwitchDownloaderCore.Tools
                 {
                     var mediaInfo = new ExtMediaInfo();
 
-                    if (text.StartsWith("#EXT-X-MEDIA:"))
+                    if (text.StartsWith(MEDIA_INFO_KEY))
                         text = text[13..];
 
                     const string KEY_TYPE = "TYPE=";
@@ -462,8 +463,6 @@ namespace TwitchDownloaderCore.Tools
             {
                 public readonly record struct StreamResolution(uint Width, uint Height)
                 {
-                    public static implicit operator StreamResolution((uint width, uint height) tuple) => new(tuple.width, tuple.height);
-
                     public override string ToString() => $"{Width}x{Height}";
 
                     public static StreamResolution Parse(ReadOnlySpan<char> text)
@@ -483,7 +482,11 @@ namespace TwitchDownloaderCore.Tools
 
                         return new StreamResolution(width, height);
                     }
+
+                    public static implicit operator StreamResolution((uint width, uint height) tuple) => new(tuple.width, tuple.height);
                 }
+
+                internal const string STREAM_INFO_KEY = "#EXT-X-STREAM-INF:";
 
                 private ExtStreamInfo() { }
 
@@ -506,7 +509,7 @@ namespace TwitchDownloaderCore.Tools
 
                 public override string ToString()
                 {
-                    var sb = new StringBuilder("#EXT-X-STREAM-INF:");
+                    var sb = new StringBuilder(STREAM_INFO_KEY);
 
                     if (ProgramId != default)
                     {
@@ -556,7 +559,7 @@ namespace TwitchDownloaderCore.Tools
                 {
                     var streamInfo = new ExtStreamInfo();
 
-                    if (text.StartsWith("#EXT-X-STREAM-INF:"))
+                    if (text.StartsWith(STREAM_INFO_KEY))
                         text = text[18..];
 
                     const string KEY_PROGRAM_ID = "PROGRAM-ID=";
@@ -614,6 +617,8 @@ namespace TwitchDownloaderCore.Tools
 
             public sealed record ExtPartInfo
             {
+                internal const string PART_INFO_KEY = "#EXTINF:";
+
                 private ExtPartInfo() { }
 
                 public ExtPartInfo(decimal duration, bool live)
@@ -625,13 +630,13 @@ namespace TwitchDownloaderCore.Tools
                 public decimal Duration { get; private set; }
                 public bool Live { get; private set; }
 
-                public override string ToString() => $"#EXTINF:{Duration},{(Live ? "live" : "")}";
+                public override string ToString() => $"{PART_INFO_KEY}{Duration},{(Live ? "live" : "")}";
 
                 public static ExtPartInfo Parse(ReadOnlySpan<char> text)
                 {
                     var partInfo = new ExtPartInfo();
 
-                    if (text.StartsWith("#EXTINF:"))
+                    if (text.StartsWith(PART_INFO_KEY))
                         text = text[8..];
 
                     do
