@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderCore.Tools
@@ -10,9 +11,51 @@ namespace TwitchDownloaderCore.Tools
     // ReSharper disable StringLiteralTypo
     public sealed record M3U8(M3U8.Metadata FileMetadata, M3U8.Stream[] Streams)
     {
+        public static M3U8 Parse(System.IO.Stream stream, Encoding streamEncoding, string basePath = "")
+        {
+            var sr = new StreamReader(stream, streamEncoding);
+            if (!ParsingHelpers.TryParseM3UHeader(sr.ReadLine(), out _))
+            {
+                throw new FormatException("Invalid playlist, M3U header is missing.");
+            }
+
+            var streams = new List<Stream>();
+
+            Stream.ExtMediaInfo currentExtMediaInfo = null;
+            Stream.ExtStreamInfo currentExtStreamInfo = null;
+
+            Metadata.Builder metadataBuilder = new();
+            DateTimeOffset currentExtProgramDateTime = default;
+            Stream.ExtByteRange currentByteRange = default;
+            Stream.ExtPartInfo currentExtPartInfo = null;
+
+            while (sr.ReadLine() is { } line)
+            {
+                if (line[0] != '#')
+                {
+                    var path = Path.Combine(basePath, line);
+                    streams.Add(new Stream(currentExtMediaInfo, currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
+                    currentExtMediaInfo = null;
+                    currentExtStreamInfo = null;
+                    currentExtProgramDateTime = default;
+                    currentByteRange = default;
+                    currentExtPartInfo = null;
+
+                    continue;
+                }
+
+                if (!ParseM3U8Key(line, metadataBuilder, ref currentExtMediaInfo, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
+                {
+                    break;
+                }
+            }
+
+            return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
+        }
+
         public static M3U8 Parse(ReadOnlySpan<char> text, string basePath = "")
         {
-            if (!ParsingHelpers.TryParseM3UHeader(ref text))
+            if (!ParsingHelpers.TryParseM3UHeader(text, out text))
             {
                 throw new FormatException("Invalid playlist, M3U header is missing.");
             }
@@ -63,47 +106,55 @@ namespace TwitchDownloaderCore.Tools
                     continue;
                 }
 
-                const string MEDIA_INFO_KEY = "#EXT-X-MEDIA:";
-                const string STREAM_INFO_KEY = "#EXT-X-STREAM-INF:";
-                const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
-                const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
-                const string PART_INFO_KEY = "#EXTINF:";
-                const string END_LIST_KEY = "#EXT-X-ENDLIST";
-                if (workingSlice.StartsWith(MEDIA_INFO_KEY))
-                {
-                    currentExtMediaInfo = Stream.ExtMediaInfo.Parse(workingSlice);
-                }
-                else if (workingSlice.StartsWith(STREAM_INFO_KEY))
-                {
-                    currentExtStreamInfo = Stream.ExtStreamInfo.Parse(workingSlice);
-                }
-                else if (workingSlice.StartsWith(PROGRAM_DATE_TIME_KEY))
-                {
-                    currentExtProgramDateTime = ParsingHelpers.ParseDateTimeOffset(workingSlice, PROGRAM_DATE_TIME_KEY);
-                }
-                else if (workingSlice.StartsWith(BYTE_RANGE_KEY))
-                {
-                    currentByteRange = Stream.ExtByteRange.Parse(workingSlice);
-                }
-                else if (workingSlice.StartsWith(PART_INFO_KEY))
-                {
-                    currentExtPartInfo = Stream.ExtPartInfo.Parse(workingSlice);
-                }
-                else if (workingSlice.StartsWith(END_LIST_KEY))
+                if (!ParseM3U8Key(workingSlice, metadataBuilder, ref currentExtMediaInfo, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
                 {
                     break;
-                }
-                else
-                {
-                    metadataBuilder.ParseAndAppend(workingSlice);
                 }
 
                 if (lineEnd == -1)
+                {
                     break;
-
+                }
             } while ((textStart += lineEnd) < textEnd);
 
             return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
+        }
+
+        private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtMediaInfo extMediaInfo, ref Stream.ExtStreamInfo extStreamInfo,
+            ref DateTimeOffset extProgramDateTime, ref Stream.ExtByteRange byteRange, ref Stream.ExtPartInfo extPartInfo)
+        {
+            const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
+            const string END_LIST_KEY = "#EXT-X-ENDLIST";
+            if (text.StartsWith(Stream.ExtMediaInfo.MEDIA_INFO_KEY))
+            {
+                extMediaInfo = Stream.ExtMediaInfo.Parse(text);
+            }
+            else if (text.StartsWith(Stream.ExtStreamInfo.STREAM_INFO_KEY))
+            {
+                extStreamInfo = Stream.ExtStreamInfo.Parse(text);
+            }
+            else if (text.StartsWith(PROGRAM_DATE_TIME_KEY))
+            {
+                extProgramDateTime = ParsingHelpers.ParseDateTimeOffset(text, PROGRAM_DATE_TIME_KEY);
+            }
+            else if (text.StartsWith(Stream.ExtByteRange.BYTE_RANGE_KEY))
+            {
+                byteRange = Stream.ExtByteRange.Parse(text);
+            }
+            else if (text.StartsWith(Stream.ExtPartInfo.PART_INFO_KEY))
+            {
+                extPartInfo = Stream.ExtPartInfo.Parse(text);
+            }
+            else if (text.StartsWith(END_LIST_KEY))
+            {
+                return false;
+            }
+            else
+            {
+                metadataBuilder.ParseAndAppend(text);
+            }
+
+            return true;
         }
 
         public sealed record Metadata
@@ -261,12 +312,13 @@ namespace TwitchDownloaderCore.Tools
 
             public readonly record struct ExtByteRange(uint Start, uint Length)
             {
-                public static implicit operator ExtByteRange((uint start, uint length) tuple) => new(tuple.start, tuple.length);
-                public override string ToString() => $"#EXT-X-BYTERANGE:{Start}@{Length}";
+                internal const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
+
+                public override string ToString() => $"{BYTE_RANGE_KEY}{Start}@{Length}";
 
                 public static ExtByteRange Parse(ReadOnlySpan<char> text)
                 {
-                    if (text.StartsWith("#EXT-X-BYTERANGE:"))
+                    if (text.StartsWith(BYTE_RANGE_KEY))
                         text = text[17..];
 
                     var separatorIndex = text.IndexOf('@');
@@ -281,6 +333,8 @@ namespace TwitchDownloaderCore.Tools
 
                     return new ExtByteRange(start, end);
                 }
+
+                public static implicit operator ExtByteRange((uint start, uint length) tuple) => new(tuple.start, tuple.length);
             }
 
             public sealed class ExtMediaInfo
@@ -291,6 +345,8 @@ namespace TwitchDownloaderCore.Tools
                     Video,
                     Audio
                 }
+
+                internal const string MEDIA_INFO_KEY = "#EXT-X-MEDIA:";
 
                 private ExtMediaInfo() { }
 
@@ -311,19 +367,49 @@ namespace TwitchDownloaderCore.Tools
 
                 public override string ToString()
                 {
+                    var sb = new StringBuilder(MEDIA_INFO_KEY);
+
+                    if (Type != MediaType.Unknown)
+                    {
+                        sb.Append("TYPE=");
+                        sb.Append(Type.ToString().ToUpper());
+                        sb.Append(",");
+                    }
+
+                    if (GroupId != null)
+                    {
+                        sb.Append("GROUP-ID=\"");
+                        sb.Append(GroupId);
+                        sb.Append("\",");
+                    }
+
+                    if (Name != null)
+                    {
+                        sb.Append("NAME=\"");
+                        sb.Append(Name);
+                        sb.Append("\",");
+                    }
+
+                    sb.Append("AUTOSELECT=");
+                    sb.Append(BooleanToWord(AutoSelect));
+                    sb.Append(",");
+
+                    sb.Append("DEFAULT=");
+                    sb.Append(BooleanToWord(Default));
+
+                    return sb.ToString();
+
                     static string BooleanToWord(bool b)
                     {
                         return b ? "YES" : "NO";
                     }
-
-                    return $"#EXT-X-MEDIA:TYPE={Type.ToString().ToUpper()},GROUP-ID=\"{GroupId}\",NAME=\"{Name}\",AUTOSELECT={BooleanToWord(AutoSelect)},DEFAULT={BooleanToWord(Default)}";
                 }
 
                 public static ExtMediaInfo Parse(ReadOnlySpan<char> text)
                 {
                     var mediaInfo = new ExtMediaInfo();
 
-                    if (text.StartsWith("#EXT-X-MEDIA:"))
+                    if (text.StartsWith(MEDIA_INFO_KEY))
                         text = text[13..];
 
                     const string KEY_TYPE = "TYPE=";
@@ -377,8 +463,6 @@ namespace TwitchDownloaderCore.Tools
             {
                 public readonly record struct StreamResolution(uint Width, uint Height)
                 {
-                    public static implicit operator StreamResolution((uint width, uint height) tuple) => new(tuple.width, tuple.height);
-
                     public override string ToString() => $"{Width}x{Height}";
 
                     public static StreamResolution Parse(ReadOnlySpan<char> text)
@@ -398,7 +482,11 @@ namespace TwitchDownloaderCore.Tools
 
                         return new StreamResolution(width, height);
                     }
+
+                    public static implicit operator StreamResolution((uint width, uint height) tuple) => new(tuple.width, tuple.height);
                 }
+
+                internal const string STREAM_INFO_KEY = "#EXT-X-STREAM-INF:";
 
                 private ExtStreamInfo() { }
 
@@ -419,13 +507,59 @@ namespace TwitchDownloaderCore.Tools
                 public string Video { get; private set; }
                 public decimal Framerate { get; private set; }
 
-                public override string ToString() => $"#EXT-X-STREAM-INF:PROGRAM-ID={ProgramId},BANDWIDTH={Bandwidth},CODECS=\"{Codecs}\",RESOLUTION={Resolution},VIDEO=\"{Video}\",FRAME-RATE={Framerate}";
+                public override string ToString()
+                {
+                    var sb = new StringBuilder(STREAM_INFO_KEY);
+
+                    if (ProgramId != default)
+                    {
+                        sb.Append("PROGRAM-ID=");
+                        sb.Append(ProgramId);
+                        sb.Append(",");
+                    }
+
+                    if (Bandwidth != default)
+                    {
+                        sb.Append("BANDWIDTH=");
+                        sb.Append(Bandwidth);
+                        sb.Append(",");
+                    }
+
+                    if (Codecs != null)
+                    {
+                        sb.Append("CODECS=\"");
+                        sb.Append(Codecs);
+                        sb.Append("\",");
+                    }
+
+                    if (Resolution != default)
+                    {
+                        sb.Append("RESOLUTION=");
+                        sb.Append(Resolution.ToString());
+                        sb.Append(",");
+                    }
+
+                    if (Video != null)
+                    {
+                        sb.Append("VIDEO=\"");
+                        sb.Append(Video);
+                        sb.Append("\",");
+                    }
+
+                    if (Framerate != default)
+                    {
+                        sb.Append("FRAME-RATE=");
+                        sb.Append(Framerate);
+                    }
+
+                    return sb.ToString();
+                }
 
                 public static ExtStreamInfo Parse(ReadOnlySpan<char> text)
                 {
                     var streamInfo = new ExtStreamInfo();
 
-                    if (text.StartsWith("#EXT-X-STREAM-INF:"))
+                    if (text.StartsWith(STREAM_INFO_KEY))
                         text = text[18..];
 
                     const string KEY_PROGRAM_ID = "PROGRAM-ID=";
@@ -470,12 +604,21 @@ namespace TwitchDownloaderCore.Tools
                         text = text[(nextIndex + 1)..];
                     } while (true);
 
+                    // Sometimes Twitch's M3U8 response lacks a Framerate value, among other things. We can just guess the framerate using the Video value.
+                    if (streamInfo.Framerate == 0 && Regex.IsMatch(streamInfo.Video, @"p\d+$", RegexOptions.RightToLeft))
+                    {
+                        var index = streamInfo.Video.LastIndexOf('p');
+                        streamInfo.Framerate = int.Parse(streamInfo.Video.AsSpan(index + 1));
+                    }
+
                     return streamInfo;
                 }
             }
 
             public sealed record ExtPartInfo
             {
+                internal const string PART_INFO_KEY = "#EXTINF:";
+
                 private ExtPartInfo() { }
 
                 public ExtPartInfo(decimal duration, bool live)
@@ -487,13 +630,13 @@ namespace TwitchDownloaderCore.Tools
                 public decimal Duration { get; private set; }
                 public bool Live { get; private set; }
 
-                public override string ToString() => $"#EXTINF:{Duration},{(Live ? "live" : "")}";
+                public override string ToString() => $"{PART_INFO_KEY}{Duration},{(Live ? "live" : "")}";
 
                 public static ExtPartInfo Parse(ReadOnlySpan<char> text)
                 {
                     var partInfo = new ExtPartInfo();
 
-                    if (text.StartsWith("#EXTINF:"))
+                    if (text.StartsWith(PART_INFO_KEY))
                         text = text[8..];
 
                     do
@@ -523,15 +666,16 @@ namespace TwitchDownloaderCore.Tools
 
         private static class ParsingHelpers
         {
-            public static bool TryParseM3UHeader(ref ReadOnlySpan<char> text)
+            public static bool TryParseM3UHeader(ReadOnlySpan<char> text, out ReadOnlySpan<char> textWithoutHeader)
             {
                 const string M3U_HEADER = "#EXTM3U";
                 if (!text.StartsWith(M3U_HEADER))
                 {
+                    textWithoutHeader = default;
                     return false;
                 }
 
-                text = text[7..].TrimStart(" \r\n");
+                textWithoutHeader = text[7..].TrimStart(" \r\n");
                 return true;
             }
 
