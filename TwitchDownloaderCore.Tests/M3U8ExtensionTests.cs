@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore.Tests
                     new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p60", 60),
                     "720p60"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p30", "720p30", true, true),
+                    new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p30", "720p", true, true),
                     new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p30", 30),
                     "720p30")
             });
