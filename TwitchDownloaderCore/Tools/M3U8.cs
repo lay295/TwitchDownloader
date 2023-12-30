@@ -366,12 +366,42 @@ namespace TwitchDownloaderCore.Tools
 
                 public override string ToString()
                 {
+                    var sb = new StringBuilder("#EXT-X-MEDIA:");
+
+                    if (Type != MediaType.Unknown)
+                    {
+                        sb.Append("TYPE=");
+                        sb.Append(Type.ToString().ToUpper());
+                        sb.Append(",");
+                    }
+
+                    if (GroupId != null)
+                    {
+                        sb.Append("GROUP-ID=\"");
+                        sb.Append(GroupId);
+                        sb.Append("\",");
+                    }
+
+                    if (Name != null)
+                    {
+                        sb.Append("NAME=\"");
+                        sb.Append(Name);
+                        sb.Append("\",");
+                    }
+
+                    sb.Append("AUTOSELECT=");
+                    sb.Append(BooleanToWord(AutoSelect));
+                    sb.Append(",");
+
+                    sb.Append("DEFAULT=");
+                    sb.Append(BooleanToWord(Default));
+
+                    return sb.ToString();
+
                     static string BooleanToWord(bool b)
                     {
                         return b ? "YES" : "NO";
                     }
-
-                    return $"#EXT-X-MEDIA:TYPE={Type.ToString().ToUpper()},GROUP-ID=\"{GroupId}\",NAME=\"{Name}\",AUTOSELECT={BooleanToWord(AutoSelect)},DEFAULT={BooleanToWord(Default)}";
                 }
 
                 public static ExtMediaInfo Parse(ReadOnlySpan<char> text)
@@ -474,7 +504,53 @@ namespace TwitchDownloaderCore.Tools
                 public string Video { get; private set; }
                 public decimal Framerate { get; private set; }
 
-                public override string ToString() => $"#EXT-X-STREAM-INF:PROGRAM-ID={ProgramId},BANDWIDTH={Bandwidth},CODECS=\"{Codecs}\",RESOLUTION={Resolution},VIDEO=\"{Video}\",FRAME-RATE={Framerate}";
+                public override string ToString()
+                {
+                    var sb = new StringBuilder("#EXT-X-STREAM-INF:");
+
+                    if (ProgramId != default)
+                    {
+                        sb.Append("PROGRAM-ID=");
+                        sb.Append(ProgramId);
+                        sb.Append(",");
+                    }
+
+                    if (Bandwidth != default)
+                    {
+                        sb.Append("BANDWIDTH=");
+                        sb.Append(Bandwidth);
+                        sb.Append(",");
+                    }
+
+                    if (Codecs != null)
+                    {
+                        sb.Append("CODECS=\"");
+                        sb.Append(Codecs);
+                        sb.Append("\",");
+                    }
+
+                    if (Resolution != default)
+                    {
+                        sb.Append("RESOLUTION=");
+                        sb.Append(Resolution.ToString());
+                        sb.Append(",");
+                    }
+
+                    if (Video != null)
+                    {
+                        sb.Append("VIDEO=\"");
+                        sb.Append(Video);
+                        sb.Append("\",");
+                    }
+
+                    if (Framerate != default)
+                    {
+                        sb.Append("FRAME-RATE=");
+                        sb.Append(Framerate);
+                    }
+
+                    return sb.ToString();
+                }
 
                 public static ExtStreamInfo Parse(ReadOnlySpan<char> text)
                 {
