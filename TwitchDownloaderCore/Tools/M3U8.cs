@@ -31,15 +31,17 @@ namespace TwitchDownloaderCore.Tools
 
             while (sr.ReadLine() is { } line)
             {
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
+                    continue;
+                }
+
                 if (line[0] != '#')
                 {
                     var path = Path.Combine(basePath, line);
                     streams.Add(new Stream(currentExtMediaInfo, currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
-                    currentExtMediaInfo = null;
-                    currentExtStreamInfo = null;
-                    currentExtProgramDateTime = default;
-                    currentByteRange = default;
-                    currentExtPartInfo = null;
+                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
 
                     continue;
                 }
@@ -90,15 +92,17 @@ namespace TwitchDownloaderCore.Tools
                 if (lineEnd != -1)
                     workingSlice = workingSlice[..lineEnd];
 
+                if (workingSlice.IsWhiteSpace())
+                {
+                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
+                    continue;
+                }
+
                 if (workingSlice[0] != '#')
                 {
                     var path = Path.Combine(basePath, workingSlice.ToString());
                     streams.Add(new Stream(currentExtMediaInfo, currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
-                    currentExtMediaInfo = null;
-                    currentExtStreamInfo = null;
-                    currentExtProgramDateTime = default;
-                    currentByteRange = default;
-                    currentExtPartInfo = null;
+                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
 
                     if (lineEnd == -1)
                         break;
@@ -118,6 +122,16 @@ namespace TwitchDownloaderCore.Tools
             } while ((textStart += lineEnd) < textEnd);
 
             return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
+        }
+
+        private static void ClearStreamMetadata(out Stream.ExtMediaInfo currentExtMediaInfo, out Stream.ExtStreamInfo currentExtStreamInfo, out DateTimeOffset currentExtProgramDateTime,
+            out Stream.ExtByteRange currentByteRange, out Stream.ExtPartInfo currentExtPartInfo)
+        {
+            currentExtMediaInfo = null;
+            currentExtStreamInfo = null;
+            currentExtProgramDateTime = default;
+            currentByteRange = default;
+            currentExtPartInfo = null;
         }
 
         private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtMediaInfo extMediaInfo, ref Stream.ExtStreamInfo extStreamInfo,
