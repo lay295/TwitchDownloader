@@ -147,7 +147,7 @@ namespace TwitchDownloaderCore
 
         private async Task EncodeClipWithMetadata(string inputFile, string destinationFile, Clip clipMetadata, VideoMomentEdge clipChapter, CancellationToken cancellationToken)
         {
-            var metadataFile = $"{Path.GetFileName(inputFile)}_metadata.txt";
+            var metadataFile = $"{inputFile}_metadata.txt";
 
             try
             {
