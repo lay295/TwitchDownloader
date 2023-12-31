@@ -7,8 +7,8 @@ namespace TwitchDownloaderCore.Tools
         public static string StringifyByteCount(long sizeInBytes)
         {
             const long ONE_KIBIBYTE = 1024;
-            const long ONE_MEBIBYTE = 1_048_576;
-            const long ONE_GIBIBYTE = 1_073_741_824;
+            const long ONE_MEBIBYTE = ONE_KIBIBYTE * 1024;
+            const long ONE_GIBIBYTE = ONE_MEBIBYTE * 1024;
 
             return sizeInBytes switch
             {

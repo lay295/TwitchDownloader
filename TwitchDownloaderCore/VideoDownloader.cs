@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
@@ -572,17 +573,7 @@ namespace TwitchDownloaderCore
 
             var m3u8 = M3U8.Parse(playlistString);
 
-            for (var i = m3u8.Streams.Length - 1; i >= 0; i--)
-            {
-                var m3u8Stream = m3u8.Streams[i];
-                if (m3u8Stream.MediaInfo.Name.StartsWith(downloadOptions.Quality, StringComparison.OrdinalIgnoreCase))
-                {
-                    return m3u8.Streams[i];
-                }
-            }
-
-            // Unable to find specified quality, default to highest quality
-            return m3u8.Streams[0];
+            return m3u8.GetStreamOfQuality(downloadOptions.Quality);
         }
 
         /// <summary>

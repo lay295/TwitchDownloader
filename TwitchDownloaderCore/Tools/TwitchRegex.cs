@@ -7,7 +7,7 @@ namespace TwitchDownloaderCore.Tools
     {
         // TODO: Use source generators when .NET7
         private static readonly Regex VideoId = new(@"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?|\s)", RegexOptions.Compiled);
-        private static readonly Regex HighlightId = new(@"(?<=^|twitch\.tv\/\w+\/video\/)\d+(?=$|\?|\s)", RegexOptions.Compiled);
+        private static readonly Regex HighlightId = new(@"(?<=^|twitch\.tv\/\w+\/v(?:ideo)?\/)\d+(?=$|\?|\s)", RegexOptions.Compiled);
         private static readonly Regex ClipId = new(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\w+\/clip\/)?)[\w-]+?(?=$|\?|\s)", RegexOptions.Compiled);
 
         public static readonly Regex UrlTimeCode = new(@"(?<=(?:\?|&)t=)\d+h\d+m\d+s(?=$|\?|\s)", RegexOptions.Compiled);
