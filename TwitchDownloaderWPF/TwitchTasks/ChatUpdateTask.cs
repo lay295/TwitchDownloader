@@ -17,11 +17,18 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public ITwitchTask DependantTask { get; set; }
         public string TaskType { get; } = Translations.Strings.ChatUpdate;
         public TwitchTaskException Exception { get; private set; } = new();
+        public string OutputFile => UpdateOptions.OutputFile;
+        public bool CanCancel { get; private set; } = true;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Cancel()
         {
+            if (!CanCancel)
+            {
+                return;
+            }
+
             try
             {
                 TokenSource.Cancel();
@@ -46,6 +53,12 @@ namespace TwitchDownloaderWPF.TwitchTasks
         {
             Status = newStatus;
             OnPropertyChanged(nameof(Status));
+
+            if (CanCancel && newStatus is TwitchTaskStatus.Canceled or TwitchTaskStatus.Failed or TwitchTaskStatus.Finished or TwitchTaskStatus.Stopping)
+            {
+                CanCancel = false;
+                OnPropertyChanged(nameof(CanCancel));
+            }
         }
 
         public async Task RunAsync()

@@ -24,10 +24,11 @@ namespace TwitchDownloaderWPF.TwitchTasks
         ITwitchTask DependantTask { get; set; }
         string TaskType { get; }
         TwitchTaskException Exception { get; }
+        string OutputFile { get; }
+        bool CanCancel { get; }
 
         Task RunAsync();
         void Cancel();
         bool CanRun();
-        void ChangeStatus(TwitchTaskStatus newStatus);
     }
 }
