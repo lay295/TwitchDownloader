@@ -807,4 +807,10 @@
   <data name="ButtonCancelSettingsChanges" xml:space="preserve">
     <value>Скасувати</value>
   </data>
+  <data name="ContextMenuRemoveTask" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="ContextMenuOpenTaskFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
 </root>
