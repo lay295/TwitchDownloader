@@ -149,12 +149,13 @@ namespace TwitchDownloaderCore
         {
             var metadataFile = $"{inputFile}_metadata.txt";
 
+            Process process = null;
             try
             {
                 await FfmpegMetadata.SerializeAsync(metadataFile, clipMetadata.broadcaster.displayName, downloadOptions.Id, clipMetadata.title, clipMetadata.createdAt, clipMetadata.viewCount,
                     videoMomentEdges: new[] { clipChapter }, cancellationToken: cancellationToken);
 
-                var process = new Process
+                process = new Process
                 {
                     StartInfo =
                     {
@@ -172,7 +173,6 @@ namespace TwitchDownloaderCore
                 process.BeginErrorReadLine();
 
                 // If the process has exited before we call WaitForExitAsync, the thread locks up.
-                // This was probably not intended by the .NET team, but it's an issue regardless.
                 if (process.HasExited)
                     return;
 
@@ -180,6 +180,12 @@ namespace TwitchDownloaderCore
             }
             finally
             {
+                if (process is { HasExited: false })
+                {
+                    process.Kill();
+                    await Task.Delay(100, cancellationToken);
+                }
+
                 File.Delete(metadataFile);
             }
         }
