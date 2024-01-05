@@ -169,6 +169,7 @@ namespace TwitchDownloaderCore
                 };
 
                 process.Start();
+                process.BeginErrorReadLine();
 
                 // If the process has exited before we call WaitForExitAsync, the thread locks up.
                 // This was probably not intended by the .NET team, but it's an issue regardless.
