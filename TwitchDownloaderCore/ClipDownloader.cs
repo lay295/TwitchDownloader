@@ -77,7 +77,7 @@ namespace TwitchDownloaderCore
                 if (!File.Exists(downloadOptions.Filename))
                 {
                     File.Move(tempFile, downloadOptions.Filename);
-                    throw new FileNotFoundException("Unable to serialize metadata (is FFmpeg missing?). The download has been completed without custom metadata.");
+                    _progress.Report(new ProgressReport(ReportType.Log, "Unable to serialize metadata. The download has been completed without custom metadata."));
                 }
 
                 _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Encoding Clip Metadata 100%"));
