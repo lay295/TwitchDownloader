@@ -29,11 +29,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            try
-            {
-                TokenSource.Cancel();
-            }
-            catch (ObjectDisposedException) { }
+            TokenSource.Cancel();
 
             if (Status == TwitchTaskStatus.Running)
             {
@@ -85,6 +81,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             if (TokenSource.IsCancellationRequested)
             {
                 TokenSource.Dispose();
+                ChangeStatus(TwitchTaskStatus.Canceled);
                 return;
             }
 
