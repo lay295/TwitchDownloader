@@ -199,9 +199,9 @@ namespace TwitchDownloaderWPF
             window.ShowDialog();
         }
 
-        private void btnCancelTask_Click(object sender, RoutedEventArgs e)
+        private void BtnCancelTask_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button { DataContext: ITwitchTask task } cancelButton))
+            if (sender is not Button { DataContext: ITwitchTask task })
             {
                 return;
             }
@@ -216,7 +216,7 @@ namespace TwitchDownloaderWPF
             task.Cancel();
         }
 
-        private void btnTaskError_Click(object sender, RoutedEventArgs e)
+        private void BtnTaskError_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button { DataContext: ITwitchTask task })
             {
@@ -239,7 +239,7 @@ namespace TwitchDownloaderWPF
             MessageBox.Show(errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        private void btnRemoveTask_Click(object sender, RoutedEventArgs e)
+        private void BtnRemoveTask_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button { DataContext: ITwitchTask task })
             {
