@@ -39,22 +39,22 @@
                             <Border BorderThickness="1" CornerRadius="8" Margin="8,8,8,8" Padding="4" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
                                 <Border.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Header="Cancel" Click="MenuItemCancelTask_Click" IsEnabled="{Binding CanCancel}" Foreground="{DynamicResource AppText}">
+                                        <MenuItem Header="{lex:Loc TaskCancel}" Click="MenuItemCancelTask_Click" IsEnabled="{Binding CanCancel}" Foreground="{DynamicResource AppText}">
                                             <MenuItem.Icon>
                                                 <fa:SvgAwesome Icon="Solid_StopCircle" Foreground="{DynamicResource AppText}" />
                                             </MenuItem.Icon>
                                         </MenuItem>
-                                        <MenuItem Header="Error" Click="MenuItemTaskError_Click" Visibility="{Binding Exception.Visibility}" Foreground="{DynamicResource AppText}">
+                                        <MenuItem Header="{lex:Loc TaskErrorButton}" Click="MenuItemTaskError_Click" Visibility="{Binding Exception.Visibility}" Foreground="{DynamicResource AppText}">
                                             <MenuItem.Icon>
                                                 <fa:SvgAwesome Icon="Solid_ExclamationTriangle" Foreground="{DynamicResource AppText}" />
                                             </MenuItem.Icon>
                                         </MenuItem>
-                                        <MenuItem Header="Remove" Click="MenuItemRemoveTask_Click" Foreground="{DynamicResource AppText}">
+                                        <MenuItem Header="{lex:Loc ContextMenuRemoveTask}" Click="MenuItemRemoveTask_Click" Foreground="{DynamicResource AppText}">
                                             <MenuItem.Icon>
                                                 <fa:SvgAwesome Icon="Solid_Times" Foreground="{DynamicResource AppText}" />
                                             </MenuItem.Icon>
                                         </MenuItem>
-                                        <MenuItem Header="Open folder" Click="MenuItemOpenTaskFolder_Click" Foreground="{DynamicResource AppText}">
+                                        <MenuItem Header="{lex:Loc ContextMenuOpenTaskFolder}" Click="MenuItemOpenTaskFolder_Click" Foreground="{DynamicResource AppText}">
                                             <MenuItem.Icon>
                                                 <fa:SvgAwesome Icon="Solid_FolderOpen" Foreground="{DynamicResource AppText}" />
                                             </MenuItem.Icon>
