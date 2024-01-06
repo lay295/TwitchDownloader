@@ -32,6 +32,11 @@ namespace TwitchDownloaderCore.Extensions
                 throw new ArgumentException(nameof(m3u8), "M3U8 does not contain any streams.");
             }
 
+            if (qualityString is null)
+            {
+                return streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate);
+            }
+
             if (qualityString.Contains("audio", StringComparison.OrdinalIgnoreCase) &&
                 streams.FirstOrDefault(x => x.MediaInfo.Name.Contains("audio", StringComparison.OrdinalIgnoreCase)) is { } audioStream)
             {
