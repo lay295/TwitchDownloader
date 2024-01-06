@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -149,7 +151,7 @@ namespace TwitchDownloaderCore.Tools
             }
             else if (text.StartsWith(PROGRAM_DATE_TIME_KEY))
             {
-                extProgramDateTime = ParsingHelpers.ParseDateTimeOffset(text, PROGRAM_DATE_TIME_KEY);
+                extProgramDateTime = ParsingHelpers.ParseDateTimeOffset(text, PROGRAM_DATE_TIME_KEY, false);
             }
             else if (text.StartsWith(Stream.ExtByteRange.BYTE_RANGE_KEY))
             {
@@ -588,11 +590,11 @@ namespace TwitchDownloaderCore.Tools
 
                         if (text.StartsWith(KEY_PROGRAM_ID))
                         {
-                            streamInfo.ProgramId = ParsingHelpers.ParseIntValue(text, KEY_PROGRAM_ID);
+                            streamInfo.ProgramId = ParsingHelpers.ParseIntValue(text, KEY_PROGRAM_ID, false);
                         }
                         else if (text.StartsWith(KEY_BANDWIDTH))
                         {
-                            streamInfo.Bandwidth = ParsingHelpers.ParseIntValue(text, KEY_BANDWIDTH);
+                            streamInfo.Bandwidth = ParsingHelpers.ParseIntValue(text, KEY_BANDWIDTH, false);
                         }
                         else if (text.StartsWith(KEY_CODECS))
                         {
@@ -608,7 +610,7 @@ namespace TwitchDownloaderCore.Tools
                         }
                         else if (text.StartsWith(KEY_FRAMERATE))
                         {
-                            streamInfo.Framerate = ParsingHelpers.ParseDecimalValue(text, KEY_FRAMERATE);
+                            streamInfo.Framerate = ParsingHelpers.ParseDecimalValue(text, KEY_FRAMERATE, false);
                         }
 
                         var nextIndex = text.UnEscapedIndexOf(',');
@@ -711,7 +713,7 @@ namespace TwitchDownloaderCore.Tools
                 return temp[..closeQuote].ToString();
             }
 
-            public static int ParseIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
+            public static int ParseIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
             {
                 var temp = text[keyName.Length..];
                 temp = temp[..NextKeyStart(temp)];
@@ -719,10 +721,13 @@ namespace TwitchDownloaderCore.Tools
                 if (int.TryParse(temp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue))
                     return intValue;
 
+                if (!strict)
+                    return default;
+
                 throw new FormatException($"Unable to parse integer from: {text}");
             }
 
-            public static uint ParseUIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
+            public static uint ParseUIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
             {
                 var temp = text[keyName.Length..];
                 temp = temp[..NextKeyStart(temp)];
@@ -730,10 +735,13 @@ namespace TwitchDownloaderCore.Tools
                 if (uint.TryParse(temp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var uIntValue))
                     return uIntValue;
 
+                if (!strict)
+                    return default;
+
                 throw new FormatException($"Unable to parse integer from: {text}");
             }
 
-            public static decimal ParseDecimalValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
+            public static decimal ParseDecimalValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
             {
                 var temp = text[keyName.Length..];
                 temp = temp[..NextKeyStart(temp)];
@@ -741,10 +749,13 @@ namespace TwitchDownloaderCore.Tools
                 if (decimal.TryParse(temp, NumberStyles.Number, CultureInfo.InvariantCulture, out var decimalValue))
                     return decimalValue;
 
+                if (!strict)
+                    return default;
+
                 throw new FormatException($"Unable to parse decimal from: {text}");
             }
 
-            public static bool ParseBooleanValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
+            public static bool ParseBooleanValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
             {
                 var temp = text[keyName.Length..];
 
@@ -759,6 +770,9 @@ namespace TwitchDownloaderCore.Tools
                 if (bool.TryParse(temp, out var booleanValue))
                     return booleanValue;
 
+                if (!strict)
+                    return default;
+
                 throw new FormatException($"Unable to parse boolean from: {text}");
             }
 
@@ -770,13 +784,16 @@ namespace TwitchDownloaderCore.Tools
                 return Stream.ExtStreamInfo.StreamResolution.Parse(temp);
             }
 
-            public static DateTimeOffset ParseDateTimeOffset(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
+            public static DateTimeOffset ParseDateTimeOffset(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
             {
                 var temp = text[keyName.Length..];
                 temp = temp[..NextKeyStart(temp)];
 
                 if (DateTimeOffset.TryParse(temp, out var dateTimeOffset))
                     return dateTimeOffset;
+
+                if (!strict)
+                    return default;
 
                 throw new FormatException($"Unable to parse DateTimeOffset from: {text}");
             }
