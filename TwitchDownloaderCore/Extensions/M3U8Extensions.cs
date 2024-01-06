@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore.Extensions
 
             if (qualityString is null)
             {
-                return streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate);
+                return m3u8.BestQualityStream();
             }
 
             if (qualityString.Contains("audio", StringComparison.OrdinalIgnoreCase) &&
@@ -57,7 +57,7 @@ namespace TwitchDownloaderCore.Extensions
             var qualityStringMatch = UserQualityStringRegex.Match(qualityString);
             if (!qualityStringMatch.Success)
             {
-                return streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate);
+                return m3u8.BestQualityStream();
             }
 
             var desiredWidth = qualityStringMatch.Groups["Width"];
@@ -74,7 +74,7 @@ namespace TwitchDownloaderCore.Extensions
             {
                 1 => filteredStreams[0],
                 2 when !desiredFramerate.Success => filteredStreams.First(x => Math.Abs(x.StreamInfo.Framerate - 30) <= 2),
-                _ => streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate)
+                _ => m3u8.BestQualityStream()
             };
         }
 
@@ -117,6 +117,15 @@ namespace TwitchDownloaderCore.Extensions
             var frameRate = (uint)(Math.Round(streamInfo.Framerate / 10) * 10);
 
             return $"{frameHeight}p{frameRate}";
+        }
+
+        /// <summary>
+        /// Returns the best quality stream from the provided M3U8.
+        /// </summary>
+        public static M3U8.Stream BestQualityStream(this M3U8 m3u8)
+        {
+            var source = Array.Find(m3u8.Streams, x => x.MediaInfo.Name.Equals("source", StringComparison.OrdinalIgnoreCase));
+            return source ?? m3u8.Streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate);
         }
     }
 }
