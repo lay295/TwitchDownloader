@@ -74,7 +74,11 @@ namespace TwitchDownloaderWPF
                 Settings.Default.Save();
             }
 
-            var currentVersion = Version.Parse("1.53.6");
+            // Flash the window taskbar icon if it is not in the foreground. This is to mitigate a problem where
+            // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
+            FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
+
+            var currentVersion = Version.Parse("1.53.9");
             Title = $"Twitch Downloader v{currentVersion}";
 
             // TODO: extract FFmpeg handling to a dedicated service
@@ -84,6 +88,9 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full, new FfmpegDownloadProgress());
+
+                    // Flash the window to signify that FFmpeg has been downloaded
+                    FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
                 }
                 catch (Exception ex)
                 {
@@ -102,10 +109,6 @@ namespace TwitchDownloaderWPF
                 Title = oldTitle;
             }
 
-            // Flash the window taskbar icon if it is not in the foreground. This is to mitigate a problem where
-            // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
-            await FlashWindowIfNotForeground(TimeSpan.FromSeconds(3));
-
             AutoUpdater.InstalledVersion = currentVersion;
 #if !DEBUG
             if (AppContext.BaseDirectory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
@@ -117,7 +120,7 @@ namespace TwitchDownloaderWPF
 #endif
         }
 
-        private async Task FlashWindowIfNotForeground(TimeSpan flashDuration)
+        private async void FlashTaskbarIconIfNotForeground(TimeSpan flashDuration)
         {
             var currentWindow = new WindowInteropHelper(this).Handle;
             var foregroundWindow = NativeFunctions.GetForegroundWindow();

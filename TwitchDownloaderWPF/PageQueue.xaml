@@ -37,6 +37,30 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="1" CornerRadius="8" Margin="8,8,8,8" Padding="4" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+                                <Border.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="{lex:Loc TaskCancel}" Click="MenuItemCancelTask_Click" IsEnabled="{Binding CanCancel}" Foreground="{DynamicResource AppText}">
+                                            <MenuItem.Icon>
+                                                <fa:SvgAwesome Icon="Solid_StopCircle" Foreground="{DynamicResource AppText}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="{lex:Loc TaskErrorButton}" Click="MenuItemTaskError_Click" Visibility="{Binding Exception.Visibility}" Foreground="{DynamicResource AppText}">
+                                            <MenuItem.Icon>
+                                                <fa:SvgAwesome Icon="Solid_ExclamationTriangle" Foreground="{DynamicResource AppText}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="{lex:Loc ContextMenuRemoveTask}" Click="MenuItemRemoveTask_Click" Foreground="{DynamicResource AppText}">
+                                            <MenuItem.Icon>
+                                                <fa:SvgAwesome Icon="Solid_Times" Foreground="{DynamicResource AppText}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="{lex:Loc ContextMenuOpenTaskFolder}" Click="MenuItemOpenTaskFolder_Click" Foreground="{DynamicResource AppText}">
+                                            <MenuItem.Icon>
+                                                <fa:SvgAwesome Icon="Solid_FolderOpen" Foreground="{DynamicResource AppText}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Border.ContextMenu>
                                 <Grid Margin="1,1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto" />
@@ -49,12 +73,12 @@
                                         <TextBlock Text="{Binding TaskType, StringFormat=Task Type: {0}}" Foreground="{DynamicResource AppText}"></TextBlock>
                                         <TextBlock Text="{Binding Status, StringFormat=Status: {0}, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Foreground="{DynamicResource AppText}"></TextBlock>
                                         <StackPanel Orientation="Horizontal" Margin="1,1,0,1">
-                                            <Button Content="{lex:Loc TaskCancel}" Margin="0,0,4,0" MinWidth="60" Height="28" FontSize="12" Click="btnCancelTask_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
-                                            <Button Visibility="{Binding Exception.Visibility}" Content="{lex:Loc TaskErrorButton}" Margin="0,0,4,0" MinWidth="60" Height="28" FontSize="12" Click="btnTaskError_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
+                                            <Button Content="{lex:Loc TaskCancel}" Margin="0,0,4,0" MinWidth="60" Height="28" FontSize="12" Click="BtnCancelTask_Click" IsEnabled="{Binding CanCancel}" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
+                                            <Button Visibility="{Binding Exception.Visibility}" Content="{lex:Loc TaskErrorButton}" Margin="0,0,4,0" MinWidth="60" Height="28" FontSize="12" Click="BtnTaskError_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
                                             <ProgressBar Height="16" Width="200" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Background="{DynamicResource AppElementInnerBackground}" Foreground="{DynamicResource ProgressBarForeground}" />
                                         </StackPanel>
                                     </StackPanel>
-                                    <Button Grid.Column="2" Padding="7, 0" VerticalAlignment="Top" Height="24" FontSize="12" Content="X" Click="btnRemoveTask_Click" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppTextDisabled}" BorderBrush="{DynamicResource AppElementBorder}" />
+                                    <Button Grid.Column="2" Padding="7, 0" VerticalAlignment="Top" Height="24" FontSize="12" Content="X" Click="BtnRemoveTask_Click" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppTextDisabled}" BorderBrush="{DynamicResource AppElementBorder}" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
