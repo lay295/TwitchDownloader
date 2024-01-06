@@ -103,6 +103,8 @@ namespace TwitchDownloaderCore.Tests
         [InlineData("480p60", "1080p60")]
         [InlineData("852x480p60", "1080p60")]
         [InlineData("Source", "1080p60")]
+        [InlineData("", "1080p60")]
+        [InlineData(null, "1080p60")]
         public static void ReturnsHighestQualityWhenDesiredQualityNotFoundForOldM3U8Response(string qualityString, string expectedPath)
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), new[]
