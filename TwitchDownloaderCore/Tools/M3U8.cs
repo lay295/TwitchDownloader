@@ -339,10 +339,10 @@ namespace TwitchDownloaderCore.Tools
                     if (separatorIndex == -1)
                         throw new FormatException($"Unable to parse ByteRange from {text}.");
 
-                    if (!uint.TryParse(text[..separatorIndex], out var start))
+                    if (!uint.TryParse(text[..separatorIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var start))
                         throw new FormatException($"Unable to parse ByteRange from {text}.");
 
-                    if (!uint.TryParse(text[(separatorIndex + 1)..], out var end))
+                    if (!uint.TryParse(text[(separatorIndex + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var end))
                         throw new FormatException($"Unable to parse ByteRange from {text}.");
 
                     return new ExtByteRange(start, end);
@@ -488,10 +488,10 @@ namespace TwitchDownloaderCore.Tools
                         if (separatorIndex == -1 || separatorIndex == text.Length)
                             throw new FormatException($"Unable to parse Resolution from {text}.");
 
-                        if (!uint.TryParse(text[..separatorIndex], out var width))
+                        if (!uint.TryParse(text[..separatorIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var width))
                             throw new FormatException($"Unable to parse Resolution from {text}.");
 
-                        if (!uint.TryParse(text[(separatorIndex + 1)..], out var height))
+                        if (!uint.TryParse(text[(separatorIndex + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var height))
                             throw new FormatException($"Unable to parse Resolution from {text}.");
 
                         return new StreamResolution(width, height);
@@ -716,7 +716,7 @@ namespace TwitchDownloaderCore.Tools
                 var temp = text[keyName.Length..];
                 temp = temp[..NextKeyStart(temp)];
 
-                if (int.TryParse(temp, out var intValue))
+                if (int.TryParse(temp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue))
                     return intValue;
 
                 throw new FormatException($"Unable to parse integer from: {text}");
@@ -727,7 +727,7 @@ namespace TwitchDownloaderCore.Tools
                 var temp = text[keyName.Length..];
                 temp = temp[..NextKeyStart(temp)];
 
-                if (uint.TryParse(temp, out var uIntValue))
+                if (uint.TryParse(temp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var uIntValue))
                     return uIntValue;
 
                 throw new FormatException($"Unable to parse integer from: {text}");
@@ -738,7 +738,7 @@ namespace TwitchDownloaderCore.Tools
                 var temp = text[keyName.Length..];
                 temp = temp[..NextKeyStart(temp)];
 
-                if (decimal.TryParse(temp, out var decimalValue))
+                if (decimal.TryParse(temp, NumberStyles.Number, CultureInfo.InvariantCulture, out var decimalValue))
                     return decimalValue;
 
                 throw new FormatException($"Unable to parse decimal from: {text}");
