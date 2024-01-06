@@ -88,7 +88,7 @@ namespace TwitchDownloaderCore
                     .Take(videoListCrop.Start.Value)
                     .Sum(x => x.PartInfo.Duration);
 
-                startOffsetSeconds -= downloadOptions.CropBeginningTime;
+                startOffsetSeconds = downloadOptions.CropBeginningTime - startOffsetSeconds;
                 double seekDuration = Math.Round(downloadOptions.CropEndingTime - downloadOptions.CropBeginningTime);
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
