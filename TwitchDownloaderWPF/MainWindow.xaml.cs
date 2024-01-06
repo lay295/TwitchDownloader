@@ -78,7 +78,7 @@ namespace TwitchDownloaderWPF
             // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
             FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
 
-            var currentVersion = Version.Parse("1.53.8");
+            var currentVersion = Version.Parse("1.53.9");
             Title = $"Twitch Downloader v{currentVersion}";
 
             // TODO: extract FFmpeg handling to a dedicated service
