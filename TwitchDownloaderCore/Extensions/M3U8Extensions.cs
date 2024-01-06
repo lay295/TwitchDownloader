@@ -125,7 +125,7 @@ namespace TwitchDownloaderCore.Extensions
         public static M3U8.Stream BestQualityStream(this M3U8 m3u8)
         {
             var source = Array.Find(
-                m3u8.Streams, x => x.MediaInfo.Name.Equals("source", StringComparison.OrdinalIgnoreCase) ||
+                m3u8.Streams, x => x.MediaInfo.Name.Contains("source", StringComparison.OrdinalIgnoreCase) ||
                     x.MediaInfo.GroupId.Equals("chunked", StringComparison.OrdinalIgnoreCase));
             return source ?? m3u8.Streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate);
         }
