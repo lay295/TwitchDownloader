@@ -57,15 +57,49 @@ namespace TwitchDownloaderCore
 
         public static async Task<string> GetVideoPlaylist(int videoId, string token, string sig)
         {
-            var request = new HttpRequestMessage()
+            HttpRequestMessage request;
+            HttpResponseMessage response;
+            try
             {
-                RequestUri = new Uri($"https://usher.ttvnw.net/vod/{videoId}.m3u8?sig={sig}&token={token}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h264"),
-                Method = HttpMethod.Get
-            };
-            var response = await httpClient.SendAsync(request);
+                request = new HttpRequestMessage()
+                {
+                    RequestUri = new Uri($"https://usher.ttvnw.net/vod/{videoId}.m3u8?sig={sig}&token={token}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h264"),
+                    Method = HttpMethod.Get
+                };
+                response = await httpClient.SendAsync(request);
+            }
+            catch (Exception ex)
+            {
+                if (IsAuthException(ex))
+                {
+                    request = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri($"https://twitch-downloader-proxy.twitcharchives.workers.dev/{videoId}.m3u8?sig={sig}&token={token}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h264"),
+                        Method = HttpMethod.Get
+                    };
+                    response = await httpClient.SendAsync(request);
+                }
+                else
+                {
+                    throw;
+                }
+            }
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadAsStringAsync();
+        }
+
+        static bool IsAuthException(Exception ex)
+        {
+            while (ex != null)
+            {
+                if (ex is System.Security.Authentication.AuthenticationException)
+                {
+                    return true;
+                }
+                ex = ex.InnerException;
+            }
+            return false;
         }
 
         public static async Task<GqlClipResponse> GetClipInfo(object clipId)
