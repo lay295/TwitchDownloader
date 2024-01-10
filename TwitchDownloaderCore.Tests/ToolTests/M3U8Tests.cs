@@ -2,7 +2,7 @@
 using System.Text;
 using TwitchDownloaderCore.Tools;
 
-namespace TwitchDownloaderCore.Tests
+namespace TwitchDownloaderCore.Tests.ToolTests
 {
     // ReSharper disable StringLiteralTypo
     public class M3U8Tests

@@ -1,6 +1,6 @@
 using TwitchDownloaderCore.Tools;
 
-namespace TwitchDownloaderCore.Tests
+namespace TwitchDownloaderCore.Tests.ToolTests
 {
     // Important notes: When a TimeSpan less than 24 hours in length is passed to TimeSpanHFormat.Format, TimeSpan.ToString is used instead.
     // ReSharper disable StringLiteralTypo

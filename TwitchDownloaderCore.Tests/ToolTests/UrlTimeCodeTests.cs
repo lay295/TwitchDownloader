@@ -1,6 +1,6 @@
 using TwitchDownloaderCore.Tools;
 
-namespace TwitchDownloaderCore.Tests
+namespace TwitchDownloaderCore.Tests.ToolTests
 {
     public class UrlTimeCodeTests
     {
