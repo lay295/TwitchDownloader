@@ -1,7 +1,7 @@
 ﻿using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Tools;
 
-namespace TwitchDownloaderCore.Tests
+namespace TwitchDownloaderCore.Tests.ExtensionTests
 {
     public static class M3U8ExtensionTests
     {
