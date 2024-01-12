@@ -129,7 +129,11 @@ namespace TwitchDownloaderCore
             response.EnsureSuccessStatusCode();
 
             var gqlClipTokenResponses = await response.Content.ReadFromJsonAsync<GqlClipTokenResponse[]>();
-            Array.Sort(gqlClipTokenResponses[0].data.clip.videoQualities, new ClipQualityComparer());
+            if (gqlClipTokenResponses[0].data.clip.videoQualities is { Length: > 0})
+            {
+                Array.Sort(gqlClipTokenResponses[0].data.clip.videoQualities, new ClipQualityComparer());
+            }
+
             return gqlClipTokenResponses;
         }
 
