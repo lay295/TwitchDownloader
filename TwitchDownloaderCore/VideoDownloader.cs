@@ -56,7 +56,7 @@ namespace TwitchDownloaderCore
 
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(downloadOptions.Id, videoInfoResponse.data.video);
 
-                var qualityPlaylist = await GetQualityPlaylist(videoInfoResponse);
+                var qualityPlaylist = await GetQualityPlaylist();
 
                 var playlistUrl = qualityPlaylist.Path;
                 var baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
@@ -556,7 +556,7 @@ namespace TwitchDownloaderCore
             return new Range(startIndex, endIndex);
         }
 
-        private async Task<M3U8.Stream> GetQualityPlaylist(GqlVideoResponse videoInfo)
+        private async Task<M3U8.Stream> GetQualityPlaylist()
         {
             GqlVideoTokenResponse accessToken = await TwitchHelper.GetVideoToken(downloadOptions.Id, downloadOptions.Oauth);
 
