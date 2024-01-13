@@ -178,11 +178,11 @@ dotnet restore
 - Non-Windows devices may need to explicitly specify a project to restore, i.e. `dotnet restore TwitchDownloaderCLI`
 4. a) Build the GUI:
 ```
-dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
+dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
 4. b) Build the CLI:
 ```
-dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile> -p:DebugType=None -p:DebugSymbols=false
+dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 ```
 - Applicable Profiles: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
 5. a) Navigate to the GUI build folder:

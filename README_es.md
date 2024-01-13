@@ -164,13 +164,13 @@ dotnet restore
 ```
 4. a) Compila la GUI:
 ```
-dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
+dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
 4. b) Compila la CLI:
 ```
-dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Perfil> -p:DebugType=None -p:DebugSymbols=false
+dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Perfil>
 ```
-- Perfiles aplicables: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`
+- Perfiles aplicables: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
 5. a) Navega hasta la carpeta de la compilación de la GUI:
 ```
 cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64

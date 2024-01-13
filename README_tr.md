@@ -159,13 +159,13 @@ dotnet restore
 ```
 4. a) GUI'yi oluşturun:
 ```
-dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
+dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
 4. b) CLI'yi oluşturun:
 ```
-dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile> -p:DebugType=None -p:DebugSymbols=false
+dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 ```
-- Uygulanabilir Profiller: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`
+- Uygulanabilir Profiller: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
 5. a) GUI derleme klasörüne gidin:
 ```
 cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
