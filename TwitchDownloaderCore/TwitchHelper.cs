@@ -116,22 +116,22 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlClipResponse>();
         }
 
-        public static async Task<GqlClipTokenResponse[]> GetClipLinks(string clipId)
+        public static async Task<GqlClipTokenResponse> GetClipLinks(string clipId)
         {
             var request = new HttpRequestMessage()
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("[{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}]", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
-            var gqlClipTokenResponses = await response.Content.ReadFromJsonAsync<GqlClipTokenResponse[]>();
-            if (gqlClipTokenResponses[0].data.clip.videoQualities is { Length: > 0})
+            var gqlClipTokenResponses = await response.Content.ReadFromJsonAsync<GqlClipTokenResponse>();
+            if (gqlClipTokenResponses.data.clip.videoQualities is { Length: > 0 })
             {
-                Array.Sort(gqlClipTokenResponses[0].data.clip.videoQualities, new ClipQualityComparer());
+                Array.Sort(gqlClipTokenResponses.data.clip.videoQualities, new ClipQualityComparer());
             }
 
             return gqlClipTokenResponses;

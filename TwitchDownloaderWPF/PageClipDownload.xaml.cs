@@ -55,7 +55,7 @@ namespace TwitchDownloaderWPF
                 btnGetInfo.IsEnabled = false;
                 comboQuality.Items.Clear();
                 Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
-                Task<GqlClipTokenResponse[]> taskLinks = TwitchHelper.GetClipLinks(clipId);
+                Task<GqlClipTokenResponse> taskLinks = TwitchHelper.GetClipLinks(clipId);
                 await Task.WhenAll(taskClipInfo, taskLinks);
 
                 GqlClipResponse clipData = taskClipInfo.Result;
@@ -78,7 +78,7 @@ namespace TwitchDownloaderWPF
                 viewCount = taskClipInfo.Result.data.clip.viewCount;
                 game = taskClipInfo.Result.data.clip.game?.displayName ?? "Unknown";
 
-                foreach (var quality in taskLinks.Result[0].data.clip.videoQualities)
+                foreach (var quality in taskLinks.Result.data.clip.videoQualities)
                 {
                     comboQuality.Items.Add(new TwitchClip(quality.quality, Math.Round(quality.frameRate).ToString("F0"), quality.sourceURL));
                 }

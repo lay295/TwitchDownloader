@@ -92,7 +92,7 @@ namespace TwitchDownloaderCore
         private async Task<string> GetDownloadUrl()
         {
             var listLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
-            var clip = listLinks[0].data.clip;
+            var clip = listLinks.data.clip;
 
             if (clip.playbackAccessToken is null)
             {
