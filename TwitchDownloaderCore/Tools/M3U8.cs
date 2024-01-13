@@ -12,6 +12,27 @@ namespace TwitchDownloaderCore.Tools
     // ReSharper disable StringLiteralTypo
     public sealed record M3U8(M3U8.Metadata FileMetadata, M3U8.Stream[] Streams)
     {
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("#EXTM3U");
+
+            if (FileMetadata?.ToString() is { Length: > 0} metadataString)
+            {
+                sb.AppendLine(metadataString);
+            }
+
+            foreach (var stream in Streams)
+            {
+                sb.AppendLine(stream.ToString());
+            }
+
+            sb.Append("#EXT-X-ENDLIST");
+
+            return sb.ToString();
+        }
+
         public static M3U8 Parse(System.IO.Stream stream, Encoding streamEncoding, string basePath = "")
         {
             var sr = new StreamReader(stream, streamEncoding);
@@ -91,7 +112,7 @@ namespace TwitchDownloaderCore.Tools
                 var workingSlice = text[textStart..];
                 lineEnd = workingSlice.IndexOf('\n');
                 if (lineEnd != -1)
-                    workingSlice = workingSlice[..lineEnd];
+                    workingSlice = workingSlice[..lineEnd].TrimEnd('\r');
 
                 if (workingSlice.IsWhiteSpace())
                 {
@@ -181,6 +202,15 @@ namespace TwitchDownloaderCore.Tools
                 Event
             }
 
+            private const string TARGET_VERSION_KEY = "#EXT-X-VERSION:";
+            private const string TARGET_DURATION_KEY = "#EXT-X-TARGETDURATION:";
+            private const string PLAYLIST_TYPE_KEY = "#EXT-X-PLAYLIST-TYPE:";
+            private const string MEDIA_SEQUENCE_KEY = "#EXT-X-MEDIA-SEQUENCE:";
+            private const string TWITCH_LIVE_SEQUENCE_KEY = "#EXT-X-TWITCH-LIVE-SEQUENCE:";
+            private const string TWITCH_ELAPSED_SECS_KEY = "#EXT-X-TWITCH-ELAPSED-SECS:";
+            private const string TWITCH_TOTAL_SECS_KEY = "#EXT-X-TWITCH-TOTAL-SECS:";
+            private const string TWITCH_INFO_KEY = "#EXT-X-TWITCH-INFO:";
+
             // Generic M3U headers
             public uint Version { get; private set; }
             public uint StreamTargetDuration { get; private set; }
@@ -195,6 +225,40 @@ namespace TwitchDownloaderCore.Tools
             // Other headers that we don't have dedicated properties for. Useful for debugging.
             private readonly List<KeyValuePair<string, string>> _unparsedValues = new();
             public IReadOnlyList<KeyValuePair<string, string>> UnparsedValues => _unparsedValues;
+
+            public override string ToString()
+            {
+                var sb = new StringBuilder();
+                var itemSeparator = Environment.NewLine;
+
+                StringBuilderHelpers.AppendIfNotDefault(sb, TARGET_VERSION_KEY, Version, itemSeparator);
+                StringBuilderHelpers.AppendIfNotDefault(sb, TARGET_DURATION_KEY, StreamTargetDuration, itemSeparator);
+                if (Type != PlaylistType.Unknown)
+                {
+                    sb.Append(PLAYLIST_TYPE_KEY);
+                    sb.Append(Type.ToString().ToUpper());
+                    sb.Append(itemSeparator);
+                }
+
+                StringBuilderHelpers.AppendIfNotDefault(sb, MEDIA_SEQUENCE_KEY, MediaSequence, itemSeparator);
+                StringBuilderHelpers.AppendIfNotDefault(sb, TWITCH_LIVE_SEQUENCE_KEY, TwitchLiveSequence, itemSeparator);
+                StringBuilderHelpers.AppendIfNotDefault(sb, TWITCH_ELAPSED_SECS_KEY, TwitchElapsedSeconds, itemSeparator);
+                StringBuilderHelpers.AppendIfNotDefault(sb, TWITCH_TOTAL_SECS_KEY, TwitchTotalSeconds, itemSeparator);
+
+                foreach (var (key, value) in _unparsedValues)
+                {
+                    sb.Append(key);
+                    sb.Append(value);
+                    sb.Append(itemSeparator);
+                }
+
+                if (sb.Length == 0)
+                {
+                    return "";
+                }
+
+                return sb.ToString().AsSpan().TrimEnd(itemSeparator).ToString();
+            }
 
             public sealed class Builder
             {
@@ -214,26 +278,19 @@ namespace TwitchDownloaderCore.Tools
 
                 private void ParseAndAppendCore(ReadOnlySpan<char> text)
                 {
-                    _metadata ??= new Metadata();
-
-                    const string TARGET_VERSION_KEY = "#EXT-X-VERSION:";
-                    const string TARGET_DURATION_KEY = "#EXT-X-TARGETDURATION:";
-                    const string PLAYLIST_TYPE_KEY = "#EXT-X-PLAYLIST-TYPE:";
-                    const string MEDIA_SEQUENCE_KEY = "#EXT-X-MEDIA-SEQUENCE:";
-                    const string TWITCH_LIVE_SEQUENCE_KEY = "#EXT-X-TWITCH-LIVE-SEQUENCE:";
-                    const string TWITCH_ELAPSED_SECS_KEY = "#EXT-X-TWITCH-ELAPSED-SECS:";
-                    const string TWITCH_TOTAL_SECS_KEY = "#EXT-X-TWITCH-TOTAL-SECS:";
-                    const string TWITCH_INFO_KEY = "#EXT-X-TWITCH-INFO:";
                     if (text.StartsWith(TARGET_VERSION_KEY))
                     {
+                        _metadata ??= new Metadata();
                         _metadata.Version = ParsingHelpers.ParseUIntValue(text, TARGET_VERSION_KEY);
                     }
                     else if (text.StartsWith(TARGET_DURATION_KEY))
                     {
+                        _metadata ??= new Metadata();
                         _metadata.StreamTargetDuration = ParsingHelpers.ParseUIntValue(text, TARGET_DURATION_KEY);
                     }
                     else if (text.StartsWith(PLAYLIST_TYPE_KEY))
                     {
+                        _metadata ??= new Metadata();
                         var temp = text[PLAYLIST_TYPE_KEY.Length..];
                         if (temp.StartsWith("VOD"))
                             _metadata.Type = PlaylistType.Vod;
@@ -244,18 +301,22 @@ namespace TwitchDownloaderCore.Tools
                     }
                     else if (text.StartsWith(MEDIA_SEQUENCE_KEY))
                     {
+                        _metadata ??= new Metadata();
                         _metadata.MediaSequence = ParsingHelpers.ParseUIntValue(text, MEDIA_SEQUENCE_KEY);
                     }
                     else if (text.StartsWith(TWITCH_LIVE_SEQUENCE_KEY))
                     {
+                        _metadata ??= new Metadata();
                         _metadata.TwitchLiveSequence = ParsingHelpers.ParseUIntValue(text, TWITCH_LIVE_SEQUENCE_KEY);
                     }
                     else if (text.StartsWith(TWITCH_ELAPSED_SECS_KEY))
                     {
+                        _metadata ??= new Metadata();
                         _metadata.TwitchElapsedSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_ELAPSED_SECS_KEY);
                     }
                     else if (text.StartsWith(TWITCH_TOTAL_SECS_KEY))
                     {
+                        _metadata ??= new Metadata();
                         _metadata.TwitchTotalSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_TOTAL_SECS_KEY);
                     }
                     else if (text.StartsWith(TWITCH_INFO_KEY))
@@ -264,6 +325,7 @@ namespace TwitchDownloaderCore.Tools
                     }
                     else if (text[0] == '#')
                     {
+                        _metadata ??= new Metadata();
                         var colonIndex = text.IndexOf(':');
                         if (colonIndex != -1)
                         {
@@ -316,12 +378,11 @@ namespace TwitchDownloaderCore.Tools
                     sb.AppendLine(ByteRange.ToString());
 
                 if (!string.IsNullOrEmpty(Path))
-                    sb.AppendLine(Path);
+                    sb.Append(Path);
 
                 if (sb.Length == 0)
                     return "";
 
-                sb.Append("#EXT-X-ENDLIST");
                 return sb.ToString();
             }
 
@@ -383,31 +444,21 @@ namespace TwitchDownloaderCore.Tools
                 public override string ToString()
                 {
                     var sb = new StringBuilder(MEDIA_INFO_KEY);
+                    ReadOnlySpan<char> keyValueSeparator = stackalloc char[] { ',' };
 
                     if (Type != MediaType.Unknown)
                     {
                         sb.Append("TYPE=");
                         sb.Append(Type.ToString().ToUpper());
-                        sb.Append(",");
+                        sb.Append(keyValueSeparator);
                     }
 
-                    if (GroupId != null)
-                    {
-                        sb.Append("GROUP-ID=\"");
-                        sb.Append(GroupId);
-                        sb.Append("\",");
-                    }
-
-                    if (Name != null)
-                    {
-                        sb.Append("NAME=\"");
-                        sb.Append(Name);
-                        sb.Append("\",");
-                    }
+                    StringBuilderHelpers.AppendStringIfNotNullOrEmpty(sb, "GROUP-ID=", GroupId, keyValueSeparator);
+                    StringBuilderHelpers.AppendStringIfNotNullOrEmpty(sb, "NAME=", Name, keyValueSeparator);
 
                     sb.Append("AUTOSELECT=");
                     sb.Append(BooleanToWord(AutoSelect));
-                    sb.Append(",");
+                    sb.Append(keyValueSeparator);
 
                     sb.Append("DEFAULT=");
                     sb.Append(BooleanToWord(Default));
@@ -525,47 +576,14 @@ namespace TwitchDownloaderCore.Tools
                 public override string ToString()
                 {
                     var sb = new StringBuilder(STREAM_INFO_KEY);
+                    ReadOnlySpan<char> keyValueSeparator = stackalloc char[] { ',' };
 
-                    if (ProgramId != default)
-                    {
-                        sb.Append("PROGRAM-ID=");
-                        sb.Append(ProgramId);
-                        sb.Append(",");
-                    }
-
-                    if (Bandwidth != default)
-                    {
-                        sb.Append("BANDWIDTH=");
-                        sb.Append(Bandwidth);
-                        sb.Append(",");
-                    }
-
-                    if (Codecs != null)
-                    {
-                        sb.Append("CODECS=\"");
-                        sb.Append(Codecs);
-                        sb.Append("\",");
-                    }
-
-                    if (Resolution != default)
-                    {
-                        sb.Append("RESOLUTION=");
-                        sb.Append(Resolution.ToString());
-                        sb.Append(",");
-                    }
-
-                    if (Video != null)
-                    {
-                        sb.Append("VIDEO=\"");
-                        sb.Append(Video);
-                        sb.Append("\",");
-                    }
-
-                    if (Framerate != default)
-                    {
-                        sb.Append("FRAME-RATE=");
-                        sb.Append(Framerate);
-                    }
+                    StringBuilderHelpers.AppendIfNotDefault(sb, "PROGRAM-ID=", ProgramId, keyValueSeparator);
+                    StringBuilderHelpers.AppendIfNotDefault(sb, "BANDWIDTH=", Bandwidth, keyValueSeparator);
+                    StringBuilderHelpers.AppendStringIfNotNullOrEmpty(sb, "CODECS=", Codecs, keyValueSeparator);
+                    StringBuilderHelpers.AppendIfNotDefault(sb, "RESOLUTION=", Resolution, keyValueSeparator);
+                    StringBuilderHelpers.AppendStringIfNotNullOrEmpty(sb, "VIDEO=", Video, keyValueSeparator);
+                    StringBuilderHelpers.AppendIfNotDefault(sb, "FRAME-RATE=", Framerate, default);
 
                     return sb.ToString();
                 }
@@ -805,6 +823,65 @@ namespace TwitchDownloaderCore.Tools
                     -1 => text.Length, // This is probably the last value
                     _ => nextKey
                 };
+            }
+        }
+
+        private static class StringBuilderHelpers
+        {
+            public static void AppendIfNotDefault(StringBuilder sb, string keyName, uint value, ReadOnlySpan<char> end)
+            {
+                if (value == default)
+                    return;
+
+                sb.Append(keyName);
+                sb.Append(value);
+                sb.Append(end);
+            }
+
+            public static void AppendIfNotDefault(StringBuilder sb, string keyName, int value, ReadOnlySpan<char> end)
+            {
+                if (value == default)
+                    return;
+
+                sb.Append(keyName);
+                sb.Append(value);
+                sb.Append(end);
+            }
+
+            public static void AppendIfNotDefault(StringBuilder sb, string keyName, decimal value, ReadOnlySpan<char> end)
+            {
+                if (value == default)
+                    return;
+
+                sb.Append(keyName);
+                sb.Append(value);
+                sb.Append(end);
+            }
+
+            public static void AppendIfNotDefault(StringBuilder sb, string keyName, M3U8.Stream.ExtStreamInfo.StreamResolution value, ReadOnlySpan<char> end)
+            {
+                if (value == default)
+                    return;
+
+                sb.Append(keyName);
+                sb.Append(value.ToString());
+                sb.Append(end);
+            }
+
+            public static void AppendStringIfNotNullOrEmpty(StringBuilder sb, string keyName, string value, ReadOnlySpan<char> end)
+            {
+                if (string.IsNullOrEmpty(value))
+                    return;
+
+                sb.Append(keyName);
+
+                if (!keyName.EndsWith('"'))
+                {
+                    sb.Append('"');
+                }
+                sb.Append(value);
+                sb.Append('"');
+                sb.Append(end);
             }
         }
     }
