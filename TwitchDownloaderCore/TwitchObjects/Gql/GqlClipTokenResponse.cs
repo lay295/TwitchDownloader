@@ -26,7 +26,7 @@
 
     public class VideoQuality
     {
-        public double frameRate { get; set; }
+        public decimal frameRate { get; set; }
         public string quality { get; set; }
         public string sourceURL { get; set; }
     }
