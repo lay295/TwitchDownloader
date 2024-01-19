@@ -212,18 +212,18 @@ namespace TwitchDownloaderCore.Tools
             private const string TWITCH_INFO_KEY = "#EXT-X-TWITCH-INFO:";
 
             // Generic M3U headers
-            public uint Version { get; private set; }
-            public uint StreamTargetDuration { get; private set; }
-            public PlaylistType Type { get; private set; } = PlaylistType.Unknown;
-            public uint MediaSequence { get; private set; }
+            public uint? Version { get; init; }
+            public uint? StreamTargetDuration { get; init; }
+            public PlaylistType Type { get; init; } = PlaylistType.Unknown;
+            public uint? MediaSequence { get; init; }
 
             // Twitch specific
-            public uint TwitchLiveSequence { get; private set; }
-            public decimal TwitchElapsedSeconds { get; private set; }
-            public decimal TwitchTotalSeconds { get; private set; }
+            public uint? TwitchLiveSequence { get; init; }
+            public decimal? TwitchElapsedSeconds { get; init; }
+            public decimal? TwitchTotalSeconds { get; init; }
 
             // Other headers that we don't have dedicated properties for. Useful for debugging.
-            private readonly List<KeyValuePair<string, string>> _unparsedValues = new();
+            private List<KeyValuePair<string, string>> _unparsedValues = new();
             public IReadOnlyList<KeyValuePair<string, string>> UnparsedValues => _unparsedValues;
 
             public override string ToString()
@@ -231,8 +231,8 @@ namespace TwitchDownloaderCore.Tools
                 var sb = new StringBuilder();
                 var itemSeparator = Environment.NewLine;
 
-                StringBuilderHelpers.AppendIfNotDefault(sb, TARGET_VERSION_KEY, Version, itemSeparator);
-                StringBuilderHelpers.AppendIfNotDefault(sb, TARGET_DURATION_KEY, StreamTargetDuration, itemSeparator);
+                StringBuilderHelpers.AppendIfNotNull(sb, TARGET_VERSION_KEY, Version, itemSeparator);
+                StringBuilderHelpers.AppendIfNotNull(sb, TARGET_DURATION_KEY, StreamTargetDuration, itemSeparator);
                 if (Type != PlaylistType.Unknown)
                 {
                     sb.Append(PLAYLIST_TYPE_KEY);
@@ -240,10 +240,10 @@ namespace TwitchDownloaderCore.Tools
                     sb.Append(itemSeparator);
                 }
 
-                StringBuilderHelpers.AppendIfNotDefault(sb, MEDIA_SEQUENCE_KEY, MediaSequence, itemSeparator);
-                StringBuilderHelpers.AppendIfNotDefault(sb, TWITCH_LIVE_SEQUENCE_KEY, TwitchLiveSequence, itemSeparator);
-                StringBuilderHelpers.AppendIfNotDefault(sb, TWITCH_ELAPSED_SECS_KEY, TwitchElapsedSeconds, itemSeparator);
-                StringBuilderHelpers.AppendIfNotDefault(sb, TWITCH_TOTAL_SECS_KEY, TwitchTotalSeconds, itemSeparator);
+                StringBuilderHelpers.AppendIfNotNull(sb, MEDIA_SEQUENCE_KEY, MediaSequence, itemSeparator);
+                StringBuilderHelpers.AppendIfNotNull(sb, TWITCH_LIVE_SEQUENCE_KEY, TwitchLiveSequence, itemSeparator);
+                StringBuilderHelpers.AppendIfNotNull(sb, TWITCH_ELAPSED_SECS_KEY, TwitchElapsedSeconds, itemSeparator);
+                StringBuilderHelpers.AppendIfNotNull(sb, TWITCH_TOTAL_SECS_KEY, TwitchTotalSeconds, itemSeparator);
 
                 foreach (var (key, value) in _unparsedValues)
                 {
@@ -262,7 +262,19 @@ namespace TwitchDownloaderCore.Tools
 
             public sealed class Builder
             {
-                private Metadata _metadata;
+                // Generic M3U headers
+                private uint _version;
+                private uint _streamTargetDuration;
+                private PlaylistType _type = PlaylistType.Unknown;
+                private uint _mediaSequence;
+
+                // Twitch specific
+                private uint _twitchLiveSequence;
+                private decimal _twitchElapsedSeconds;
+                private decimal _twitchTotalSeconds;
+
+                // Other headers that we don't have dedicated properties for. Useful for debugging.
+                private readonly List<KeyValuePair<string, string>> _unparsedValues = new();
 
                 public Builder ParseAndAppend(ReadOnlySpan<char> text)
                 {
@@ -280,44 +292,37 @@ namespace TwitchDownloaderCore.Tools
                 {
                     if (text.StartsWith(TARGET_VERSION_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.Version = ParsingHelpers.ParseUIntValue(text, TARGET_VERSION_KEY);
+                        _version = ParsingHelpers.ParseUIntValue(text, TARGET_VERSION_KEY);
                     }
                     else if (text.StartsWith(TARGET_DURATION_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.StreamTargetDuration = ParsingHelpers.ParseUIntValue(text, TARGET_DURATION_KEY);
+                        _streamTargetDuration = ParsingHelpers.ParseUIntValue(text, TARGET_DURATION_KEY);
                     }
                     else if (text.StartsWith(PLAYLIST_TYPE_KEY))
                     {
-                        _metadata ??= new Metadata();
                         var temp = text[PLAYLIST_TYPE_KEY.Length..];
                         if (temp.StartsWith("VOD"))
-                            _metadata.Type = PlaylistType.Vod;
+                            _type = PlaylistType.Vod;
                         else if (temp.StartsWith("EVENT"))
-                            _metadata.Type = PlaylistType.Event;
+                            _type = PlaylistType.Event;
                         else
                             throw new FormatException($"Unable to parse PlaylistType from: {text}");
                     }
                     else if (text.StartsWith(MEDIA_SEQUENCE_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.MediaSequence = ParsingHelpers.ParseUIntValue(text, MEDIA_SEQUENCE_KEY);
+                        _mediaSequence = ParsingHelpers.ParseUIntValue(text, MEDIA_SEQUENCE_KEY);
                     }
                     else if (text.StartsWith(TWITCH_LIVE_SEQUENCE_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.TwitchLiveSequence = ParsingHelpers.ParseUIntValue(text, TWITCH_LIVE_SEQUENCE_KEY);
+                        _twitchLiveSequence = ParsingHelpers.ParseUIntValue(text, TWITCH_LIVE_SEQUENCE_KEY);
                     }
                     else if (text.StartsWith(TWITCH_ELAPSED_SECS_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.TwitchElapsedSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_ELAPSED_SECS_KEY);
+                        _twitchElapsedSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_ELAPSED_SECS_KEY);
                     }
                     else if (text.StartsWith(TWITCH_TOTAL_SECS_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.TwitchTotalSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_TOTAL_SECS_KEY);
+                        _twitchTotalSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_TOTAL_SECS_KEY);
                     }
                     else if (text.StartsWith(TWITCH_INFO_KEY))
                     {
@@ -325,24 +330,43 @@ namespace TwitchDownloaderCore.Tools
                     }
                     else if (text[0] == '#')
                     {
-                        _metadata ??= new Metadata();
                         var colonIndex = text.IndexOf(':');
                         if (colonIndex != -1)
                         {
                             var kvp = new KeyValuePair<string, string>(text[..(colonIndex + 1)].ToString(), text[(colonIndex + 1)..].ToString());
-                            _metadata._unparsedValues.Add(kvp);
+                            _unparsedValues.Add(kvp);
                         }
                         else
                         {
                             var kvp = new KeyValuePair<string, string>("", text.ToString());
-                            _metadata._unparsedValues.Add(kvp);
+                            _unparsedValues.Add(kvp);
                         }
                     }
                 }
 
                 public Metadata ToMetadata()
                 {
-                    return _metadata;
+                    if (_version == default &&
+                        _streamTargetDuration == default &&
+                        _type == PlaylistType.Unknown &&
+                        _mediaSequence == default &&
+                        _twitchLiveSequence == default &&
+                        _twitchElapsedSeconds == default &&
+                        _twitchTotalSeconds == default &&
+                        _unparsedValues.Count == 0)
+                        return null;
+
+                    return new Metadata
+                    {
+                        Version = _version,
+                        StreamTargetDuration = _streamTargetDuration,
+                        Type = _type,
+                        MediaSequence = _mediaSequence,
+                        TwitchLiveSequence = _twitchLiveSequence,
+                        TwitchElapsedSeconds = _twitchElapsedSeconds,
+                        TwitchTotalSeconds = _twitchTotalSeconds,
+                        _unparsedValues = _unparsedValues
+                    };
                 }
             }
         }
@@ -828,43 +852,58 @@ namespace TwitchDownloaderCore.Tools
 
         private static class StringBuilderHelpers
         {
-            public static void AppendIfNotDefault(StringBuilder sb, string keyName, uint value, ReadOnlySpan<char> end)
+            public static void AppendIfNotNull<T>(StringBuilder sb, string keyName, T? value, ReadOnlySpan<char> end) where T : struct
             {
-                if (value == default)
+                if (!value.HasValue)
                     return;
 
                 sb.Append(keyName);
-                sb.Append(value);
+                switch (value)
+                {
+                    case int i32:
+                        sb.Append(i32);
+                        break;
+                    case uint u32:
+                        sb.Append(u32);
+                        break;
+                    case decimal fixed64:
+                        sb.Append(fixed64);
+                        break;
+                    case Stream.ExtStreamInfo.StreamResolution resolution:
+                        sb.Append(resolution.ToString());
+                        break;
+                    default:
+                        var type = value.GetType();
+                        throw new ArgumentOutOfRangeException($"{type.FullName ?? type.Name} is not a valid case. Please report this as a bug: https://github.com/lay295/TwitchDownloader/issues/new/choose");
+                }
                 sb.Append(end);
             }
 
-            public static void AppendIfNotDefault(StringBuilder sb, string keyName, int value, ReadOnlySpan<char> end)
+            public static void AppendIfNotDefault<T>(StringBuilder sb, string keyName, T value, ReadOnlySpan<char> end) where T : struct, IEquatable<T>
             {
-                if (value == default)
+                if (!value.Equals(default))
                     return;
 
                 sb.Append(keyName);
-                sb.Append(value);
-                sb.Append(end);
-            }
+                switch (value)
+                {
+                    case int i32:
+                        sb.Append(i32);
+                        break;
+                    case uint u32:
+                        sb.Append(u32);
+                        break;
+                    case decimal fixed64:
+                        sb.Append(fixed64);
+                        break;
+                    case Stream.ExtStreamInfo.StreamResolution resolution:
+                        sb.Append(resolution.ToString());
+                        break;
+                    default:
+                        var type = value.GetType();
+                        throw new ArgumentOutOfRangeException($"{type.FullName ?? type.Name} is not a valid case. Please report this as a bug: https://github.com/lay295/TwitchDownloader/issues/new/choose");
+                }
 
-            public static void AppendIfNotDefault(StringBuilder sb, string keyName, decimal value, ReadOnlySpan<char> end)
-            {
-                if (value == default)
-                    return;
-
-                sb.Append(keyName);
-                sb.Append(value);
-                sb.Append(end);
-            }
-
-            public static void AppendIfNotDefault(StringBuilder sb, string keyName, M3U8.Stream.ExtStreamInfo.StreamResolution value, ReadOnlySpan<char> end)
-            {
-                if (value == default)
-                    return;
-
-                sb.Append(keyName);
-                sb.Append(value.ToString());
                 sb.Append(end);
             }
 
