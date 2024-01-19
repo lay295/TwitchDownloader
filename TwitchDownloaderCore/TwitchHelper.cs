@@ -84,6 +84,19 @@ namespace TwitchDownloaderCore
                     throw;
                 }
             }
+
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                // Twitch returns 403 Forbidden for (some? all?) sub-only VODs when correct authorization is not provided
+                var forbiddenResponse = await response.Content.ReadAsStringAsync();
+                if (forbiddenResponse.Contains("vod_manifest_restricted") || forbiddenResponse.Contains("unauthorized_entitlements"))
+                {
+                    // Return the error string so the caller can choose their error strategy
+                    // TODO: We may want to eventually return all 403 responses so the error messages can be parsed and/or logged since more potential errors exist
+                    return forbiddenResponse;
+                }
+            }
+
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadAsStringAsync();
