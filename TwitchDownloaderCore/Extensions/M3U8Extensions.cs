@@ -37,6 +37,11 @@ namespace TwitchDownloaderCore.Extensions
                 return m3u8.BestQualityStream();
             }
 
+            if (qualityString.Contains("source", StringComparison.OrdinalIgnoreCase) || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
+            {
+                return m3u8.BestQualityStream();
+            }
+
             if (qualityString.Contains("audio", StringComparison.OrdinalIgnoreCase) &&
                 streams.FirstOrDefault(x => x.MediaInfo.Name.Contains("audio", StringComparison.OrdinalIgnoreCase)) is { } audioStream)
             {
