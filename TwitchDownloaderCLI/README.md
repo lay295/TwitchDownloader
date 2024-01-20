@@ -15,7 +15,7 @@ A cross platform command line tool that can do the main functions of the GUI pro
 ---
 
 ## Arguments for mode videodownload
-<sup>Downloads a stream VOD or highlight from Twitch</sup>
+#### Downloads a stream VOD or highlight from Twitch
 
 **-u / --id (REQUIRED)**
 The ID or URL of the VOD to download.
@@ -53,7 +53,7 @@ Path to temporary folder for cache.
 (Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode clipdownload
-<sup>Downloads a clip from Twitch</sup>
+#### Downloads a clip from Twitch
 
 **-u / --id (REQUIRED)**
 The ID or URL of the Clip to download.
@@ -80,7 +80,7 @@ Path to temporary folder for cache.
 (Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode chatdownload
-<sup>Downloads the chat of a VOD, highlight, or clip</sup>
+#### Downloads the chat of a VOD, highlight, or clip
 
 **-u / --id (REQUIRED)**
 The ID or URL of the VOD or clip to download.
@@ -125,7 +125,7 @@ Path to temporary folder for cache.
 (Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode chatupdate
-<sup>Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format</sup>
+#### Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format
 
 **-i / --input (REQUIRED)**
 Path to input file. Valid extensions are: `.json`, `.json.gz`.
@@ -167,7 +167,7 @@ Path to temporary folder for cache.
 (Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode chatrender
-<sup>Renders a chat JSON as a video</sup>
+#### Renders a chat JSON as a video
 
 **-i / --input (REQUIRED)**
 The path to the `.json` or `.json.gz` chat file input.
@@ -323,7 +323,7 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 
 
 ## Arguments for mode ffmpeg
-<sup>Manage standalone FFmpeg</sup>
+#### Manage standalone FFmpeg
 
 **-d / --download**
 (Default: `false`) Downloads FFmpeg as a standalone file.
@@ -332,7 +332,7 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 (Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode cache
-<sup>Manage the working cache.</sup>
+#### Manage the working cache.
 
 **-c / --clear**
 (Default: `false`) Clears the default cache folder.
@@ -346,51 +346,71 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 ---
 
 ## Example Commands
-<sup>Examples of typical use cases</sup>
+#### Examples of typical TwitchDownloaderCLI use cases.
+
+Note: Commands are formatted for unix systems (i.e. Mac, Linux). For usage on Windows, replace `./TwitchDownloaderCLI` with `TwitchDownloaderCLI.exe` (cmd) or `./TwitchDownloaderCLI.exe` (powershell).
 
 Download a VOD with defaults
 
-    TwitchDownloaderCLI videodownload --id 612942303 -o video.mp4
+    ./TwitchDownloaderCLI videodownload --id 612942303 -o video.mp4
 
 Download a Clip with defaults
 
-    TwitchDownloaderCLI clipdownload --id NurturingCalmHamburgerVoHiYo -o clip.mp4
+    ./TwitchDownloaderCLI clipdownload --id NurturingCalmHamburgerVoHiYo -o clip.mp4
 
 Download a Chat JSON with embedded emotes/badges from Twitch and emotes from Bttv
 
-    TwitchDownloaderCLI chatdownload --id 612942303 --embed-images --bttv=true --ffz=false --stv=false -o chat.json
+    ./TwitchDownloaderCLI chatdownload --id 612942303 --embed-images --bttv=true --ffz=false --stv=false -o chat.json
 
 Download a Chat as plain text with timestamps
 
-    TwitchDownloaderCLI chatdownload --id 612942303 --timestamp-format Relative -o chat.txt
+    ./TwitchDownloaderCLI chatdownload --id 612942303 --timestamp-format Relative -o chat.txt
 
 Add embeds to a chat file that was downloaded without embeds
 
-    TwitchDownloaderCLI chatupdate -i chat.json -o chat_embedded.json --embed-missing
+    ./TwitchDownloaderCLI chatupdate -i chat.json -o chat_embedded.json --embed-missing
 
 Convert a JSON chat file to HTML
 
-    TwitchDownloaderCLI chatupdate -i chat.json -o chat.html
+    ./TwitchDownloaderCLI chatupdate -i chat.json -o chat.html
 
 Render a chat with defaults
 
-    TwitchDownloaderCLI chatrender -i chat.json -o chat.mp4
+    ./TwitchDownloaderCLI chatrender -i chat.json -o chat.mp4
 
 Render a chat with custom video settings and message outlines
 
-    TwitchDownloaderCLI chatrender -i chat.json -h 1440 -w 720 --framerate 60 --outline -o chat.mp4
+    ./TwitchDownloaderCLI chatrender -i chat.json -h 1440 -w 720 --framerate 60 --outline -o chat.mp4
 
 Render a chat with custom FFmpeg arguments
 
-    TwitchDownloaderCLI chatrender -i chat.json --output-args='-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"' -o chat.mp4
+    ./TwitchDownloaderCLI chatrender -i chat.json --output-args='-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p "{save_path}"' -o chat.mp4
+
+Download a portable FFmpeg binary for your system
+
+    ./TwitchDownloaderCLI ffmpeg --download
+
+Clear the default TwitchDownloader cache folder
+
+    ./TwitchDownloaderCLI cache --clear
+
+Print the available operations
+
+    ./TwitchDownloaderCLI help
+
+Print the available options for the VOD downloader
+
+  ./TwitchDownloaderCLI videodownload --help
 
 ---
 
 ## Additional Notes
 
-String arguments, such as output file, that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd> .
+All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303` or `--id https://twitch.tv/videos/612942303`.
 
-Default true boolean flags must be assigned: `--default-true-flag=false`. Default false boolean flags should still be raised normally: `--default-false-flag`
+String arguments that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd>. i.e. `--output 'my output file.mp4'` or `--output "my output file.mp4"`
+
+Default true boolean flags must be assigned: `--default-true-flag=false`. Default false boolean flags should still be raised normally: `--default-false-flag`.
 
 For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 
