@@ -400,7 +400,7 @@ Print the available operations
 
 Print the available options for the VOD downloader
 
-  ./TwitchDownloaderCLI videodownload --help
+    ./TwitchDownloaderCLI videodownload --help
 
 ---
 
