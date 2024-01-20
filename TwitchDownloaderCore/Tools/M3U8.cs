@@ -881,7 +881,7 @@ namespace TwitchDownloaderCore.Tools
 
             public static void AppendIfNotDefault<T>(StringBuilder sb, string keyName, T value, ReadOnlySpan<char> end) where T : struct, IEquatable<T>
             {
-                if (!value.Equals(default))
+                if (value.Equals(default))
                     return;
 
                 sb.Append(keyName);
