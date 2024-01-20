@@ -129,5 +129,9 @@ namespace TwitchDownloaderCore.Extensions
                     x.MediaInfo.GroupId.Equals("chunked", StringComparison.OrdinalIgnoreCase));
             return source ?? m3u8.Streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate);
         }
+
+        internal static bool IsSource(this M3U8.Stream stream)
+            => stream.MediaInfo.Name.Contains("source", StringComparison.OrdinalIgnoreCase) ||
+               stream.MediaInfo.GroupId.Equals("chunked", StringComparison.OrdinalIgnoreCase);
     }
 }

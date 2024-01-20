@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderCore.Tools
 {
@@ -13,6 +14,9 @@ namespace TwitchDownloaderCore.Tools
             }
 
             if (y?.StreamInfo is null) return 1;
+
+            if (x.IsSource()) return -1;
+            if (y.IsSource()) return 1;
 
             var xResolution = x.StreamInfo.Resolution;
             var yResolution = y.StreamInfo.Resolution;
