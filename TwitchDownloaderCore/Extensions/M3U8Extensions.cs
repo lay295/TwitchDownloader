@@ -108,6 +108,11 @@ namespace TwitchDownloaderCore.Extensions
 
             if (streamInfo.Resolution == default)
             {
+                if (stream.IsSource())
+                {
+                    return "Source";
+                }
+
                 return "";
             }
 
@@ -115,11 +120,21 @@ namespace TwitchDownloaderCore.Extensions
 
             if (streamInfo.Framerate == default)
             {
+                if (stream.IsSource())
+                {
+                    return $"{frameHeight}p (Source)";
+                }
+
                 return $"{frameHeight}p";
             }
 
             // Some M3U8 responses have framerate values up to 2fps more/less than the typical framerate.
             var frameRate = (uint)(Math.Round(streamInfo.Framerate / 10) * 10);
+
+            if (stream.IsSource())
+            {
+                return $"{frameHeight}p{frameRate} (Source)";
+            }
 
             return $"{frameHeight}p{frameRate}";
         }
