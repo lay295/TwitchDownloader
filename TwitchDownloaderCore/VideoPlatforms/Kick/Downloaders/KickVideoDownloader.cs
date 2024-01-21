@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
@@ -15,7 +14,6 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
     public class KickVideoDownloader : IVideoDownloader
     {
         private readonly VideoDownloadOptions downloadOptions;
-        private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
         private readonly IProgress<ProgressReport> _progress;
         private bool _shouldClearCache = true;
 
@@ -121,7 +119,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
 
         private async Task<(M3U8 playlist, Range cropRange)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
-            var playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
+            var playlistString = await Task.Run(() => CurlImpersonate.GetCurlResponse(playlistUrl), cancellationToken);
             var playlist = M3U8.Parse(playlistString);
 
             var videoListCrop = DownloadTools.GetStreamListCrop(playlist.Streams, downloadOptions);

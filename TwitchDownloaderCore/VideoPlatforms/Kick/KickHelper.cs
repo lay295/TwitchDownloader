@@ -49,7 +49,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick
 
         public static async Task<M3U8> GetQualitiesPlaylist(KickVideoResponse videoResponse)
         {
-            var playlist = await HttpClient.GetStringAsync(videoResponse.source);
+            var playlist = await Task.Run(() => CurlImpersonate.GetCurlResponse(videoResponse.source));
             return M3U8.Parse(playlist);
         }
 
