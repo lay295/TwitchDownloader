@@ -358,7 +358,7 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
                 sortedComments.AddRange(commentTask);
             }
 
-            sortedComments.Sort(new SortedCommentComparer());
+            sortedComments.Sort(new CommentOffsetComparer());
 
             chatRoot.comments = sortedComments.DistinctBy(x => x._id).ToList();
 

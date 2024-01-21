@@ -18,16 +18,19 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public ITwitchTask DependantTask { get; set; }
         public string TaskType { get; } = Translations.Strings.ClipDownload;
         public TwitchTaskException Exception { get; private set; } = new();
+        public string OutputFile => DownloadOptions.Filename;
+        public bool CanCancel { get; private set; } = true;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Cancel()
         {
-            try
+            if (!CanCancel)
             {
-                TokenSource.Cancel();
+                return;
             }
-            catch (ObjectDisposedException) { }
+
+            TokenSource.Cancel();
 
             if (Status == TwitchTaskStatus.Running)
             {
@@ -47,6 +50,12 @@ namespace TwitchDownloaderWPF.TwitchTasks
         {
             Status = newStatus;
             OnPropertyChanged(nameof(Status));
+
+            if (CanCancel && newStatus is TwitchTaskStatus.Canceled or TwitchTaskStatus.Failed or TwitchTaskStatus.Finished or TwitchTaskStatus.Stopping)
+            {
+                CanCancel = false;
+                OnPropertyChanged(nameof(CanCancel));
+            }
         }
 
         public async Task RunAsync()
@@ -54,9 +63,9 @@ namespace TwitchDownloaderWPF.TwitchTasks
             if (TokenSource.IsCancellationRequested)
             {
                 TokenSource.Dispose();
+                ChangeStatus(TwitchTaskStatus.Canceled);
                 return;
             }
-
 
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;

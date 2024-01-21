@@ -170,7 +170,7 @@
             <TabItem Header="{lex:Loc RenderTabFfmpeg}" Background="{DynamicResource AppBackground}" Foreground="{DynamicResource AppText}">
                 <StackPanel Orientation="Vertical" Background="{DynamicResource AppBackground}" Margin="5,10,5,5">
                     <WrapPanel Orientation="Horizontal">
-                        <fa:SvgAwesome Icon="Solid_ExclamationTriangle" Width="16" Margin="0,0,3,0" Foreground="{DynamicResource AppText}" />
+                        <fa:SvgAwesome Icon="Solid_ExclamationCircle" Width="16" Margin="0,0,3,0" Foreground="{DynamicResource AppText}" />
                         <TextBlock Text="{lex:Loc RenderFfmpegWarning}" Foreground="{DynamicResource AppInnerText}" FontWeight="Bold" TextWrapping="Wrap" />
                     </WrapPanel>
                     <TextBlock Text="{lex:Loc FfmpegInputArguments}" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"></TextBlock>

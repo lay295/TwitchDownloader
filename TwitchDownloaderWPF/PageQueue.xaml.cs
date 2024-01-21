@@ -7,6 +7,7 @@ using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderWPF.Properties;
 using System.Diagnostics;
 using TwitchDownloaderCore.Tools;
+using System.IO;
 
 namespace TwitchDownloaderWPF
 {
@@ -200,38 +201,64 @@ namespace TwitchDownloaderWPF
             window.ShowDialog();
         }
 
-        private void btnCancelTask_Click(object sender, RoutedEventArgs e)
-        {
-            if (!(sender is Button { DataContext: ITwitchTask task } cancelButton))
-            {
-                return;
-            }
-
-            cancelButton.IsEnabled = false;
-
-            if (task.Status is TwitchTaskStatus.Failed or TwitchTaskStatus.Canceled or TwitchTaskStatus.Finished)
-            {
-                return;
-            }
-
-            task.Cancel();
-        }
-
-        private void btnTaskError_Click(object sender, RoutedEventArgs e)
+        private void BtnCancelTask_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button { DataContext: ITwitchTask task })
             {
                 return;
             }
 
-            TwitchTaskException taskException = task.Exception;
+            CancelTask(task);
+        }
+
+        private void MenuItemCancelTask_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            {
+                return;
+            }
+
+            CancelTask(task);
+        }
+
+        private static void CancelTask(ITwitchTask task)
+        {
+            if (task.CanCancel)
+            {
+                task.Cancel();
+            }
+        }
+
+        private void BtnTaskError_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button { DataContext: ITwitchTask task })
+            {
+                return;
+            }
+
+            ShowTaskException(task);
+        }
+
+        private void MenuItemTaskError_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            {
+                return;
+            }
+
+            ShowTaskException(task);
+        }
+
+        private static void ShowTaskException(ITwitchTask task)
+        {
+            var taskException = task.Exception;
 
             if (taskException?.Exception == null)
             {
                 return;
             }
 
-            string errorMessage = taskException.Exception.Message;
+            var errorMessage = taskException.Exception.Message;
             if (Settings.Default.VerboseErrors)
             {
                 errorMessage = taskException.Exception.ToString();
@@ -240,13 +267,28 @@ namespace TwitchDownloaderWPF
             MessageBox.Show(errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        private void btnRemoveTask_Click(object sender, RoutedEventArgs e)
+        private void BtnRemoveTask_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button { DataContext: ITwitchTask task })
             {
                 return;
             }
 
+            RemoveTask(task);
+        }
+
+        private void MenuItemRemoveTask_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            {
+                return;
+            }
+
+            RemoveTask(task);
+        }
+
+        private static void RemoveTask(ITwitchTask task)
+        {
             if (task.CanRun() || task.Status is TwitchTaskStatus.Running or TwitchTaskStatus.Waiting)
             {
                 MessageBox.Show(Translations.Strings.CancelTaskBeforeRemoving, Translations.Strings.TaskCouldNotBeRemoved, MessageBoxButton.OK, MessageBoxImage.Information);
@@ -257,6 +299,22 @@ namespace TwitchDownloaderWPF
             {
                 MessageBox.Show(Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void MenuItemOpenTaskFolder_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            {
+                return;
+            }
+
+            var outputFolder = Path.GetDirectoryName(task.OutputFile);
+            if (!Directory.Exists(outputFolder))
+            {
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo(outputFolder) { UseShellExecute = true });
         }
     }
 }

@@ -63,16 +63,62 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
 
         public static async Task<string> GetVideoPlaylist(int videoId, string token, string sig)
         {
-            var request = new HttpRequestMessage()
+            HttpRequestMessage request;
+            HttpResponseMessage response;
+            try
             {
-                RequestUri = new Uri($"http://usher.ttvnw.net/vod/{videoId}?nauth={token}&nauthsig={sig}&allow_audio_only=true&allow_source=true&player=twitchweb"),
-                Method = HttpMethod.Get
-            };
-            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-            var response = await httpClient.SendAsync(request);
+                request = new HttpRequestMessage()
+                {
+                    RequestUri = new Uri($"https://usher.ttvnw.net/vod/{videoId}.m3u8?sig={sig}&token={token}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h264"),
+                    Method = HttpMethod.Get
+                };
+                response = await httpClient.SendAsync(request);
+            }
+            catch (Exception ex)
+            {
+                if (IsAuthException(ex))
+                {
+                    request = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri($"https://twitch-downloader-proxy.twitcharchives.workers.dev/{videoId}.m3u8?sig={sig}&token={token}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h264"),
+                        Method = HttpMethod.Get
+                    };
+                    response = await httpClient.SendAsync(request);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                // Twitch returns 403 Forbidden for (some? all?) sub-only VODs when correct authorization is not provided
+                var forbiddenResponse = await response.Content.ReadAsStringAsync();
+                if (forbiddenResponse.Contains("vod_manifest_restricted") || forbiddenResponse.Contains("unauthorized_entitlements"))
+                {
+                    // Return the error string so the caller can choose their error strategy
+                    // TODO: We may want to eventually return all 403 responses so the error messages can be parsed and/or logged since more potential errors exist
+                    return forbiddenResponse;
+                }
+            }
+
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadAsStringAsync();
+        }
+
+        static bool IsAuthException(Exception ex)
+        {
+            while (ex != null)
+            {
+                if (ex is System.Security.Authentication.AuthenticationException)
+                {
+                    return true;
+                }
+                ex = ex.InnerException;
+            }
+            return false;
         }
 
         public static async Task<M3U8> GetVideoQualitiesPlaylist(TwitchVideoInfo videoInfo)
@@ -103,20 +149,24 @@ namespace TwitchDownloaderCore.VideoPlatforms.Twitch
             return gqlClipResponse;
         }
 
-        public static async Task<GqlClipTokenResponse[]> GetClipLinks(string clipId)
+        public static async Task<GqlClipTokenResponse> GetClipLinks(string clipId)
         {
             var request = new HttpRequestMessage()
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("[{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}]", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
-            var gqlClipTokenResponses = await response.Content.ReadFromJsonAsync<GqlClipTokenResponse[]>();
-            Array.Sort(gqlClipTokenResponses[0].data.clip.videoQualities, new ClipQualityComparer());
+            var gqlClipTokenResponses = await response.Content.ReadFromJsonAsync<GqlClipTokenResponse>();
+            if (gqlClipTokenResponses.data.clip.videoQualities is { Length: > 0 })
+            {
+                Array.Sort(gqlClipTokenResponses.data.clip.videoQualities, new ClipQualityComparer());
+            }
+
             return gqlClipTokenResponses;
         }
 

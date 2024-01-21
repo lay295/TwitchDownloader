@@ -107,7 +107,7 @@ namespace TwitchDownloaderCore
                 chatRoot.video.created_at = videoInfo.createdAt;
                 chatRoot.video.length = videoInfo.lengthSeconds;
                 chatRoot.video.viewCount = videoInfo.viewCount;
-                chatRoot.video.game = videoInfo.game.displayName;
+                chatRoot.video.game = videoInfo.game?.displayName;
 
                 var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo)).data.video.moments.edges;
                 foreach (var responseChapter in chaptersInfo)
