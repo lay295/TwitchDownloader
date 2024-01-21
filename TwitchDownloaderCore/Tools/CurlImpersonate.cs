@@ -34,16 +34,10 @@ namespace TwitchDownloaderCore.Tools
                 {
                     var length = (int)size * (int)nmemb;
 
-                    var buffer = ArrayPool<byte>.Shared.Rent(length);
-                    try
+                    unsafe
                     {
-                        Marshal.Copy(data, buffer, 0, length);
-                        stream.Write(buffer, 0, length);
-                    }
-                    finally
-                    {
-                        Array.Clear(buffer); // Clear the buffer in case we were working with sensitive information.
-                        ArrayPool<byte>.Shared.Return(buffer);
+                        using var ums = new UnmanagedMemoryStream((byte*)data, length);
+                        ums.CopyTo(stream);
                     }
 
                     return (UIntPtr)length;
