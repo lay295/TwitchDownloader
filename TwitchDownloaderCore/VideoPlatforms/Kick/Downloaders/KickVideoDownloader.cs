@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.VideoPlatforms.Interfaces;
@@ -40,14 +41,13 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             {
                 ServicePointManager.DefaultConnectionLimit = downloadOptions.DownloadThreads;
                 KickVideoResponse videoInfo = await KickHelper.GetVideoInfo(downloadOptions.Id);
-                var (qualitiesPlaylist, desiredStream) = await GetQualitiesPlaylist(videoInfo);
-                var selectedStream = qualitiesPlaylist.Streams[desiredStream];
+                var qualityPlaylist = await GetQualityPlaylist(videoInfo);
 
-                var playlistUrl = videoInfo.source[..(videoInfo.source.LastIndexOf('/') + 1)] + selectedStream.Path;
+                var playlistUrl = videoInfo.source[..(videoInfo.source.LastIndexOf('/') + 1)] + qualityPlaylist.Path;
                 var baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
 
                 var videoLength = TimeSpan.FromSeconds(videoInfo.Duration);
-                DriveHelper.CheckAvailableStorageSpace(downloadOptions, selectedStream.StreamInfo.Bandwidth, videoLength, _progress);
+                DriveHelper.CheckAvailableStorageSpace(downloadOptions, qualityPlaylist.StreamInfo.Bandwidth, videoLength, _progress);
 
                 var (playlist, videoListCrop) = await GetVideoPlaylist(playlistUrl, cancellationToken);
 
@@ -127,21 +127,11 @@ namespace TwitchDownloaderCore.VideoPlatforms.Kick.Downloaders
             return (playlist, videoListCrop);
         }
 
-        private async Task<(M3U8 playlist, Index streamIndex)> GetQualitiesPlaylist(KickVideoResponse videoInfo)
+        private async Task<M3U8.Stream> GetQualityPlaylist(KickVideoResponse videoInfo)
         {
             var m3u8 = await KickHelper.GetQualitiesPlaylist(videoInfo);
 
-            for (var i = m3u8.Streams.Length - 1; i >= 0; i--)
-            {
-                var m3u8Stream = m3u8.Streams[i];
-                if (m3u8Stream.MediaInfo.Name.StartsWith(downloadOptions.Quality))
-                {
-                    return (m3u8, i);
-                }
-            }
-
-            // Unable to find specified quality, default to highest quality
-            return (m3u8, 0);
+            return m3u8.GetStreamOfQuality(downloadOptions.Quality);
         }
     }
 }
