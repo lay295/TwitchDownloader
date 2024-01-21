@@ -21,6 +21,13 @@ namespace TwitchDownloaderCore.Tools
 
         public static byte[] GetCurlResponseBytes(string url)
         {
+            using var ms = new MemoryStream();
+            GetCurlResponse(url, ms);
+            return ms.ToArray();
+        }
+
+        public static void GetCurlResponse(string url, Stream destination)
+        {
             var easy = CurlNative.Easy.Init();
 
             try
@@ -29,7 +36,6 @@ namespace TwitchDownloaderCore.Tools
                 CurlNative.Easy.SetOpt(easy, CURLoption.CAINFO, "curl-ca-bundle.crt");
                 CurlNative.Easy.SetOpt(easy, CURLoption.TIMEOUT_MS, 30000);
 
-                var stream = new MemoryStream();
                 CurlNative.Easy.SetOpt(easy, CURLoption.WRITEFUNCTION, (data, size, nmemb, user) =>
                 {
                     var length = (int)size * (int)nmemb;
@@ -37,14 +43,13 @@ namespace TwitchDownloaderCore.Tools
                     unsafe
                     {
                         using var ums = new UnmanagedMemoryStream((byte*)data, length);
-                        ums.CopyTo(stream);
+                        ums.CopyTo(destination);
                     }
 
                     return (UIntPtr)length;
                 });
 
                 var result = CurlNative.Easy.Perform(easy);
-                return stream.ToArray();
             }
             finally
             {
