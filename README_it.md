@@ -46,34 +46,34 @@ La GUI di Windows WPF implementa tutte le funzioni base del programma e alcune f
 
 ### Supporto al multi linguaggio
 
-The Windows WPF GUI is available in multiple languages thanks to community translations. See the [Localization section](TwitchDownloaderWPF/README.md#localization) of the [WPF README](TwitchDownloaderWPF/README.md) for more details. 
+La GUI di Windows WPF è disponibile in molteplici linguaggio grazie alle traduzioni della community. Guarda la [sezione localizzazione](TwitchDownloaderWPF/README.md#localization) o il [WPF README](TwitchDownloaderWPF/README.md) per più dettagli.
 
-### Theming
+### Temi
 
-The Windows WPF GUI comes bundled with both light and dark themes, along with an option to update live according the current Windows theme. It also supports user created themes! See the [Theming section](TwitchDownloaderWPF/README.md#theming) of the [WPF README](TwitchDownloaderWPF/README.md) for more details.
+L'interfaccia grafica WPF di Windows viene fornita con temi chiari e scuri e con l'opzione di aggiornamento live in base al tema corrente di Windows. Supporta anche temi creati dall'utente! Guarda la [sezione temi](TwitchDownloaderWPF/README.md#theming) di [WPF README](TwitchDownloaderWPF/README.md) per più dettagli.
 
-### Video Demonstration
+### Dimostrazione Video
 
 https://www.youtube.com/watch?v=0W3MhfhnYjk
-(older version, same concept)
+(versione più vecchia, stesso concetto)
 
 ## Linux?
 
-Check twitch-downloader-gui on [github](https://github.com/mohad12211/twitch-downloader-gui) or on the [AUR](https://aur.archlinux.org/packages/twitch-downloader-gui) for a Linux GUI wrapper for the CLI.
+Controlla twitch-downloader-gui su [github](https://github.com/mohad12211/twitch-downloader-gui) o la [AUR](https://aur.archlinux.org/packages/twitch-downloader-gui) per un wrapper Linux GUI per la CLI.
 
 ## MacOS?
 
-No GUI is available for MacOS yet :(
+Non è ancora disponibile nessuna GUI per MacOS :(
 
 # CLI
 
-### [See the full CLI documentation here](TwitchDownloaderCLI/README.md).
+### [Guarda la documentazione completa del CLI qui](TwitchDownloaderCLI/README.md).
 
-The CLI is cross-platform and implements the main functions of the program. It works on Windows, Linux, and MacOS<sup>*</sup>.
+Il CLI è cross-platform ed implementa le funzioni principali del programma. Funzione su Windows, Linux, e MacOS<sup>*</sup>.
 
-<sup>*Only Intel Macs have been tested</sup>
+<sup>*Solo i Mac con Intel sono stati testati</sup>
 
-With the CLI, it is possible to automate video processing using external scripts. For example, you could copy-paste the following code into a `.bat` file on Windows to download a VOD and its chat, and then render the chat, all from a single input.
+Con il Cli, è possibile automatizzare l'elaborazione video utilizzando script esterni. Per esempio, puoi copiare il seguente codice in un file `.bat`  su Windows per scaricare un VOD e la sua chat, renderizzandola, tutto in un singolo input.
 ```bat
 @echo off
 set /p vodid="Enter VOD ID: "
@@ -82,138 +82,138 @@ TwitchDownloaderCLI.exe chatdownload --id %vodid% -o %vodid%_chat.json -E
 TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framerate 30 --update-rate 0 --font-size 18 -o %vodid%_chat.mp4
 ```
 
-## Windows - Getting started
+## Windows - Come iniziare
 
-1. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest version for Windows or [build from source](#building-from-source).
-2. Extract `TwitchDownloaderCLI.exe`.
-3. Browse to where you extracted the executable:
+1. Vai a [Releases](https://github.com/lay295/TwitchDownloader/releases/) e scarica l'ultima versione per Windows o [compilala dal sorgente](#building-from-source).
+2. Estrai `TwitchDownloaderCLI.exe`.
+3. Vai a adove hai estratto l'eseguibile:
 ```
 cd C:\folder\containing\TwitchDownloaderCLI
 ```
-4. If you do not have FFmpeg, you can install it via [Chocolatey package manager](https://community.chocolatey.org/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+4. Se non hai FFmpeg, puoi installarlo con [Chocolatey package manager](https://community.chocolatey.org/), o puoi averlo standalone da [ffmpeg.org](https://ffmpeg.org/download.html) o usando TwitchDownloaderCLI:
 ```
 TwitchDownloaderCLI.exe ffmpeg --download
 ```
-5. You can now start using TwitchDownloaderCLI, for example:
+5. Puoi ora iniziare ad usare TwitchDownloaderCLI, per esempio:
 ```
 TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 ```
-You can find more example commands in the [CLI README](TwitchDownloaderCLI/README.md#example-commands).
+Puoi trovare più esempi di comandi in [CLI README](TwitchDownloaderCLI/README.md#example-commands).
 
-## Linux – Getting started
+## Linux – Come iniziare
 
-1. Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
-2. Ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
-3. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for Linux, grab the [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/) for Arch Linux, or [build from source](#building-from-source).
-4. Extract `TwitchDownloaderCLI`.
-5. Browse to where you extracted the binary:
+1. Alcune distro, come Linux Alpine, mancano di font per alcune lingue (Arabo, Persiano, Thai, etc.) Se è il tuo caso, installa font addizionali come [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) o controlla la wiki della tua distro sui font visto che potrebbe avere un comando specifico per l'installazione, come la pagina [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) per i font.
+2. Assicurati che `fontconfig` e `libfontconfig1` siano installati. `apt-get install fontconfig libfontconfig1` su Ubuntu.
+3. Vai a [Releases](https://github.com/lay295/TwitchDownloader/releases/) e scarica l'ultimo file binario per Linux, prendi il [pacchetto AUR](https://aur.archlinux.org/packages/twitch-downloader-bin/) per Arch Linux, o [compila dal sorgente](#building-from-source).
+5. Estrai `TwitchDownloaderCLI`.
+6. Naviga dove hai estratto il binario:
 ```
 cd directory/containing/TwitchDownloaderCLI
 ```
-6. Give the binary executable rights:
+6. Dai al binario i diritti di eseguibile:
 ```
 sudo chmod +x TwitchDownloaderCLI
 ```
-7. a) If you do not have FFmpeg, you should install it system-wide via your distro package manager, however you can also get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+7. a) Se non hai FFmpeg, dovresti installarlo a livello di sistema tramite il gestore di pacchetti, tuttavia si può anche ottenere come un file standalone da [ffmpeg.org](https://ffmpeg.org/download.html) o usando TwitchDownloaderCLI:
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
-7. b) If downloaded as a standalone file, you must also give it executable rights with:
+7. b) Se scaricato come file standalone, devi eseguirlo con diritti di eseguibile con:
 ```
 sudo chmod +x ffmpeg
 ```
-8. You can now start using TwitchDownloaderCLI, for example:
+8. Puoi ora iniziare ad usare TwitchDownloaderCLI, per esempio:
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
-You can find more example commands in the [CLI README](TwitchDownloaderCLI/README.md#example-commands).
+Puoi trovare più esempio in [CLI README](TwitchDownloaderCLI/README.md#example-commands).
 
-## MacOS – Getting started
-1. If your device has an Apple Silicon M-series processor, ensure that you download the arm64 binary, however if you would like to use the x64 binary on Apple Silicon it must be run via a terminal session running under Rosetta 2:
+## MacOS – Come iniziare
+1. Se il tuo dispositivo ha un processore Apple Silicon M-series, assicurati di scaricare il binario per arm64, però se si desidera utilizzare il binario x64 su Apple Silicon deve essere eseguito tramite una sessione terminale in esecuzione sotto Rosetta 2:
 ```
 arch -x86_64 zsh
 ```
-2. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for MacOS or [build from source](#building-from-source).
-3. Extract `TwitchDownloaderCLI`.
-4. Browse to where you extracted the binary:
+2. Vai a [Releases](https://github.com/lay295/TwitchDownloader/releases/) e scarica l'ultimo binario per MacOS o [compilalo dal sorgente](#building-from-source).
+3. Estrai `TwitchDownloaderCLI`.
+4. Naviga nella cartella dove hai estratto il binario:
 ```
 cd directory/containing/TwitchDownloaderCLI
 ```
-5. Give the binary executable rights in the terminal:
+5. Dai i diritti eseguibili binari nel terminale:
 ```
 chmod +x TwitchDownloaderCLI
 ```
-6. a) If you do not have FFmpeg, you can install it system-wide via the [Homebrew package manager](https://brew.sh/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+6. a) Se non si dispone di FFmpeg, è possibile installarlo a livello di sistema tramite [Homebrew package manager](https://brew.sh/), o puoi ottenerlo come un file standalone da [ffmpeg.org](https://ffmpeg.org/download.html) o usando TwitchDownloaderCLI:
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
-6. b) If downloaded as a standalone file, you must also give it executable rights with:
+6. b) Se scaricato come un file standalone, si deve anche dare diritti eseguibili con:
 ```
 chmod +x ffmpeg
 ```
-7. You can now start using TwitchDownloaderCLI, for example:
+7. Puoi ora utilizzare TwitchDownloaderCLI, per esempio:
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
-You can find more example commands in the [CLI README](TwitchDownloaderCLI/README.md#example-commands).
+Puoi trovare altri esempi nel [CLI README](TwitchDownloaderCLI/README.md#example-commands).
 
-# Building from source
+# Compilare il sorgente
 
-## Requirements
+## Requisiti
 
 - [.NET 6.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
-- About 1GB of disk space
+- Circa 1GB di spazio su disco
 
-## Build Instructions
+## Istruzioni
 
-1. Clone the repository:
+1. Clona la repository:
 ```
 git clone https://github.com/lay295/TwitchDownloader.git
 ```
-2. Navigate to the solution folder:
+2. Naviga nella cartella:
 ```
 cd TwitchDownloader
 ```
-3. Restore the solution:
+3. Ripristina:
 ```
 dotnet restore
 ```
-- Non-Windows devices may need to explicitly specify a project to restore, i.e. `dotnet restore TwitchDownloaderCLI`
-4. a) Build the GUI:
+- Dispositivi diversi da Windows potrebbero necessitare di specificare esplicitamente un progetto da ripristinare, i.e. `dotnet restore TwitchDownloaderCLI`
+4. a) Costruisci la GUI:
 ```
 dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
-4. b) Build the CLI:
+4. b) Costruisci il CLI:
 ```
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 ```
-- Applicable Profiles: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
-5. a) Navigate to the GUI build folder:
+- Profili Applicabili: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
+5. a) Naviga nella cartella della GUI:
 ```
 cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
 ```
-5. b) Navigate to the CLI build folder:
+5. b) Naviga nella cartella del CLI:
 ```
 cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 ```
 
-# Third Party Credits
+# Crediti di Terze Parti
 
-Chat Renders are rendered with [SkiaSharp](https://github.com/mono/SkiaSharp) and [HarfBuzzSharp](https://github.com/mono/SkiaSharp) © Microsoft Corporation.
+I rendering di chat sono resi con [SkiaSharp](https://github.com/mono/SkiaSharp) e [HarfBuzzSharp](https://github.com/mono/SkiaSharp) © Microsoft Corporation.
 
-Chat Renders are encoded and Video Downloads are finalized with [FFmpeg](https://ffmpeg.org/) © The FFmpeg developers.
+I rendering di chat sono codificati e i download video sono finalizzati con [FFmpeg](https://ffmpeg.org/) © The FFmpeg developers.
 
-Chat Renders may use [Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google and contributors.
+I rendering di chat potrebbero usare [Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google e collaboratori.
 
-Chat Renders may use [Twemoji](https://github.com/twitter/twemoji) © Twitter and contributors.
+I rendering di chat potrebbero usare [Twemoji](https://github.com/twitter/twemoji) © Twitter e collaboratori.
 
-Bundled FFmpeg binaries are fetched from [gyan.dev](https://www.gyan.dev/ffmpeg/) © Gyan Doshi.
+I binari FFmpeg in bundle sono recuperati da [gyan.dev](https://www.gyan.dev/ffmpeg/) © Gyan Doshi.
 
-FFmpeg binaries fetched are runtime are downloaded using [Xabe.FFmpeg.Downloader](https://github.com/tomaszzmuda/Xabe.FFmpeg) © Xabe.
+I binari FFmpeg recuperati vengono scaricati usando [Xabe.FFmpeg.Downloader](https://github.com/tomaszzmuda/Xabe.FFmpeg) © Xabe.
 
-Chat Html exports utilize the _Inter_ typeface hosted by the [Google Fonts API](https://fonts.google.com/) © Google.
+Le esportazioni di Chat Html utilizzano il carattere _Inter_ ospitato dal [Google Fonts API](https://fonts.google.com/) © Google.
 
-For a full list of utilized external libraries, see [THIRD-PARTY-LICENSES.txt](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt).
+Per un elenco completo delle librerie esterne utilizzate, vedere [THIRD-PARTY-LICENSES.txt](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt).
 
 # Licenza
 
