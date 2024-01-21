@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderWPF.Properties;
@@ -131,7 +130,7 @@ namespace TwitchDownloaderWPF
                     if (checkChat.IsChecked.GetValueOrDefault())
                     {
                         ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
-                        chatOptions.Id = downloadOptions.Id.ToString();
+                        chatOptions.Id = downloadOptions.Id;
                         if (radioJson.IsChecked == true)
                             chatOptions.DownloadFormat = ChatFormat.Json;
                         else if (radioHTML.IsChecked == true)
@@ -462,7 +461,7 @@ namespace TwitchDownloaderWPF
                         {
                             Oauth = Settings.Default.OAuth,
                             TempFolder = Settings.Default.TempPath,
-                            Id = int.Parse(taskData.Id),
+                            Id = taskData.Id,
                             FfmpegPath = "ffmpeg",
                             CropBeginning = false,
                             CropEnding = false,

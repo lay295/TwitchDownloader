@@ -74,6 +74,8 @@ namespace TwitchDownloaderWPF
                 Settings.Default.Save();
             }
 
+            Environment.SetEnvironmentVariable("CURL_IMPERSONATE", "chrome110");
+
             // Flash the window taskbar icon if it is not in the foreground. This is to mitigate a problem where
             // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
             FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));

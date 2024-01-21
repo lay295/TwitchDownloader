@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
 
 namespace TwitchDownloaderCore.Chat
 {
@@ -37,7 +37,7 @@ namespace TwitchDownloaderCore.Chat
             var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
             if (!outputDirectory.Exists)
             {
-                TwitchHelper.CreateDirectory(outputDirectory.FullName);
+                PlatformHelper.CreateDirectory(outputDirectory.FullName);
             }
 
             await using var fs = File.Create(filePath);

@@ -6,6 +6,7 @@ using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -15,10 +16,10 @@ namespace TwitchDownloaderCLI.Modes
         {
             var downloadOptions = GetDownloadOptions(inputOptions);
 
-            ChatDownloader chatDownloader = new(downloadOptions);
             Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            chatDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
+            ChatDownloaderFactory downloadFactory = new ChatDownloaderFactory(progress);
+            IChatDownloader chatDownloader = downloadFactory.Create(downloadOptions);
+            chatDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
         private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions)
@@ -29,8 +30,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var vodClipIdMatch = TwitchRegex.MatchVideoOrClipId(inputOptions.Id);
-            if (vodClipIdMatch is not { Success: true })
+            if (!IdParse.TryParseVideoOrClipId(inputOptions.Id, out var videoPlatform, out var videoType, out var videoId))
             {
                 Console.WriteLine("[ERROR] - Unable to parse Vod/Clip ID/URL.");
                 Environment.Exit(1);
@@ -47,7 +47,9 @@ namespace TwitchDownloaderCLI.Modes
                     ".txt" or ".text" or "" => ChatFormat.Text,
                     _ => throw new NotSupportedException($"{fileExtension} is not a valid chat file extension.")
                 },
-                Id = vodClipIdMatch.Value,
+                Id = videoId,
+                VideoPlatform = videoPlatform,
+                VideoType = videoType,
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
 
 namespace TwitchDownloaderCore.Tests.ToolTests
 {

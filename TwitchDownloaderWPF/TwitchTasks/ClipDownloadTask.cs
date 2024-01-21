@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders;
 
 namespace TwitchDownloaderWPF.TwitchTasks
 {
@@ -68,7 +69,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
             Progress<ProgressReport> progress = new Progress<ProgressReport>();
             progress.ProgressChanged += Progress_ProgressChanged;
-            ClipDownloader downloader = new ClipDownloader(DownloadOptions, progress);
+            TwitchClipDownloader downloader = new TwitchClipDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {

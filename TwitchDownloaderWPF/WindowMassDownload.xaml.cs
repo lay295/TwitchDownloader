@@ -8,8 +8,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using TwitchDownloaderCore;
-using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.TwitchTasks;
@@ -21,7 +22,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class WindowMassDownload : Window
     {
-        public DownloadType downloaderType { get; set; }
+        public VideoType downloaderType { get; set; }
         public ObservableCollection<TaskData> videoList { get; set; } = new ObservableCollection<TaskData>();
         public readonly List<TaskData> selectedItems = new List<TaskData>();
         public readonly List<string> cursorList = new List<string>();
@@ -30,12 +31,12 @@ namespace TwitchDownloaderWPF
         public string period = "";
         public int videoCount = 50;
 
-        public WindowMassDownload(DownloadType type)
+        public WindowMassDownload(VideoType type)
         {
             downloaderType = type;
             InitializeComponent();
             itemList.ItemsSource = videoList;
-            if (downloaderType == DownloadType.Video)
+            if (downloaderType == VideoType.Video)
             {
                 ComboSortByDate.Visibility = Visibility.Hidden;
                 LabelSort.Visibility = Visibility.Hidden;
@@ -76,7 +77,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            if (downloaderType == DownloadType.Video)
+            if (downloaderType == VideoType.Video)
             {
                 string currentCursor = "";
                 if (cursorList.Count > 0 && cursorIndex >= 0)
@@ -256,7 +257,7 @@ namespace TwitchDownloaderWPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Title = downloaderType == DownloadType.Video
+            Title = downloaderType == VideoType.Video
                 ? Translations.Strings.TitleVideoMassDownloader
                 : Translations.Strings.TitleClipMassDownloader;
             App.RequestTitleBarChange();

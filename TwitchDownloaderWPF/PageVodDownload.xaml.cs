@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +16,7 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
@@ -30,7 +29,8 @@ namespace TwitchDownloaderWPF
     public partial class PageVodDownload : Page
     {
         public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = new();
-        public int currentVideoId;
+        public string currentVideoId;
+        public VideoPlatform platform;
         public DateTime currentVideoTime;
         public TimeSpan vodLength;
         public int viewCount;
@@ -80,26 +80,34 @@ namespace TwitchDownloaderWPF
 
         private async Task GetVideoInfo()
         {
-            int videoId = ValidateUrl(textUrl.Text.Trim());
-            if (videoId <= 0)
+            bool parseSuccess = IdParse.TryParseVod(textUrl.Text.Trim(), out VideoPlatform videoPlatform, out string videoId);
+            if (!parseSuccess)
             {
                 MessageBox.Show(Translations.Strings.InvalidVideoLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidVideoLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             currentVideoId = videoId;
+            platform = videoPlatform;
+
             try
             {
-                Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
-                Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, TextOauth.Text);
-                await Task.WhenAll(taskVideoInfo, taskAccessToken);
-
-                if (taskAccessToken.Result.data.videoPlaybackAccessToken is null)
+                IVideoInfo videoInfo = null;
+                M3U8 videoPlaylist = null;
+                try
                 {
-                    throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                    videoInfo = await PlatformHelper.GetVideoInfo(videoPlatform, videoId, TextOauth.Text);
+                    videoPlaylist = await PlatformHelper.GetQualitiesPlaylist(videoPlatform, videoInfo);
+                }
+                catch (NullReferenceException ex)
+                {
+                    if (ex.Message.Contains("Insufficient access"))
+                        throw new NullReferenceException(Translations.Strings.InsufficientAccessMayNeedOauth);
+
+                    throw;
                 }
 
-                var thumbUrl = taskVideoInfo.Result.data.video.thumbnailURLs.FirstOrDefault();
+                var thumbUrl = videoInfo.ThumbnailUrl;
                 if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                 {
                     AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
@@ -109,15 +117,6 @@ namespace TwitchDownloaderWPF
 
                 comboQuality.Items.Clear();
                 videoQualities.Clear();
-
-                var playlistString = await TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
-                if (playlistString.Contains("vod_manifest_restricted") || playlistString.Contains("unauthorized_entitlements"))
-                {
-                    throw new NullReferenceException(Translations.Strings.InsufficientAccessMayNeedOauth);
-                }
-
-                var videoPlaylist = M3U8.Parse(playlistString);
-                videoPlaylist.SortStreamsByQuality();
 
                 //Add video qualities to combo quality
                 foreach (var stream in videoPlaylist.Streams)
@@ -132,13 +131,13 @@ namespace TwitchDownloaderWPF
 
                 comboQuality.SelectedIndex = 0;
 
-                vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
-                textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
-                textTitle.Text = taskVideoInfo.Result.data.video.title;
-                var videoCreatedAt = taskVideoInfo.Result.data.video.createdAt;
+                vodLength = TimeSpan.FromSeconds(videoInfo.Duration);
+                textStreamer.Text = videoInfo.StreamerName;
+                textTitle.Text = videoInfo.Title;
+                var videoCreatedAt = videoInfo.CreatedAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
-                var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
+                var urlTimeCodeMatch = UrlTimeCode.TimeCodeRegex.Match(textUrl.Text);
                 if (urlTimeCodeMatch.Success)
                 {
                     var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
@@ -160,8 +159,8 @@ namespace TwitchDownloaderWPF
                 numEndMinute.Value = vodLength.Minutes;
                 numEndSecond.Value = vodLength.Seconds;
                 labelLength.Text = vodLength.ToString("c");
-                viewCount = taskVideoInfo.Result.data.video.viewCount;
-                game = taskVideoInfo.Result.data.video.game?.displayName ?? "Unknown";
+                viewCount = videoInfo.ViewCount;
+                game = videoInfo.Game ?? "Unknown";
 
                 UpdateVideoSizeEstimates();
 
@@ -211,7 +210,8 @@ namespace TwitchDownloaderWPF
                 CropEnding = checkEnd.IsChecked.GetValueOrDefault(),
                 CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds),
                 FfmpegPath = "ffmpeg",
-                TempFolder = Settings.Default.TempPath
+                TempFolder = Settings.Default.TempPath,
+                VideoPlatform = platform
             };
             return options;
         }
@@ -287,17 +287,6 @@ namespace TwitchDownloaderWPF
                 ImageBehavior.SetAnimatedSource(statusImage, null);
                 statusImage.Source = image;
             }
-        }
-
-        private static int ValidateUrl(string text)
-        {
-            var vodIdMatch = TwitchRegex.MatchVideoId(text);
-            if (vodIdMatch is {Success: true} && int.TryParse(vodIdMatch.ValueSpan, out var vodId))
-            {
-                return vodId;
-            }
-
-            return -1;
         }
 
         public bool ValidateInputs()
@@ -425,8 +414,9 @@ namespace TwitchDownloaderWPF
             VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
 
             Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-            VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
             _cancellationTokenSource = new CancellationTokenSource();
+            VideoDownloaderFactory videoDownloaderFactory = new VideoDownloaderFactory(downloadProgress);
+            IVideoDownloader currentDownload = videoDownloaderFactory.Create(options);
 
             SetImage("Images/ppOverheat.gif", true);
             statusMessage.Text = Translations.Strings.StatusDownloading;

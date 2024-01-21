@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CurlThin" Version="0.0.7" />
     <PackageReference Include="HarfBuzzSharp" Version="7.3.0" />
     <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="7.3.0" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />

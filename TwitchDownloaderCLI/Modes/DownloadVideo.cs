@@ -6,6 +6,7 @@ using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -19,7 +20,8 @@ namespace TwitchDownloaderCLI.Modes
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
 
             var downloadOptions = GetDownloadOptions(inputOptions);
-            VideoDownloader videoDownloader = new(downloadOptions, progress);
+            VideoDownloaderFactory downloadFactory = new VideoDownloaderFactory(progress);
+            IVideoDownloader videoDownloader = downloadFactory.Create(downloadOptions);
             videoDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
@@ -31,8 +33,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var vodIdMatch = TwitchRegex.MatchVideoId(inputOptions.Id);
-            if (vodIdMatch is not { Success: true})
+            if (IdParse.TryParseVod(inputOptions.Id, out var videoPlatform, out var videoId))
             {
                 Console.WriteLine("[ERROR] - Unable to parse Vod ID/URL.");
                 Environment.Exit(1);
@@ -50,13 +51,14 @@ namespace TwitchDownloaderCLI.Modes
             {
                 DownloadThreads = inputOptions.DownloadThreads,
                 ThrottleKib = inputOptions.ThrottleKib,
-                Id = int.Parse(vodIdMatch.ValueSpan),
+                Id = videoId,
+                VideoPlatform = videoPlatform,
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
                 Quality = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
                 {
-                    ".mp4" => inputOptions.Quality,
-                    ".m4a" => "Audio",
+                    ".m4a" when videoPlatform is VideoPlatform.Twitch => "Audio",
+                    ".mp4" or ".m4a" => inputOptions.Quality,
                     _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
                 },
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,

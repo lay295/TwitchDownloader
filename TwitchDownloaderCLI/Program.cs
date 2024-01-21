@@ -16,6 +16,8 @@ namespace TwitchDownloaderCLI
     {
         private static void Main(string[] args)
         {
+            Environment.SetEnvironmentVariable("CURL_IMPERSONATE", "chrome110");
+
             var preParsedArgs = PreParseArgs.Parse(args, Path.GetFileName(Environment.ProcessPath));
 
             var parser = new Parser(config =>
@@ -24,7 +26,7 @@ namespace TwitchDownloaderCLI
                 config.HelpWriter = null; // Use null instead of TextWriter.Null due to how CommandLine works internally
             });
 
-            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs);
+            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CurlArgs, CacheArgs>(preParsedArgs);
             parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
 
             CoreLicensor.EnsureFilesExist(AppContext.BaseDirectory);
@@ -37,6 +39,7 @@ namespace TwitchDownloaderCLI
                 .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
                 .WithParsed<ChatRenderArgs>(RenderChat.Render)
                 .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
+                .WithParsed<CurlArgs>(CurlHandler.ParseArgs)
                 .WithParsed<CacheArgs>(CacheHandler.ParseArgs);
         }
 

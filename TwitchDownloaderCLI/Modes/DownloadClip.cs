@@ -6,6 +6,7 @@ using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.VideoPlatforms.Interfaces;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -23,7 +24,8 @@ namespace TwitchDownloaderCLI.Modes
 
             var downloadOptions = GetDownloadOptions(inputOptions);
 
-            ClipDownloader clipDownloader = new(downloadOptions, progress);
+            ClipDownloaderFactory downloadFactory = new ClipDownloaderFactory(progress);
+            IClipDownloader clipDownloader = downloadFactory.Create(downloadOptions);
             clipDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
@@ -35,22 +37,27 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var clipIdMatch = TwitchRegex.MatchClipId(inputOptions.Id);
-            if (clipIdMatch is not { Success: true })
+            if (!IdParse.TryParseClip(inputOptions.Id, out var videoPlatform, out var videoId))
             {
                 Console.WriteLine("[ERROR] - Unable to parse Clip ID/URL.");
                 Environment.Exit(1);
             }
 
+            if (videoPlatform == VideoPlatform.Kick)
+            {
+                CurlHandler.DetectCurl(inputOptions.CurlImpersonatePath);
+            }
+
             ClipDownloadOptions downloadOptions = new()
             {
-                Id = clipIdMatch.Value,
+                Id = videoId,
                 Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,
                 ThrottleKib = inputOptions.ThrottleKib,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 EncodeMetadata = inputOptions.EncodeMetadata!.Value,
-                TempFolder = inputOptions.TempFolder
+                TempFolder = inputOptions.TempFolder,
+                VideoPlatform = videoPlatform,
             };
 
             return downloadOptions;

@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderWPF.Properties;
 using System.Diagnostics;
+using TwitchDownloaderCore.Tools;
 using System.IO;
 
 namespace TwitchDownloaderWPF
@@ -182,7 +183,7 @@ namespace TwitchDownloaderWPF
 
         private void btnVods_Click(object sender, RoutedEventArgs e)
         {
-            var window = new WindowMassDownload(DownloadType.Video)
+            var window = new WindowMassDownload(VideoType.Video)
             {
                 Owner = Application.Current.MainWindow,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
@@ -192,7 +193,7 @@ namespace TwitchDownloaderWPF
 
         private void btnClips_Click(object sender, RoutedEventArgs e)
         {
-            var window = new WindowMassDownload(DownloadType.Clip)
+            var window = new WindowMassDownload(VideoType.Clip)
             {
                 Owner = Application.Current.MainWindow,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner

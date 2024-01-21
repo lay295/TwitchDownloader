@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects;
-using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Downloaders;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 
 namespace TwitchDownloaderCore
 {
@@ -91,7 +92,7 @@ namespace TwitchDownloaderCore
                 VideoInfo videoInfo = null;
                 try
                 {
-                    videoInfo = (await TwitchHelper.GetVideoInfo(videoId)).data.video;
+                    videoInfo = (await TwitchHelper.GetVideoInfo(videoId)).GqlVideoResponse.data.video;
                 }
                 catch { /* Eat the exception */ }
 
@@ -257,8 +258,8 @@ namespace TwitchDownloaderCore
                 newEmote.id = emote.Id;
                 newEmote.imageScale = emote.ImageScale;
                 newEmote.data = emote.ImageData;
-                newEmote.width = emote.Width / emote.ImageScale;
-                newEmote.height = emote.Height / emote.ImageScale;
+                newEmote.width = (int)(emote.Width / emote.ImageScale);
+                newEmote.height = (int)(emote.Height / emote.ImageScale);
                 chatRoot.embeddedData.firstParty.Add(newEmote);
             }
             progress?.Report(new ProgressReport(ReportType.Log, $"Input 1st party emote count: {inputCount}. Output count: {chatRoot.embeddedData.firstParty.Count}"));
@@ -277,8 +278,8 @@ namespace TwitchDownloaderCore
                 newEmote.imageScale = emote.ImageScale;
                 newEmote.data = emote.ImageData;
                 newEmote.name = emote.Name;
-                newEmote.width = emote.Width / emote.ImageScale;
-                newEmote.height = emote.Height / emote.ImageScale;
+                newEmote.width = (int)(emote.Width / emote.ImageScale);
+                newEmote.height = (int)(emote.Height / emote.ImageScale);
                 chatRoot.embeddedData.thirdParty.Add(newEmote);
             }
             progress?.Report(new ProgressReport(ReportType.Log, $"Input 3rd party emote count: {inputCount}. Output count: {chatRoot.embeddedData.thirdParty.Count}"));
@@ -318,8 +319,8 @@ namespace TwitchDownloaderCore
                     newEmote.imageScale = emotePair.Value.ImageScale;
                     newEmote.data = emotePair.Value.ImageData;
                     newEmote.name = emotePair.Value.Name;
-                    newEmote.width = emotePair.Value.Width / emotePair.Value.ImageScale;
-                    newEmote.height = emotePair.Value.Height / emotePair.Value.ImageScale;
+                    newEmote.width = (int)(emotePair.Value.Width / emotePair.Value.ImageScale);
+                    newEmote.height = (int)(emotePair.Value.Height / emotePair.Value.ImageScale);
                     newBit.tierList.Add(emotePair.Key, newEmote);
                 }
                 chatRoot.embeddedData.twitchBits.Add(newBit);
@@ -395,8 +396,8 @@ namespace TwitchDownloaderCore
 
         private async Task AppendCommentSection(ChatDownloadOptions downloadOptions, string inputFile, CancellationToken cancellationToken = new())
         {
-            ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
-            await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
+            TwitchChatDownloader chatDownloader = new TwitchChatDownloader(downloadOptions, new Progress<ProgressReport>());
+            await chatDownloader.DownloadAsync(cancellationToken);
 
             ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, onlyFirstAndLastComments: false, getEmbeds: false, cancellationToken);
 

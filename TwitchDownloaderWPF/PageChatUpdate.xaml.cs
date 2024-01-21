@@ -13,8 +13,8 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects;
-using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using WpfAnimatedGif;
@@ -115,7 +115,7 @@ namespace TwitchDownloaderWPF
             {
                 if (VideoId.All(char.IsDigit))
                 {
-                    GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(VideoId));
+                    GqlVideoResponse videoInfo = (await TwitchHelper.GetVideoInfo(int.Parse(VideoId))).GqlVideoResponse;
                     if (videoInfo.data.video == null)
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);

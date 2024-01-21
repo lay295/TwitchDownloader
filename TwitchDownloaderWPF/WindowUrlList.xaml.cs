@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using TwitchDownloaderCore;
-using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
+using TwitchDownloaderCore.VideoPlatforms.Twitch.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.TwitchTasks;
@@ -33,9 +34,7 @@ namespace TwitchDownloaderWPF
 
             foreach (var url in urlList)
             {
-                string id = PageChatDownload.ValidateUrl(url);
-
-                if (string.IsNullOrWhiteSpace(id))
+                if (IdParse.TryParseVideoOrClipId(url, out _, out _, out var id))
                 {
                     invalidList.Add(url);
                 }
@@ -53,14 +52,14 @@ namespace TwitchDownloaderWPF
             }
 
             Dictionary<int, string> taskDict = new Dictionary<int, string>();
-            List<Task<GqlVideoResponse>> taskVideoList = new List<Task<GqlVideoResponse>>();
+            List<Task<TwitchVideoInfo>> taskVideoList = new List<Task<TwitchVideoInfo>>();
             List<Task<GqlClipResponse>> taskClipList = new List<Task<GqlClipResponse>>();
 
             foreach (var id in idList)
             {
                 if (id.All(char.IsDigit))
                 {
-                    Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(int.Parse(id));
+                    Task<TwitchVideoInfo> task = TwitchHelper.GetVideoInfo(int.Parse(id));
                     taskVideoList.Add(task);
                     taskDict[task.Id] = id;
                 }
@@ -86,7 +85,7 @@ namespace TwitchDownloaderWPF
                 string id = taskDict[task.Id];
                 if (!task.IsFaulted)
                 {
-                    var videoInfo = task.Result.data.video;
+                    var videoInfo = task.Result.GqlVideoResponse.data.video;
                     var thumbUrl = videoInfo.thumbnailURLs.FirstOrDefault();
                     if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                     {

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace TwitchDownloaderCore.Tools
 {
     public static class UrlTimeCode
     {
+        public static readonly Regex TimeCodeRegex = new(@"(?<=(?:\?|&)t=)\d+h\d+m\d+s(?=$|\?|\s)", RegexOptions.Compiled);
+
         /// <summary>
         /// Converts the span representation of a time interval in the format of '2d21h11m9s' to its <see cref="TimeSpan"/> equivalent.
         /// </summary>

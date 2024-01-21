@@ -1,4 +1,6 @@
-﻿namespace TwitchDownloaderCore.Options
+﻿using TwitchDownloaderCore.Tools;
+
+namespace TwitchDownloaderCore.Options
 {
     public class ClipDownloadOptions
     {
@@ -9,5 +11,6 @@
         public string TempFolder { get; set; }
         public bool EncodeMetadata { get; set; }
         public string FfmpegPath { get; set; }
+        public VideoPlatform VideoPlatform { get; set; }
     }
 }

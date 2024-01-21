@@ -18,7 +18,8 @@ using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderCore.VideoPlatforms.Kick;
+using TwitchDownloaderCore.VideoPlatforms.Twitch;
 
 namespace TwitchDownloaderCore
 {
@@ -111,7 +112,7 @@ namespace TwitchDownloaderCore
             var renderFileDirectory = Directory.GetParent(Path.GetFullPath(renderOptions.OutputFile))!;
             if (!renderFileDirectory.Exists)
             {
-                TwitchHelper.CreateDirectory(renderFileDirectory.FullName);
+                PlatformHelper.CreateDirectory(renderFileDirectory.FullName);
             }
 
             if (File.Exists(renderOptions.OutputFile))
@@ -1589,13 +1590,27 @@ namespace TwitchDownloaderCore
         /// <remarks>chatRoot.embeddedData will be empty after calling this to save on memory!</remarks>
         private async Task FetchScaledImages(CancellationToken cancellationToken)
         {
-            var badgeTask = GetScaledBadges(cancellationToken);
-            var emoteTask = GetScaledEmotes(cancellationToken);
-            var emoteThirdTask = GetScaledThirdEmotes(cancellationToken);
-            var cheerTask = GetScaledBits(cancellationToken);
-            var emojiTask = GetScaledEmojis(cancellationToken);
+            Task<List<ChatBadge>> badgeTask = null;
+            Task<List<TwitchEmote>> emoteTask = null;
+            Task<List<TwitchEmote>> emoteThirdTask = null;
+            Task<List<CheerEmote>> cheerTask = null;
+            Task<Dictionary<string,SKBitmap>> emojiTask = null;
 
-            await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
+            if (chatRoot.videoPlatform == VideoPlatform.Twitch)
+            {
+                badgeTask = GetScaledBadges(cancellationToken);
+                emoteTask = GetScaledEmotes(cancellationToken);
+                emoteThirdTask = GetScaledThirdEmotes(cancellationToken);
+                cheerTask = GetScaledBits(cancellationToken);
+                emojiTask = GetScaledEmojis(cancellationToken);
+                await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask);
+            }
+            else if (chatRoot.videoPlatform == VideoPlatform.Kick)
+            {
+                emoteTask = GetKickScaledEmotes(cancellationToken);
+                emoteThirdTask = GetKickScaledThirdEmotes(cancellationToken);
+                await Task.WhenAll(emoteTask, emoteThirdTask);
+            }
 
             // Clear chatRoot.embeddedData and manually call GC to save some memory
             chatRoot.embeddedData = null;
@@ -1603,11 +1618,11 @@ namespace TwitchDownloaderCore
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            badgeList = badgeTask.Result;
-            emoteList = emoteTask.Result;
-            emoteThirdList = emoteThirdTask.Result;
-            cheermotesList = cheerTask.Result;
-            emojiCache = emojiTask.Result;
+            badgeList = badgeTask?.Result ?? new();
+            emoteList = emoteTask?.Result ?? new();
+            emoteThirdList = emoteThirdTask?.Result ?? new();
+            cheermotesList = cheerTask?.Result ?? new();
+            emojiCache = emojiTask?.Result ?? new();
 
             badgeList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
             emoteList.Sort((a, b) => string.Compare(a.Id, b.Id, StringComparison.Ordinal));
@@ -1712,6 +1727,41 @@ namespace TwitchDownloaderCore
             }
 
             return emojiTask;
+        }
+
+        private async Task<List<TwitchEmote>> GetKickScaledEmotes(CancellationToken cancellationToken)
+        {
+            var emoteTask = await KickHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
+
+            foreach (var emote in emoteTask)
+            {
+                double newScale = (2.0 / emote.ImageScale) * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                if (Math.Abs(newScale - 1.0) > 0.01)
+                {
+                    emote.Resize(newScale);
+                }
+                emote.ImageData = Array.Empty<byte>(); // Clear the image byte[] as we aren't embedding to an output file
+            }
+
+            return emoteTask;
+        }
+
+        private async Task<List<TwitchEmote>> GetKickScaledThirdEmotes(CancellationToken cancellationToken)
+        {
+            var emoteThirdTask = await KickHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes,
+                renderOptions.StvEmotes, renderOptions.AllowUnlistedEmotes, renderOptions.Offline, cancellationToken);
+
+            foreach (var emote in emoteThirdTask)
+            {
+                double newScale = (2.0 / emote.ImageScale) * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                if (Math.Abs(newScale - 1.0) > 0.01)
+                {
+                    emote.Resize(newScale);
+                }
+                emote.ImageData = Array.Empty<byte>(); // Clear the image byte[] as we aren't embedding to an output file
+            }
+
+            return emoteThirdTask;
         }
 
         private (int startTick, int totalTicks) GetVideoTicks()
