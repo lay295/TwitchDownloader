@@ -1,17 +1,17 @@
-<p align="center">
+<div align="center">
   <a href="https://github.com/lay295/TwitchDownloader">
     <img src="TwitchDownloaderWPF/Images/Logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Twitch İndirici</h3>
 
-  <p align="center">
+  <div align="center">
     Twitch VOD/Clip/Chat İndirici ve Chat Oynatıcı
     <br />
     <br />
     <a href="https://github.com/lay295/TwitchDownloader/issues">Hata Bildir</a>
-  </p>
-</p>
+  </div>
+</div>
 
 [**İspanyolca'da Oku**](README_es.md)  
 [**İngilizce'de Oku**](README.md)

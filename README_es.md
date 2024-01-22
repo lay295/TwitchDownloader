@@ -1,18 +1,17 @@
-<p align="center">
+<div align="center">
   <a href="https://github.com/lay295/TwitchDownloader">
     <img src="TwitchDownloaderWPF/Images/Logo.png" alt="Logo" width="80" height="80">
-    
   </a>
 
   <h3 align="center">Twitch Downloader</h3>
 
-  <p align="center">
+  <div align="center">
     Descargador de Twitch VOD/Clip/Chat y Renderizador de Chat
     <br />
     <br />
     <a href="https://github.com/lay295/TwitchDownloader/issues">Reportar un error</a>
-  </p>
-</p>
+  </div>
+</div>
 
 **Este archivo Readme podría no estar actualizado, considere revisar el Readme en [**ingles**](README.md)**
 
