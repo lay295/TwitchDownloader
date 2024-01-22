@@ -127,7 +127,7 @@
     <value>Hai selezionato un canale alfa (trasparenza) per un contenitore/codec che non lo supporta.\nRimuovi la trasparenza o codifica con MOV e RLE/PRORES (la dimensione del file sarà grande).</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
-    <value>Tema</value>
+    <value>Tema </value>
     <comment>Lascia uno spazio alla fine</comment>
   </data>
   <data name="ApplicationThemeTooltip" xml:space="preserve">
@@ -553,7 +553,7 @@
     <value>Output di errore dettagliato</value>
   </data>
   <data name="VerboseErrors" xml:space="preserve">
-    <valueDettagli di errori:</value>
+    <value>Dettagli di errori:</value>
   </data>
   <data name="VideoCreatedAt" xml:space="preserve">
     <value>Creato:</value>
@@ -678,7 +678,7 @@
     <value>Download di massa di clips</value>
   </data>
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
-    <value>¿TwitchDownloaderWPF non è disponibile nella tua lingua? Fai click per sapere come aiutare o tradutte!</value>
+    <value>TwitchDownloaderWPF non è disponibile nella tua lingua? Fai click per sapere come aiutare o tradutte!</value>
   </data>
   <data name="InvalidFolderPath" xml:space="preserve">
     <value>Percorso della cartella non valido</value>
