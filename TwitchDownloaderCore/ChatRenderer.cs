@@ -652,17 +652,9 @@ namespace TwitchDownloaderCore
 
         private static string GetKeyName(IEnumerable<Codepoint> codepoints)
         {
-            List<string> codepointList = new List<string>();
-            foreach (Codepoint codepoint in codepoints)
-            {
-                if (codepoint.Value != 0xFE0F)
-                {
-                    codepointList.Add(codepoint.Value.ToString("X"));
-                }
-            }
+            var codepointList = from codepoint in codepoints where codepoint.Value != 0xFE0F select codepoint.Value.ToString("X");
 
-            string emojiKey = string.Join(' ', codepointList);
-            return emojiKey;
+            return string.Join(' ', codepointList);
         }
 
         private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, ref Point defaultPos)
@@ -917,14 +909,27 @@ namespace TwitchDownloaderCore
 
             static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, [NotNullWhen(true)] out TwitchEmote twitchEmote)
             {
-                // Enumerating over a span is faster than a list
                 var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
-                foreach (var emote1 in emoteListSpan)
+                var lo = 0;
+                var hi = emoteListSpan.Length - 1;
+                while (lo <= hi)
                 {
-                    if (emote1.Name.AsSpan().SequenceEqual(emoteName))
+                    var i = lo + ((hi - lo) >> 1);
+                    var order = emoteListSpan[i].Name.AsSpan().CompareTo(emoteName, StringComparison.Ordinal);
+
+                    if (order == 0)
                     {
-                        twitchEmote = emote1;
+                        twitchEmote = emoteListSpan[i];
                         return true;
+                    }
+
+                    if (order < 0)
+                    {
+                        lo = i + 1;
+                    }
+                    else
+                    {
+                        hi = i - 1;
                     }
                 }
 
@@ -1179,14 +1184,27 @@ namespace TwitchDownloaderCore
 
             static bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, [NotNullWhen(true)] out CheerEmote cheerEmote)
             {
-                // Enumerating over a span is faster than a list
-                var cheerEmoteListSpan = CollectionsMarshal.AsSpan(cheerEmoteList);
-                foreach (var emote1 in cheerEmoteListSpan)
+                var emoteListSpan = CollectionsMarshal.AsSpan(cheerEmoteList);
+                var lo = 0;
+                var hi = emoteListSpan.Length - 1;
+                while (lo <= hi)
                 {
-                    if (emote1.prefix.AsSpan().Equals(prefix, StringComparison.OrdinalIgnoreCase))
+                    var i = lo + ((hi - lo) >> 1);
+                    var order = emoteListSpan[i].prefix.AsSpan().CompareTo(prefix, StringComparison.Ordinal);
+
+                    if (order == 0)
                     {
-                        cheerEmote = emote1;
+                        cheerEmote = emoteListSpan[i];
                         return true;
+                    }
+
+                    if (order < 0)
+                    {
+                        lo = i + 1;
+                    }
+                    else
+                    {
+                        hi = i - 1;
                     }
                 }
 
@@ -1228,14 +1246,27 @@ namespace TwitchDownloaderCore
 
             static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteId, [NotNullWhen(true)] out TwitchEmote twitchEmote)
             {
-                // Enumerating over a span is faster than a list
                 var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
-                foreach (var emote1 in emoteListSpan)
+                var lo = 0;
+                var hi = emoteListSpan.Length - 1;
+                while (lo <= hi)
                 {
-                    if (emote1.Id.AsSpan().SequenceEqual(emoteId))
+                    var i = lo + ((hi - lo) >> 1);
+                    var order = emoteListSpan[i].Id.AsSpan().CompareTo(emoteId, StringComparison.Ordinal);
+
+                    if (order == 0)
                     {
-                        twitchEmote = emote1;
+                        twitchEmote = emoteListSpan[i];
                         return true;
+                    }
+
+                    if (order < 0)
+                    {
+                        lo = i + 1;
+                    }
+                    else
+                    {
+                        hi = i - 1;
                     }
                 }
 
@@ -1460,29 +1491,49 @@ namespace TwitchDownloaderCore
 
             foreach (var badge in comment.message.user_badges)
             {
-                string id = badge._id;
-                string version = badge.version;
+                var id = badge._id;
+                var version = badge.version;
 
-                foreach (var cachedBadge in badgeList)
-                {
-                    if (cachedBadge.Name != id)
-                        continue;
+                if (!TryGetBadge(badgeList, id, out var cachedBadge))
+                    continue;
 
-                    foreach (var cachedVersion in cachedBadge.Versions)
-                    {
-                        if (cachedVersion.Key == version)
-                        {
-                            returnList.Add((cachedVersion.Value, cachedBadge.Type));
-                            goto NextUserBadge;
-                        }
-                    }
-                }
+                if (!cachedBadge.Versions.TryGetValue(version, out var badgeBitmap))
+                    continue;
 
-                // goto is cheaper and more readable than using a boolean + branch check after each operation
-                NextUserBadge: ;
+                returnList.Add((badgeBitmap, cachedBadge.Type));
             }
 
             return returnList;
+
+            static bool TryGetBadge(List<ChatBadge> badgeList, ReadOnlySpan<char> badgeName, [NotNullWhen(true)] out ChatBadge badge)
+            {
+                var badgeSpan = CollectionsMarshal.AsSpan(badgeList);
+                var lo = 0;
+                var hi = badgeSpan.Length - 1;
+                while (lo <= hi)
+                {
+                    var i = lo + ((hi - lo) >> 1);
+                    var order = badgeSpan[i].Name.AsSpan().CompareTo(badgeName, StringComparison.Ordinal);
+
+                    if (order == 0)
+                    {
+                        badge = badgeSpan[i];
+                        return true;
+                    }
+
+                    if (order < 0)
+                    {
+                        lo = i + 1;
+                    }
+                    else
+                    {
+                        hi = i - 1;
+                    }
+                }
+
+                badge = null;
+                return false;
+            }
         }
 
         private void DrawTimestamp(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, ref Point defaultPos)
@@ -1557,6 +1608,11 @@ namespace TwitchDownloaderCore
             emoteThirdList = emoteThirdTask.Result;
             cheermotesList = cheerTask.Result;
             emojiCache = emojiTask.Result;
+
+            badgeList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+            emoteList.Sort((a, b) => string.Compare(a.Id, b.Id, StringComparison.Ordinal));
+            emoteThirdList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+            cheermotesList.Sort((a, b) => string.Compare(a.prefix, b.prefix, StringComparison.Ordinal));
         }
 
         private async Task<List<ChatBadge>> GetScaledBadges(CancellationToken cancellationToken)

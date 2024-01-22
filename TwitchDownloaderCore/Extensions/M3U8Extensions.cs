@@ -32,6 +32,16 @@ namespace TwitchDownloaderCore.Extensions
                 throw new ArgumentException(nameof(m3u8), "M3U8 does not contain any streams.");
             }
 
+            if (string.IsNullOrWhiteSpace(qualityString))
+            {
+                return m3u8.BestQualityStream();
+            }
+
+            if (qualityString.Contains("source", StringComparison.OrdinalIgnoreCase) || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
+            {
+                return m3u8.BestQualityStream();
+            }
+
             if (qualityString.Contains("audio", StringComparison.OrdinalIgnoreCase) &&
                 streams.FirstOrDefault(x => x.MediaInfo.Name.Contains("audio", StringComparison.OrdinalIgnoreCase)) is { } audioStream)
             {
@@ -52,7 +62,7 @@ namespace TwitchDownloaderCore.Extensions
             var qualityStringMatch = UserQualityStringRegex.Match(qualityString);
             if (!qualityStringMatch.Success)
             {
-                return streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate);
+                return m3u8.BestQualityStream();
             }
 
             var desiredWidth = qualityStringMatch.Groups["Width"];
@@ -69,7 +79,7 @@ namespace TwitchDownloaderCore.Extensions
             {
                 1 => filteredStreams[0],
                 2 when !desiredFramerate.Success => filteredStreams.First(x => Math.Abs(x.StreamInfo.Framerate - 30) <= 2),
-                _ => streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate)
+                _ => m3u8.BestQualityStream()
             };
         }
 
@@ -79,25 +89,32 @@ namespace TwitchDownloaderCore.Extensions
         /// </returns>
         public static string GetResolutionFramerateString(this M3U8.Stream stream)
         {
+            const string RESOLUTION_FRAMERATE_PATTERN = /*lang=regex*/@"\d{3,4}p\d{2,3}";
+
             var mediaInfo = stream.MediaInfo;
-            if (mediaInfo.Name.Contains("audio", StringComparison.OrdinalIgnoreCase) || Regex.IsMatch(mediaInfo.Name, @"\d{3,4}p\d{2,3}"))
+            if (mediaInfo.Name.Contains("audio", StringComparison.OrdinalIgnoreCase) || Regex.IsMatch(mediaInfo.Name, RESOLUTION_FRAMERATE_PATTERN))
             {
                 return mediaInfo.Name;
             }
 
             var streamInfo = stream.StreamInfo;
-            if (Regex.IsMatch(streamInfo.Video, @"\d{3,4}p\d{2,3}"))
+            if (Regex.IsMatch(streamInfo.Video, RESOLUTION_FRAMERATE_PATTERN))
             {
                 return streamInfo.Video;
             }
 
-            if (Regex.IsMatch(mediaInfo.GroupId, @"\d{3,4}p\d{2,3}"))
+            if (Regex.IsMatch(mediaInfo.GroupId, RESOLUTION_FRAMERATE_PATTERN))
             {
                 return mediaInfo.GroupId;
             }
 
             if (streamInfo.Resolution == default)
             {
+                if (stream.IsSource())
+                {
+                    return "Source";
+                }
+
                 return "";
             }
 
@@ -105,13 +122,36 @@ namespace TwitchDownloaderCore.Extensions
 
             if (streamInfo.Framerate == default)
             {
+                if (stream.IsSource())
+                {
+                    return $"{frameHeight}p (Source)";
+                }
+
                 return $"{frameHeight}p";
             }
 
             // Some M3U8 responses have framerate values up to 2fps more/less than the typical framerate.
             var frameRate = (uint)(Math.Round(streamInfo.Framerate / 10) * 10);
 
+            if (stream.IsSource())
+            {
+                return $"{frameHeight}p{frameRate} (Source)";
+            }
+
             return $"{frameHeight}p{frameRate}";
         }
+
+        /// <summary>
+        /// Returns the best quality stream from the provided M3U8.
+        /// </summary>
+        public static M3U8.Stream BestQualityStream(this M3U8 m3u8)
+        {
+            var source = Array.Find(m3u8.Streams, x => x.IsSource());
+            return source ?? m3u8.Streams.MaxBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * x.StreamInfo.Framerate);
+        }
+
+        internal static bool IsSource(this M3U8.Stream stream)
+            => stream.MediaInfo.Name.Contains("source", StringComparison.OrdinalIgnoreCase) ||
+               stream.MediaInfo.GroupId.Equals("chunked", StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -50,7 +50,8 @@ namespace TwitchDownloaderCLI.Tools
             }
             catch
             {
-                Console.WriteLine("[ERROR] - Unable to update FFmpeg file permissions. Run 'sudo chmod +x ffmpeg' if further FFmpeg errors occur.");
+                Console.WriteLine("[ERROR] - Unable to update FFmpeg file permissions. Run '{0}' if further FFmpeg errors occur.",
+                    RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "chmod +x ffmpeg" : "sudo chmod +x ffmpeg");
             }
         }
 

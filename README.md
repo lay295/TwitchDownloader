@@ -95,10 +95,11 @@ cd C:\folder\containing\TwitchDownloaderCLI
 ```
 TwitchDownloaderCLI.exe ffmpeg --download
 ```
-5. You can now start using the downloader, for example:
+5. You can now start using TwitchDownloaderCLI, for example:
 ```
 TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 ```
+You can find more example commands in the [CLI README](TwitchDownloaderCLI/README.md#example-commands).
 
 ## Linux – Getting started
 
@@ -122,10 +123,11 @@ sudo chmod +x TwitchDownloaderCLI
 ```
 sudo chmod +x ffmpeg
 ```
-8. You can now start using the downloader, for example:
+8. You can now start using TwitchDownloaderCLI, for example:
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
+You can find more example commands in the [CLI README](TwitchDownloaderCLI/README.md#example-commands).
 
 ## MacOS – Getting started
 1. If your device has an Apple Silicon M-series processor, ensure that you download the arm64 binary, however if you would like to use the x64 binary on Apple Silicon it must be run via a terminal session running under Rosetta 2:
@@ -150,16 +152,18 @@ chmod +x TwitchDownloaderCLI
 ```
 chmod +x ffmpeg
 ```
-7. You can now start using the downloader, for example:
+7. You can now start using TwitchDownloaderCLI, for example:
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
+You can find more example commands in the [CLI README](TwitchDownloaderCLI/README.md#example-commands).
 
 # Building from source
 
 ## Requirements
 
 - [.NET 6.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- About 1GB of disk space
 
 ## Build Instructions
 
@@ -178,11 +182,11 @@ dotnet restore
 - Non-Windows devices may need to explicitly specify a project to restore, i.e. `dotnet restore TwitchDownloaderCLI`
 4. a) Build the GUI:
 ```
-dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=None -p:DebugSymbols=false
+dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
 4. b) Build the CLI:
 ```
-dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile> -p:DebugType=None -p:DebugSymbols=false
+dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 ```
 - Applicable Profiles: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
 5. a) Navigate to the GUI build folder:
@@ -194,13 +198,9 @@ cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
 cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 ```
 
-# License
-
-[MIT](./LICENSE.txt)
-
 # Third Party Credits
 
-Chat Renders are rendered with [SkiaSharp and HarfBuzzSharp](https://github.com/mono/SkiaSharp) © Microsoft Corporation.
+Chat Renders are rendered with [SkiaSharp](https://github.com/mono/SkiaSharp) and [HarfBuzzSharp](https://github.com/mono/SkiaSharp) © Microsoft Corporation.
 
 Chat Renders are encoded and Video Downloads are finalized with [FFmpeg](https://ffmpeg.org/) © The FFmpeg developers.
 
@@ -215,3 +215,9 @@ FFmpeg binaries fetched are runtime are downloaded using [Xabe.FFmpeg.Downloader
 Chat Html exports utilize the _Inter_ typeface hosted by the [Google Fonts API](https://fonts.google.com/) © Google.
 
 For a full list of utilized external libraries, see [THIRD-PARTY-LICENSES.txt](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt).
+
+# License
+
+[MIT](./LICENSE.txt)
+
+TwitchDownloader is in no way associated with Twitch Interactive, Inc. or its affiliates.

@@ -1,6 +1,6 @@
 ﻿using TwitchDownloaderCore.Extensions;
 
-namespace TwitchDownloaderCore.Tests
+namespace TwitchDownloaderCore.Tests.ExtensionTests
 {
     public class ReadOnlySpanUnEscapedIndexOfTests
     {
