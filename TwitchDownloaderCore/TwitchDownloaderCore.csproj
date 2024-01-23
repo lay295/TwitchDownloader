@@ -23,14 +23,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="HarfBuzzSharp" Version="7.3.0" />
-    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="7.3.0" />
+    <PackageReference Include="HarfBuzzSharp" Version="7.3.0.1" />
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="7.3.0.1" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
-    <PackageReference Include="SkiaSharp" Version="2.88.6" />
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.6" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.6" />
-    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="2.88.6" />
-    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+    <PackageReference Include="SkiaSharp" Version="2.88.7" />
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.7" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.7" />
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="2.88.7" />
+    <PackageReference Include="System.Text.Json" Version="8.0.1" />
     <PackageReference Include="Unicode.net" Version="2.0.0" />
   </ItemGroup>
 

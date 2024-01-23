@@ -1,21 +1,22 @@
-<p align="center">
+<div align="center">
   <a href="https://github.com/lay295/TwitchDownloader">
-    <img src="TwitchDownloaderWPF/Images/Logo.png" alt="Logo" width="80" height="80">
-    
+    <img src="TwitchDownloaderWPF/Images/Logo.png" alt="Logo" width="80" height="80"> 
   </a>
 
   <h3 align="center">Twitch Downloader</h3>
 
-  <p align="center">
+  <div align="center">
     Twitch VOD/Clip/Chat Downloader and Chat Renderer
     <br />
     <br />
     <a href="https://github.com/lay295/TwitchDownloader/issues">Report Bug</a>
-  </p>
-</p>
+  </div>
+</div>
 
-[**Readme in Spanish**](README_es.md)  
-[**Readme in Turkish**](README_tr.md)
+This document is also available in:
+- [**Spanish / Español**](README_es.md)
+- [**Italian / Italiano**](README_it.md)
+- [**Turkish / Türkçe**](README_tr.md)
 
 ## Chat Render Example
 
