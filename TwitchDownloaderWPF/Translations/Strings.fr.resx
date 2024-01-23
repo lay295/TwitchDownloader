@@ -813,4 +813,7 @@
   <data name="ContextMenuOpenTaskFolder" xml:space="preserve">
     <value>Open folder</value>
   </data>
+  <data name="PreferredQuality" xml:space="preserve">
+    <value>Qualité préférée:</value>
+  </data>
 </root>
