@@ -815,4 +815,7 @@
     <value>Open folder
 </value>
   </data>
+  <data name="PreferredQuality" xml:space="preserve">
+    <value>Preferred Quality:</value>
+  </data>
 </root>

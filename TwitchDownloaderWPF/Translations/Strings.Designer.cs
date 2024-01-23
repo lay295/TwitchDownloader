@@ -1194,6 +1194,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Preferred Quality:.
+        /// </summary>
+        public static string PreferredQuality {
+            get {
+                return ResourceManager.GetString("PreferredQuality", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quality:.
         /// </summary>
         public static string Quality {
