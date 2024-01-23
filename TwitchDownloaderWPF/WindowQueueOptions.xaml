@@ -10,7 +10,7 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="Queue Options" MinHeight="240" Height="240" MinWidth="500" Width="500" Loaded="Window_loaded">
+        Title="Queue Options" MinHeight="280" Height="280" MinWidth="500" Width="500" Loaded="Window_loaded">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
@@ -33,7 +33,20 @@
                 <TextBox x:Name="textFolder" HorizontalAlignment="Left" Height="23" Margin="3,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" MinWidth="300" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 <Button x:Name="btnFolder" Content="{lex:Loc Browse}" HorizontalAlignment="Left" Margin="3,0,0,0" VerticalAlignment="Top" MinWidth="60" Click="btnFolder_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
             </WrapPanel>
-            <CheckBox x:Name="checkVideo" Content="{lex:Loc DownloadVideo}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <CheckBox x:Name="checkVideo" Content="{lex:Loc DownloadVideo}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Checked="CheckVideo_OnChecked" Unchecked="CheckVideo_OnChecked" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}"/>
+            <StackPanel Orientation="Horizontal" Margin="20,5,0,0">
+                <TextBlock x:Name="TextPreferredQuality" Text="Preferred Quality:" HorizontalAlignment="Right" Margin="5,4,0,0" Foreground="{DynamicResource AppTextDisabled}" />
+                <ComboBox SelectedIndex="0" x:Name="ComboPreferredQuality" IsEnabled="False" Margin="5,0,0,0" MinWidth="90" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}">
+                    <ComboBoxItem Content="Source" />
+                    <ComboBoxItem Content="1440p" />
+                    <ComboBoxItem Content="1080p" />
+                    <ComboBoxItem Content="720p" />
+                    <ComboBoxItem Content="480p" />
+                    <ComboBoxItem Content="360p" />
+                    <ComboBoxItem Content="160p" />
+                    <ComboBoxItem Content="144p" />
+                </ComboBox>
+            </StackPanel>
             <CheckBox x:Name="checkChat" Content="{lex:Loc DownloadChat}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Checked="checkChat_Checked" Unchecked="checkChat_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="20,5,0,0" Visibility="Visible">

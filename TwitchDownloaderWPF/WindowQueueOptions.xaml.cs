@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderWPF.Properties;
@@ -32,6 +31,9 @@ namespace TwitchDownloaderWPF
             string queueFolder = Settings.Default.QueueFolder;
             if (Directory.Exists(queueFolder))
                 textFolder.Text = queueFolder;
+
+            TextPreferredQuality.Visibility = Visibility.Collapsed;
+            ComboPreferredQuality.Visibility = Visibility.Collapsed;
 
             if (page is PageVodDownload or PageClipDownload)
             {
@@ -463,6 +465,7 @@ namespace TwitchDownloaderWPF
                             Oauth = Settings.Default.OAuth,
                             TempFolder = Settings.Default.TempPath,
                             Id = int.Parse(taskData.Id),
+                            Quality = (ComboPreferredQuality.SelectedItem as ComboBoxItem)?.Content as string,
                             FfmpegPath = "ffmpeg",
                             CropBeginning = false,
                             CropEnding = false,
@@ -497,6 +500,7 @@ namespace TwitchDownloaderWPF
                         ClipDownloadOptions downloadOptions = new ClipDownloadOptions
                         {
                             Id = taskData.Id,
+                            Quality = (ComboPreferredQuality.SelectedItem as ComboBoxItem)?.Content as string,
                             Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
                                 TimeSpan.Zero, TimeSpan.FromSeconds(taskData.Length), taskData.Views.ToString(), taskData.Game) + ".mp4"),
                             ThrottleKib = Settings.Default.DownloadThrottleEnabled
@@ -682,6 +686,20 @@ namespace TwitchDownloaderWPF
         {
             Title = Translations.Strings.TitleEnqueueOptions;
             App.RequestTitleBarChange();
+        }
+
+        private void CheckVideo_OnChecked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                ComboPreferredQuality.IsEnabled = checkVideo.IsChecked.GetValueOrDefault();
+                try
+                {
+                    var newBrush = (Brush)Application.Current.Resources[checkVideo.IsChecked.GetValueOrDefault() ? "AppText" : "AppTextDisabled"];
+                    TextPreferredQuality.Foreground = newBrush;
+                }
+                catch { /* Ignored */ }
+            }
         }
     }
 }
