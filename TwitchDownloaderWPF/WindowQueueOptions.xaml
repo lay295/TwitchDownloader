@@ -35,7 +35,7 @@
             </WrapPanel>
             <CheckBox x:Name="checkVideo" Content="{lex:Loc DownloadVideo}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Checked="CheckVideo_OnChecked" Unchecked="CheckVideo_OnChecked" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}"/>
             <StackPanel Orientation="Horizontal" Margin="20,5,0,0">
-                <TextBlock x:Name="TextPreferredQuality" Text="{lex:Loc PreferredQuality}" HorizontalAlignment="Right" Margin="5,4,0,0" Foreground="{DynamicResource AppTextDisabled}" />
+                <TextBlock x:Name="TextPreferredQuality" Text="{lex:Loc PreferredQuality}" HorizontalAlignment="Right" Margin="5,5,0,0" Foreground="{DynamicResource AppTextDisabled}" />
                 <ComboBox SelectedIndex="0" x:Name="ComboPreferredQuality" IsEnabled="False" Margin="5,0,0,0" MinWidth="90" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}">
                     <ComboBoxItem Content="Source" />
                     <ComboBoxItem Content="1440p" />
