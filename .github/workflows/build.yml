@@ -39,7 +39,7 @@ jobs:
      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
  
     steps:
-    - uses: actions/checkout@v2.7
+    - uses: actions/checkout@v2.7.0
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [create-release, build-gui]
     steps:
-    - uses: actions/checkout@v2.7
+    - uses: actions/checkout@v2.7.0
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -207,7 +207,7 @@ jobs:
     runs-on: macos-latest
     needs: [create-release, build-cli]
     steps:
-    - uses: actions/checkout@v2.7
+    - uses: actions/checkout@v2.7.0
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
