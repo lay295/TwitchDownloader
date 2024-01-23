@@ -2,10 +2,10 @@
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-    [Verb("tsmerge", HelpText = "Concatenates .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) parts into another file")]
+    [Verb("tsmerge", HelpText = "Concatenates multiple .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) files into a single file")]
     public class TsMergeArgs : ITwitchDownloaderArgs
     {
-        [Option('l', "inputlist", Required = true, HelpText = "Path to text file which contains the list of parts to concatenate.")]
+        [Option('i', "input", Required = true, HelpText = "Path a text file containing the absolute paths of the files to concatenate, separated by newlines. M3U/M3U8 is also supported.")]
         public string InputList { get; set; }
 
         [Option('o', "output", Required = true, HelpText = "Path to output file.")]

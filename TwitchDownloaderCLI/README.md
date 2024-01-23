@@ -346,10 +346,10 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 (Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode tsmerge
-<sup>Concatenates .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) parts into another file</sup>
+#### Concatenates multiple .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) files into a single file
 
-**-l / --inputlist (REQUIRED)**
-Path to input list file in text format (one part per line).
+**-i / --input (REQUIRED)**
+Path a text file containing the absolute paths of the files to concatenate, separated by newlines. M3U/M3U8 is also supported.
 
 **-o / --output (REQUIRED)**
 File the program will output to.
@@ -408,6 +408,10 @@ Clear the default TwitchDownloader cache folder
 
     ./TwitchDownloaderCLI cache --clear
 
+Concatenate several ts files into a single output file
+
+    TwitchDownloaderCLI tsmerge -i list.txt -o output.ts
+
 Print the available operations
 
     ./TwitchDownloaderCLI help
@@ -415,10 +419,6 @@ Print the available operations
 Print the available options for the VOD downloader
 
     ./TwitchDownloaderCLI videodownload --help
-
-Concatenate several ts parts into another
-
-    TwitchDownloaderCLI tsmerge -l list.txt -o output.ts
 
 ---
 

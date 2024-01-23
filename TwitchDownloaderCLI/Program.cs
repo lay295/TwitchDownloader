@@ -38,7 +38,7 @@ namespace TwitchDownloaderCLI
                 .WithParsed<ChatRenderArgs>(RenderChat.Render)
                 .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
                 .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
-                .WithParsed<TsMergeArgs>(MergeTS.Merge);
+                .WithParsed<TsMergeArgs>(MergeTs.Merge);
         }
 
         private static void WriteHelpText(IEnumerable<Error> errors, ParserResult<object> parserResult, ParserSettings parserSettings)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Options;
@@ -11,41 +10,59 @@ namespace TwitchDownloaderCore
 {
     public sealed class TsMerger
     {
-        private readonly TsMergeOptions downloadOptions;
+        private readonly TsMergeOptions mergeOptions;
         private readonly IProgress<ProgressReport> _progress;
 
         public TsMerger(TsMergeOptions tsMergeOptions, IProgress<ProgressReport> progress)
         {
-            downloadOptions = tsMergeOptions;
+            mergeOptions = tsMergeOptions;
             _progress = progress;
         }
 
         public async Task MergeAsync(CancellationToken cancellationToken)
         {
-            string InputList = downloadOptions.InputList;
-            List<string> videoPartsList = System.IO.File.ReadLines(InputList).ToList();
-            videoPartsList.RemoveAll(string.IsNullOrWhiteSpace);
+            if (!File.Exists(mergeOptions.InputFile))
+            {
+                throw new FileNotFoundException("Input file does not exist");
+            }
+
+            var fileList = new List<string>();
+            await using (var fs = File.Open(mergeOptions.InputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                using var sr = new StreamReader(fs);
+                while (await sr.ReadLineAsync() is { } line)
+                {
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    if (line.StartsWith('#'))
+                        continue;
+
+                    fileList.Add(line);
+                }
+            }
 
             _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Verifying Parts 0% [1/2]"));
 
-            VerifyDownloadedParts(videoPartsList, cancellationToken);
+            await VerifyVideoParts(fileList, cancellationToken);
 
             _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Combining Parts 0% [2/2]" });
 
-            await CombineVideoParts(videoPartsList, cancellationToken);
+            await CombineVideoParts(fileList, cancellationToken);
 
             _progress.Report(new ProgressReport(100));
         }
 
-        private void VerifyDownloadedParts(List<string> videoParts, CancellationToken cancellationToken)
+        private async Task VerifyVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
         {
             var failedParts = new List<string>();
-            var partCount = videoParts.Count;
+            var partCount = fileList.Count;
             var doneCount = 0;
 
-            foreach (var part in videoParts)
+            foreach (var part in fileList)
             {
-                if (!VerifyVideoPart(part))
+                var isValidTs = await VerifyVideoPart(part);
+                if (!isValidTs)
                 {
                     failedParts.Add(part);
                 }
@@ -60,26 +77,26 @@ namespace TwitchDownloaderCore
 
             if (failedParts.Count != 0)
             {
-                if (failedParts.Count == videoParts.Count)
+                if (failedParts.Count == fileList.Count)
                 {
                     // Every video part returned corrupted, probably a false positive.
                     return;
                 }
 
-                _progress.Report(new ProgressReport(ReportType.Log, $"The following parts appear to be invalid TS files: {string.Join(", ", failedParts)}"));
+                _progress.Report(new ProgressReport(ReportType.Log, $"The following TS files appear to be invalid or corrupted: {string.Join(", ", failedParts)}"));
             }
         }
 
-        private static bool VerifyVideoPart(string partFile)
+        private static async Task<bool> VerifyVideoPart(string filePath)
         {
             const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
 
-            if (!File.Exists(partFile))
+            if (!File.Exists(filePath))
             {
                 return false;
             }
 
-            using var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.None);
+            await using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             var fileLength = fs.Length;
             if (fileLength == 0 || fileLength % TS_PACKET_LENGTH != 0)
             {
@@ -89,16 +106,16 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private async Task CombineVideoParts(List<string> videoParts, CancellationToken cancellationToken)
+        private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
         {
-            DriveInfo outputDrive = DriveHelper.GetOutputDrive(downloadOptions.OutputFile);
-            string outputFile = downloadOptions.OutputFile;
+            DriveInfo outputDrive = DriveHelper.GetOutputDrive(mergeOptions.OutputFile);
+            string outputFile = mergeOptions.OutputFile;
 
-            int partCount = videoParts.Count;
+            int partCount = fileList.Count;
             int doneCount = 0;
 
-            await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None);
-            foreach (var partFile in videoParts)
+            await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+            foreach (var partFile in fileList)
             {
                 await DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken);
 
