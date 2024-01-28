@@ -178,7 +178,9 @@ namespace TwitchDownloaderCore.Chat
             chatRoot.video ??= new Video
             {
                 start = (int)Math.Floor(chatRoot.comments.FirstOrDefault()?.content_offset_seconds ?? 0),
-                end = (int)Math.Ceiling(chatRoot.comments.LastOrDefault()?.content_offset_seconds ?? MAX_STREAM_LENGTH)
+                end = (int)Math.Ceiling(chatRoot.comments.LastOrDefault()?.content_offset_seconds ?? MAX_STREAM_LENGTH),
+                id = chatRoot.comments.FirstOrDefault()?.content_id,
+                created_at = chatRoot.comments.FirstOrDefault()?.created_at - TimeSpan.FromSeconds(chatRoot.comments.FirstOrDefault()?.content_offset_seconds ?? 0) ?? default
             };
 
             if (chatRoot.streamer is null)
