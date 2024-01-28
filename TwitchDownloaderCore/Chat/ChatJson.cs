@@ -175,18 +175,23 @@ namespace TwitchDownloaderCore.Chat
         private static async Task UpgradeChatJson(ChatRoot chatRoot)
         {
             const int MAX_STREAM_LENGTH = 172_800; // 48 hours in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+
+            var firstComment = chatRoot.comments.FirstOrDefault();
+            var lastComment = chatRoot.comments.LastOrDefault();
+
             chatRoot.video ??= new Video
             {
-                start = (int)Math.Floor(chatRoot.comments.FirstOrDefault()?.content_offset_seconds ?? 0),
-                end = (int)Math.Ceiling(chatRoot.comments.LastOrDefault()?.content_offset_seconds ?? MAX_STREAM_LENGTH),
-                id = chatRoot.comments.FirstOrDefault()?.content_id,
-                created_at = chatRoot.comments.FirstOrDefault()?.created_at - TimeSpan.FromSeconds(chatRoot.comments.FirstOrDefault()?.content_offset_seconds ?? 0) ?? default
+                start = (int)Math.Floor(firstComment?.content_offset_seconds ?? 0),
+                end = (int)Math.Ceiling(lastComment?.content_offset_seconds ?? MAX_STREAM_LENGTH),
+                id = firstComment?.content_id,
+                created_at = firstComment?.created_at - TimeSpan.FromSeconds(firstComment?.content_offset_seconds ?? 0) ?? default
             };
 
             if (chatRoot.streamer is null)
             {
                 var assumedId = int.Parse(chatRoot.video.user_id
-                                          ?? chatRoot.comments.FirstOrDefault(x => x.message.user_badges?.Any(b => b._id.Equals("broadcaster")) ?? false)?.commenter._id
+                                          ?? chatRoot.comments.Where(x => x.message.user_badges != null)
+                                              .FirstOrDefault(x => x.message.user_badges.Any(b => b._id.Equals("broadcaster")))?.commenter._id
                                           ?? "0");
                 var assumedName = chatRoot.video.user_name ?? await TwitchHelper.GetStreamerName(assumedId);
 
