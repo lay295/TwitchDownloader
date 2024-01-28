@@ -189,11 +189,20 @@ namespace TwitchDownloaderCore.Chat
 
             if (chatRoot.streamer is null)
             {
-                var assumedId = int.Parse(chatRoot.video.user_id
-                                          ?? chatRoot.comments.Where(x => x.message.user_badges != null)
-                                              .FirstOrDefault(x => x.message.user_badges.Any(b => b._id.Equals("broadcaster")))?.commenter._id
-                                          ?? "0");
-                var assumedName = chatRoot.video.user_name ?? await TwitchHelper.GetStreamerName(assumedId);
+                var broadcaster = new Lazy<Comment>(() =>
+                    chatRoot.comments
+                        .Where(x => x.message.user_badges != null)
+                        .FirstOrDefault(x => x.message.user_badges.Any(b => b._id.Equals("broadcaster"))));
+
+                if (!int.TryParse(chatRoot.video.user_id, out var assumedId))
+                {
+                    if (!int.TryParse(broadcaster.Value?.commenter._id, out assumedId))
+                    {
+                        assumedId = 0;
+                    }
+                }
+
+                var assumedName = chatRoot.video.user_name ?? broadcaster.Value?.commenter.display_name ?? await TwitchHelper.GetStreamerName(assumedId);
 
                 chatRoot.streamer = new Streamer { id = assumedId, name = assumedName };
             }
