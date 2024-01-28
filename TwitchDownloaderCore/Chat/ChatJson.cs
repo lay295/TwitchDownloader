@@ -199,9 +199,12 @@ namespace TwitchDownloaderCore.Chat
 
                 if (!int.TryParse(chatRoot.video.user_id, out var assumedId))
                 {
-                    if (!int.TryParse(broadcaster.Value?.commenter._id, out assumedId))
+                    if (chatRoot.comments.FirstOrDefault(x => int.TryParse(x.channel_id, out assumedId)) is null)
                     {
-                        assumedId = 0;
+                        if (!int.TryParse(broadcaster.Value?.commenter._id, out assumedId))
+                        {
+                            assumedId = 0;
+                        }
                     }
                 }
 
