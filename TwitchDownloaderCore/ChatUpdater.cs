@@ -85,6 +85,11 @@ namespace TwitchDownloaderCore
             progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Updating Video Info [{currentStep}/{totalSteps}]"));
             progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
 
+            if (string.IsNullOrWhiteSpace(chatRoot.video.id))
+            {
+                return;
+            }
+
             if (chatRoot.video.id.All(char.IsDigit))
             {
                 var videoId = int.Parse(chatRoot.video.id);
