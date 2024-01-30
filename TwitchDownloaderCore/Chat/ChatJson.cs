@@ -175,16 +175,40 @@ namespace TwitchDownloaderCore.Chat
         private static async Task UpgradeChatJson(ChatRoot chatRoot)
         {
             const int MAX_STREAM_LENGTH = 172_800; // 48 hours in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+
+            var firstComment = chatRoot.comments.FirstOrDefault();
+            var lastComment = chatRoot.comments.LastOrDefault();
+
             chatRoot.video ??= new Video
             {
-                start = (int)Math.Floor(chatRoot.comments.FirstOrDefault()?.content_offset_seconds ?? 0),
-                end = (int)Math.Ceiling(chatRoot.comments.LastOrDefault()?.content_offset_seconds ?? MAX_STREAM_LENGTH)
+                start = (int)Math.Floor(firstComment?.content_offset_seconds ?? 0),
+                end = (int)Math.Ceiling(lastComment?.content_offset_seconds ?? MAX_STREAM_LENGTH)
             };
+
+            chatRoot.video.id ??= firstComment?.content_id;
+
+            if (chatRoot.video.created_at == default)
+                chatRoot.video.created_at = firstComment?.created_at - TimeSpan.FromSeconds(firstComment?.content_offset_seconds ?? 0) ?? default;
 
             if (chatRoot.streamer is null)
             {
-                var assumedId = int.Parse(chatRoot.video.user_id ?? chatRoot.comments.FirstOrDefault()?.channel_id ?? "0");
-                var assumedName = chatRoot.video.user_name ?? await TwitchHelper.GetStreamerName(assumedId);
+                var broadcaster = new Lazy<Comment>(() =>
+                    chatRoot.comments
+                        .Where(x => x.message.user_badges != null)
+                        .FirstOrDefault(x => x.message.user_badges.Any(b => b._id.Equals("broadcaster"))));
+
+                if (!int.TryParse(chatRoot.video.user_id, out var assumedId))
+                {
+                    if (chatRoot.comments.FirstOrDefault(x => int.TryParse(x.channel_id, out assumedId)) is null)
+                    {
+                        if (!int.TryParse(broadcaster.Value?.commenter._id, out assumedId))
+                        {
+                            assumedId = 0;
+                        }
+                    }
+                }
+
+                var assumedName = chatRoot.video.user_name ?? broadcaster.Value?.commenter.display_name ?? await TwitchHelper.GetStreamerName(assumedId);
 
                 chatRoot.streamer = new Streamer { id = assumedId, name = assumedName };
             }
