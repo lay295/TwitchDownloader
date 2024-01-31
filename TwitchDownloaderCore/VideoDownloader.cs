@@ -321,7 +321,7 @@ namespace TwitchDownloaderCore
             _progress.Report(new ProgressReport(ReportType.Log, sb.ToString()));
         }
 
-        private async Task VerifyDownloadedParts(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
+        private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
         {
             var failedParts = new List<M3U8.Stream>();
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
@@ -345,10 +345,17 @@ namespace TwitchDownloaderCore
 
             if (failedParts.Count != 0)
             {
-                if (failedParts.Count == partCount)
+                if (playlist.Count == 1)
                 {
-                    // Every video part returned corrupted, probably a false positive.
+                    // The video is only 1 part, it probably won't be a complete file.
                     return;
+                }
+
+                if (partCount > 20 && failedParts.Count >= partCount * 0.95)
+                {
+                    // 19/20 parts failed to verify. Either the VOD is heavily corrupted or something went horribly wrong.
+                    // TODO: Somehow let the user bypass this. Maybe with callbacks?
+                    throw new Exception($"Too many parts are corrupted or missing ({failedParts}/{partCount}), aborting.");
                 }
 
                 _progress.Report(new ProgressReport(ReportType.Log, $"The following parts will be redownloaded: {string.Join(", ", failedParts)}"));
@@ -359,7 +366,6 @@ namespace TwitchDownloaderCore
         private static bool VerifyVideoPart(string filePath)
         {
             const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
-
 
             if (!File.Exists(filePath))
             {
@@ -376,7 +382,7 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        public int RunFfmpegVideoCopy(string downloadFolder, string metadataPath, double startOffset, double seekDuration)
+        private int RunFfmpegVideoCopy(string downloadFolder, string metadataPath, double startOffset, double seekDuration)
         {
             var process = new Process
             {
@@ -480,20 +486,20 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException)
                 {
-                    const int maxRetries = 10;
-                    if (++errorCount > maxRetries)
+                    const int MAX_RETRIES = 10;
+                    if (++errorCount > MAX_RETRIES)
                     {
-                        throw new HttpRequestException($"Video part {videoPartName} failed after {maxRetries} retries");
+                        throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_RETRIES} retries");
                     }
 
                     await Task.Delay(1_000 * errorCount, cancellationTokenSource.Token);
                 }
                 catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
                 {
-                    const int maxRetries = 3;
-                    if (++timeoutCount > maxRetries)
+                    const int MAX_RETRIES = 3;
+                    if (++timeoutCount > MAX_RETRIES)
                     {
-                        throw new HttpRequestException($"Video part {videoPartName} timed out {maxRetries} times");
+                        throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_RETRIES} times");
                     }
 
                     await Task.Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
@@ -595,17 +601,17 @@ namespace TwitchDownloaderCore
             response.EnsureSuccessStatusCode();
 
             // Why are we setting a CTS CancelAfter timer? See lay295#265
-            const int sixtySeconds = 60;
+            const int SIXTY_SECONDS = 60;
             if (throttleKib == -1 || !response.Content.Headers.ContentLength.HasValue)
             {
-                cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(sixtySeconds));
+                cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(SIXTY_SECONDS));
             }
             else
             {
-                const double oneKibibyte = 1024d;
+                const double ONE_KIBIBYTE = 1024d;
                 cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(Math.Max(
-                    sixtySeconds,
-                    response.Content.Headers.ContentLength!.Value / oneKibibyte / throttleKib * 8 // Allow up to 8x the shortest download time given the thread bandwidth
+                    SIXTY_SECONDS,
+                    response.Content.Headers.ContentLength!.Value / ONE_KIBIBYTE / throttleKib * 8 // Allow up to 8x the shortest download time given the thread bandwidth
                     )));
             }
 
