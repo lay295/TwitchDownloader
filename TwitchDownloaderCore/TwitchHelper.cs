@@ -1,5 +1,6 @@
 ﻿using SkiaSharp;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -813,63 +814,57 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
-        public static void CleanupUnmanagedCacheFiles(string cacheFolder, IProgress<ProgressReport> progress)
+        public static async Task CleanupOrphanedVideoCaches(string cacheFolder, SpanAction<bool, DirectoryInfo[]> callback, IProgress<ProgressReport> progress)
         {
-            if (!Directory.Exists(cacheFolder))
+            if (!Directory.Exists(cacheFolder) || callback == null)
             {
                 return;
             }
 
-            // Let's delete any video download cache folders older than 24 hours
-            var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
-            var directories = Directory.GetDirectories(cacheFolder);
-            var directoriesDeleted = (from directory in directories
-                let videoFolderMatch = videoFolderRegex.Match(directory)
-                where videoFolderMatch.Success
-                where DeleteOldDirectory(directory, videoFolderMatch.Groups[1].ValueSpan)
-                select directory).Count();
+            var videoFolderRegex = new Regex(@"\d+_\d+$", RegexOptions.RightToLeft);
+            var allCacheDirectories = Directory.GetDirectories(cacheFolder);
 
-            if (directoriesDeleted > 0)
+            var oldVideoCaches = (from directory in allCacheDirectories
+                    where videoFolderRegex.IsMatch(directory)
+                    let directoryInfo = new DirectoryInfo(directory)
+                    where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 0 // TODO: 7
+                    select directoryInfo)
+                .ToArray();
+
+            if (oldVideoCaches.Length == 0)
             {
-                progress.Report(new ProgressReport(ReportType.Log, $"{directoriesDeleted} old video caches were deleted."));
+                return;
             }
-        }
 
-        private static bool DeleteOldDirectory(string directory, ReadOnlySpan<char> directoryCreationMillis)
-        {
-            var downloadTime = long.Parse(directoryCreationMillis);
-            var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var shouldDelete = new bool[oldVideoCaches.Length];
+            await Task.Run(() => callback(shouldDelete.AsSpan(), oldVideoCaches));
 
-            const int TWENTY_FOUR_HOURS_MILLIS = 86_400_000;
-            if (currentTime - downloadTime > TWENTY_FOUR_HOURS_MILLIS * 7)
+            var toDelete = 0;
+            var wasDeleted = 0;
+            for (var i = 0; i < shouldDelete.Length; i++)
             {
-                try
+                if (shouldDelete[i])
                 {
-                    Directory.Delete(directory, true);
-                    return true;
+                    toDelete++;
+
+                    try
+                    {
+                        Directory.Delete(oldVideoCaches[i].FullName);
+                        wasDeleted++;
+                    }
+                    catch
+                    {
+                        // Oh well
+                    }
                 }
-                catch { /* Eat the exception */ }
             }
-            return false;
-        }
 
-        private static bool DeleteColdDirectory(string directory)
-        {
-            // Directory.GetLastWriteTimeUtc() works as expected on both Windows and MacOS. Assuming it does on Linux too
-            var directoryWriteTimeMillis = Directory.GetLastWriteTimeUtc(directory).Ticks / TimeSpan.TicksPerMillisecond;
-            var currentTimeMillis = DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
-
-            const int SIX_HOURS_MILLIS = 21_600_000;
-            if (currentTimeMillis - directoryWriteTimeMillis > SIX_HOURS_MILLIS)
+            if (toDelete > 0)
             {
-                try
-                {
-                    Directory.Delete(directory, true);
-                    return true;
-                }
-                catch { /* Eat the exception */ }
+                progress.Report(toDelete == wasDeleted
+                    ? new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted.")
+                    : new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted, {toDelete - wasDeleted} could not be deleted."));
             }
-            return false;
         }
 
         public static int TimestampToSeconds(string input)
