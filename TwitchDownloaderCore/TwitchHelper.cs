@@ -827,7 +827,7 @@ namespace TwitchDownloaderCore
             var oldVideoCaches = (from directory in allCacheDirectories
                     where videoFolderRegex.IsMatch(directory)
                     let directoryInfo = new DirectoryInfo(directory)
-                    where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 0 // TODO: 7
+                    where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7
                     select directoryInfo)
                 .ToArray();
 
