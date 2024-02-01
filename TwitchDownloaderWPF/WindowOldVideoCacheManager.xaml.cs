@@ -12,6 +12,7 @@ namespace TwitchDownloaderWPF;
 public partial class WindowOldVideoCacheManager : Window
 {
     public ObservableCollection<GridItem> GridItems { get; } = new();
+    private long _totalSize = 0;
 
     public WindowOldVideoCacheManager(DirectoryInfo[] directories)
     {
@@ -23,17 +24,9 @@ public partial class WindowOldVideoCacheManager : Window
         Task.Run(() =>
         {
             // Do this on a separate thread because there may be a lot of IO to do
-            var totalSize = 0L;
             foreach (var gridItem in GridItems)
             {
-                totalSize += gridItem.CalculateSize();
-            }
-
-            if (TextTotalSize != null)
-            {
-                // Do this the dumb way because bindings are annoying without view models
-                var sizeString = VideoSizeEstimator.StringifyByteCount(totalSize);
-                Dispatcher.Invoke(() => TextTotalSize.Text = string.IsNullOrEmpty(sizeString) ? "0B" : sizeString);
+                _totalSize += gridItem.CalculateSize();
             }
         });
 
@@ -47,6 +40,10 @@ public partial class WindowOldVideoCacheManager : Window
 
         // For some stupid reason, this does not work unless I manually set it, even though its a binding
         DataGrid.ItemsSource = GridItems;
+
+        // Do this the dumb way because bindings are annoying without view models
+        var sizeString = VideoSizeEstimator.StringifyByteCount(_totalSize);
+        TextTotalSize.Text = string.IsNullOrEmpty(sizeString) ? "0B" : sizeString;
     }
 
     private void OnClosing(object sender, CancelEventArgs e)
