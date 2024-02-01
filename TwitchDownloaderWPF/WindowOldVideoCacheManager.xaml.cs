@@ -74,7 +74,7 @@ public partial class WindowOldVideoCacheManager : Window
         public GridItem(DirectoryInfo directoryInfo)
         {
             Directory = directoryInfo;
-            ShouldDelete = false;
+            ShouldDelete = true;
             Age = string.Format(Translations.Strings.FileAgeInDays, (DateTime.UtcNow - Directory.CreationTimeUtc).Days);
         }
 
