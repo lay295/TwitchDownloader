@@ -814,7 +814,7 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
-        public static async Task CleanupOrphanedVideoCaches(string cacheFolder, Func<DirectoryInfo[], DirectoryInfo[]> itemsToDeleteCallback, IProgress<ProgressReport> progress)
+        public static async Task CleanupAbandonedVideoCaches(string cacheFolder, Func<DirectoryInfo[], DirectoryInfo[]> itemsToDeleteCallback, IProgress<ProgressReport> progress)
         {
             if (!Directory.Exists(cacheFolder) || itemsToDeleteCallback == null)
             {

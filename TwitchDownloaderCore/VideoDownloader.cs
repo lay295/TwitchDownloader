@@ -36,7 +36,7 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
         {
-            await TwitchHelper.CleanupOrphanedVideoCaches(downloadOptions.TempFolder, downloadOptions.CacheCleanerCallback, _progress);
+            await TwitchHelper.CleanupAbandonedVideoCaches(downloadOptions.TempFolder, downloadOptions.CacheCleanerCallback, _progress);
 
             string downloadFolder = Path.Combine(
                 downloadOptions.TempFolder,
