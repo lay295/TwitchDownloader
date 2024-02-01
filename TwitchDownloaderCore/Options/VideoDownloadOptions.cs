@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+﻿using System;
 using System.IO;
 
 namespace TwitchDownloaderCore.Options
@@ -17,6 +17,6 @@ namespace TwitchDownloaderCore.Options
         public string Oauth { get; set; }
         public string FfmpegPath { get; set; }
         public string TempFolder { get; set; }
-        public SpanAction<bool, DirectoryInfo[]> CacheCleanerCallback { get; set; }
+        public Func<DirectoryInfo[], DirectoryInfo[]> CacheCleanerCallback { get; set; }
     }
 }

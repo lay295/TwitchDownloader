@@ -814,9 +814,9 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
-        public static async Task CleanupOrphanedVideoCaches(string cacheFolder, SpanAction<bool, DirectoryInfo[]> callback, IProgress<ProgressReport> progress)
+        public static async Task CleanupOrphanedVideoCaches(string cacheFolder, Func<DirectoryInfo[], DirectoryInfo[]> itemsToDeleteCallback, IProgress<ProgressReport> progress)
         {
-            if (!Directory.Exists(cacheFolder) || callback == null)
+            if (!Directory.Exists(cacheFolder) || itemsToDeleteCallback == null)
             {
                 return;
             }
@@ -836,35 +836,30 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            var shouldDelete = new bool[oldVideoCaches.Length];
-            await Task.Run(() => callback(shouldDelete.AsSpan(), oldVideoCaches));
+            var toDelete = await Task.Run(() => itemsToDeleteCallback(oldVideoCaches));
 
-            var toDelete = 0;
-            var wasDeleted = 0;
-            for (var i = 0; i < shouldDelete.Length; i++)
+            if (toDelete == null || toDelete.Length == 0)
             {
-                if (shouldDelete[i])
-                {
-                    toDelete++;
+                return;
+            }
 
-                    try
-                    {
-                        Directory.Delete(oldVideoCaches[i].FullName);
-                        wasDeleted++;
-                    }
-                    catch
-                    {
-                        // Oh well
-                    }
+            var wasDeleted = 0;
+            foreach (var directory in toDelete)
+            {
+                try
+                {
+                    Directory.Delete(directory.FullName);
+                    wasDeleted++;
+                }
+                catch
+                {
+                    // Oh well
                 }
             }
 
-            if (toDelete > 0)
-            {
-                progress.Report(toDelete == wasDeleted
-                    ? new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted.")
-                    : new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted, {toDelete - wasDeleted} could not be deleted."));
-            }
+            progress.Report(toDelete.Length == wasDeleted
+                ? new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted.")
+                : new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted, {toDelete.Length - wasDeleted} could not be deleted."));
         }
 
         public static int TimestampToSeconds(string input)
