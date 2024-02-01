@@ -23,7 +23,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="0" x:Name="DataGrid" Margin="6, 6, 6, 0" ItemsSource="{Binding GridItems}" IsReadOnly="False" AutoGenerateColumns="False" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" RowBackground="{DynamicResource AppElementInnerBackground}">
+        <DataGrid Grid.Row="0" x:Name="DataGrid" Margin="6, 6, 6, 0" ItemsSource="{Binding GridItems}" IsReadOnly="False" AutoGenerateColumns="False" Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
             <DataGrid.Columns>
                 <!-- Workaround for DataGridCheckBoxColumn sometimes requiring multiple clicks to work for some reason -->
                 <DataGridTemplateColumn Header="{lex:Loc DeleteCacheColumnHeader}" MinWidth="55">
@@ -33,15 +33,15 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FilePathColumnHeader}" MinWidth="60" Width="*" Binding="{Binding Path}" />
-                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileAgeColumnHeader}" MinWidth="60" Binding="{Binding Age}" />
-                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileSizeColumnHeader}" MinWidth="75" Binding="{Binding Size}" />
+                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FilePathColumnHeader}" MinWidth="60" Width="*" Binding="{Binding Path}" Foreground="{DynamicResource AppText}" />
+                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileAgeColumnHeader}" MinWidth="60" Binding="{Binding Age}" Foreground="{DynamicResource AppText}" />
+                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileSizeColumnHeader}" MinWidth="75" Binding="{Binding Size}" Foreground="{DynamicResource AppText}" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <Button Grid.Row="1" x:Name="BtnSelectAll" Content="{lex:Loc SelectAll}" Margin="6,5,0,6" HorizontalAlignment="Left" MinWidth="80" Click="BtnSelectAll_OnClick" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <Button Grid.Row="1" x:Name="BtnSelectAll" Content="{lex:Loc SelectAll}" Margin="6,5,0,6" HorizontalAlignment="Left" MinWidth="80" Click="BtnSelectAll_OnClick" Foreground="{DynamicResource ActionButtonText}" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" />
         <Button Grid.Row="1" x:Name="BtnAccept" Content="{lex:Loc Accept}" Margin="0, 5, 0, 6" MinWidth="60" Click="BtnAccept_OnClick" Foreground="{DynamicResource ActionButtonText}" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" />
-        <Label Grid.Row="1" x:Name="LabelTotalSize" Margin="0,5,6,6" HorizontalAlignment="Right" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+        <Label Grid.Row="1" x:Name="LabelTotalSize" Margin="0,5,6,6" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
             <TextBlock>
                 <Run Text="{lex:Loc SizeOfAllFiles}"/>
                 <Run x:Name="TextTotalSize" Text="0B"/>
