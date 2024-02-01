@@ -40,7 +40,7 @@ namespace TwitchDownloaderCore
 
             string downloadFolder = Path.Combine(
                 downloadOptions.TempFolder,
-                $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+                $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}");
 
             _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Fetching Video Info [1/5]"));
 
