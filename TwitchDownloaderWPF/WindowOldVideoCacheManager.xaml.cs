@@ -64,14 +64,6 @@ public partial class WindowOldVideoCacheManager : Window
         Close();
     }
 
-    private void BtnSelectAll_OnClick(object sender, RoutedEventArgs e)
-    {
-        foreach (var gridItem in GridItems)
-        {
-            gridItem.ShouldDelete = true;
-        }
-    }
-
     public DirectoryInfo[] GetItemsToDelete() => GridItems
         .Where(x => x.ShouldDelete)
         .Select(x => x.Directory)
