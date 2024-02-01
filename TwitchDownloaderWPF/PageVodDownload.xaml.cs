@@ -423,20 +423,7 @@ namespace TwitchDownloaderWPF
             btnGetInfo.IsEnabled = false;
 
             VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
-            options.CacheCleanerCallback += directories =>
-            {
-                return Dispatcher.Invoke(() =>
-                {
-                    var window = new WindowOldVideoCacheManager(directories)
-                    {
-                        Owner = Application.Current.MainWindow,
-                        WindowStartupLocation = WindowStartupLocation.CenterOwner
-                    };
-                    window.ShowDialog();
-
-                    return window.GetItemsToDelete();
-                });
-            };
+            options.CacheCleanerCallback = HandleCacheCleanerCallback;
 
             Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
             VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
@@ -473,6 +460,21 @@ namespace TwitchDownloaderWPF
 
             currentDownload = null;
             GC.Collect();
+        }
+
+        private DirectoryInfo[] HandleCacheCleanerCallback(DirectoryInfo[] directories)
+        {
+            return Dispatcher.Invoke(() =>
+            {
+                var window = new WindowOldVideoCacheManager(directories)
+                {
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
+                window.ShowDialog();
+
+                return window.GetItemsToDelete();
+            });
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
