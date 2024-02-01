@@ -42,7 +42,7 @@ public partial class WindowOldVideoCacheManager : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // TODO: Title = Translations.Strings.
+        Title = Translations.Strings.TitleWindowOldVideoCacheManager;
         App.RequestTitleBarChange();
 
         // For some stupid reason, this does not work unless I manually set it, even though its a binding
@@ -86,7 +86,7 @@ public partial class WindowOldVideoCacheManager : Window
         {
             Directory = directoryInfo;
             ShouldDelete = false;
-            Age = $"{(DateTime.UtcNow - Directory.CreationTimeUtc).Days} days";
+            Age = string.Format(Translations.Strings.FileAgeInDays, (DateTime.UtcNow - Directory.CreationTimeUtc).Days);
         }
 
         public long CalculateSize()
