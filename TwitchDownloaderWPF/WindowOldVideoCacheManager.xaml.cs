@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using TwitchDownloaderCore.Tools;
@@ -64,18 +65,64 @@ public partial class WindowOldVideoCacheManager : Window
         Close();
     }
 
+    private void BtnSelectAll_OnClick(object sender, RoutedEventArgs e)
+    {
+        foreach (var gridItem in GridItems)
+        {
+            gridItem.ShouldDelete = true;
+        }
+    }
+
     public DirectoryInfo[] GetItemsToDelete() => GridItems
         .Where(x => x.ShouldDelete)
         .Select(x => x.Directory)
         .ToArray();
 
-    public sealed class GridItem
+    public sealed class GridItem : INotifyPropertyChanged
     {
         public GridItem(DirectoryInfo directoryInfo)
         {
             Directory = directoryInfo;
-            ShouldDelete = true;
+            ShouldDelete = false;
             Age = string.Format(Translations.Strings.FileAgeInDays, (DateTime.UtcNow - Directory.CreationTimeUtc).Days);
+        }
+
+        public readonly DirectoryInfo Directory;
+
+        private bool _shouldDelete;
+
+        public bool ShouldDelete
+        {
+            get => _shouldDelete;
+            set
+            {
+                if (value == _shouldDelete) return;
+                _shouldDelete = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Age { get; }
+        public string Path => Directory.FullName;
+
+        private string _size = "";
+
+        public string Size
+        {
+            get => _size;
+            private set
+            {
+                if (value == _size) return;
+                _size = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public long CalculateSize()
@@ -86,11 +133,5 @@ public partial class WindowOldVideoCacheManager : Window
 
             return sizeBytes;
         }
-
-        public readonly DirectoryInfo Directory;
-        public bool ShouldDelete { get; set; }
-        public string Age { get; }
-        public string Path => Directory.FullName;
-        public string Size { get; private set; } = "";
     }
 }
