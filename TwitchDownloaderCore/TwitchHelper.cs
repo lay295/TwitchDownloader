@@ -848,7 +848,7 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    Directory.Delete(directory.FullName);
+                    Directory.Delete(directory.FullName, true);
                     wasDeleted++;
                 }
                 catch
