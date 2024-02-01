@@ -1,0 +1,51 @@
+﻿<Window x:Class="TwitchDownloaderWPF.WindowOldVideoCacheManager"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:TwitchDownloaderWPF"
+        xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
+        xmlns:lex="http://wpflocalizeextension.codeplex.com"
+        lex:LocalizeDictionary.DesignCulture=""
+        lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
+        lex:ResxLocalizationProvider.DefaultDictionary="Strings"
+        mc:Ignorable="d"
+        Title="Select Caches To Delete" Height="450" Width="800" Loaded="OnLoaded" Closing="OnClosing" d:DataContext="{d:DesignInstance local:WindowOldVideoCacheManager}">
+    <Window.Resources>
+        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{DynamicResource AppBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DataGrid Grid.Row="0" x:Name="DataGrid" Margin="6, 6, 6, 0" ItemsSource="{Binding GridItems}" IsReadOnly="False" AutoGenerateColumns="False" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" RowBackground="{DynamicResource AppElementInnerBackground}">
+            <DataGrid.Columns>
+                <!-- Workaround for DataGridCheckBoxColumn sometimes requiring multiple clicks to work for some reason -->
+                <DataGridTemplateColumn Header="Delete?" MinWidth="55">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox HorizontalAlignment="Center" IsChecked="{Binding ShouldDelete, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn IsReadOnly="True" Header="Path" MinWidth="60" Width="*" Binding="{Binding Path}" />
+                <DataGridTextColumn IsReadOnly="True" Header="Age" MinWidth="60" Binding="{Binding Age}" />
+                <DataGridTextColumn IsReadOnly="True" Header="Size" MinWidth="75" Binding="{Binding Size}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Button Grid.Row="1" x:Name="BtnSelectAll" Content="{lex:Loc SelectAll}" Margin="6,5,0,6" HorizontalAlignment="Left" MinWidth="80" Click="BtnSelectAll_OnClick" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <Button Grid.Row="1" x:Name="BtnAccept" Content="{lex:Loc Accept}" Margin="0, 5, 0, 6" MinWidth="60" Click="BtnAccept_OnClick" Foreground="{DynamicResource ActionButtonText}" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" />
+        <Label Grid.Row="1" x:Name="LabelTotalSize" Margin="0,5,6,6" HorizontalAlignment="Right" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+            <TextBlock>
+                <Run Text="Total size:"/>
+                <Run x:Name="TextTotalSize" Text="0B"/>
+            </TextBlock>
+        </Label>
+    </Grid>
+</Window>

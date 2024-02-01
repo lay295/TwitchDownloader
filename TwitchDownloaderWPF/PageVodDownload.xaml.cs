@@ -423,6 +423,20 @@ namespace TwitchDownloaderWPF
             btnGetInfo.IsEnabled = false;
 
             VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
+            options.CacheCleanerCallback += directories =>
+            {
+                return Dispatcher.Invoke(() =>
+                {
+                    var window = new WindowOldVideoCacheManager(directories)
+                    {
+                        Owner = Application.Current.MainWindow,
+                        WindowStartupLocation = WindowStartupLocation.CenterOwner
+                    };
+                    window.ShowDialog();
+
+                    return window.GetItemsToDelete();
+                });
+            };
 
             Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
             VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
