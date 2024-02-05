@@ -32,7 +32,7 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             var vodIdMatch = TwitchRegex.MatchVideoId(inputOptions.Id);
-            if (vodIdMatch is not { Success: true})
+            if (vodIdMatch is not { Success: true })
             {
                 Console.WriteLine("[ERROR] - Unable to parse Vod ID/URL.");
                 Environment.Exit(1);
@@ -40,10 +40,12 @@ namespace TwitchDownloaderCLI.Modes
 
             if (!Path.HasExtension(inputOptions.OutputFile) && inputOptions.Quality is { Length: > 0 })
             {
-                if (char.IsDigit(inputOptions.Quality[0]))
-                    inputOptions.OutputFile += ".mp4";
-                else if (char.ToLower(inputOptions.Quality[0]) is 'a')
+                if (inputOptions.Quality.Contains("audio", StringComparison.OrdinalIgnoreCase))
                     inputOptions.OutputFile += ".m4a";
+                else if (char.IsDigit(inputOptions.Quality[0])
+                         || inputOptions.Quality.Contains("source", StringComparison.OrdinalIgnoreCase)
+                         || inputOptions.Quality.Contains("chunked", StringComparison.OrdinalIgnoreCase))
+                    inputOptions.OutputFile += ".mp4";
             }
 
             VideoDownloadOptions downloadOptions = new()
