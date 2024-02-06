@@ -816,8 +816,14 @@ namespace TwitchDownloaderCore
         /// </summary>
         public static async Task CleanupAbandonedVideoCaches(string cacheFolder, Func<DirectoryInfo[], DirectoryInfo[]> itemsToDeleteCallback, IProgress<ProgressReport> progress)
         {
-            if (!Directory.Exists(cacheFolder) || itemsToDeleteCallback == null)
+            if (!Directory.Exists(cacheFolder))
             {
+                return;
+            }
+
+            if (itemsToDeleteCallback == null)
+            {
+                // TODO: Log this
                 return;
             }
 
