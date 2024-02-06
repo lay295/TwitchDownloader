@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -13,9 +14,9 @@ namespace TwitchDownloaderWPF
     public partial class WindowOldVideoCacheManager : Window
     {
         public ObservableCollection<GridItem> GridItems { get; } = new();
-        private long _totalSize = 0;
+        private long _totalSize;
 
-        public WindowOldVideoCacheManager(DirectoryInfo[] directories)
+        public WindowOldVideoCacheManager(IEnumerable<DirectoryInfo> directories)
         {
             foreach (var directoryInfo in directories)
             {
@@ -24,7 +25,7 @@ namespace TwitchDownloaderWPF
 
             Task.Run(() =>
             {
-                // Do this on a separate thread because there may be a lot of IO to do
+                // Do this on a separate thread because there may be a lot of dirs/files to check
                 foreach (var gridItem in GridItems)
                 {
                     _totalSize += gridItem.CalculateSize();
@@ -84,7 +85,7 @@ namespace TwitchDownloaderWPF
             {
                 Directory = directoryInfo;
                 ShouldDelete = false;
-                Age = string.Format(Translations.Strings.FileAgeInDays, (DateTime.UtcNow - Directory.CreationTimeUtc).Days);
+                Age = (DateTime.UtcNow - directoryInfo.CreationTimeUtc).Days;
             }
 
             public readonly DirectoryInfo Directory;
@@ -102,7 +103,7 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            public string Age { get; }
+            public int Age { get; }
 
             public string Path => Directory.FullName;
 

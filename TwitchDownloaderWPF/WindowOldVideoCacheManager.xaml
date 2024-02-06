@@ -34,7 +34,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FilePathColumnHeader}" MinWidth="60" Width="*" Binding="{Binding Path}" Foreground="{DynamicResource AppText}" />
-                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileAgeColumnHeader}" MinWidth="60" Binding="{Binding Age}" Foreground="{DynamicResource AppText}" />
+                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileAgeColumnHeader}" MinWidth="60" Binding="{Binding Age, StringFormat={lex:Loc FileAgeInDays}}" Foreground="{DynamicResource AppText}" />
                 <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileSizeColumnHeader}" MinWidth="75" Binding="{Binding Size}" Foreground="{DynamicResource AppText}" />
             </DataGrid.Columns>
         </DataGrid>
