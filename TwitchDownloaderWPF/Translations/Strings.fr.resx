@@ -823,7 +823,7 @@
     <value>Total Size:</value>
   </data>
   <data name="DeleteCacheColumnHeader" xml:space="preserve">
-    <value>Delete?</value>
+    <value>Delete</value>
   </data>
   <data name="FilePathColumnHeader" xml:space="preserve">
     <value>Path</value>

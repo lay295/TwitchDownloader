@@ -528,7 +528,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete?.
+        ///   Looks up a localized string similar to Delete.
         /// </summary>
         public static string DeleteCacheColumnHeader {
             get {
