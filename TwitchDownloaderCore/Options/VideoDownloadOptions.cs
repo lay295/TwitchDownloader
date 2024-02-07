@@ -1,4 +1,7 @@
-﻿namespace TwitchDownloaderCore.Options
+﻿using System;
+using System.IO;
+
+namespace TwitchDownloaderCore.Options
 {
     public class VideoDownloadOptions
     {
@@ -14,5 +17,6 @@
         public string Oauth { get; set; }
         public string FfmpegPath { get; set; }
         public string TempFolder { get; set; }
+        public Func<DirectoryInfo[], DirectoryInfo[]> CacheCleanerCallback { get; set; }
     }
 }

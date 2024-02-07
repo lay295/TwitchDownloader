@@ -19,6 +19,15 @@ namespace TwitchDownloaderCLI.Modes
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
 
             var downloadOptions = GetDownloadOptions(inputOptions);
+            downloadOptions.CacheCleanerCallback = directoryInfos =>
+            {
+                Console.WriteLine(
+                    $"[LOG] - {directoryInfos.Length} unmanaged video caches were found at '{downloadOptions.TempFolder}' and can be safely deleted. " +
+                    "Run 'TwitchDownloaderCLI cache help' for more information.");
+
+                return Array.Empty<DirectoryInfo>();
+            };
+
             VideoDownloader videoDownloader = new(downloadOptions, progress);
             videoDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
