@@ -79,7 +79,14 @@ namespace TwitchDownloaderCLI
                 return;
             }
 
-            Console.WriteLine($"{HeadingInfo.Default} {CopyrightInfo.Default.ToString()!.Replace("\u00A9", "(c)")}");
+            var nameVersionString = HeadingInfo.Default.ToString();
+
+#if !DEBUG
+            // Remove git commit hash from version string
+            nameVersionString = System.Text.RegularExpressions.Regex.Replace(nameVersionString, @"(?<=\d)\+[0-9a-f]+", "");
+#endif
+
+            Console.WriteLine($"{nameVersionString} {CopyrightInfo.Default.ToString()!.Replace("\u00A9", "(c)")}");
         }
     }
 }
