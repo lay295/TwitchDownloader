@@ -128,7 +128,7 @@
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Tema </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="ApplicationThemeTooltip" xml:space="preserve">
     <value>Clique para saber mais em como fazer seu próprio tema!</value>
@@ -141,7 +141,7 @@
   </data>
   <data name="BannedWordsList" xml:space="preserve">
     <value>Lista de Palavras Banidas </value>
-    <comment>Deixando um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="BannedWordsListTooltip" xml:space="preserve">
     <value>Lista de palavras banidas ou frases - separados por vírgulas, espaços ao redor das vírgulas serão ignoradas, NÃO é sensível à capitalização.</value>
@@ -253,14 +253,14 @@
   </data>
   <data name="EmbedImages" xml:space="preserve">
     <value>Imagens imbutidas </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="EmbedImagesTooltip" xml:space="preserve">
     <value>Embuta emotes first party, insígnias, e cheermotes no arquivo de download para renderização offline. Útil para propósitos de preservação, o tamanho do arquivo será maior.</value>
   </data>
   <data name="EmbedMissing" xml:space="preserve">
     <value>Embuta os Perdidos </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="EmbedMissingTooltip" xml:space="preserve">
     <value>Embuta emotes perdidos, insígnias, e cheermotes. Imagens já imbutidas serão tocadas.</value>
@@ -276,7 +276,7 @@
   </data>
   <data name="ErrorLog" xml:space="preserve">
     <value>ERRO: </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="FfmpegInputArguments" xml:space="preserve">
     <value>Insira Argumentos:</value>
@@ -315,7 +315,7 @@
   </data>
   <data name="IgnoreUsersList" xml:space="preserve">
     <value>Ignorar a Lista de Usuários </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
     <value>Lista de nomes de usuário - separados por vírgulas, espaços ao redor das vírgulas serão ignoradas, NÃO é sensível à capitalização.</value>
@@ -355,14 +355,14 @@
   </data>
   <data name="Oauth" xml:space="preserve">
     <value>OAuth (opcional) </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="OAuthTooltip" xml:space="preserve">
     <value>Requerido apenas para VODs disponíveis só pra subs. Todos tokens OAuth 3rd party não funcionarão. Clique para ver um vídeo do YouTube em como obter seu token OAuth.</value>
   </data>
   <data name="Offline" xml:space="preserve">
     <value>Offline </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="OfflineTooltip" xml:space="preserve">
     <value>Renderizar o chat usando somente recursos embutidos no arquivp do chat em json.</value>
@@ -417,7 +417,7 @@
   </data>
   <data name="ReplaceEmbeds" xml:space="preserve">
     <value>Trocar Embutidos </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="ReplaceEmbedsTooltip" xml:space="preserve">
     <value>Trocar todos os emotes embutidos, insígnias, e cheermotes no arquivo. Todas imagens embutidas serão sobrescritos!</value>
@@ -478,7 +478,7 @@
   </data>
   <data name="ThirdPartyEmotes" xml:space="preserve">
     <value>Emotes 3rd Party</value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
     <value>Também embuta emotes third party no arquivo. O tamanho do arquivo será muito mais largo.</value>
@@ -590,7 +590,7 @@
   </data>
   <data name="ApplicationLanguage" xml:space="preserve">
     <value>Linguagem </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="RenderChat" xml:space="preserve">
     <value>Renderizar o Chat</value>
@@ -627,7 +627,7 @@
   </data>
   <data name="FileNotFound" xml:space="preserve">
     <value>Arquivo não Encontrado: </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="FatalError" xml:space="preserve">
     <value>Erro Fatal</value>
@@ -641,7 +641,7 @@
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Dispersação </value>
-    <comment>Deixe um espaço traçado</comment>
+    <comment>Deixe um espaço no final</comment>
   </data>
   <data name="MessageDispersionTooltip" xml:space="preserve">
     <value>Em Novembro de 2022 uma mudança do API da Twitch fez mensagens do chat baixar somente em segundos inteiros. Esta opção usa metadados adicionais para tentar restaurar mensagens quando elas foram realmente enviadas. Isto deve resultar em uma ordem de comentários diferente.</value>
@@ -693,7 +693,7 @@
     <value>Cancelando</value>
   </data>
   <data name="MaximumThreadBandwidth" xml:space="preserve">
-    <value>Banda Máxima de Processo </value><comment>Deixe um espaço traçado</comment>
+    <value>Banda Máxima de Processo </value><comment>Deixe um espaço no final</comment>
   </data>
   <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
     <value>A banda máxima que um novo processo de download será permitido a usar, em kibibytes por segundo.</value>
@@ -756,7 +756,7 @@
     <value>Cor do Plano de Fundo Alternativo:</value>
   </data>
   <data name="AlternateMessageBackgrounds" xml:space="preserve">
-    <value>Planos de Fundo Alternativos </value><comment>Deixe um espaço traçado</comment>
+    <value>Planos de Fundo Alternativos </value><comment>Deixe um espaço no final</comment>
   </data>
   <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
     <value>Alterna as cores do plano de fundo de cada mensagem do chat para ajudar a diferenciá-los.</value>
