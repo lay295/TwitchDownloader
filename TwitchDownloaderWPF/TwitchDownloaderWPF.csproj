@@ -50,6 +50,9 @@
     <EmbeddedResource Include="Themes\README.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Update="Translations\Strings.pt-br.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TwitchDownloaderCore\TwitchDownloaderCore.csproj" />
