@@ -10,14 +10,14 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="Queue Options" MinHeight="280" Height="280" MinWidth="500" Width="500" Loaded="Window_loaded">
+        Title="Queue Options" MinHeight="280" Height="280" MinWidth="500" Width="500" SizeToContent="WidthAndHeight" Loaded="Window_loaded" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
         </Style>
     </Window.Resources>
 
-    <Grid Background="{DynamicResource AppBackground}">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6"/>
             <ColumnDefinition Width="*"/>
