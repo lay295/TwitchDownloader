@@ -11,6 +11,8 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Merge(TsMergeArgs inputOptions)
         {
+            Console.WriteLine("[INFO] The TS merger is experimental and is subject to change without notice in future releases.");
+
             Progress<ProgressReport> progress = new();
             progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
 

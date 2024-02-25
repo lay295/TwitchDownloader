@@ -434,8 +434,5 @@ For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `a
 
 Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
 
-The list file for tsmerge can contain relative or absolute paths, but the path format differs from Windows to Linux/UNIX/MacOS (like volume paths or "/" instead of "\" to separate directories).
-The list must be a text file and describe one ts path per line.
-
-The concatenation made by tsmerge is not a raw (binary) concatenation, like `dd`, `cat` or `pv` would do on Linux, or `copy /b` on Windows.
-Instead, the streams have to be partially recoded, to keep its structure valid and playable. Using other software may not achieve this result.
+The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
+Alternatively, the list file may also be an M3U8 playlist file.

@@ -26,17 +26,23 @@ namespace TwitchDownloaderCore
                 throw new FileNotFoundException("Input file does not exist");
             }
 
+            var isM3U8 = false;
             var fileList = new List<string>();
             await using (var fs = File.Open(mergeOptions.InputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 using var sr = new StreamReader(fs);
                 while (await sr.ReadLineAsync() is { } line)
                 {
-                    if (string.IsNullOrWhiteSpace(line))
-                        continue;
+                    if (string.IsNullOrWhiteSpace(line)) continue;
 
-                    if (line.StartsWith('#'))
-                        continue;
+                    if (isM3U8)
+                    {
+                        if (line.StartsWith('#')) continue;
+                    }
+                    else
+                    {
+                        if (line.StartsWith("#EXTM3U")) isM3U8 = true;
+                    }
 
                     fileList.Add(line);
                 }
@@ -83,7 +89,7 @@ namespace TwitchDownloaderCore
                     return;
                 }
 
-                _progress.Report(new ProgressReport(ReportType.Log, $"The following TS files appear to be invalid or corrupted: {string.Join(", ", failedParts)}"));
+                _progress.Report(new ProgressReport(ReportType.Log, $"The following TS files are invalid or corrupted: {string.Join(", ", failedParts)}"));
             }
         }
 
