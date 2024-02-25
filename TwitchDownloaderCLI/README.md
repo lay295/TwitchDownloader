@@ -1,5 +1,6 @@
 # TwitchDownloaderCLI
 A cross platform command line tool that can do the main functions of the GUI program, which can download VODs/Clips/Chats and render chats.
+Also can concatenate/combine/merge Transport Stream files, either those parts downloaded with the CLI itself or from another source.
 
 - [TwitchDownloaderCLI](#twitchdownloadercli)
   - [Arguments for mode videodownload](#arguments-for-mode-videodownload)
@@ -9,6 +10,7 @@ A cross platform command line tool that can do the main functions of the GUI pro
   - [Arguments for mode chatrender](#arguments-for-mode-chatrender)
   - [Arguments for mode ffmpeg](#arguments-for-mode-ffmpeg)
   - [Arguments for mode cache](#arguments-for-mode-cache)
+  - [Arguments for mode tsmerge](#arguments-for-mode-tsmerge)
   - [Example Commands](#example-commands)
   - [Additional Notes](#additional-notes)
 
@@ -343,6 +345,18 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--banner**
 (Default: `true`) Displays a banner containing version and copyright information.
 
+## Arguments for mode tsmerge
+#### Concatenates multiple .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) files into a single file
+
+**-i / --input (REQUIRED)**
+Path a text file containing the absolute paths of the files to concatenate, separated by newlines. M3U/M3U8 is also supported.
+
+**-o / --output (REQUIRED)**
+File the program will output to.
+
+**--banner**
+(Default: `true`) Displays a banner containing version and copyright information.
+
 ---
 
 ## Example Commands
@@ -394,6 +408,10 @@ Clear the default TwitchDownloader cache folder
 
     ./TwitchDownloaderCLI cache --clear
 
+Concatenate several ts files into a single output file
+
+    TwitchDownloaderCLI tsmerge -i list.txt -o output.ts
+
 Print the available operations
 
     ./TwitchDownloaderCLI help
@@ -415,3 +433,6 @@ Default true boolean flags must be assigned: `--default-true-flag=false`. Defaul
 For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 
 Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
+
+The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
+Alternatively, the list file may also be an M3U8 playlist file.
