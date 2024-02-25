@@ -16,6 +16,7 @@
 This document is also available in:
 - [**Spanish / Español**](README_es.md)
 - [**Italian / Italiano**](README_it.md)
+- [**Portuguese (Brazil) / Português (Brasil)**](README_ptbr.md)
 - [**Turkish / Türkçe**](README_tr.md)
 
 ## Chat Render Example
