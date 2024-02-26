@@ -1628,11 +1628,11 @@ namespace TwitchDownloaderCore
             foreach (var badge in badgeTask)
             {
                 // Assume badges are always 2x scale, not 1x or 4x
-                if (Math.Abs(renderOptions.ReferenceScale - 1.0) > 0.01)
+                var newScale = renderOptions.ReferenceScale * renderOptions.BadgeScale;
+                if (Math.Abs(newScale - 1.0) > 0.01)
                 {
-                    badge.Resize(renderOptions.ReferenceScale * renderOptions.BadgeScale);
+                    badge.Resize(newScale);
                 }
-                badge.VersionsData.Clear(); // Clear the image byte[]s as we aren't embedding to an output file
             }
 
             return badgeTask;
@@ -1644,12 +1644,12 @@ namespace TwitchDownloaderCore
 
             foreach (var emote in emoteTask)
             {
-                double newScale = (2.0 / emote.ImageScale) * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                // Assume emojis are 4x scale
+                double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
                 {
                     emote.Resize(newScale);
                 }
-                emote.ImageData = Array.Empty<byte>(); // Clear the image byte[] as we aren't embedding to an output file
             }
 
             return emoteTask;
@@ -1662,12 +1662,12 @@ namespace TwitchDownloaderCore
 
             foreach (var emote in emoteThirdTask)
             {
-                double newScale = (2.0 / emote.ImageScale) * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                // Assume emojis are 4x scale
+                double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
                 {
                     emote.Resize(newScale);
                 }
-                emote.ImageData = Array.Empty<byte>(); // Clear the image byte[] as we aren't embedding to an output file
             }
 
             return emoteThirdTask;
@@ -1680,14 +1680,10 @@ namespace TwitchDownloaderCore
             foreach (var cheer in cheerTask)
             {
                 //Assume cheermotes are always 2x scale, not 1x or 4x
-                if (Math.Abs(renderOptions.ReferenceScale - 1.0) > 0.01)
+                var newScale = renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                if (Math.Abs(newScale - 1.0) > 0.01)
                 {
-                    cheer.Resize(renderOptions.ReferenceScale * renderOptions.EmoteScale);
-                }
-
-                foreach (var tier in cheer.tierList)
-                {
-                    tier.Value.ImageData = Array.Empty<byte>(); // Clear the image byte[]s as we aren't embedding to an output file
+                    cheer.Resize(newScale);
                 }
             }
 

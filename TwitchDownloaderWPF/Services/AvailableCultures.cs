@@ -40,6 +40,7 @@ namespace TwitchDownloaderWPF.Services
                 French = new Culture("fr-FR", "Français"),
                 Italian = new Culture("it-it", "Italiano"),
                 Polish = new Culture("pl-PL", "Polski"),
+                Polish = new Culture("pt-BR", "Português (Brasil)"),
                 Russian = new Culture("ru-RU", "Русский"),
                 Turkish = new Culture("tr-TR", "Türkçe"),
                 Ukrainian = new Culture("uk-ua", "Українська"),
