@@ -680,7 +680,6 @@ namespace TwitchDownloaderCore
                         }
                         catch { /* If we can't delete, oh well. It could get cleanup up later anyways */ }
                     }
-
                 }
 
                 doneCount++;
