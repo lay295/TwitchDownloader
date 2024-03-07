@@ -32,6 +32,8 @@ namespace TwitchDownloaderCore
                 string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
                 "TwitchDownloader");
             _progress = progress;
+
+            _shouldClearCache = !(downloadOptions.KeepCacheNoParts || downloadOptions.KeepCache);
         }
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
@@ -669,11 +671,16 @@ namespace TwitchDownloaderCore
                         await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
                     }
 
-                    try
+
+                    if (!downloadOptions.KeepCache && downloadOptions.KeepCacheNoParts)
                     {
-                        File.Delete(partFile);
+                        try
+                        {
+                            File.Delete(partFile);
+                        }
+                        catch { /* If we can't delete, oh well. It could get cleanup up later anyways */ }
                     }
-                    catch { /* If we can't delete, oh well. It should get cleanup up later anyways */ }
+
                 }
 
                 doneCount++;
