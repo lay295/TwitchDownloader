@@ -671,7 +671,6 @@ namespace TwitchDownloaderCore
                         await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
                     }
 
-
                     if (!downloadOptions.KeepCache && downloadOptions.KeepCacheNoParts)
                     {
                         try
