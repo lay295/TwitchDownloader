@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
@@ -70,6 +70,8 @@ namespace TwitchDownloaderCLI.Modes
                     ".m4a" => "Audio",
                     _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
                 },
+                KeepCache = inputOptions.KeepCache,
+                KeepCacheNoParts = inputOptions.KeepCacheNoParts,
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,
