@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
@@ -13,6 +13,12 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option('q', "quality", HelpText = "The quality the program will attempt to download.")]
         public string Quality { get; set; }
+
+        [Option('K', "keepcache", Required = false, HelpText = "Keep entire cache folder.")]
+        public bool KeepCache { get; set; }
+
+        [Option('k', "keepcachenoparts", Required = false, HelpText = "Keep cache folder except .ts parts.")]
+        public bool KeepCacheNoParts { get; set; }
 
         [Option('b', "beginning", HelpText = "Time in seconds to crop beginning.")]
         public int CropBeginningTime { get; set; }
