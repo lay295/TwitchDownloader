@@ -22,17 +22,26 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
 **-u / --id (REQUIRED)**
 The ID or URL of the VOD to download.
 
-**-o / --output (REQUIRED)**
+**-o / --output**
 File the program will output to. File extension will be used to determine download type. Valid extensions are: `.mp4` and `.m4a`.
 
 **-q / --quality**
 The quality the program will attempt to download, for example "1080p60", if not found will download highest quality stream.
 
+**-K / --cache**
+Keep entire cache folder. Overrides "-k".
+
+**-k / --cache-noparts**
+Keep cache folder except .ts parts.
+
+**-F / --skip-storagecheck**
+Skip checking for free storage space.
+
 **-b / --beginning**
-Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time in seconds where the crop begins. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e / --ending**
-Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time in seconds where the crop ends. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
 
@@ -94,10 +103,10 @@ File the program will output to. File extension will be used to determine downlo
 (Default: `None`) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-b / --beginning**
-Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time in seconds where the crop begins. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e / --ending**
-Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time in seconds where the crop ends. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 **-E / --embed-images**
 (Default: `false`) Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.
@@ -145,10 +154,10 @@ Path to output file. File extension will be used to determine new chat type. Val
 (Default: `false`) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
 
 **b / --beginning**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time in seconds where the chat begins. Comments may be added but not removed. -1 = No crop.
 
 **-e / --ending**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time in seconds where chat ends. Comments may be added but not removed. -1 = No crop.
 
 **--bttv**
 (Default: `true`) Enable embedding BTTV emotes.
@@ -193,10 +202,10 @@ File the program will output to.
 (Default: `600`) Height of chat render.
 
 **-b / --beginning**
-(Default: `-1`) Time in seconds to crop the beginning of the render.
+(Default: `-1`) Time in seconds where the crop of the render begins.
 
 **-e / --ending**
-(Default: `-1`) Time in seconds to crop the ending of the render.
+(Default: `-1`) Time in seconds where the crop of the render ends.
 
 **--bttv**
 (Default: `true`) Enable BTTV emotes.
@@ -433,6 +442,8 @@ Default true boolean flags must be assigned: `--default-true-flag=false`. Defaul
 For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 
 Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
+
+When cropping, the part of the file to be retained is the one after the crop starts and before the crop ends. The rest is discarded.
 
 The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
 Alternatively, the list file may also be an M3U8 playlist file.
