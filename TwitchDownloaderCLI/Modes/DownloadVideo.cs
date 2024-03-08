@@ -53,7 +53,7 @@ namespace TwitchDownloaderCLI.Modes
                 ThrottleKib = inputOptions.ThrottleKib,
                 Id = int.Parse(vodIdMatch.ValueSpan),
                 Oauth = inputOptions.Oauth,
-                Quality = inputOptions.Quality,
+                Filename = inputOptions.OutputFile,
                 KeepCache = inputOptions.KeepCache,
                 KeepCacheNoParts = inputOptions.KeepCacheNoParts,
                 SkipStorageCheck = inputOptions.SkipStorageCheck,
@@ -62,12 +62,29 @@ namespace TwitchDownloaderCLI.Modes
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
-                TempFolder = string.IsNullOrWhiteSpace(inputOptions.TempFolder) ? Path.GetTempPath() : inputOptions.TempFolder
+                TempFolder = inputOptions.TempFolder
             };
 
             if (!string.IsNullOrWhiteSpace(inputOptions.OutputFile))
             {
                 downloadOptions.Filename = inputOptions.OutputFile;
+
+                if (!Path.HasExtension(inputOptions.OutputFile) && inputOptions.Quality is { Length: > 0 })
+                {
+                    if (inputOptions.Quality.Contains("audio", StringComparison.OrdinalIgnoreCase))
+                        inputOptions.OutputFile += ".m4a";
+                    else if (char.IsDigit(inputOptions.Quality[0])
+                             || inputOptions.Quality.Contains("source", StringComparison.OrdinalIgnoreCase)
+                             || inputOptions.Quality.Contains("chunked", StringComparison.OrdinalIgnoreCase))
+                        inputOptions.OutputFile += ".mp4";
+                }
+
+                downloadOptions.Quality = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
+                {
+                    ".mp4" => inputOptions.Quality,
+                    ".m4a" => "Audio",
+                    _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
+                };
             }
 
             return downloadOptions;
