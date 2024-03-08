@@ -23,7 +23,7 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
 The ID or URL of the VOD to download.
 
 **-o / --output**
-File the program will output to. File extension will be used to determine download type. Valid extensions are: `.mp4` and `.m4a`.
+File the program will output to. File extension will be used to determine download type if the extension is present. Valid extensions are: `.mp4` and `.m4a`. 
 
 **-q / --quality**
 The quality the program will attempt to download, for example "1080p60", if not found will download highest quality stream.
