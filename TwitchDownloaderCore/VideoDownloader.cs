@@ -189,8 +189,8 @@ namespace TwitchDownloaderCore
              */
 
             var videoSizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth,
-                                                                        downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
-                                                                        downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : videoLength);
+                downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
+                downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : videoLength);
             bool keepAllTsParts = downloadOptions.KeepCache;
             var tempFolderDrive = DriveHelper.GetOutputDrive(downloadOptions.TempFolder);
             DriveInfo destinationDrive = _shouldGenerateOutputFile ? DriveHelper.GetOutputDrive(downloadOptions.Filename) : null;
