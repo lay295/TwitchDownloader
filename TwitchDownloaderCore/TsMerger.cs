@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -57,6 +57,7 @@ namespace TwitchDownloaderCore
             await CombineVideoParts(fileList, cancellationToken);
 
             _progress.Report(new ProgressReport(100));
+            Console.WriteLine();
         }
 
         private async Task VerifyVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
