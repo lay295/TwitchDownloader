@@ -730,7 +730,6 @@ namespace TwitchDownloaderCore
                         await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
                     }
 
-
                     if (!downloadOptions.KeepCache && downloadOptions.KeepCacheNoParts)
                     {
                         try
@@ -739,7 +738,6 @@ namespace TwitchDownloaderCore
                         }
                         catch { /* If we can't delete, oh well. It could get cleanup up later anyways */ }
                     }
-
                 }
 
                 doneCount++;
