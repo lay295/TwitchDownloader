@@ -134,6 +134,7 @@ namespace TwitchDownloaderCore
 
                 _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video 100% [5/5]"));
                 _progress.Report(new ProgressReport(100));
+                Console.WriteLine();
             }
             finally
             {
