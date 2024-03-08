@@ -149,7 +149,7 @@ namespace TwitchDownloaderCore
         {
             /*
             Real size of output.ts is higher than videoSizeInBytes the smaller is the duration and the crop percentage,
-            but it's at least 100% of it (above 2.5 hours of duration).
+            but it's at least 100% of it (above 2.5 hours of duration can be considered he same size).
             Real size of output.mp4 is generally 98% of videoSizeInBytes but can be up to 105% for 1 second crop.
             Percentages for output.m4a can be different.
 
