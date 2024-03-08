@@ -34,7 +34,6 @@ namespace TwitchDownloaderCore
                 string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
                 "TwitchDownloader");
             _progress = progress;
-
             _shouldClearCache = !(downloadOptions.KeepCacheNoParts || downloadOptions.KeepCache);
             _shouldGenerateOutputFile = !string.IsNullOrWhiteSpace(downloadOptions.Filename);
             _shouldSkipStorageCheck = downloadOptions.SkipStorageCheck;
