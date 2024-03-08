@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
@@ -26,10 +26,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('h', "chat-height", Default = 600, HelpText = "Height of chat render.")]
         public int ChatHeight { get; set; }
 
-        [Option('b', "beginning", Default = -1, HelpText = "Time in seconds to crop beginning of the render.")]
+        [Option('b', "beginning", Default = -1, HelpText = "Time in seconds where the crop begins.")]
         public int CropBeginningTime { get; set; }
 
-        [Option('e', "ending", Default = -1, HelpText = "Time in seconds to crop ending of the render.")]
+        [Option('e', "ending", Default = -1, HelpText = "Time in seconds where the crop ends.")]
         public int CropEndingTime { get; set; }
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV emotes.")]
