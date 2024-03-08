@@ -202,10 +202,10 @@ File the program will output to.
 (Default: `600`) Height of chat render.
 
 **-b / --beginning**
-(Default: `-1`) Time in seconds where the crop of the render begins.
+(Default: `-1`) Time in seconds where the crop begins.
 
 **-e / --ending**
-(Default: `-1`) Time in seconds where the crop of the render ends.
+(Default: `-1`) Time in seconds where the crop ends.
 
 **--bttv**
 (Default: `true`) Enable BTTV emotes.
