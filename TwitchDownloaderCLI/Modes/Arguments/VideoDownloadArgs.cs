@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
@@ -8,16 +8,25 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD to download.")]
         public string Id { get; set; }
 
-        [Option('o', "output", Required = true, HelpText = "Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4 and .m4a.")]
+        [Option('o', "output", Required = false, HelpText = "Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4 and .m4a.")]
         public string OutputFile { get; set; }
 
         [Option('q', "quality", HelpText = "The quality the program will attempt to download.")]
         public string Quality { get; set; }
 
-        [Option('b', "beginning", HelpText = "Time in seconds to crop beginning.")]
+        [Option('K', "cache", Required = false, HelpText = "Keep entire cache folder. Overrides \"-k\".")]
+        public bool KeepCache { get; set; }
+
+        [Option('k', "cache-noparts", Required = false, HelpText = "Keep cache folder except .ts parts.")]
+        public bool KeepCacheNoParts { get; set; }
+
+        [Option('F', "skip-storagecheck", HelpText = "Skip checking for free storage space.")]
+        public bool SkipStorageCheck { get; set; }
+
+        [Option('b', "beginning", HelpText = "Time in seconds where the crop begins.")]
         public int CropBeginningTime { get; set; }
 
-        [Option('e', "ending", HelpText = "Time in seconds to crop ending.")]
+        [Option('e', "ending", HelpText = "Time in seconds where the crop ends.")]
         public int CropEndingTime { get; set; }
 
         [Option('t', "threads", Default = 4, HelpText = "Number of download threads.")]
