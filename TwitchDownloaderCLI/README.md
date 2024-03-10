@@ -14,6 +14,13 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
   - [Example Commands](#example-commands)
   - [Additional Notes](#additional-notes)
 
+### Global arguments
+
+**--silent**
+Sets also `--banner false`.
+
+The mode to be used must support also the global arguments which are passed.
+
 ---
 
 ## Arguments for mode videodownload
