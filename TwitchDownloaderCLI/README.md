@@ -16,8 +16,11 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
 
 ### Global arguments
 
+**--banner**
+(Default: `true`) Displays a banner containing version and copyright information.
+
 **--silent**
-Sets also `--banner false`.
+(Default: `false`) Suppresses progress console output. Implies `--banner false`.
 
 The mode to be used must support also the global arguments which are passed.
 
