@@ -22,7 +22,7 @@ The mode to be used must support also the global arguments which are passed.
 (Default: `true`) Displays a banner containing version and copyright information.
 
 **--silent**
-(Default: `false`) Suppresses progress console output. Implies `--banner false`.
+(Default: `false`) Suppresses progress console output. `--silent false` implies `--banner false`.
 
 ---
 
