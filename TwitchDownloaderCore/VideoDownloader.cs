@@ -79,6 +79,18 @@ namespace TwitchDownloaderCore
                     Directory.Delete(downloadFolder, true);
                 TwitchHelper.CreateDirectory(downloadFolder);
 
+                var startOffsetSeconds = (double)playlist.Streams
+                    .Take(videoListCrop.Start.Value)
+                    .Sum(x => x.PartInfo.Duration);
+
+                startOffsetSeconds = downloadOptions.CropBeginningTime - startOffsetSeconds;
+                double seekDuration = Math.Round(downloadOptions.CropEndingTime - downloadOptions.CropBeginningTime);
+
+                string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
+                VideoInfo videoInfo = videoInfoResponse.data.video;
+                await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
+                    videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), startOffsetSeconds, videoChapterResponse.data.video.moments.edges, cancellationToken);
+
                 _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading 0% [2/5]"));
 
                 await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
@@ -92,19 +104,7 @@ namespace TwitchDownloaderCore
                 await CombineVideoParts(downloadFolder, playlist.Streams, videoListCrop, cancellationToken);
 
                 _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Finalizing Video 0% [5/5]" });
-
-                var startOffsetSeconds = (double)playlist.Streams
-                    .Take(videoListCrop.Start.Value)
-                    .Sum(x => x.PartInfo.Duration);
-
-                startOffsetSeconds = downloadOptions.CropBeginningTime - startOffsetSeconds;
-                double seekDuration = Math.Round(downloadOptions.CropEndingTime - downloadOptions.CropBeginningTime);
-
-                string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
-                VideoInfo videoInfo = videoInfoResponse.data.video;
-                await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
-                    videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), startOffsetSeconds, videoChapterResponse.data.video.moments.edges, cancellationToken);
-
+                
                 if (_shouldGenerateOutputFile)
                 {
                     var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
