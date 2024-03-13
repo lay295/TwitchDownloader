@@ -8,16 +8,19 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD to download.")]
         public string Id { get; set; }
 
-        [Option('o', "output", Required = false, HelpText = "Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4 and .m4a.")]
+        [Option('o', "output", HelpText = "Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4, .m4a.")]
         public string OutputFile { get; set; }
 
-        [Option('q', "quality", HelpText = "The quality the program will attempt to download.")]
+        [Option('q', "quality", HelpText = "The quality the program will attempt to download. If '-o' and '-q' are missing will be 'best'.")]
         public string Quality { get; set; }
 
-        [Option('K', "cache", Required = false, HelpText = "Keep entire cache folder. Overrides \"-k\".")]
+        [Option('p', "parts", HelpText = "Only download .ts parts and metadata.txt to cache folder, and exit.")]
+        public bool TsPartsOnly { get; set; }
+
+        [Option('K', "cache", HelpText = "Keep entire cache folder. Overrides '-k'.")]
         public bool KeepCache { get; set; }
 
-        [Option('k', "cache-noparts", Required = false, HelpText = "Keep cache folder except .ts parts.")]
+        [Option('k', "cache-noparts", HelpText = "Keep cache folder except .ts parts. Merged 'output.ts' is not considered a part.")]
         public bool KeepCacheNoParts { get; set; }
 
         [Option('F', "skip-storagecheck", HelpText = "Skip checking for free storage space.")]
@@ -29,7 +32,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('e', "ending", HelpText = "Time in seconds where the crop ends.")]
         public int CropEndingTime { get; set; }
 
-        [Option('t', "threads", Default = 4, HelpText = "Number of download threads.")]
+        [Option('t', "threads", Default = 4, HelpText = "Number of simultaneous download threads.")]
         public int DownloadThreads { get; set; }
 
         [Option("bandwidth", Default = -1, HelpText = "The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or -1 for no maximum.")]
@@ -41,7 +44,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("ffmpeg-path", HelpText = "Path to FFmpeg executable.")]
         public string FfmpegPath { get; set; }
 
-        [Option("temp-path", Default = "", HelpText = "Path to temporary caching folder.")]
+        [Option("temp-path", Default = "", HelpText = "Set custom path to cache folder instead of provided by system. Recommended for '-k', '-K', '-p'.")]
         public string TempFolder { get; set; }
 
         [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
