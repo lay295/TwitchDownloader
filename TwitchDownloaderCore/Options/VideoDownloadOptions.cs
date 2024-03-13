@@ -8,6 +8,7 @@ namespace TwitchDownloaderCore.Options
         public int Id { get; set; }
         public string Quality { get; set; }
         public string Filename { get; set; }
+        public bool TsPartsOnly { get; set; }
         public bool KeepCache { get; set; }
         public bool KeepCacheNoParts { get; set; }
         public bool SkipStorageCheck { get; set; }
