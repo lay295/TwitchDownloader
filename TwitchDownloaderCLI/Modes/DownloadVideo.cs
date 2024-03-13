@@ -53,6 +53,7 @@ namespace TwitchDownloaderCLI.Modes
                 ThrottleKib = inputOptions.ThrottleKib,
                 Id = int.Parse(vodIdMatch.ValueSpan),
                 Oauth = inputOptions.Oauth,
+                TsPartsOnly = inputOptions.TsPartsOnly,
                 KeepCache = inputOptions.KeepCache,
                 KeepCacheNoParts = inputOptions.KeepCacheNoParts,
                 SkipStorageCheck = inputOptions.SkipStorageCheck,
@@ -85,6 +86,8 @@ namespace TwitchDownloaderCLI.Modes
                     _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
                 };
             }
+            else if (string.IsNullOrWhiteSpace(inputOptions.Quality))
+                downloadOptions.Quality = "best";
             else if (inputOptions.Quality.Contains("audio", StringComparison.OrdinalIgnoreCase))
                 downloadOptions.Quality = "Audio";
             else
