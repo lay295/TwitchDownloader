@@ -70,8 +70,8 @@ OAuth access token to download subscriber only VODs. <ins>**DO NOT SHARE YOUR OA
 **--ffmpeg-path**
 Path to FFmpeg executable.
 
-**-c / --cache-path**
-Set custom path to cache folder instead of provided by system. Recommended for '-k', '-K', '-p'.
+**-c / --temp-path**
+Set custom path to temp/cache folder instead of provided by system. Recommended for '-k', '-K', '-p'.
 
 **--banner**
 (Default: `true`) Displays a banner containing version and copyright information.
