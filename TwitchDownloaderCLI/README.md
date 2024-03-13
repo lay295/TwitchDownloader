@@ -16,7 +16,7 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
 
 ### Global arguments
 
-The mode to be used must support also the global arguments which are passed.
+The mode in use must support also the global arguments which are passed to the CLI.
 
 **--banner**
 (Default: `true`) Displays a banner containing version and copyright information.
@@ -33,16 +33,19 @@ The mode to be used must support also the global arguments which are passed.
 The ID or URL of the VOD to download.
 
 **-o / --output**
-File the program will output to. File extension will be used to determine download type if the extension is present. Valid extensions are: `.mp4` and `.m4a`.
+Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4, .m4a.
 
 **-q / --quality**
-The quality the program will attempt to download, for example "1080p60", if not found will download highest quality stream.
+The quality the program will attempt to download, like '1080p60'. If '-o' and '-q' are missing will be 'best'.
+
+**-p / --parts**
+Only download .ts parts and metadata.txt to cache folder, and exit.
 
 **-K / --cache**
-Keep entire cache folder. Overrides "-k".
+Keep entire cache folder. Overrides '-k'.
 
 **-k / --cache-noparts**
-Keep cache folder except .ts parts.
+Keep cache folder except .ts parts. Merged 'output.ts' is not considered a part.
 
 **-F / --skip-storagecheck**
 Skip checking for free storage space.
@@ -56,7 +59,7 @@ Time in seconds where the crop ends. For example if I had a 10 second stream but
 Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
 
 **-t / --threads**
-(Default: `4`) Number of download threads.
+(Default: `4`) Number of simultaneous download threads.
 
 **--bandwidth**
 (Default: `-1`) The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
@@ -67,8 +70,8 @@ OAuth access token to download subscriber only VODs. <ins>**DO NOT SHARE YOUR OA
 **--ffmpeg-path**
 Path to FFmpeg executable.
 
-**--temp-path**
-Path to temporary folder for cache.
+**-c / --cache-path**
+Set custom path to cache folder instead of provided by system. Recommended for '-k', '-K', '-p'.
 
 **--banner**
 (Default: `true`) Displays a banner containing version and copyright information.
@@ -453,7 +456,9 @@ For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `a
 
 Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
 
-When cropping, the part of the file to be retained is the one after the crop starts and before the crop ends. The rest is discarded.
+When cropping, the part of the file to be retained is the one after the crop starts and before the crop ends. The rest is discarded. So in this context 'crop' means 'crop in', while in others could mean 'crop out' and that's the opposite.
+
+The location of the `temp`, `temporary` or `cache` folder, is automatically assigned by the operating system. In some operating systems can be difficult or impossible to access outside `TwitchDownloader` if it's in a private or encrypted area. Also could cause excessive wear of the internal flash storage. This is why it's recommended to manually set it to a specific place.
 
 The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
 Alternatively, the list file may also be an M3U8 playlist file.
