@@ -11,7 +11,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('o', "output", HelpText = "Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4, .m4a.")]
         public string OutputFile { get; set; }
 
-        [Option('q', "quality", HelpText = "The quality the program will attempt to download. If '-o' and '-q' are missing will be 'best'.")]
+        [Option('q', "quality", HelpText = "The quality the program will attempt to download, like '1080p60'. If '-o' and '-q' are missing will be 'best'.")]
         public string Quality { get; set; }
 
         [Option('p', "parts", HelpText = "Only download .ts parts and metadata.txt to cache folder, and exit.")]
