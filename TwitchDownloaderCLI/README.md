@@ -51,10 +51,10 @@ Keep cache folder except .ts parts. Merged 'output.ts' is not considered a part.
 Skip checking for free storage space.
 
 **-b / --beginning**
-Time in seconds where the crop begins. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time in seconds where the crop of the ID begins. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e / --ending**
-Time in seconds where the crop ends. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time in seconds where the crop of the ID ends. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
 
