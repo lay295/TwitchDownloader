@@ -36,7 +36,7 @@ The ID or URL of the VOD to download.
 Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4, .m4a.
 
 **-q / --quality**
-The quality the program will attempt to download, like '1080p60'. If '-o' and '-q' are missing will be 'best'. 
+The quality the program will attempt to download, like '1080p60'. If '-o' and '-q' are missing will be 'best'.
 
 **-p / --parts**
 Only download .ts parts and metadata.txt to cache folder, and exit. Overrides '-k', '-K', '-o'.
@@ -458,7 +458,7 @@ Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian,
 
 When cropping, the part of the file to be retained is the one after the crop starts and before the crop ends. The rest is discarded. So in this context 'crop' means 'crop in', while in others could mean 'crop out' and that's the opposite.
 
-The location of the `temp`, `temporary` or `cache` folder, is automatically assigned by the operating system. In some operating systems can be difficult or impossible to access outside `TwitchDownloader`, if it's in a private or encrypted area. Also could cause excessive wear of the internal flash storage. This is why it's recommended to manually set it to a specific place.
+The location of the `temp`, `temporary` or `cache` folder, is automatically assigned by the operating system by default. In some operating systems can be difficult or impossible to access by a program different than `TwitchDownloader`, if it's in a private or encrypted area, or if the permissions are limited. Also could cause excessive wear of the internal flash storage. This is why it's recommended to manually set it to a specific place.
 
 The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
 Alternatively, the list file may also be an M3U8 playlist file.
