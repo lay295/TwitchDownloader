@@ -37,7 +37,19 @@ namespace TwitchDownloaderCore.Extensions
                 return m3u8.BestQualityStream();
             }
 
-            if (qualityString.Contains("source", StringComparison.OrdinalIgnoreCase) || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase) || qualityString.Contains("best", StringComparison.OrdinalIgnoreCase))
+            // Not in m3u8.Streams but for user friendliness
+            if (qualityString.Contains("best", StringComparison.OrdinalIgnoreCase))
+            {
+                return m3u8.BestQualityStream();
+            }
+
+            // Not in m3u8.Streams but for user friendliness
+            if (qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase))
+            {
+                return m3u8.WorstQualityStream();
+            }
+
+            if (qualityString.Contains("source", StringComparison.OrdinalIgnoreCase) || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
             {
                 return m3u8.BestQualityStream();
             }
@@ -130,6 +142,33 @@ namespace TwitchDownloaderCore.Extensions
             return stream.IsSource()
                 ? $"{frameHeight}p{frameRate} (Source)"
                 : $"{frameHeight}p{frameRate}";
+        }
+
+        /// <summary>
+        /// Returns the best worst stream with video from the provided M3U8.
+        /// </summary>
+        public static M3U8.Stream WorstQualityStream(this M3U8 m3u8)
+        {
+            var videoStreams = m3u8.Streams.Where(x => x.StreamInfo.Resolution.Width > 0 && x.StreamInfo.Resolution.Height > 0).ToArray();
+
+            if (m3u8.Streams.Length == 1 && m3u8.Streams[0].IsSource())
+            {
+                return m3u8.Streams[0];
+            }
+
+            if (videoStreams.Length == 1)
+            {
+                return videoStreams[0];
+            }
+
+            var worstStream = videoStreams.MinBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * (x.StreamInfo.Framerate > 0 ? x.StreamInfo.Framerate : 1));
+
+            if (worstStream == null && m3u8.Streams.Any())
+            {
+                worstStream = m3u8.Streams.MinBy(x => x.StreamInfo.Resolution.Width * x.StreamInfo.Resolution.Height * (x.StreamInfo.Framerate > 0 ? x.StreamInfo.Framerate : 1));
+            }
+
+            return worstStream;
         }
 
         /// <summary>
