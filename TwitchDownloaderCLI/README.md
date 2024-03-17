@@ -36,7 +36,7 @@ The ID or URL of the VOD to download.
 Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4, .m4a.
 
 **-q / --quality**
-The quality the program will attempt to download, like '1080p60'. If '-o' and '-q' are missing will be 'best'.
+The quality the program will attempt to download, like '1080p60'. If '-o' and '-q' are missing will be 'best'. 
 
 **-p / --parts**
 Only download .ts parts and metadata.txt to cache folder, and exit. Overrides '-k', '-K', '-o'.
@@ -458,7 +458,19 @@ Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian,
 
 When cropping, the part of the file to be retained is the one after the crop starts and before the crop ends. The rest is discarded. So in this context 'crop' means 'crop in', while in others could mean 'crop out' and that's the opposite.
 
-The location of the `temp`, `temporary` or `cache` folder, is automatically assigned by the operating system. In some operating systems can be difficult or impossible to access outside `TwitchDownloader` if it's in a private or encrypted area. Also could cause excessive wear of the internal flash storage. This is why it's recommended to manually set it to a specific place.
+The location of the `temp`, `temporary` or `cache` folder, is automatically assigned by the operating system. In some operating systems can be difficult or impossible to access outside `TwitchDownloader`, if it's in a private or encrypted area. Also could cause excessive wear of the internal flash storage. This is why it's recommended to manually set it to a specific place.
 
 The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
 Alternatively, the list file may also be an M3U8 playlist file.
+
+The `Quality` keywords available for the `videodownload` mode are:
+
+- best, source, chunked
+- 1080, 1080p, 1080p60, 1920x1080, 1920x1080p, 1920x1080p60
+- 720, 720p, 720p60, 1280x720, 1280x720p, 1280x720p60
+- 480, 480p, 480p60, 640x480, 640x480p, 640x480p60
+- 360, 360p, 360p60, 480x360, 480x360p, 480x360p60
+- 160, 160p, 160p60, 284x160, 284x160p, 284x160p60
+- audio
+
+The framerate is detected based on the resolution, which is prioritized. If the framerate (like 60, 120 or any other) is set, will look for a stream that matches both paramters. If that stream does not exist, will default to best. There's only one audio quality for all Qualities.
