@@ -471,6 +471,7 @@ The `Quality` keywords available for the `videodownload` mode are:
 - 480, 480p, 480p60, 640x480, 640x480p, 640x480p60
 - 360, 360p, 360p60, 480x360, 480x360p, 480x360p60
 - 160, 160p, 160p60, 284x160, 284x160p, 284x160p60
+- worst
 - audio
 
 The framerate is detected based on the resolution, which is prioritized. If the framerate (like 60, 120 or any other) is set, will look for a stream that matches both paramters. If that stream does not exist, will default to best. There's only one audio quality for all Qualities.
