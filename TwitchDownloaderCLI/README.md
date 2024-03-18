@@ -376,6 +376,9 @@ Path a text file containing the absolute paths of the files to concatenate, sepa
 **-o / --output (REQUIRED)**
 File the program will output to.
 
+**-f / --ignore-missing**
+(Default: `false`) Ignore missing files listed inside input. Useful when the stream was trimmed.
+
 **--banner**
 (Default: `true`) Displays a banner containing version and copyright information.
 
