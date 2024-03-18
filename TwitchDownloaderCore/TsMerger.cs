@@ -34,7 +34,16 @@ namespace TwitchDownloaderCore
                 {
                     if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
 
-                    fileList.Add(line);
+                    var lineFilePath = Path.IsPathRooted(line) ? line : Path.Combine(Path.GetDirectoryName(mergeOptions.InputFile), line);
+
+                    if (File.Exists(lineFilePath))
+                    {
+                        fileList.Add(lineFilePath);
+                    }
+                    else if (!mergeOptions.IgnoreMissingParts)
+                    {
+                        throw new FileNotFoundException($"File listed in the playlist does not exist: {lineFilePath}");
+                    }
                 }
             }
 
