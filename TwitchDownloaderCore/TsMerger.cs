@@ -54,7 +54,7 @@ namespace TwitchDownloaderCore
 
             if (anyFilesMissing && mergeOptions.IgnoreMissingParts)
             {
-                _progress.Report(new ProgressReport(ReportType.Log, "One or more files listed in the playlist do not exist and were skipped."));
+                _progress.Report(new ProgressReport(ReportType.LogWithoutNewlineFirst, "One or more files listed in the playlist do not exist and were skipped."));
             }
 
             _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Verifying Parts 0% [1/2]"));
