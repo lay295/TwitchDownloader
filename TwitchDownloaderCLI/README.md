@@ -445,6 +445,7 @@ Print the available options for the VOD downloader
 ---
 
 ## Additional Notes
+#### General
 
 All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303` or `--id https://twitch.tv/videos/612942303`.
 
@@ -463,10 +464,13 @@ The location of the `temp`, `temporary` or `cache` folder, is automatically assi
 The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
 Alternatively, the list file may also be an M3U8 playlist file.
 
+Values for `-b` and `-e` must be in whole (integer) seconds.
+
 The `Quality` keywords available for the `videodownload` mode are:
 
 - best, source, chunked
 - 1080, 1080p, 1080p60, 1920x1080, 1920x1080p, 1920x1080p60
+- 900, 900p, 900p60, 1600x900, 1600x900p, 1600x900p60
 - 720, 720p, 720p60, 1280x720, 1280x720p, 1280x720p60
 - 480, 480p, 480p60, 640x480, 640x480p, 640x480p60
 - 360, 360p, 360p60, 480x360, 480x360p, 480x360p60
@@ -474,4 +478,9 @@ The `Quality` keywords available for the `videodownload` mode are:
 - worst
 - audio
 
-The framerate is detected based on the resolution, which is prioritized. If the framerate (like 60, 120 or any other) is set, will look for a stream that matches both paramters. If that stream does not exist, will default to best. There's only one audio quality for all Qualities.
+The framerate is detected based on the resolution, which is prioritized. If the framerate (like 30, 50, 60, 120 or any other) is manually set, will look for a stream that matches the provided parameters. If that stream does not exist, will default to best.
+The audio stream is also the same audio stream for all video tracks. Twitch does not allow different audio tracks with different qualities for the same VOD ID. But there are different audio qualities to choose from before starting the stream.
+
+#### Trimming and chapters
+
+The mode `videodownload` has the options `-b` and `-e` to trim the output file compared to the whole VOD.
