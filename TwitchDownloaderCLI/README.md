@@ -51,10 +51,10 @@ Keep cache folder except .ts parts. Merged 'output.ts' is not considered a part.
 Skip checking for free storage space.
 
 **-b / --beginning**
-Time in seconds where the crop of the ID begins. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time in seconds where the crop of the ID begins. May break first GOP. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e / --ending**
-Time in seconds where the crop of the ID ends. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time in seconds where the crop of the ID ends. May break last GOP. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
 
@@ -487,12 +487,12 @@ This trim splits the compressed video outside of I-frames (in copy mode) most of
 
 As a result of this, the GOP at the beginning and/or the end will be split, leaving that part of it unplayable, until the next I-frame (Intra-Frame or key-Frame) is reached. The audio is not affected, either if it is alone or with video.
 
-So when it's not cut by I-frame, although the audio and the video have the same duration, the playable video is less than the audio, and starts to play after the audio has been already reproducing for a while. However this depends on what video player is being used the the specific version:
+This is because Twitch streams use the H.264 (AVC) codec, which is a consumer-only video format designed for efficiency.
+
+So when it's not cut by I-frame, although the audio and the video have the same duration, the playable video is less than the audio, and starts to play after the audio has been already reproducing for a while. Depending on the video player and its version:
 
 - If the output file is only .m4a there's no issue, plays from beginning to end.
-- Some video players play from the very start if at least one of the tracks is playable, so they put a black frame on screen while the audio plays until everything is back in sync. `Quick Look` (Mac Spacebar Preview) does this.
-- Other video players start playing from the timestamp when all tracks can be decoded properly, so they wait until the video can be played, and skip that portion of audio. Forcing to play audio only, like `mpv --no-video output.mp4`, forces to play the entire audio stream.
+- Some video players play from the very start of the whole file, if at least one of the tracks is playable. They put a black frame on screen while the audio plays until everything is back in sync. `Quick Look` (Mac Spacebar Preview) does this. This is the most conversative approach and it's when people realize their video is broken.
+- Other video players start playing from the timestamp when all tracks can be decoded properly, so they wait until the video can be played, and skip that portion of audio. Some people may never know that there's more audio inside. Forcing to play audio only, like `mpv --no-video output.mp4`, forces to play the entire audio stream.
 
-To avoid this issue, trim the beginning earlier, and the end later, so all the desired content falls into full GOPs.
-
-Chapters are not adjusted relative to the trimmed file, `ffmpeg` can't do that automatically.
+To avoid losing video content, trim the beginning earlier, and the end later, so all the desired content falls into full GOPs. Chapters are not adjusted relative to the trimmed file, `ffmpeg` can't do that automatically.
