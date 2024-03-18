@@ -14,7 +14,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('q', "quality", HelpText = "The quality the program will attempt to download, like '1080p60'. If '-o' and '-q' are missing will be 'best'.")]
         public string Quality { get; set; }
 
-        [Option('p', "parts", HelpText = "Only download .ts parts and metadata.txt to cache folder, and exit. Overrides '-k', '-K', '-o'.")]
+        [Option('p', "parts", HelpText = "Only download playlist.m3u8, metadata.txt and .ts parts to cache folder, and exit. Overrides '-k', '-K', '-o'.")]
         public bool TsPartsOnly { get; set; }
 
         [Option('K', "cache", HelpText = "Keep entire cache folder. Overrides '-k'.")]
