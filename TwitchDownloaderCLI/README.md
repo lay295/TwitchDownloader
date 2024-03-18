@@ -39,7 +39,7 @@ Path to output file. File extension will be used to determine download type. Val
 The quality the program will attempt to download, like '1080p60'. If '-o' and '-q' are missing will be 'best'.
 
 **-p / --parts**
-Only download .ts parts and metadata.txt to cache folder, and exit. Overrides '-k', '-K', '-o'.
+Only download playlist.m3u8, metadata.txt and .ts parts to cache folder, and exit. Overrides '-k', '-K', '-o'.
 
 **-K / --cache**
 Keep entire cache folder. Overrides '-k'.
