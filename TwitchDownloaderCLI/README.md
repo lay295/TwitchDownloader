@@ -447,7 +447,7 @@ Print the available options for the VOD downloader
 ## Additional Notes
 #### General
 
-All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303` or `--id https://twitch.tv/videos/612942303`.
+All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303` or `--id https://www.twitch.tv/videos/799499623?filter=all&sort=views`.
 
 String arguments that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd>. i.e. `--output 'my output file.mp4'` or `--output "my output file.mp4"`
 
@@ -463,8 +463,6 @@ The location of the `temp`, `temporary` or `cache` folder, is automatically assi
 
 The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
 Alternatively, the list file may also be an M3U8 playlist file.
-
-Values for `-b` and `-e` must be in whole (integer) seconds.
 
 The `Quality` keywords available for the `videodownload` mode are:
 
@@ -483,4 +481,18 @@ The audio stream is also the same audio stream for all video tracks. Twitch does
 
 #### Trimming and chapters
 
-The mode `videodownload` has the options `-b` and `-e` to trim the output file compared to the whole VOD.
+The mode `videodownload` has the options `-b` and `-e` to trim the output file at the beginning and/or at the end. The values are in whole seconds and relative to the full ID duration. The mode `clipdownload` doesn't have these options.
+
+This trim splits the compressed video outside of I-frames (in copy mode) most of the time, and doesn't recode the affected GOPs, for the sake of speed and simplicity. Twitch streams don't always have I-frames placed at whole second marks (can be like 2.9899 seconds). Sometimes the GOPs can be spaced more than 10 seconds from each other, but usually it's 1.5-2.
+
+As a result of this, the GOP at the beginning and/or the end will be split, leaving that part of it unplayable, until the next I-frame (Intra-Frame or key-Frame) is reached. The audio is not affected, either if it is alone or with video.
+
+So when it's not cut by I-frame, although the audio and the video have the same duration, the playable video is less than the audio, and starts to play after the audio has been already reproducing for a while. However this depends on what video player is being used the the specific version:
+
+- If the output file is only .m4a there's no issue, plays from beginning to end.
+- Some video players play from the very start if at least one of the tracks is playable, so they put a black frame on screen while the audio plays until everything is back in sync. `Quick Look` (Mac Spacebar Preview) does this.
+- Other video players start playing from the timestamp when all tracks can be decoded properly, so they wait until the video can be played, and skip that portion of audio. Forcing to play audio only, like `mpv --no-video output.mp4`, forces to play the entire audio stream.
+
+To avoid this issue, trim the beginning earlier, and the end later, so all the desired content falls into full GOPs.
+
+Chapters are not adjusted relative to the trimmed file, `ffmpeg` can't do that automatically.
