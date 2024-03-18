@@ -447,7 +447,7 @@ Print the available options for the VOD downloader
 ## Additional Notes
 #### General
 
-All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303` or `--id https://www.twitch.tv/videos/799499623?filter=all&sort=views`.
+All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303`, `--id https://twitch.tv/videos/612942303` or `--id https://www.twitch.tv/videos/799499623?filter=all&sort=views`.
 
 String arguments that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd>. i.e. `--output 'my output file.mp4'` or `--output "my output file.mp4"`
 
