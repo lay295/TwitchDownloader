@@ -102,6 +102,10 @@ namespace TwitchDownloaderCore
                 startOffsetSeconds = downloadOptions.CropBeginningTime - startOffsetSeconds;
                 double seekDuration = Math.Round(downloadOptions.CropEndingTime - downloadOptions.CropBeginningTime);
 
+                string playlistFilePath = Path.Combine(downloadFolder, "playlist.m3u8"); ;
+                string playlistContent = playlist.ToString();
+                await File.WriteAllTextAsync(playlistFilePath, playlistContent, cancellationToken);
+
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 VideoInfo videoInfo = videoInfoResponse.data.video;
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
