@@ -27,6 +27,7 @@ namespace TwitchDownloaderCore
             }
 
             var fileList = new List<string>();
+            bool anyFilesMissing = false;
             await using (var fs = File.Open(mergeOptions.InputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 using var sr = new StreamReader(fs);
@@ -40,11 +41,20 @@ namespace TwitchDownloaderCore
                     {
                         fileList.Add(lineFilePath);
                     }
-                    else if (!mergeOptions.IgnoreMissingParts)
+                    else
                     {
-                        throw new FileNotFoundException($"File listed in the playlist does not exist: {lineFilePath}");
+                        anyFilesMissing = true;
+                        if (!mergeOptions.IgnoreMissingParts)
+                        {
+                            throw new FileNotFoundException($"File does not exist: {lineFilePath}");
+                        }
                     }
                 }
+            }
+
+            if (anyFilesMissing && mergeOptions.IgnoreMissingParts)
+            {
+                _progress.Report(new ProgressReport(ReportType.Log, "One or more files listed in the playlist do not exist and were skipped."));
             }
 
             _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Verifying Parts 0% [1/2]"));
