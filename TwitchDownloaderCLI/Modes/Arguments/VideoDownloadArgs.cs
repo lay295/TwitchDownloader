@@ -26,10 +26,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('F', "skip-storagecheck", HelpText = "Skip checking for free storage space.")]
         public bool SkipStorageCheck { get; set; }
 
-        [Option('b', "beginning", HelpText = "Time in seconds where the crop of the ID begins.")]
+        [Option('b', "beginning", HelpText = "Time in seconds where the crop of the ID begins. May break first GOP.")]
         public int CropBeginningTime { get; set; }
 
-        [Option('e', "ending", HelpText = "Time in seconds where the crop of the ID ends.")]
+        [Option('e', "ending", HelpText = "Time in seconds where the crop of the ID ends. May break last GOP.")]
         public int CropEndingTime { get; set; }
 
         [Option('t', "threads", Default = 4, HelpText = "Number of simultaneous download threads.")]
