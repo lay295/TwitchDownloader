@@ -476,6 +476,7 @@ The `Quality` keywords available for the `videodownload` mode are:
 - 480, 480p, 480p60, 640x480, 640x480p, 640x480p60
 - 360, 360p, 360p60, 480x360, 480x360p, 480x360p60
 - 160, 160p, 160p60, 284x160, 284x160p, 284x160p60
+- 144, 144p, 144p60. 256x144, 256x144p, 256x144p60
 - worst
 - audio
 
