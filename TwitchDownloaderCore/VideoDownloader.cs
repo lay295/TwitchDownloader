@@ -89,7 +89,7 @@ namespace TwitchDownloaderCore
                     CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
                 }
 
-                var (playlist, videoListCrop, vodAge) = await GetVideoPlaylist(playlistUrl, cancellationToken);
+                var (playlist, videoListCrop, vodAge, playlistString) = await GetVideoPlaylist(playlistUrl, cancellationToken);
 
                 if (Directory.Exists(downloadFolder))
                     Directory.Delete(downloadFolder, true);
@@ -102,9 +102,8 @@ namespace TwitchDownloaderCore
                 startOffsetSeconds = downloadOptions.CropBeginningTime - startOffsetSeconds;
                 double seekDuration = Math.Round(downloadOptions.CropEndingTime - downloadOptions.CropBeginningTime);
 
-                string playlistFilePath = Path.Combine(downloadFolder, "playlist.m3u8"); ;
-                string playlistContent = playlist.ToString();
-                await File.WriteAllTextAsync(playlistFilePath, playlistContent, cancellationToken);
+                string playlistFilePath = Path.Combine(downloadFolder, "playlist.m3u8");
+                await File.WriteAllTextAsync(playlistFilePath, playlistString, cancellationToken);
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 VideoInfo videoInfo = videoInfoResponse.data.video;
@@ -601,7 +600,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<(M3U8 playlist, Range cropRange, double vodAge)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
+        private async Task<(M3U8 playlist, Range cropRange, double vodAge, string playlistString)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
             var playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
             var playlist = M3U8.Parse(playlistString);
@@ -615,7 +614,7 @@ namespace TwitchDownloaderCore
 
             var videoListCrop = GetStreamListCrop(playlist.Streams, downloadOptions);
 
-            return (playlist, videoListCrop, vodAge);
+            return (playlist, videoListCrop, vodAge, playlistString);
         }
 
         private static Range GetStreamListCrop(IList<M3U8.Stream> streamList, VideoDownloadOptions downloadOptions)
