@@ -491,7 +491,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("429496729500@1")]
         [InlineData("1@429496729500")]
         [InlineData("42949672950000")]
-        public void CorrectlyThrowsFormatExceptionForBadByteRangeString(string byteRangeString)
+        public void ThrowsFormatExceptionForBadByteRangeString(string byteRangeString)
         {
             Assert.Throws<FormatException>(() => M3U8.Stream.ExtByteRange.Parse(byteRangeString));
         }
@@ -512,9 +512,71 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("429496729500x1")]
         [InlineData("1x429496729500")]
         [InlineData("42949672950000")]
-        public void CorrectlyThrowsFormatExceptionForBadResolutionString(string byteRangeString)
+        public void ThrowsFormatExceptionForBadResolutionString(string byteRangeString)
         {
             Assert.Throws<FormatException>(() => M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(byteRangeString));
+        }
+
+
+        [Theory]
+        [InlineData("en-GB")]
+        [InlineData("tr-TR")]
+        [InlineData("ru-RU")]
+        public void CorrectlyStringifiesInvariantOfCulture(string culture)
+        {
+            const string EXAMPLE_M3U8 =
+                "#EXTM3U" +
+                "\n#EXT-X-TWITCH-INFO:ORIGIN=\"s3\",B=\"false\",REGION=\"NA\",USER-IP=\"255.255.255.255\",SERVING-ID=\"123abc456def789ghi012jkl345mno67\",CLUSTER=\"cloudfront_vod\",USER-COUNTRY=\"US\",MANIFEST-CLUSTER=\"cloudfront_vod\"" +
+                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"chunked\",FRAME-RATE=59.995" +
+                "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/chunked/index-dvr.m3u8" +
+                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"720p60\",NAME=\"720p60\",AUTOSELECT=YES,DEFAULT=YES" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\",FRAME-RATE=59.995" +
+                "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/720p60/index-dvr.m3u8" +
+                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"480p30\",NAME=\"480p\",AUTOSELECT=YES,DEFAULT=YES" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=1454397,CODECS=\"avc1.4D001F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\",FRAME-RATE=29.998" +
+                "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/480p30/index-dvr.m3u8" +
+                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"audio_only\",NAME=\"Audio Only\",AUTOSELECT=NO,DEFAULT=NO" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",VIDEO=\"audio_only\"" +
+                "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/audio_only/index-dvr.m3u8" +
+                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"360p30\",NAME=\"360p\",AUTOSELECT=YES,DEFAULT=YES" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\",FRAME-RATE=29.998" +
+                "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/360p30/index-dvr.m3u8" +
+                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"160p30\",NAME=\"160p\",AUTOSELECT=YES,DEFAULT=YES" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\",FRAME-RATE=29.998" +
+                "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/160p30/index-dvr.m3u8" +
+                "\n#EXT-X-VERSION:4" +
+                "\n#EXT-X-MEDIA-SEQUENCE:0" +
+                "\n#EXT-X-TARGETDURATION:2" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:07.97Z\n#EXT-X-BYTERANGE:1601196@6470396\n#EXTINF:2.000,\n500.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:09.97Z\n#EXT-X-BYTERANGE:1588224@0\n#EXTINF:2.000,\n501.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:11.97Z\n#EXT-X-BYTERANGE:1579200@1588224\n#EXTINF:2.000,\n501.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:13.97Z\n#EXT-X-BYTERANGE:1646128@3167424\n#EXTINF:2.000,\n501.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:15.97Z\n#EXT-X-BYTERANGE:1587472@4813552\n#EXTINF:2.000,\n501.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:17.97Z\n#EXT-X-BYTERANGE:1594052@6401024\n#EXTINF:2.000,\n501.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:19.97Z\n#EXT-X-BYTERANGE:1851236@0\n#EXTINF:2.000,\n502.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:21.97Z\n#EXT-X-BYTERANGE:1437448@1851236\n#EXTINF:2.000,\n502.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:23.97Z\n#EXT-X-BYTERANGE:1535960@3288684\n#EXTINF:2.000,\n502.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:25.97Z\n#EXT-X-BYTERANGE:1568672@4824644\n#EXTINF:2.000,\n502.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:27.97Z\n#EXT-X-BYTERANGE:1625824@6393316\n#EXTINF:2.000,\n502.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:29.97Z\n#EXT-X-BYTERANGE:1583524@0\n#EXTINF:2.000,\n503.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:31.97Z\n#EXT-X-BYTERANGE:1597060@1583524\n#EXTINF:2.000,\n503.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:33.97Z\n#EXT-X-BYTERANGE:1642368@3180584\n#EXTINF:2.000,\n503.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:35.97Z\n#EXT-X-BYTERANGE:1556076@4822952\n#EXTINF:2.000,\n503.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:37.97Z\n#EXT-X-BYTERANGE:1669252@6379028\n#EXTINF:2.000,\n503.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:39.97Z\n#EXT-X-BYTERANGE:1544984@0\n#EXTINF:2.000,\n504.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:41.97Z\n#EXT-X-BYTERANGE:1601384@1544984\n#EXTINF:2.000,\n504.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:43.97Z\n#EXT-X-BYTERANGE:1672260@3146368\n#EXTINF:2.000,\n504.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:45.97Z\n#EXT-X-BYTERANGE:1623192@4818628\n#EXTINF:2.000,\n504.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:47.97Z\n#EXT-X-BYTERANGE:1526748@6441820\n#EXTINF:2.000,\n504.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:49.97Z\n#EXT-X-BYTERANGE:1731668@0\n#EXTINF:2.000,\n505.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:51.97Z\n#EXT-X-BYTERANGE:1454368@1731668\n#EXTINF:2.000,\n505.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:53.97Z\n#EXT-X-BYTERANGE:1572432@3186036\n#EXTINF:2.000,\n505.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:55.97Z\n#EXT-X-BYTERANGE:1625824@4758468\n#EXTINF:2.000,\n505.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:57.97Z\n#EXT-X-BYTERANGE:1616988@6384292\n#EXTINF:2.000,\n505.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:59.97Z\n#EXT-X-BYTERANGE:1632028@0\n#EXTINF:2.000,\n506.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:01.97Z\n#EXT-X-BYTERANGE:1543668@1632028\n#EXTINF:2.000,\n506.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:03.97Z\n#EXT-X-BYTERANGE:1768140@3175696\n#EXTINF:2.000,\n506.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:05.97Z\n#EXT-X-BYTERANGE:1519040@4943836\n#EXTINF:2.000,\n506.ts" +
+                "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:07.97Z\n#EXT-X-BYTERANGE:1506068@6462876\n#EXTINF:2.000,\n506.ts\n#EXT-X-ENDLIST";
+
+            var m3u8 = M3U8.Parse(EXAMPLE_M3U8);
+
+            var oldCulture = CultureInfo.CurrentCulture;
+
+            CultureInfo.CurrentCulture = new CultureInfo("en-US");
+            var stringExpected = m3u8.ToString();
+            CultureInfo.CurrentCulture = new CultureInfo(culture);
+            var stringActual = m3u8.ToString();
+
+            CultureInfo.CurrentCulture = oldCulture;
+
+            Assert.Equal(stringExpected, stringActual);
         }
     }
 }
