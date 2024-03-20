@@ -9,6 +9,7 @@ using TwitchDownloaderCore.Extensions;
 namespace TwitchDownloaderCore.Tools
 {
     // https://en.wikipedia.org/wiki/M3U
+    // https://datatracker.ietf.org/doc/html/rfc8216
     // ReSharper disable StringLiteralTypo
     public sealed record M3U8(M3U8.Metadata FileMetadata, M3U8.Stream[] Streams)
     {
