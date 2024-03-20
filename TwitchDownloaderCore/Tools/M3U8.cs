@@ -257,7 +257,7 @@ namespace TwitchDownloaderCore.Tools
                     return "";
                 }
 
-                return sb.ToString().AsSpan().TrimEnd(itemSeparator).ToString();
+                return sb.TrimEnd(itemSeparator).ToString();
             }
 
             public sealed class Builder
