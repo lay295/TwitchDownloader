@@ -32,6 +32,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('e', "ending", HelpText = "Time in seconds where the crop of the ID ends. May break last GOP.")]
         public int CropEndingTime { get; set; }
 
+        [Option("tbn", HelpText = "Set specific TBN (time base in AVStream) for output.")]
+        public int SetTbnValue { get; set; }
+
         [Option('t', "threads", Default = 4, HelpText = "Number of simultaneous download threads.")]
         public int DownloadThreads { get; set; }
 
