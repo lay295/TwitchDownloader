@@ -675,9 +675,11 @@ namespace TwitchDownloaderCore.Tools
 
                     sb.Append(Duration.ToString(CultureInfo.InvariantCulture));
 
+                    // Twitch leaves a trailing comma, so we will too.
+                    sb.Append(',');
+
                     if (Live)
                     {
-                        sb.Append(',');
                         sb.Append("live");
                     }
 
