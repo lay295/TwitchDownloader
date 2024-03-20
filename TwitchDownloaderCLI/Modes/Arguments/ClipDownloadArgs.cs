@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
@@ -19,6 +19,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("encode-metadata", Default = true, HelpText = "Uses FFmpeg to add metadata to the clip output file.")]
         public bool? EncodeMetadata { get; set; }
+
+        [Option("tbn", HelpText = "Set specific TBN (time base in AVStream) for output.")]
+        public int SetTbnValue { get; set; }
 
         [Option("ffmpeg-path", HelpText = "Path to FFmpeg executable.")]
         public string FfmpegPath { get; set; }
