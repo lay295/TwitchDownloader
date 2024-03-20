@@ -133,6 +133,11 @@ namespace TwitchDownloaderWPF
                 var sizeString = VideoSizeEstimator.StringifyByteCount(sizeBytes);
                 Size = string.IsNullOrEmpty(sizeString) ? "0B" : sizeString;
 
+                if (sizeBytes == 0)
+                {
+                    ShouldDelete = true;
+                }
+
                 return sizeBytes;
             }
         }
