@@ -161,7 +161,7 @@ namespace TwitchDownloaderCore
                     StartInfo =
                     {
                         FileName = downloadOptions.FfmpegPath,
-                        Arguments = $"-i \"{inputFile}\" -i \"{metadataFile}\" -map_metadata 1 -y -c copy \"{destinationFile}\"",
+                        Arguments = $"-i \"{inputFile}\" -i \"{metadataFile}\" -map_metadata 1 -y -c copy {(downloadOptions.SetTbn ? $"-video_track_timescale {downloadOptions.SetTbnValue} " : "")}\"{destinationFile}\"",
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         RedirectStandardInput = false,
