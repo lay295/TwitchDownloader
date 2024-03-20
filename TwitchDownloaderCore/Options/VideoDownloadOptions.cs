@@ -16,6 +16,8 @@ namespace TwitchDownloaderCore.Options
         public double CropBeginningTime { get; set; }
         public bool CropEnding { get; set; }
         public double CropEndingTime { get; set; }
+        public bool SetTbn { get; set; }
+        public int SetTbnValue { get; set; }
         public int DownloadThreads { get; set; }
         public int ThrottleKib { get; set; }
         public string Oauth { get; set; }
