@@ -58,6 +58,9 @@ Time in seconds where the crop of the ID ends. May break last GOP. For example i
 
 Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
 
+**--tbn**
+Set specific TBN (time base in AVStream) for output.
+
 **-t / --threads**
 (Default: `4`) Number of simultaneous download threads.
 
@@ -93,6 +96,9 @@ The quality the program will attempt to download, for example "1080p60", if not 
 
 **--encode-metadata**
 (Default: `true`) Uses FFmpeg to add metadata to the clip output file.
+
+**--tbn**
+Set specific TBN (time base in AVStream) for output.
 
 **--ffmpeg-path**
 Path to FFmpeg executable.
