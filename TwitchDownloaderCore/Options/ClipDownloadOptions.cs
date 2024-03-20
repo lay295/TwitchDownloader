@@ -1,4 +1,4 @@
-﻿namespace TwitchDownloaderCore.Options
+namespace TwitchDownloaderCore.Options
 {
     public class ClipDownloadOptions
     {
@@ -8,6 +8,8 @@
         public int ThrottleKib { get; set; }
         public string TempFolder { get; set; }
         public bool EncodeMetadata { get; set; }
+        public bool SetTbn { get; set; }
+        public int SetTbnValue { get; set; }
         public string FfmpegPath { get; set; }
     }
 }
