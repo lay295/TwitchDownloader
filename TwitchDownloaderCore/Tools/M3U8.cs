@@ -202,6 +202,9 @@ namespace TwitchDownloaderCore.Tools
                 Event
             }
 
+            internal const string PLAYLIST_TYPE_VOD = "VOD";
+            internal const string PLAYLIST_TYPE_EVENT = "EVENT";
+
             private const string TARGET_VERSION_KEY = "#EXT-X-VERSION:";
             private const string TARGET_DURATION_KEY = "#EXT-X-TARGETDURATION:";
             private const string PLAYLIST_TYPE_KEY = "#EXT-X-PLAYLIST-TYPE:";
@@ -236,7 +239,7 @@ namespace TwitchDownloaderCore.Tools
                 if (Type != PlaylistType.Unknown)
                 {
                     sb.Append(PLAYLIST_TYPE_KEY);
-                    sb.Append(Type.ToString().ToUpper());
+                    sb.Append(Type.AsString());
                     sb.Append(itemSeparator);
                 }
 
@@ -292,9 +295,9 @@ namespace TwitchDownloaderCore.Tools
                     {
                         _metadata ??= new Metadata();
                         var temp = text[PLAYLIST_TYPE_KEY.Length..];
-                        if (temp.StartsWith("VOD"))
+                        if (temp.StartsWith(PLAYLIST_TYPE_VOD))
                             _metadata.Type = PlaylistType.Vod;
-                        else if (temp.StartsWith("EVENT"))
+                        else if (temp.StartsWith(PLAYLIST_TYPE_EVENT))
                             _metadata.Type = PlaylistType.Event;
                         else
                             throw new FormatException($"Unable to parse PlaylistType from: {text}");
@@ -422,6 +425,9 @@ namespace TwitchDownloaderCore.Tools
                     Audio
                 }
 
+                internal const string MEDIA_TYPE_VIDEO = "VIDEO";
+                internal const string MEDIA_TYPE_AUDIO = "AUDIO";
+
                 internal const string MEDIA_INFO_KEY = "#EXT-X-MEDIA:";
 
                 private ExtMediaInfo() { }
@@ -449,7 +455,7 @@ namespace TwitchDownloaderCore.Tools
                     if (Type != MediaType.Unknown)
                     {
                         sb.Append("TYPE=");
-                        sb.Append(Type.ToString().ToUpper());
+                        sb.Append(Type.AsString());
                         sb.Append(keyValueSeparator);
                     }
 
@@ -490,9 +496,9 @@ namespace TwitchDownloaderCore.Tools
                         if (text.StartsWith(KEY_TYPE))
                         {
                             var temp = text[KEY_TYPE.Length..];
-                            if (temp.StartsWith("VIDEO"))
+                            if (temp.StartsWith(MEDIA_TYPE_VIDEO))
                                 mediaInfo.Type = MediaType.Video;
-                            else if (temp.StartsWith("AUDIO"))
+                            else if (temp.StartsWith(MEDIA_TYPE_AUDIO))
                                 mediaInfo.Type = MediaType.Audio;
                             else
                                 throw new FormatException($"Unable to parse MediaType from: {text}");
@@ -663,7 +669,22 @@ namespace TwitchDownloaderCore.Tools
                 public decimal Duration { get; private set; }
                 public bool Live { get; private set; }
 
-                public override string ToString() => $"{PART_INFO_KEY}{Duration},{(Live ? "live" : "")}";
+                public override string ToString()
+                {
+                    var sb = new StringBuilder(PART_INFO_KEY);
+
+                    sb.Append(Duration.ToString(CultureInfo.InvariantCulture));
+
+                    // Twitch leaves a trailing comma, so we will too.
+                    sb.Append(',');
+
+                    if (Live)
+                    {
+                        sb.Append("live");
+                    }
+
+                    return sb.ToString();
+                }
 
                 public static ExtPartInfo Parse(ReadOnlySpan<char> text)
                 {
@@ -806,7 +827,7 @@ namespace TwitchDownloaderCore.Tools
                 var temp = text[keyName.Length..];
                 temp = temp[..NextKeyStart(temp)];
 
-                if (DateTimeOffset.TryParse(temp, out var dateTimeOffset))
+                if (DateTimeOffset.TryParse(temp, null, DateTimeStyles.AssumeUniversal, out var dateTimeOffset))
                     return dateTimeOffset;
 
                 if (!strict)
@@ -854,11 +875,11 @@ namespace TwitchDownloaderCore.Tools
                     return;
 
                 sb.Append(keyName);
-                sb.Append(value);
+                sb.Append(value.ToString(CultureInfo.InvariantCulture));
                 sb.Append(end);
             }
 
-            public static void AppendIfNotDefault(StringBuilder sb, string keyName, M3U8.Stream.ExtStreamInfo.StreamResolution value, ReadOnlySpan<char> end)
+            public static void AppendIfNotDefault(StringBuilder sb, string keyName, Stream.ExtStreamInfo.StreamResolution value, ReadOnlySpan<char> end)
             {
                 if (value == default)
                     return;
@@ -883,6 +904,31 @@ namespace TwitchDownloaderCore.Tools
                 sb.Append('"');
                 sb.Append(end);
             }
+        }
+    }
+
+    public static class EnumExtensions
+    {
+        public static string AsString(this M3U8.Stream.ExtMediaInfo.MediaType mediaType)
+        {
+            return mediaType switch
+            {
+                M3U8.Stream.ExtMediaInfo.MediaType.Unknown => null,
+                M3U8.Stream.ExtMediaInfo.MediaType.Video => M3U8.Stream.ExtMediaInfo.MEDIA_TYPE_VIDEO,
+                M3U8.Stream.ExtMediaInfo.MediaType.Audio => M3U8.Stream.ExtMediaInfo.MEDIA_TYPE_AUDIO,
+                _ => throw new ArgumentOutOfRangeException(nameof(mediaType), mediaType, null)
+            };
+        }
+
+        public static string AsString(this M3U8.Metadata.PlaylistType playlistType)
+        {
+            return playlistType switch
+            {
+                M3U8.Metadata.PlaylistType.Unknown => null,
+                M3U8.Metadata.PlaylistType.Vod => M3U8.Metadata.PLAYLIST_TYPE_VOD,
+                M3U8.Metadata.PlaylistType.Event => M3U8.Metadata.PLAYLIST_TYPE_EVENT,
+                _ => throw new ArgumentOutOfRangeException(nameof(playlistType), playlistType, null)
+            };
         }
     }
 }
