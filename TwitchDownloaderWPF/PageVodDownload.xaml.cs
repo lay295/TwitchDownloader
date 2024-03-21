@@ -204,12 +204,12 @@ namespace TwitchDownloaderWPF
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
                     viewCount.ToString(), game) + (comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? ".m4a" : ".mp4")),
                 Oauth = TextOauth.Text,
-                Quality = GetQualityWithoutSize(comboQuality.Text).ToString(),
+                Quality = GetQualityWithoutSize(comboQuality.Text),
                 Id = currentVideoId,
                 CropBeginning = checkStart.IsChecked.GetValueOrDefault(),
-                CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds),
+                CropBeginningTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value),
                 CropEnding = checkEnd.IsChecked.GetValueOrDefault(),
-                CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds),
+                CropEndingTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value),
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath
             };

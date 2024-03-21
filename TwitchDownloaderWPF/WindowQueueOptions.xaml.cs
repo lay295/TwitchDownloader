@@ -146,13 +146,13 @@ namespace TwitchDownloaderWPF
                         if (downloadOptions.CropBeginning)
                         {
                             chatOptions.CropBeginning = true;
-                            chatOptions.CropBeginningTime = downloadOptions.CropBeginningTime;
+                            chatOptions.CropBeginningTime = downloadOptions.CropBeginningTime.TotalSeconds;
                         }
 
                         if (downloadOptions.CropEnding)
                         {
                             chatOptions.CropEnding = true;
-                            chatOptions.CropEndingTime = downloadOptions.CropEndingTime;
+                            chatOptions.CropEndingTime = downloadOptions.CropEndingTime.TotalSeconds;
                         }
 
                         ChatDownloadTask chatTask = new ChatDownloadTask
@@ -475,8 +475,8 @@ namespace TwitchDownloaderWPF
                                 : -1
                         };
                         downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
-                            downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
-                            downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : TimeSpan.FromSeconds(taskData.Length),
+                            downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : TimeSpan.Zero,
+                            downloadOptions.CropEnding ? downloadOptions.CropEndingTime : TimeSpan.FromSeconds(taskData.Length),
                             taskData.Views.ToString(), taskData.Game) + ".mp4");
 
                         VodDownloadTask downloadTask = new VodDownloadTask
