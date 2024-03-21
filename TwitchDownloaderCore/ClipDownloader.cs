@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -82,6 +82,7 @@ namespace TwitchDownloaderCore
 
                 _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Encoding Clip Metadata 100%"));
                 _progress.Report(new ProgressReport(100));
+                Console.WriteLine();
             }
             finally
             {
@@ -160,7 +161,7 @@ namespace TwitchDownloaderCore
                     StartInfo =
                     {
                         FileName = downloadOptions.FfmpegPath,
-                        Arguments = $"-i \"{inputFile}\" -i \"{metadataFile}\" -map_metadata 1 -y -c copy \"{destinationFile}\"",
+                        Arguments = $"-i \"{inputFile}\" -i \"{metadataFile}\" -map_metadata 1 -y -c copy {(downloadOptions.SetTbn ? $"-video_track_timescale {downloadOptions.SetTbnValue} " : "")}\"{destinationFile}\"",
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         RedirectStandardInput = false,
