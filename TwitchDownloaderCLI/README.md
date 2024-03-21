@@ -14,6 +14,16 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
   - [Example Commands](#example-commands)
   - [Additional Notes](#additional-notes)
 
+### Global arguments
+
+The mode in use must support also the global arguments which are passed to the CLI.
+
+**--banner**
+(Default: `true`) Displays a banner containing version and copyright information.
+
+**--silent**
+(Default: `false`) Suppresses progress console output. `--silent true` implies `--banner false`.
+
 ---
 
 ## Arguments for mode videodownload
@@ -22,34 +32,49 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
 **-u / --id (REQUIRED)**
 The ID or URL of the VOD to download.
 
-**-o / --output (REQUIRED)**
-File the program will output to. File extension will be used to determine download type. Valid extensions are: `.mp4` and `.m4a`.
+**-o / --output**
+Path to output file. File extension will be used to determine download type. Valid extensions are: .mp4, .m4a.
 
 **-q / --quality**
-The quality the program will attempt to download, for example "1080p60", if not found will download highest quality stream.
+The quality the program will attempt to download, like '1080p60'. If '-o' and '-q' are missing will be 'best'.
+
+**-p / --parts**
+Only download playlist.m3u8, metadata.txt and .ts parts to cache folder, and exit. Overrides '-k', '-K', '-o'.
+
+**-K / --cache**
+Keep entire cache folder. Overrides '-k'.
+
+**-k / --cache-noparts**
+Keep cache folder except .ts parts. Merged 'output.ts' is not considered a part.
+
+**-F / --skip-storagecheck**
+Skip checking for free storage space.
 
 **-b / --beginning**
-Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time in seconds where the crop of the ID begins. May break first GOP. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e / --ending**
-Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time in seconds where the crop of the ID ends. May break last GOP. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
 
+**--tbn**
+Set specific TBN (time base in AVStream) for output.
+
 **-t / --threads**
-(Default: `4`) Number of download threads.
+(Default: `4`) Number of simultaneous download threads.
 
 **--bandwidth**
 (Default: `-1`) The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
 
-**--oauth**
+**-a / --oauth**
 OAuth access token to download subscriber only VODs. <ins>**DO NOT SHARE YOUR OAUTH TOKEN WITH ANYONE.**</ins>
 
 **--ffmpeg-path**
 Path to FFmpeg executable.
 
-**--temp-path**
-Path to temporary folder for cache.
+**-c / --temp-path**
+Set custom path to temp/cache folder instead of provided by system. Recommended for '-k', '-K', '-p'.
 
 **--banner**
 (Default: `true`) Displays a banner containing version and copyright information.
@@ -71,6 +96,9 @@ The quality the program will attempt to download, for example "1080p60", if not 
 
 **--encode-metadata**
 (Default: `true`) Uses FFmpeg to add metadata to the clip output file.
+
+**--tbn**
+Set specific TBN (time base in AVStream) for output.
 
 **--ffmpeg-path**
 Path to FFmpeg executable.
@@ -94,10 +122,10 @@ File the program will output to. File extension will be used to determine downlo
 (Default: `None`) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-b / --beginning**
-Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time in seconds where the crop begins. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e / --ending**
-Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time in seconds where the crop ends. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 **-E / --embed-images**
 (Default: `false`) Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.
@@ -145,10 +173,10 @@ Path to output file. File extension will be used to determine new chat type. Val
 (Default: `false`) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
 
 **b / --beginning**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time in seconds where the chat begins. Comments may be added but not removed. -1 = No crop.
 
 **-e / --ending**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time in seconds where chat ends. Comments may be added but not removed. -1 = No crop.
 
 **--bttv**
 (Default: `true`) Enable embedding BTTV emotes.
@@ -193,10 +221,10 @@ File the program will output to.
 (Default: `600`) Height of chat render.
 
 **-b / --beginning**
-(Default: `-1`) Time in seconds to crop the beginning of the render.
+(Default: `-1`) Time in seconds where the crop begins.
 
 **-e / --ending**
-(Default: `-1`) Time in seconds to crop the ending of the render.
+(Default: `-1`) Time in seconds where the crop ends.
 
 **--bttv**
 (Default: `true`) Enable BTTV emotes.
@@ -354,6 +382,9 @@ Path a text file containing the absolute paths of the files to concatenate, sepa
 **-o / --output (REQUIRED)**
 File the program will output to.
 
+**-f / --ignore-missing**
+(Default: `false`) Ignore missing files listed inside input. Useful when the stream was trimmed.
+
 **--banner**
 (Default: `true`) Displays a banner containing version and copyright information.
 
@@ -423,8 +454,9 @@ Print the available options for the VOD downloader
 ---
 
 ## Additional Notes
+#### General
 
-All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303` or `--id https://twitch.tv/videos/612942303`.
+All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303`, `--id https://twitch.tv/videos/612942303` or `--id https://www.twitch.tv/videos/799499623?filter=all&sort=views`.
 
 String arguments that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd>. i.e. `--output 'my output file.mp4'` or `--output "my output file.mp4"`
 
@@ -434,5 +466,43 @@ For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `a
 
 Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
 
+When cropping, the part of the file to be retained is the one after the crop starts and before the crop ends. The rest is discarded. So in this context 'crop' means 'crop in', while in others could mean 'crop out' and that's the opposite.
+
+The location of the `temp`, `temporary` or `cache` folder, is automatically assigned by the operating system by default. In some operating systems can be difficult or impossible to access by a program different than `TwitchDownloader`, if it's in a private or encrypted area, or if the permissions are limited. Also could cause excessive wear of the internal flash storage. This is why it's recommended to manually set it to a specific place.
+
 The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
 Alternatively, the list file may also be an M3U8 playlist file.
+
+The `Quality` keywords available for the `videodownload` mode are:
+
+- best, source, chunked
+- 1080, 1080p, 1080p60, 1920x1080, 1920x1080p, 1920x1080p60
+- 900, 900p, 900p60, 1600x900, 1600x900p, 1600x900p60
+- 720, 720p, 720p60, 1280x720, 1280x720p, 1280x720p60
+- 480, 480p, 480p60, 640x480, 640x480p, 640x480p60
+- 360, 360p, 360p60, 480x360, 480x360p, 480x360p60
+- 160, 160p, 160p60, 284x160, 284x160p, 284x160p60
+- 144, 144p, 144p60. 256x144, 256x144p, 256x144p60
+- worst
+- audio
+
+The framerate is detected based on the resolution, which is prioritized. If the framerate (like 30, 50, 60, 120 or any other) is manually set, will look for a stream that matches the provided parameters. If that stream does not exist, will default to best.
+The audio stream is also the same audio stream for all video tracks. Twitch does not allow different audio tracks with different qualities for the same VOD ID. But there are different audio qualities to choose from before starting the stream.
+
+#### Trimming and chapters
+
+The mode `videodownload` has the options `-b` and `-e` to trim the output file at the beginning and/or at the end. The values are in whole seconds and relative to the full ID duration. The mode `clipdownload` doesn't have these options.
+
+This trim splits the compressed video outside of I-frames (in copy mode) most of the time, and doesn't recode the affected GOPs, for the sake of speed and simplicity. Twitch streams don't always have I-frames placed at whole second marks (can be like 2.9899 seconds). Sometimes the GOPs can be spaced more than 10 seconds from each other, but usually it's 1.5-2.
+
+As a result of this, the GOP at the beginning and/or the end will be split, leaving that part of it unplayable, until the next I-frame (Intra-Frame or key-Frame) is reached. The audio is not affected, either if it is alone or with video.
+
+This is because Twitch streams use the H.264 (AVC) codec, which is a consumer-only video format designed for efficiency.
+
+So when it's not cut by I-frame, although the audio and the video have the same duration, the playable video is less than the audio, and starts to play after the audio has been already reproducing for a while. Depending on the video player and its version:
+
+- If the output file is only .m4a there's no issue, plays from beginning to end.
+- Some video players play from the very start of the whole file, if at least one of the tracks is playable. They put a black frame on screen while the audio plays until everything is back in sync. `Quick Look` (Mac Spacebar Preview) does this. This is the most conversative approach and it's when people realize their video is broken.
+- Other video players start playing from the timestamp when all tracks can be decoded properly, so they wait until the video can be played, and skip that portion of audio. Some people may never know that there's more audio inside. Forcing to play audio only, like `mpv --no-video output.mp4`, forces to play the entire audio stream.
+
+To avoid losing video content, trim the beginning earlier, and the end later, so all the desired content falls into full GOPs. Chapters are not adjusted relative to trimmed file, `ffmpeg` can't do that automatically.
