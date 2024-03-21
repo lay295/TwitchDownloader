@@ -1,8 +1,9 @@
-﻿namespace TwitchDownloaderCore
+namespace TwitchDownloaderCore
 {
     public enum ReportType
     {
         Log,
+        LogWithoutNewlineFirst,
         Percent,
         NewLineStatus,
         SameLineStatus,
