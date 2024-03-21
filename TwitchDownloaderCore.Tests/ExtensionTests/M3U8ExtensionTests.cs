@@ -21,6 +21,9 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
         [InlineData("1920x1080p", "1080p60")]
         [InlineData("1920x1080p60", "1080p60")]
         [InlineData("Source", "1080p60")]
+        [InlineData("chunked", "1080p60")]
+        [InlineData("Best", "1080p60")]
+        [InlineData("Worst", "720p30")]
         public static void CorrectlyFindsStreamOfQualityFromLiveM3U8Response(string qualityString, string expectedPath)
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), new[]
@@ -61,6 +64,10 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
         [InlineData("audio", "audio_only")]
         [InlineData("Audio", "audio_only")]
         [InlineData("Audio Only", "audio_only")]
+        [InlineData("Source", "1080p60")]
+        [InlineData("chunked", "1080p60")]
+        [InlineData("Best", "1080p60")]
+        [InlineData("Worst", "144p30")]
         public static void CorrectlyFindsStreamOfQualityFromOldM3U8Response(string qualityString, string expectedPath)
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), new[]
@@ -105,6 +112,10 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
         [InlineData("1080p60", "1080p60")]
         [InlineData("720p60", "720p60")]
         [InlineData("foo", "1080p60")]
+        [InlineData("Source", "1080p60")]
+        [InlineData("chunked", "1080p60")]
+        [InlineData("Best", "1080p60")]
+        [InlineData("Worst", "720p60")]
         public static void CorrectlyFindsStreamOfQualityFromM3U8ResponseWithoutFramerate(string qualityString, string expectedPath)
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), new[]
