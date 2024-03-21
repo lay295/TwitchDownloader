@@ -25,6 +25,8 @@ namespace TwitchDownloaderCore
         private readonly IProgress<ProgressReport> _progress;
         private bool _shouldClearCache = true;
 
+        private const string TOTAL_STEPS = "6";
+
         public VideoDownloader(VideoDownloadOptions videoDownloadOptions, IProgress<ProgressReport> progress)
         {
             downloadOptions = videoDownloadOptions;
@@ -42,7 +44,7 @@ namespace TwitchDownloaderCore
                 downloadOptions.TempFolder,
                 $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}");
 
-            _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Fetching Video Info [1/5]"));
+            _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Fetching Video Info [1/{TOTAL_STEPS}]"));
 
             try
             {
@@ -70,19 +72,28 @@ namespace TwitchDownloaderCore
                     Directory.Delete(downloadFolder, true);
                 TwitchHelper.CreateDirectory(downloadFolder);
 
-                _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading 0% [2/5]"));
+                _progress.Report(new ProgressReport(ReportType.NewLineStatus, $"Downloading 0% [2/{TOTAL_STEPS}]"));
 
                 await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
 
-                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Verifying Parts 0% [3/5]" });
+                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = $"Verifying Parts 0% [3/{TOTAL_STEPS}]" });
 
                 await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
 
-                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Combining Parts 0% [4/5]" });
+
+                string captionsPath = null;
+                if (downloadOptions.Captions != CaptionsStyle.None)
+                {
+                    _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = $"Extracting captions 0% [4/{TOTAL_STEPS}]" });
+
+                    captionsPath = await ExtractCaptions(playlist.Streams, videoListCrop, downloadFolder, cancellationToken);
+                }
+
+                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = $"Combining Parts 0% [5/{TOTAL_STEPS}]" });
 
                 await CombineVideoParts(downloadFolder, playlist.Streams, videoListCrop, cancellationToken);
 
-                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Finalizing Video 0% [5/5]" });
+                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = $"Finalizing Video 0% [6/{TOTAL_STEPS}]" });
 
                 var startOffsetSeconds = (double)playlist.Streams
                     .Take(videoListCrop.Start.Value)
@@ -106,7 +117,7 @@ namespace TwitchDownloaderCore
                 var ffmpegRetries = 0;
                 do
                 {
-                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, metadataPath, startOffsetSeconds, seekDuration), cancellationToken);
+                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, metadataPath, captionsPath, startOffsetSeconds, seekDuration), cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
                         _progress.Report(new ProgressReport(ReportType.Log, $"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds..."));
@@ -120,7 +131,7 @@ namespace TwitchDownloaderCore
                     throw new Exception($"Failed to finalize video. The download cache has not been cleared and can be found at {downloadFolder} along with a log file.");
                 }
 
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video 100% [5/5]"));
+                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video 100% [6/{TOTAL_STEPS}]"));
                 _progress.Report(new ProgressReport(100));
             }
             finally
@@ -247,7 +258,7 @@ namespace TwitchDownloaderCore
                 {
                     previousDoneCount = videoPartsQueue.Count;
                     var percent = (int)((partCount - previousDoneCount) / (double)partCount * 100);
-                    _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading {percent}% [2/5]"));
+                    _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading {percent}% [2/{TOTAL_STEPS}]"));
                     _progress.Report(new ProgressReport(percent));
                 }
 
@@ -337,7 +348,7 @@ namespace TwitchDownloaderCore
 
                 doneCount++;
                 var percent = (int)(doneCount / (double)partCount * 100);
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Verifying Parts {percent}% [3/5]"));
+                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Verifying Parts {percent}% [3/{TOTAL_STEPS}]"));
                 _progress.Report(new ProgressReport(percent));
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -382,7 +393,45 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private int RunFfmpegVideoCopy(string downloadFolder, string metadataPath, double startOffset, double seekDuration)
+        private async Task<string> ExtractCaptions(ICollection<M3U8.Stream> playlist, Range videoListCrop, string downloadFolder, CancellationToken cancellationToken)
+        {
+            var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
+            var doneCount = 0;
+            var captionFilePath = Path.Combine(downloadFolder, "captions.srt");
+            await using var finalCaptionFile = new FileStream(captionFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+
+            foreach (var videoPart in playlist)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var videoPartPath = Path.Combine(downloadFolder, RemoveQueryString(videoPart.Path));
+                var videoPartCaptionPath = $"{videoPartPath}.srt";
+                // TODO: Implement custom caption scanner instead of using FFmpeg. FFmpeg is so slow :/
+                var process = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = downloadOptions.FfmpegPath,
+                        Arguments = $"-y -f lavfi -loglevel quiet -i movie={videoPartPath}[out+subcc] -map 0:1 {videoPartCaptionPath}",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    }
+                };
+                process.Start();
+                await process.WaitForExitAsync(cancellationToken);
+
+                // TODO: renumber/re-time caption segments, then write to finalCaptionFile
+
+                doneCount++;
+                var percent = (int)(doneCount / (double)partCount * 100);
+                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Extracting Captions {percent}% [4/{TOTAL_STEPS}]"));
+                _progress.Report(new ProgressReport(percent));
+            }
+
+            return captionFilePath;
+        }
+
+        private int RunFfmpegVideoCopy(string downloadFolder, string metadataPath, string captionsPath, double startOffset, double seekDuration)
         {
             var process = new Process
             {
@@ -678,7 +727,7 @@ namespace TwitchDownloaderCore
 
                 doneCount++;
                 int percent = (int)(doneCount / (double)partCount * 100);
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Combining Parts {percent}% [4/5]"));
+                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Combining Parts {percent}% [5/{TOTAL_STEPS}]"));
                 _progress.Report(new ProgressReport(percent));
 
                 cancellationToken.ThrowIfCancellationRequested();

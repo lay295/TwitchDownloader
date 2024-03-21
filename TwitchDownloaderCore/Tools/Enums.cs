@@ -21,4 +21,11 @@
         None,
         UtcFull
     }
+
+    public enum CaptionsStyle
+    {
+        None,
+        Embedded,
+        SeparateSrt
+    }
 }
