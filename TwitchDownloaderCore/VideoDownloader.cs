@@ -430,7 +430,9 @@ namespace TwitchDownloaderCore
             return process.ExitCode;
         }
 
-        private static void HandleFfmpegOutput(string output, Regex encodingTimeRegex, double videoLength, IProgress<ProgressReport> progress)
+        private bool _reportedPercentIssue;
+
+        private void HandleFfmpegOutput(string output, Regex encodingTimeRegex, double videoLength, IProgress<ProgressReport> progress)
         {
             var encodingTimeMatch = encodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
@@ -445,17 +447,18 @@ namespace TwitchDownloaderCore
 
             var percent = (int)Math.Round(encodingTime.TotalSeconds / videoLength * 100);
 
-            // Apparently it is possible for the percent to not be within the range of 0-100. lay295#716
-            if (percent is < 0 or > 100)
+            if (percent is < 0 or > 100 && !_reportedPercentIssue)
             {
-                progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video... [5/5]"));
-                progress.Report(new ProgressReport(0));
+                _reportedPercentIssue = true;
+
+                // This should no longer occur, but just in case it does...
+                progress.Report(new ProgressReport(ReportType.Log,
+                    $"{nameof(percent)} was < 0 or > 100 ({percent}). {nameof(output)}: '{output}'. {nameof(videoLength)}: '{videoLength}'. {nameof(encodingTime)}: '{encodingTime}'. " +
+                    $"Please report this as a bug: https://github.com/lay295/TwitchDownloader/issues/new/choose"));
             }
-            else
-            {
-                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [5/5]"));
-                progress.Report(new ProgressReport(percent));
-            }
+
+            progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [5/5]"));
+            progress.Report(new ProgressReport(percent));
         }
 
         /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
