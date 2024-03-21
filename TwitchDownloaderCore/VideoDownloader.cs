@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,6 +24,10 @@ namespace TwitchDownloaderCore
         private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
         private readonly IProgress<ProgressReport> _progress;
         private bool _shouldClearCache = true;
+        private readonly bool _shouldGenerateOutputFile = false;
+        private readonly bool _shouldSkipStorageCheck = false;
+        private readonly bool _shouldDownloadOnlyTsParts = false;
+        private readonly short _totalProgressSteps = 0;
 
         public VideoDownloader(VideoDownloadOptions videoDownloadOptions, IProgress<ProgressReport> progress)
         {
@@ -32,6 +36,23 @@ namespace TwitchDownloaderCore
                 string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
                 "TwitchDownloader");
             _progress = progress;
+            _shouldGenerateOutputFile = !string.IsNullOrWhiteSpace(downloadOptions.Filename);
+            _shouldSkipStorageCheck = downloadOptions.SkipStorageCheck;
+            _shouldDownloadOnlyTsParts = downloadOptions.TsPartsOnly;
+            _shouldClearCache = !_shouldDownloadOnlyTsParts && !(downloadOptions.KeepCacheNoParts || downloadOptions.KeepCache);
+
+            if (_shouldDownloadOnlyTsParts)
+            {
+                _totalProgressSteps = 3;
+            }
+            else if (!_shouldGenerateOutputFile)
+            {
+                _totalProgressSteps = 4;
+            }
+            else
+            {
+                _totalProgressSteps = 5;
+            }
         }
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
@@ -42,7 +63,7 @@ namespace TwitchDownloaderCore
                 downloadOptions.TempFolder,
                 $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}");
 
-            _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Fetching Video Info [1/5]"));
+            _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Fetching Video Info [1/{_totalProgressSteps}]"));
 
             try
             {
@@ -62,27 +83,17 @@ namespace TwitchDownloaderCore
                 var baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
 
                 var videoLength = TimeSpan.FromSeconds(videoInfoResponse.data.video.lengthSeconds);
-                CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
 
-                var (playlist, videoListCrop, vodAge) = await GetVideoPlaylist(playlistUrl, cancellationToken);
+                if (!_shouldSkipStorageCheck)
+                {
+                    CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
+                }
+
+                var (playlist, videoListCrop, vodAge, playlistString) = await GetVideoPlaylist(playlistUrl, cancellationToken);
 
                 if (Directory.Exists(downloadFolder))
                     Directory.Delete(downloadFolder, true);
                 TwitchHelper.CreateDirectory(downloadFolder);
-
-                _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading 0% [2/5]"));
-
-                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
-
-                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Verifying Parts 0% [3/5]" });
-
-                await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
-
-                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Combining Parts 0% [4/5]" });
-
-                await CombineVideoParts(downloadFolder, playlist.Streams, videoListCrop, cancellationToken);
-
-                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Finalizing Video 0% [5/5]" });
 
                 var startOffsetSeconds = (double)playlist.Streams
                     .Take(videoListCrop.Start.Value)
@@ -91,37 +102,62 @@ namespace TwitchDownloaderCore
                 startOffsetSeconds = downloadOptions.CropBeginningTime - startOffsetSeconds;
                 double seekDuration = Math.Round(downloadOptions.CropEndingTime - downloadOptions.CropBeginningTime);
 
+                string playlistFilePath = Path.Combine(downloadFolder, "playlist.m3u8");
+                await File.WriteAllTextAsync(playlistFilePath, playlistString, cancellationToken);
+
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 VideoInfo videoInfo = videoInfoResponse.data.video;
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
                     videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), downloadOptions.CropBeginningTime, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
-                var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
-                if (!finalizedFileDirectory.Exists)
+                _progress.Report(new ProgressReport(ReportType.NewLineStatus, $"Downloading 0% [2/{_totalProgressSteps}]"));
+
+                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
+
+                _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = $"Verifying Parts 0% [3/{_totalProgressSteps}]" });
+
+                await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
+
+                if (!_shouldDownloadOnlyTsParts)
                 {
-                    TwitchHelper.CreateDirectory(finalizedFileDirectory.FullName);
+                    _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = $"Combining Parts 0% [4/{_totalProgressSteps}]" });
+
+                    await CombineVideoParts(downloadFolder, playlist.Streams, videoListCrop, cancellationToken);
                 }
 
-                int ffmpegExitCode;
-                var ffmpegRetries = 0;
-                do
+                if (_shouldGenerateOutputFile && !_shouldDownloadOnlyTsParts)
                 {
-                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, metadataPath, startOffsetSeconds, seekDuration), cancellationToken);
-                    if (ffmpegExitCode != 0)
+                    _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = $"Finalizing Video 0% [5/{_totalProgressSteps}]" });
+
+                    var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
+                    if (!finalizedFileDirectory.Exists)
                     {
-                        _progress.Report(new ProgressReport(ReportType.Log, $"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds..."));
-                        await Task.Delay(10_000, cancellationToken);
+                        TwitchHelper.CreateDirectory(finalizedFileDirectory.FullName);
                     }
-                } while (ffmpegExitCode != 0 && ffmpegRetries++ < 1);
 
-                if (ffmpegExitCode != 0 || !File.Exists(downloadOptions.Filename))
-                {
-                    _shouldClearCache = false;
-                    throw new Exception($"Failed to finalize video. The download cache has not been cleared and can be found at {downloadFolder} along with a log file.");
+                    int ffmpegExitCode;
+                    var ffmpegRetries = 0;
+                    do
+                    {
+                        ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, metadataPath, startOffsetSeconds, seekDuration), cancellationToken);
+                        if (ffmpegExitCode != 0)
+                        {
+                            _progress.Report(new ProgressReport(ReportType.Log, $"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds..."));
+                            await Task.Delay(10_000, cancellationToken);
+                        }
+                    } while (ffmpegExitCode != 0 && ffmpegRetries++ < 1);
+
+                    if (ffmpegExitCode != 0 || !File.Exists(downloadOptions.Filename))
+                    {
+                        _shouldClearCache = false;
+                        throw new Exception($"Failed to finalize video. The download cache has not been cleared and can be found at {downloadFolder} along with a log file.");
+                    }
+
+                    _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video 100% [5/{_totalProgressSteps}]"));
+                    _progress.Report(new ProgressReport(100));
                 }
 
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video 100% [5/5]"));
-                _progress.Report(new ProgressReport(100));
+                Console.WriteLine();
             }
             finally
             {
@@ -134,30 +170,87 @@ namespace TwitchDownloaderCore
 
         private void CheckAvailableStorageSpace(int bandwidth, TimeSpan videoLength)
         {
+            /*
+            Real size of output.ts is higher than videoSizeInBytes the smaller is the duration and the crop percentage,
+            but it's at least 100% of it (above 2.5 hours of duration can be considered the same size).
+            Real size of output.mp4 is generally 98% of videoSizeInBytes but can be up to 105% for 1 second crop.
+            Percentages for output.m4a can be different.
+
+            The sum of parts.ts always has the same size as output.ts
+            videoSizeInBytes is the reference for calculations (100%)
+
+            Case 1 (crop 100%, no crop):
+            videoSizeInBytes    226785953
+            output.ts           227712744; 227712744/226785953=1.00408663318   ~101%
+            output.mp4          220774770; 220774770/226785953=0.973494024121  ~98%
+            Duration:           3:51
+
+            Case 2 (crop 100%, no crop):
+            videoSizeInBytes    6928957075
+            output.ts           6928318880; 6928318880/6928957075=0.999907894508    ~100%
+            output.mp4          6650715123; 6650715123/6928957075=0.95984360287     ~96%
+            Duration:           2:24:10
+
+            Case 3 (crop 71%):
+            71% of 231 seconds = 164 seconds. To remove 67 seconds.
+            videoSizeInBytes    161008209;
+            output.ts           170569956; 170569956/161008209=1.05938670494    ~106%
+            output.mp4          156901116; 156901116/161008209=0.974491406211   ~98%
+            Duration:           2:44
+
+            Case 4 (crop 71%):
+            71% of 8650 seconds = 6142 seconds. To remove 2508 seconds.
+            videoSizeInBytes    4919960041
+            output.ts           4934806360; 4934806360/4919960041=1.00301756902     ~101%
+            output.mp4          4723516881; 4723516881/4919960041=0.960072204172    ~97%
+            Duration:           1:42:22
+
+            Case 5 (crop 1 second):
+            videoSizeInBytes    981757
+            output.ts           9863608; 9863608/981757=10.0468934777   ~1005%
+            output.mp4          1022497; 1022497/981757=1.04149703032   ~105%
+            Duration:           1
+             */
+
             var videoSizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth,
                 downloadOptions.CropBeginning ? TimeSpan.FromSeconds(downloadOptions.CropBeginningTime) : TimeSpan.Zero,
                 downloadOptions.CropEnding ? TimeSpan.FromSeconds(downloadOptions.CropEndingTime) : videoLength);
-            var tempFolderDrive = DriveHelper.GetOutputDrive(downloadOptions.TempFolder);
-            var destinationDrive = DriveHelper.GetOutputDrive(downloadOptions.Filename);
 
-            if (tempFolderDrive.Name == destinationDrive.Name)
+            DriveInfo tempFolderDrive = DriveHelper.GetOutputDrive(downloadOptions.TempFolder);
+            DriveInfo destinationDrive = _shouldGenerateOutputFile ? DriveHelper.GetOutputDrive(downloadOptions.Filename) : null;
+            long requiredSpaceOnTempDrive = videoSizeInBytes;
+            long requiredSpaceOnDestinationDrive = 0;
+
+            if (!_shouldDownloadOnlyTsParts)
             {
-                if (tempFolderDrive.AvailableFreeSpace < videoSizeInBytes * 2)
+                if (downloadOptions.KeepCache)
                 {
-                    _progress.Report(new ProgressReport(ReportType.Log, $"The drive '{tempFolderDrive.Name}' may not have enough free space to complete the download."));
+                    requiredSpaceOnTempDrive += videoSizeInBytes;
+                }
+
+                if (_shouldGenerateOutputFile)
+                {
+                    requiredSpaceOnDestinationDrive = videoSizeInBytes;
+
+                    if (tempFolderDrive.Name == destinationDrive?.Name)
+                    {
+                        requiredSpaceOnTempDrive += requiredSpaceOnDestinationDrive;
+                        requiredSpaceOnDestinationDrive = 0;
+                    }
                 }
             }
-            else
-            {
-                if (tempFolderDrive.AvailableFreeSpace < videoSizeInBytes)
-                {
-                    // More drive space is needed by the raw ts files due to repeat metadata, but the amount of metadata packets can vary between files so we won't bother.
-                    _progress.Report(new ProgressReport(ReportType.Log, $"The drive '{tempFolderDrive.Name}' may not have enough free space to complete the download."));
-                }
 
-                if (destinationDrive.AvailableFreeSpace < videoSizeInBytes)
+            if (tempFolderDrive.AvailableFreeSpace < requiredSpaceOnTempDrive)
+            {
+                // More drive space is needed by the raw ts files due to repeat metadata, but the amount of metadata packets can vary between files so we won't bother.
+                _progress.Report(new ProgressReport(ReportType.Log, $"Insufficient space on temp drive '{tempFolderDrive.Name}'. Required: {requiredSpaceOnTempDrive / (1024.0 * 1024.0):F2} MB."));
+            }
+
+            if (requiredSpaceOnDestinationDrive > 0 && destinationDrive != null)
+            {
+                if (destinationDrive.AvailableFreeSpace < requiredSpaceOnDestinationDrive)
                 {
-                    _progress.Report(new ProgressReport(ReportType.Log, $"The drive '{destinationDrive.Name}' may not have enough free space to complete finalization."));
+                    _progress.Report(new ProgressReport(ReportType.Log, $"Insufficient space on destination drive '{destinationDrive.Name}'. Required: {requiredSpaceOnDestinationDrive / (1024.0 * 1024.0):F2} MB."));
                 }
             }
         }
@@ -247,7 +340,7 @@ namespace TwitchDownloaderCore
                 {
                     previousDoneCount = videoPartsQueue.Count;
                     var percent = (int)((partCount - previousDoneCount) / (double)partCount * 100);
-                    _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading {percent}% [2/5]"));
+                    _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading {percent}% [2/{_totalProgressSteps}]"));
                     _progress.Report(new ProgressReport(percent));
                 }
 
@@ -337,7 +430,7 @@ namespace TwitchDownloaderCore
 
                 doneCount++;
                 var percent = (int)(doneCount / (double)partCount * 100);
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Verifying Parts {percent}% [3/5]"));
+                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Verifying Parts {percent}% [3/{_totalProgressSteps}]"));
                 _progress.Report(new ProgressReport(percent));
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -390,7 +483,7 @@ namespace TwitchDownloaderCore
                 {
                     FileName = downloadOptions.FfmpegPath,
                     Arguments = string.Format(
-                        "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i \"{1}\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.CropEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"",
+                        "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i \"{1}\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.CropEnding ? "-t {4} " : "") + (downloadOptions.SetTbn ? $"-video_track_timescale {downloadOptions.SetTbnValue} " : "") + "-c:v copy \"{5}\"",
                         Path.Combine(downloadFolder, "output.ts"), metadataPath, startOffset.ToString(CultureInfo.InvariantCulture), int.MaxValue, seekDuration.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -410,7 +503,7 @@ namespace TwitchDownloaderCore
 
                 logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
-                HandleFfmpegOutput(e.Data, encodingTimeRegex, seekDuration, _progress);
+                HandleFfmpegOutput(e.Data, encodingTimeRegex, seekDuration, _progress, _totalProgressSteps);
             };
 
             process.Start();
@@ -429,7 +522,7 @@ namespace TwitchDownloaderCore
             return process.ExitCode;
         }
 
-        private static void HandleFfmpegOutput(string output, Regex encodingTimeRegex, double videoLength, IProgress<ProgressReport> progress)
+        private static void HandleFfmpegOutput(string output, Regex encodingTimeRegex, double videoLength, IProgress<ProgressReport> progress, short totalProgressSteps)
         {
             var encodingTimeMatch = encodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
@@ -447,12 +540,12 @@ namespace TwitchDownloaderCore
             // Apparently it is possible for the percent to not be within the range of 0-100. lay295#716
             if (percent is < 0 or > 100)
             {
-                progress.Report(new ProgressReport(ReportType.SameLineStatus, "Finalizing Video... [5/5]"));
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video... [5/{totalProgressSteps}]"));
                 progress.Report(new ProgressReport(0));
             }
             else
             {
-                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [5/5]"));
+                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Finalizing Video {percent}% [5/{totalProgressSteps}]"));
                 progress.Report(new ProgressReport(percent));
             }
         }
@@ -507,7 +600,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<(M3U8 playlist, Range cropRange, double vodAge)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
+        private async Task<(M3U8 playlist, Range cropRange, double vodAge, string playlistString)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
             var playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
             var playlist = M3U8.Parse(playlistString);
@@ -521,7 +614,7 @@ namespace TwitchDownloaderCore
 
             var videoListCrop = GetStreamListCrop(playlist.Streams, downloadOptions);
 
-            return (playlist, videoListCrop, vodAge);
+            return (playlist, videoListCrop, vodAge, playlistString);
         }
 
         private static Range GetStreamListCrop(IList<M3U8.Stream> streamList, VideoDownloadOptions downloadOptions)
@@ -669,16 +762,19 @@ namespace TwitchDownloaderCore
                         await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
                     }
 
-                    try
+                    if (!_shouldDownloadOnlyTsParts && !downloadOptions.KeepCache && downloadOptions.KeepCacheNoParts)
                     {
-                        File.Delete(partFile);
+                        try
+                        {
+                            File.Delete(partFile);
+                        }
+                        catch { /* If we can't delete, oh well. It could get cleanup up later anyways */ }
                     }
-                    catch { /* If we can't delete, oh well. It should get cleanup up later anyways */ }
                 }
 
                 doneCount++;
                 int percent = (int)(doneCount / (double)partCount * 100);
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Combining Parts {percent}% [4/5]"));
+                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Combining Parts {percent}% [4/{_totalProgressSteps}]"));
                 _progress.Report(new ProgressReport(percent));
 
                 cancellationToken.ThrowIfCancellationRequested();
