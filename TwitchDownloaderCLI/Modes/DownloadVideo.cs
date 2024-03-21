@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
@@ -47,36 +47,53 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            if (!Path.HasExtension(inputOptions.OutputFile) && inputOptions.Quality is { Length: > 0 })
-            {
-                if (inputOptions.Quality.Contains("audio", StringComparison.OrdinalIgnoreCase))
-                    inputOptions.OutputFile += ".m4a";
-                else if (char.IsDigit(inputOptions.Quality[0])
-                         || inputOptions.Quality.Contains("source", StringComparison.OrdinalIgnoreCase)
-                         || inputOptions.Quality.Contains("chunked", StringComparison.OrdinalIgnoreCase))
-                    inputOptions.OutputFile += ".mp4";
-            }
-
             VideoDownloadOptions downloadOptions = new()
             {
                 DownloadThreads = inputOptions.DownloadThreads,
                 ThrottleKib = inputOptions.ThrottleKib,
                 Id = int.Parse(vodIdMatch.ValueSpan),
                 Oauth = inputOptions.Oauth,
-                Filename = inputOptions.OutputFile,
-                Quality = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
-                {
-                    ".mp4" => inputOptions.Quality,
-                    ".m4a" => "Audio",
-                    _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
-                },
+                TsPartsOnly = inputOptions.TsPartsOnly,
+                KeepCache = inputOptions.KeepCache,
+                KeepCacheNoParts = inputOptions.KeepCacheNoParts,
+                SkipStorageCheck = inputOptions.SkipStorageCheck,
                 CropBeginning = inputOptions.CropBeginningTime > 0.0,
                 CropBeginningTime = inputOptions.CropBeginningTime,
                 CropEnding = inputOptions.CropEndingTime > 0.0,
                 CropEndingTime = inputOptions.CropEndingTime,
+                SetTbn = inputOptions.SetTbnValue > 0.0,
+                SetTbnValue = inputOptions.SetTbnValue,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder
             };
+
+            if (!string.IsNullOrWhiteSpace(inputOptions.OutputFile))
+            {
+                if (!Path.HasExtension(inputOptions.OutputFile) && inputOptions.Quality is { Length: > 0 })
+                {
+                    if (inputOptions.Quality.Contains("audio", StringComparison.OrdinalIgnoreCase))
+                        inputOptions.OutputFile += ".m4a";
+                    else if (char.IsDigit(inputOptions.Quality[0])
+                             || inputOptions.Quality.Contains("source", StringComparison.OrdinalIgnoreCase)
+                             || inputOptions.Quality.Contains("chunked", StringComparison.OrdinalIgnoreCase))
+                        inputOptions.OutputFile += ".mp4";
+                }
+
+                downloadOptions.Filename = inputOptions.OutputFile;
+
+                downloadOptions.Quality = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
+                {
+                    ".mp4" => inputOptions.Quality,
+                    ".m4a" => "Audio",
+                    _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
+                };
+            }
+            else if (string.IsNullOrWhiteSpace(inputOptions.Quality))
+                downloadOptions.Quality = "best";
+            else if (inputOptions.Quality.Contains("audio", StringComparison.OrdinalIgnoreCase))
+                downloadOptions.Quality = "Audio";
+            else
+                downloadOptions.Quality = inputOptions.Quality;
 
             return downloadOptions;
         }
