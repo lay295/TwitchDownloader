@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -26,7 +26,8 @@ namespace TwitchDownloaderCLI.Modes
             TsMergeOptions mergeOptions = new()
             {
                 OutputFile = inputOptions.OutputFile,
-                InputFile = inputOptions.InputList
+                InputFile = inputOptions.InputList,
+                IgnoreMissingParts = inputOptions.IgnoreMissingParts
             };
 
             return mergeOptions;
