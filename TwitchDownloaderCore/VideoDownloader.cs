@@ -107,7 +107,7 @@ namespace TwitchDownloaderCore
                 var ffmpegRetries = 0;
                 do
                 {
-                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, metadataPath, startOffsetSeconds, seekDuration), cancellationToken);
+                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, metadataPath, startOffsetSeconds, seekDuration, videoLength.TotalSeconds), cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
                         _progress.Report(new ProgressReport(ReportType.Log, $"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds..."));
@@ -383,7 +383,7 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private int RunFfmpegVideoCopy(string downloadFolder, string metadataPath, double startOffset, double seekDuration)
+        private int RunFfmpegVideoCopy(string downloadFolder, string metadataPath, double startOffset, double seekDuration, double videoLength)
         {
             var process = new Process
             {
@@ -411,7 +411,7 @@ namespace TwitchDownloaderCore
 
                 logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
-                HandleFfmpegOutput(e.Data, encodingTimeRegex, seekDuration, _progress);
+                HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength, _progress);
             };
 
             process.Start();
