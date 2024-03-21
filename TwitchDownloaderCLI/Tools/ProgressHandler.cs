@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using TwitchDownloaderCore;
 
 namespace TwitchDownloaderCLI.Tools
@@ -13,6 +13,9 @@ namespace TwitchDownloaderCLI.Tools
             {
                 case ReportType.Log:
                     ReportLog(e);
+                    break;
+                case ReportType.LogWithoutNewlineFirst:
+                    LogWithoutNewlineFirst(e);
                     break;
                 case ReportType.NewLineStatus:
                     ReportNewLineStatus(e);
@@ -31,6 +34,13 @@ namespace TwitchDownloaderCLI.Tools
             var currentStatus = Environment.NewLine + "[LOG] - " + e.Data + Environment.NewLine;
             _previousMessage = currentStatus;
             Console.Write(currentStatus);
+        }
+
+        private static void LogWithoutNewlineFirst(ProgressReport e)
+        {
+            var currentMessage = "[LOG] - " + e.Data;
+            Console.Write(currentMessage + Environment.NewLine);
+            _previousMessage = currentMessage;
         }
 
         private static void ReportNewLineStatus(ProgressReport e)

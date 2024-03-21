@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -26,26 +26,35 @@ namespace TwitchDownloaderCore
                 throw new FileNotFoundException("Input file does not exist");
             }
 
-            var isM3U8 = false;
             var fileList = new List<string>();
+            bool anyFilesMissing = false;
             await using (var fs = File.Open(mergeOptions.InputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 using var sr = new StreamReader(fs);
                 while (await sr.ReadLineAsync() is { } line)
                 {
-                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
 
-                    if (isM3U8)
+                    var lineFilePath = Path.IsPathRooted(line) ? line : Path.Combine(Path.GetDirectoryName(mergeOptions.InputFile), line);
+
+                    if (File.Exists(lineFilePath))
                     {
-                        if (line.StartsWith('#')) continue;
+                        fileList.Add(lineFilePath);
                     }
                     else
                     {
-                        if (line.StartsWith("#EXTM3U")) isM3U8 = true;
+                        anyFilesMissing = true;
+                        if (!mergeOptions.IgnoreMissingParts)
+                        {
+                            throw new FileNotFoundException($"File does not exist: {lineFilePath}");
+                        }
                     }
-
-                    fileList.Add(line);
                 }
+            }
+
+            if (anyFilesMissing && mergeOptions.IgnoreMissingParts)
+            {
+                _progress.Report(new ProgressReport(ReportType.LogWithoutNewlineFirst, "One or more files listed in the playlist do not exist and were skipped."));
             }
 
             _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Verifying Parts 0% [1/2]"));
@@ -57,6 +66,7 @@ namespace TwitchDownloaderCore
             await CombineVideoParts(fileList, cancellationToken);
 
             _progress.Report(new ProgressReport(100));
+            Console.WriteLine();
         }
 
         private async Task VerifyVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)

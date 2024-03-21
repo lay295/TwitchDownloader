@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
@@ -50,6 +50,8 @@ namespace TwitchDownloaderCLI.Modes
                 ThrottleKib = inputOptions.ThrottleKib,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 EncodeMetadata = inputOptions.EncodeMetadata!.Value,
+                SetTbn = inputOptions.SetTbnValue > 0.0,
+                SetTbnValue = inputOptions.SetTbnValue,
                 TempFolder = inputOptions.TempFolder
             };
 
