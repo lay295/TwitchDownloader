@@ -107,8 +107,9 @@ namespace TwitchDownloaderCore
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 VideoInfo videoInfo = videoInfoResponse.data.video;
+                var chaptersOffset = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0;
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
-                    videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), downloadOptions.CropBeginningTime, videoChapterResponse.data.video.moments.edges, cancellationToken);
+                    videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), chaptersOffset, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
                 _progress.Report(new ProgressReport(ReportType.NewLineStatus, $"Downloading 0% [2/{_totalProgressSteps}]"));
 
