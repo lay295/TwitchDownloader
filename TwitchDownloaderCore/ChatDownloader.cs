@@ -530,6 +530,8 @@ namespace TwitchDownloaderCore
                 default:
                     throw new NotSupportedException($"{downloadOptions.DownloadFormat} is not a supported output format.");
             }
+
+            Console.WriteLine();
         }
     }
 }
