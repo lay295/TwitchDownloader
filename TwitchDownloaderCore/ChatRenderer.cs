@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
@@ -38,7 +39,7 @@ namespace TwitchDownloaderCore
         // TODO: Use FrozenDictionary when .NET 8
         private static readonly IReadOnlyDictionary<int, string> AllEmojiSequences = Emoji.All.ToDictionary(e => e.SortOrder, e => e.Sequence.AsString);
 
-        private readonly IProgress<ProgressReport> _progress;
+        private readonly ITaskProgress _progress;
         private readonly ChatRenderOptions renderOptions;
         private List<ChatBadge> badgeList = new List<ChatBadge>();
         private List<TwitchEmote> emoteList = new List<TwitchEmote>();
@@ -53,7 +54,7 @@ namespace TwitchDownloaderCore
         private SKPaint outlinePaint;
         private readonly HighlightIcons highlightIcons;
 
-        public ChatRenderer(ChatRenderOptions chatRenderOptions, IProgress<ProgressReport> progress = null)
+        public ChatRenderer(ChatRenderOptions chatRenderOptions, ITaskProgress progress = null)
         {
             renderOptions = chatRenderOptions;
             renderOptions.TempFolder = Path.Combine(
@@ -67,7 +68,7 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
         {
-            _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Fetching Images [1/2]"));
+            _progress.SetStatus("Fetching Images [1/2]", false);
             await Task.Run(() => FetchScaledImages(cancellationToken), cancellationToken);
 
             if (renderOptions.DisperseCommentOffsets)
@@ -122,7 +123,7 @@ namespace TwitchDownloaderCore
 
             FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false);
             FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(0, true) : null;
-            _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Rendering Video: 0% [2/2]"));
+            _progress.SetStatus(@"Rendering Video {0}% ({1:h\hm\ms\s} Elapsed | {2:h\hm\ms\s} Remaining)", true);
 
             try
             {
@@ -289,21 +290,17 @@ namespace TwitchDownloaderCore
 
                 if (_progress != null && currentTick % 3 == 0)
                 {
-                    double percentDouble = (currentTick - startTick) / (double)(endTick - startTick) * 100.0;
-                    int percentInt = (int)percentDouble;
-                    _progress.Report(new ProgressReport(percentInt));
+                    var percent = (currentTick - startTick) / (double)(endTick - startTick) * 100;
+                    var elapsed = stopwatch.Elapsed.TotalSeconds;
 
-                    int timeLeftInt = (int)(100.0 / percentDouble * stopwatch.Elapsed.TotalSeconds) - (int)stopwatch.Elapsed.TotalSeconds;
-                    TimeSpan timeLeft = new TimeSpan(0, 0, timeLeftInt);
-                    TimeSpan timeElapsed = new TimeSpan(0, 0, (int)stopwatch.Elapsed.TotalSeconds);
-                    _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Rendering Video: {percentInt}% ({timeElapsed:h\\hm\\ms\\s} Elapsed | {timeLeft:h\\hm\\ms\\s} Remaining)"));
+                    var timeLeft = TimeSpan.FromSeconds((100 / percent * elapsed) - elapsed);
+                    _progress.ReportProgress((int)Math.Round(percent), elapsed, timeLeft);
                 }
             }
 
             stopwatch.Stop();
-            _progress?.Report(new ProgressReport(100));
-            _progress?.Report(new ProgressReport(ReportType.SameLineStatus, "Rendering Video: 100%"));
-            _progress?.Report(new ProgressReport(ReportType.Log, $"FINISHED. RENDER TIME: {stopwatch.Elapsed.TotalSeconds:F1}s SPEED: {(endTick - startTick) / (double)renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds:F2}x"));
+            _progress?.ReportProgress(100, stopwatch.Elapsed, TimeSpan.Zero);
+            _progress?.LogInfo($"FINISHED. RENDER TIME: {stopwatch.Elapsed.TotalSeconds:F1}s SPEED: {(endTick - startTick) / (double)renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds:F2}x");
 
             latestUpdate?.Image.Dispose();
 
@@ -391,7 +388,7 @@ namespace TwitchDownloaderCore
                 {
                     if (e.Data != null)
                     {
-                        _progress.Report(new ProgressReport() { ReportType = ReportType.FfmpegLog, Data = e.Data });
+                        _progress.LogFfmpeg(e.Data);
                     }
                 };
             }
@@ -1743,7 +1740,7 @@ namespace TwitchDownloaderCore
                 if (!noFallbackFontFound)
                 {
                     noFallbackFontFound = true;
-                    _progress?.Report(new ProgressReport(ReportType.Log, "No valid typefaces were found for some messages."));
+                    _progress?.LogWarning("No valid typefaces were found for some messages.");
                 }
             }
 

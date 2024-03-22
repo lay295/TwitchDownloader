@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Api;
@@ -814,7 +815,7 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
-        public static async Task CleanupAbandonedVideoCaches(string cacheFolder, Func<DirectoryInfo[], DirectoryInfo[]> itemsToDeleteCallback, IProgress<ProgressReport> progress)
+        public static async Task CleanupAbandonedVideoCaches(string cacheFolder, Func<DirectoryInfo[], DirectoryInfo[]> itemsToDeleteCallback, ITaskLogger logger)
         {
             if (!Directory.Exists(cacheFolder))
             {
@@ -863,9 +864,9 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            progress.Report(toDelete.Length == wasDeleted
-                ? new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted.")
-                : new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted, {toDelete.Length - wasDeleted} could not be deleted."));
+            logger.LogInfo(toDelete.Length == wasDeleted
+                ? $"{wasDeleted} old video caches were deleted."
+                : $"{wasDeleted} old video caches were deleted, {toDelete.Length - wasDeleted} could not be deleted.");
         }
 
         public static int TimestampToSeconds(string input)
