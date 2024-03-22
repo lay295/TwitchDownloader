@@ -20,6 +20,7 @@ using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -256,22 +257,6 @@ namespace TwitchDownloaderWPF
                 : qualityWithSize[..qualityIndex];
         }
 
-        private void OnProgressChanged(ProgressReport progress)
-        {
-            switch (progress.ReportType)
-            {
-                case ReportType.Percent:
-                    statusProgressBar.Value = (int)progress.Data;
-                    break;
-                case ReportType.NewLineStatus or ReportType.SameLineStatus:
-                    statusMessage.Text = (string)progress.Data;
-                    break;
-                case ReportType.Log:
-                    AppendLog((string)progress.Data);
-                    break;
-            }
-        }
-
         public void SetImage(string imageUri, bool isGif)
         {
             var image = new BitmapImage();
@@ -321,6 +306,20 @@ namespace TwitchDownloaderWPF
             }
 
             return true;
+        }
+
+        private void SetPercent(int percent)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusProgressBar.Value = percent
+            );
+        }
+
+        private void SetStatus(string message)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusMessage.Text = message
+            );
         }
 
         private void AppendLog(string message)
@@ -425,7 +424,7 @@ namespace TwitchDownloaderWPF
             VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
             options.CacheCleanerCallback = HandleCacheCleanerCallback;
 
-            Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
+            var downloadProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
             VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
             _cancellationTokenSource = new CancellationTokenSource();
 

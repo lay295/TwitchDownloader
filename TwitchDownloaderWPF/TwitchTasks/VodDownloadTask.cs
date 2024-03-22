@@ -1,24 +1,72 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderWPF.Utils;
 
 namespace TwitchDownloaderWPF.TwitchTasks
 {
     class VodDownloadTask : ITwitchTask
     {
         public TaskData Info { get; set; } = new TaskData();
-        public int Progress { get; set; }
-        public TwitchTaskStatus Status { get; private set; } = TwitchTaskStatus.Ready;
-        public VideoDownloadOptions DownloadOptions { get; set; }
+
+        private int _progress;
+        public int Progress
+        {
+            get => _progress;
+            set
+            {
+                if (value == _progress) return;
+                _progress = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private TwitchTaskStatus _status = TwitchTaskStatus.Ready;
+        public TwitchTaskStatus Status
+        {
+            get => _status;
+            private set
+            {
+                if (value == _status) return;
+                _status = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public VideoDownloadOptions DownloadOptions { get; init; }
         public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
         public ITwitchTask DependantTask { get; set; }
         public string TaskType { get; } = Translations.Strings.VodDownload;
-        public TwitchTaskException Exception { get; private set; } = new();
+
+        private TwitchTaskException _exception = new();
+        public TwitchTaskException Exception
+        {
+            get => _exception;
+            private set
+            {
+                if (Equals(value, _exception)) return;
+                _exception = value;
+                OnPropertyChanged();
+            }
+        }
+
         public string OutputFile => DownloadOptions.Filename;
-        public bool CanCancel { get; private set; } = true;
+
+        private bool _canCancel = true;
+        public bool CanCancel
+        {
+            get => _canCancel;
+            private set
+            {
+                if (value == _canCancel) return;
+                _canCancel = value;
+                OnPropertyChanged();
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -48,12 +96,10 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public void ChangeStatus(TwitchTaskStatus newStatus)
         {
             Status = newStatus;
-            OnPropertyChanged(nameof(Status));
 
             if (CanCancel && newStatus is TwitchTaskStatus.Canceled or TwitchTaskStatus.Failed or TwitchTaskStatus.Finished or TwitchTaskStatus.Stopping)
             {
                 CanCancel = false;
-                OnPropertyChanged(nameof(CanCancel));
             }
         }
 
@@ -66,8 +112,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            Progress<ProgressReport> progress = new Progress<ProgressReport>();
-            progress.ProgressChanged += Progress_ProgressChanged;
+            var progress = new WpfTaskProgress(i => Progress = i);
             VideoDownloader downloader = new VideoDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
@@ -80,7 +125,6 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 else
                 {
                     Progress = 100;
-                    OnPropertyChanged(nameof(Progress));
                     ChangeStatus(TwitchTaskStatus.Finished);
                 }
             }
@@ -92,7 +136,6 @@ namespace TwitchDownloaderWPF.TwitchTasks
             {
                 ChangeStatus(TwitchTaskStatus.Failed);
                 Exception = new TwitchTaskException(ex);
-                OnPropertyChanged(nameof(Exception));
             }
             downloader = null;
             TokenSource.Dispose();
@@ -100,20 +143,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             GC.WaitForPendingFinalizers();
         }
 
-        private void Progress_ProgressChanged(object sender, ProgressReport e)
-        {
-            if (e.ReportType == ReportType.Percent)
-            {
-                int percent = (int)e.Data;
-                if (percent > Progress)
-                {
-                    Progress = percent;
-                    OnPropertyChanged(nameof(Progress));
-                }
-            }
-        }
-
-        protected virtual void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

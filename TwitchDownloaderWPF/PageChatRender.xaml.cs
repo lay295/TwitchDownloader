@@ -19,6 +19,7 @@ using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 using MessageBox = System.Windows.MessageBox;
 
@@ -148,25 +149,6 @@ namespace TwitchDownloaderWPF
             }
 
             return options;
-        }
-
-        private void OnProgressChanged(ProgressReport progress)
-        {
-            switch (progress.ReportType)
-            {
-                case ReportType.Percent:
-                    statusProgressBar.Value = (int)progress.Data;
-                    break;
-                case ReportType.NewLineStatus or ReportType.SameLineStatus:
-                    statusMessage.Text = (string)progress.Data;
-                    break;
-                case ReportType.Log:
-                    AppendLog((string)progress.Data);
-                    break;
-                case ReportType.FfmpegLog:
-                    ffmpegLog.Add((string)progress.Data);
-                    break;
-            }
         }
 
         private void LoadSettings()
@@ -423,6 +405,20 @@ namespace TwitchDownloaderWPF
             return true;
         }
 
+        private void SetPercent(int percent)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusProgressBar.Value = percent
+            );
+        }
+
+        private void SetStatus(string message)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusMessage.Text = message
+            );
+        }
+
         private void AppendLog(string message)
         {
             textLog.Dispatcher.BeginInvoke(() =>
@@ -602,7 +598,7 @@ namespace TwitchDownloaderWPF
 
                 ChatRenderOptions options = GetOptions(saveFileDialog.FileName);
 
-                Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
+                var renderProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog, s => ffmpegLog.Add(s));
                 ChatRenderer currentRender = new ChatRenderer(options, renderProgress);
                 try
                 {

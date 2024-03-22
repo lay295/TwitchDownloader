@@ -10,13 +10,12 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
-using TwitchDownloaderCore.Chat;
-using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -218,6 +217,20 @@ namespace TwitchDownloaderWPF
                 : null;
         }
 
+        private void SetPercent(int percent)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusProgressBar.Value = percent
+            );
+        }
+
+        private void SetStatus(string message)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusMessage.Text = message
+            );
+        }
+
         private void AppendLog(string message)
         {
             textLog.Dispatcher.BeginInvoke(() =>
@@ -248,22 +261,6 @@ namespace TwitchDownloaderWPF
             options.Filename = filename;
             options.ConnectionCount = (int)numChatDownloadConnections.Value;
             return options;
-        }
-
-        private void OnProgressChanged(ProgressReport progress)
-        {
-            switch (progress.ReportType)
-            {
-                case ReportType.Percent:
-                    statusProgressBar.Value = (int)progress.Data;
-                    break;
-                case ReportType.NewLineStatus or ReportType.SameLineStatus:
-                    statusMessage.Text = (string)progress.Data;
-                    break;
-                case ReportType.Log:
-                    AppendLog((string)progress.Data);
-                    break;
-            }
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -506,7 +503,8 @@ namespace TwitchDownloaderWPF
                 else if (radioTimestampNone.IsChecked == true)
                     downloadOptions.TimeFormat = TimestampFormat.None;
 
-                ChatDownloader currentDownload = new ChatDownloader(downloadOptions);
+                var downloadProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
+                ChatDownloader currentDownload = new ChatDownloader(downloadOptions, downloadProgress);
 
                 btnGetInfo.IsEnabled = false;
                 SetEnabled(false, false);
@@ -516,11 +514,10 @@ namespace TwitchDownloaderWPF
                 _cancellationTokenSource = new CancellationTokenSource();
                 UpdateActionButtons(true);
 
-                Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
 
                 try
                 {
-                    await currentDownload.DownloadAsync(downloadProgress, _cancellationTokenSource.Token);
+                    await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
                     statusMessage.Text = Translations.Strings.StatusDone;
                     SetImage("Images/ppHop.gif", true);
                 }

@@ -17,6 +17,7 @@ using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -257,6 +258,20 @@ namespace TwitchDownloaderWPF
             numEndSecond.IsEnabled = isEnabled;
         }
 
+        private void SetPercent(int percent)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusProgressBar.Value = percent
+            );
+        }
+
+        private void SetStatus(string message)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusMessage.Text = message
+            );
+        }
+
         private void AppendLog(string message)
         {
             textLog.Dispatcher.BeginInvoke(() =>
@@ -312,22 +327,6 @@ namespace TwitchDownloaderWPF
                 options.TextTimestampFormat = TimestampFormat.None;
 
             return options;
-        }
-
-        private void OnProgressChanged(ProgressReport progress)
-        {
-            switch (progress.ReportType)
-            {
-                case ReportType.Percent:
-                    statusProgressBar.Value = (int)progress.Data;
-                    break;
-                case ReportType.NewLineStatus or ReportType.SameLineStatus:
-                    statusMessage.Text = (string)progress.Data;
-                    break;
-                case ReportType.Log:
-                    AppendLog((string)progress.Data);
-                    break;
-            }
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -510,7 +509,8 @@ namespace TwitchDownloaderWPF
             {
                 ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
 
-                ChatUpdater currentUpdate = new ChatUpdater(updateOptions);
+                var updateProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
+                ChatUpdater currentUpdate = new ChatUpdater(updateOptions, updateProgress);
                 try
                 {
                     await currentUpdate.ParseJsonAsync(CancellationToken.None);
@@ -533,11 +533,9 @@ namespace TwitchDownloaderWPF
                 _cancellationTokenSource = new CancellationTokenSource();
                 UpdateActionButtons(true);
 
-                Progress<ProgressReport> updateProgress = new Progress<ProgressReport>(OnProgressChanged);
-
                 try
                 {
-                    await currentUpdate.UpdateAsync(updateProgress, _cancellationTokenSource.Token);
+                    await currentUpdate.UpdateAsync(_cancellationTokenSource.Token);
                     await Task.Delay(300); // we need to wait a bit incase the "writing to output file" report comes late
                     textJson.Text = "";
                     statusMessage.Text = Translations.Strings.StatusDone;
