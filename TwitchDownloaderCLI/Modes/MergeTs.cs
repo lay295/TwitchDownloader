@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
@@ -11,13 +10,13 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Merge(TsMergeArgs inputOptions)
         {
-            Console.WriteLine("[INFO] The TS merger is experimental and is subject to change without notice in future releases.");
+            var progress = new CliTaskProgress();
 
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
+            progress.LogInfo("The TS merger is experimental and is subject to change without notice in future releases.");
 
             var mergeOptions = GetMergeOptions(inputOptions);
-            TsMerger tsMerger = new(mergeOptions, progress);
+
+            var tsMerger = new TsMerger(mergeOptions, progress);
             tsMerger.MergeAsync(new CancellationToken()).Wait();
         }
 
