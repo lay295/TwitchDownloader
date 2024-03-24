@@ -646,17 +646,17 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     await currentRender.RenderVideoAsync(_cancellationTokenSource.Token);
-                    statusMessage.Text = Translations.Strings.StatusDone;
+                    renderProgress.SetStatus(Translations.Strings.StatusDone, false);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
                 {
-                    statusMessage.Text = Translations.Strings.StatusCanceled;
+                    renderProgress.SetStatus(Translations.Strings.StatusCanceled, false);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex)
                 {
-                    statusMessage.Text = Translations.Strings.StatusError;
+                    renderProgress.SetStatus(Translations.Strings.StatusError, false);
                     SetImage("Images/peepoSad.png", false);
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
@@ -672,7 +672,7 @@ namespace TwitchDownloaderWPF
                         }
                     }
                 }
-                statusProgressBar.Value = 0;
+                renderProgress.ReportProgress(0);
                 _cancellationTokenSource.Dispose();
                 UpdateActionButtons(false);
 

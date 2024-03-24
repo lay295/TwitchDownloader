@@ -18,9 +18,9 @@ namespace TwitchDownloaderWPF.Utils
         public WpfTaskProgress(Action<int> handlePercent)
         {
             _handlePercent = handlePercent;
-            _handleStatus = static _ => { };
-            _handleLog = static _ => { };
-            _handleFfmpegLog = static _ => { };
+            _handleStatus = null;
+            _handleLog = null;
+            _handleFfmpegLog = null;
         }
 
         public WpfTaskProgress(Action<int> handlePercent, Action<string> handleStatus, Action<string> handleLog, Action<string> handleFfmpegLog = null)
@@ -45,7 +45,7 @@ namespace TwitchDownloaderWPF.Utils
                 }
                 else
                 {
-                    _handleStatus(status);
+                    _handleStatus?.Invoke(status);
                 }
             }
         }
@@ -68,7 +68,7 @@ namespace TwitchDownloaderWPF.Utils
                 }
 
                 var status = string.Format(_status, percent);
-                _handleStatus(status);
+                _handleStatus?.Invoke(status);
             }
         }
 
@@ -90,23 +90,23 @@ namespace TwitchDownloaderWPF.Utils
                 }
 
                 var status = string.Format(_status, percent, arg1, arg2);
-                _handleStatus(status);
+                _handleStatus?.Invoke(status);
             }
         }
 
         public void LogInfo(string logMessage)
         {
-            _handleLog(logMessage);
+            _handleLog?.Invoke(logMessage);
         }
 
         public void LogWarning(string logMessage)
         {
-            _handleLog(logMessage);
+            _handleLog?.Invoke(logMessage);
         }
 
         public void LogError(string logMessage)
         {
-            _handleLog(logMessage);
+            _handleLog?.Invoke(Translations.Strings.ErrorLog + logMessage);
         }
 
         public void LogFfmpeg(string logMessage)

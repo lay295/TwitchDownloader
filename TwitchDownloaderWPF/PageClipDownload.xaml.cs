@@ -213,26 +213,26 @@ namespace TwitchDownloaderWPF
             ClipDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
             _cancellationTokenSource = new CancellationTokenSource();
 
+            var downloadProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
+            var currentDownload = new ClipDownloader(downloadOptions, downloadProgress);
+
             SetImage("Images/ppOverheat.gif", true);
             statusMessage.Text = Translations.Strings.StatusDownloading;
             UpdateActionButtons(true);
             try
             {
-                var downloadProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
-                await new ClipDownloader(downloadOptions, downloadProgress)
-                    .DownloadAsync(_cancellationTokenSource.Token);
-
-                statusMessage.Text = Translations.Strings.StatusDone;
+                await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
+                downloadProgress.SetStatus(Translations.Strings.StatusDone, false);
                 SetImage("Images/ppHop.gif", true);
             }
             catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
             {
-                statusMessage.Text = Translations.Strings.StatusCanceled;
+                downloadProgress.SetStatus(Translations.Strings.StatusCanceled, false);
                 SetImage("Images/ppHop.gif", true);
             }
             catch (Exception ex)
             {
-                statusMessage.Text = Translations.Strings.StatusError;
+                downloadProgress.SetStatus(Translations.Strings.StatusError, false);
                 SetImage("Images/peepoSad.png", false);
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
@@ -241,7 +241,7 @@ namespace TwitchDownloaderWPF
                 }
             }
             btnGetInfo.IsEnabled = true;
-            statusProgressBar.Value = 0;
+            downloadProgress.ReportProgress(0);
             _cancellationTokenSource.Dispose();
             UpdateActionButtons(false);
         }

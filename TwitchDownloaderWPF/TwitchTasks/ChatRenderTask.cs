@@ -144,7 +144,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 }
                 else
                 {
-                    Progress = 100;
+                    progress.ReportProgress(100);
                     ChangeStatus(TwitchTaskStatus.Finished);
                 }
             }

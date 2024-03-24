@@ -510,7 +510,7 @@ namespace TwitchDownloaderWPF
                 ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
 
                 var updateProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
-                ChatUpdater currentUpdate = new ChatUpdater(updateOptions, updateProgress);
+                var currentUpdate = new ChatUpdater(updateOptions, updateProgress);
                 try
                 {
                     await currentUpdate.ParseJsonAsync(CancellationToken.None);
@@ -536,19 +536,18 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     await currentUpdate.UpdateAsync(_cancellationTokenSource.Token);
-                    await Task.Delay(300); // we need to wait a bit incase the "writing to output file" report comes late
                     textJson.Text = "";
-                    statusMessage.Text = Translations.Strings.StatusDone;
+                    updateProgress.SetStatus(Translations.Strings.StatusDone, false);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
                 {
-                    statusMessage.Text = Translations.Strings.StatusCanceled;
+                    updateProgress.SetStatus(Translations.Strings.StatusCanceled, false);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex)
                 {
-                    statusMessage.Text = Translations.Strings.StatusError;
+                    updateProgress.SetStatus(Translations.Strings.StatusError, false);
                     SetImage("Images/peepoSad.png", false);
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
@@ -557,7 +556,7 @@ namespace TwitchDownloaderWPF
                     }
                 }
                 btnBrowse.IsEnabled = true;
-                statusProgressBar.Value = 0;
+                updateProgress.ReportProgress(0);
                 _cancellationTokenSource.Dispose();
                 UpdateActionButtons(false);
 
