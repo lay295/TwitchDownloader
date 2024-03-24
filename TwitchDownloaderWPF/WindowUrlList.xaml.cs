@@ -49,6 +49,7 @@ namespace TwitchDownloaderWPF
             if (invalidList.Count > 0)
             {
                 MessageBox.Show(Translations.Strings.UnableToParseInputsMessage + Environment.NewLine + string.Join(Environment.NewLine, invalidList.ToArray()), Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                btnQueue.IsEnabled = true;
                 return;
             }
 
@@ -151,6 +152,7 @@ namespace TwitchDownloaderWPF
             if (errorList.Count > 0)
             {
                 MessageBox.Show(Translations.Strings.UnableToGetInfoMessage + Environment.NewLine + string.Join(Environment.NewLine, errorList.ToArray()), Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                btnQueue.IsEnabled = true;
                 return;
             }
 
