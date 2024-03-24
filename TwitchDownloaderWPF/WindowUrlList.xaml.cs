@@ -25,13 +25,13 @@ namespace TwitchDownloaderWPF
         {
             btnQueue.IsEnabled = false;
             List<string> idList = new List<string>();
-            List<string> urlList = new List<string>(textList.Text.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             List<string> invalidList = new List<string>();
             List<string> errorList = new List<string>();
             List<TaskData> dataList = new List<TaskData>();
             Dictionary<string, string> idDict = new Dictionary<string, string>();
 
-            foreach (var url in urlList)
+            var urls = textList.Text.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            foreach (var url in urls)
             {
                 string id = PageChatDownload.ValidateUrl(url);
 
@@ -84,9 +84,8 @@ namespace TwitchDownloaderWPF
                     continue;
 
                 string id = taskDict[task.Id];
-                if (!task.IsFaulted)
+                if (!task.IsFaulted && task.Result.data.video is { } videoInfo)
                 {
-                    var videoInfo = task.Result.data.video;
                     var thumbUrl = videoInfo.thumbnailURLs.FirstOrDefault();
                     if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                     {
@@ -123,9 +122,8 @@ namespace TwitchDownloaderWPF
                     continue;
 
                 string id = taskDict[task.Id];
-                if (!task.IsFaulted)
+                if (!task.IsFaulted && task.Result.data.clip is { } clipInfo)
                 {
-                    var clipInfo = task.Result.data.clip;
                     var thumbUrl = clipInfo.thumbnailURL;
                     if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                     {
