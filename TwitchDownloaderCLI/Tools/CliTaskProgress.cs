@@ -17,6 +17,8 @@ namespace TwitchDownloaderCLI.Tools
         private bool _lastWriteHadNewLine = true;
         private int _lastStatusLength;
         private int _lastPercent = -1;
+        private TimeSpan _lastTime1 = new(-1);
+        private TimeSpan _lastTime2 = new(-1);
 
         public CliTaskProgress()
         {
@@ -83,11 +85,11 @@ namespace TwitchDownloaderCLI.Tools
             }
         }
 
-        public void ReportProgress<T1, T2>(int percent, T1 arg1, T2 arg2)
+        public void ReportProgress(int percent, TimeSpan time1, TimeSpan time2)
         {
             lock (this)
             {
-                if ((!_lastWriteHadNewLine && _lastPercent == percent)
+                if ((!_lastWriteHadNewLine && _lastPercent == percent && _lastTime1 == time1 && _lastTime2 == time2)
                     || !_statusIsTemplate)
                 {
                     return;
@@ -100,7 +102,7 @@ namespace TwitchDownloaderCLI.Tools
 
                 Console.Write(STATUS_PREAMBLE);
 
-                var status = string.Format(_status, percent, arg1, arg2);
+                var status = string.Format(_status, percent, time1, time2);
                 Console.Write(status);
 
                 var totalStatusLength = STATUS_PREAMBLE.Length + status.Length;
@@ -116,6 +118,8 @@ namespace TwitchDownloaderCLI.Tools
                 _lastWriteHadNewLine = false;
                 _lastStatusLength = totalStatusLength;
                 _lastPercent = percent;
+                _lastTime1 = time1;
+                _lastTime2 = time2;
             }
         }
 

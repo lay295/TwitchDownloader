@@ -1,3 +1,5 @@
+using System;
+
 namespace TwitchDownloaderCore.Interfaces
 {
     public interface ITaskProgress : ITaskLogger
@@ -5,6 +7,6 @@ namespace TwitchDownloaderCore.Interfaces
         // TODO: Add StringSyntaxAttribute when .NET 7+
         void SetStatus(string status, bool isTemplate);
         void ReportProgress(int percent);
-        void ReportProgress<T1, T2>(int percent, T1 arg1, T2 arg2);
+        void ReportProgress(int percent, TimeSpan time1, TimeSpan time2);
     }
 }

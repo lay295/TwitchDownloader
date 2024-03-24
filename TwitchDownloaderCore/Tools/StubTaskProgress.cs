@@ -1,10 +1,11 @@
+using System;
 using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderCore.Tools
 {
     public class StubTaskProgress : ITaskProgress
     {
-        public static StubTaskProgress Instance = new();
+        public static readonly StubTaskProgress Instance = new();
 
         private StubTaskProgress() { }
 
@@ -20,6 +21,6 @@ namespace TwitchDownloaderCore.Tools
 
         public void ReportProgress(int percent) { }
 
-        public void ReportProgress<T1, T2>(int percent, T1 arg1, T2 arg2) { }
+        public void ReportProgress(int percent, TimeSpan time1, TimeSpan time2) { }
     }
 }

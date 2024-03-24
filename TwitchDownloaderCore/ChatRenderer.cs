@@ -291,9 +291,10 @@ namespace TwitchDownloaderCore
                 if (_progress != null && currentTick % 3 == 0)
                 {
                     var percent = (currentTick - startTick) / (double)(endTick - startTick) * 100;
-                    var elapsed = stopwatch.Elapsed.TotalSeconds;
+                    var elapsed = stopwatch.Elapsed;
+                    var elapsedSeconds = elapsed.TotalSeconds;
 
-                    var timeLeft = TimeSpan.FromSeconds((100 / percent * elapsed) - elapsed);
+                    var timeLeft = TimeSpan.FromSeconds((100 / percent * elapsedSeconds) - elapsedSeconds);
                     _progress.ReportProgress((int)Math.Round(percent), elapsed, timeLeft);
                 }
             }
