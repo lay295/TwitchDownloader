@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Tools
@@ -38,6 +39,8 @@ namespace TwitchDownloaderCore.Tools
         private const string CHARITY_DONATION_ICON_SVG = "M 14.211579,29.774743 23.549474,11.09897 H 48.450526 L 57.788421,29.774743 47.345541,42.829108 60.901052,60.90103 H 39.112633 L 36,57.010242 32.887368,60.90103 h -21.78842 l 13.55551,-18.071922 z m 13.185107,-12.450515 -3.112631,6.225256 h 23.43189 l -3.112632,-6.225256 z m 2.378051,12.450515 2.334473,3.112628 -3.598202,4.796559 -6.32798,-7.909187 z m 10.20943,22.255295 2.119703,2.645734 h 6.346656 l -5.12028,-6.829109 -3.342966,4.180262 z  M 23.549474,54.675772 42.225261,29.774743 h 7.59171 L 29.89613,54.675772 Z";
         private const string CHANNEL_POINT_ICON_SVG = "m 34.074833,10.317667 a 25.759205,25.759174 0 0 0 -23.83413,25.686052 25.759298,25.759267 0 0 0 51.518594,0 25.759205,25.759174 0 0 0 -27.684464,-25.686052 z m 0.329458,6.432744 a 19.319404,19.319381 0 0 1 20.915597,19.253308 19.319888,19.319865 0 0 1 -38.639776,0 19.319404,19.319381 0 0 1 17.724179,-19.253308 z M 36,23.124918 v 6.439401 a 6.4398012,6.4397935 0 0 1 6.439407,6.4394 H 48.88048 A 12.879602,12.879587 0 0 0 36,23.124918 Z";
 
+        private const int ICON_SIZE = 72; // Icon SVG strings are scaled for 72x72
+
         private static readonly Regex SubMessageRegex = new(@"^((?:\w+ )?subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d{1,3} months(?:, currently on a \d{1,3} month streak)?! )(.+)$", RegexOptions.Compiled);
         private static readonly Regex GiftAnonymousRegex = new(@"^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d", RegexOptions.Compiled);
         private static readonly Regex WatchStreakRegex = new(@"^((?:\w+ )?watched \d+ consecutive streams this month and sparked a watch streak! )(.+)$", RegexOptions.Compiled);
@@ -54,12 +57,22 @@ namespace TwitchDownloaderCore.Tools
         private readonly string _cachePath;
         private readonly SKColor _purple;
         private readonly bool _offline;
+        private readonly double _fontSize;
+        private readonly bool _outline;
+        private readonly SKPaint _outlinePaint;
 
-        public HighlightIcons(string cachePath, SKColor iconPurple, bool offline)
+        public HighlightIcons(ChatRenderOptions renderOptions, SKColor iconPurple, SKPaint outlinePaint)
         {
-            _cachePath = Path.Combine(cachePath, "icons");
+            _cachePath = Path.Combine(renderOptions.TempFolder, "icons");
             _purple = iconPurple;
-            _offline = offline;
+            _offline = renderOptions.Offline;
+            _fontSize = renderOptions.FontSize;
+            _outline = renderOptions.Outline;
+            if (_outline)
+            {
+                _outlinePaint = outlinePaint.Clone();
+                _outlinePaint.StrokeWidth *= (float)(ICON_SIZE / (_fontSize / 0.6));
+            }
         }
 
         // If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck
@@ -138,28 +151,28 @@ namespace TwitchDownloaderCore.Tools
 
         /// <returns>The requested icon or <see langword="null"/> if no icon exists for the highlight type</returns>
         /// <remarks>The <see cref="SKImage"/> returned is NOT a copy and should not be manually disposed.</remarks>
-        public SKImage GetHighlightIcon(HighlightType highlightType, SKColor textColor, double fontSize)
+        public SKImage GetHighlightIcon(HighlightType highlightType, SKColor textColor)
         {
             return highlightType switch
             {
-                HighlightType.SubscribedTier => _subscribedTierIcon ??= GenerateSvgIcon(SUBSCRIBED_TIER_ICON_SVG, textColor, fontSize),
-                HighlightType.SubscribedPrime => _subscribedPrimeIcon ??= GenerateSvgIcon(SUBSCRIBED_PRIME_ICON_SVG, _purple, fontSize),
-                HighlightType.GiftedSingle => _giftSingleIcon ??= GenerateSvgIcon(GIFTED_SINGLE_ICON_SVG, textColor, fontSize),
-                HighlightType.GiftedMany => _giftManyIcon ??= GenerateGiftedManyIcon(fontSize, _cachePath, _offline),
-                HighlightType.GiftedAnonymous => _giftAnonymousIcon ??= GenerateSvgIcon(GIFTED_ANONYMOUS_ICON_SVG, textColor, fontSize),
-                HighlightType.BitBadgeTierNotification => _bitBadgeTierNotificationIcon ??= GenerateSvgIcon(BIT_BADGE_TIER_NOTIFICATION_ICON_SVG, textColor, fontSize),
-                HighlightType.WatchStreak => _watchStreakIcon ??= GenerateSvgIcon(WATCH_STREAK_ICON_SVG, textColor, fontSize),
-                HighlightType.CharityDonation => _charityDonationIcon ??= GenerateSvgIcon(CHARITY_DONATION_ICON_SVG, textColor, fontSize),
+                HighlightType.SubscribedTier => _subscribedTierIcon ??= GenerateSvgIcon(SUBSCRIBED_TIER_ICON_SVG, textColor),
+                HighlightType.SubscribedPrime => _subscribedPrimeIcon ??= GenerateSvgIcon(SUBSCRIBED_PRIME_ICON_SVG, _purple),
+                HighlightType.GiftedSingle => _giftSingleIcon ??= GenerateSvgIcon(GIFTED_SINGLE_ICON_SVG, textColor),
+                HighlightType.GiftedMany => _giftManyIcon ??= GenerateGiftedManyIcon(),
+                HighlightType.GiftedAnonymous => _giftAnonymousIcon ??= GenerateSvgIcon(GIFTED_ANONYMOUS_ICON_SVG, textColor),
+                HighlightType.BitBadgeTierNotification => _bitBadgeTierNotificationIcon ??= GenerateSvgIcon(BIT_BADGE_TIER_NOTIFICATION_ICON_SVG, textColor),
+                HighlightType.WatchStreak => _watchStreakIcon ??= GenerateSvgIcon(WATCH_STREAK_ICON_SVG, textColor),
+                HighlightType.CharityDonation => _charityDonationIcon ??= GenerateSvgIcon(CHARITY_DONATION_ICON_SVG, textColor),
                 _ => null
             };
         }
 
-        private static SKImage GenerateGiftedManyIcon(double fontSize, string cachePath, bool offline)
+        private SKImage GenerateGiftedManyIcon()
         {
             //int newSize = (int)(fontSize / 0.2727); // 44*44px @ 12pt font // Doesn't work because our image sections aren't tall enough and I'm not rewriting that right now
-            var finalIconSize = (int)(fontSize / 0.6); // 20x20px @ 12pt font
+            var finalIconSize = (int)(_fontSize / 0.6); // 20x20px @ 12pt font
 
-            if (offline)
+            if (_offline)
             {
                 using var offlineBitmap = new SKBitmap(finalIconSize, finalIconSize);
                 using (var offlineCanvas = new SKCanvas(offlineBitmap))
@@ -168,7 +181,7 @@ namespace TwitchDownloaderCore.Tools
                 return SKImage.FromBitmap(offlineBitmap);
             }
 
-            var taskIconBytes = TwitchHelper.GetImage(cachePath, GIFTED_MANY_ICON_URL, "gift-illus", "3", "png");
+            var taskIconBytes = TwitchHelper.GetImage(_cachePath, GIFTED_MANY_ICON_URL, "gift-illus", "3", "png");
             taskIconBytes.Wait();
             using var ms = new MemoryStream(taskIconBytes.Result); // Illustration is 72x72
             using var codec = SKCodec.Create(ms);
@@ -180,9 +193,9 @@ namespace TwitchDownloaderCore.Tools
             return SKImage.FromBitmap(resizedBitmap);
         }
 
-        private static SKImage GenerateSvgIcon(string iconSvgString, SKColor iconColor, double fontSize)
+        private SKImage GenerateSvgIcon(string iconSvgString, SKColor iconColor)
         {
-            using var tempBitmap = new SKBitmap(72, 72); // Icon SVG strings are scaled for 72x72
+            using var tempBitmap = new SKBitmap(ICON_SIZE, ICON_SIZE);
             using var tempCanvas = new SKCanvas(tempBitmap);
 
             using var iconPath = SKPath.ParseSvgPathData(iconSvgString);
@@ -192,8 +205,13 @@ namespace TwitchDownloaderCore.Tools
             iconPaint.Color = iconColor;
             iconPaint.IsAntialias = true;
 
+            if (_outline)
+            {
+                tempCanvas.DrawPath(iconPath, _outlinePaint);
+            }
+
             tempCanvas.DrawPath(iconPath, iconPaint);
-            var newSize = (int)(fontSize / 0.6); // 20*20px @ 12pt font
+            var newSize = (int)(_fontSize / 0.6); // 20*20px @ 12pt font
             var imageInfo = new SKImageInfo(newSize, newSize);
             var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
             resizedBitmap.SetImmutable();
@@ -319,14 +337,7 @@ namespace TwitchDownloaderCore.Tools
                     _giftManyIcon?.Dispose();
                     _giftAnonymousIcon?.Dispose();
                     _bitBadgeTierNotificationIcon?.Dispose();
-
-                    // Set the root references to null to explicitly tell the garbage collector that the resources have been disposed
-                    _subscribedTierIcon = null;
-                    _subscribedPrimeIcon = null;
-                    _giftSingleIcon = null;
-                    _giftManyIcon = null;
-                    _giftAnonymousIcon = null;
-                    _bitBadgeTierNotificationIcon = null;
+                    _outlinePaint?.Dispose();
                 }
             }
             finally
