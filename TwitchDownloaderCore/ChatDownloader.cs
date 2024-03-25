@@ -145,7 +145,7 @@ namespace TwitchDownloaderCore
                 {
                     _id = oldComment.id,
                     created_at = oldComment.createdAt,
-                    channel_id = video.creator.id,
+                    channel_id = video.creator?.id ?? "", // Deliberate empty string for ChatJson.UpgradeChatJson
                     content_type = "video",
                     content_id = video.id,
                     content_offset_seconds = oldComment.contentOffsetSeconds,
