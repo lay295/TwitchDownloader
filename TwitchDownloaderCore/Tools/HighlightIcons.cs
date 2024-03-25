@@ -188,12 +188,9 @@ namespace TwitchDownloaderCore.Tools
             using var iconPath = SKPath.ParseSvgPathData(iconSvgString);
             iconPath.FillType = SKPathFillType.EvenOdd;
 
-            var iconPaint = new SKPaint
-            {
-                Color = iconColor,
-                IsAntialias = true,
-                LcdRenderText = true
-            };
+            using var iconPaint = new SKPaint();
+            iconPaint.Color = iconColor;
+            iconPaint.IsAntialias = true;
 
             tempCanvas.DrawPath(iconPath, iconPaint);
             var newSize = (int)(fontSize / 0.6); // 20*20px @ 12pt font
