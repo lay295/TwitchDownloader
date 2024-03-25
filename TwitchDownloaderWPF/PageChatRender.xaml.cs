@@ -646,17 +646,17 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     await currentRender.RenderVideoAsync(_cancellationTokenSource.Token);
-                    renderProgress.SetStatus(Translations.Strings.StatusDone, false);
+                    renderProgress.SetStatus(Translations.Strings.StatusDone);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
                 {
-                    renderProgress.SetStatus(Translations.Strings.StatusCanceled, false);
+                    renderProgress.SetStatus(Translations.Strings.StatusCanceled);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex)
                 {
-                    renderProgress.SetStatus(Translations.Strings.StatusError, false);
+                    renderProgress.SetStatus(Translations.Strings.StatusError);
                     SetImage("Images/peepoSad.png", false);
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)

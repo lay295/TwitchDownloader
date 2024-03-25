@@ -31,7 +31,7 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
         {
-            _progress.SetStatus("Fetching Clip Info", false);
+            _progress.SetStatus("Fetching Clip Info");
 
             var downloadUrl = await GetDownloadUrl();
             var clipInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
@@ -44,7 +44,7 @@ namespace TwitchDownloaderCore
                 TwitchHelper.CreateDirectory(clipDirectory.FullName);
             }
 
-            _progress.SetStatus("Downloading Clip {0}%", true);
+            _progress.SetTemplateStatus("Downloading Clip {0}%", 0);
 
             void DownloadProgressHandler(StreamCopyProgress streamProgress)
             {
@@ -68,7 +68,7 @@ namespace TwitchDownloaderCore
             {
                 await DownloadFileTaskAsync(downloadUrl, tempFile, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
 
-                _progress.SetStatus("Encoding Clip Metadata {0}%", true);
+                _progress.SetTemplateStatus("Encoding Clip Metadata {0}%", 0);
 
                 var clipChapter = TwitchHelper.GenerateClipChapter(clipInfo.data.clip);
                 await EncodeClipWithMetadata(tempFile, downloadOptions.Filename, clipInfo.data.clip, clipChapter, cancellationToken);

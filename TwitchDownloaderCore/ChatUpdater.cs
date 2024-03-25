@@ -64,7 +64,7 @@ namespace TwitchDownloaderCore
             }
 
             // Finally save the output to file!
-            _progress.SetStatus($"Writing Output File [{++currentStep}/{totalSteps}]", false);
+            _progress.SetStatus($"Writing Output File [{++currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
             switch (_updateOptions.OutputFormat)
@@ -85,7 +85,7 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateVideoInfo(int totalSteps, int currentStep, CancellationToken cancellationToken)
         {
-            _progress.SetStatus($"Updating Video Info [{currentStep}/{totalSteps}]", false);
+            _progress.SetStatus($"Updating Video Info [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
             if (string.IsNullOrWhiteSpace(chatRoot.video.id))
@@ -175,7 +175,7 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateChatCrop(int totalSteps, int currentStep, CancellationToken cancellationToken)
         {
-            _progress.SetStatus($"Updating Chat Crop [{currentStep}/{totalSteps}]", false);
+            _progress.SetStatus($"Updating Chat Crop [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
             int inputCommentCount = chatRoot.comments.Count;
@@ -220,7 +220,7 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateEmbeds(int currentStep, int totalSteps, CancellationToken cancellationToken)
         {
-            _progress.SetStatus($"Updating Embeds [{currentStep}/{totalSteps}]", false);
+            _progress.SetStatus($"Updating Embeds [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
             chatRoot.embeddedData ??= new EmbeddedData();

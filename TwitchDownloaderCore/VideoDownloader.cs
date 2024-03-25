@@ -45,7 +45,7 @@ namespace TwitchDownloaderCore
                 downloadOptions.TempFolder,
                 $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}");
 
-            _progress.SetStatus("Fetching Video Info [1/5]", false);
+            _progress.SetStatus("Fetching Video Info [1/5]");
 
             try
             {
@@ -73,19 +73,19 @@ namespace TwitchDownloaderCore
                     Directory.Delete(downloadFolder, true);
                 TwitchHelper.CreateDirectory(downloadFolder);
 
-                _progress.SetStatus("Downloading {0}% [2/5]", true);
+                _progress.SetTemplateStatus("Downloading {0}% [2/5]", 0);
 
                 await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
 
-                _progress.SetStatus("Verifying Parts {0}% [3/5]", true);
+                _progress.SetTemplateStatus("Verifying Parts {0}% [3/5]", 0);
 
                 await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
 
-                _progress.SetStatus("Combining Parts {0}% [4/5]", true);
+                _progress.SetTemplateStatus("Combining Parts {0}% [4/5]", 0);
 
                 await CombineVideoParts(downloadFolder, playlist.Streams, videoListCrop, cancellationToken);
 
-                _progress.SetStatus("Finalizing Video {0}% [5/5]", true);
+                _progress.SetTemplateStatus("Finalizing Video {0}% [5/5]", 0);
 
                 var startOffset = TimeSpan.FromSeconds((double)playlist.Streams
                     .Take(videoListCrop.Start.Value)

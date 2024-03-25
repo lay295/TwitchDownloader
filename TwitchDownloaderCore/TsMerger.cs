@@ -48,11 +48,11 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            _progress.SetStatus("Verifying Parts {0}% [1/2]", true);
+            _progress.SetTemplateStatus("Verifying Parts {0}% [1/2]", 0);
 
             await VerifyVideoParts(fileList, cancellationToken);
 
-            _progress.SetStatus("Combining Parts {0}% [2/2]", true);
+            _progress.SetTemplateStatus("Combining Parts {0}% [2/2]", 0);
 
             await CombineVideoParts(fileList, cancellationToken);
 

@@ -537,17 +537,17 @@ namespace TwitchDownloaderWPF
                 {
                     await currentUpdate.UpdateAsync(_cancellationTokenSource.Token);
                     textJson.Text = "";
-                    updateProgress.SetStatus(Translations.Strings.StatusDone, false);
+                    updateProgress.SetStatus(Translations.Strings.StatusDone);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
                 {
-                    updateProgress.SetStatus(Translations.Strings.StatusCanceled, false);
+                    updateProgress.SetStatus(Translations.Strings.StatusCanceled);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex)
                 {
-                    updateProgress.SetStatus(Translations.Strings.StatusError, false);
+                    updateProgress.SetStatus(Translations.Strings.StatusError);
                     SetImage("Images/peepoSad.png", false);
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)

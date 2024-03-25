@@ -33,22 +33,38 @@ namespace TwitchDownloaderWPF.Utils
             _handleFfmpegLog = handleFfmpegLog;
         }
 
-        public void SetStatus(string status, bool isTemplate)
+        public void SetStatus(string status)
         {
             lock (this)
             {
                 _status = status;
-                _statusIsTemplate = isTemplate;
+                _statusIsTemplate = false;
 
-                if (isTemplate)
-                {
-                    _lastPercent = -1; // Ensure that the progress report runs
-                    ReportProgress(0);
-                }
-                else
-                {
-                    _handleStatus?.Invoke(status);
-                }
+                _handleStatus?.Invoke(status);
+            }
+        }
+
+        public void SetTemplateStatus(string status, int initialPercent)
+        {
+            lock (this)
+            {
+                _status = status;
+                _statusIsTemplate = true;
+
+                _lastPercent = -1; // Ensure that the progress report runs
+                ReportProgress(initialPercent);
+            }
+        }
+
+        public void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2)
+        {
+            lock (this)
+            {
+                _status = status;
+                _statusIsTemplate = true;
+
+                _lastPercent = -1; // Ensure that the progress report runs
+                ReportProgress(initialPercent, initialTime1, initialTime2);
             }
         }
 

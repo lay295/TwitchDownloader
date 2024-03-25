@@ -403,7 +403,7 @@ namespace TwitchDownloaderCore
 
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
-                _progress.SetStatus("Downloading + Embedding Images {0}%", true);
+                _progress.SetTemplateStatus("Downloading + Embedding Images {0}%", 0);
                 chatRoot.embeddedData = new EmbeddedData();
 
                 // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
@@ -480,7 +480,7 @@ namespace TwitchDownloaderCore
             if (downloadOptions.DownloadFormat is ChatFormat.Json)
             {
                 //Best effort, but if we fail oh well
-                _progress.SetStatus("Backfilling commenter info", false);
+                _progress.SetStatus("Backfilling commenter info");
                 List<string> userList = chatRoot.comments.DistinctBy(x => x.commenter._id).Select(x => x.commenter._id).ToList();
                 Dictionary<string, User> userInfo = new Dictionary<string, User>();
                 int batchSize = 100;
@@ -516,7 +516,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            _progress.SetStatus("Writing output file", false);
+            _progress.SetStatus("Writing output file");
             switch (downloadOptions.DownloadFormat)
             {
                 case ChatFormat.Json:

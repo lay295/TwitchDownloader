@@ -25,27 +25,48 @@ namespace TwitchDownloaderCLI.Tools
             // TODO: Take in ITwitchDownloaderArgs to configure log levels
         }
 
-        public void SetStatus(string status, bool isTemplate)
+        public void SetStatus(string status)
         {
             lock (this)
             {
                 _status = status;
-                _statusIsTemplate = isTemplate;
+                _statusIsTemplate = false;
 
-                if (isTemplate)
-                {
-                    if (!_lastWriteHadNewLine)
-                    {
-                        Console.WriteLine();
-                    }
+                WriteNewLineMessage(STATUS_PREAMBLE, status);
+            }
+        }
 
-                    _lastPercent = -1; // Ensure that the progress report runs
-                    ReportProgress(0);
-                }
-                else
+        public void SetTemplateStatus(string status, int initialPercent)
+        {
+            lock (this)
+            {
+                _status = status;
+                _statusIsTemplate = true;
+
+                if (!_lastWriteHadNewLine)
                 {
-                    WriteNewLineMessage(STATUS_PREAMBLE, status);
+                    Console.WriteLine();
                 }
+
+                _lastPercent = -1; // Ensure that the progress report runs
+                ReportProgress(initialPercent);
+            }
+        }
+
+        public void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2)
+        {
+            lock (this)
+            {
+                _status = status;
+                _statusIsTemplate = true;
+
+                if (!_lastWriteHadNewLine)
+                {
+                    Console.WriteLine();
+                }
+
+                _lastPercent = -1; // Ensure that the progress report runs
+                ReportProgress(initialPercent, initialTime1, initialTime2);
             }
         }
 

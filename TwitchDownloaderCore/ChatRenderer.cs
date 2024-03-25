@@ -68,7 +68,7 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
         {
-            _progress.SetStatus("Fetching Images [1/2]", false);
+            _progress.SetStatus("Fetching Images [1/2]");
             await Task.Run(() => FetchScaledImages(cancellationToken), cancellationToken);
 
             if (renderOptions.DisperseCommentOffsets)
@@ -123,7 +123,7 @@ namespace TwitchDownloaderCore
 
             FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false);
             FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(0, true) : null;
-            _progress.SetStatus(@"Rendering Video {0}% ({1:h\hm\ms\s} Elapsed | {2:h\hm\ms\s} Remaining)", true);
+            _progress.SetTemplateStatus(@"Rendering Video {0}% ({1:h\hm\ms\s} Elapsed | {2:h\hm\ms\s} Remaining)", 0, TimeSpan.Zero, TimeSpan.Zero);
 
             try
             {
