@@ -7,7 +7,7 @@ namespace TwitchDownloaderCLI.Tools
     {
         private const string STATUS_PREAMBLE = "[STATUS] - ";
         private const string INFO_LOG_PREAMBLE = "[INFO] - ";
-        private const string WARNING_LOG_PREAMBLE = "[INFO] - ";
+        private const string WARNING_LOG_PREAMBLE = "[WARNING] - ";
         private const string ERROR_LOG_PREAMBLE = "[ERROR] - ";
         private const string FFMPEG_LOG_PREAMBLE = "<FFMPEG> ";
 
