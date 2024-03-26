@@ -1,6 +1,8 @@
 ﻿using SkiaSharp;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
@@ -60,6 +62,7 @@ namespace TwitchDownloaderCore.Tools
         private readonly double _fontSize;
         private readonly bool _outline;
         private readonly SKPaint _outlinePaint;
+        private readonly Dictionary<SKColor, SKPaint> _iconPaints = new();
 
         public HighlightIcons(ChatRenderOptions renderOptions, SKColor iconPurple, SKPaint outlinePaint)
         {
@@ -189,6 +192,7 @@ namespace TwitchDownloaderCore.Tools
 
             var imageInfo = new SKImageInfo(finalIconSize, finalIconSize);
             using var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+
             resizedBitmap.SetImmutable();
             return SKImage.FromBitmap(resizedBitmap);
         }
@@ -198,12 +202,9 @@ namespace TwitchDownloaderCore.Tools
             using var tempBitmap = new SKBitmap(ICON_SIZE, ICON_SIZE);
             using var tempCanvas = new SKCanvas(tempBitmap);
 
+            var iconPaint = GetSvgIconPaint(iconColor);
             using var iconPath = SKPath.ParseSvgPathData(iconSvgString);
             iconPath.FillType = SKPathFillType.EvenOdd;
-
-            using var iconPaint = new SKPaint();
-            iconPaint.Color = iconColor;
-            iconPaint.IsAntialias = true;
 
             if (_outline)
             {
@@ -214,8 +215,23 @@ namespace TwitchDownloaderCore.Tools
             var newSize = (int)(_fontSize / 0.6); // 20*20px @ 12pt font
             var imageInfo = new SKImageInfo(newSize, newSize);
             var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+
             resizedBitmap.SetImmutable();
             return SKImage.FromBitmap(resizedBitmap);
+        }
+
+        private SKPaint GetSvgIconPaint(SKColor iconColor)
+        {
+            ref var iconPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(_iconPaints, iconColor, out var exists);
+
+            if (!exists)
+            {
+                iconPaint = new SKPaint();
+                iconPaint.Color = iconColor;
+                iconPaint.IsAntialias = true;
+            }
+
+            return iconPaint;
         }
 
         /// <summary>
@@ -338,6 +354,10 @@ namespace TwitchDownloaderCore.Tools
                     _giftAnonymousIcon?.Dispose();
                     _bitBadgeTierNotificationIcon?.Dispose();
                     _outlinePaint?.Dispose();
+                    foreach (var (_, paint) in _iconPaints)
+                    {
+                        paint.Dispose();
+                    }
                 }
             }
             finally
