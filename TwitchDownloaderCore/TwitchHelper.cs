@@ -388,8 +388,13 @@ namespace TwitchDownloaderCore
                 {
                     await FetchEmoteImages(comments, emoteDataResponse.BTTV, returnList, alreadyAdded, bttvFolder, cancellationToken);
                 }
-                catch (HttpRequestException e) when (progress != null)
+                catch (HttpRequestException e)
                 {
+                    if (progress is null)
+                    {
+                        throw new Exception($"BTTV returned HTTP {e.StatusCode}. See inner exception.", e);
+                    }
+
                     progress.Report(new ProgressReport(ReportType.Log, $"BetterTTV returned HTTP {e.StatusCode}. BTTV emotes may not be present for this session."));
                 }
             }
@@ -402,10 +407,14 @@ namespace TwitchDownloaderCore
                 {
                     await FetchEmoteImages(comments, emoteDataResponse.FFZ, returnList, alreadyAdded, ffzFolder, cancellationToken);
                 }
-                catch (HttpRequestException e) when (progress != null)
+                catch (HttpRequestException e)
                 {
-                    // We use the BetterTTV proxy of the FFZ API
-                    progress.Report(new ProgressReport(ReportType.Log, $"BetterTTV returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session."));
+                    if (progress is null)
+                    {
+                        throw new Exception($"FFZ returned HTTP {e.StatusCode}. See inner exception.", e);
+                    }
+
+                    progress.Report(new ProgressReport(ReportType.Log, $"FFZ returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session."));
                 }
             }
 
@@ -417,8 +426,13 @@ namespace TwitchDownloaderCore
                 {
                     await FetchEmoteImages(comments, emoteDataResponse.STV, returnList, alreadyAdded, stvFolder, cancellationToken);
                 }
-                catch (HttpRequestException e) when (progress != null)
+                catch (HttpRequestException e)
                 {
+                    if (progress is null)
+                    {
+                        throw new Exception($"7TV returned HTTP {e.StatusCode}. See inner exception.", e);
+                    }
+
                     progress.Report(new ProgressReport(ReportType.Log, $"7TV returned HTTP {e.StatusCode}. 7TV emotes may not be present for this session."));
                 }
             }
