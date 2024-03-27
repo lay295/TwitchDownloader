@@ -390,7 +390,7 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e) when (progress != null)
                 {
-                    progress.Report(new ProgressReport(ReportType.Log, $"BTTV returned HTTP {e.StatusCode}. BTTV emotes may not be present for this session."));
+                    progress.Report(new ProgressReport(ReportType.Log, $"BetterTTV returned HTTP {e.StatusCode}. BTTV emotes may not be present for this session."));
                 }
             }
 
@@ -404,7 +404,8 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e) when (progress != null)
                 {
-                    progress.Report(new ProgressReport(ReportType.Log, $"FFZ returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session."));
+                    // We use the BetterTTV proxy of the FFZ API
+                    progress.Report(new ProgressReport(ReportType.Log, $"BetterTTV returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session."));
                 }
             }
 
