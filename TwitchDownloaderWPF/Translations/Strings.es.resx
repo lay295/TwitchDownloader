@@ -779,64 +779,64 @@
     <value>Descarga FFmpeg {0}%</value>
   </data>
   <data name="CopyVideoIDToClipboard" xml:space="preserve">
-    <value>Copy ID to clipboard</value>
+    <value>Copiar ID al portapapeles</value>
   </data>
   <data name="CopyVideoURLToClipboard" xml:space="preserve">
-    <value>Copy URL to clipboard</value>
+    <value>Copiar URL al portapapeles</value>
   </data>
   <data name="OpenVideoInBrowser" xml:space="preserve">
-    <value>Open in browser</value>
+    <value>Abrir en el navegador</value>
   </data>
   <data name="ResetSettingsConfirmationMessage" xml:space="preserve">
-    <value>Are you sure you want to restore all settings to their default values?</value>
+    <value>¿Estás seguro de que quieres restaurar todos los ajustes a sus valores por defecto?</value>
   </data>
   <data name="ResetSettingsConfirmation" xml:space="preserve">
-    <value>Restore Settings Confirmation</value>
+    <value>Confirmación de restauración de ajustes</value>
   </data>
   <data name="TheApplicationMustBeRestartedMessage" xml:space="preserve">
-    <value>The application must be restarted for changes to take effect.</value>
+    <value>La aplicación debe reiniciarse para que los cambios surtan efecto.</value>
   </data>
   <data name="RestartTheApplication" xml:space="preserve">
-    <value>Please restart {0}</value><comment>{0} is the name of the application.</comment>
+    <value>Por favor, reinicie {0}</value><comment>{0} es el nombre de la aplicación.</comment>
   </data>
   <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
-    <value>Restore Defaults</value>
+    <value>Restaurar valores predeterminados</value>
   </data>
   <data name="ButtonSaveSettings" xml:space="preserve">
-    <value>Save</value>
+    <value>Guardar</value>
   </data>
   <data name="ButtonCancelSettingsChanges" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Cancelar</value>
   </data>
   <data name="ContextMenuRemoveTask" xml:space="preserve">
-    <value>Remove</value>
+    <value>Quitar</value>
   </data>
   <data name="ContextMenuOpenTaskFolder" xml:space="preserve">
-    <value>Open folder
+    <value>Abrir carpeta
 </value>
   </data>
   <data name="PreferredQuality" xml:space="preserve">
-    <value>Preferred Quality:</value>
+    <value>Calidad preferida:</value>
   </data>
   <data name="TitleWindowOldVideoCacheManager" xml:space="preserve">
-    <value>Select Caches To Delete</value>
+    <value>Seleccione las cachés que desea eliminar</value>
   </data>
   <data name="SizeOfAllFiles" xml:space="preserve">
-    <value>Total Size:</value>
+    <value>Tamaño total:</value>
   </data>
   <data name="DeleteCacheColumnHeader" xml:space="preserve">
-    <value>Delete</value>
+    <value>Borrar</value>
   </data>
   <data name="FilePathColumnHeader" xml:space="preserve">
-    <value>Path</value>
+    <value>Ruta</value>
   </data>
   <data name="FileAgeColumnHeader" xml:space="preserve">
-    <value>Age</value>
+    <value>Edad</value>
   </data>
   <data name="FileSizeColumnHeader" xml:space="preserve">
-    <value>Size</value>
+    <value>Tamaño</value>
   </data>
   <data name="FileAgeInDays" xml:space="preserve">
-    <value>{0:N0} days</value>
+    <value>{0:N0} días</value>
   </data>
 </root>
