@@ -294,8 +294,8 @@ namespace TwitchDownloaderCore
                     var elapsed = stopwatch.Elapsed;
                     var elapsedSeconds = elapsed.TotalSeconds;
 
-                    var timeLeft = TimeSpan.FromSeconds((100 / percent * elapsedSeconds) - elapsedSeconds);
-                    _progress.ReportProgress((int)Math.Round(percent), elapsed, timeLeft);
+                    var secondsLeft = unchecked((int)(100 / percent * elapsedSeconds - elapsedSeconds));
+                    _progress.ReportProgress((int)Math.Round(percent), elapsed, TimeSpan.FromSeconds(secondsLeft));
                 }
             }
 
