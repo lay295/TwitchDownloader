@@ -390,7 +390,7 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e) when (progress != null)
                 {
-                    progress.Report(new ProgressReport(ReportType.Log, $"BTTV returned HTTP {e.StatusCode}. BTTV emotes may be disabled for this session."));
+                    progress.Report(new ProgressReport(ReportType.Log, $"BTTV returned HTTP {e.StatusCode}. BTTV emotes may not be present for this session."));
                 }
             }
 
@@ -404,7 +404,7 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e) when (progress != null)
                 {
-                    progress.Report(new ProgressReport(ReportType.Log, $"FFZ returned HTTP {e.StatusCode}. FFZ emotes may be disabled for this session."));
+                    progress.Report(new ProgressReport(ReportType.Log, $"FFZ returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session."));
                 }
             }
 
@@ -418,7 +418,7 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e) when (progress != null)
                 {
-                    progress.Report(new ProgressReport(ReportType.Log, $"7TV returned HTTP {e.StatusCode}. 7TV emotes may be disabled for this session."));
+                    progress.Report(new ProgressReport(ReportType.Log, $"7TV returned HTTP {e.StatusCode}. 7TV emotes may not be present for this session."));
                 }
             }
 
