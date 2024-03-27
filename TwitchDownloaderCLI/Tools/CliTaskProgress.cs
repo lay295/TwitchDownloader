@@ -80,28 +80,10 @@ namespace TwitchDownloaderCLI.Tools
                     return;
                 }
 
-                if (!_lastWriteHadNewLine)
-                {
-                    Console.Write('\r');
-                }
-
-                Console.Write(STATUS_PREAMBLE);
-
                 var status = string.Format(_status, percent);
-                Console.Write(status);
-
-                var totalStatusLength = STATUS_PREAMBLE.Length + status.Length;
-                if (totalStatusLength < _lastStatusLength)
-                {
-                    // Ensure that the previous status is completely overwritten
-                    for (var i = 0; i < _lastStatusLength - totalStatusLength; i++)
-                    {
-                        Console.Write(' ');
-                    }
-                }
+                _lastStatusLength = WriteSameLineMessage(STATUS_PREAMBLE, status, _lastStatusLength);
 
                 _lastWriteHadNewLine = false;
-                _lastStatusLength = totalStatusLength;
                 _lastPercent = percent;
             }
         }
@@ -116,32 +98,37 @@ namespace TwitchDownloaderCLI.Tools
                     return;
                 }
 
-                if (!_lastWriteHadNewLine)
-                {
-                    Console.Write('\r');
-                }
-
-                Console.Write(STATUS_PREAMBLE);
-
                 var status = string.Format(_status, percent, time1, time2);
-                Console.Write(status);
-
-                var totalStatusLength = STATUS_PREAMBLE.Length + status.Length;
-                if (totalStatusLength < _lastStatusLength)
-                {
-                    // Ensure that the previous status is completely overwritten
-                    for (var i = 0; i < _lastStatusLength - totalStatusLength; i++)
-                    {
-                        Console.Write(' ');
-                    }
-                }
+                _lastStatusLength = WriteSameLineMessage(STATUS_PREAMBLE, status, _lastStatusLength);
 
                 _lastWriteHadNewLine = false;
-                _lastStatusLength = totalStatusLength;
                 _lastPercent = percent;
                 _lastTime1 = time1;
                 _lastTime2 = time2;
             }
+        }
+
+        private int WriteSameLineMessage(string preamble, string message, int previousMessageLength)
+        {
+            if (!_lastWriteHadNewLine)
+            {
+                Console.Write('\r');
+            }
+
+            Console.Write(preamble);
+            Console.Write(message);
+
+            var messageLength = preamble.Length + message.Length;
+            if (messageLength < previousMessageLength)
+            {
+                // Ensure that the previous line is completely overwritten
+                for (var i = 0; i < previousMessageLength - messageLength; i++)
+                {
+                    Console.Write(' ');
+                }
+            }
+
+            return messageLength;
         }
 
         public void LogInfo(string logMessage)
