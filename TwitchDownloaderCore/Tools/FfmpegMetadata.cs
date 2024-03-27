@@ -14,7 +14,7 @@ namespace TwitchDownloaderCore.Tools
         private const string LINE_FEED = "\u000A";
 
         public static async Task SerializeAsync(string filePath, string streamerName, string videoId, string videoTitle, DateTime videoCreation, int viewCount, string videoDescription = null,
-            double startOffsetSeconds = 0, IEnumerable<VideoMomentEdge> videoMomentEdges = null, CancellationToken cancellationToken = default)
+            TimeSpan startOffset = default, IEnumerable<VideoMomentEdge> videoMomentEdges = null, CancellationToken cancellationToken = default)
         {
             await using var fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
@@ -22,7 +22,7 @@ namespace TwitchDownloaderCore.Tools
             await SerializeGlobalMetadata(sw, streamerName, videoId, videoTitle, videoCreation, viewCount, videoDescription);
             await fs.FlushAsync(cancellationToken);
 
-            await SerializeChapters(sw, videoMomentEdges, startOffsetSeconds);
+            await SerializeChapters(sw, videoMomentEdges, startOffset);
             await fs.FlushAsync(cancellationToken);
         }
 
@@ -43,7 +43,7 @@ namespace TwitchDownloaderCore.Tools
             await sw.WriteLineAsync(@$"Views: {viewCount}");
         }
 
-        private static async Task SerializeChapters(StreamWriter sw, IEnumerable<VideoMomentEdge> videoMomentEdges, double startOffsetSeconds)
+        private static async Task SerializeChapters(StreamWriter sw, IEnumerable<VideoMomentEdge> videoMomentEdges, TimeSpan startOffset)
         {
             if (videoMomentEdges is null)
             {
@@ -51,7 +51,7 @@ namespace TwitchDownloaderCore.Tools
             }
 
             // Note: FFmpeg automatically handles out of range chapters for us
-            var startOffsetMillis = (int)(startOffsetSeconds * 1000);
+            var startOffsetMillis = (int)startOffset.TotalMilliseconds;
             foreach (var momentEdge in videoMomentEdges)
             {
                 if (momentEdge.node._type != "GAME_CHANGE")

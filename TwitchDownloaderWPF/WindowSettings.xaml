@@ -12,14 +12,14 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
-        Title="Global Settings" MinWidth="400" MinHeight="500" Width="500" Height="592" Initialized="Window_Initialized" Closing="Window_Closing" Loaded="Window_Loaded">
+        Title="Global Settings" MinWidth="400" MinHeight="500" Width="500" Height="592" SizeToContent="Height" Initialized="Window_Initialized" Closing="Window_Closing" Loaded="Window_Loaded" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
         </Style>
     </Window.Resources>
 
-    <Grid Background="{DynamicResource AppBackground}">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="8"/>
             <ColumnDefinition Width="*"/>

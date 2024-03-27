@@ -24,7 +24,7 @@ namespace TwitchDownloaderCLI
                 config.HelpWriter = null; // Use null instead of TextWriter.Null due to how CommandLine works internally
             });
 
-            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs);
+            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs, TsMergeArgs>(preParsedArgs);
             parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
 
             CoreLicensor.EnsureFilesExist(AppContext.BaseDirectory);
@@ -37,7 +37,8 @@ namespace TwitchDownloaderCLI
                 .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
                 .WithParsed<ChatRenderArgs>(RenderChat.Render)
                 .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
-                .WithParsed<CacheArgs>(CacheHandler.ParseArgs);
+                .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
+                .WithParsed<TsMergeArgs>(MergeTs.Merge);
         }
 
         private static void WriteHelpText(IEnumerable<Error> errors, ParserResult<object> parserResult, ParserSettings parserSettings)
@@ -79,7 +80,14 @@ namespace TwitchDownloaderCLI
                 return;
             }
 
-            Console.WriteLine($"{HeadingInfo.Default} {CopyrightInfo.Default.ToString()!.Replace("\u00A9", "(c)")}");
+            var nameVersionString = HeadingInfo.Default.ToString();
+
+#if !DEBUG
+            // Remove git commit hash from version string
+            nameVersionString = System.Text.RegularExpressions.Regex.Replace(nameVersionString, @"(?<=\d)\+[0-9a-f]+", "");
+#endif
+
+            Console.WriteLine($"{nameVersionString} {CopyrightInfo.Default.ToString()!.Replace("\u00A9", "(c)")}");
         }
     }
 }

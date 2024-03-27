@@ -6,7 +6,7 @@ namespace TwitchDownloaderWPF.Services
 {
     public static class ThumbnailService
     {
-        public const string THUMBNAIL_MISSING_URL = @"https://vod-secure.twitch.tv/_404/404_processing_320x180.png";
+        internal const string THUMBNAIL_MISSING_URL = @"https://vod-secure.twitch.tv/_404/404_processing_320x180.png";
 
         /// <exception cref="ArgumentNullException">The <paramref name="thumbUrl"/> was <see langword="null"/></exception>
         public static BitmapImage GetThumb(string thumbUrl, BitmapCacheOption cacheOption = BitmapCacheOption.OnLoad)

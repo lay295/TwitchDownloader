@@ -1,5 +1,6 @@
 ﻿using SkiaSharp;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -57,15 +58,62 @@ namespace TwitchDownloaderCore
 
         public static async Task<string> GetVideoPlaylist(int videoId, string token, string sig)
         {
-            var request = new HttpRequestMessage()
+            HttpRequestMessage request;
+            HttpResponseMessage response;
+            try
             {
-                RequestUri = new Uri($"https://usher.ttvnw.net/vod/{videoId}.m3u8?sig={sig}&token={token}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h264"),
-                Method = HttpMethod.Get
-            };
-            var response = await httpClient.SendAsync(request);
+                request = new HttpRequestMessage()
+                {
+                    RequestUri = new Uri($"https://usher.ttvnw.net/vod/{videoId}.m3u8?sig={sig}&token={token}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h264"),
+                    Method = HttpMethod.Get
+                };
+                response = await httpClient.SendAsync(request);
+            }
+            catch (Exception ex)
+            {
+                if (IsAuthException(ex))
+                {
+                    request = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri($"https://twitch-downloader-proxy.twitcharchives.workers.dev/{videoId}.m3u8?sig={sig}&token={token}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h264"),
+                        Method = HttpMethod.Get
+                    };
+                    response = await httpClient.SendAsync(request);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                // Twitch returns 403 Forbidden for (some? all?) sub-only VODs when correct authorization is not provided
+                var forbiddenResponse = await response.Content.ReadAsStringAsync();
+                if (forbiddenResponse.Contains("vod_manifest_restricted") || forbiddenResponse.Contains("unauthorized_entitlements"))
+                {
+                    // Return the error string so the caller can choose their error strategy
+                    // TODO: We may want to eventually return all 403 responses so the error messages can be parsed and/or logged since more potential errors exist
+                    return forbiddenResponse;
+                }
+            }
+
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadAsStringAsync();
+        }
+
+        static bool IsAuthException(Exception ex)
+        {
+            while (ex != null)
+            {
+                if (ex is System.Security.Authentication.AuthenticationException)
+                {
+                    return true;
+                }
+                ex = ex.InnerException;
+            }
+            return false;
         }
 
         public static async Task<GqlClipResponse> GetClipInfo(object clipId)
@@ -82,20 +130,24 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlClipResponse>();
         }
 
-        public static async Task<GqlClipTokenResponse[]> GetClipLinks(string clipId)
+        public static async Task<GqlClipTokenResponse> GetClipLinks(string clipId)
         {
             var request = new HttpRequestMessage()
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("[{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}]", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
-            var gqlClipTokenResponses = await response.Content.ReadFromJsonAsync<GqlClipTokenResponse[]>();
-            Array.Sort(gqlClipTokenResponses[0].data.clip.videoQualities, new ClipQualityComparer());
+            var gqlClipTokenResponses = await response.Content.ReadFromJsonAsync<GqlClipTokenResponse>();
+            if (gqlClipTokenResponses.data.clip.videoQualities is { Length: > 0 })
+            {
+                Array.Sort(gqlClipTokenResponses.data.clip.videoQualities, new ClipQualityComparer());
+            }
+
             return gqlClipTokenResponses;
         }
 
@@ -762,63 +814,58 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
-        public static void CleanupUnmanagedCacheFiles(string cacheFolder, IProgress<ProgressReport> progress)
+        public static async Task CleanupAbandonedVideoCaches(string cacheFolder, Func<DirectoryInfo[], DirectoryInfo[]> itemsToDeleteCallback, IProgress<ProgressReport> progress)
         {
             if (!Directory.Exists(cacheFolder))
             {
                 return;
             }
 
-            // Let's delete any video download cache folders older than 24 hours
-            var videoFolderRegex = new Regex(@"\d+_(\d+)$", RegexOptions.RightToLeft); // Matches "...###_###" and captures the 2nd ###
-            var directories = Directory.GetDirectories(cacheFolder);
-            var directoriesDeleted = (from directory in directories
-                let videoFolderMatch = videoFolderRegex.Match(directory)
-                where videoFolderMatch.Success
-                where DeleteOldDirectory(directory, videoFolderMatch.Groups[1].ValueSpan)
-                select directory).Count();
-
-            if (directoriesDeleted > 0)
+            if (itemsToDeleteCallback == null)
             {
-                progress.Report(new ProgressReport(ReportType.Log, $"{directoriesDeleted} old video caches were deleted."));
+                // TODO: Log this
+                return;
             }
-        }
 
-        private static bool DeleteOldDirectory(string directory, ReadOnlySpan<char> directoryCreationMillis)
-        {
-            var downloadTime = long.Parse(directoryCreationMillis);
-            var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var videoFolderRegex = new Regex(@"\d+_\d+$", RegexOptions.RightToLeft);
+            var allCacheDirectories = Directory.GetDirectories(cacheFolder);
 
-            const int TWENTY_FOUR_HOURS_MILLIS = 86_400_000;
-            if (currentTime - downloadTime > TWENTY_FOUR_HOURS_MILLIS * 7)
+            var oldVideoCaches = (from directory in allCacheDirectories
+                    where videoFolderRegex.IsMatch(directory)
+                    let directoryInfo = new DirectoryInfo(directory)
+                    where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7
+                    select directoryInfo)
+                .ToArray();
+
+            if (oldVideoCaches.Length == 0)
             {
-                try
-                {
-                    Directory.Delete(directory, true);
-                    return true;
-                }
-                catch { /* Eat the exception */ }
+                return;
             }
-            return false;
-        }
 
-        private static bool DeleteColdDirectory(string directory)
-        {
-            // Directory.GetLastWriteTimeUtc() works as expected on both Windows and MacOS. Assuming it does on Linux too
-            var directoryWriteTimeMillis = Directory.GetLastWriteTimeUtc(directory).Ticks / TimeSpan.TicksPerMillisecond;
-            var currentTimeMillis = DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
+            var toDelete = await Task.Run(() => itemsToDeleteCallback(oldVideoCaches));
 
-            const int SIX_HOURS_MILLIS = 21_600_000;
-            if (currentTimeMillis - directoryWriteTimeMillis > SIX_HOURS_MILLIS)
+            if (toDelete == null || toDelete.Length == 0)
+            {
+                return;
+            }
+
+            var wasDeleted = 0;
+            foreach (var directory in toDelete)
             {
                 try
                 {
-                    Directory.Delete(directory, true);
-                    return true;
+                    Directory.Delete(directory.FullName, true);
+                    wasDeleted++;
                 }
-                catch { /* Eat the exception */ }
+                catch
+                {
+                    // Oh well
+                }
             }
-            return false;
+
+            progress.Report(toDelete.Length == wasDeleted
+                ? new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted.")
+                : new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted, {toDelete.Length - wasDeleted} could not be deleted."));
         }
 
         public static int TimestampToSeconds(string input)

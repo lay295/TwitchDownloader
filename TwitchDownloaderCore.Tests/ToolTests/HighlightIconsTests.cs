@@ -2,7 +2,7 @@
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
-namespace TwitchDownloaderCore.Tests
+namespace TwitchDownloaderCore.Tests.ToolTests
 {
     // ReSharper disable StringLiteralTypo
     public class HighlightIconsTests

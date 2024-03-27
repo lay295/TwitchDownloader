@@ -528,6 +528,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string DeleteCacheColumnHeader {
+            get {
+                return ResourceManager.GetString("DeleteCacheColumnHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete Confirmation.
         /// </summary>
         public static string DeleteConfirmation {
@@ -825,6 +834,24 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Age.
+        /// </summary>
+        public static string FileAgeColumnHeader {
+            get {
+                return ResourceManager.GetString("FileAgeColumnHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:N0} days.
+        /// </summary>
+        public static string FileAgeInDays {
+            get {
+                return ResourceManager.GetString("FileAgeInDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {title} {id} {date} {channel} {date_custom=&quot;&quot;} {random_string} {crop_start} {crop_end} {crop_start_custom=&quot;&quot;} {crop_end_custom=&quot;&quot;} {length} {length_custom=&quot;&quot;} {views} {game}.
         /// </summary>
         public static string FilenameTemplateParameters {
@@ -839,6 +866,24 @@ namespace TwitchDownloaderWPF.Translations {
         public static string FileNotFound {
             get {
                 return ResourceManager.GetString("FileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path.
+        /// </summary>
+        public static string FilePathColumnHeader {
+            get {
+                return ResourceManager.GetString("FilePathColumnHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Size.
+        /// </summary>
+        public static string FileSizeColumnHeader {
+            get {
+                return ResourceManager.GetString("FileSizeColumnHeader", resourceCulture);
             }
         }
         
@@ -1194,6 +1239,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Preferred Quality:.
+        /// </summary>
+        public static string PreferredQuality {
+            get {
+                return ResourceManager.GetString("PreferredQuality", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quality:.
         /// </summary>
         public static string Quality {
@@ -1442,6 +1496,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string SidePaddingScale {
             get {
                 return ResourceManager.GetString("SidePaddingScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Total Size:.
+        /// </summary>
+        public static string SizeOfAllFiles {
+            get {
+                return ResourceManager.GetString("SizeOfAllFiles", resourceCulture);
             }
         }
         
@@ -1802,6 +1865,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string TitleVideoMassDownloader {
             get {
                 return ResourceManager.GetString("TitleVideoMassDownloader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select Caches To Delete.
+        /// </summary>
+        public static string TitleWindowOldVideoCacheManager {
+            get {
+                return ResourceManager.GetString("TitleWindowOldVideoCacheManager", resourceCulture);
             }
         }
         

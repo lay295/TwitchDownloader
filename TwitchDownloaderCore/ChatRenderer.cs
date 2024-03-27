@@ -62,7 +62,10 @@ namespace TwitchDownloaderCore
             renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize - renderOptions.SidePadding * 2;
             renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
             _progress = progress;
-            highlightIcons = new HighlightIcons(renderOptions.TempFolder, Purple, renderOptions.Offline);
+            outlinePaint = new SKPaint { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
+            nameFont = new SKPaint { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
+            messageFont = new SKPaint { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
+            highlightIcons = new HighlightIcons(renderOptions, Purple, outlinePaint);
         }
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
@@ -75,10 +78,6 @@ namespace TwitchDownloaderCore
                 DisperseCommentOffsets(chatRoot.comments);
             }
             FloorCommentOffsets(chatRoot.comments);
-
-            outlinePaint = new SKPaint() { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-            nameFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-            messageFont = new SKPaint() { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
 
             if (renderOptions.Font == "Inter Embedded")
             {
@@ -652,17 +651,9 @@ namespace TwitchDownloaderCore
 
         private static string GetKeyName(IEnumerable<Codepoint> codepoints)
         {
-            List<string> codepointList = new List<string>();
-            foreach (Codepoint codepoint in codepoints)
-            {
-                if (codepoint.Value != 0xFE0F)
-                {
-                    codepointList.Add(codepoint.Value.ToString("X"));
-                }
-            }
+            var codepointList = from codepoint in codepoints where codepoint.Value != 0xFE0F select codepoint.Value.ToString("X");
 
-            string emojiKey = string.Join(' ', codepointList);
-            return emojiKey;
+            return string.Join(' ', codepointList);
         }
 
         private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, ref Point defaultPos)
@@ -689,7 +680,7 @@ namespace TwitchDownloaderCore
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
 
-            var highlightIcon = highlightIcons.GetHighlightIcon(highlightType, messageFont.Color, renderOptions.FontSize);
+            var highlightIcon = highlightIcons.GetHighlightIcon(highlightType, messageFont.Color);
 
             Point iconPoint = new()
             {
@@ -917,14 +908,27 @@ namespace TwitchDownloaderCore
 
             static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, [NotNullWhen(true)] out TwitchEmote twitchEmote)
             {
-                // Enumerating over a span is faster than a list
                 var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
-                foreach (var emote1 in emoteListSpan)
+                var lo = 0;
+                var hi = emoteListSpan.Length - 1;
+                while (lo <= hi)
                 {
-                    if (emote1.Name.AsSpan().SequenceEqual(emoteName))
+                    var i = lo + ((hi - lo) >> 1);
+                    var order = emoteListSpan[i].Name.AsSpan().CompareTo(emoteName, StringComparison.Ordinal);
+
+                    if (order == 0)
                     {
-                        twitchEmote = emote1;
+                        twitchEmote = emoteListSpan[i];
                         return true;
+                    }
+
+                    if (order < 0)
+                    {
+                        lo = i + 1;
+                    }
+                    else
+                    {
+                        hi = i - 1;
                     }
                 }
 
@@ -1179,14 +1183,27 @@ namespace TwitchDownloaderCore
 
             static bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, [NotNullWhen(true)] out CheerEmote cheerEmote)
             {
-                // Enumerating over a span is faster than a list
-                var cheerEmoteListSpan = CollectionsMarshal.AsSpan(cheerEmoteList);
-                foreach (var emote1 in cheerEmoteListSpan)
+                var emoteListSpan = CollectionsMarshal.AsSpan(cheerEmoteList);
+                var lo = 0;
+                var hi = emoteListSpan.Length - 1;
+                while (lo <= hi)
                 {
-                    if (emote1.prefix.AsSpan().Equals(prefix, StringComparison.OrdinalIgnoreCase))
+                    var i = lo + ((hi - lo) >> 1);
+                    var order = emoteListSpan[i].prefix.AsSpan().CompareTo(prefix, StringComparison.Ordinal);
+
+                    if (order == 0)
                     {
-                        cheerEmote = emote1;
+                        cheerEmote = emoteListSpan[i];
                         return true;
+                    }
+
+                    if (order < 0)
+                    {
+                        lo = i + 1;
+                    }
+                    else
+                    {
+                        hi = i - 1;
                     }
                 }
 
@@ -1228,14 +1245,27 @@ namespace TwitchDownloaderCore
 
             static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteId, [NotNullWhen(true)] out TwitchEmote twitchEmote)
             {
-                // Enumerating over a span is faster than a list
                 var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
-                foreach (var emote1 in emoteListSpan)
+                var lo = 0;
+                var hi = emoteListSpan.Length - 1;
+                while (lo <= hi)
                 {
-                    if (emote1.Id.AsSpan().SequenceEqual(emoteId))
+                    var i = lo + ((hi - lo) >> 1);
+                    var order = emoteListSpan[i].Id.AsSpan().CompareTo(emoteId, StringComparison.Ordinal);
+
+                    if (order == 0)
                     {
-                        twitchEmote = emote1;
+                        twitchEmote = emoteListSpan[i];
                         return true;
+                    }
+
+                    if (order < 0)
+                    {
+                        lo = i + 1;
+                    }
+                    else
+                    {
+                        hi = i - 1;
                     }
                 }
 
@@ -1460,29 +1490,49 @@ namespace TwitchDownloaderCore
 
             foreach (var badge in comment.message.user_badges)
             {
-                string id = badge._id;
-                string version = badge.version;
+                var id = badge._id;
+                var version = badge.version;
 
-                foreach (var cachedBadge in badgeList)
-                {
-                    if (cachedBadge.Name != id)
-                        continue;
+                if (!TryGetBadge(badgeList, id, out var cachedBadge))
+                    continue;
 
-                    foreach (var cachedVersion in cachedBadge.Versions)
-                    {
-                        if (cachedVersion.Key == version)
-                        {
-                            returnList.Add((cachedVersion.Value, cachedBadge.Type));
-                            goto NextUserBadge;
-                        }
-                    }
-                }
+                if (!cachedBadge.Versions.TryGetValue(version, out var badgeBitmap))
+                    continue;
 
-                // goto is cheaper and more readable than using a boolean + branch check after each operation
-                NextUserBadge: ;
+                returnList.Add((badgeBitmap, cachedBadge.Type));
             }
 
             return returnList;
+
+            static bool TryGetBadge(List<ChatBadge> badgeList, ReadOnlySpan<char> badgeName, [NotNullWhen(true)] out ChatBadge badge)
+            {
+                var badgeSpan = CollectionsMarshal.AsSpan(badgeList);
+                var lo = 0;
+                var hi = badgeSpan.Length - 1;
+                while (lo <= hi)
+                {
+                    var i = lo + ((hi - lo) >> 1);
+                    var order = badgeSpan[i].Name.AsSpan().CompareTo(badgeName, StringComparison.Ordinal);
+
+                    if (order == 0)
+                    {
+                        badge = badgeSpan[i];
+                        return true;
+                    }
+
+                    if (order < 0)
+                    {
+                        lo = i + 1;
+                    }
+                    else
+                    {
+                        hi = i - 1;
+                    }
+                }
+
+                badge = null;
+                return false;
+            }
         }
 
         private void DrawTimestamp(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, ref Point defaultPos)
@@ -1557,6 +1607,11 @@ namespace TwitchDownloaderCore
             emoteThirdList = emoteThirdTask.Result;
             cheermotesList = cheerTask.Result;
             emojiCache = emojiTask.Result;
+
+            badgeList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+            emoteList.Sort((a, b) => string.Compare(a.Id, b.Id, StringComparison.Ordinal));
+            emoteThirdList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+            cheermotesList.Sort((a, b) => string.Compare(a.prefix, b.prefix, StringComparison.Ordinal));
         }
 
         private async Task<List<ChatBadge>> GetScaledBadges(CancellationToken cancellationToken)
@@ -1572,11 +1627,11 @@ namespace TwitchDownloaderCore
             foreach (var badge in badgeTask)
             {
                 // Assume badges are always 2x scale, not 1x or 4x
-                if (Math.Abs(renderOptions.ReferenceScale - 1.0) > 0.01)
+                var newScale = renderOptions.ReferenceScale * renderOptions.BadgeScale;
+                if (Math.Abs(newScale - 1.0) > 0.01)
                 {
-                    badge.Resize(renderOptions.ReferenceScale * renderOptions.BadgeScale);
+                    badge.Resize(newScale);
                 }
-                badge.VersionsData.Clear(); // Clear the image byte[]s as we aren't embedding to an output file
             }
 
             return badgeTask;
@@ -1588,12 +1643,12 @@ namespace TwitchDownloaderCore
 
             foreach (var emote in emoteTask)
             {
-                double newScale = (2.0 / emote.ImageScale) * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                // Assume emojis are 4x scale
+                double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
                 {
                     emote.Resize(newScale);
                 }
-                emote.ImageData = Array.Empty<byte>(); // Clear the image byte[] as we aren't embedding to an output file
             }
 
             return emoteTask;
@@ -1606,12 +1661,12 @@ namespace TwitchDownloaderCore
 
             foreach (var emote in emoteThirdTask)
             {
-                double newScale = (2.0 / emote.ImageScale) * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                // Assume emojis are 4x scale
+                double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
                 {
                     emote.Resize(newScale);
                 }
-                emote.ImageData = Array.Empty<byte>(); // Clear the image byte[] as we aren't embedding to an output file
             }
 
             return emoteThirdTask;
@@ -1624,14 +1679,10 @@ namespace TwitchDownloaderCore
             foreach (var cheer in cheerTask)
             {
                 //Assume cheermotes are always 2x scale, not 1x or 4x
-                if (Math.Abs(renderOptions.ReferenceScale - 1.0) > 0.01)
+                var newScale = renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                if (Math.Abs(newScale - 1.0) > 0.01)
                 {
-                    cheer.Resize(renderOptions.ReferenceScale * renderOptions.EmoteScale);
-                }
-
-                foreach (var tier in cheer.tierList)
-                {
-                    tier.Value.ImageData = Array.Empty<byte>(); // Clear the image byte[]s as we aren't embedding to an output file
+                    cheer.Resize(newScale);
                 }
             }
 

@@ -808,9 +808,33 @@
     <value>Скасувати</value>
   </data>
   <data name="ContextMenuRemoveTask" xml:space="preserve">
-    <value>Remove</value>
+    <value>Прибрати</value>
   </data>
   <data name="ContextMenuOpenTaskFolder" xml:space="preserve">
-    <value>Open folder</value>
+    <value>Відкрити папку</value>
+  </data>
+  <data name="PreferredQuality" xml:space="preserve">
+    <value>Бажана якість:</value>
+  </data>
+  <data name="TitleWindowOldVideoCacheManager" xml:space="preserve">
+    <value>Select Caches To Delete</value>
+  </data>
+  <data name="SizeOfAllFiles" xml:space="preserve">
+    <value>Total Size:</value>
+  </data>
+  <data name="DeleteCacheColumnHeader" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="FilePathColumnHeader" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="FileAgeColumnHeader" xml:space="preserve">
+    <value>Age</value>
+  </data>
+  <data name="FileSizeColumnHeader" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="FileAgeInDays" xml:space="preserve">
+    <value>{0:N0} days</value>
   </data>
 </root>

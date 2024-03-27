@@ -204,12 +204,12 @@ namespace TwitchDownloaderWPF
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
                     viewCount.ToString(), game) + (comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? ".m4a" : ".mp4")),
                 Oauth = TextOauth.Text,
-                Quality = GetQualityWithoutSize(comboQuality.Text).ToString(),
+                Quality = GetQualityWithoutSize(comboQuality.Text),
                 Id = currentVideoId,
                 CropBeginning = checkStart.IsChecked.GetValueOrDefault(),
-                CropBeginningTime = (int)(new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value).TotalSeconds),
+                CropBeginningTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value),
                 CropEnding = checkEnd.IsChecked.GetValueOrDefault(),
-                CropEndingTime = (int)(new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value).TotalSeconds),
+                CropEndingTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value),
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath
             };
@@ -423,6 +423,7 @@ namespace TwitchDownloaderWPF
             btnGetInfo.IsEnabled = false;
 
             VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
+            options.CacheCleanerCallback = HandleCacheCleanerCallback;
 
             Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
             VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
@@ -459,6 +460,21 @@ namespace TwitchDownloaderWPF
 
             currentDownload = null;
             GC.Collect();
+        }
+
+        private DirectoryInfo[] HandleCacheCleanerCallback(DirectoryInfo[] directories)
+        {
+            return Dispatcher.Invoke(() =>
+            {
+                var window = new WindowOldVideoCacheManager(directories)
+                {
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
+                window.ShowDialog();
+
+                return window.GetItemsToDelete();
+            });
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
