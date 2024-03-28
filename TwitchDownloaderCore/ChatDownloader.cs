@@ -148,7 +148,7 @@ namespace TwitchDownloaderCore
                 {
                     _id = oldComment.id,
                     created_at = oldComment.createdAt,
-                    channel_id = video.creator.id,
+                    channel_id = video.creator?.id ?? "", // Deliberate empty string for ChatJson.UpgradeChatJson
                     content_type = "video",
                     content_id = video.id,
                     content_offset_seconds = oldComment.contentOffsetSeconds,
@@ -408,7 +408,7 @@ namespace TwitchDownloaderCore
 
                 // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
                 // TODO: Combine this with ChatUpdater in a different file
-                List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
+                List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, progress: progress, cancellationToken: cancellationToken);
                 _progress.ReportProgress(50 / 4);
                 List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(chatRoot.comments, downloadOptions.TempFolder, cancellationToken: cancellationToken);
                 _progress.ReportProgress(50 / 4 * 2);

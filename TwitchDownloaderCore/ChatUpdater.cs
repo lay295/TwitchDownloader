@@ -257,7 +257,7 @@ namespace TwitchDownloaderCore
 
         private async Task ThirdPartyEmoteTask(CancellationToken cancellationToken = default)
         {
-            List<TwitchEmote> thirdPartyEmoteList = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, _updateOptions.BttvEmotes, _updateOptions.FfzEmotes, _updateOptions.StvEmotes, cancellationToken: cancellationToken);
+            List<TwitchEmote> thirdPartyEmoteList = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, _updateOptions.BttvEmotes, _updateOptions.FfzEmotes, _updateOptions.StvEmotes, progress: progress, cancellationToken: cancellationToken);
 
             int inputCount = chatRoot.embeddedData.thirdParty.Count;
             chatRoot.embeddedData.thirdParty = new List<EmbedEmoteData>();

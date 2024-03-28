@@ -14,7 +14,7 @@ namespace TwitchDownloaderCore.Tools
         private const string LINE_FEED = "\u000A";
 
         public static async Task SerializeAsync(string filePath, string streamerName, string videoId, string videoTitle, DateTime videoCreation, int viewCount, string videoDescription = null,
-            TimeSpan startOffset = default, TimeSpan videoLength = default, IEnumerable<VideoMomentEdge> videoMomentEdges = null, CancellationToken cancellationToken = default)
+            TimeSpan startOffset = default, IEnumerable<VideoMomentEdge> videoMomentEdges = null, CancellationToken cancellationToken = default)
         {
             await using var fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
@@ -22,7 +22,7 @@ namespace TwitchDownloaderCore.Tools
             await SerializeGlobalMetadata(sw, streamerName, videoId, videoTitle, videoCreation, viewCount, videoDescription);
             await fs.FlushAsync(cancellationToken);
 
-            await SerializeChapters(sw, videoMomentEdges, startOffset, videoLength);
+            await SerializeChapters(sw, videoMomentEdges, startOffset);
             await fs.FlushAsync(cancellationToken);
         }
 
@@ -43,7 +43,7 @@ namespace TwitchDownloaderCore.Tools
             await sw.WriteLineAsync(@$"Views: {viewCount}");
         }
 
-        private static async Task SerializeChapters(StreamWriter sw, IEnumerable<VideoMomentEdge> videoMomentEdges, TimeSpan startOffset, TimeSpan videoLength)
+        private static async Task SerializeChapters(StreamWriter sw, IEnumerable<VideoMomentEdge> videoMomentEdges, TimeSpan startOffset)
         {
             if (videoMomentEdges is null)
             {
@@ -60,13 +60,6 @@ namespace TwitchDownloaderCore.Tools
                 }
 
                 var startMillis = momentEdge.node.positionMilliseconds - startOffsetMillis;
-                if (startMillis >= videoLength.TotalMilliseconds)
-                {
-                    // Because of floating point error, if the video ends on the same second as a new chapter beings, FFmpeg will keep the chapter
-                    // The kept chapter is less than a second long, but a user complained.
-                    continue;
-                }
-
                 var lengthMillis = momentEdge.node.durationMilliseconds;
                 var gameName = momentEdge.node.details.game?.displayName ?? momentEdge.node.description;
 

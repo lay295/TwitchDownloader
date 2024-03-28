@@ -345,7 +345,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = new())
+        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -385,21 +385,57 @@ namespace TwitchDownloaderCore
 
             if (bttv)
             {
-                await FetchEmoteImages(comments, emoteDataResponse.BTTV, returnList, alreadyAdded, bttvFolder, cancellationToken);
+                try
+                {
+                    await FetchEmoteImages(comments, emoteDataResponse.BTTV, returnList, alreadyAdded, bttvFolder, cancellationToken);
+                }
+                catch (HttpRequestException e)
+                {
+                    if (progress is null)
+                    {
+                        throw new Exception($"BTTV returned HTTP {e.StatusCode}. See inner exception.", e);
+                    }
+
+                    progress.Report(new ProgressReport(ReportType.Log, $"BetterTTV returned HTTP {e.StatusCode}. BTTV emotes may not be present for this session."));
+                }
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (ffz)
             {
-                await FetchEmoteImages(comments, emoteDataResponse.FFZ, returnList, alreadyAdded, ffzFolder, cancellationToken);
+                try
+                {
+                    await FetchEmoteImages(comments, emoteDataResponse.FFZ, returnList, alreadyAdded, ffzFolder, cancellationToken);
+                }
+                catch (HttpRequestException e)
+                {
+                    if (progress is null)
+                    {
+                        throw new Exception($"FFZ returned HTTP {e.StatusCode}. See inner exception.", e);
+                    }
+
+                    progress.Report(new ProgressReport(ReportType.Log, $"FFZ returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session."));
+                }
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (stv)
             {
-                await FetchEmoteImages(comments, emoteDataResponse.STV, returnList, alreadyAdded, stvFolder, cancellationToken);
+                try
+                {
+                    await FetchEmoteImages(comments, emoteDataResponse.STV, returnList, alreadyAdded, stvFolder, cancellationToken);
+                }
+                catch (HttpRequestException e)
+                {
+                    if (progress is null)
+                    {
+                        throw new Exception($"7TV returned HTTP {e.StatusCode}. See inner exception.", e);
+                    }
+
+                    progress.Report(new ProgressReport(ReportType.Log, $"7TV returned HTTP {e.StatusCode}. 7TV emotes may not be present for this session."));
+                }
             }
 
             return returnList;
