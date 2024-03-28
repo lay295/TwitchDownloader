@@ -15,6 +15,7 @@ using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -118,6 +119,20 @@ namespace TwitchDownloaderWPF
                 : null;
         }
 
+        private void SetPercent(int percent)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusProgressBar.Value = percent
+            );
+        }
+
+        private void SetStatus(string message)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusMessage.Text = message
+            );
+        }
+
         private void AppendLog(string message)
         {
             textLog.Dispatcher.BeginInvoke(() =>
@@ -136,22 +151,6 @@ namespace TwitchDownloaderWPF
             comboQuality.IsEnabled = enabled;
             SplitBtnDownload.IsEnabled = enabled;
             CheckMetadata.IsEnabled = enabled;
-        }
-
-        private void OnProgressChanged(ProgressReport progress)
-        {
-            switch (progress.ReportType)
-            {
-                case ReportType.Percent:
-                    statusProgressBar.Value = (int)progress.Data;
-                    break;
-                case ReportType.NewLineStatus or ReportType.SameLineStatus:
-                    statusMessage.Text = (string)progress.Data;
-                    break;
-                case ReportType.Log:
-                    AppendLog((string)progress.Data);
-                    break;
-            }
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -214,26 +213,26 @@ namespace TwitchDownloaderWPF
             ClipDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
             _cancellationTokenSource = new CancellationTokenSource();
 
+            var downloadProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
+            var currentDownload = new ClipDownloader(downloadOptions, downloadProgress);
+
             SetImage("Images/ppOverheat.gif", true);
             statusMessage.Text = Translations.Strings.StatusDownloading;
             UpdateActionButtons(true);
             try
             {
-                var downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-                await new ClipDownloader(downloadOptions, downloadProgress)
-                    .DownloadAsync(_cancellationTokenSource.Token);
-
-                statusMessage.Text = Translations.Strings.StatusDone;
+                await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
+                downloadProgress.SetStatus(Translations.Strings.StatusDone);
                 SetImage("Images/ppHop.gif", true);
             }
             catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
             {
-                statusMessage.Text = Translations.Strings.StatusCanceled;
+                downloadProgress.SetStatus(Translations.Strings.StatusCanceled);
                 SetImage("Images/ppHop.gif", true);
             }
             catch (Exception ex)
             {
-                statusMessage.Text = Translations.Strings.StatusError;
+                downloadProgress.SetStatus(Translations.Strings.StatusError);
                 SetImage("Images/peepoSad.png", false);
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
@@ -242,7 +241,7 @@ namespace TwitchDownloaderWPF
                 }
             }
             btnGetInfo.IsEnabled = true;
-            statusProgressBar.Value = 0;
+            downloadProgress.ReportProgress(0);
             _cancellationTokenSource.Dispose();
             UpdateActionButtons(false);
         }

@@ -15,10 +15,10 @@ namespace TwitchDownloaderCLI.Modes
         {
             var downloadOptions = GetDownloadOptions(inputOptions);
 
-            ChatDownloader chatDownloader = new(downloadOptions);
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            chatDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
+            var progress = new CliTaskProgress();
+
+            var chatDownloader = new ChatDownloader(downloadOptions, progress);
+            chatDownloader.DownloadAsync(CancellationToken.None).Wait();
         }
 
         private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions)

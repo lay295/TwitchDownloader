@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
@@ -16,10 +17,10 @@ namespace TwitchDownloaderCore
     public sealed class ClipDownloader
     {
         private readonly ClipDownloadOptions downloadOptions;
-        private readonly IProgress<ProgressReport> _progress;
+        private readonly ITaskProgress _progress;
         private static readonly HttpClient HttpClient = new();
 
-        public ClipDownloader(ClipDownloadOptions clipDownloadOptions, IProgress<ProgressReport> progress)
+        public ClipDownloader(ClipDownloadOptions clipDownloadOptions, ITaskProgress progress)
         {
             downloadOptions = clipDownloadOptions;
             _progress = progress;
@@ -30,7 +31,7 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
         {
-            _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Fetching Clip Info"));
+            _progress.SetStatus("Fetching Clip Info");
 
             var downloadUrl = await GetDownloadUrl();
             var clipInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
@@ -43,13 +44,12 @@ namespace TwitchDownloaderCore
                 TwitchHelper.CreateDirectory(clipDirectory.FullName);
             }
 
-            _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Downloading Clip 0%"));
+            _progress.SetTemplateStatus("Downloading Clip {0}%", 0);
 
             void DownloadProgressHandler(StreamCopyProgress streamProgress)
             {
                 var percent = (int)(streamProgress.BytesCopied / (double)streamProgress.SourceLength * 100);
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Downloading Clip {percent}%"));
-                _progress.Report(new ProgressReport(percent));
+                _progress.ReportProgress(percent);
             }
 
             if (!downloadOptions.EncodeMetadata)
@@ -68,8 +68,7 @@ namespace TwitchDownloaderCore
             {
                 await DownloadFileTaskAsync(downloadUrl, tempFile, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
 
-                _progress.Report(new ProgressReport(ReportType.NewLineStatus, "Encoding Clip Metadata 0%"));
-                _progress.Report(new ProgressReport(0));
+                _progress.SetTemplateStatus("Encoding Clip Metadata {0}%", 0);
 
                 var clipChapter = TwitchHelper.GenerateClipChapter(clipInfo.data.clip);
                 await EncodeClipWithMetadata(tempFile, downloadOptions.Filename, clipInfo.data.clip, clipChapter, cancellationToken);
@@ -77,11 +76,10 @@ namespace TwitchDownloaderCore
                 if (!File.Exists(downloadOptions.Filename))
                 {
                     File.Move(tempFile, downloadOptions.Filename);
-                    _progress.Report(new ProgressReport(ReportType.Log, "Unable to serialize metadata. The download has been completed without custom metadata."));
+                    _progress.LogError("Unable to serialize metadata. The download has been completed without custom metadata.");
                 }
 
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Encoding Clip Metadata 100%"));
-                _progress.Report(new ProgressReport(100));
+                _progress.ReportProgress(100);
             }
             finally
             {

@@ -13,17 +13,16 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Download(ClipDownloadArgs inputOptions)
         {
+            var progress = new CliTaskProgress();
+
             if (inputOptions.EncodeMetadata == true)
             {
-                FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
+                FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
             }
-
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
 
             var downloadOptions = GetDownloadOptions(inputOptions);
 
-            ClipDownloader clipDownloader = new(downloadOptions, progress);
+            var clipDownloader = new ClipDownloader(downloadOptions, progress);
             clipDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 

@@ -1,7 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderCore.Tools
 {
@@ -29,12 +29,12 @@ namespace TwitchDownloaderCore.Tools
             return outputDrive;
         }
 
-        public static async Task WaitForDrive(DriveInfo drive, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        public static async Task WaitForDrive(DriveInfo drive, ITaskLogger logger, CancellationToken cancellationToken)
         {
             var driveNotReadyCount = 0;
             while (!drive.IsReady)
             {
-                progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Waiting for output drive ({(driveNotReadyCount + 1) / 2f:F1}s)"));
+                logger.LogInfo($"Waiting for output drive ({(driveNotReadyCount + 1) / 2f:F1}s)");
                 await Task.Delay(500, cancellationToken);
 
                 if (++driveNotReadyCount >= 20)

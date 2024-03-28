@@ -14,13 +14,12 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Render(ChatRenderArgs inputOptions)
         {
-            FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
+            var progress = new CliTaskProgress();
 
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
+            FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
             var renderOptions = GetRenderOptions(inputOptions);
-            using ChatRenderer chatRenderer = new(renderOptions, progress);
+            using var chatRenderer = new ChatRenderer(renderOptions, progress);
             chatRenderer.ParseJsonAsync().Wait();
             chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
         }

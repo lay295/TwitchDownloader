@@ -1,15 +1,17 @@
-﻿using Mono.Unix;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Mono.Unix;
 using TwitchDownloaderCLI.Modes.Arguments;
+using TwitchDownloaderCLI.Tools;
+using TwitchDownloaderCore.Interfaces;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
 
-namespace TwitchDownloaderCLI.Tools
+namespace TwitchDownloaderCLI.Modes
 {
     public static class FfmpegHandler
     {
@@ -55,14 +57,14 @@ namespace TwitchDownloaderCLI.Tools
             }
         }
 
-        public static void DetectFfmpeg(string ffmpegPath)
+        public static void DetectFfmpeg(string ffmpegPath, ITaskLogger logger)
         {
             if (File.Exists(ffmpegPath) || File.Exists(FfmpegExecutableName) || PathUtils.ExistsOnPATH(FfmpegExecutableName))
             {
                 return;
             }
 
-            Console.WriteLine("[ERROR] - Unable to find FFmpeg, exiting. You can download FFmpeg automatically with the command \"TwitchDownloaderCLI ffmpeg -d\"");
+            logger.LogError("Unable to find FFmpeg, exiting. You can download FFmpeg automatically with the command \"TwitchDownloaderCLI ffmpeg -d\"");
             Environment.Exit(1);
         }
 

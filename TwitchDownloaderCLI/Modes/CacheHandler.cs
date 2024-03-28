@@ -2,7 +2,7 @@
 using System.IO;
 using TwitchDownloaderCLI.Modes.Arguments;
 
-namespace TwitchDownloaderCLI.Tools
+namespace TwitchDownloaderCLI.Modes
 {
     public static class CacheHandler
     {
