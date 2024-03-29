@@ -370,19 +370,10 @@ namespace TwitchDownloaderCore
 
                 var taskProgress = new Progress<int>(percent =>
                 {
-                    percent = Math.Max(percent, 100);
+                    percentages[tc] = Math.Clamp(percent, 0, 100);
 
-                    percentages[tc] = percent;
-
-                    percent = 0;
-                    for (var j = 0; j < connectionCount; j++)
-                    {
-                        percent += percentages[j];
-                    }
-
-                    percent /= connectionCount;
-
-                    _progress.ReportProgress(percent);
+                    var reportPercent = percentages.Sum() / connectionCount;
+                    _progress.ReportProgress(reportPercent);
                 });
 
                 double start = videoStart + chunk * i;
