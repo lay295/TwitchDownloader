@@ -646,7 +646,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<Dictionary<string, SKBitmap>> GetEmojis(string cacheFolder, EmojiVendor emojiVendor, CancellationToken cancellationToken = default)
+        public static async Task<Dictionary<string, SKBitmap>> GetEmojis(string cacheFolder, EmojiVendor emojiVendor, IProgress<ProgressReport> progress, CancellationToken cancellationToken = default)
         {
             var returnCache = new Dictionary<string, SKBitmap>();
 
@@ -708,6 +708,13 @@ namespace TwitchDownloaderCore
             {
                 await using var fs = File.OpenRead(emojiPath);
                 var emojiImage = SKBitmap.Decode(fs);
+
+                if (emojiImage is null)
+                {
+                    progress.Report(new ProgressReport(ReportType.Log, $"Failed to decode emoji {Path.GetFileName(emojiPath)}, skipping."));
+                    continue;
+                }
+
                 returnCache.Add(Path.GetFileNameWithoutExtension(emojiPath), emojiImage);
             }
 
