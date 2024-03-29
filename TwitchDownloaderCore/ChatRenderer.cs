@@ -1691,7 +1691,7 @@ namespace TwitchDownloaderCore
 
         private async Task<Dictionary<string, SKBitmap>> GetScaledEmojis(CancellationToken cancellationToken)
         {
-            var emojiTask = await TwitchHelper.GetEmojis(renderOptions.TempFolder, renderOptions.EmojiVendor, cancellationToken);
+            var emojiTask = await TwitchHelper.GetEmojis(renderOptions.TempFolder, renderOptions.EmojiVendor, _progress, cancellationToken);
 
             //Assume emojis are 4x (they're 72x72)
             double emojiScale = 0.5 * renderOptions.ReferenceScale * renderOptions.EmojiScale;
