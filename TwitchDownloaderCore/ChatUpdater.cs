@@ -252,7 +252,7 @@ namespace TwitchDownloaderCore
                 newEmote.height = emote.Height / emote.ImageScale;
                 chatRoot.embeddedData.firstParty.Add(newEmote);
             }
-            _progress?.LogInfo($"Input 1st party emote count: {inputCount}. Output count: {chatRoot.embeddedData.firstParty.Count}");
+            _progress.LogInfo($"Input 1st party emote count: {inputCount}. Output count: {chatRoot.embeddedData.firstParty.Count}");
         }
 
         private async Task ThirdPartyEmoteTask(CancellationToken cancellationToken = default)
@@ -272,7 +272,7 @@ namespace TwitchDownloaderCore
                 newEmote.height = emote.Height / emote.ImageScale;
                 chatRoot.embeddedData.thirdParty.Add(newEmote);
             }
-            _progress?.LogInfo($"Input 3rd party emote count: {inputCount}. Output count: {chatRoot.embeddedData.thirdParty.Count}");
+            _progress.LogInfo($"Input 3rd party emote count: {inputCount}. Output count: {chatRoot.embeddedData.thirdParty.Count}");
         }
 
         private async Task ChatBadgeTask(CancellationToken cancellationToken = default)
@@ -288,7 +288,7 @@ namespace TwitchDownloaderCore
                 newBadge.versions = badge.VersionsData;
                 chatRoot.embeddedData.twitchBadges.Add(newBadge);
             }
-            _progress?.LogInfo($"Input badge count: {inputCount}. Output count: {chatRoot.embeddedData.twitchBadges.Count}");
+            _progress.LogInfo($"Input badge count: {inputCount}. Output count: {chatRoot.embeddedData.twitchBadges.Count}");
         }
 
         private async Task BitTask(CancellationToken cancellationToken = default)
@@ -315,7 +315,7 @@ namespace TwitchDownloaderCore
                 }
                 chatRoot.embeddedData.twitchBits.Add(newBit);
             }
-            _progress?.LogInfo($"Input bit emote count: {inputCount}. Output count: {chatRoot.embeddedData.twitchBits.Count}");
+            _progress.LogInfo($"Input bit emote count: {inputCount}. Output count: {chatRoot.embeddedData.twitchBits.Count}");
         }
 
         private bool _cropTaskReportedExpiredVod;

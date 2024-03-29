@@ -54,7 +54,7 @@ namespace TwitchDownloaderCore
         private SKPaint outlinePaint;
         private readonly HighlightIcons highlightIcons;
 
-        public ChatRenderer(ChatRenderOptions chatRenderOptions, ITaskProgress progress = null)
+        public ChatRenderer(ChatRenderOptions chatRenderOptions, ITaskProgress progress)
         {
             renderOptions = chatRenderOptions;
             renderOptions.TempFolder = Path.Combine(
@@ -287,7 +287,7 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                if (_progress != null && currentTick % 3 == 0)
+                if (currentTick % 3 == 0)
                 {
                     var percent = (currentTick - startTick) / (double)(endTick - startTick) * 100;
                     var elapsed = stopwatch.Elapsed;
@@ -299,8 +299,8 @@ namespace TwitchDownloaderCore
             }
 
             stopwatch.Stop();
-            _progress?.ReportProgress(100, stopwatch.Elapsed, TimeSpan.Zero);
-            _progress?.LogInfo($"FINISHED. RENDER TIME: {stopwatch.Elapsed.TotalSeconds:F1}s SPEED: {(endTick - startTick) / (double)renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds:F2}x");
+            _progress.ReportProgress(100, stopwatch.Elapsed, TimeSpan.Zero);
+            _progress.LogInfo($"FINISHED. RENDER TIME: {stopwatch.Elapsed.TotalSeconds:F1}s SPEED: {(endTick - startTick) / (double)renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds:F2}x");
 
             latestUpdate?.Image.Dispose();
 
@@ -1744,7 +1744,7 @@ namespace TwitchDownloaderCore
                 if (!noFallbackFontFound)
                 {
                     noFallbackFontFound = true;
-                    _progress?.LogWarning("No valid typefaces were found for some messages.");
+                    _progress.LogWarning("No valid typefaces were found for some messages.");
                 }
             }
 
