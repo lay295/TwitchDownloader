@@ -360,7 +360,7 @@ namespace TwitchDownloaderCore
             chatRoot.video.game = game;
             videoDuration = videoEnd - videoStart;
 
-            var tasks = new List<Task<List<Comment>>>();
+            var downloadTasks = new List<Task<List<Comment>>>(connectionCount);
             var percentages = new int[connectionCount];
 
             double chunk = videoDuration / connectionCount;
@@ -386,13 +386,14 @@ namespace TwitchDownloaderCore
                 });
 
                 double start = videoStart + chunk * i;
-                tasks.Add(DownloadSection(start, start + chunk, videoId, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
+                downloadTasks.Add(DownloadSection(start, start + chunk, videoId, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
             }
 
-            await Task.WhenAll(tasks);
+            _progress.SetTemplateStatus("Downloading {0}%", 0);
+            await Task.WhenAll(downloadTasks);
 
-            var sortedComments = new List<Comment>(tasks.Count);
-            foreach (var commentTask in tasks)
+            var sortedComments = new List<Comment>(downloadTasks.Count);
+            foreach (var commentTask in downloadTasks)
             {
                 sortedComments.AddRange(commentTask.Result);
             }
