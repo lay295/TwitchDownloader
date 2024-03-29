@@ -6,6 +6,7 @@ namespace TwitchDownloaderCLI.Tools
     public class CliTaskProgress : ITaskProgress
     {
         private const string STATUS_PREAMBLE = "[STATUS] - ";
+        private const string VERBOSE_LOG_PREAMBLE = "[VERBOSE] - ";
         private const string INFO_LOG_PREAMBLE = "[INFO] - ";
         private const string WARNING_LOG_PREAMBLE = "[WARNING] - ";
         private const string ERROR_LOG_PREAMBLE = "[ERROR] - ";
@@ -129,6 +130,14 @@ namespace TwitchDownloaderCLI.Tools
             }
 
             return messageLength;
+        }
+
+        public void LogVerbose(string logMessage)
+        {
+            lock (this)
+            {
+                // WriteNewLineMessage(VERBOSE_LOG_PREAMBLE, logMessage);
+            }
         }
 
         public void LogInfo(string logMessage)

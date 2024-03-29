@@ -3,6 +3,7 @@ using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderWPF.Utils
 {
+    // TODO: Implement log levels
     internal class WpfTaskProgress : ITaskProgress
     {
         private string _status;
@@ -112,6 +113,11 @@ namespace TwitchDownloaderWPF.Utils
                 var status = string.Format(_status, percent, time1, time2);
                 _handleStatus?.Invoke(status);
             }
+        }
+
+        public void LogVerbose(string logMessage)
+        {
+            //_handleLog?.Invoke(logMessage);
         }
 
         public void LogInfo(string logMessage)

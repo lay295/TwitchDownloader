@@ -9,6 +9,8 @@ namespace TwitchDownloaderCore.Tools
 
         private StubTaskProgress() { }
 
+        public void LogVerbose(string logMessage) { }
+
         public void LogInfo(string logMessage) { }
 
         public void LogWarning(string logMessage) { }

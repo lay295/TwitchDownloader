@@ -704,6 +704,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
+            var failedToDecode = 0;
             foreach (var emojiPath in emojiFiles)
             {
                 await using var fs = File.OpenRead(emojiPath);
@@ -711,11 +712,17 @@ namespace TwitchDownloaderCore
 
                 if (emojiImage is null)
                 {
-                    logger.LogWarning($"Failed to decode emoji {Path.GetFileName(emojiPath)}, skipping.");
+                    failedToDecode++;
+                    logger.LogVerbose($"Failed to decode emoji {Path.GetFileName(emojiPath)}, skipping.");
                     continue;
                 }
 
                 returnCache.Add(Path.GetFileNameWithoutExtension(emojiPath), emojiImage);
+            }
+
+            if (failedToDecode > 0)
+            {
+                logger.LogWarning($"{failedToDecode} emojis failed to decode.");
             }
 
             return returnCache;
