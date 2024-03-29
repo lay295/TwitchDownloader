@@ -1691,22 +1691,26 @@ namespace TwitchDownloaderCore
 
         private async Task<Dictionary<string, SKBitmap>> GetScaledEmojis(CancellationToken cancellationToken)
         {
-            var emojiTask = await TwitchHelper.GetEmojis(renderOptions.TempFolder, renderOptions.EmojiVendor, cancellationToken);
+            var emojis = await TwitchHelper.GetEmojis(renderOptions.TempFolder, renderOptions.EmojiVendor, _progress, cancellationToken);
 
             //Assume emojis are 4x (they're 72x72)
             double emojiScale = 0.5 * renderOptions.ReferenceScale * renderOptions.EmojiScale;
-            List<string> emojiKeys = new List<string>(emojiTask.Keys);
+
+            // We can't just enumerate the dictionary because of the version checks
+            string[] emojiKeys = emojis.Keys.ToArray();
             foreach (var emojiKey in emojiKeys)
             {
-                SKImageInfo oldEmojiInfo = emojiTask[emojiKey].Info;
+                SKBitmap bitmap = emojis[emojiKey];
+                SKImageInfo oldEmojiInfo = bitmap.Info;
                 SKImageInfo imageInfo = new SKImageInfo((int)(oldEmojiInfo.Width * emojiScale), (int)(oldEmojiInfo.Height * emojiScale));
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
-                emojiTask[emojiKey].ScalePixels(newBitmap, SKFilterQuality.High);
-                emojiTask[emojiKey].Dispose();
-                emojiTask[emojiKey] = newBitmap;
+                bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
+                bitmap.Dispose();
+                newBitmap.SetImmutable();
+                emojis[emojiKey] = newBitmap;
             }
 
-            return emojiTask;
+            return emojis;
         }
 
         private (int startTick, int totalTicks) GetVideoTicks()
