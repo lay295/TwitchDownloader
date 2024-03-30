@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 
@@ -11,9 +11,9 @@ namespace TwitchDownloaderCore
     public sealed class TsMerger
     {
         private readonly TsMergeOptions mergeOptions;
-        private readonly IProgress<ProgressReport> _progress;
+        private readonly ITaskProgress _progress;
 
-        public TsMerger(TsMergeOptions tsMergeOptions, IProgress<ProgressReport> progress)
+        public TsMerger(TsMergeOptions tsMergeOptions, ITaskProgress progress)
         {
             mergeOptions = tsMergeOptions;
             _progress = progress;
@@ -48,15 +48,15 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            _progress.Report(new ProgressReport(ReportType.SameLineStatus, "Verifying Parts 0% [1/2]"));
+            _progress.SetTemplateStatus("Verifying Parts {0}% [1/2]", 0);
 
             await VerifyVideoParts(fileList, cancellationToken);
 
-            _progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Combining Parts 0% [2/2]" });
+            _progress.SetTemplateStatus("Combining Parts {0}% [2/2]", 0);
 
             await CombineVideoParts(fileList, cancellationToken);
 
-            _progress.Report(new ProgressReport(100));
+            _progress.ReportProgress(100);
         }
 
         private async Task VerifyVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
@@ -75,8 +75,7 @@ namespace TwitchDownloaderCore
 
                 doneCount++;
                 var percent = (int)(doneCount / (double)partCount * 100);
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Verifying Parts {percent}% [1/2]"));
-                _progress.Report(new ProgressReport(percent));
+                _progress.ReportProgress(percent);
 
                 cancellationToken.ThrowIfCancellationRequested();
             }
@@ -89,7 +88,7 @@ namespace TwitchDownloaderCore
                     return;
                 }
 
-                _progress.Report(new ProgressReport(ReportType.Log, $"The following TS files are invalid or corrupted: {string.Join(", ", failedParts)}"));
+                _progress.LogInfo($"The following TS files are invalid or corrupted: {string.Join(", ", failedParts)}");
             }
         }
 
@@ -132,8 +131,7 @@ namespace TwitchDownloaderCore
 
                 doneCount++;
                 int percent = (int)(doneCount / (double)partCount * 100);
-                _progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Combining Parts {percent}% [2/2]"));
-                _progress.Report(new ProgressReport(percent));
+                _progress.ReportProgress(percent);
 
                 cancellationToken.ThrowIfCancellationRequested();
             }

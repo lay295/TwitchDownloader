@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
@@ -18,16 +19,18 @@ namespace TwitchDownloaderCore
         private readonly object _cropChatRootLock = new();
 
         private readonly ChatUpdateOptions _updateOptions;
+        private readonly ITaskProgress _progress;
 
-        public ChatUpdater(ChatUpdateOptions updateOptions)
+        public ChatUpdater(ChatUpdateOptions updateOptions, ITaskProgress progress)
         {
             _updateOptions = updateOptions;
+            _progress = progress;
             _updateOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(_updateOptions.TempFolder) ? Path.GetTempPath() : _updateOptions.TempFolder,
                 "TwitchDownloader");
         }
 
-        public async Task UpdateAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        public async Task UpdateAsync(CancellationToken cancellationToken)
         {
             chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (!Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.Equals(".json", StringComparison.OrdinalIgnoreCase))
@@ -43,13 +46,13 @@ namespace TwitchDownloaderCore
                 && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)) totalSteps++;
 
             currentStep++;
-            await UpdateVideoInfo(totalSteps, currentStep, progress, cancellationToken);
+            await UpdateVideoInfo(totalSteps, currentStep, cancellationToken);
 
             // If we are editing the chat crop
             if (_updateOptions.CropBeginning || _updateOptions.CropEnding)
             {
                 currentStep++;
-                await UpdateChatCrop(totalSteps, currentStep, progress, cancellationToken);
+                await UpdateChatCrop(totalSteps, currentStep, cancellationToken);
             }
 
             // If we are updating/replacing embeds
@@ -57,12 +60,12 @@ namespace TwitchDownloaderCore
                 && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds))
             {
                 currentStep++;
-                await UpdateEmbeds(currentStep, totalSteps, progress, cancellationToken);
+                await UpdateEmbeds(currentStep, totalSteps, cancellationToken);
             }
 
             // Finally save the output to file!
-            progress.Report(new ProgressReport(ReportType.NewLineStatus, $"Writing Output File [{++currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
+            _progress.SetStatus($"Writing Output File [{++currentStep}/{totalSteps}]");
+            _progress.ReportProgress(currentStep * 100 / totalSteps);
 
             switch (_updateOptions.OutputFormat)
             {
@@ -80,10 +83,10 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task UpdateVideoInfo(int totalSteps, int currentStep, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        private async Task UpdateVideoInfo(int totalSteps, int currentStep, CancellationToken cancellationToken)
         {
-            progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Updating Video Info [{currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
+            _progress.SetStatus($"Updating Video Info [{currentStep}/{totalSteps}]");
+            _progress.ReportProgress(currentStep * 100 / totalSteps);
 
             if (string.IsNullOrWhiteSpace(chatRoot.video.id))
             {
@@ -102,7 +105,7 @@ namespace TwitchDownloaderCore
 
                 if (videoInfo is null)
                 {
-                    progress.Report(new ProgressReport(ReportType.SameLineStatus, "Unable to fetch video info, deleted/expired VOD possibly?"));
+                    _progress.LogInfo("Unable to fetch video info, deleted/expired VOD possibly?");
                     return;
                 }
 
@@ -143,7 +146,7 @@ namespace TwitchDownloaderCore
 
                 if (clipInfo is null)
                 {
-                    progress.Report(new ProgressReport(ReportType.SameLineStatus, "Unable to fetch clip info, deleted possibly?"));
+                    _progress.LogInfo("Unable to fetch clip info, deleted possibly?");
                     return;
                 }
 
@@ -170,34 +173,17 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task UpdateChatCrop(int totalSteps, int currentStep, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        private async Task UpdateChatCrop(int totalSteps, int currentStep, CancellationToken cancellationToken)
         {
-            progress.Report(new ProgressReport(ReportType.SameLineStatus, $"Updating Chat Crop [{currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
-
-            bool cropTaskVodExpired = false;
-            var cropTaskProgress = new Progress<ProgressReport>(report =>
-            {
-                if (((string)report.Data).Contains("vod is expired", StringComparison.OrdinalIgnoreCase))
-                {
-                    // If the user is moving both crops in one command, we only want to propagate a 'vod expired/id corrupt' report once
-                    if (cropTaskVodExpired)
-                    {
-                        return;
-                    }
-
-                    cropTaskVodExpired = true;
-                }
-
-                progress.Report(report);
-            });
+            _progress.SetStatus($"Updating Chat Crop [{currentStep}/{totalSteps}]");
+            _progress.ReportProgress(currentStep * 100 / totalSteps);
 
             int inputCommentCount = chatRoot.comments.Count;
 
             var chatCropTasks = new[]
             {
-                ChatBeginningCropTask(cropTaskProgress, cancellationToken),
-                ChatEndingCropTask(cropTaskProgress, cancellationToken)
+                ChatBeginningCropTask(cancellationToken),
+                ChatEndingCropTask(cancellationToken)
             };
 
             await Task.WhenAll(chatCropTasks);
@@ -228,29 +214,29 @@ namespace TwitchDownloaderCore
             // If the comment count didn't change, it probably failed so don't report the counts
             if (inputCommentCount != chatRoot.comments.Count)
             {
-                progress.Report(new ProgressReport(ReportType.Log, $"Input comment count: {inputCommentCount}. Output count: {chatRoot.comments.Count}"));
+                _progress.LogInfo($"Input comment count: {inputCommentCount}. Output count: {chatRoot.comments.Count}");
             }
         }
 
-        private async Task UpdateEmbeds(int currentStep, int totalSteps, IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        private async Task UpdateEmbeds(int currentStep, int totalSteps, CancellationToken cancellationToken)
         {
-            progress.Report(new ProgressReport(ReportType.NewLineStatus, $"Updating Embeds [{currentStep}/{totalSteps}]"));
-            progress.Report(new ProgressReport(currentStep * 100 / totalSteps));
+            _progress.SetStatus($"Updating Embeds [{currentStep}/{totalSteps}]");
+            _progress.ReportProgress(currentStep * 100 / totalSteps);
 
             chatRoot.embeddedData ??= new EmbeddedData();
 
             var embedTasks = new[]
             {
-                Task.Run(() => FirstPartyEmoteTask(progress, cancellationToken), cancellationToken),
-                Task.Run(() => ThirdPartyEmoteTask(progress, cancellationToken), cancellationToken),
-                Task.Run(() => ChatBadgeTask(progress, cancellationToken), cancellationToken),
-                Task.Run(() => BitTask(progress, cancellationToken), cancellationToken),
+                Task.Run(() => FirstPartyEmoteTask(cancellationToken), cancellationToken),
+                Task.Run(() => ThirdPartyEmoteTask(cancellationToken), cancellationToken),
+                Task.Run(() => ChatBadgeTask(cancellationToken), cancellationToken),
+                Task.Run(() => BitTask(cancellationToken), cancellationToken),
             };
 
             await Task.WhenAll(embedTasks);
         }
 
-        private async Task FirstPartyEmoteTask(IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
+        private async Task FirstPartyEmoteTask(CancellationToken cancellationToken = default)
         {
             List<TwitchEmote> firstPartyEmoteList = await TwitchHelper.GetEmotes(chatRoot.comments, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
@@ -266,12 +252,12 @@ namespace TwitchDownloaderCore
                 newEmote.height = emote.Height / emote.ImageScale;
                 chatRoot.embeddedData.firstParty.Add(newEmote);
             }
-            progress?.Report(new ProgressReport(ReportType.Log, $"Input 1st party emote count: {inputCount}. Output count: {chatRoot.embeddedData.firstParty.Count}"));
+            _progress.LogInfo($"Input 1st party emote count: {inputCount}. Output count: {chatRoot.embeddedData.firstParty.Count}");
         }
 
-        private async Task ThirdPartyEmoteTask(IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
+        private async Task ThirdPartyEmoteTask(CancellationToken cancellationToken = default)
         {
-            List<TwitchEmote> thirdPartyEmoteList = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, _updateOptions.BttvEmotes, _updateOptions.FfzEmotes, _updateOptions.StvEmotes, progress: progress, cancellationToken: cancellationToken);
+            List<TwitchEmote> thirdPartyEmoteList = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, _updateOptions.TempFolder, _progress, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, _updateOptions.BttvEmotes, _updateOptions.FfzEmotes, _updateOptions.StvEmotes, cancellationToken: cancellationToken);
 
             int inputCount = chatRoot.embeddedData.thirdParty.Count;
             chatRoot.embeddedData.thirdParty = new List<EmbedEmoteData>();
@@ -286,10 +272,10 @@ namespace TwitchDownloaderCore
                 newEmote.height = emote.Height / emote.ImageScale;
                 chatRoot.embeddedData.thirdParty.Add(newEmote);
             }
-            progress?.Report(new ProgressReport(ReportType.Log, $"Input 3rd party emote count: {inputCount}. Output count: {chatRoot.embeddedData.thirdParty.Count}"));
+            _progress.LogInfo($"Input 3rd party emote count: {inputCount}. Output count: {chatRoot.embeddedData.thirdParty.Count}");
         }
 
-        private async Task ChatBadgeTask(IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
+        private async Task ChatBadgeTask(CancellationToken cancellationToken = default)
         {
             List<ChatBadge> badgeList = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
@@ -302,10 +288,10 @@ namespace TwitchDownloaderCore
                 newBadge.versions = badge.VersionsData;
                 chatRoot.embeddedData.twitchBadges.Add(newBadge);
             }
-            progress?.Report(new ProgressReport(ReportType.Log, $"Input badge count: {inputCount}. Output count: {chatRoot.embeddedData.twitchBadges.Count}"));
+            _progress.LogInfo($"Input badge count: {inputCount}. Output count: {chatRoot.embeddedData.twitchBadges.Count}");
         }
 
-        private async Task BitTask(IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
+        private async Task BitTask(CancellationToken cancellationToken = default)
         {
             List<CheerEmote> bitList = await TwitchHelper.GetBits(chatRoot.comments, _updateOptions.TempFolder, chatRoot.streamer.id.ToString(), _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
@@ -329,10 +315,12 @@ namespace TwitchDownloaderCore
                 }
                 chatRoot.embeddedData.twitchBits.Add(newBit);
             }
-            progress?.Report(new ProgressReport(ReportType.Log, $"Input bit emote count: {inputCount}. Output count: {chatRoot.embeddedData.twitchBits.Count}"));
+            _progress.LogInfo($"Input bit emote count: {inputCount}. Output count: {chatRoot.embeddedData.twitchBits.Count}");
         }
 
-        private async Task ChatBeginningCropTask(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        private bool _cropTaskReportedExpiredVod;
+
+        private async Task ChatBeginningCropTask(CancellationToken cancellationToken)
         {
             if (!_updateOptions.CropBeginning)
             {
@@ -352,7 +340,11 @@ namespace TwitchDownloaderCore
             }
             catch (NullReferenceException)
             {
-                progress.Report(new ProgressReport(ReportType.Log, "Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt"));
+                if (!_cropTaskReportedExpiredVod)
+                {
+                    _cropTaskReportedExpiredVod = true;
+                    _progress.LogInfo("Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt");
+                }
             }
 
             if (File.Exists(tempFile))
@@ -365,7 +357,7 @@ namespace TwitchDownloaderCore
             chatRoot.video.start = Math.Min(Math.Max(_updateOptions.CropBeginningTime, 0.0), beginningCropClamp);
         }
 
-        private async Task ChatEndingCropTask(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        private async Task ChatEndingCropTask(CancellationToken cancellationToken)
         {
             if (!_updateOptions.CropEnding)
             {
@@ -385,7 +377,11 @@ namespace TwitchDownloaderCore
             }
             catch (NullReferenceException)
             {
-                progress.Report(new ProgressReport(ReportType.Log, "Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt"));
+                if (!_cropTaskReportedExpiredVod)
+                {
+                    _cropTaskReportedExpiredVod = true;
+                    _progress.LogInfo("Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt");
+                }
             }
 
             if (File.Exists(tempFile))
@@ -400,8 +396,8 @@ namespace TwitchDownloaderCore
 
         private async Task AppendCommentSection(ChatDownloadOptions downloadOptions, string inputFile, CancellationToken cancellationToken = new())
         {
-            ChatDownloader chatDownloader = new ChatDownloader(downloadOptions);
-            await chatDownloader.DownloadAsync(new Progress<ProgressReport>(), cancellationToken);
+            var chatDownloader = new ChatDownloader(downloadOptions, StubTaskProgress.Instance);
+            await chatDownloader.DownloadAsync(cancellationToken);
 
             ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, onlyFirstAndLastComments: false, getEmbeds: false, cancellationToken);
 

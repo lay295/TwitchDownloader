@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Api;
@@ -344,7 +345,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
+        public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -390,12 +391,7 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e)
                 {
-                    if (progress is null)
-                    {
-                        throw new Exception($"BTTV returned HTTP {e.StatusCode}. See inner exception.", e);
-                    }
-
-                    progress.Report(new ProgressReport(ReportType.Log, $"BetterTTV returned HTTP {e.StatusCode}. BTTV emotes may not be present for this session."));
+                    logger.LogError($"BetterTTV returned HTTP {e.StatusCode}. BTTV emotes may not be present for this session.");
                 }
             }
 
@@ -409,12 +405,7 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e)
                 {
-                    if (progress is null)
-                    {
-                        throw new Exception($"FFZ returned HTTP {e.StatusCode}. See inner exception.", e);
-                    }
-
-                    progress.Report(new ProgressReport(ReportType.Log, $"FFZ returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session."));
+                    logger.LogError($"FFZ returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session.");
                 }
             }
 
@@ -428,12 +419,7 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e)
                 {
-                    if (progress is null)
-                    {
-                        throw new Exception($"7TV returned HTTP {e.StatusCode}. See inner exception.", e);
-                    }
-
-                    progress.Report(new ProgressReport(ReportType.Log, $"7TV returned HTTP {e.StatusCode}. 7TV emotes may not be present for this session."));
+                    logger.LogError($"7TV returned HTTP {e.StatusCode}. 7TV emotes may not be present for this session.");
                 }
             }
 
@@ -660,7 +646,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public static async Task<Dictionary<string, SKBitmap>> GetEmojis(string cacheFolder, EmojiVendor emojiVendor, IProgress<ProgressReport> progress, CancellationToken cancellationToken = default)
+        public static async Task<Dictionary<string, SKBitmap>> GetEmojis(string cacheFolder, EmojiVendor emojiVendor, ITaskLogger logger, CancellationToken cancellationToken = default)
         {
             var returnCache = new Dictionary<string, SKBitmap>();
 
@@ -718,6 +704,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
+            var failedToDecode = 0;
             foreach (var emojiPath in emojiFiles)
             {
                 await using var fs = File.OpenRead(emojiPath);
@@ -725,11 +712,17 @@ namespace TwitchDownloaderCore
 
                 if (emojiImage is null)
                 {
-                    progress.Report(new ProgressReport(ReportType.Log, $"Failed to decode emoji {Path.GetFileName(emojiPath)}, skipping."));
+                    failedToDecode++;
+                    logger.LogVerbose($"Failed to decode emoji {Path.GetFileName(emojiPath)}, skipping.");
                     continue;
                 }
 
                 returnCache.Add(Path.GetFileNameWithoutExtension(emojiPath), emojiImage);
+            }
+
+            if (failedToDecode > 0)
+            {
+                logger.LogWarning($"{failedToDecode} emojis failed to decode.");
             }
 
             return returnCache;
@@ -857,7 +850,7 @@ namespace TwitchDownloaderCore
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
-        public static async Task CleanupAbandonedVideoCaches(string cacheFolder, Func<DirectoryInfo[], DirectoryInfo[]> itemsToDeleteCallback, IProgress<ProgressReport> progress)
+        public static async Task CleanupAbandonedVideoCaches(string cacheFolder, Func<DirectoryInfo[], DirectoryInfo[]> itemsToDeleteCallback, ITaskLogger logger)
         {
             if (!Directory.Exists(cacheFolder))
             {
@@ -906,9 +899,9 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            progress.Report(toDelete.Length == wasDeleted
-                ? new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted.")
-                : new ProgressReport(ReportType.Log, $"{wasDeleted} old video caches were deleted, {toDelete.Length - wasDeleted} could not be deleted."));
+            logger.LogInfo(toDelete.Length == wasDeleted
+                ? $"{wasDeleted} old video caches were deleted."
+                : $"{wasDeleted} old video caches were deleted, {toDelete.Length - wasDeleted} could not be deleted.");
         }
 
         public static int TimestampToSeconds(string input)
