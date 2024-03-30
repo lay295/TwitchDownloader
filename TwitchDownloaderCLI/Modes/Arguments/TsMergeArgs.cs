@@ -10,7 +10,5 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option('o', "output", Required = true, HelpText = "Path to output file.")]
         public string OutputFile { get; set; }
-
-        public bool? ShowBanner { get; set; }
     }
 }
