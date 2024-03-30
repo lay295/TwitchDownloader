@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCore.Interfaces;
 
@@ -158,6 +159,16 @@ namespace TwitchDownloaderCLI.Tools
             }
         }
 
+        public void LogVerbose(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Verbose) == 0) return;
+
+            lock (this)
+            {
+                WriteNewLineMessage(VERBOSE_LOG_PREAMBLE, logMessage.ToStringAndClear());
+            }
+        }
+
         public void LogInfo(string logMessage)
         {
             if ((_logLevel & LogLevel.Info) == 0) return;
@@ -165,6 +176,16 @@ namespace TwitchDownloaderCLI.Tools
             lock (this)
             {
                 WriteNewLineMessage(INFO_LOG_PREAMBLE, logMessage);
+            }
+        }
+
+        public void LogInfo(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Info) == 0) return;
+
+            lock (this)
+            {
+                WriteNewLineMessage(INFO_LOG_PREAMBLE, logMessage.ToStringAndClear());
             }
         }
 
@@ -178,6 +199,16 @@ namespace TwitchDownloaderCLI.Tools
             }
         }
 
+        public void LogWarning(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Warning) == 0) return;
+
+            lock (this)
+            {
+                WriteNewLineMessage(WARNING_LOG_PREAMBLE, logMessage.ToStringAndClear());
+            }
+        }
+
         public void LogError(string logMessage)
         {
             if ((_logLevel & LogLevel.Error) == 0) return;
@@ -185,6 +216,16 @@ namespace TwitchDownloaderCLI.Tools
             lock (this)
             {
                 WriteNewLineMessage(ERROR_LOG_PREAMBLE, logMessage);
+            }
+        }
+
+        public void LogError(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Error) == 0) return;
+
+            lock (this)
+            {
+                WriteNewLineMessage(ERROR_LOG_PREAMBLE, logMessage.ToStringAndClear());
             }
         }
 

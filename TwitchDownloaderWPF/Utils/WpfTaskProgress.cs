@@ -1,10 +1,10 @@
 using System;
+using System.Runtime.CompilerServices;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderWPF.Models;
 
 namespace TwitchDownloaderWPF.Utils
 {
-    // TODO: Implement log levels
     internal class WpfTaskProgress : ITaskProgress
     {
         private string _status;
@@ -129,42 +129,65 @@ namespace TwitchDownloaderWPF.Utils
 
         public void LogVerbose(string logMessage)
         {
-            if ((_logLevel & LogLevel.Verbose) != 0)
-            {
-                _handleLog?.Invoke(logMessage);
-            }
+            if ((_logLevel & LogLevel.Verbose) == 0) return;
+
+            _handleLog?.Invoke(logMessage);
+        }
+
+        public void LogVerbose(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Verbose) == 0) return;
+
+            _handleLog?.Invoke(logMessage.ToStringAndClear());
         }
 
         public void LogInfo(string logMessage)
         {
-            if ((_logLevel & LogLevel.Info) != 0)
-            {
-                _handleLog.Invoke(logMessage);
-            }
+            if ((_logLevel & LogLevel.Info) == 0) return;
+
+            _handleLog.Invoke(logMessage);
+        }
+
+        public void LogInfo(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Info) == 0) return;
+
+            _handleLog.Invoke(logMessage.ToStringAndClear());
         }
 
         public void LogWarning(string logMessage)
         {
-            if ((_logLevel & LogLevel.Warning) != 0)
-            {
-                _handleLog?.Invoke(logMessage);
-            }
+            if ((_logLevel & LogLevel.Warning) == 0) return;
+
+            _handleLog?.Invoke(logMessage);
+        }
+
+        public void LogWarning(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Warning) == 0) return;
+
+            _handleLog?.Invoke(logMessage.ToStringAndClear());
         }
 
         public void LogError(string logMessage)
         {
-            if ((_logLevel & LogLevel.Error) != 0)
-            {
-                _handleLog?.Invoke(Translations.Strings.ErrorLog + logMessage);
-            }
+            if ((_logLevel & LogLevel.Error) == 0) return;
+
+            _handleLog?.Invoke(Translations.Strings.ErrorLog + logMessage);
+        }
+
+        public void LogError(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Error) == 0) return;
+
+            _handleLog?.Invoke(Translations.Strings.ErrorLog + logMessage.ToStringAndClear());
         }
 
         public void LogFfmpeg(string logMessage)
         {
-            if ((_logLevel & LogLevel.Ffmpeg) != 0)
-            {
-                _handleFfmpegLog?.Invoke(logMessage);
-            }
+            if ((_logLevel & LogLevel.Ffmpeg) == 0) return;
+
+            _handleFfmpegLog?.Invoke(logMessage);
         }
     }
 }

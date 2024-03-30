@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderCore.Tools
@@ -11,11 +12,19 @@ namespace TwitchDownloaderCore.Tools
 
         public void LogVerbose(string logMessage) { }
 
+        public void LogVerbose(DefaultInterpolatedStringHandler logMessage) { }
+
         public void LogInfo(string logMessage) { }
+
+        public void LogInfo(DefaultInterpolatedStringHandler logMessage) { }
 
         public void LogWarning(string logMessage) { }
 
+        public void LogWarning(DefaultInterpolatedStringHandler logMessage) { }
+
         public void LogError(string logMessage) { }
+
+        public void LogError(DefaultInterpolatedStringHandler logMessage) { }
 
         public void LogFfmpeg(string logMessage) { }
 
