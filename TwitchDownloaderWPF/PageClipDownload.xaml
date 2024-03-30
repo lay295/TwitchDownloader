@@ -66,7 +66,7 @@
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock Text="{lex:Loc Length}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="{lex:Loc Quality}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock Text="{lex:Loc EncodeClipMetadata}" HorizontalAlignment="Right" Margin="0,17,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock Text="{lex:Loc EncodeClipMetadata}" HorizontalAlignment="Right" Margin="0,16,0,0" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel>
                 <TextBlock x:Name="labelLength" Text="0:0:0" Margin="5,0,0,0" Foreground="{DynamicResource AppText}" />

@@ -19,7 +19,7 @@
     <SolidColorBrush x:Key="AppInnerTextDisabled" Color="#999999"/>
     <SolidColorBrush x:Key="AppHyperlink" Color="#F224B7"/>
     <SolidColorBrush x:Key="AppCheckBox" Color="#B5005D"/>
-    <SolidColorBrush x:Key="AppRadio" Color="#B5005D"/>
+    <!-- <SolidColorBrush x:Key="AppRadio" Color="#B5005D"/> DEPRECATED -->
     <SolidColorBrush x:Key="AppDivider" Color="#919191"/>
     <SolidColorBrush x:Key="AppDividerText" Color="#E0E0E0"/>
 

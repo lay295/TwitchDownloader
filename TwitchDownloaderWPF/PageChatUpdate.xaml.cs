@@ -480,25 +480,38 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            var saveFileDialog = new SaveFileDialog
+            {
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text,
+                    ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text,
+                    checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.start) ? 0.0 : ChatJsonInfo.video.start),
+                    checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : VideoLength,
+                    ViewCount.ToString(), Game)
+            };
 
             if (radioJson.IsChecked == true)
             {
                 if (radioCompressionNone.IsChecked == true)
+                {
                     saveFileDialog.Filter = "JSON Files | *.json";
+                    saveFileDialog.FileName += ".json";
+                }
                 else if (radioCompressionGzip.IsChecked == true)
+                {
                     saveFileDialog.Filter = "GZip JSON Files | *.json.gz";
+                    saveFileDialog.FileName += ".json.gz";
+                }
             }
             else if (radioHTML.IsChecked == true)
-                saveFileDialog.Filter = "HTML Files | *.html;*.htm";
+            {
+                saveFileDialog.Filter = "HTML Files | *.html";
+                saveFileDialog.FileName += ".html";
+            }
             else if (radioText.IsChecked == true)
+            {
                 saveFileDialog.Filter = "TXT Files | *.txt";
-
-            saveFileDialog.FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text,
-                ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text,
-                checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.start) ? 0.0 : ChatJsonInfo.video.start),
-                checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : VideoLength,
-                ViewCount.ToString(), Game);
+                saveFileDialog.FileName += ".txt";
+            }
 
             if (saveFileDialog.ShowDialog() != true)
             {
