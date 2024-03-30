@@ -19,17 +19,23 @@ namespace TwitchDownloaderCLI.Modes
 
         public static void ParseArgs(FfmpegArgs args)
         {
+            var progress = new CliTaskProgress(args.LogLevel);
+
             if (args.DownloadFfmpeg)
             {
-                DownloadFfmpeg();
+                DownloadFfmpeg(progress);
             }
         }
 
-        private static void DownloadFfmpeg()
+        private static void DownloadFfmpeg(ITaskProgress progress)
         {
-            Console.Write("[INFO] - Downloading FFmpeg");
+            if (File.Exists(FfmpegExecutableName))
+            {
+                progress.LogInfo("FFmpeg was already found in the current working directory.");
+                return;
+            }
 
-            using var progressHandler = new XabeProgressHandler();
+            using var progressHandler = new XabeProgressHandler(progress);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -52,8 +58,8 @@ namespace TwitchDownloaderCLI.Modes
             }
             catch
             {
-                Console.WriteLine("[ERROR] - Unable to update FFmpeg file permissions. Run '{0}' if further FFmpeg errors occur.",
-                    RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "chmod +x ffmpeg" : "sudo chmod +x ffmpeg");
+                var chmodCommand = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "chmod +x ffmpeg" : "sudo chmod +x ffmpeg";
+                progress.LogError($"Unable to update FFmpeg file permissions. Run '{chmodCommand}' if further FFmpeg errors occur.");
             }
         }
 
@@ -74,17 +80,14 @@ namespace TwitchDownloaderCLI.Modes
             private readonly ConcurrentQueue<int> _percentQueue = new();
             private readonly Timer _timer;
 
-            public XabeProgressHandler()
+            // This may seem overly complicated, but it removes the expensive console writes from the thread that is downloading FFmpeg
+            public XabeProgressHandler(ITaskProgress progress)
             {
-                _timer = new Timer(Callback, _percentQueue, 0, 100);
-
-                static void Callback(object state)
+                progress.SetTemplateStatus("Downloading FFmpeg {0}%", 0);
+                _timer = new Timer(_ =>
                 {
-                    if (state is not ConcurrentQueue<int> { IsEmpty: false } queue) return;
-
-                    var currentPercent = queue.Max();
-                    Console.Write($"\r[INFO] - Downloading FFmpeg {currentPercent}%");
-                }
+                    progress.ReportProgress(_percentQueue.Max());
+                }, null, 0, 100);
             }
 
             public void Report(ProgressInfo value)

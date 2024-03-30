@@ -6,6 +6,7 @@ using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderCLI.Modes
@@ -14,17 +15,17 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Render(ChatRenderArgs inputOptions)
         {
-            var progress = new CliTaskProgress();
+            var progress = new CliTaskProgress(inputOptions.LogLevel);
 
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
-            var renderOptions = GetRenderOptions(inputOptions);
+            var renderOptions = GetRenderOptions(inputOptions, progress);
             using var chatRenderer = new ChatRenderer(renderOptions, progress);
             chatRenderer.ParseJsonAsync().Wait();
             chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
         }
 
-        private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions)
+        private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions, ITaskLogger logger)
         {
             ChatRenderOptions renderOptions = new()
             {
@@ -96,12 +97,12 @@ namespace TwitchDownloaderCLI.Modes
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255 && !(renderOptions.AlternateMessageBackgrounds! && renderOptions.AlternateBackgroundColor.Alpha != 255))
             {
-                Console.WriteLine("[WARNING] - Generate mask option has been selected with an opaque background. You most likely want to set a transparent background with --background-color \"#00000000\"");
+                logger.LogWarning("Generate mask option has been selected with an opaque background. You most likely want to set a transparent background with --background-color \"#00000000\"");
             }
 
             if (renderOptions.ChatHeight % 2 != 0 || renderOptions.ChatWidth % 2 != 0)
             {
-                Console.WriteLine("[WARNING] - Width and Height MUST be even, rounding up to the nearest even number to prevent errors");
+                logger.LogWarning("Width and Height MUST be even, rounding up to the nearest even number to prevent errors");
                 if (renderOptions.ChatHeight % 2 != 0)
                 {
                     renderOptions.ChatHeight++;

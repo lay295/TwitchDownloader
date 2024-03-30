@@ -24,9 +24,12 @@ namespace TwitchDownloaderCLI.Tools
 
         private readonly LogLevel _logLevel;
 
-        public CliTaskProgress()
+        public CliTaskProgress(LogLevel logLevel)
         {
-            // TODO: Take in ITwitchDownloaderArgs to configure log levels
+            if ((logLevel & LogLevel.None) == 0)
+            {
+                _logLevel = logLevel;
+            }
         }
 
         public void SetStatus(string status)
