@@ -3,6 +3,7 @@ A cross platform command line tool that can do the main functions of the GUI pro
 Also can concatenate/combine/merge Transport Stream files, either those parts downloaded with the CLI itself or from another source.
 
 - [TwitchDownloaderCLI](#twitchdownloadercli)
+  - [Global arguments](#global-arguments)
   - [Arguments for mode videodownload](#arguments-for-mode-videodownload)
   - [Arguments for mode clipdownload](#arguments-for-mode-clipdownload)
   - [Arguments for mode chatdownload](#arguments-for-mode-chatdownload)
@@ -16,6 +17,15 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
 
 ---
 
+## Global arguments
+#### Common arguments shared between all the modes
+
+**--banner**
+(Default: `true`) Displays a banner containing version and copyright information.
+
+**--log-level**
+(Default: `Info,Warning,Error`) Sets the log level flags. Applicable values are: `None`, `Verbose`, `Info`, `Warning`, `Error`, `Ffmpeg`. When `None` is passed, any other log level flags are ignored and `--banner=false` is implied.
+
 ## Arguments for mode videodownload
 #### Downloads a stream VOD or highlight from Twitch
 
@@ -26,13 +36,13 @@ The ID or URL of the VOD to download.
 File the program will output to. File extension will be used to determine download type. Valid extensions are: `.mp4` and `.m4a`.
 
 **-q / --quality**
-The quality the program will attempt to download, for example "1080p60", if not found will download highest quality stream.
+The quality that the program will attempt to download, for example "1080p60". If not found, the highest quality stream will be downloaded.
 
 **-b / --beginning**
-Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time in seconds to trim beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e / --ending**
-Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time in seconds to trim ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
 
@@ -51,9 +61,6 @@ Path to FFmpeg executable.
 **--temp-path**
 Path to temporary folder for cache.
 
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
-
 ## Arguments for mode clipdownload
 #### Downloads a clip from Twitch
 
@@ -64,7 +71,7 @@ The ID or URL of the Clip to download.
 File the program will output to.
 
 **-q / --quality**
-The quality the program will attempt to download, for example "1080p60", if not found will download highest quality video.
+The quality that the program will attempt to download, for example "1080p60". If not found, the highest quality video will be downloaded.
 
 **--bandwidth**
 (Default: `-1`) The maximum bandwidth the clip downloader is allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
@@ -77,9 +84,6 @@ Path to FFmpeg executable.
 
 **--temp-path**
 Path to temporary folder for cache.
-
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode chatdownload
 #### Downloads the chat of a VOD, highlight, or clip
@@ -94,10 +98,10 @@ File the program will output to. File extension will be used to determine downlo
 (Default: `None`) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-b / --beginning**
-Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time in seconds to trim beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
 
 **-e / --ending**
-Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time in seconds to trim ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
 
 **-E / --embed-images**
 (Default: `false`) Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.
@@ -117,14 +121,8 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 **--chat-connections**
 (Default: `4`) The number of parallel downloads for chat.
 
-**--silent**
-(Default: `false`) Suppresses progress console output.
-
 **--temp-path**
 Path to temporary folder for cache.
-
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode chatupdate
 #### Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format
@@ -164,9 +162,6 @@ Path to output file. File extension will be used to determine new chat type. Val
 
 **--temp-path**
 Path to temporary folder for cache.
-
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode chatrender
 #### Renders a chat JSON as a video
@@ -235,7 +230,7 @@ File the program will output to.
 (Default: `bold`) Font style of username. Valid values are **normal**, **bold**, and **italic**.
 
 **--timestamp**
-(Default: `false`) Enables timestamps to left of messages, similar to VOD chat on Twitch.
+(Default: `false`) Enables timestamps to the left of messages, similar to VOD chat on Twitch.
 
 **--generate-mask**
 (Default: `false`) Generates a mask file of the chat in addition to the rendered chat.
@@ -320,18 +315,11 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--scale-highlight-indent**
 (Default: `1.0`) Number to scale highlight indent size (sub messages).
 
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
-
-
 ## Arguments for mode ffmpeg
 #### Manage standalone FFmpeg
 
 **-d / --download**
 (Default: `false`) Downloads FFmpeg as a standalone file.
-
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode cache
 #### Manage the working cache.
@@ -342,9 +330,6 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--force-clear**
 (Default: `false`) Clears the default cache folder, bypassing the confirmation prompt.
 
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
-
 ## Arguments for mode tsmerge
 #### Concatenates multiple .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) files into a single file
 
@@ -353,9 +338,6 @@ Path a text file containing the absolute paths of the files to concatenate, sepa
 
 **-o / --output (REQUIRED)**
 File the program will output to.
-
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
 
 ---
 
@@ -426,9 +408,11 @@ Print the available options for the VOD downloader
 
 All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303` or `--id https://twitch.tv/videos/612942303`.
 
-String arguments that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd>. i.e. `--output 'my output file.mp4'` or `--output "my output file.mp4"`
+String arguments that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd> depending on your shell. i.e. `--output 'my output file.mp4'` or `--output "my output file.mp4"`
 
 Default true boolean flags must be assigned: `--default-true-flag=false`. Default false boolean flags should still be raised normally: `--default-false-flag`.
+
+Enum flag arguments may be assigned as `--flag Value1,Value2,Value3` or `--flag "Value1, Value2, Value3"`.
 
 For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 
