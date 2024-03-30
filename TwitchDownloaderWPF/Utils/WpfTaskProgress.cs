@@ -1,5 +1,6 @@
 using System;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderWPF.Models;
 
 namespace TwitchDownloaderWPF.Utils
 {
@@ -13,6 +14,8 @@ namespace TwitchDownloaderWPF.Utils
         private TimeSpan _lastTime1 = new(-1);
         private TimeSpan _lastTime2 = new(-1);
 
+        private readonly LogLevel _logLevel;
+
         private readonly Action<int> _handlePercent;
         private readonly Action<string> _handleStatus;
         private readonly Action<string> _handleLog;
@@ -24,6 +27,8 @@ namespace TwitchDownloaderWPF.Utils
             _handleStatus = null;
             _handleLog = null;
             _handleFfmpegLog = null;
+
+            _logLevel = LogLevel.None;
         }
 
         public WpfTaskProgress(Action<int> handlePercent, Action<string> handleStatus, Action<string> handleLog, Action<string> handleFfmpegLog = null)
@@ -32,6 +37,13 @@ namespace TwitchDownloaderWPF.Utils
             _handleStatus = handleStatus;
             _handleLog = handleLog;
             _handleFfmpegLog = handleFfmpegLog;
+
+            // TODO: Make this user configurable
+            _logLevel = LogLevel.Info | LogLevel.Warning | LogLevel.Error;
+            if (handleFfmpegLog is not null)
+            {
+                _logLevel |= LogLevel.Ffmpeg;
+            }
         }
 
         public void SetStatus(string status)
@@ -117,27 +129,42 @@ namespace TwitchDownloaderWPF.Utils
 
         public void LogVerbose(string logMessage)
         {
-            //_handleLog?.Invoke(logMessage);
+            if ((_logLevel & LogLevel.Verbose) != 0)
+            {
+                _handleLog?.Invoke(logMessage);
+            }
         }
 
         public void LogInfo(string logMessage)
         {
-            _handleLog?.Invoke(logMessage);
+            if ((_logLevel & LogLevel.Info) != 0)
+            {
+                _handleLog.Invoke(logMessage);
+            }
         }
 
         public void LogWarning(string logMessage)
         {
-            _handleLog?.Invoke(logMessage);
+            if ((_logLevel & LogLevel.Warning) != 0)
+            {
+                _handleLog?.Invoke(logMessage);
+            }
         }
 
         public void LogError(string logMessage)
         {
-            _handleLog?.Invoke(Translations.Strings.ErrorLog + logMessage);
+            if ((_logLevel & LogLevel.Error) != 0)
+            {
+                _handleLog?.Invoke(Translations.Strings.ErrorLog + logMessage);
+            }
         }
 
         public void LogFfmpeg(string logMessage)
         {
-            _handleFfmpegLog?.Invoke(logMessage);
+            if ((_logLevel & LogLevel.Ffmpeg) != 0)
+            {
+                _handleFfmpegLog?.Invoke(logMessage);
+            }
         }
     }
 }
