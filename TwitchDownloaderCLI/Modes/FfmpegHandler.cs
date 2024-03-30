@@ -13,7 +13,7 @@ using Xabe.FFmpeg.Downloader;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    public static class FfmpegHandler
+    internal static class FfmpegHandler
     {
         public static readonly string FfmpegExecutableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg";
 

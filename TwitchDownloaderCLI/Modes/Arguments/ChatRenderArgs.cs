@@ -3,7 +3,7 @@
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("chatrender", HelpText = "Renders a chat JSON as a video")]
-    public class ChatRenderArgs : ITwitchDownloaderArgs
+    internal sealed class ChatRenderArgs : TwitchDownloaderArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to JSON chat file input.")]
         public string InputFile { get; set; }
@@ -151,8 +151,5 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("scale-highlight-indent", Default = 1.0, HelpText = "Number to scale highlight indent size (sub messages).")]
         public double ScaleAccentIndent { get; set; }
-
-        [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
-        public bool? ShowBanner { get; set; }
     }
 }

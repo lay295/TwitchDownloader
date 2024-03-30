@@ -4,7 +4,7 @@ using TwitchDownloaderCore.Tools;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("chatupdate", HelpText = "Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format.")]
-    public class ChatUpdateArgs : ITwitchDownloaderArgs
+    internal sealed class ChatUpdateArgs : TwitchDownloaderArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are: .json, .json.gz.")]
         public string InputFile { get; set; }
@@ -41,8 +41,5 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
-
-        [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
-        public bool? ShowBanner { get; set; }
     }
 }

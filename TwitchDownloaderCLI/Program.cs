@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using CommandLine.Text;
+using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -28,7 +29,7 @@ namespace TwitchDownloaderCLI
             parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
 
             CoreLicensor.EnsureFilesExist(AppContext.BaseDirectory);
-            WriteApplicationBanner((ITwitchDownloaderArgs)parserResult.Value, args);
+            WriteApplicationBanner((TwitchDownloaderArgs)parserResult.Value);
 
             parserResult
                 .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
@@ -73,9 +74,9 @@ namespace TwitchDownloaderCLI
             Environment.Exit(1);
         }
 
-        private static void WriteApplicationBanner(ITwitchDownloaderArgs args, string[] argsArray)
+        private static void WriteApplicationBanner(TwitchDownloaderArgs args)
         {
-            if (args.ShowBanner == false || argsArray.Contains("--silent"))
+            if (args.ShowBanner == false || (args.LogLevel & LogLevel.None) != 0)
             {
                 return;
             }

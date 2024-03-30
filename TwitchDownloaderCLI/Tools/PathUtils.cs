@@ -3,7 +3,7 @@ using System.IO;
 
 namespace TwitchDownloaderCLI.Tools
 {
-    public static class PathUtils
+    internal static class PathUtils
     {
         // https://stackoverflow.com/a/3856090/12204538
         public static bool ExistsOnPATH(string fileName)
