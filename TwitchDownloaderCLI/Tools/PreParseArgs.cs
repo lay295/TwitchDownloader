@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Tools
 {
@@ -8,7 +9,7 @@ namespace TwitchDownloaderCLI.Tools
     {
         internal static string[] Parse(string[] args, string processFileName)
         {
-            if (args.Any(x => x is "-m" or "--mode" or "--embed-emotes"))
+            if (args.Any(x => x is "-m" or "--mode" or "--embed-emotes" or "--silent"))
             {
                 // A legacy syntax was used, convert to new syntax
                 return Process(ConvertFromOldSyntax(args, processFileName));
@@ -44,6 +45,12 @@ namespace TwitchDownloaderCLI.Tools
             {
                 Console.WriteLine("[INFO] The program has switched from --mode <mode> to verbs (like \'git <verb>\'), consider using verbs instead. Run \'{0} help\' for more information.", processFileName);
                 processedArgs = ConvertModeSyntax(processedArgs);
+            }
+
+            if (args.Any(x => x is "--silent"))
+            {
+                Console.WriteLine("[INFO] The program has switched from --silent to log levels, consider using log levels instead. '--log-level None' will be applied to the current session. Run \'{0} help\' for more information.", processFileName);
+                processedArgs = ConvertSilentSyntax(processedArgs);
             }
 
             return processedArgs.ToArray();
@@ -85,6 +92,20 @@ namespace TwitchDownloaderCLI.Tools
             }
 
             return processedArgs.ToList();
+        }
+
+        private static List<string> ConvertSilentSyntax(List<string> args)
+        {
+            for (var i = 0; i < args.Count; i++)
+            {
+                if (args[i].Equals("--silent"))
+                {
+                    args[i] = "--log-level";
+                    args.Insert(i + 1, nameof(LogLevel.None));
+                }
+            }
+
+            return args;
         }
     }
 }
