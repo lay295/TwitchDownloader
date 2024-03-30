@@ -44,8 +44,8 @@
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,4,3,3" Text="{lex:Loc SettingsTimeFormat}" Foreground="{DynamicResource AppText}" />
-                <RadioButton x:Name="RadioTimeFormatUtc" Content="{lex:Loc TimestampUtc}" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                <RadioButton x:Name="RadioTimeFormatLocal" IsChecked="True" Content="{lex:Loc TimestampLocal}" Margin="3,0,0,0" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <RadioButton x:Name="RadioTimeFormatUtc" Content="{lex:Loc TimestampUtc}" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <RadioButton x:Name="RadioTimeFormatLocal" IsChecked="True" Content="{lex:Loc TimestampLocal}" Margin="3,0,0,0" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,4,3,3" Text="{lex:Loc VerboseErrors}" Foreground="{DynamicResource AppText}" />
