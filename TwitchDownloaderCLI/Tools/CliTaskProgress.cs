@@ -34,6 +34,8 @@ namespace TwitchDownloaderCLI.Tools
 
         public void SetStatus(string status)
         {
+            if ((_logLevel & LogLevel.Status) == 0) return;
+
             lock (this)
             {
                 _status = status;
@@ -45,6 +47,8 @@ namespace TwitchDownloaderCLI.Tools
 
         public void SetTemplateStatus(string status, int initialPercent)
         {
+            if ((_logLevel & LogLevel.Status) == 0) return;
+
             lock (this)
             {
                 _status = status;
@@ -62,6 +66,8 @@ namespace TwitchDownloaderCLI.Tools
 
         public void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2)
         {
+            if ((_logLevel & LogLevel.Status) == 0) return;
+
             lock (this)
             {
                 _status = status;
@@ -79,6 +85,8 @@ namespace TwitchDownloaderCLI.Tools
 
         public void ReportProgress(int percent)
         {
+            if ((_logLevel & LogLevel.Status) == 0) return;
+
             lock (this)
             {
                 if ((!_lastWriteHadNewLine && _lastPercent == percent)
@@ -97,6 +105,8 @@ namespace TwitchDownloaderCLI.Tools
 
         public void ReportProgress(int percent, TimeSpan time1, TimeSpan time2)
         {
+            if ((_logLevel & LogLevel.Status) == 0) return;
+
             lock (this)
             {
                 if ((!_lastWriteHadNewLine && _lastPercent == percent && _lastTime1 == time1 && _lastTime2 == time2)
@@ -140,56 +150,51 @@ namespace TwitchDownloaderCLI.Tools
 
         public void LogVerbose(string logMessage)
         {
-            if ((_logLevel & LogLevel.Verbose) != 0)
+            if ((_logLevel & LogLevel.Verbose) == 0) return;
+
+            lock (this)
             {
-                lock (this)
-                {
-                    WriteNewLineMessage(VERBOSE_LOG_PREAMBLE, logMessage);
-                }
+                WriteNewLineMessage(VERBOSE_LOG_PREAMBLE, logMessage);
             }
         }
 
         public void LogInfo(string logMessage)
         {
-            if ((_logLevel & LogLevel.Info) != 0)
+            if ((_logLevel & LogLevel.Info) == 0) return;
+
+            lock (this)
             {
-                lock (this)
-                {
-                    WriteNewLineMessage(INFO_LOG_PREAMBLE, logMessage);
-                }
+                WriteNewLineMessage(INFO_LOG_PREAMBLE, logMessage);
             }
         }
 
         public void LogWarning(string logMessage)
         {
-            if ((_logLevel & LogLevel.Warning) != 0)
+            if ((_logLevel & LogLevel.Warning) == 0) return;
+
+            lock (this)
             {
-                lock (this)
-                {
-                    WriteNewLineMessage(WARNING_LOG_PREAMBLE, logMessage);
-                }
+                WriteNewLineMessage(WARNING_LOG_PREAMBLE, logMessage);
             }
         }
 
         public void LogError(string logMessage)
         {
-            if ((_logLevel & LogLevel.Error) != 0)
+            if ((_logLevel & LogLevel.Error) == 0) return;
+
+            lock (this)
             {
-                lock (this)
-                {
-                    WriteNewLineMessage(ERROR_LOG_PREAMBLE, logMessage);
-                }
+                WriteNewLineMessage(ERROR_LOG_PREAMBLE, logMessage);
             }
         }
 
         public void LogFfmpeg(string logMessage)
         {
-            if ((_logLevel & LogLevel.Ffmpeg) != 0)
+            if ((_logLevel & LogLevel.Ffmpeg) == 0) return;
+
+            lock (this)
             {
-                lock (this)
-                {
-                    WriteNewLineMessage(FFMPEG_LOG_PREAMBLE, logMessage);
-                }
+                WriteNewLineMessage(FFMPEG_LOG_PREAMBLE, logMessage);
             }
         }
 

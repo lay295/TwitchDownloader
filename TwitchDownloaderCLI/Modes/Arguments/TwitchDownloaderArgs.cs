@@ -8,7 +8,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
         public bool? ShowBanner { get; set; }
 
-        [Option("log-level", Default = LogLevel.Info | LogLevel.Warning | LogLevel.Error, HelpText = "Sets the log level flags. Applicable values are: None, Verbose, Info, Warning, Error, Ffmpeg.")]
+        [Option("log-level", Default = Models.LogLevel.Status | LogLevel.Info | LogLevel.Warning | LogLevel.Error, HelpText = "Sets the log level flags. Applicable values are: None, Status, Verbose, Info, Warning, Error, Ffmpeg.")]
         public LogLevel LogLevel { get; set; }
     }
 }
