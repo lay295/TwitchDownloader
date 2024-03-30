@@ -43,26 +43,26 @@
                 <CheckBox x:Name="CheckDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckDonation_OnCheckedChanged" Unchecked="CheckDonation_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,4,3,3" Text="{lex:Loc SettingsTimeFormat}" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3,3,3,4" Text="{lex:Loc SettingsTimeFormat}" Foreground="{DynamicResource AppText}" />
                 <RadioButton x:Name="RadioTimeFormatUtc" Content="{lex:Loc TimestampUtc}" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 <RadioButton x:Name="RadioTimeFormatLocal" IsChecked="True" Content="{lex:Loc TimestampLocal}" Margin="3,0,0,0" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,4,3,3" Text="{lex:Loc VerboseErrors}" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3,3,3,2" Text="{lex:Loc VerboseErrors}" Foreground="{DynamicResource AppText}" />
                 <CheckBox x:Name="CheckVerboseErrors" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckVerboseErrors_OnCheckedChanged" Unchecked="CheckVerboseErrors_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <!--TODO: Add theme creation window instead of just opening the theme folder-->
-                <TextBlock Margin="3,7,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc ApplicationTheme}"/><Hyperlink ToolTipService.ShowDuration="30000" NavigateUri="Themes" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ApplicationThemeTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc ApplicationTheme}"/><Hyperlink ToolTipService.ShowDuration="30000" NavigateUri="Themes" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ApplicationThemeTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 <ComboBox x:Name="ComboTheme" MinWidth="100" MaxWidth="345" HorizontalAlignment="Left" SelectionChanged="ComboTheme_OnSelectionChanged" Margin="3,0,3,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <fa:SvgAwesome Margin="3,2,1,-2" Icon="Solid_Language" Width="32" Height="26" Foreground="{DynamicResource AppText}" />
-                <TextBlock Margin="3,8,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc ApplicationLanguage}"/><Hyperlink ToolTipService.ShowDuration="30000" NavigateUri="https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderWPF/README.md#localization" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ApplicationLanguageTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <fa:SvgAwesome Margin="3,0,1,-2" Icon="Solid_Language" Width="32" Height="26" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc ApplicationLanguage}"/><Hyperlink ToolTipService.ShowDuration="30000" NavigateUri="https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderWPF/README.md#localization" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ApplicationLanguageTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 <ComboBox x:Name="ComboLocale" MinWidth="100" MaxWidth="330" HorizontalAlignment="Left" SelectionChanged="ComboLocale_OnSelectionChanged" Margin="3,0,3,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,7,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MaximumThreadBandwidth}" /><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MaximumThreadBandwidthTooltip}" /></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MaximumThreadBandwidth}" /><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MaximumThreadBandwidthTooltip}" /></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 <CheckBox x:Name="CheckThrottleEnabled" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="1, 6, 3, 3" Checked="CheckThrottleEnabled_OnCheckedChanged" Unchecked="CheckThrottleEnabled_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
                 <hc:NumericUpDown x:Name="NumMaximumBandwidth" Value="4096" Minimum="1" Maximum="122070" ValueChanged="NumMaximumBandwidth_OnValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 <TextBlock Margin="3,7,0,0" Text="KiB/s" Foreground="{DynamicResource AppText}" />
