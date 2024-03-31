@@ -1014,10 +1014,14 @@ namespace TwitchDownloaderCore
             response.EnsureSuccessStatusCode();
 
             var chapterResponse = await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
-            chapterResponse.data.video.moments ??= new VideoMomentConnection
+            chapterResponse.data.video.moments ??= new VideoMomentConnection { edges = new List<VideoMomentEdge>() };
+
+            // When downloading VODs of currently-airing streams, the last chapter lacks a duration
+            if (chapterResponse.data.video.moments.edges.LastOrDefault() is { } lastEdge && lastEdge.node.durationMilliseconds is 0)
             {
-                edges = new List<VideoMomentEdge>()
-            };
+                lastEdge.node.durationMilliseconds = lastEdge.node.video.lengthSeconds * 1000 - lastEdge.node.positionMilliseconds;
+            }
+
             return chapterResponse;
         }
 
