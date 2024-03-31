@@ -1,9 +1,10 @@
 using System;
+using System.Runtime.CompilerServices;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderWPF.Models;
 
 namespace TwitchDownloaderWPF.Utils
 {
-    // TODO: Implement log levels
     internal class WpfTaskProgress : ITaskProgress
     {
         private string _status;
@@ -12,6 +13,8 @@ namespace TwitchDownloaderWPF.Utils
         private int _lastPercent = -1;
         private TimeSpan _lastTime1 = new(-1);
         private TimeSpan _lastTime2 = new(-1);
+
+        private readonly LogLevel _logLevel;
 
         private readonly Action<int> _handlePercent;
         private readonly Action<string> _handleStatus;
@@ -24,14 +27,23 @@ namespace TwitchDownloaderWPF.Utils
             _handleStatus = null;
             _handleLog = null;
             _handleFfmpegLog = null;
+
+            _logLevel = LogLevel.None;
         }
 
-        public WpfTaskProgress(Action<int> handlePercent, Action<string> handleStatus, Action<string> handleLog, Action<string> handleFfmpegLog = null)
+        public WpfTaskProgress(LogLevel logLevel, Action<int> handlePercent, Action<string> handleStatus, Action<string> handleLog, Action<string> handleFfmpegLog = null)
         {
             _handlePercent = handlePercent;
             _handleStatus = handleStatus;
             _handleLog = handleLog;
             _handleFfmpegLog = handleFfmpegLog;
+
+            _logLevel = logLevel;
+            if (handleFfmpegLog is not null)
+            {
+                // TODO: Make this user configurable
+                _logLevel |= LogLevel.Ffmpeg;
+            }
         }
 
         public void SetStatus(string status)
@@ -117,26 +129,64 @@ namespace TwitchDownloaderWPF.Utils
 
         public void LogVerbose(string logMessage)
         {
-            //_handleLog?.Invoke(logMessage);
+            if ((_logLevel & LogLevel.Verbose) == 0) return;
+
+            _handleLog?.Invoke(logMessage);
+        }
+
+        public void LogVerbose(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Verbose) == 0) return;
+
+            _handleLog?.Invoke(logMessage.ToStringAndClear());
         }
 
         public void LogInfo(string logMessage)
         {
-            _handleLog?.Invoke(logMessage);
+            if ((_logLevel & LogLevel.Info) == 0) return;
+
+            _handleLog.Invoke(logMessage);
+        }
+
+        public void LogInfo(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Info) == 0) return;
+
+            _handleLog.Invoke(logMessage.ToStringAndClear());
         }
 
         public void LogWarning(string logMessage)
         {
+            if ((_logLevel & LogLevel.Warning) == 0) return;
+
             _handleLog?.Invoke(logMessage);
+        }
+
+        public void LogWarning(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Warning) == 0) return;
+
+            _handleLog?.Invoke(logMessage.ToStringAndClear());
         }
 
         public void LogError(string logMessage)
         {
+            if ((_logLevel & LogLevel.Error) == 0) return;
+
             _handleLog?.Invoke(Translations.Strings.ErrorLog + logMessage);
+        }
+
+        public void LogError(DefaultInterpolatedStringHandler logMessage)
+        {
+            if ((_logLevel & LogLevel.Error) == 0) return;
+
+            _handleLog?.Invoke(Translations.Strings.ErrorLog + logMessage.ToStringAndClear());
         }
 
         public void LogFfmpeg(string logMessage)
         {
+            if ((_logLevel & LogLevel.Ffmpeg) == 0) return;
+
             _handleFfmpegLog?.Invoke(logMessage);
         }
     }

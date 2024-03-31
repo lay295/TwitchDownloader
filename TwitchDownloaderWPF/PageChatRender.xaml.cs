@@ -18,6 +18,7 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
@@ -598,7 +599,7 @@ namespace TwitchDownloaderWPF
 
                 ChatRenderOptions options = GetOptions(saveFileDialog.FileName);
 
-                var renderProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog, s => ffmpegLog.Add(s));
+                var renderProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog, s => ffmpegLog.Add(s));
                 ChatRenderer currentRender = new ChatRenderer(options, renderProgress);
                 try
                 {

@@ -5,9 +5,11 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using HandyControl.Data;
+using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
-using MessageBox = System.Windows.MessageBox;
+using CheckComboBox = HandyControl.Controls.CheckComboBox;
+using CheckComboBoxItem = HandyControl.Controls.CheckComboBoxItem;
 
 namespace TwitchDownloaderWPF
 {
@@ -82,6 +84,20 @@ namespace TwitchDownloaderWPF
             if (selectedIndex > -1)
             {
                 ComboLocale.SelectedIndex = selectedIndex;
+            }
+
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = nameof(LogLevel.Verbose), Tag = LogLevel.Verbose });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = nameof(LogLevel.Info), Tag = LogLevel.Info });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = nameof(LogLevel.Warning), Tag = LogLevel.Warning });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = nameof(LogLevel.Error), Tag = LogLevel.Error });
+            // ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = "FFmpeg", Tag = LogLevel.Ffmpeg });
+            var currentLogLevels = (LogLevel)Settings.Default.LogLevels;
+            foreach (CheckComboBoxItem item in ComboLogLevels.Items)
+            {
+                if (currentLogLevels.HasFlag((Enum)item.Tag))
+                {
+                    ComboLogLevels.SelectedItems.Add(item);
+                }
             }
         }
 
@@ -306,6 +322,17 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.TemplateChat = TextChatTemplate.Text;
+        }
+
+        private void ComboLogLevels_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            var newLogLevel = ComboLogLevels.SelectedItems
+                .Cast<CheckComboBoxItem>()
+                .Sum(item => (int)item.Tag);
+            Settings.Default.LogLevels = newLogLevel;
         }
     }
 }

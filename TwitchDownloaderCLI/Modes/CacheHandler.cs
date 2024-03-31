@@ -4,7 +4,7 @@ using TwitchDownloaderCLI.Modes.Arguments;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    public static class CacheHandler
+    internal static class CacheHandler
     {
         public static void ParseArgs(CacheArgs args)
         {

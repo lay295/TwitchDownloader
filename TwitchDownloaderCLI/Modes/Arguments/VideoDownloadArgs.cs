@@ -3,7 +3,7 @@
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("videodownload", HelpText = "Downloads a stream VOD from Twitch")]
-    public class VideoDownloadArgs : ITwitchDownloaderArgs
+    internal sealed class VideoDownloadArgs : TwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD to download.")]
         public string Id { get; set; }
@@ -34,8 +34,5 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary caching folder.")]
         public string TempFolder { get; set; }
-
-        [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
-        public bool? ShowBanner { get; set; }
     }
 }

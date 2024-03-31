@@ -4,6 +4,7 @@ using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 
@@ -13,31 +14,31 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Download(ClipDownloadArgs inputOptions)
         {
-            var progress = new CliTaskProgress();
+            var progress = new CliTaskProgress(inputOptions.LogLevel);
 
             if (inputOptions.EncodeMetadata == true)
             {
                 FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
             }
 
-            var downloadOptions = GetDownloadOptions(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions, progress);
 
             var clipDownloader = new ClipDownloader(downloadOptions, progress);
             clipDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
-        private static ClipDownloadOptions GetDownloadOptions(ClipDownloadArgs inputOptions)
+        private static ClipDownloadOptions GetDownloadOptions(ClipDownloadArgs inputOptions, ITaskLogger logger)
         {
             if (inputOptions.Id is null)
             {
-                Console.WriteLine("[ERROR] - Clip ID/URL cannot be null!");
+                logger.LogError("Clip ID/URL cannot be null!");
                 Environment.Exit(1);
             }
 
             var clipIdMatch = TwitchRegex.MatchClipId(inputOptions.Id);
             if (clipIdMatch is not { Success: true })
             {
-                Console.WriteLine("[ERROR] - Unable to parse Clip ID/URL.");
+                logger.LogError("Unable to parse Clip ID/URL.");
                 Environment.Exit(1);
             }
 
