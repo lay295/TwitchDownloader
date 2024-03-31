@@ -15,6 +15,7 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.Utils;
@@ -522,7 +523,7 @@ namespace TwitchDownloaderWPF
             {
                 ChatUpdateOptions updateOptions = GetOptions(saveFileDialog.FileName);
 
-                var updateProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
+                var updateProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
                 var currentUpdate = new ChatUpdater(updateOptions, updateProgress);
                 try
                 {

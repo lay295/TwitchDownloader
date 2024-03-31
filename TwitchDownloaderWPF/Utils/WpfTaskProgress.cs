@@ -31,17 +31,17 @@ namespace TwitchDownloaderWPF.Utils
             _logLevel = LogLevel.None;
         }
 
-        public WpfTaskProgress(Action<int> handlePercent, Action<string> handleStatus, Action<string> handleLog, Action<string> handleFfmpegLog = null)
+        public WpfTaskProgress(LogLevel logLevel, Action<int> handlePercent, Action<string> handleStatus, Action<string> handleLog, Action<string> handleFfmpegLog = null)
         {
             _handlePercent = handlePercent;
             _handleStatus = handleStatus;
             _handleLog = handleLog;
             _handleFfmpegLog = handleFfmpegLog;
 
-            // TODO: Make this user configurable
-            _logLevel = LogLevel.Info | LogLevel.Warning | LogLevel.Error;
+            _logLevel = logLevel;
             if (handleFfmpegLog is not null)
             {
+                // TODO: Make this user configurable
                 _logLevel |= LogLevel.Ffmpeg;
             }
         }

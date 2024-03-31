@@ -13,6 +13,7 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.Utils;
@@ -517,7 +518,7 @@ namespace TwitchDownloaderWPF
                 else if (radioTimestampNone.IsChecked == true)
                     downloadOptions.TimeFormat = TimestampFormat.None;
 
-                var downloadProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
+                var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
                 var currentDownload = new ChatDownloader(downloadOptions, downloadProgress);
 
                 btnGetInfo.IsEnabled = false;

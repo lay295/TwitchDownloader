@@ -18,6 +18,7 @@ using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.Utils;
@@ -424,7 +425,7 @@ namespace TwitchDownloaderWPF
             VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
             options.CacheCleanerCallback = HandleCacheCleanerCallback;
 
-            var downloadProgress = new WpfTaskProgress(SetPercent, SetStatus, AppendLog);
+            var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
             VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
             _cancellationTokenSource = new CancellationTokenSource();
 

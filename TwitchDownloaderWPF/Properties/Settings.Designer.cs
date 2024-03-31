@@ -897,5 +897,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["EncodeClipMetadata"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("14")]
+        public int LogLevels {
+            get {
+                return ((int)(this["LogLevels"]));
+            }
+            set {
+                this["LogLevels"] = value;
+            }
+        }
     }
 }
