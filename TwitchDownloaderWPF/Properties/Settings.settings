@@ -222,7 +222,7 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="LogLevels" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">14</Value>
+      <Value Profile="(Default)">30</Value>
     </Setting>
   </Settings>
 </SettingsFile>

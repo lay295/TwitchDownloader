@@ -1086,6 +1086,60 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string LogLevelError {
+            get {
+                return ResourceManager.GetString("LogLevelError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to FFmpeg.
+        /// </summary>
+        public static string LogLevelFfmpeg {
+            get {
+                return ResourceManager.GetString("LogLevelFfmpeg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Info.
+        /// </summary>
+        public static string LogLevelInfo {
+            get {
+                return ResourceManager.GetString("LogLevelInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Log Levels:.
+        /// </summary>
+        public static string LogLevels {
+            get {
+                return ResourceManager.GetString("LogLevels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verbose.
+        /// </summary>
+        public static string LogLevelVerbose {
+            get {
+                return ResourceManager.GetString("LogLevelVerbose", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning.
+        /// </summary>
+        public static string LogLevelWarning {
+            get {
+                return ResourceManager.GetString("LogLevelWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You&apos;ve selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask..
         /// </summary>
         public static string MaskWithNoAlpha {

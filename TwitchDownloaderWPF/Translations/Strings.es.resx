@@ -839,4 +839,22 @@
   <data name="FileAgeInDays" xml:space="preserve">
     <value>{0:N0} días</value>
   </data>
+  <data name="LogLevels" xml:space="preserve">
+    <value>Log Levels:</value>
+  </data>
+  <data name="LogLevelVerbose" xml:space="preserve">
+    <value>Verbose</value>
+  </data>
+  <data name="LogLevelInfo" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="LogLevelWarning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="LogLevelError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="LogLevelFfmpeg" xml:space="preserve">
+    <value>FFmpeg</value>
+  </data>
 </root>

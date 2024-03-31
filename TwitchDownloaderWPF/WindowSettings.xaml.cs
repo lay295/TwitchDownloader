@@ -86,11 +86,11 @@ namespace TwitchDownloaderWPF
                 ComboLocale.SelectedIndex = selectedIndex;
             }
 
-            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = nameof(LogLevel.Verbose), Tag = LogLevel.Verbose });
-            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = nameof(LogLevel.Info), Tag = LogLevel.Info });
-            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = nameof(LogLevel.Warning), Tag = LogLevel.Warning });
-            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = nameof(LogLevel.Error), Tag = LogLevel.Error });
-            // ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = "FFmpeg", Tag = LogLevel.Ffmpeg });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelVerbose, Tag = LogLevel.Verbose });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelInfo, Tag = LogLevel.Info });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelWarning, Tag = LogLevel.Warning });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelError, Tag = LogLevel.Error });
+            // ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelFfmpeg, Tag = LogLevel.Ffmpeg });
             var currentLogLevels = (LogLevel)Settings.Default.LogLevels;
             foreach (CheckComboBoxItem item in ComboLogLevels.Items)
             {
