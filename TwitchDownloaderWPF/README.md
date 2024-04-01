@@ -239,14 +239,15 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 #### <ins>Optimizing Render Speeds</ins>
 
 If render speeds feel like they are too slow, try any of the following:
-- Reduce render width
-- Reduce render height
-- Increase update rate
-- Disable dispersion if update rate is less than 1.0
-- Reduce framerate
-- Disable generate mask
-- Disable image sharpening
-- Disable BTTV, FFZ, 7TV emotes
+
+| Large Impact             | Medium Impact                 | Small Impact                              |
+|--------------------------|-------------------------------|-------------------------------------------|
+| Reduce render width      | Disable BTTV, FFZ, 7TV emotes | Disable dispersion if update rate is <1.0 |
+| Reduce render height     | Increase update rate          | Disable sub messages                      |
+| Reduce framerate         | Switch to system emojis       | Disable outlines                          |
+| Disable generate mask    |                               | Disable alternating backgrounds           |
+| Disable image sharpening |                               |                                           |
+| Change codec to H.264    |                               |                                           |
 
 ### Task Queue
 Create and manage multiple jobs.
