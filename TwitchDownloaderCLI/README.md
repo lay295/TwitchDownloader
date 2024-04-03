@@ -125,7 +125,7 @@ Time in seconds to trim ending. For example if I had a 10 second stream but only
 Path to temporary folder for cache.
 
 ## Arguments for mode chatupdate
-#### Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format
+#### Updates the embedded emotes, badges, bits, and trims a chat JSON and/or converts a JSON chat to another format
 
 **-i / --input (REQUIRED)**
 Path to input file. Valid extensions are: `.json`, `.json.gz`.
@@ -143,10 +143,10 @@ Path to output file. File extension will be used to determine new chat type. Val
 (Default: `false`) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
 
 **b / --beginning**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No trim.
 
 **-e / --ending**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time in seconds for chat ending. Comments may be added but not removed. -1 = No trim.
 
 **--bttv**
 (Default: `true`) Enable embedding BTTV emotes.
@@ -188,10 +188,10 @@ File the program will output to.
 (Default: `600`) Height of chat render.
 
 **-b / --beginning**
-(Default: `-1`) Time in seconds to crop the beginning of the render.
+(Default: `-1`) Time in seconds to trim the beginning of the render.
 
 **-e / --ending**
-(Default: `-1`) Time in seconds to crop the ending of the render.
+(Default: `-1`) Time in seconds to trim the ending of the render.
 
 **--bttv**
 (Default: `true`) Enable BTTV emotes.

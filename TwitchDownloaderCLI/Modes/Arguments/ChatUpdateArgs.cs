@@ -3,7 +3,7 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-    [Verb("chatupdate", HelpText = "Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format.")]
+    [Verb("chatupdate", HelpText = "Updates the embedded emotes, badges, bits, and trims a chat JSON and/or converts a JSON chat to another format.")]
     internal sealed class ChatUpdateArgs : TwitchDownloaderArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are: .json, .json.gz.")]
@@ -21,11 +21,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
         public bool ReplaceEmbeds { get; set; }
 
-        [Option('b', "beginning", Default = -1, HelpText = "New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.")]
-        public int CropBeginningTime { get; set; }
+        [Option('b', "beginning", Default = -1, HelpText = "New time in seconds for chat beginning. Comments may be added but not removed. -1 = No trim.")]
+        public int TrimBeginningTime { get; set; }
 
-        [Option('e', "ending", Default = -1, HelpText = "New time in seconds for chat ending. Comments may be added but not removed. -1 = No crop.")]
-        public int CropEndingTime { get; set; }
+        [Option('e', "ending", Default = -1, HelpText = "New time in seconds for chat ending. Comments may be added but not removed. -1 = No trim.")]
+        public int TrimEndingTime { get; set; }
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download.")]
         public bool? BttvEmotes { get; set; }

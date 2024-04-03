@@ -26,11 +26,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('h', "chat-height", Default = 600, HelpText = "Height of chat render.")]
         public int ChatHeight { get; set; }
 
-        [Option('b', "beginning", Default = -1, HelpText = "Time in seconds to crop beginning of the render.")]
-        public int CropBeginningTime { get; set; }
+        [Option('b', "beginning", Default = -1, HelpText = "Time in seconds to trim beginning of the render.")]
+        public int TrimBeginningTime { get; set; }
 
-        [Option('e', "ending", Default = -1, HelpText = "Time in seconds to crop ending of the render.")]
-        public int CropEndingTime { get; set; }
+        [Option('e', "ending", Default = -1, HelpText = "Time in seconds to trim ending of the render.")]
+        public int TrimEndingTime { get; set; }
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV emotes.")]
         public bool? BttvEmotes { get; set; }
