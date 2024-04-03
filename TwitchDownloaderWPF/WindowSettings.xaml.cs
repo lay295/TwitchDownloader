@@ -130,7 +130,6 @@ namespace TwitchDownloaderWPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Title = Translations.Strings.TitleGlobalSettings;
             App.RequestTitleBarChange();
         }
 
@@ -191,7 +190,6 @@ namespace TwitchDownloaderWPF
                 _refreshCultureOnCancel = true;
                 Settings.Default.GuiCulture = selectedCulture;
                 App.RequestCultureChange();
-                Title = Translations.Strings.TitleGlobalSettings;
             }
         }
 

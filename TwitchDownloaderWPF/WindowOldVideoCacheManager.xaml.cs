@@ -39,7 +39,6 @@ namespace TwitchDownloaderWPF
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            Title = Translations.Strings.TitleWindowOldVideoCacheManager;
             App.RequestTitleBarChange();
 
             // For some stupid reason, this does not work unless I manually set it, even though its a binding
