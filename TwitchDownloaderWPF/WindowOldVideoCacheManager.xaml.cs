@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderWPF
@@ -72,6 +74,31 @@ namespace TwitchDownloaderWPF
             {
                 gridItem.ShouldDelete = true;
             }
+        }
+
+        private void MenuItemOpenFolder_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: GridItem gridItem })
+            {
+                return;
+            }
+
+            if (!Directory.Exists(gridItem.Path))
+            {
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo(gridItem.Path) { UseShellExecute = true });
+        }
+
+        private void MenuItemCopyPath_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: GridItem gridItem })
+            {
+                return;
+            }
+
+            Clipboard.SetText(gridItem.Path);
         }
 
         public DirectoryInfo[] GetItemsToDelete() => GridItems
