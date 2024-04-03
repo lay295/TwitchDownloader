@@ -90,7 +90,7 @@
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndMinute" ValueChanged="numEndMinute_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndSecond" ValueChanged="numEndSecond_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
-                    <hc:NumericUpDown Margin="0,5,0,0" Minimum="1" Value="4" Maximum="10" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <hc:NumericUpDown Margin="0,5,0,0" Minimum="1" Value="4" Maximum="20" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     <TextBox x:Name="TextOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" TextChanged="TextOauth_TextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
             </StackPanel>
