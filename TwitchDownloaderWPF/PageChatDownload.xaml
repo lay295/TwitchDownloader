@@ -117,7 +117,7 @@
                         <CheckBox IsEnabled="False" x:Name="checkStvEmbed" Margin="0,0,10,0" Checked="checkStvEmbed_Checked" Unchecked="checkStvEmbed_Unchecked" Content="7TV" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
                 </StackPanel>
-                <hc:NumericUpDown Margin="5,8,0,0" Minimum="1" Value="1" x:Name="numChatDownloadConnections" HorizontalAlignment="Left" ValueChanged="numChatDownloadConnections_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <hc:NumericUpDown Margin="5,8,0,0" Minimum="1" Value="1" Maximum="20" x:Name="numChatDownloadConnections" HorizontalAlignment="Left" ValueChanged="numChatDownloadConnections_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom">
