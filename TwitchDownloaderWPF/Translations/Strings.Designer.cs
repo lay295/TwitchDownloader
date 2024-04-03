@@ -449,6 +449,15 @@ namespace TwitchDownloaderWPF.Translations {
         /// <summary>
         ///   Looks up a localized string similar to Open folder.
         /// </summary>
+        public static string ContextMenuOpenFolder {
+            get {
+                return ResourceManager.GetString("ContextMenuOpenFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open folder.
+        /// </summary>
         public static string ContextMenuOpenTaskFolder {
             get {
                 return ResourceManager.GetString("ContextMenuOpenTaskFolder", resourceCulture);
@@ -461,6 +470,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string ContextMenuRemoveTask {
             get {
                 return ResourceManager.GetString("ContextMenuRemoveTask", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy path to clipboard.
+        /// </summary>
+        public static string CopyFolderPathToClipboard {
+            get {
+                return ResourceManager.GetString("CopyFolderPathToClipboard", resourceCulture);
             }
         }
         

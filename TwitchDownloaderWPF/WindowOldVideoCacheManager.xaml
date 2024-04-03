@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:TwitchDownloaderWPF"
         xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
+        xmlns:fa="http://schemas.fontawesome.com/icons/"
         lex:LocalizeDictionary.DesignCulture=""
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
@@ -24,6 +25,25 @@
         </Grid.RowDefinitions>
 
         <DataGrid Grid.Row="0" x:Name="DataGrid" Margin="6, 6, 6, 0" ItemsSource="{Binding GridItems}" IsReadOnly="False" AutoGenerateColumns="False" Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+            <DataGrid.Resources>
+                <ContextMenu x:Key="RowMenu">
+                    <MenuItem Header="{lex:Loc ContextMenuOpenFolder}" Click="MenuItemOpenFolder_OnClick" Foreground="{DynamicResource AppText}">
+                        <MenuItem.Icon>
+                            <fa:SvgAwesome Icon="Solid_FolderOpen" Foreground="{DynamicResource AppText}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="{lex:Loc CopyFolderPathToClipboard}" Click="MenuItemCopyPath_OnClick" Foreground="{DynamicResource AppText}">
+                        <MenuItem.Icon>
+                            <fa:SvgAwesome Icon="Solid_Copy" Foreground="{DynamicResource AppText}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </DataGrid.Resources>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow" BasedOn="{StaticResource DataGridRowStyle}">
+                    <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <!-- Workaround for DataGridCheckBoxColumn sometimes requiring multiple clicks to work for some reason -->
                 <DataGridTemplateColumn Header="{lex:Loc DeleteCacheColumnHeader}" MinWidth="55">
