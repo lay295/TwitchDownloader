@@ -136,7 +136,6 @@ namespace TwitchDownloaderWPF
                 Offline = checkOffline.IsChecked.GetValueOrDefault(),
                 AllowUnlistedEmotes = true,
                 DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault(),
-                LogFfmpegOutput = true
             };
             if (RadioEmojiNotoColor.IsChecked == true)
                 options.EmojiVendor = EmojiVendor.GoogleNotoColor;

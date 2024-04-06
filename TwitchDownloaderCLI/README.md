@@ -279,9 +279,6 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--temp-path**
 (Default: ` `) Path to temporary folder for cache.
 
-**--verbose-ffmpeg**
-(Default: `false`) Prints every message from FFmpeg.
-
 **--skip-drive-waiting**
 (Default: `false`) Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives. Skipping can result in 1-5% render speed increases.
 
