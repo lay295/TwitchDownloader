@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
@@ -21,11 +22,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
         public bool ReplaceEmbeds { get; set; }
 
-        [Option('b', "beginning", Default = -1, HelpText = "New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.")]
-        public int CropBeginningTime { get; set; }
+        [Option('b', "beginning", Default = -1, HelpText = "New time for chat beginning. Comments may be added but not removed.")] // TODO
+        public Time CropBeginningTime { get; set; }
 
-        [Option('e', "ending", Default = -1, HelpText = "New time in seconds for chat ending. Comments may be added but not removed. -1 = No crop.")]
-        public int CropEndingTime { get; set; }
+        [Option('e', "ending", Default = -1, HelpText = "New time for chat ending. Comments may be added but not removed.")]
+        public Time CropEndingTime { get; set; }
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download.")]
         public bool? BttvEmotes { get; set; }

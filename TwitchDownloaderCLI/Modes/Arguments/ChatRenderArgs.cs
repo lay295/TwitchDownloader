@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
@@ -26,11 +27,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('h', "chat-height", Default = 600, HelpText = "Height of chat render.")]
         public int ChatHeight { get; set; }
 
-        [Option('b', "beginning", Default = -1, HelpText = "Time in seconds to crop beginning of the render.")]
-        public int CropBeginningTime { get; set; }
+        [Option('b', "beginning", Default = -1, HelpText = "Time to crop beginning of the render.")] // TODO
+        public Time CropBeginningTime { get; set; }
 
-        [Option('e', "ending", Default = -1, HelpText = "Time in seconds to crop ending of the render.")]
-        public int CropEndingTime { get; set; }
+        [Option('e', "ending", Default = -1, HelpText = "Time to crop ending of the render.")]
+        public Time CropEndingTime { get; set; }
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV emotes.")]
         public bool? BttvEmotes { get; set; }
