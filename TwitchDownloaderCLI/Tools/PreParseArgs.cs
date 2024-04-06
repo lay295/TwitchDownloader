@@ -53,6 +53,12 @@ namespace TwitchDownloaderCLI.Tools
                 processedArgs = ConvertSilentSyntax(processedArgs);
             }
 
+            if (args.Any(x => x is "--verbose-ffmpeg"))
+            {
+                Console.WriteLine("[INFO] The program has switched from --verbose-ffmpeg to log levels, consider using log levels instead. '--log-level Status,Info,Warning,Error,Ffmpeg' will be applied to the current session. Run \'{0} help\' for more information.", processFileName);
+                processedArgs = ConvertVerboseFfmpegSyntax(processedArgs);
+            }
+
             return processedArgs.ToArray();
         }
 
@@ -102,6 +108,23 @@ namespace TwitchDownloaderCLI.Tools
                 {
                     args[i] = "--log-level";
                     args.Insert(i + 1, nameof(LogLevel.None));
+                }
+            }
+
+            return args;
+        }
+
+        private static List<string> ConvertVerboseFfmpegSyntax(List<string> args)
+        {
+            for (var i = 0; i < args.Count; i++)
+            {
+                if (args[i].Equals("--verbose-ffmpeg"))
+                {
+                    // If the user is still using --verbose-ffmpeg they probably aren't using log levels yet, so its safe to assume that there won't be a double-parse error
+                    args[i] = "--log-level";
+                    var logLevels = Enum.GetNames(typeof(LogLevel))
+                        .Where(x => x is not nameof(LogLevel.None) and not nameof(LogLevel.Verbose));
+                    args.Insert(i + 1, string.Join(',', logLevels));
                 }
             }
 
