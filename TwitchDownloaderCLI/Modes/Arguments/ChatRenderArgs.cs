@@ -116,9 +116,6 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
 
-        [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from FFmpeg.")]
-        public bool LogFfmpegOutput { get; set; }
-
         [Option("skip-drive-waiting", Default = false, HelpText = "Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives.")]
         public bool SkipDriveWaiting { get; set; }
 
