@@ -4,7 +4,6 @@ namespace TwitchDownloaderCore.Interfaces
 {
     public interface ITaskLogger
     {
-        // TODO: Add DefaultInterpolatedStringHandler overloads once log levels are implemented for zero-alloc logging
         void LogVerbose(string logMessage);
         void LogVerbose(DefaultInterpolatedStringHandler logMessage);
         void LogInfo(string logMessage);

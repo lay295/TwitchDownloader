@@ -169,8 +169,8 @@ namespace TwitchDownloaderCore
         {
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var videoPartsQueue = new ConcurrentQueue<string>(playlist.Take(videoListCrop).Select(x => x.Path));
-            var downloadThreads = new DownloadThread[downloadOptions.DownloadThreads];
 
+            var downloadThreads = new DownloadThread[downloadOptions.DownloadThreads];
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
             {
                 downloadThreads[i] = new DownloadThread(videoPartsQueue, _httpClient, baseUrl, downloadFolder, vodAirDate, downloadOptions.ThrottleKib, _progress, cancellationToken);
