@@ -291,8 +291,8 @@ namespace TwitchDownloaderWPF
                 StvEmotes = checkStvEmbed.IsChecked.GetValueOrDefault(),
                 InputFile = textJson.Text,
                 OutputFile = outputFile,
-                CropBeginningTime = -1,
-                CropEndingTime = -1
+                TrimBeginningTime = -1,
+                TrimEndingTime = -1
             };
 
             if (radioJson.IsChecked.GetValueOrDefault())
@@ -309,15 +309,15 @@ namespace TwitchDownloaderWPF
 
             if (checkStart.IsChecked == true)
             {
-                options.CropBeginning = true;
+                options.TrimBeginning = true;
                 TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                options.CropBeginningTime = (int)Math.Round(start.TotalSeconds);
+                options.TrimBeginningTime = (int)Math.Round(start.TotalSeconds);
             }
             if (checkEnd.IsChecked == true)
             {
-                options.CropEnding = true;
+                options.TrimEnding = true;
                 TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                options.CropEndingTime = (int)Math.Round(end.TotalSeconds);
+                options.TrimEndingTime = (int)Math.Round(end.TotalSeconds);
             }
 
             if (radioTimestampUTC.IsChecked.GetValueOrDefault())

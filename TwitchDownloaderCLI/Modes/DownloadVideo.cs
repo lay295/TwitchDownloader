@@ -62,10 +62,10 @@ namespace TwitchDownloaderCLI.Modes
                     ".m4a" => "Audio",
                     _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
                 },
-                CropBeginning = inputOptions.TrimBeginningTime > TimeSpan.Zero,
-                CropBeginningTime = inputOptions.TrimBeginningTime,
-                CropEnding = inputOptions.TrimEndingTime > TimeSpan.Zero,
-                CropEndingTime = inputOptions.TrimEndingTime,
+                TrimBeginning = inputOptions.TrimBeginningTime > TimeSpan.Zero,
+                TrimBeginningTime = inputOptions.TrimBeginningTime,
+                TrimEnding = inputOptions.TrimEndingTime > TimeSpan.Zero,
+                TrimEndingTime = inputOptions.TrimEndingTime,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder,
                 CacheCleanerCallback = directoryInfos =>

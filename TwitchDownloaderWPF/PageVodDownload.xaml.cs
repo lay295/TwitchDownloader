@@ -208,10 +208,10 @@ namespace TwitchDownloaderWPF
                 Oauth = TextOauth.Text,
                 Quality = GetQualityWithoutSize(comboQuality.Text),
                 Id = currentVideoId,
-                CropBeginning = checkStart.IsChecked.GetValueOrDefault(),
-                CropBeginningTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value),
-                CropEnding = checkEnd.IsChecked.GetValueOrDefault(),
-                CropEndingTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value),
+                TrimBeginning = checkStart.IsChecked.GetValueOrDefault(),
+                TrimBeginningTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value),
+                TrimEnding = checkEnd.IsChecked.GetValueOrDefault(),
+                TrimEndingTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value),
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath
             };

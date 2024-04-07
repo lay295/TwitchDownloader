@@ -492,16 +492,16 @@ namespace TwitchDownloaderWPF
                 {
                     if (checkCropStart.IsChecked == true)
                     {
-                        downloadOptions.CropBeginning = true;
+                        downloadOptions.TrimBeginning = true;
                         TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                        downloadOptions.CropBeginningTime = (int)start.TotalSeconds;
+                        downloadOptions.TrimBeginningTime = (int)start.TotalSeconds;
                     }
 
                     if (checkCropEnd.IsChecked == true)
                     {
-                        downloadOptions.CropEnding = true;
+                        downloadOptions.TrimEnding = true;
                         TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                        downloadOptions.CropEndingTime = (int)end.TotalSeconds;
+                        downloadOptions.TrimEndingTime = (int)end.TotalSeconds;
                     }
 
                     downloadOptions.Id = downloadId;

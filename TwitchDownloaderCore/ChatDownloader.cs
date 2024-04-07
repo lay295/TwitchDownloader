@@ -285,8 +285,8 @@ namespace TwitchDownloaderCore
                 chatRoot.video.description = videoInfoResponse.data.video.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
                 videoTitle = videoInfoResponse.data.video.title;
                 videoCreatedAt = videoInfoResponse.data.video.createdAt;
-                videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
-                videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : videoInfoResponse.data.video.lengthSeconds;
+                videoStart = downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : 0.0;
+                videoEnd = downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : videoInfoResponse.data.video.lengthSeconds;
                 videoTotalLength = videoInfoResponse.data.video.lengthSeconds;
                 viewCount = videoInfoResponse.data.video.viewCount;
                 game = videoInfoResponse.data.video.game?.displayName ?? "Unknown";
@@ -319,10 +319,10 @@ namespace TwitchDownloaderCore
                 }
 
                 videoId = clipInfoResponse.data.clip.video.id;
-                downloadOptions.CropBeginning = true;
-                downloadOptions.CropBeginningTime = (int)clipInfoResponse.data.clip.videoOffsetSeconds;
-                downloadOptions.CropEnding = true;
-                downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + clipInfoResponse.data.clip.durationSeconds;
+                downloadOptions.TrimBeginning = true;
+                downloadOptions.TrimBeginningTime = (int)clipInfoResponse.data.clip.videoOffsetSeconds;
+                downloadOptions.TrimEnding = true;
+                downloadOptions.TrimEndingTime = downloadOptions.TrimBeginningTime + clipInfoResponse.data.clip.durationSeconds;
                 chatRoot.streamer.name = clipInfoResponse.data.clip.broadcaster.displayName;
                 chatRoot.streamer.id = int.Parse(clipInfoResponse.data.clip.broadcaster.id);
                 videoTitle = clipInfoResponse.data.clip.title;

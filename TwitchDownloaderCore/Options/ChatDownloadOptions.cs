@@ -8,10 +8,10 @@ namespace TwitchDownloaderCore.Options
         public string Id { get; set; }
         public string Filename { get; set; }
         public ChatCompression Compression { get; set; } = ChatCompression.None;
-        public bool CropBeginning { get; set; }
-        public double CropBeginningTime { get; set; }
-        public bool CropEnding { get; set; }
-        public double CropEndingTime { get; set; }
+        public bool TrimBeginning { get; set; }
+        public double TrimBeginningTime { get; set; }
+        public bool TrimEnding { get; set; }
+        public double TrimEndingTime { get; set; }
         public bool EmbedData { get; set; }
         public bool BttvEmotes { get; set; }
         public bool FfzEmotes { get; set; }
