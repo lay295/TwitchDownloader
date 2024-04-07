@@ -17,10 +17,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public ChatCompression Compression { get; set; }
 
         [Option('b', "beginning", HelpText = "Time to crop beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
-        public Time CropBeginningTime { get; set; }
+        public TimeDuration CropBeginningTime { get; set; }
 
         [Option('e', "ending", HelpText = "Time to crop ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
-        public Time CropEndingTime { get; set; }
+        public TimeDuration CropEndingTime { get; set; }
 
         [Option('E', "embed-images", Default = false, HelpText = "Embed first party emotes, badges, and cheermotes into the chat download for offline rendering.")]
         public bool EmbedData { get; set; }

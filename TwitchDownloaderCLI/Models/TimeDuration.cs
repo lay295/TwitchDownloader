@@ -6,29 +6,29 @@ using System.Text.RegularExpressions;
 namespace TwitchDownloaderCLI.Models
 {
     [DebuggerDisplay("{_timeSpan}")]
-    public readonly record struct Time
+    public readonly record struct TimeDuration
     {
         private readonly TimeSpan _timeSpan;
 
         /// <summary>
         /// Constructor used by CommandLineParser
         /// </summary>
-        public Time(string str)
+        public TimeDuration(string str)
         {
             this = Parse(str);
         }
 
-        public Time(TimeSpan timeSpan)
+        public TimeDuration(TimeSpan timeSpan)
         {
             _timeSpan = timeSpan;
         }
 
-        public Time(long ticks)
+        public TimeDuration(long ticks)
         {
             _timeSpan = TimeSpan.FromTicks(ticks);
         }
 
-        public static Time Parse(string str)
+        public static TimeDuration Parse(string str)
         {
             if (string.IsNullOrWhiteSpace(str))
             {
@@ -38,14 +38,14 @@ namespace TwitchDownloaderCLI.Models
             if (str.Contains(':'))
             {
                 var timeSpan = TimeSpan.Parse(str);
-                return new Time(timeSpan);
+                return new TimeDuration(timeSpan);
             }
 
             var multiplier = GetMultiplier(str, out var span);
             if (decimal.TryParse(span, NumberStyles.Number, null, out var result))
             {
                 var ticks = (long)(result * multiplier);
-                return new Time(ticks);
+                return new TimeDuration(ticks);
             }
 
             throw new FormatException();
@@ -86,6 +86,6 @@ namespace TwitchDownloaderCLI.Models
             throw new FormatException();
         }
 
-        public static implicit operator TimeSpan(Time time) => time._timeSpan;
+        public static implicit operator TimeSpan(TimeDuration timeDuration) => timeDuration._timeSpan;
     }
 }

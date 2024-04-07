@@ -3,7 +3,7 @@ using static System.TimeSpan;
 
 namespace TwitchDownloaderCLI.Tests.ModelTests
 {
-    public class TimeTests
+    public class TimeDurationTests
     {
         [Theory]
         [InlineData("200ms", 200 * TicksPerMillisecond)]
@@ -16,9 +16,9 @@ namespace TwitchDownloaderCLI.Tests.ModelTests
         [InlineData("12:03:45", 12 * TicksPerHour + 3 * TicksPerMinute + 45 * TicksPerSecond)]
         public void CorrectlyParsesTimeStrings(string input, long expectedTicks)
         {
-            var expected = new Time(expectedTicks);
+            var expected = new TimeDuration(expectedTicks);
 
-            var actual = new Time(input);
+            var actual = new TimeDuration(input);
 
             Assert.Equal(expected, actual);
         }
@@ -32,7 +32,7 @@ namespace TwitchDownloaderCLI.Tests.ModelTests
         {
             Assert.ThrowsAny<Exception>(() =>
             {
-                _ = Time.Parse(input);
+                _ = TimeDuration.Parse(input);
             });
         }
     }
