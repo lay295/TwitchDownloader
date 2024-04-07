@@ -42,9 +42,9 @@ namespace TwitchDownloaderCLI.Models
             }
 
             var multiplier = GetMultiplier(str, out var span);
-            if (double.TryParse(span, NumberStyles.Number, null, out var result))
+            if (decimal.TryParse(span, NumberStyles.Number, null, out var result))
             {
-                var ticks = checked((long)(result * multiplier));
+                var ticks = (long)(result * multiplier);
                 return new Time(ticks);
             }
 
