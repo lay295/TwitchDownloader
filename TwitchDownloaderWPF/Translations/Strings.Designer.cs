@@ -303,15 +303,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Crop:.
-        /// </summary>
-        public static string ChatCrop {
-            get {
-                return ResourceManager.GetString("ChatCrop", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Chat Download.
         /// </summary>
         public static string ChatDownload {
@@ -497,33 +488,6 @@ namespace TwitchDownloaderWPF.Translations {
         public static string CopyVideoURLToClipboard {
             get {
                 return ResourceManager.GetString("CopyVideoURLToClipboard", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to End.
-        /// </summary>
-        public static string CropEnd {
-            get {
-                return ResourceManager.GetString("CropEnd", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Start.
-        /// </summary>
-        public static string CropStart {
-            get {
-                return ResourceManager.GetString("CropStart", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Crop Video:.
-        /// </summary>
-        public static string CropVideo {
-            get {
-                return ResourceManager.GetString("CropVideo", resourceCulture);
             }
         }
         
@@ -1005,15 +969,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid Crop Inputs.
-        /// </summary>
-        public static string InvalidCropInputs {
-            get {
-                return ResourceManager.GetString("InvalidCropInputs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid Folder Path.
         /// </summary>
         public static string InvalidFolderPath {
@@ -1028,6 +983,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string InvalidStartEndTime {
             get {
                 return ResourceManager.GetString("InvalidStartEndTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Trim Inputs.
+        /// </summary>
+        public static string InvalidTrimInputs {
+            get {
+                return ResourceManager.GetString("InvalidTrimInputs", resourceCulture);
             }
         }
         
@@ -1982,6 +1946,42 @@ namespace TwitchDownloaderWPF.Translations {
         public static string TopTwentyFourHours {
             get {
                 return ResourceManager.GetString("TopTwentyFourHours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trim:.
+        /// </summary>
+        public static string TrimChat {
+            get {
+                return ResourceManager.GetString("TrimChat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to End.
+        /// </summary>
+        public static string TrimEnd {
+            get {
+                return ResourceManager.GetString("TrimEnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start.
+        /// </summary>
+        public static string TrimStart {
+            get {
+                return ResourceManager.GetString("TrimStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trim:.
+        /// </summary>
+        public static string TrimVideo {
+            get {
+                return ResourceManager.GetString("TrimVideo", resourceCulture);
             }
         }
         

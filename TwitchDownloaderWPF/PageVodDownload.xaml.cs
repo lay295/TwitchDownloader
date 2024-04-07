@@ -51,18 +51,18 @@ namespace TwitchDownloaderWPF
             checkEnd.IsEnabled = isEnabled;
             SplitBtnDownload.IsEnabled = isEnabled;
             MenuItemEnqueue.IsEnabled = isEnabled;
-            SetEnabledCropStart(isEnabled & checkStart.IsChecked.GetValueOrDefault());
-            SetEnabledCropEnd(isEnabled & checkEnd.IsChecked.GetValueOrDefault());
+            SetEnabledTrimStart(isEnabled & checkStart.IsChecked.GetValueOrDefault());
+            SetEnabledTrimEnd(isEnabled & checkEnd.IsChecked.GetValueOrDefault());
         }
 
-        private void SetEnabledCropStart(bool isEnabled)
+        private void SetEnabledTrimStart(bool isEnabled)
         {
             numStartHour.IsEnabled = isEnabled;
             numStartMinute.IsEnabled = isEnabled;
             numStartSecond.IsEnabled = isEnabled;
         }
 
-        private void SetEnabledCropEnd(bool isEnabled)
+        private void SetEnabledTrimEnd(bool isEnabled)
         {
             numEndHour.IsEnabled = isEnabled;
             numEndMinute.IsEnabled = isEnabled;
@@ -222,10 +222,10 @@ namespace TwitchDownloaderWPF
         {
             int selectedIndex = comboQuality.SelectedIndex;
 
-            var cropStart = checkStart.IsChecked == true
+            var trimStart = checkStart.IsChecked == true
                 ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value)
                 : TimeSpan.Zero;
-            var cropEnd = checkEnd.IsChecked == true
+            var trimEnd = checkEnd.IsChecked == true
                 ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value)
                 : vodLength;
 
@@ -235,7 +235,7 @@ namespace TwitchDownloaderWPF
                 var quality = GetQualityWithoutSize(qualityWithSize);
                 var bandwidth = videoQualities[quality].bandwidth;
 
-                var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth, cropStart, cropEnd);
+                var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth, trimStart, trimEnd);
                 if (sizeInBytes == 0)
                 {
                     comboQuality.Items[i] = quality;
@@ -333,8 +333,8 @@ namespace TwitchDownloaderWPF
         private void Page_Initialized(object sender, EventArgs e)
         {
             SetEnabled(false);
-            SetEnabledCropStart(false);
-            SetEnabledCropEnd(false);
+            SetEnabledTrimStart(false);
+            SetEnabledTrimEnd(false);
             WebRequest.DefaultWebProxy = null;
             numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
             TextOauth.Text = Settings.Default.OAuth;
@@ -381,14 +381,14 @@ namespace TwitchDownloaderWPF
 
         private void checkStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropStart(checkStart.IsChecked.GetValueOrDefault());
+            SetEnabledTrimStart(checkStart.IsChecked.GetValueOrDefault());
 
             UpdateVideoSizeEstimates();
         }
 
         private void checkEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropEnd(checkEnd.IsChecked.GetValueOrDefault());
+            SetEnabledTrimEnd(checkEnd.IsChecked.GetValueOrDefault());
 
             UpdateVideoSizeEstimates();
         }
@@ -402,7 +402,7 @@ namespace TwitchDownloaderWPF
 
             if (!ValidateInputs())
             {
-                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidCropInputs);
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidTrimInputs);
                 return;
             }
 
@@ -505,7 +505,7 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidCropInputs);
+                AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidTrimInputs);
             }
         }
 

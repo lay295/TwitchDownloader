@@ -164,8 +164,8 @@
   <data name="ChatBadges" xml:space="preserve">
     <value>Chat Badges:</value>
   </data>
-  <data name="ChatCrop" xml:space="preserve">
-    <value>Crop:</value>
+  <data name="TrimChat" xml:space="preserve">
+    <value>Trim:</value>
   </data>
   <data name="ChatDownload" xml:space="preserve">
     <value>Chat Download</value>
@@ -215,14 +215,14 @@
   <data name="TemplateClips" xml:space="preserve">
     <value>Clips:</value>
   </data>
-  <data name="CropEnd" xml:space="preserve">
+  <data name="TrimEnd" xml:space="preserve">
     <value>End</value>
   </data>
-  <data name="CropStart" xml:space="preserve">
+  <data name="TrimStart" xml:space="preserve">
     <value>Start</value>
   </data>
-  <data name="CropVideo" xml:space="preserve">
-    <value>Crop Video:</value>
+  <data name="TrimVideo" xml:space="preserve">
+    <value>Trim:</value>
   </data>
   <data name="DateCustomFormatting" xml:space="preserve">
     <value>date_custom formatting is based on the</value>
@@ -326,8 +326,8 @@
   <data name="InvalidClipLinkIdMessage" xml:space="preserve">
     <value>Please enter a valid clip Link/ID\nExamples:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
   </data>
-  <data name="InvalidCropInputs" xml:space="preserve">
-    <value>Invalid Crop Inputs</value>
+  <data name="InvalidTrimInputs" xml:space="preserve">
+    <value>Invalid Trim Inputs</value>
   </data>
   <data name="InvalidStartEndTime" xml:space="preserve">
     <value>Invalid start or end time</value>

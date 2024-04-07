@@ -69,7 +69,7 @@
                 <TextBlock Text="{lex:Loc DownloadFormat}" HorizontalAlignment="Right" Margin="0,12,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock Visibility="Visible" x:Name="compressionText" Text="{lex:Loc ChatCompression}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock Visibility="Collapsed" x:Name="timeText" Text="{lex:Loc TimestampFormat}" HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock x:Name="textCrop" Text="{lex:Loc ChatCrop}" HorizontalAlignment="Right" Margin="0,10,0,33" Foreground="{DynamicResource AppText}" />
+                <TextBlock x:Name="textTrim" Text="{lex:Loc TrimChat}" HorizontalAlignment="Right" Margin="0,10,0,33" Foreground="{DynamicResource AppText}" />
                 <StackPanel x:Name="stackEmbedText" Visibility="Visible">
                     <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" ><Run Text="{lex:Loc EmbedMissing}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc EmbedMissingTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                     <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" ><Run Text="{lex:Loc ReplaceEmbeds}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ReplaceEmbedsTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
@@ -95,14 +95,14 @@
                 <StackPanel Margin="5,5,0,0">
                     <StackPanel Orientation="Horizontal">
                         <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkStart_OnCheckStateChanged" Unchecked="checkStart_OnCheckStateChanged" BorderBrush="{DynamicResource AppElementBorder}" />
-                        <TextBlock Margin="2,0,0,0" Text="{lex:Loc CropStart}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
+                        <TextBlock Margin="2,0,0,0" Text="{lex:Loc TrimStart}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" Value="0" x:Name="numStartHour" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numStartMinute" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numStartSecond" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                         <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkEnd_OnCheckStateChanged" Unchecked="checkEnd_OnCheckStateChanged" BorderBrush="{DynamicResource AppElementBorder}" />
-                        <TextBlock Margin="2,0,4.5,0" Text="{lex:Loc CropEnd}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                        <TextBlock Margin="2,0,4.5,0" Text="{lex:Loc TrimEnd}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" Value="0" x:Name="numEndHour" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndMinute" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="60" Value="0" x:Name="numEndSecond" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
