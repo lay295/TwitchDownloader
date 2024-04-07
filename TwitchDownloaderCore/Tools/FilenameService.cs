@@ -18,8 +18,8 @@ namespace TwitchDownloaderCore.Tools
                 .Replace("{channel}", RemoveInvalidFilenameChars(channel))
                 .Replace("{date}", date.ToString("M-d-yy"))
                 .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
-                .Replace("{crop_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
-                .Replace("{crop_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimEnd))
+                .Replace("{trim_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
+                .Replace("{trim_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimEnd))
                 .Replace("{length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", videoLength))
                 .Replace("{views}", viewCount)
                 .Replace("{game}", RemoveInvalidFilenameChars(game));
@@ -30,15 +30,15 @@ namespace TwitchDownloaderCore.Tools
                 ReplaceCustomWithFormattable(stringBuilder, dateRegex, date);
             }
 
-            if (template.Contains("{crop_start_custom="))
+            if (template.Contains("{trim_start_custom="))
             {
-                var trimStartRegex = new Regex("{crop_start_custom=\"(.*?)\"}");
+                var trimStartRegex = new Regex("{trim_start_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, trimStartRegex, trimStart);
             }
 
-            if (template.Contains("{crop_end_custom="))
+            if (template.Contains("{trim_end_custom="))
             {
-                var trimEndRegex = new Regex("{crop_end_custom=\"(.*?)\"}");
+                var trimEndRegex = new Regex("{trim_end_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, trimEndRegex, trimEnd);
             }
 

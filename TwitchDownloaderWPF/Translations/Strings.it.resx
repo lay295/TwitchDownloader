@@ -298,7 +298,7 @@
     <value>Emotes FFZ:</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
-    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {crop_start} {crop_end} {crop_start_custom=""} {crop_end_custom=""} {length} {length_custom=""} {views} {game}</value>
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
     <comment>Non tradurre</comment>
   </data>
   <data name="FontColor" xml:space="preserve">
@@ -733,7 +733,7 @@
     <value>Scala di contorno:</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
-    <value>I formati crop_start_custom, crop_end_custom e length_custom si basano sul formato</value>
+    <value>I formati trim_start_custom, trim_end_custom e length_custom si basano sul formato</value>
   </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
     <value>Stringhe di formato di intervallo di tempo standard di C#</value>
