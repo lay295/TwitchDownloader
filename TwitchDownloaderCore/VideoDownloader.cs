@@ -420,11 +420,16 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException ex) when (tryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
                 {
+                    logger.LogVerbose($"Received {ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
                     tryUnmute = false;
+
+                    await Task.Delay(100);
                 }
-                catch (HttpRequestException)
+                catch (HttpRequestException ex)
                 {
                     const int MAX_RETRIES = 10;
+
+                    logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} for {videoPartName}. {MAX_RETRIES - (errorCount + 1)} retries left.");
                     if (++errorCount > MAX_RETRIES)
                     {
                         throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_RETRIES} retries");
@@ -435,6 +440,8 @@ namespace TwitchDownloaderCore
                 catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
                 {
                     const int MAX_RETRIES = 3;
+
+                    logger.LogVerbose($"{videoPartName} timed out. {MAX_RETRIES - (timeoutCount + 1)} retries left.");
                     if (++timeoutCount > MAX_RETRIES)
                     {
                         throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_RETRIES} times");
@@ -524,9 +531,10 @@ namespace TwitchDownloaderCore
         /// <param name="url">The url of the file to download.</param>
         /// <param name="destinationFile">The path to the file where download will be saved.</param>
         /// <param name="throttleKib">The maximum download speed in kibibytes per second, or -1 for no maximum.</param>
+        /// <param name="logger">Logger.</param>
         /// <param name="cancellationTokenSource">A <see cref="CancellationTokenSource"/> containing a <see cref="CancellationToken"/> to cancel the operation.</param>
         /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
-        private static async Task DownloadFileAsync(HttpClient httpClient, Uri url, string destinationFile, int throttleKib, CancellationTokenSource cancellationTokenSource = null)
+        private static async Task DownloadFileAsync(HttpClient httpClient, Uri url, string destinationFile, int throttleKib, ITaskLogger logger, CancellationTokenSource cancellationTokenSource = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
 
@@ -567,10 +575,10 @@ namespace TwitchDownloaderCore
                         await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
                         await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
                     }
-                    catch (IOException e) when (e.Message.Contains("EOF"))
+                    catch (IOException ex) when (ex.Message.Contains("EOF"))
                     {
                         // If we get an exception for EOF, it may be related to the throttler. Try again without it.
-                        // TODO: Log this somehow
+                        logger.LogVerbose($"Unexpected EOF, retrying without bandwidth throttle. Message: {ex.Message}.");
                         await Task.Delay(2_000, cancellationToken);
                         goto case -1;
                     }
