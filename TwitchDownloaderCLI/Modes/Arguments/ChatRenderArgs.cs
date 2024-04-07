@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
@@ -26,11 +27,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('h', "chat-height", Default = 600, HelpText = "Height of chat render.")]
         public int ChatHeight { get; set; }
 
-        [Option('b', "beginning", Default = -1, HelpText = "Time in seconds to trim beginning of the render.")]
-        public int TrimBeginningTime { get; set; }
+        [Option('b', "beginning", HelpText = "Time to trim the beginning of the render. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimBeginningTime { get; set; } = new(-1);
 
-        [Option('e', "ending", Default = -1, HelpText = "Time in seconds to trim ending of the render.")]
-        public int TrimEndingTime { get; set; }
+        [Option('e', "ending", HelpText = "Time to trim the ending of the render. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimEndingTime { get; set; } = new(-1);
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV emotes.")]
         public bool? BttvEmotes { get; set; }
@@ -115,9 +116,6 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
-
-        [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from FFmpeg.")]
-        public bool LogFfmpegOutput { get; set; }
 
         [Option("skip-drive-waiting", Default = false, HelpText = "Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives.")]
         public bool SkipDriveWaiting { get; set; }

@@ -684,7 +684,6 @@ namespace TwitchDownloaderWPF
 
         private void Window_loaded(object sender, RoutedEventArgs e)
         {
-            Title = Translations.Strings.TitleEnqueueOptions;
             App.RequestTitleBarChange();
         }
 

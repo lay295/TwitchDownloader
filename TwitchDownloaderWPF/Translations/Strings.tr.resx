@@ -856,4 +856,10 @@
   <data name="LogLevelFfmpeg" xml:space="preserve">
     <value>FFmpeg</value>
   </data>
+  <data name="CopyFolderPathToClipboard" xml:space="preserve">
+    <value>Copy path to clipboard</value>
+  </data>
+  <data name="ContextMenuOpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
 </root>

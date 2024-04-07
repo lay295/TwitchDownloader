@@ -382,16 +382,13 @@ namespace TwitchDownloaderCore
                 SavePath = savePath
             };
 
-            if (renderOptions.LogFfmpegOutput && _progress != null)
+            process.ErrorDataReceived += (_, e) =>
             {
-                process.ErrorDataReceived += (_, e) =>
+                if (e.Data != null)
                 {
-                    if (e.Data != null)
-                    {
-                        _progress.LogFfmpeg(e.Data);
-                    }
-                };
-            }
+                    _progress.LogFfmpeg(e.Data);
+                }
+            };
 
             process.Start();
             process.BeginErrorReadLine();

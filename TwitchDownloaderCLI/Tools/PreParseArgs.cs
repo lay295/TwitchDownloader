@@ -9,7 +9,7 @@ namespace TwitchDownloaderCLI.Tools
     {
         internal static string[] Parse(string[] args, string processFileName)
         {
-            if (args.Any(x => x is "-m" or "--mode" or "--embed-emotes" or "--silent"))
+            if (args.Any(x => x is "-m" or "--mode" or "--embed-emotes" or "--silent" or "--verbose-ffmpeg"))
             {
                 // A legacy syntax was used, convert to new syntax
                 return Process(ConvertFromOldSyntax(args, processFileName));
@@ -20,10 +20,11 @@ namespace TwitchDownloaderCLI.Tools
 
         private static string[] Process(string[] args)
         {
-            if (args.Length == 0)
-                return args;
+            if (args.Length > 0)
+            {
+                args[0] = args[0].ToLower();
+            }
 
-            args[0] = args[0].ToLower();
             return args;
         }
 
@@ -35,77 +36,63 @@ namespace TwitchDownloaderCLI.Tools
         {
             var processedArgs = args.ToList();
 
-            if (args.Any(x => x.Equals("--embed-emotes")))
+            for (var i = 0; i < processedArgs.Count; i++)
             {
-                Console.WriteLine("[INFO] The program has switched from --embed-emotes to -E / --embed-images, consider using those instead. Run \'{0} help\' for more information.", processFileName);
-                processedArgs = ConvertEmbedEmoteSyntax(processedArgs);
-            }
-
-            if (args.Any(x => x is "-m" or "--mode"))
-            {
-                Console.WriteLine("[INFO] The program has switched from --mode <mode> to verbs (like \'git <verb>\'), consider using verbs instead. Run \'{0} help\' for more information.", processFileName);
-                processedArgs = ConvertModeSyntax(processedArgs);
-            }
-
-            if (args.Any(x => x is "--silent"))
-            {
-                Console.WriteLine("[INFO] The program has switched from --silent to log levels, consider using log levels instead. '--log-level None' will be applied to the current session. Run \'{0} help\' for more information.", processFileName);
-                processedArgs = ConvertSilentSyntax(processedArgs);
+                switch (processedArgs[i])
+                {
+                    case "--embed-emotes":
+                        Console.WriteLine("[INFO] The program has switched from --embed-emotes to -E / --embed-images, consider using those instead. Run \'{0} help\' for more information.", processFileName);
+                        ConvertEmbedEmoteSyntax(processedArgs, i);
+                        break;
+                    case "-m" or "--mode":
+                        Console.WriteLine("[INFO] The program has switched from --mode <mode> to verbs (like \'git <verb>\'), consider using verbs instead. Run \'{0} help\' for more information.", processFileName);
+                        ConvertModeSyntax(processedArgs, i);
+                        break;
+                    case "--silent":
+                        Console.WriteLine("[INFO] The program has switched from --silent to log levels, consider using log levels instead. '--log-level None' will be applied to the current session. Run \'{0} help\' for more information.", processFileName);
+                        ConvertSilentSyntax(processedArgs, i);
+                        break;
+                    case "--verbose-ffmpeg":
+                        Console.WriteLine("[INFO] The program has switched from --verbose-ffmpeg to log levels, consider using log levels instead. '--log-level Status,Info,Warning,Error,Ffmpeg' will be applied to the current session. Run \'{0} help\' for more information.", processFileName);
+                        ConvertVerboseFfmpegSyntax(processedArgs, i);
+                        break;
+                }
             }
 
             return processedArgs.ToArray();
         }
 
-        private static List<string> ConvertEmbedEmoteSyntax(List<string> args)
+        private static void ConvertEmbedEmoteSyntax(IList<string> args, int index)
         {
-            var argsLength = args.Count;
-
-            for (var i = 0; i < argsLength; i++)
-            {
-                if (args[i].Equals("--embed-emotes"))
-                {
-                    args[i] = "-E";
-                    break;
-                }
-            }
-
-            return args;
+            args[index] = "-E";
         }
 
-        private static List<string> ConvertModeSyntax(List<string> args)
+        private static void ConvertModeSyntax(IList<string> args, int index)
         {
-            var argsLength = args.Count;
-            var processedArgs = new string[argsLength - 1];
+            // --mode
+            args.RemoveAt(index);
 
-            var j = 1;
-            for (var i = 0; i < argsLength; i++)
-            {
-                if (args[i].Equals("-m") || args[i].Equals("--mode"))
-                {
-                    // Copy the run-mode to the verb position
-                    processedArgs[0] = args[i + 1];
-                    i++;
-                    continue;
-                }
-                processedArgs[j] = args[i];
-                j++;
-            }
-
-            return processedArgs.ToList();
+            // run-mode
+            var runMode = args[index];
+            args.RemoveAt(index);
+            args.Insert(0, runMode);
         }
 
-        private static List<string> ConvertSilentSyntax(List<string> args)
+        private static void ConvertSilentSyntax(IList<string> args, int index)
         {
-            for (var i = 0; i < args.Count; i++)
-            {
-                if (args[i].Equals("--silent"))
-                {
-                    args[i] = "--log-level";
-                    args.Insert(i + 1, nameof(LogLevel.None));
-                }
-            }
+            args[index] = "--log-level";
+            args.Insert(index + 1, nameof(LogLevel.None));
+        }
 
-            return args;
+        private static void ConvertVerboseFfmpegSyntax(IList<string> args, int index)
+        {
+            // If the user is still using --verbose-ffmpeg they probably aren't using log levels yet, so its safe to assume that there won't be a double-parse error
+            args[index] = "--log-level";
+
+            var logLevels = Enum.GetNames(typeof(LogLevel))
+                .Where(x => x is not nameof(LogLevel.None) and not nameof(LogLevel.Verbose));
+
+            args.Insert(index + 1, string.Join(',', logLevels));
         }
     }
 }

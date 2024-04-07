@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
@@ -14,11 +15,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('q', "quality", HelpText = "The quality the program will attempt to download.")]
         public string Quality { get; set; }
 
-        [Option('b', "beginning", HelpText = "Time in seconds to trim beginning.")]
-        public int TrimBeginningTime { get; set; }
+        [Option('b', "beginning", HelpText = "Time to trim beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimBeginningTime { get; set; }
 
-        [Option('e', "ending", HelpText = "Time in seconds to trim ending.")]
-        public int TrimEndingTime { get; set; }
+        [Option('e', "ending", HelpText = "Time to trim ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimEndingTime { get; set; }
 
         [Option('t', "threads", Default = 4, HelpText = "Number of download threads.")]
         public int DownloadThreads { get; set; }

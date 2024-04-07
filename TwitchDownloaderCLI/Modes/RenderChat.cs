@@ -36,8 +36,8 @@ namespace TwitchDownloaderCLI.Modes
                 MessageColor = SKColor.Parse(inputOptions.MessageColor),
                 ChatHeight = inputOptions.ChatHeight,
                 ChatWidth = inputOptions.ChatWidth,
-                StartOverride = inputOptions.TrimBeginningTime,
-                EndOverride = inputOptions.TrimEndingTime,
+                StartOverride = (int)((TimeSpan)inputOptions.TrimBeginningTime).TotalSeconds,
+                EndOverride = (int)((TimeSpan)inputOptions.TrimEndingTime).TotalSeconds,
                 BttvEmotes = (bool)inputOptions.BttvEmotes!,
                 FfzEmotes = (bool)inputOptions.FfzEmotes!,
                 StvEmotes = (bool)inputOptions.StvEmotes!,
@@ -79,7 +79,6 @@ namespace TwitchDownloaderCLI.Modes
                     "system" or "none" => EmojiVendor.None,
                     _ => throw new NotSupportedException("Invalid emoji vendor. Valid values are: 'twitter' / 'twemoji', and 'google' / 'notocolor'")
                 },
-                LogFfmpegOutput = inputOptions.LogFfmpegOutput,
                 SkipDriveWaiting = inputOptions.SkipDriveWaiting,
                 EmoteScale = inputOptions.ScaleEmote,
                 BadgeScale = inputOptions.ScaleBadge,

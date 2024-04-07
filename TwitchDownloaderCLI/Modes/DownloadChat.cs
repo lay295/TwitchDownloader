@@ -49,10 +49,10 @@ namespace TwitchDownloaderCLI.Modes
                     _ => throw new NotSupportedException($"{fileExtension} is not a valid chat file extension.")
                 },
                 Id = vodClipIdMatch.Value,
-                CropBeginning = inputOptions.TrimBeginningTime > 0.0,
-                CropBeginningTime = inputOptions.TrimBeginningTime,
-                CropEnding = inputOptions.TrimEndingTime > 0.0,
-                CropEndingTime = inputOptions.TrimEndingTime,
+                CropBeginning = inputOptions.TrimBeginningTime > TimeSpan.Zero,
+                CropBeginningTime = ((TimeSpan)inputOptions.TrimBeginningTime).TotalSeconds,
+                CropEnding = inputOptions.TrimEndingTime > TimeSpan.Zero,
+                CropEndingTime = ((TimeSpan)inputOptions.TrimEndingTime).TotalSeconds,
                 EmbedData = inputOptions.EmbedData,
                 Filename = inputOptions.Compression is ChatCompression.Gzip
                     ? inputOptions.OutputFile + ".gz"
