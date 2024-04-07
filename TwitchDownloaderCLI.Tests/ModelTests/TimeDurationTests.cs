@@ -13,6 +13,8 @@ namespace TwitchDownloaderCLI.Tests.ModelTests
         [InlineData("55s", 55 * TicksPerSecond)]
         [InlineData("17m", 17 * TicksPerMinute)]
         [InlineData("31h", 31 * TicksPerHour)]
+        [InlineData("0:09:27", 9 * TicksPerMinute + 27 * TicksPerSecond)]
+        [InlineData("11:30", 11 * TicksPerHour + 30 * TicksPerMinute)]
         [InlineData("12:03:45", 12 * TicksPerHour + 3 * TicksPerMinute + 45 * TicksPerSecond)]
         public void CorrectlyParsesTimeStrings(string input, long expectedTicks)
         {
@@ -26,6 +28,7 @@ namespace TwitchDownloaderCLI.Tests.ModelTests
         [Theory]
         [InlineData("")]
         [InlineData("   ")]
+        [InlineData("100 s")]
         [InlineData("123d")]
         [InlineData("0:12345")]
         public void ThrowsOnBadFormat(string input)
