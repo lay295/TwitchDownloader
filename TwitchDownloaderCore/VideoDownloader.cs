@@ -165,79 +165,23 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartsAsync(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, TimeSpan vodAge, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var videoPartsQueue = new ConcurrentQueue<string>(playlist.Take(videoListCrop).Select(x => x.Path));
-            var downloadTasks = new Task[downloadOptions.DownloadThreads];
+            var downloadThreads = new DownloadThread[downloadOptions.DownloadThreads];
 
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
             {
-                downloadTasks[i] = StartNewDownloadThread(videoPartsQueue, baseUrl, downloadFolder, vodAge, cancellationToken);
+                downloadThreads[i] = new DownloadThread(videoPartsQueue, _httpClient, baseUrl, downloadFolder, vodAge, downloadOptions.ThrottleKib, _progress, cancellationToken);
             }
 
-            var downloadExceptions = await WaitForDownloadThreads(downloadTasks, videoPartsQueue, baseUrl, downloadFolder, vodAge, partCount, cancellationToken);
+            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, videoPartsQueue, partCount, cancellationToken);
 
             LogDownloadThreadExceptions(downloadExceptions);
         }
 
-        private Task StartNewDownloadThread(ConcurrentQueue<string> videoPartsQueue, Uri baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
-        {
-            return Task.Factory.StartNew(
-                ExecuteDownloadThread,
-                new Tuple<ConcurrentQueue<string>, HttpClient, Uri, string, double, int, CancellationToken>(
-                    videoPartsQueue, _httpClient, baseUrl, downloadFolder, vodAge, downloadOptions.ThrottleKib, cancellationToken),
-                cancellationToken,
-                TaskCreationOptions.LongRunning,
-                TaskScheduler.Current);
-
-            static void ExecuteDownloadThread(object state)
-            {
-                var (partQueue, httpClient, rootUrl, cacheFolder, videoAge, throttleKib, cancelToken) =
-                    (Tuple<ConcurrentQueue<string>, HttpClient, Uri, string, double, int, CancellationToken>)state;
-
-                using var cts = new CancellationTokenSource();
-                cancelToken.Register(PropagateCancel, cts);
-
-                while (!partQueue.IsEmpty)
-                {
-                    cancelToken.ThrowIfCancellationRequested();
-
-                    string videoPart = null;
-                    try
-                    {
-                        if (partQueue.TryDequeue(out videoPart))
-                        {
-                            DownloadVideoPartAsync(httpClient, rootUrl, videoPart, cacheFolder, videoAge, throttleKib, cts).GetAwaiter().GetResult();
-                        }
-                    }
-                    catch
-                    {
-                        if (videoPart != null && !cancelToken.IsCancellationRequested)
-                        {
-                            // Requeue the video part now instead of deferring to the verifier since we already know it's bad
-                            partQueue.Enqueue(videoPart);
-                        }
-
-                        throw;
-                    }
-
-                    const int A_PRIME_NUMBER = 71;
-                    Thread.Sleep(A_PRIME_NUMBER);
-                }
-            }
-
-            static void PropagateCancel(object tokenSourceToCancel)
-            {
-                try
-                {
-                    ((CancellationTokenSource)tokenSourceToCancel)?.Cancel();
-                }
-                catch (ObjectDisposedException) { }
-            }
-        }
-
-        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(Task[] tasks, ConcurrentQueue<string> videoPartsQueue, Uri baseUrl, string downloadFolder, double vodAge, int partCount, CancellationToken cancellationToken)
+        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(DownloadThread[] downloadThreads, ConcurrentQueue<string> videoPartsQueue, int partCount, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
             var previousDoneCount = 0;
@@ -254,9 +198,9 @@ namespace TwitchDownloaderCore
                 }
 
                 allThreadsExited = true;
-                for (var t = 0; t < tasks.Length; t++)
+                foreach (var thread in downloadThreads)
                 {
-                    var task = tasks[t];
+                    var task = thread.ThreadTask;
 
                     if (task.IsFaulted)
                     {
@@ -264,7 +208,7 @@ namespace TwitchDownloaderCore
 
                         if (restartedThreads <= maxRestartedThreads)
                         {
-                            tasks[t] = StartNewDownloadThread(videoPartsQueue, baseUrl, downloadFolder, vodAge, cancellationToken);
+                            thread.StartDownloadThread();
                             restartedThreads++;
                         }
                     }
@@ -325,7 +269,7 @@ namespace TwitchDownloaderCore
             _progress.LogInfo(sb.ToString());
         }
 
-        private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
+        private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, TimeSpan vodAge, CancellationToken cancellationToken)
         {
             var failedParts = new List<M3U8.Stream>();
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
@@ -450,10 +394,11 @@ namespace TwitchDownloaderCore
             _progress.ReportProgress(Math.Clamp(percent, 0, 100));
         }
 
+        // TODO: Move into DownloadThread class
         /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
-        private static async Task DownloadVideoPartAsync(HttpClient httpClient, Uri baseUrl, string videoPartName, string downloadFolder, double vodAge, int throttleKib, CancellationTokenSource cancellationTokenSource)
+        private static async Task DownloadVideoPartAsync(HttpClient httpClient, Uri baseUrl, string videoPartName, string downloadFolder, TimeSpan vodAge, int throttleKib, ITaskLogger logger, CancellationTokenSource cancellationTokenSource)
         {
-            bool tryUnmute = vodAge < 24;
+            bool tryUnmute = vodAge < TimeSpan.FromHours(24);
             int errorCount = 0;
             int timeoutCount = 0;
             while (true)
@@ -464,11 +409,11 @@ namespace TwitchDownloaderCore
                 {
                     if (tryUnmute && videoPartName.Contains("-muted"))
                     {
-                        await DownloadFileAsync(httpClient, new Uri(baseUrl, videoPartName.Replace("-muted", "")), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, cancellationTokenSource);
+                        await DownloadFileAsync(httpClient, new Uri(baseUrl, videoPartName.Replace("-muted", "")), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, logger, cancellationTokenSource);
                     }
                     else
                     {
-                        await DownloadFileAsync(httpClient, new Uri(baseUrl, videoPartName), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, cancellationTokenSource);
+                        await DownloadFileAsync(httpClient, new Uri(baseUrl, videoPartName), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, logger, cancellationTokenSource);
                     }
 
                     return;
@@ -500,16 +445,16 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<(M3U8 playlist, Range cropRange, double vodAge)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
+        private async Task<(M3U8 playlist, Range cropRange, TimeSpan vodAge)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
             var playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
             var playlist = M3U8.Parse(playlistString);
 
-            double vodAge = 25;
+            var vodAge = TimeSpan.FromHours(25);
             var airDateKvp = playlist.FileMetadata.UnparsedValues.FirstOrDefault(x => x.Key == "#ID3-EQUIV-TDTG:");
             if (DateTimeOffset.TryParse(airDateKvp.Value, out var airDate))
             {
-                vodAge = (DateTimeOffset.UtcNow - airDate).TotalHours;
+                vodAge = DateTimeOffset.UtcNow - airDate;
             }
 
             var videoListCrop = GetStreamListCrop(playlist.Streams, downloadOptions);
@@ -696,6 +641,89 @@ namespace TwitchDownloaderCore
                 }
             }
             catch (IOException) { } // Directory is probably being used by another process
+        }
+
+        // TODO: Move to separate file
+        private sealed record DownloadThread
+        {
+            private readonly ConcurrentQueue<string> _videoPartsQueue;
+            private readonly HttpClient _client;
+            private readonly Uri _baseUrl;
+            private readonly string _cacheFolder;
+            private readonly TimeSpan _videoAge;
+            private readonly int _throttleKib;
+            private readonly ITaskLogger _logger;
+            private readonly CancellationToken _cancellationToken;
+            public Task ThreadTask { get; private set; }
+
+            public DownloadThread(ConcurrentQueue<string> videoPartsQueue, HttpClient httpClient, Uri baseUrl, string cacheFolder, TimeSpan videoAge, int throttleKib, ITaskLogger logger, CancellationToken cancellationToken)
+            {
+                _videoPartsQueue = videoPartsQueue;
+                _client = httpClient;
+                _baseUrl = baseUrl;
+                _cacheFolder = cacheFolder;
+                _videoAge = videoAge;
+                _throttleKib = throttleKib;
+                _logger = logger;
+                _cancellationToken = cancellationToken;
+                StartDownloadThread();
+            }
+
+            public void StartDownloadThread()
+            {
+                if (ThreadTask is { Status: TaskStatus.Created or TaskStatus.WaitingForActivation or TaskStatus.WaitingToRun or TaskStatus.Running })
+                {
+                    throw new InvalidOperationException($"Tried to start a thread that was already running or waiting to run ({ThreadTask.Status}).");
+                }
+
+                ThreadTask = Task.Factory.StartNew(
+                    ExecuteDownloadThread,
+                    _cancellationToken,
+                    TaskCreationOptions.LongRunning,
+                    TaskScheduler.Current);
+            }
+
+            private void ExecuteDownloadThread()
+            {
+                using var cts = new CancellationTokenSource();
+                _cancellationToken.Register(PropagateCancel, cts);
+
+                while (!_videoPartsQueue.IsEmpty)
+                {
+                    _cancellationToken.ThrowIfCancellationRequested();
+
+                    string videoPart = null;
+                    try
+                    {
+                        if (_videoPartsQueue.TryDequeue(out videoPart))
+                        {
+                            DownloadVideoPartAsync(_client, _baseUrl, videoPart, _cacheFolder, _videoAge, _throttleKib, _logger, cts).GetAwaiter().GetResult();
+                        }
+                    }
+                    catch
+                    {
+                        if (videoPart != null && !_cancellationToken.IsCancellationRequested)
+                        {
+                            // Requeue the video part now instead of deferring to the verifier since we already know it's bad
+                            _videoPartsQueue.Enqueue(videoPart);
+                        }
+
+                        throw;
+                    }
+
+                    const int A_PRIME_NUMBER = 71;
+                    Thread.Sleep(A_PRIME_NUMBER);
+                }
+            }
+
+            private static void PropagateCancel(object tokenSourceToCancel)
+            {
+                try
+                {
+                    (tokenSourceToCancel as CancellationTokenSource)?.Cancel();
+                }
+                catch (ObjectDisposedException) { }
+            }
         }
     }
 }
