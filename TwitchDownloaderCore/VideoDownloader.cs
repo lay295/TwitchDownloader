@@ -67,7 +67,7 @@ namespace TwitchDownloaderCore
                 var videoLength = TimeSpan.FromSeconds(videoInfoResponse.data.video.lengthSeconds);
                 CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
 
-                var (playlist, videoListCrop, vodAge) = await GetVideoPlaylist(playlistUrl, cancellationToken);
+                var (playlist, videoListCrop, airDate) = await GetVideoPlaylist(playlistUrl, cancellationToken);
 
                 if (Directory.Exists(downloadFolder))
                     Directory.Delete(downloadFolder, true);
@@ -75,11 +75,11 @@ namespace TwitchDownloaderCore
 
                 _progress.SetTemplateStatus("Downloading {0}% [2/5]", 0);
 
-                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
+                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
 
                 _progress.SetTemplateStatus("Verifying Parts {0}% [3/5]", 0);
 
-                await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
+                await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
 
                 _progress.SetTemplateStatus("Combining Parts {0}% [4/5]", 0);
 
@@ -165,7 +165,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, TimeSpan vodAge, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartsAsync(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var videoPartsQueue = new ConcurrentQueue<string>(playlist.Take(videoListCrop).Select(x => x.Path));
@@ -173,7 +173,7 @@ namespace TwitchDownloaderCore
 
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
             {
-                downloadThreads[i] = new DownloadThread(videoPartsQueue, _httpClient, baseUrl, downloadFolder, vodAge, downloadOptions.ThrottleKib, _progress, cancellationToken);
+                downloadThreads[i] = new DownloadThread(videoPartsQueue, _httpClient, baseUrl, downloadFolder, vodAirDate, downloadOptions.ThrottleKib, _progress, cancellationToken);
             }
 
             var downloadExceptions = await WaitForDownloadThreads(downloadThreads, videoPartsQueue, partCount, cancellationToken);
@@ -269,7 +269,7 @@ namespace TwitchDownloaderCore
             _progress.LogInfo(sb.ToString());
         }
 
-        private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, TimeSpan vodAge, CancellationToken cancellationToken)
+        private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
             var failedParts = new List<M3U8.Stream>();
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
@@ -306,7 +306,7 @@ namespace TwitchDownloaderCore
                 }
 
                 _progress.LogInfo($"The following parts will be redownloaded: {string.Join(", ", failedParts)}");
-                await DownloadVideoPartsAsync(failedParts, videoListCrop, baseUrl, downloadFolder, vodAge, cancellationToken);
+                await DownloadVideoPartsAsync(failedParts, videoListCrop, baseUrl, downloadFolder, vodAirDate, cancellationToken);
             }
         }
 
@@ -394,79 +394,21 @@ namespace TwitchDownloaderCore
             _progress.ReportProgress(Math.Clamp(percent, 0, 100));
         }
 
-        // TODO: Move into DownloadThread class
-        /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
-        private static async Task DownloadVideoPartAsync(HttpClient httpClient, Uri baseUrl, string videoPartName, string downloadFolder, TimeSpan vodAge, int throttleKib, ITaskLogger logger, CancellationTokenSource cancellationTokenSource)
-        {
-            bool tryUnmute = vodAge < TimeSpan.FromHours(24);
-            int errorCount = 0;
-            int timeoutCount = 0;
-            while (true)
-            {
-                cancellationTokenSource.Token.ThrowIfCancellationRequested();
-
-                try
-                {
-                    if (tryUnmute && videoPartName.Contains("-muted"))
-                    {
-                        await DownloadFileAsync(httpClient, new Uri(baseUrl, videoPartName.Replace("-muted", "")), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, logger, cancellationTokenSource);
-                    }
-                    else
-                    {
-                        await DownloadFileAsync(httpClient, new Uri(baseUrl, videoPartName), Path.Combine(downloadFolder, RemoveQueryString(videoPartName)), throttleKib, logger, cancellationTokenSource);
-                    }
-
-                    return;
-                }
-                catch (HttpRequestException ex) when (tryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
-                {
-                    logger.LogVerbose($"Received {ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
-                    tryUnmute = false;
-
-                    await Task.Delay(100);
-                }
-                catch (HttpRequestException ex)
-                {
-                    const int MAX_RETRIES = 10;
-
-                    logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} for {videoPartName}. {MAX_RETRIES - (errorCount + 1)} retries left.");
-                    if (++errorCount > MAX_RETRIES)
-                    {
-                        throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_RETRIES} retries");
-                    }
-
-                    await Task.Delay(1_000 * errorCount, cancellationTokenSource.Token);
-                }
-                catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
-                {
-                    const int MAX_RETRIES = 3;
-
-                    logger.LogVerbose($"{videoPartName} timed out. {MAX_RETRIES - (timeoutCount + 1)} retries left.");
-                    if (++timeoutCount > MAX_RETRIES)
-                    {
-                        throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_RETRIES} times");
-                    }
-
-                    await Task.Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
-                }
-            }
-        }
-
-        private async Task<(M3U8 playlist, Range cropRange, TimeSpan vodAge)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
+        private async Task<(M3U8 playlist, Range cropRange, DateTimeOffset airDate)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
             var playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
             var playlist = M3U8.Parse(playlistString);
 
-            var vodAge = TimeSpan.FromHours(25);
+            var airDate = DateTimeOffset.UtcNow.AddHours(-25);
             var airDateKvp = playlist.FileMetadata.UnparsedValues.FirstOrDefault(x => x.Key == "#ID3-EQUIV-TDTG:");
-            if (DateTimeOffset.TryParse(airDateKvp.Value, out var airDate))
+            if (DateTimeOffset.TryParse(airDateKvp.Value, out var vodAirDate))
             {
-                vodAge = DateTimeOffset.UtcNow - airDate;
+                airDate = vodAirDate;
             }
 
             var videoListCrop = GetStreamListCrop(playlist.Streams, downloadOptions);
 
-            return (playlist, videoListCrop, vodAge);
+            return (playlist, videoListCrop, airDate);
         }
 
         private static Range GetStreamListCrop(IList<M3U8.Stream> streamList, VideoDownloadOptions downloadOptions)
@@ -658,19 +600,20 @@ namespace TwitchDownloaderCore
             private readonly HttpClient _client;
             private readonly Uri _baseUrl;
             private readonly string _cacheFolder;
-            private readonly TimeSpan _videoAge;
+            private readonly DateTimeOffset _vodAirDate;
+            private TimeSpan VodAge => DateTimeOffset.UtcNow - _vodAirDate;
             private readonly int _throttleKib;
             private readonly ITaskLogger _logger;
             private readonly CancellationToken _cancellationToken;
             public Task ThreadTask { get; private set; }
 
-            public DownloadThread(ConcurrentQueue<string> videoPartsQueue, HttpClient httpClient, Uri baseUrl, string cacheFolder, TimeSpan videoAge, int throttleKib, ITaskLogger logger, CancellationToken cancellationToken)
+            public DownloadThread(ConcurrentQueue<string> videoPartsQueue, HttpClient httpClient, Uri baseUrl, string cacheFolder, DateTimeOffset vodAirDate, int throttleKib, ITaskLogger logger, CancellationToken cancellationToken)
             {
                 _videoPartsQueue = videoPartsQueue;
                 _client = httpClient;
                 _baseUrl = baseUrl;
                 _cacheFolder = cacheFolder;
-                _videoAge = videoAge;
+                _vodAirDate = vodAirDate;
                 _throttleKib = throttleKib;
                 _logger = logger;
                 _cancellationToken = cancellationToken;
@@ -705,7 +648,7 @@ namespace TwitchDownloaderCore
                     {
                         if (_videoPartsQueue.TryDequeue(out videoPart))
                         {
-                            DownloadVideoPartAsync(_client, _baseUrl, videoPart, _cacheFolder, _videoAge, _throttleKib, _logger, cts).GetAwaiter().GetResult();
+                            DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
                         }
                     }
                     catch
@@ -731,6 +674,65 @@ namespace TwitchDownloaderCore
                     (tokenSourceToCancel as CancellationTokenSource)?.Cancel();
                 }
                 catch (ObjectDisposedException) { }
+            }
+
+            /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
+            private async Task DownloadVideoPartAsync(string videoPartName, CancellationTokenSource cancellationTokenSource)
+            {
+                var tryUnmute = VodAge < TimeSpan.FromHours(24);
+                var errorCount = 0;
+                var timeoutCount = 0;
+                while (true)
+                {
+                    cancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        var partFile = Path.Combine(_cacheFolder, RemoveQueryString(videoPartName));
+                        if (tryUnmute && videoPartName.Contains("-muted"))
+                        {
+                            var unmutedPartName = videoPartName.Replace("-muted", "");
+                            await DownloadFileAsync(_client, new Uri(_baseUrl, unmutedPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
+                        }
+                        else
+                        {
+                            await DownloadFileAsync(_client, new Uri(_baseUrl, videoPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
+                        }
+
+                        return;
+                    }
+                    catch (HttpRequestException ex) when (tryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
+                    {
+                        _logger.LogVerbose($"Received {ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
+                        tryUnmute = false;
+
+                        await Task.Delay(100, cancellationTokenSource.Token);
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        const int MAX_RETRIES = 10;
+
+                        _logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} for {videoPartName}. {MAX_RETRIES - (errorCount + 1)} retries left.");
+                        if (++errorCount > MAX_RETRIES)
+                        {
+                            throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_RETRIES} retries");
+                        }
+
+                        await Task.Delay(1_000 * errorCount, cancellationTokenSource.Token);
+                    }
+                    catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
+                    {
+                        const int MAX_RETRIES = 3;
+
+                        _logger.LogVerbose($"{videoPartName} timed out. {MAX_RETRIES - (timeoutCount + 1)} retries left.");
+                        if (++timeoutCount > MAX_RETRIES)
+                        {
+                            throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_RETRIES} times");
+                        }
+
+                        await Task.Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
+                    }
+                }
             }
         }
     }
