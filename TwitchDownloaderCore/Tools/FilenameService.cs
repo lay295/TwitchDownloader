@@ -8,9 +8,9 @@ namespace TwitchDownloaderCore.Tools
 {
     public static class FilenameService
     {
-        public static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan cropStart, TimeSpan cropEnd, string viewCount, string game)
+        public static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, string viewCount, string game)
         {
-            var videoLength = cropEnd - cropStart;
+            var videoLength = trimEnd - trimStart;
 
             var stringBuilder = new StringBuilder(template)
                 .Replace("{title}", RemoveInvalidFilenameChars(title))
@@ -18,8 +18,8 @@ namespace TwitchDownloaderCore.Tools
                 .Replace("{channel}", RemoveInvalidFilenameChars(channel))
                 .Replace("{date}", date.ToString("M-d-yy"))
                 .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
-                .Replace("{crop_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropStart))
-                .Replace("{crop_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", cropEnd))
+                .Replace("{trim_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
+                .Replace("{trim_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimEnd))
                 .Replace("{length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", videoLength))
                 .Replace("{views}", viewCount)
                 .Replace("{game}", RemoveInvalidFilenameChars(game));
@@ -30,16 +30,16 @@ namespace TwitchDownloaderCore.Tools
                 ReplaceCustomWithFormattable(stringBuilder, dateRegex, date);
             }
 
-            if (template.Contains("{crop_start_custom="))
+            if (template.Contains("{trim_start_custom="))
             {
-                var cropStartRegex = new Regex("{crop_start_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, cropStartRegex, cropStart);
+                var trimStartRegex = new Regex("{trim_start_custom=\"(.*?)\"}");
+                ReplaceCustomWithFormattable(stringBuilder, trimStartRegex, trimStart);
             }
 
-            if (template.Contains("{crop_end_custom="))
+            if (template.Contains("{trim_end_custom="))
             {
-                var cropEndRegex = new Regex("{crop_end_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, cropEndRegex, cropEnd);
+                var trimEndRegex = new Regex("{trim_end_custom=\"(.*?)\"}");
+                ReplaceCustomWithFormattable(stringBuilder, trimEndRegex, trimEnd);
             }
 
             if (template.Contains("{length_custom="))

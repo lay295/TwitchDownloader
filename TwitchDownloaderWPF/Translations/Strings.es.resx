@@ -164,7 +164,7 @@
   <data name="ChatBadges" xml:space="preserve">
     <value>Insignias de chat:</value>
   </data>
-  <data name="ChatCrop" xml:space="preserve">
+  <data name="TrimChat" xml:space="preserve">
     <value>Recortar chat:</value>
   </data>
   <data name="ChatDownload" xml:space="preserve">
@@ -215,13 +215,13 @@
   <data name="TemplateClips" xml:space="preserve">
     <value>Clips:</value>
   </data>
-  <data name="CropEnd" xml:space="preserve">
+  <data name="TrimEnd" xml:space="preserve">
     <value>Fin</value>
   </data>
-  <data name="CropStart" xml:space="preserve">
+  <data name="TrimStart" xml:space="preserve">
     <value>Inicio</value>
   </data>
-  <data name="CropVideo" xml:space="preserve">
+  <data name="TrimVideo" xml:space="preserve">
     <value>Recortar vídeo:</value>
   </data>
   <data name="DateCustomFormatting" xml:space="preserve">
@@ -298,7 +298,7 @@
     <value>Emotes FFZ:</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
-    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {crop_start} {crop_end} {crop_start_custom=""} {crop_end_custom=""} {length} {length_custom=""} {views} {game}</value>
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
     <comment>No traducir</comment>
   </data>
   <data name="FontColor" xml:space="preserve">
@@ -326,7 +326,7 @@
   <data name="InvalidClipLinkIdMessage" xml:space="preserve">
     <value>Por favor, introduzca un clip válido Link/ID\nEjemplos:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
   </data>
-  <data name="InvalidCropInputs" xml:space="preserve">
+  <data name="InvalidTrimInputs" xml:space="preserve">
     <value>Entradas de recorte no válidas</value>
   </data>
   <data name="InvalidStartEndTime" xml:space="preserve">
@@ -733,7 +733,7 @@
     <value>Escala de contorno:</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
-    <value>Los formatos crop_start_custom, crop_end_custom y length_custom se basan en el formato</value>
+    <value>Los formatos trim_start_custom, trim_end_custom y length_custom se basan en el formato</value>
   </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
     <value>Cadenas de formato de intervalo de tiempo estándar de C#</value>

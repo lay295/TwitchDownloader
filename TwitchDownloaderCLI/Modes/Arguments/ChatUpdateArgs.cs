@@ -4,7 +4,7 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-    [Verb("chatupdate", HelpText = "Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format.")]
+    [Verb("chatupdate", HelpText = "Updates the embedded emotes, badges, bits, and trims a chat JSON and/or converts a JSON chat to another format.")]
     internal sealed class ChatUpdateArgs : TwitchDownloaderArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are: .json, .json.gz.")]
@@ -22,11 +22,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
         public bool ReplaceEmbeds { get; set; }
 
-        [Option('b', "beginning", HelpText = "New time for chat beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##). Comments may be added but not removed. -1 = No crop.")]
-        public TimeDuration CropBeginningTime { get; set; } = new(-1);
+        [Option('b', "beginning", HelpText = "New time for chat beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##). Comments may be added but not removed. -1 = Keep current trim.")]
+        public TimeDuration TrimBeginningTime { get; set; } = new(-1);
 
-        [Option('e', "ending", HelpText = "New time for chat ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##). Comments may be added but not removed. -1 = No crop.")]
-        public TimeDuration CropEndingTime { get; set; } = new(-1);
+        [Option('e', "ending", HelpText = "New time for chat ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##). Comments may be added but not removed. -1 = Keep current trim.")]
+        public TimeDuration TrimEndingTime { get; set; } = new(-1);
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download.")]
         public bool? BttvEmotes { get; set; }

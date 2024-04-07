@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -73,6 +74,12 @@ namespace TwitchDownloaderWPF
                 Settings.Default.UpgradeRequired = false;
                 Settings.Default.Save();
             }
+
+            // Replace old crop parameters with new trim parameters
+            Settings.Default.TemplateVod = Regex.Replace(Settings.Default.TemplateVod, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
+            Settings.Default.TemplateClip = Regex.Replace(Settings.Default.TemplateClip, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
+            Settings.Default.TemplateChat = Regex.Replace(Settings.Default.TemplateChat, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
+            Settings.Default.Save();
 
             // Flash the window taskbar icon if it is not in the foreground. This is to mitigate a problem where
             // it will sometimes start behind other windows, usually (but not always) due to the user's actions.

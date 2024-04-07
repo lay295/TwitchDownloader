@@ -16,11 +16,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("compression", Default = ChatCompression.None, HelpText = "Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: None, Gzip.")]
         public ChatCompression Compression { get; set; }
 
-        [Option('b', "beginning", HelpText = "Time to crop beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
-        public TimeDuration CropBeginningTime { get; set; }
+        [Option('b', "beginning", HelpText = "Time to trim beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimBeginningTime { get; set; }
 
-        [Option('e', "ending", HelpText = "Time to crop ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
-        public TimeDuration CropEndingTime { get; set; }
+        [Option('e', "ending", HelpText = "Time to trim ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimEndingTime { get; set; }
 
         [Option('E', "embed-images", Default = false, HelpText = "Embed first party emotes, badges, and cheermotes into the chat download for offline rendering.")]
         public bool EmbedData { get; set; }

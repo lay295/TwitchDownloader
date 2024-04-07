@@ -130,7 +130,7 @@ Time to trim ending. See [Time durations](#time-durations) for a more detailed e
 Path to temporary folder for cache.
 
 ## Arguments for mode chatupdate
-#### Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format
+#### Updates the embedded emotes, badges, bits, and trims a chat JSON and/or converts a JSON chat to another format
 
 **-i / --input (REQUIRED)**
 Path to input file. Valid extensions are: `.json`, `.json.gz`.
@@ -148,10 +148,10 @@ Path to output file. File extension will be used to determine new chat type. Val
 (Default: `false`) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
 
 **b / --beginning**
-(Default: `-1`) New time for chat beginning (`-1` = keep current crop). See [Time durations](#time-durations) for a more detailed explanation. Comments may be added but not removed.
+(Default: `-1`) New time for chat beginning (`-1` = keep current trim). See [Time durations](#time-durations) for a more detailed explanation. Comments may be added but not removed.
 
 **-e / --ending**
-(Default: `-1`) New time for chat ending (`-1` = keep current crop). See [Time durations](#time-durations) for a more detailed explanation. Comments may be added but not removed.
+(Default: `-1`) New time for chat ending (`-1` = keep current trim). See [Time durations](#time-durations) for a more detailed explanation. Comments may be added but not removed.
 
 **--bttv**
 (Default: `true`) Enable embedding BTTV emotes.
@@ -193,10 +193,10 @@ File the program will output to.
 (Default: `600`) Height of chat render.
 
 **-b / --beginning**
-(Default: `-1`) Time to crop the beginning of the render (`-1` = keep current crop). See [Time durations](#time-durations) for a more detailed explanation.
+(Default: `-1`) Time to trim the beginning of the render (`-1` = keep current trim). See [Time durations](#time-durations) for a more detailed explanation.
 
 **-e / --ending**
-(Default: `-1`) Time to crop the ending of the render (`-1` = keep current crop). See [Time durations](#time-durations) for a more detailed explanation.
+(Default: `-1`) Time to trim the ending of the render (`-1` = keep current trim). See [Time durations](#time-durations) for a more detailed explanation.
 
 **--bttv**
 (Default: `true`) Enable BTTV emotes.

@@ -32,8 +32,8 @@ namespace TwitchDownloaderCore
             downloadOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
                 "TwitchDownloader");
-            downloadOptions.CropBeginningTime = downloadOptions.CropBeginningTime >= TimeSpan.Zero ? downloadOptions.CropBeginningTime : TimeSpan.Zero;
-            downloadOptions.CropEndingTime = downloadOptions.CropEndingTime >= TimeSpan.Zero ? downloadOptions.CropEndingTime : TimeSpan.Zero;
+            downloadOptions.TrimBeginningTime = downloadOptions.TrimBeginningTime >= TimeSpan.Zero ? downloadOptions.TrimBeginningTime : TimeSpan.Zero;
+            downloadOptions.TrimEndingTime = downloadOptions.TrimEndingTime >= TimeSpan.Zero ? downloadOptions.TrimEndingTime : TimeSpan.Zero;
             _progress = progress;
         }
 
@@ -91,13 +91,13 @@ namespace TwitchDownloaderCore
                     .Take(videoListCrop.Start.Value)
                     .Sum(x => x.PartInfo.Duration));
 
-                startOffset = downloadOptions.CropBeginningTime - startOffset;
-                var seekDuration = downloadOptions.CropEndingTime - downloadOptions.CropBeginningTime;
+                startOffset = downloadOptions.TrimBeginningTime - startOffset;
+                var seekDuration = downloadOptions.TrimEndingTime - downloadOptions.TrimBeginningTime;
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 VideoInfo videoInfo = videoInfoResponse.data.video;
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
-                    videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), downloadOptions.CropBeginningTime,
+                    videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), downloadOptions.TrimBeginningTime,
                     videoChapterResponse.data.video.moments.edges, cancellationToken);
 
                 var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
@@ -138,8 +138,8 @@ namespace TwitchDownloaderCore
         private void CheckAvailableStorageSpace(int bandwidth, TimeSpan videoLength)
         {
             var videoSizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth,
-                downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : TimeSpan.Zero,
-                downloadOptions.CropEnding ? downloadOptions.CropEndingTime : videoLength);
+                downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
+                downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : videoLength);
             var tempFolderDrive = DriveHelper.GetOutputDrive(downloadOptions.TempFolder);
             var destinationDrive = DriveHelper.GetOutputDrive(downloadOptions.Filename);
 
@@ -393,7 +393,7 @@ namespace TwitchDownloaderCore
                 {
                     FileName = downloadOptions.FfmpegPath,
                     Arguments = string.Format(
-                        "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.CropBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i \"{1}\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.CropEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"",
+                        "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.TrimBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i \"{1}\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.TrimEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"",
                         Path.Combine(downloadFolder, "output.ts"), metadataPath, startOffset.TotalSeconds.ToString(CultureInfo.InvariantCulture), int.MaxValue, seekDuration.TotalSeconds.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -520,10 +520,10 @@ namespace TwitchDownloaderCore
         private static Range GetStreamListCrop(IList<M3U8.Stream> streamList, VideoDownloadOptions downloadOptions)
         {
             var startIndex = 0;
-            if (downloadOptions.CropBeginning)
+            if (downloadOptions.TrimBeginning)
             {
                 var startTime = 0m;
-                var cropTotalSeconds = (decimal)downloadOptions.CropBeginningTime.TotalSeconds;
+                var cropTotalSeconds = (decimal)downloadOptions.TrimBeginningTime.TotalSeconds;
                 foreach (var videoPart in streamList)
                 {
                     if (startTime + videoPart.PartInfo.Duration > cropTotalSeconds)
@@ -535,10 +535,10 @@ namespace TwitchDownloaderCore
             }
 
             var endIndex = streamList.Count;
-            if (downloadOptions.CropEnding)
+            if (downloadOptions.TrimEnding)
             {
                 var endTime = streamList.Sum(x => x.PartInfo.Duration);
-                var cropTotalSeconds = (decimal)downloadOptions.CropEndingTime.TotalSeconds;
+                var cropTotalSeconds = (decimal)downloadOptions.TrimEndingTime.TotalSeconds;
                 for (var i = streamList.Count - 1; i >= 0; i--)
                 {
                     if (endTime - streamList[i].PartInfo.Duration < cropTotalSeconds)
