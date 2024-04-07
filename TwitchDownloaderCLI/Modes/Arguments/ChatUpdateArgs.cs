@@ -22,10 +22,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('R', "replace-embeds", Default = false, HelpText = "Replace all embedded emotes, badges, and cheermotes in the file. All embedded images will be overwritten!")]
         public bool ReplaceEmbeds { get; set; }
 
-        [Option('b', "beginning", HelpText = "New time for chat beginning. Comments may be added but not removed. -1 = No crop.")] // TODO
+        [Option('b', "beginning", HelpText = "New time for chat beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##). Comments may be added but not removed. -1 = No crop.")]
         public Time CropBeginningTime { get; set; } = new(-1);
 
-        [Option('e', "ending", HelpText = "New time for chat ending. Comments may be added but not removed. -1 = No crop.")]
+        [Option('e', "ending", HelpText = "New time for chat ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##). Comments may be added but not removed. -1 = No crop.")]
         public Time CropEndingTime { get; set; } = new(-1);
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download.")]

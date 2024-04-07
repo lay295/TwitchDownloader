@@ -16,10 +16,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("compression", Default = ChatCompression.None, HelpText = "Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: None, Gzip.")]
         public ChatCompression Compression { get; set; }
 
-        [Option('b', "beginning", HelpText = "Time to crop beginning.")] // TODO
+        [Option('b', "beginning", HelpText = "Time to crop beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
         public Time CropBeginningTime { get; set; }
 
-        [Option('e', "ending", HelpText = "Time to crop ending.")]
+        [Option('e', "ending", HelpText = "Time to crop ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
         public Time CropEndingTime { get; set; }
 
         [Option('E', "embed-images", Default = false, HelpText = "Embed first party emotes, badges, and cheermotes into the chat download for offline rendering.")]

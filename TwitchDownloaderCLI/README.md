@@ -14,6 +14,13 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
   - [Arguments for mode tsmerge](#arguments-for-mode-tsmerge)
   - [Example Commands](#example-commands)
   - [Additional Notes](#additional-notes)
+    - [ID parsing](#id-parsing)
+    - [String arguments](#string-arguments)
+    - [Boolean flags](#boolean-flags)
+    - [Enum flag arguments](#enum-flag-arguments)
+    - [Time durations](#time-durations)
+    - [Rendering prerequisites](#rendering-prerequisites)
+    - [TSMerge notes](#tsmerge-notes)
 
 ---
 
@@ -39,12 +46,10 @@ File the program will output to. File extension will be used to determine downlo
 The quality that the program will attempt to download, for example "1080p60". If not found, the highest quality stream will be downloaded.
 
 **-b / --beginning**
-Time in seconds to trim beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time to trim beginning. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-e / --ending**
-Time in seconds to trim ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
-
-Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
+Time to trim ending. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-t / --threads**
 (Default: `4`) Number of download threads.
@@ -98,10 +103,10 @@ File the program will output to. File extension will be used to determine downlo
 (Default: `None`) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-b / --beginning**
-Time in seconds to trim beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time to trim beginning. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-e / --ending**
-Time in seconds to trim ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time to trim ending. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-E / --embed-images**
 (Default: `false`) Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.
@@ -143,10 +148,10 @@ Path to output file. File extension will be used to determine new chat type. Val
 (Default: `false`) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
 
 **b / --beginning**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time for chat beginning (`-1` = keep current crop). See [Time durations](#time-durations) for a more detailed explanation. Comments may be added but not removed.
 
 **-e / --ending**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time for chat ending (`-1` = keep current crop). See [Time durations](#time-durations) for a more detailed explanation. Comments may be added but not removed.
 
 **--bttv**
 (Default: `true`) Enable embedding BTTV emotes.
@@ -188,10 +193,10 @@ File the program will output to.
 (Default: `600`) Height of chat render.
 
 **-b / --beginning**
-(Default: `-1`) Time in seconds to crop the beginning of the render.
+(Default: `-1`) Time to crop the beginning of the render (`-1` = keep current crop). See [Time durations](#time-durations) for a more detailed explanation.
 
 **-e / --ending**
-(Default: `-1`) Time in seconds to crop the ending of the render.
+(Default: `-1`) Time to crop the ending of the render (`-1` = keep current crop). See [Time durations](#time-durations) for a more detailed explanation.
 
 **--bttv**
 (Default: `true`) Enable BTTV emotes.
@@ -350,6 +355,10 @@ Download a VOD with defaults
 
     ./TwitchDownloaderCLI videodownload --id 612942303 -o video.mp4
 
+Download a small portion of a VOD
+
+    ./TwitchDownloaderCLI videodownload --id 612942303 -b 0:01:40 -e 0:03:20 -o video.mp4
+
 Download a Clip with defaults
 
     ./TwitchDownloaderCLI clipdownload --id NurturingCalmHamburgerVoHiYo -o clip.mp4
@@ -406,17 +415,33 @@ Print the available options for the VOD downloader
 
 ## Additional Notes
 
+### ID parsing
 All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303` or `--id https://twitch.tv/videos/612942303`.
 
+### String arguments
 String arguments that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd> depending on your shell. i.e. `--output 'my output file.mp4'` or `--output "my output file.mp4"`
 
+### Boolean flags
 Default true boolean flags must be assigned: `--default-true-flag=false`. Default false boolean flags should still be raised normally: `--default-false-flag`.
 
-Enum flag arguments may be assigned as `--flag Value1,Value2,Value3` or `--flag "Value1, Value2, Value3"`.
+### Enum flag arguments
+Enum flag arguments may be assigned without spaces `--flag Value1,Value2,Value3` or with spaces when wrapped in quotes `--flag "Value1, Value2, Value3"` (see [String arguments](#string-arguments)).
 
+### Time durations
+Time duration arguments may be formatted in milliseconds `###ms`, seconds `###s`, minutes `###m`, hours `###h`, or [time](https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0) (i.e. `hh:mm:ss`, `hh:mm`, `dd.hh:mm:ss.ms`).
+If the time duration is given as a number without a unit, seconds will be assumed. Decimals are supported.
+
+"Beginning" arguments set when trimming begins. For example, `--beginning 17s` will make the output start 17 seconds after the source begins.
+
+"Ending" arguments set when trimming ends. For example, `--ending 17s` will make the output end at 17 seconds after the source begins.
+
+If `--beginning 17s` and `--ending 27s` are used together, the resulting output will be of seconds `17-27` of the source and will have a duration of 10 seconds.
+
+### Rendering prerequisites
 For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 
 Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
 
+### TSMerge notes
 The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
 Alternatively, the list file may also be an M3U8 playlist file.

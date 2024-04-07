@@ -15,10 +15,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('q', "quality", HelpText = "The quality the program will attempt to download.")]
         public string Quality { get; set; }
 
-        [Option('b', "beginning", HelpText = "Time to crop beginning. ")] // TODO
+        [Option('b', "beginning", HelpText = "Time to crop beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
         public Time CropBeginningTime { get; set; }
 
-        [Option('e', "ending", HelpText = "Time to crop ending.")]
+        [Option('e', "ending", HelpText = "Time to crop ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
         public Time CropEndingTime { get; set; }
 
         [Option('t', "threads", Default = 4, HelpText = "Number of download threads.")]
