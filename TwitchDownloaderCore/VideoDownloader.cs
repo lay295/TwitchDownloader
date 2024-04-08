@@ -248,7 +248,7 @@ namespace TwitchDownloaderCore
             if (downloadExceptions.Count == 0)
                 return;
 
-            var culpritList = new List<string>();
+            var culprits = new HashSet<string>();
             var sb = new StringBuilder();
             foreach (var downloadException in downloadExceptions)
             {
@@ -259,16 +259,17 @@ namespace TwitchDownloaderCore
                 };
 
                 // Try to only log exceptions from different sources
-                var culprit = ex.TargetSite?.Name;
-                if (string.IsNullOrEmpty(culprit) || culpritList.Contains(culprit))
+                var targetSiteName = ex.TargetSite?.Name ?? "PrivateMethod";
+                var targetSiteTypeName = ex.TargetSite?.DeclaringType?.Name ?? "PrivateType";
+
+                var culprit = $"{targetSiteTypeName}.{targetSiteName}";
+                if (!culprits.Add(culprit))
                     continue;
 
-                sb.EnsureCapacity(sb.Capacity + ex.Message.Length + culprit.Length + 6);
                 sb.Append(", ");
                 sb.Append(ex.Message);
                 sb.Append(" at ");
                 sb.Append(culprit);
-                culpritList.Add(culprit);
             }
 
             if (sb.Length == 0)
@@ -276,7 +277,9 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            sb.Replace(",", $"{downloadExceptions.Count} errors were encountered while downloading:", 0, 1);
+            _ = downloadExceptions.Count == 1
+                ? sb.Replace(",", "1 error was encountered while downloading:", 0, 1)
+                : sb.Replace(",", $"{downloadExceptions.Count} errors were encountered while downloading:", 0, 1);
             _progress.LogInfo(sb.ToString());
         }
 
