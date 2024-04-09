@@ -43,13 +43,13 @@ namespace TwitchDownloaderCore.Tools
             }
 
             ThreadTask = Task.Factory.StartNew(
-                ExecuteDownloadThread,
+                Execute,
                 _cancellationToken,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Current);
         }
 
-        private void ExecuteDownloadThread()
+        private void Execute()
         {
             using var cts = new CancellationTokenSource();
             _cancellationToken.Register(PropagateCancel, cts);
