@@ -39,6 +39,18 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
         {
+            // Check if already have exists file and want to overwrite or not
+            if (File.Exists(downloadOptions.Filename))
+            {
+                _progress.SetStatus("File already exists. Do you want to overwrite it? (Y/N)");
+                var response = Console.ReadLine();
+                if (response?.Trim().ToUpper() != "Y")
+                {
+                    _progress.SetStatus("Operation aborted. File not overwritten.");
+                    return;
+                }
+            }
+            
             await TwitchHelper.CleanupAbandonedVideoCaches(downloadOptions.TempFolder, downloadOptions.CacheCleanerCallback, _progress);
 
             string downloadFolder = Path.Combine(
