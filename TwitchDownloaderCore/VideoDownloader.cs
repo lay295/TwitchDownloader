@@ -32,6 +32,7 @@ namespace TwitchDownloaderCore
             downloadOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
                 "TwitchDownloader");
+
             downloadOptions.CropBeginningTime = downloadOptions.CropBeginningTime >= TimeSpan.Zero ? downloadOptions.CropBeginningTime : TimeSpan.Zero;
             downloadOptions.CropEndingTime = downloadOptions.CropEndingTime >= TimeSpan.Zero ? downloadOptions.CropEndingTime : TimeSpan.Zero;
             _progress = progress;
@@ -39,6 +40,18 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
         {
+            // Check if already have exists file and want to overwrite or not
+            if (File.Exists(downloadOptions.Filename))
+            {
+                _progress.SetStatus("File already exists. Do you want to overwrite it? (Y/N)");
+                var response = Console.ReadLine();
+                if (response?.Trim().ToUpper() != "Y")
+                {
+                    _progress.SetStatus("Operation aborted. File not overwritten.");
+                    return;
+                }
+            }
+            
             await TwitchHelper.CleanupAbandonedVideoCaches(downloadOptions.TempFolder, downloadOptions.CacheCleanerCallback, _progress);
 
             string downloadFolder = Path.Combine(
@@ -164,7 +177,6 @@ namespace TwitchDownloaderCore
                 }
             }
         }
-
         private async Task DownloadVideoPartsAsync(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, double vodAge, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
