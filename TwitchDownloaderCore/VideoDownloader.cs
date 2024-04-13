@@ -315,7 +315,7 @@ namespace TwitchDownloaderCore
                 }
 
                 _progress.LogInfo($"The following parts will be redownloaded: {string.Join(", ", failedParts)}");
-                await DownloadVideoPartsAsync(failedParts, videoListCrop, baseUrl, downloadFolder, vodAirDate, cancellationToken);
+                await DownloadVideoPartsAsync(failedParts, Range.All, baseUrl, downloadFolder, vodAirDate, cancellationToken);
             }
         }
 
