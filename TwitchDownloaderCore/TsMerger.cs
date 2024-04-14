@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Interfaces;
@@ -61,14 +63,22 @@ namespace TwitchDownloaderCore
 
         private async Task VerifyVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
         {
+            var resultCounts = new Dictionary<TsVerifyResult, int>();
+            var missingParts = new List<string>();
             var failedParts = new List<string>();
             var partCount = fileList.Count;
             var doneCount = 0;
 
             foreach (var part in fileList)
             {
-                var isValidTs = await VerifyVideoPart(part);
-                if (!isValidTs)
+                var result = await DownloadTools.VerifyTransportStream(part, _progress);
+
+                CollectionsMarshal.GetValueRefOrAddDefault(resultCounts, result, out _)++; // Gets or creates the value and increments it
+                if (result == TsVerifyResult.NotFound)
+                {
+                    missingParts.Add(part);
+                }
+                else if (result != TsVerifyResult.Success)
                 {
                     failedParts.Add(part);
                 }
@@ -80,35 +90,17 @@ namespace TwitchDownloaderCore
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            if (failedParts.Count != 0)
+            _progress.LogVerbose($"TS verification results: {string.Join(", ", resultCounts.Select(x => $"{x.Key}: {x.Value}"))}");
+
+            if (missingParts.Count > 0)
             {
-                if (failedParts.Count == fileList.Count)
-                {
-                    // Every video part returned corrupted, probably a false positive.
-                    return;
-                }
-
-                _progress.LogInfo($"The following TS files are invalid or corrupted: {string.Join(", ", failedParts)}");
-            }
-        }
-
-        private static async Task<bool> VerifyVideoPart(string filePath)
-        {
-            const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
-
-            if (!File.Exists(filePath))
-            {
-                return false;
+                _progress.LogWarning($"The following files could not be found: {string.Join(", ", missingParts)}");
             }
 
-            await using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var fileLength = fs.Length;
-            if (fileLength == 0 || fileLength % TS_PACKET_LENGTH != 0)
+            if (failedParts.Count > 0)
             {
-                return false;
+                _progress.LogWarning($"The following TS files are potentially corrupted: {string.Join(", ", failedParts)}");
             }
-
-            return true;
         }
 
         private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)

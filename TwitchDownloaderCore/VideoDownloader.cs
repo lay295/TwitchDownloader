@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -274,16 +275,20 @@ namespace TwitchDownloaderCore
 
         private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
+            var failCounts = new Dictionary<TsVerifyResult, int>();
             var failedParts = new List<M3U8.Stream>();
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var doneCount = 0;
 
-            foreach (var part in playlist.Take(videoListCrop))
+            foreach (var stream in playlist.Take(videoListCrop))
             {
-                var filePath = Path.Combine(downloadFolder, DownloadTools.RemoveQueryString(part.Path));
-                if (!VerifyVideoPart(filePath))
+                var filePath = Path.Combine(downloadFolder, DownloadTools.RemoveQueryString(stream.Path));
+
+                var result = await DownloadTools.VerifyTransportStream(filePath, _progress);
+                if (result != TsVerifyResult.Success)
                 {
-                    failedParts.Add(part);
+                    CollectionsMarshal.GetValueRefOrAddDefault(failCounts, result, out _)++; // Gets or creates the value and increments it
+                    failedParts.Add(stream);
                 }
 
                 doneCount++;
@@ -293,43 +298,25 @@ namespace TwitchDownloaderCore
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            if (failedParts.Count != 0)
+            if (failCounts.Count > 0)
             {
-                if (playlist.Count == 1)
-                {
-                    // The video is only 1 part, it probably won't be a complete file.
-                    return;
-                }
+                _progress.LogVerbose($"Verification results: {string.Join(", ", failCounts.Select(x => $"{x.Key}: {x.Value}"))}");
+            }
 
+            if (failedParts.Count > 0)
+            {
                 if (partCount > 20 && failedParts.Count >= partCount * 0.95)
                 {
                     // 19/20 parts failed to verify. Either the VOD is heavily corrupted or something went horribly wrong.
                     // TODO: Somehow let the user bypass this. Maybe with callbacks?
-                    throw new Exception($"Too many parts are corrupted or missing ({failedParts.Count}/{partCount}), aborting.");
+                    throw new Exception($"{failedParts.Count}/{partCount} parts failed to verify for the following reasons: "
+                                        + string.Join(", ", failCounts.Where(x => x.Value > 0).Select(x => $"{x.Key}: {x.Value}"))
+                                        + ", aborting.");
                 }
 
                 _progress.LogInfo($"The following parts will be redownloaded: {string.Join(", ", failedParts)}");
                 await DownloadVideoPartsAsync(failedParts, Range.All, baseUrl, downloadFolder, vodAirDate, cancellationToken);
             }
-        }
-
-        private static bool VerifyVideoPart(string filePath)
-        {
-            const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
-
-            if (!File.Exists(filePath))
-            {
-                return false;
-            }
-
-            using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var fileLength = fs.Length;
-            if (fileLength == 0 || fileLength % TS_PACKET_LENGTH != 0)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         private int RunFfmpegVideoCopy(string downloadFolder, string metadataPath, TimeSpan startOffset, TimeSpan seekDuration)

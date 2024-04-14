@@ -21,4 +21,13 @@
         None,
         UtcFull
     }
+
+    public enum TsVerifyResult
+    {
+        Unknown,
+        Success,
+        NotFound,
+        Empty,
+        CorruptedPackets,
+    }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -76,7 +77,6 @@ namespace TwitchDownloaderCore.Tools
             cancellationTokenSource?.CancelAfter(TimeSpan.FromMilliseconds(uint.MaxValue - 1));
         }
 
-
         /// <summary>
         /// Some old twitch VODs have files with a query string at the end such as 1.ts?offset=blah which isn't a valid filename
         /// </summary>
@@ -89,6 +89,54 @@ namespace TwitchDownloaderCore.Tools
             }
 
             return inputString[..queryIndex];
+        }
+
+        // https://tsduck.io/download/docs/mpegts-introduction.pdf
+        public static async Task<TsVerifyResult> VerifyTransportStream(string filePath, ITaskLogger logger)
+        {
+            const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ]
+            const int TS_PACKET_FIRST_BYTE = 0x47;
+
+            if (!File.Exists(filePath))
+            {
+                return TsVerifyResult.NotFound;
+            }
+
+            await using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            if (!fs.CanSeek)
+            {
+                return TsVerifyResult.Unknown;
+            }
+
+            if (fs.Length == 0)
+            {
+                return TsVerifyResult.Empty;
+            }
+
+            if (fs.Length % TS_PACKET_LENGTH != 0)
+            {
+                return TsVerifyResult.CorruptedPackets;
+            }
+
+            using var memoryOwner = MemoryPool<byte>.Shared.Rent(1);
+            var buffer = memoryOwner.Memory[..1];
+            do
+            {
+                var bytesRead = await fs.ReadAsync(buffer);
+                if (bytesRead != 1)
+                {
+                    logger.LogWarning($"Read {bytesRead} bytes from {filePath}. Expected 1.");
+                }
+
+                if (buffer.Span[0] != TS_PACKET_FIRST_BYTE)
+                {
+                    return TsVerifyResult.CorruptedPackets;
+                }
+
+                fs.Seek(TS_PACKET_LENGTH - 1, SeekOrigin.Current);
+            } while (fs.Position < fs.Length);
+
+            return TsVerifyResult.Success;
         }
     }
 }
