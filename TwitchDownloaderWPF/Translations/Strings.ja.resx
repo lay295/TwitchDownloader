@@ -1,0 +1,863 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
+
+    Example:
+
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
+
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Accept" xml:space="preserve">
+    <value>Accept</value>
+  </data>
+  <data name="AddToQueue" xml:space="preserve">
+    <value>キューに追加</value>
+  </data>
+  <data name="AlphaNotSupportedByCodec" xml:space="preserve">
+    <value>アルファチャンネル(透明)をサポートしていないコンテナ/コーデックで選択しています。透明度を削除するか、 MOV + RLE/PRORES または WEBM + VP8/VP9 でエンコードしてください。</value>
+  </data>
+  <data name="ApplicationTheme" xml:space="preserve">
+    <value>テーマ </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ApplicationThemeTooltip" xml:space="preserve">
+    <value>クリックして自分のテーマを作る方法を学ぶ！</value>
+  </data>
+  <data name="AvailableParameters" xml:space="preserve">
+    <value>利用可能なパラメータ:</value>
+  </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>バックグラウンドカラー:</value>
+  </data>
+  <data name="BannedWordsList" xml:space="preserve">
+    <value>BANされたワード </value>
+    <comment>Leaving a trailing space</comment>
+  </data>
+  <data name="BannedWordsListTooltip" xml:space="preserve">
+    <value>BANされたワードやフレーズのリスト - カンマ区切り、カンマの周りのスペースは無視、大文字と小文字は区別しない。</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="BttvEmotes" xml:space="preserve">
+    <value>BTTV スタンプ:</value>
+  </data>
+  <data name="CacheFolder" xml:space="preserve">
+    <value>キャッシュフォルダ:</value>
+  </data>
+  <data name="TemplateChats" xml:space="preserve">
+    <value>チャット:</value>
+  </data>
+  <data name="ChatBadgeFilter" xml:space="preserve">
+    <value>チャットバッジフィルター:</value>
+  </data>
+  <data name="ChatBadges" xml:space="preserve">
+    <value>チャットバッジ:</value>
+  </data>
+  <data name="TrimChat" xml:space="preserve">
+    <value>トリミング:</value>
+  </data>
+  <data name="ChatDownload" xml:space="preserve">
+    <value>チャットダウンロード</value>
+  </data>
+  <data name="ChatDownloads" xml:space="preserve">
+    <value>チャットダウンロード</value>
+  </data>
+  <data name="ChatFont" xml:space="preserve">
+    <value>フォント:</value>
+  </data>
+  <data name="ChatFontSize" xml:space="preserve">
+    <value>フォントサイズ:</value>
+  </data>
+  <data name="ChatHeight" xml:space="preserve">
+    <value>高さ:</value>
+  </data>
+  <data name="ChatRender" xml:space="preserve">
+    <value>チャットレンダリング</value>
+  </data>
+  <data name="ChatRenders" xml:space="preserve">
+    <value>チャットレンダリング</value>
+  </data>
+  <data name="ChatUpdate" xml:space="preserve">
+    <value>チャット</value>
+  </data>
+  <data name="ChatUpdater" xml:space="preserve">
+    <value>チャットの更新</value>
+  </data>
+  <data name="ChatWidth" xml:space="preserve">
+    <value>横幅:</value>
+  </data>
+  <data name="ClearCache" xml:space="preserve">
+    <value>クリア</value>
+  </data>
+  <data name="ClearCacheConfirmation" xml:space="preserve">
+    <value>本当にキャッシュを削除してもいいですか？\nプログラムが正常に動作しない場合のみこれを行うべきです。</value>
+  </data>
+  <data name="ClipDownload" xml:space="preserve">
+    <value>クリップダウンロード</value>
+  </data>
+  <data name="ClipDownloads" xml:space="preserve">
+    <value>クリップダウンロード</value>
+  </data>
+  <data name="ClipLinkId" xml:space="preserve">
+    <value>クリップのリンク/ID:</value>
+  </data>
+  <data name="TemplateClips" xml:space="preserve">
+    <value>クリップ:</value>
+  </data>
+  <data name="TrimEnd" xml:space="preserve">
+    <value>終了</value>
+  </data>
+  <data name="TrimStart" xml:space="preserve">
+    <value>開始</value>
+  </data>
+  <data name="TrimVideo" xml:space="preserve">
+    <value>トリミング:</value>
+  </data>
+  <data name="DateCustomFormatting" xml:space="preserve">
+    <value>date_custom の書式は</value>
+  </data>
+  <data name="DateCustomFormattingHyperlink" xml:space="preserve">
+    <value>C#標準の日付、時刻フォーマットに基づいています。</value>
+  </data>
+  <data name="DeleteConfirmation" xml:space="preserve">
+    <value>確認を削除n</value>
+  </data>
+  <data name="DonateTooltip" xml:space="preserve">
+    <value>このプログラムをよく利用し、私をサポートしたいですか？ コーヒーをおごってください :)</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>ダウンロード</value>
+  </data>
+  <data name="DownloadConnections" xml:space="preserve">
+    <value>コネクション:</value>
+  </data>
+  <data name="DownloadFilenameTemplates" xml:space="preserve">
+    <value>ダウンロードファイルの名前テンプレート:</value>
+  </data>
+  <data name="DownloadFormat" xml:space="preserve">
+    <value>ダウンロードフォーマット:</value>
+  </data>
+  <data name="DownloadThreads" xml:space="preserve">
+    <value>ダウンロードスレッド:</value>
+  </data>
+  <data name="EmbedImages" xml:space="preserve">
+    <value>イメージを埋め込む </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="EmbedImagesTooltip" xml:space="preserve">
+    <value>オフラインレンダリングのために、ファーストパーティのスタンプ、バッジ、Cheerをダウンロードファイルに埋め込む。 アーカイブ用に便利ですが、ファイルサイズが大きくなります。</value>
+  </data>
+  <data name="EmbedMissing" xml:space="preserve">
+    <value>Embed Missing </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="EmbedMissingTooltip" xml:space="preserve">
+    <value>不足しているスタンプ、バッジ、Cheerを埋め込みます。すでに埋め込まれているイメージはされません。</value>
+  </data>
+  <data name="EnqueueDownload" xml:space="preserve">
+    <value>ダウンロードをキューに追加</value>
+  </data>
+  <data name="EnqueueRender" xml:space="preserve">
+    <value>レンダリングをキューに追加</value>
+  </data>
+  <data name="EnqueueUpdate" xml:space="preserve">
+    <value>をキューに追加</value>
+  </data>
+  <data name="ErrorLog" xml:space="preserve">
+    <value>エラー: </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="FfmpegInputArguments" xml:space="preserve">
+    <value>入力引数:</value>
+  </data>
+  <data name="FfmpegOptionsHyperlink" xml:space="preserve">
+    <value>クリックしてFFmpegのオプションについて学ぶ</value>
+  </data>
+  <data name="FfmpegOutputArguments" xml:space="preserve">
+    <value>出力引数:</value>
+  </data>
+  <data name="FfmpegParameters" xml:space="preserve">
+    <value>{fps} {height} {width} {max_int} {save_path}</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="FfmpegReset" xml:space="preserve">
+    <value>デフォルトにリセット</value>
+  </data>
+  <data name="FfzEmotes" xml:space="preserve">
+    <value>FFZ スタンプ:</value>
+  </data>
+  <data name="FilenameTemplateParameters" xml:space="preserve">
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="FontColor" xml:space="preserve">
+    <value>フォントカラー:</value>
+  </data>
+  <data name="GenerateMask" xml:space="preserve">
+    <value>マスクを生成:</value>
+  </data>
+  <data name="GetInfo" xml:space="preserve">
+    <value>取得</value>
+  </data>
+  <data name="HideDonationButton" xml:space="preserve">
+    <value>寄付ボタンを非表示:</value>
+  </data>
+  <data name="IgnoreUsersList" xml:space="preserve">
+    <value>無視するユーザーのリスト </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="IgnoreUsersListTooltip" xml:space="preserve">
+    <value>ユーザー名のリスト - カンマ区切り、カンマの周りのスペースは無視、大文字と小文字は区別しない。</value>
+  </data>
+  <data name="InvalidClipLinkId" xml:space="preserve">
+    <value>不正なクリップのリンク/ID</value>
+  </data>
+  <data name="InvalidClipLinkIdMessage" xml:space="preserve">
+    <value>正しいクリップのリンク/IDを入力してください\n例:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
+  </data>
+  <data name="InvalidTrimInputs" xml:space="preserve">
+    <value>不正なトリミング入力</value>
+  </data>
+  <data name="InvalidStartEndTime" xml:space="preserve">
+    <value>不正な開始・終了時間</value>
+  </data>
+  <data name="InvalidVideoLinkId" xml:space="preserve">
+    <value>不正なビデオのリンク/ID</value>
+  </data>
+  <data name="InvalidVideoLinkIdMessage" xml:space="preserve">
+    <value>正しいビデオのリンク/IDを入力してください\n例:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
+  </data>
+  <data name="JsonFile" xml:space="preserve">
+    <value>JSONファイル:</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>長さ:</value>
+  </data>
+  <data name="ListOfVodsClips" xml:space="preserve">
+    <value>VODs/クリップのリスト (１行に１つ)</value>
+  </data>
+  <data name="LogHeader" xml:space="preserve">
+    <value>ログ:</value>
+  </data>
+  <data name="MassDownloads" xml:space="preserve">
+    <value>大量ダウンロード</value>
+  </data>
+  <data name="Oauth" xml:space="preserve">
+    <value>OAuth (任意) </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="OAuthTooltip" xml:space="preserve">
+    <value>サブスクライバーのみのVODsにのみ必要です。サードパーティのOAuthトークンは使用できません。OAuthトークンの取得方法はYouTubeのビデオをご覧ください。</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>オフライン </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="OfflineTooltip" xml:space="preserve">
+    <value>チャットJSONファイルに埋め込まれたリソースのみを使用してチャットをレンダリングする。</value>
+  </data>
+  <data name="Outline" xml:space="preserve">
+    <value>アウトライン:</value>
+  </data>
+  <data name="ParallelTaskLimits" xml:space="preserve">
+    <value>並列タスクの制限</value>
+  </data>
+  <data name="PartialRender" xml:space="preserve">
+    <value>部分レンダリング</value>
+  </data>
+  <data name="Quality" xml:space="preserve">
+    <value>品質:</value>
+  </data>
+  <data name="Render" xml:space="preserve">
+    <value>レンダリング</value>
+  </data>
+  <data name="RenderFfmpegWarning" xml:space="preserve">
+    <value>これは高度なユーザーのみです。もし「pipe ended」というエラーがでたらこれが原因かもしれません。</value>
+  </data>
+  <data name="RenderFileFormat" xml:space="preserve">
+    <value>ファイルフォーマット:</value>
+  </data>
+  <data name="RenderFramerate" xml:space="preserve">
+    <value>フレームレート:</value>
+  </data>
+  <data name="RenderCodec" xml:space="preserve">
+    <value>コーデック:</value>
+  </data>
+  <data name="RenderTabEncoding" xml:space="preserve">
+    <value>エンコーディング</value>
+  </data>
+  <data name="RenderTabFfmpeg" xml:space="preserve">
+    <value>FFmpeg</value>
+  </data>
+  <data name="RenderTabGeneral" xml:space="preserve">
+    <value>一般</value>
+  </data>
+  <data name="RenderTabPreview" xml:space="preserve">
+    <value>プレビュー</value>
+  </data>
+  <data name="RenderTabRendering" xml:space="preserve">
+    <value>レンダリング</value>
+  </data>
+  <data name="RenderTabScaling" xml:space="preserve">
+    <value>スケーリング</value>
+  </data>
+  <data name="RenderWidthHeightMustBeEven" xml:space="preserve">
+    <value>横幅と高さは偶数でなければいけない</value>
+  </data>
+  <data name="ReplaceEmbeds" xml:space="preserve">
+    <value>埋め込みを置き換える </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ReplaceEmbedsTooltip" xml:space="preserve">
+    <value>ファイルに埋め込まれた全てのスタンプ、バッジ、Cheerを置き換える。全ての埋め込まれたイメージが上書きされます！</value>
+  </data>
+  <data name="SearchClips" xml:space="preserve">
+    <value>クリップを検索</value>
+  </data>
+  <data name="SearchVods" xml:space="preserve">
+    <value>VODsを検索</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>全て選択</value>
+  </data>
+  <data name="SelectedItems" xml:space="preserve">
+    <value>選択されたアイテム:</value>
+  </data>
+  <data name="SetChannel" xml:space="preserve">
+    <value>チャンネルを設定</value>
+  </data>
+  <data name="Sort" xml:space="preserve">
+    <value>ソート:</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>完了</value>
+  </data>
+  <data name="StatusDownloading" xml:space="preserve">
+    <value>ダウンロード中</value>
+  </data>
+  <data name="StatusError" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="StatusIdle" xml:space="preserve">
+    <value>待機中</value>
+  </data>
+  <data name="StatusRendering" xml:space="preserve">
+    <value>レンダリング中</value>
+  </data>
+  <data name="StatusUpdating" xml:space="preserve">
+    <value>中</value>
+  </data>
+  <data name="Streamer" xml:space="preserve">
+    <value>配信者:</value>
+  </data>
+  <data name="StvEmotes" xml:space="preserve">
+    <value>7TV スタンプ:</value>
+  </data>
+  <data name="SubMessages" xml:space="preserve">
+    <value>サブスクライバーメッセージ:</value>
+  </data>
+  <data name="TaskCancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="TaskErrorButton" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="TaskQueue" xml:space="preserve">
+    <value>タスクキュー</value>
+  </data>
+  <data name="ThirdPartyEmotes" xml:space="preserve">
+    <value>サードパーティスタンプ </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
+    <value>また、サードパーティのスタンプをファイルに埋め込む。ファイルサイズがかなり大きくなります。</value>
+  </data>
+  <data name="TimestampFormat" xml:space="preserve">
+    <value>タイムスタンプフォーマット:</value>
+  </data>
+  <data name="TimestampNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="TimestampRelative" xml:space="preserve">
+    <value>相対的</value>
+  </data>
+  <data name="Timestamps" xml:space="preserve">
+    <value>タイムスタンプ:</value>
+  </data>
+  <data name="TimestampUtc" xml:space="preserve">
+    <value>UTC</value>
+  </data>
+  <data name="TopAllTime" xml:space="preserve">
+    <value>トップ 全期間</value>
+  </data>
+  <data name="TopSevenDays" xml:space="preserve">
+    <value>トップ 7日間</value>
+  </data>
+  <data name="TopThirtyDays" xml:space="preserve">
+    <value>トップ 30日間</value>
+  </data>
+  <data name="TopTwentyFourHours" xml:space="preserve">
+    <value>トップ 24時間</value>
+  </data>
+  <data name="UnableToFindThumbnail" xml:space="preserve">
+    <value>サムネイルが見つかりません</value>
+  </data>
+  <data name="UnableToGetClipInfo" xml:space="preserve">
+    <value>クリップの情報を取得できません。 クリップIDを再度確認して再度試してください。</value>
+  </data>
+  <data name="UnableToGetInfo" xml:space="preserve">
+    <value>情報を取得できません</value>
+  </data>
+  <data name="UnableToGetInfoMessage" xml:space="preserve">
+    <value>ビデオ/クリップの情報を取得できません。 リンクを再度確認して再度試してください。</value>
+  </data>
+  <data name="UnableToGetVideoInfo" xml:space="preserve">
+    <value>ビデオの情報を取得できません。 リンク/IDを再度確認して再度試してください。</value>
+  </data>
+  <data name="UnableToParseInputs" xml:space="preserve">
+    <value>入力を解析できませんでした</value>
+  </data>
+  <data name="UnableToParseInputsMessage" xml:space="preserve">
+    <value>入力が正しいか再度確認してください</value>
+  </data>
+  <data name="UnableToParseLink" xml:space="preserve">
+    <value>リンクを解析できませんでした</value>
+  </data>
+  <data name="UnableToParseLinkMessage" xml:space="preserve">
+    <value>VOD/クリップのリンクが正しいか再度確認してください</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>不明</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="UpdateRate" xml:space="preserve">
+    <value>Update Rate:</value>
+  </data>
+  <data name="UrlList" xml:space="preserve">
+    <value>URLリスト</value>
+  </data>
+  <data name="VerboseErrorOutput" xml:space="preserve">
+    <value>詳細なエラー出力</value>
+  </data>
+  <data name="VerboseErrors" xml:space="preserve">
+    <value>詳細なエラー:</value>
+  </data>
+  <data name="VideoCreatedAt" xml:space="preserve">
+    <value>作成日:</value>
+  </data>
+  <data name="VideoTitle" xml:space="preserve">
+    <value>タイトル:</value>
+  </data>
+  <data name="VodClipLink" xml:space="preserve">
+    <value>VOD/クリップのリンク:</value>
+  </data>
+  <data name="VodDownload" xml:space="preserve">
+    <value>VODのダウンロード</value>
+  </data>
+  <data name="VodDownloads" xml:space="preserve">
+    <value>VODのダウンロード</value>
+  </data>
+  <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
+    <value>ビデオの有効期限が切れているか、埋め込みIDが壊れている</value>
+  </data>
+  <data name="VodLinkId" xml:space="preserve">
+    <value>VOD リンク/ID:</value>
+  </data>
+  <data name="TemplateVods" xml:space="preserve">
+    <value>VODs:</value>
+  </data>
+  <data name="DownloadChat" xml:space="preserve">
+    <value>チャットのダウンロード</value>
+  </data>
+  <data name="DownloadFolder" xml:space="preserve">
+    <value>ダウンロードフォルダ:</value>
+  </data>
+  <data name="DownloadVideo" xml:space="preserve">
+    <value>ビデオのダウンロード</value>
+  </data>
+  <data name="ApplicationLanguage" xml:space="preserve">
+    <value>言語 </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="RenderChat" xml:space="preserve">
+    <value>チャットのレンダリング</value>
+  </data>
+  <data name="HighlightIndentScale" xml:space="preserve">
+    <value>Highlight Indent Scale:</value>
+  </data>
+  <data name="HighlightStrokeScale" xml:space="preserve">
+    <value>Highlight Stroke Scale:</value>
+  </data>
+  <data name="BadgeScale" xml:space="preserve">
+    <value>Badge Scale:</value>
+  </data>
+  <data name="EmojiScale" xml:space="preserve">
+    <value>Emoji Scale:</value>
+  </data>
+  <data name="EmoteScale" xml:space="preserve">
+    <value>Emote Scale:</value>
+  </data>
+  <data name="EmoteSpacingScale" xml:space="preserve">
+    <value>Emote Spacing Scale:</value>
+  </data>
+  <data name="SidePaddingScale" xml:space="preserve">
+    <value>Side Padding Scale:</value>
+  </data>
+  <data name="SectionHeightScale" xml:space="preserve">
+    <value>Section Height Scale:</value>
+  </data>
+  <data name="VerticalSpacingScale" xml:space="preserve">
+    <value>Vertical Spacing Scale:</value>
+  </data>
+  <data name="WordSpacingScale" xml:space="preserve">
+    <value>Word Spacing Scale:</value>
+  </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>ファイルが見つかりませんでした: </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="FatalError" xml:space="preserve">
+    <value>致命的なエラー</value>
+  </data>
+  <data name="ThemeNotFound" xml:space="preserve">
+    <value>テーマが見つかりませんでした</value>
+  </data>
+  <data name="ThemeNotFoundMessage" xml:space="preserve">
+    <value>{theme} が見つかりませんでした。 テーマをシステムに戻す。</value>
+    <comment>Do not translate {theme}</comment>
+  </data>
+  <data name="MessageDispersion" xml:space="preserve">
+    <value>分散 </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="MessageDispersionTooltip" xml:space="preserve">
+    <value>2022年11月にTwitch APIが変更され、チャットメッセージのダウンロードが秒単位になりました。このオプションでは、追加のメタデータを使用して、メッセージが実際に送信された時刻に復元しようとします。その結果、コメントの順序が異なる場合があります。</value>
+  </data>
+  <data name="ChatCompression" xml:space="preserve">
+    <value>圧縮:</value>
+  </data>
+  <data name="ChatCompressionNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="ChatCompressionGzip" xml:space="preserve">
+    <value>Gzip</value>
+    <comment>Do not translate</comment>
+  </data>
+  <data name="ThemesFailedToWrite" xml:space="preserve">
+    <value>テーマに含まれているものの書き込みに失敗しました。</value>
+  </data>
+  <data name="TitleGlobalSettings" xml:space="preserve">
+    <value>グローバル設定</value>
+  </data>
+  <data name="TitleEnqueueOptions" xml:space="preserve">
+    <value>キュー追加設定</value>
+  </data>
+  <data name="TitleRenderRange" xml:space="preserve">
+    <value>レンダリング範囲の選択 (秒)</value>
+  </data>
+  <data name="TitleUrlList" xml:space="preserve">
+    <value>ダウンロードURLのリスト</value>
+  </data>
+  <data name="TitleVideoMassDownloader" xml:space="preserve">
+    <value>Video Mass Downloader</value>
+  </data>
+  <data name="TitleClipMassDownloader" xml:space="preserve">
+    <value>Clip Mass Downloader</value>
+  </data>
+  <data name="ApplicationLanguageTooltip" xml:space="preserve">
+    <value>あなたの母国語でTwitchDownloaderWPFが利用できませんか？クリックで翻訳を手伝う方法を学ぶ！</value>
+  </data>
+  <data name="InvalidFolderPath" xml:space="preserve">
+    <value>不正なフォルダパス</value>
+  </data>
+  <data name="InvaliFolderPathMessage" xml:space="preserve">
+    <value>フォルダが存在しません</value>
+  </data>
+  <data name="StatusCanceled" xml:space="preserve">
+    <value>キャンセルされた</value>
+  </data>
+  <data name="StatusCanceling" xml:space="preserve">
+    <value>キャンセル中</value>
+  </data>
+  <data name="MaximumThreadBandwidth" xml:space="preserve">
+    <value>最大スレッド帯域幅 </value><comment>Leave a trailing space</comment>
+  </data>
+  <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
+    <value>新しいダウンロードスレッドが使用できる最大帯域幅を、1 秒あたりのキロバイト数で指定する。</value>
+  </data>
+  <data name="RenderImageSharpening" xml:space="preserve">
+    <value>Sharpening:</value>
+  </data>
+  <data name="TimestampLocal" xml:space="preserve">
+    <value>ローカル</value>
+  </data>
+  <data name="SettingsTimeFormat" xml:space="preserve">
+    <value>時刻フォーマット:</value>
+  </data>
+  <data name="NoJsonFilesSelected" xml:space="preserve">
+    <value>JSONファイルが選択されていません</value>
+  </data>
+  <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
+    <value>アクセス不足。Oauthが必要な場合があります。</value>
+  </data>
+  <data name="EmojiVendor" xml:space="preserve">
+    <value>Emojiベンダー:</value>
+  </data>
+  <data name="EmojiVendorNotoColor" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="EmojiVendorTwemoji" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="EmojiVendorNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="MaskWithNoAlpha" xml:space="preserve">
+    <value>背景が不透明なマスクを生成するを選択しました。背景色のアルファ値を下げるか、マスクの生成を無効にします。.</value>
+  </data>
+  <data name="OutlineScale" xml:space="preserve">
+    <value>アウトラインスケール:</value>
+  </data>
+  <data name="TimeSpanCustomFormatting" xml:space="preserve">
+    <value>trim_start_custom, trim_end_custom, length_custom の書式は</value>
+  </data>
+  <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
+    <value>C#標準のTimeSpan書式文字列に基づいています。</value>
+  </data>
+  <data name="UnknownErrorOccurred" xml:space="preserve">
+    <value>不明なエラーが発生しました</value>
+  </data>
+  <data name="TaskCouldNotBeRemoved" xml:space="preserve">
+    <value>タスクを削除できませんでした</value>
+  </data>
+  <data name="CancelTaskBeforeRemoving" xml:space="preserve">
+    <value>タスクをキャンセルするか、タスクの終了を待ってから削除してください。</value>
+  </data>
+  <data name="UnableToDownloadFfmpeg" xml:space="preserve">
+    <value>FFmpegがダウンロードできませんでした</value>
+  </data>
+  <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
+    <value>FFmpegがダウンロードできませんでした。 {0} から手動でダウンロードし、ファイルを {1} においてください。</value>
+  </data>
+  <data name="AlternateBackgroundColor" xml:space="preserve">
+    <value>代替バックグラウンドカラー:</value>
+  </data>
+  <data name="AlternateMessageBackgrounds" xml:space="preserve">
+    <value>代わりの背景 </value><comment>Leave a trailing space</comment>
+  </data>
+  <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
+    <value>他のチャットメッセージの背景色を交互に表示し、見分けやすくします。</value>
+  </data>
+  <data name="EncodeClipMetadata" xml:space="preserve">
+    <value>メタデータのエンコード:</value>
+  </data>
+  <data name="MessageBoxTitleError" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
+    <value>Windowsアプリケーションのテーマウォッチャーを起動できません。Windows テーマのリアルタイム同期が無効になっています。 Error code: {0}</value>
+  </data>
+  <data name="LabelVideosPerPage" xml:space="preserve">
+    <value>ページ毎のビデオ:</value>
+  </data>
+  <data name="StatusDownloaderFFmpeg" xml:space="preserve">
+    <value>FFmpegをダウンロード中 {0}%</value>
+  </data>
+  <data name="CopyVideoIDToClipboard" xml:space="preserve">
+    <value>クリップボードにIDをコピー</value>
+  </data>
+  <data name="CopyVideoURLToClipboard" xml:space="preserve">
+    <value>クリップボードにURLをコピー</value>
+  </data>
+  <data name="OpenVideoInBrowser" xml:space="preserve">
+    <value>ブラウザーで開く</value>
+  </data>
+  <data name="ResetSettingsConfirmationMessage" xml:space="preserve">
+    <value>本当にすべての設定をデフォルトに戻しますか？</value>
+  </data>
+  <data name="ResetSettingsConfirmation" xml:space="preserve">
+    <value>Restore Settings Confirmation</value>
+  </data>
+  <data name="TheApplicationMustBeRestartedMessage" xml:space="preserve">
+    <value>設定を有効にするにはアプリケーションを再起動する必要があります。</value>
+  </data>
+  <data name="RestartTheApplication" xml:space="preserve">
+    <value>再起動してください {0}</value><comment>{0} is the name of the application.</comment>
+  </data>
+  <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
+    <value>デフォルトに戻す</value>
+  </data>
+  <data name="ButtonSaveSettings" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="ButtonCancelSettingsChanges" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="ContextMenuRemoveTask" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="ContextMenuOpenTaskFolder" xml:space="preserve">
+    <value>フォルダを開く</value>
+  </data>
+  <data name="PreferredQuality" xml:space="preserve">
+    <value>優先品質:</value>
+  </data>
+  <data name="TitleWindowOldVideoCacheManager" xml:space="preserve">
+    <value>削除するキャッシュを選択</value>
+  </data>
+  <data name="SizeOfAllFiles" xml:space="preserve">
+    <value>合計サイズ:</value>
+  </data>
+  <data name="DeleteCacheColumnHeader" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="FilePathColumnHeader" xml:space="preserve">
+    <value>パス</value>
+  </data>
+  <data name="FileAgeColumnHeader" xml:space="preserve">
+    <value>Age</value>
+  </data>
+  <data name="FileSizeColumnHeader" xml:space="preserve">
+    <value>サイズ</value>
+  </data>
+  <data name="FileAgeInDays" xml:space="preserve">
+    <value>{0:N0} 日</value>
+  </data>
+  <data name="LogLevels" xml:space="preserve">
+    <value>ログレベル:</value>
+  </data>
+  <data name="LogLevelVerbose" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="LogLevelInfo" xml:space="preserve">
+    <value>情報</value>
+  </data>
+  <data name="LogLevelWarning" xml:space="preserve">
+    <value>警告</value>
+  </data>
+  <data name="LogLevelError" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="LogLevelFfmpeg" xml:space="preserve">
+    <value>FFmpeg</value>
+  </data>
+  <data name="CopyFolderPathToClipboard" xml:space="preserve">
+    <value>クリップボードにパスをコピー</value>
+  </data>
+  <data name="ContextMenuOpenFolder" xml:space="preserve">
+    <value>フォルダを開く</value>
+  </data>
+</root>
