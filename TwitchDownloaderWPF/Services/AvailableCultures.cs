@@ -28,6 +28,8 @@ namespace TwitchDownloaderWPF.Services
         public static readonly Culture Ukrainian;
         public static readonly Culture SimplifiedChinese;
 
+        public static readonly Culture Japanese;
+
         public static readonly Culture[] All;
 
         // ReSharper disable StringLiteralTypo
@@ -44,7 +46,8 @@ namespace TwitchDownloaderWPF.Services
                 Russian = new Culture("ru-RU", "Русский"),
                 Turkish = new Culture("tr-TR", "Türkçe"),
                 Ukrainian = new Culture("uk-ua", "Українська"),
-                SimplifiedChinese = new Culture("zh-CN", "简体中文")
+                SimplifiedChinese = new Culture("zh-CN", "简体中文"),
+                Japanese = new Culture("ja-JP", "日本語")
             };
         }
         // ReSharper enable StringLiteralTypo
