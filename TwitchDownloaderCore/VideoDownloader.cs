@@ -275,28 +275,36 @@ namespace TwitchDownloaderCore
 
         private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
+            var failLock = new object();
             var failCounts = new Dictionary<TsVerifyResult, int>();
             var failedParts = new List<M3U8.Stream>();
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var doneCount = 0;
 
-            foreach (var stream in playlist.Take(videoListCrop))
+            var parallelOptions = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount,
+                CancellationToken = cancellationToken
+            };
+
+            await Parallel.ForEachAsync(playlist.Take(videoListCrop), parallelOptions, async (stream, token) =>
             {
                 var filePath = Path.Combine(downloadFolder, DownloadTools.RemoveQueryString(stream.Path));
 
                 var result = await DownloadTools.VerifyTransportStream(filePath, _progress);
                 if (result != TsVerifyResult.Success)
                 {
-                    CollectionsMarshal.GetValueRefOrAddDefault(failCounts, result, out _)++; // Gets or creates the value and increments it
-                    failedParts.Add(stream);
+                    lock (failLock)
+                    {
+                        CollectionsMarshal.GetValueRefOrAddDefault(failCounts, result, out _)++; // Gets or creates the value and increments it
+                        failedParts.Add(stream);
+                    }
                 }
 
-                doneCount++;
+                Interlocked.Add(ref doneCount, 1);
                 var percent = (int)(doneCount / (double)partCount * 100);
                 _progress.ReportProgress(percent);
-
-                cancellationToken.ThrowIfCancellationRequested();
-            }
+            });
 
             if (failCounts.Count > 0)
             {

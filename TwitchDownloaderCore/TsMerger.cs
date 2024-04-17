@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -63,32 +64,40 @@ namespace TwitchDownloaderCore
 
         private async Task VerifyVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
         {
+            var resultLock = new object();
             var resultCounts = new Dictionary<TsVerifyResult, int>();
             var missingParts = new List<string>();
             var failedParts = new List<string>();
             var partCount = fileList.Count;
             var doneCount = 0;
 
-            foreach (var part in fileList)
+            var parallelOptions = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount,
+                CancellationToken = cancellationToken
+            };
+
+            await Parallel.ForEachAsync(fileList, parallelOptions, async (part, token) =>
             {
                 var result = await DownloadTools.VerifyTransportStream(part, _progress);
 
-                CollectionsMarshal.GetValueRefOrAddDefault(resultCounts, result, out _)++; // Gets or creates the value and increments it
-                if (result == TsVerifyResult.NotFound)
+                lock (resultLock)
                 {
-                    missingParts.Add(part);
-                }
-                else if (result != TsVerifyResult.Success)
-                {
-                    failedParts.Add(part);
+                    CollectionsMarshal.GetValueRefOrAddDefault(resultCounts, result, out _)++; // Gets or creates the value and increments it
+                    if (result == TsVerifyResult.NotFound)
+                    {
+                        missingParts.Add(part);
+                    }
+                    else if (result != TsVerifyResult.Success)
+                    {
+                        failedParts.Add(part);
+                    }
                 }
 
-                doneCount++;
+                Interlocked.Add(ref doneCount, 1);
                 var percent = (int)(doneCount / (double)partCount * 100);
                 _progress.ReportProgress(percent);
-
-                cancellationToken.ThrowIfCancellationRequested();
-            }
+            });
 
             _progress.LogVerbose($"TS verification results: {string.Join(", ", resultCounts.Select(x => $"{x.Key}: {x.Value}"))}");
 
