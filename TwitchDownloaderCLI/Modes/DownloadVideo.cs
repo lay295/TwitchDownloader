@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -71,7 +72,7 @@ namespace TwitchDownloaderCLI.Modes
                 CacheCleanerCallback = directoryInfos =>
                 {
                     logger.LogInfo(
-                        $"{directoryInfos.Length} unmanaged video caches were found at '{inputOptions.TempFolder}' and can be safely deleted. " +
+                        $"{directoryInfos.Length} unmanaged video caches were found at '{directoryInfos.FirstOrDefault()?.Parent?.FullName ?? inputOptions.TempFolder}' and can be safely deleted. " +
                         "Run 'TwitchDownloaderCLI cache help' for more information.");
 
                     return Array.Empty<DirectoryInfo>();
