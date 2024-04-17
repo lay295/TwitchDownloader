@@ -196,7 +196,8 @@ namespace TwitchDownloaderCore
             {
                 foreach (var username in renderOptions.IgnoreUsersArray)
                 {
-                    if (username.Equals(comments[i].commenter.name, StringComparison.OrdinalIgnoreCase))
+                    if (username.Equals(comments[i].commenter.name, StringComparison.OrdinalIgnoreCase) // ASCII login name
+                        || (username.Any(IsNotAscii) && username.Equals(comments[i].commenter.display_name, StringComparison.InvariantCultureIgnoreCase))) // Potentially non-ASCII display name
                     {
                         comments.RemoveAt(i);
                         i--;
