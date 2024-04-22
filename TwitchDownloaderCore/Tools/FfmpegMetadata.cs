@@ -30,7 +30,8 @@ namespace TwitchDownloaderCore.Tools
         {
             await sw.WriteLineAsync(";FFMETADATA1");
             await sw.WriteLineAsync($"title={SanitizeKeyValue(videoTitle)} ({SanitizeKeyValue(videoId)})");
-            await sw.WriteLineAsync($"artist={SanitizeKeyValue(streamerName)}");
+            if (!string.IsNullOrWhiteSpace(streamerName))
+                await sw.WriteLineAsync($"artist={SanitizeKeyValue(streamerName)}");
             await sw.WriteLineAsync($"date={videoCreation:yyyy}"); // The 'date' key becomes 'year' in most formats
             await sw.WriteAsync(@"comment=");
             if (!string.IsNullOrWhiteSpace(videoDescription))

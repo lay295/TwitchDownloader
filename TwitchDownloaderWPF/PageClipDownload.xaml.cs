@@ -71,7 +71,7 @@ namespace TwitchDownloaderWPF
                 imgThumbnail.Source = image;
 
                 clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
-                textStreamer.Text = clipData.data.clip.broadcaster.displayName;
+                textStreamer.Text = clipData.data.clip.broadcaster?.displayName ?? "Unknown User";
                 var clipCreatedAt = clipData.data.clip.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();

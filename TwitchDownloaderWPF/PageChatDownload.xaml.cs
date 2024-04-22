@@ -172,12 +172,12 @@ namespace TwitchDownloaderWPF
                     imgThumbnail.Source = image;
 
                     TimeSpan clipLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
-                    textStreamer.Text = clipInfo.data.clip.broadcaster.displayName;
+                    textStreamer.Text = clipInfo.data.clip.broadcaster?.displayName ?? "Unknown User";
                     var clipCreatedAt = clipInfo.data.clip.createdAt;
                     textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                     currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                     textTitle.Text = clipInfo.data.clip.title;
-                    streamerId = int.Parse(clipInfo.data.clip.broadcaster.id);
+                    streamerId = int.Parse(clipInfo.data.clip.broadcaster?.id ?? "-1");
                     labelLength.Text = clipLength.ToString("c");
                     SetEnabled(true, true);
                     SetEnabledTrimStart(false);
