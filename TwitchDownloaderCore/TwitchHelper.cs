@@ -370,6 +370,7 @@ namespace TwitchDownloaderCore
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.ThirdParty, emoteData.imageScale, emoteData.id, emoteData.name);
+                        newEmote.IsZeroWidth = emoteData.isZeroWidth;
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emoteData.name);
                     }

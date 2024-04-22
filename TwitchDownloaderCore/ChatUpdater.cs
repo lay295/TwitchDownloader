@@ -270,6 +270,7 @@ namespace TwitchDownloaderCore
                 newEmote.name = emote.Name;
                 newEmote.width = emote.Width / emote.ImageScale;
                 newEmote.height = emote.Height / emote.ImageScale;
+                newEmote.isZeroWidth = emote.IsZeroWidth;
                 chatRoot.embeddedData.thirdParty.Add(newEmote);
             }
             _progress.LogInfo($"Input 3rd party emote count: {inputCount}. Output count: {chatRoot.embeddedData.thirdParty.Count}");
