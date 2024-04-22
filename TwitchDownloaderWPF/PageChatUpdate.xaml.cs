@@ -107,11 +107,11 @@ namespace TwitchDownloaderWPF
             VideoLength = TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.length) ? 0.0 : ChatJsonInfo.video.length);
             labelLength.Text = VideoLength.Seconds > 0
                 ? VideoLength.ToString("c")
-                : Translations.Strings.Unknown;
+                : Translations.Strings.UnknownVideoLength;
 
             VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1";
             ViewCount = ChatJsonInfo.video.viewCount;
-            Game = ChatJsonInfo.video.game ?? ChatJsonInfo.video.chapters.FirstOrDefault()?.gameDisplayName ?? "Unknown";
+            Game = ChatJsonInfo.video.game ?? ChatJsonInfo.video.chapters.FirstOrDefault()?.gameDisplayName ?? Translations.Strings.UnknownGame;
 
             try
             {

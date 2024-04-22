@@ -150,7 +150,7 @@ namespace TwitchDownloaderCore
             Process process = null;
             try
             {
-                await FfmpegMetadata.SerializeAsync(metadataFile, clipMetadata.broadcaster.displayName, downloadOptions.Id, clipMetadata.title, clipMetadata.createdAt, clipMetadata.viewCount,
+                await FfmpegMetadata.SerializeAsync(metadataFile, clipMetadata.broadcaster?.displayName, downloadOptions.Id, clipMetadata.title, clipMetadata.createdAt, clipMetadata.viewCount,
                     videoMomentEdges: new[] { clipChapter }, cancellationToken: cancellationToken);
 
                 process = new Process

@@ -103,7 +103,7 @@ namespace TwitchDownloaderWPF
                             Time = Settings.Default.UTCVideoTime ? video.node.createdAt : video.node.createdAt.ToLocalTime(),
                             Views = video.node.viewCount,
                             Streamer = currentChannel,
-                            Game = video.node.game?.displayName ?? "Unknown",
+                            Game = video.node.game?.displayName ?? Translations.Strings.UnknownGame,
                             Thumbnail = thumbnail
                         });
                     }
@@ -145,7 +145,7 @@ namespace TwitchDownloaderWPF
                             Time = Settings.Default.UTCVideoTime ? clip.node.createdAt : clip.node.createdAt.ToLocalTime(),
                             Views = clip.node.viewCount,
                             Streamer = currentChannel,
-                            Game = clip.node.game?.displayName ?? "Unknown",
+                            Game = clip.node.game?.displayName ?? Translations.Strings.UnknownGame,
                             Thumbnail = thumbnail
                         });
                     }

@@ -71,14 +71,14 @@ namespace TwitchDownloaderWPF
                 imgThumbnail.Source = image;
 
                 clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
-                textStreamer.Text = clipData.data.clip.broadcaster.displayName;
+                textStreamer.Text = clipData.data.clip.broadcaster?.displayName ?? Translations.Strings.UnknownUser;
                 var clipCreatedAt = clipData.data.clip.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                 textTitle.Text = clipData.data.clip.title;
                 labelLength.Text = clipLength.ToString("c");
                 viewCount = taskClipInfo.Result.data.clip.viewCount;
-                game = taskClipInfo.Result.data.clip.game?.displayName ?? "Unknown";
+                game = taskClipInfo.Result.data.clip.game?.displayName ?? Translations.Strings.UnknownGame;
 
                 foreach (var quality in taskLinks.Result.data.clip.videoQualities)
                 {
