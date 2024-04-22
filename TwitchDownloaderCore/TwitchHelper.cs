@@ -180,7 +180,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlClipSearchResponse>();
         }
 
-        public static async Task<EmoteResponse> GetThirdPartyEmotesMetadata(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, CancellationToken cancellationToken = default)
+        public static async Task<EmoteResponse> GetThirdPartyEmotesMetadata(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, ITaskLogger logger, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -202,7 +202,7 @@ namespace TwitchDownloaderCore
 
             if (getStv)
             {
-                emoteResponse.STV = await GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, cancellationToken);
+                emoteResponse.STV = await GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, logger, cancellationToken);
             }
 
             return emoteResponse;
@@ -275,7 +275,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        private static async Task<List<EmoteResponseItem>> GetStvEmotesMetadata(int streamerId, bool allowUnlistedEmotes, CancellationToken cancellationToken)
+        private static async Task<List<EmoteResponseItem>> GetStvEmotesMetadata(int streamerId, bool allowUnlistedEmotes, ITaskLogger logger, CancellationToken cancellationToken)
         {
             var globalEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://7tv.io/v3/emote-sets/global", UriKind.Absolute));
             using var globalEmoteResponse = await httpClient.SendAsync(globalEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -307,8 +307,10 @@ namespace TwitchDownloaderCore
                 List<STVFile> emoteFiles = emoteHost.files;
                 if (emoteFiles.Count == 0) // Sometimes there are no hosted files for the emote
                 {
+                    logger.LogVerbose($"{stvEmote.name} has no hosted files, skipping.");
                     continue;
                 }
+
                 // TODO: Allow and prefer avif when SkiaSharp properly supports it
                 string emoteFormat = "";
                 foreach (var fileItem in emoteFiles)
@@ -319,24 +321,28 @@ namespace TwitchDownloaderCore
                         break;
                     }
                 }
+
                 if (emoteFormat is "") // SkiaSharp does not yet properly support avif, only allow webp - see issue lay295#426
                 {
+                    logger.LogVerbose($"{stvEmote.name} is not available in webp, skipping. Available formats: {string.Join(", ", emoteFiles.Select(x => x.format))}");
                     continue;
                 }
-                string emoteUrl = $"https:{emoteHost.url}/[scale]x.{emoteFormat}";
-                StvEmoteFlags emoteFlags = emoteData.flags;
-                bool emoteIsListed = emoteData.listed;
 
-                EmoteResponseItem emoteResponse = new() { Id = stvEmote.id, Code = stvEmote.name, ImageType = emoteFormat, ImageUrl = emoteUrl };
-                if ((emoteFlags & StvEmoteFlags.ZeroWidth) == StvEmoteFlags.ZeroWidth)
+                var emoteFlags = emoteData.flags;
+                if ((emoteFlags & StvEmoteFlags.ContentTwitchDisallowed) != 0 || (emoteFlags & StvEmoteFlags.Private) != 0)
+                {
+                    logger.LogVerbose($"{stvEmote.name} has disallowed flags, skipping. Flags: {emoteFlags}.");
+                    continue;
+                }
+
+                var emoteUrl = $"https:{emoteHost.url}/[scale]x.{emoteFormat}";
+                var emoteResponse = new EmoteResponseItem { Id = stvEmote.id, Code = stvEmote.name, ImageType = emoteFormat, ImageUrl = emoteUrl };
+                if ((emoteFlags & StvEmoteFlags.ZeroWidth) != 0)
                 {
                     emoteResponse.IsZeroWidth = true;
                 }
-                if ((emoteFlags & StvEmoteFlags.ContentTwitchDisallowed) == StvEmoteFlags.ContentTwitchDisallowed || (emoteFlags & StvEmoteFlags.Private) == StvEmoteFlags.Private)
-                {
-                    continue;
-                }
-                if (allowUnlistedEmotes || emoteIsListed)
+
+                if (allowUnlistedEmotes || emoteData.listed)
                 {
                     returnList.Add(emoteResponse);
                 }
@@ -364,10 +370,14 @@ namespace TwitchDownloaderCore
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.ThirdParty, emoteData.imageScale, emoteData.id, emoteData.name);
+                        newEmote.IsZeroWidth = emoteData.isZeroWidth;
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emoteData.name);
                     }
-                    catch { }
+                    catch (Exception e)
+                    {
+                        logger.LogVerbose($"An exception occurred while loading {emoteData.name} from embedded data: {e.Message}.");
+                    }
                 }
             }
 
@@ -381,13 +391,13 @@ namespace TwitchDownloaderCore
             string ffzFolder = Path.Combine(cacheFolder, "ffz");
             string stvFolder = Path.Combine(cacheFolder, "stv");
 
-            EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, cancellationToken);
+            EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, logger, cancellationToken);
 
             if (bttv)
             {
                 try
                 {
-                    await FetchEmoteImages(comments, emoteDataResponse.BTTV, returnList, alreadyAdded, bttvFolder, cancellationToken);
+                    await FetchEmoteImages(comments, emoteDataResponse.BTTV, returnList, alreadyAdded, bttvFolder, logger, cancellationToken);
                 }
                 catch (HttpRequestException e)
                 {
@@ -401,7 +411,7 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    await FetchEmoteImages(comments, emoteDataResponse.FFZ, returnList, alreadyAdded, ffzFolder, cancellationToken);
+                    await FetchEmoteImages(comments, emoteDataResponse.FFZ, returnList, alreadyAdded, ffzFolder, logger, cancellationToken);
                 }
                 catch (HttpRequestException e)
                 {
@@ -415,7 +425,7 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    await FetchEmoteImages(comments, emoteDataResponse.STV, returnList, alreadyAdded, stvFolder, cancellationToken);
+                    await FetchEmoteImages(comments, emoteDataResponse.STV, returnList, alreadyAdded, stvFolder, logger, cancellationToken);
                 }
                 catch (HttpRequestException e)
                 {
@@ -426,7 +436,7 @@ namespace TwitchDownloaderCore
             return returnList;
 
             static async Task FetchEmoteImages(IReadOnlyCollection<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, ICollection<TwitchEmote> returnList,
-                ICollection<string> alreadyAdded, string cacheFolder, CancellationToken cancellationToken)
+                ICollection<string> alreadyAdded, string cacheFolder, ITaskLogger logger, CancellationToken cancellationToken)
             {
                 if (!Directory.Exists(cacheFolder))
                     CreateDirectory(cacheFolder);
@@ -456,12 +466,15 @@ namespace TwitchDownloaderCore
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emote.Code);
                     }
-                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        logger.LogVerbose($"Got HTTP {ex.StatusCode} when fetching {emote.Code} ({emote.ImageUrl}).");
+                    }
                 }
             }
         }
 
-        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
+        public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -482,7 +495,10 @@ namespace TwitchDownloaderCore
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emoteData.id);
                     }
-                    catch { }
+                    catch (Exception e)
+                    {
+                        logger.LogVerbose($"An exception occurred while loading {emoteData.name} from embedded data: {e.Message}.");
+                    }
                 }
             }
 
@@ -859,7 +875,7 @@ namespace TwitchDownloaderCore
 
             if (itemsToDeleteCallback == null)
             {
-                // TODO: Log this
+                logger.LogWarning($"{nameof(itemsToDeleteCallback)} was null.");
                 return;
             }
 
@@ -892,10 +908,11 @@ namespace TwitchDownloaderCore
                 {
                     Directory.Delete(directory.FullName, true);
                     wasDeleted++;
+                    logger.LogVerbose($"Deleted '{directory.FullName}' successfully.");
                 }
-                catch
+                catch (Exception e)
                 {
-                    // Oh well
+                    logger.LogVerbose($"Could not delete '{directory.FullName}': {e.Message}.");
                 }
             }
 

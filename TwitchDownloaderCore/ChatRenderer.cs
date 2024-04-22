@@ -1635,7 +1635,7 @@ namespace TwitchDownloaderCore
 
         private async Task<List<TwitchEmote>> GetScaledEmotes(CancellationToken cancellationToken)
         {
-            var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
+            var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var emote in emoteTask)
             {

@@ -402,7 +402,7 @@ namespace TwitchDownloaderCore
                 // TODO: Combine this with ChatUpdater in a different file
                 List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, _progress, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
                 _progress.ReportProgress(50 / 4);
-                List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(chatRoot.comments, downloadOptions.TempFolder, cancellationToken: cancellationToken);
+                List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(chatRoot.comments, downloadOptions.TempFolder, _progress, cancellationToken: cancellationToken);
                 _progress.ReportProgress(50 / 4 * 2);
                 List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, cancellationToken: cancellationToken);
                 _progress.ReportProgress(50 / 4 * 3);
@@ -435,6 +435,7 @@ namespace TwitchDownloaderCore
                     newEmote.data = emote.ImageData;
                     newEmote.width = emote.Width / emote.ImageScale;
                     newEmote.height = emote.Height / emote.ImageScale;
+                    newEmote.isZeroWidth = emote.IsZeroWidth;
                     chatRoot.embeddedData.firstParty.Add(newEmote);
                     _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
                 }
@@ -515,7 +516,7 @@ namespace TwitchDownloaderCore
                     await ChatJson.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.Compression, cancellationToken);
                     break;
                 case ChatFormat.Html:
-                    await ChatHtml.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.EmbedData, cancellationToken);
+                    await ChatHtml.SerializeAsync(downloadOptions.Filename, chatRoot, _progress, downloadOptions.EmbedData, cancellationToken);
                     break;
                 case ChatFormat.Text:
                     await ChatText.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.TimeFormat);
