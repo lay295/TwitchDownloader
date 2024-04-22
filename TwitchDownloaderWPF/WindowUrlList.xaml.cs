@@ -101,7 +101,7 @@ namespace TwitchDownloaderWPF
                         Streamer = videoInfo.owner.displayName,
                         Time = Settings.Default.UTCVideoTime ? videoInfo.createdAt : videoInfo.createdAt.ToLocalTime(),
                         Views = videoInfo.viewCount,
-                        Game = videoInfo.game?.displayName ?? "Unknown",
+                        Game = videoInfo.game?.displayName ?? Translations.Strings.UnknownGame,
                         Length = videoInfo.lengthSeconds
                     });
                 }
@@ -139,7 +139,7 @@ namespace TwitchDownloaderWPF
                         Streamer = clipInfo.broadcaster.displayName,
                         Time = Settings.Default.UTCVideoTime ? clipInfo.createdAt : clipInfo.createdAt.ToLocalTime(),
                         Views = clipInfo.viewCount,
-                        Game = clipInfo.game?.displayName ?? "Unknown",
+                        Game = clipInfo.game?.displayName ?? Translations.Strings.UnknownGame,
                         Length = clipInfo.durationSeconds
                     });
                 }

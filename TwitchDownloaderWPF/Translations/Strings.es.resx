@@ -862,4 +862,13 @@
   <data name="ContextMenuOpenFolder" xml:space="preserve">
     <value>Open folder</value>
   </data>
+  <data name="UnknownUser" xml:space="preserve">
+    <value>Unknown User</value>
+  </data>
+  <data name="UnknownGame" xml:space="preserve">
+    <value>Unknown Game</value>
+  </data>
+  <data name="UnknownVideoLength" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
 </root>

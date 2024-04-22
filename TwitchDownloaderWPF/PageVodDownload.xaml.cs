@@ -163,7 +163,7 @@ namespace TwitchDownloaderWPF
                 numEndSecond.Value = vodLength.Seconds;
                 labelLength.Text = vodLength.ToString("c");
                 viewCount = taskVideoInfo.Result.data.video.viewCount;
-                game = taskVideoInfo.Result.data.video.game?.displayName ?? "Unknown";
+                game = taskVideoInfo.Result.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
 
                 UpdateVideoSizeEstimates();
 
