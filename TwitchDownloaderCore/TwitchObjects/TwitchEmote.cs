@@ -36,7 +36,7 @@ namespace TwitchDownloaderCore.TwitchObjects
             using MemoryStream ms = new MemoryStream(imageData);
             Codec = SKCodec.Create(ms, out var result);
             if (Codec is null)
-                throw new BadImageFormatException($"Skia was unable to decode {imageName} ({imageId}). Returned: {result}");
+                throw new Exception($"Skia was unable to decode {imageName} ({imageId}). Returned: {result}");
 
             EmoteProvider = emoteProvider;
             Id = imageId;
