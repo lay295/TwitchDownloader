@@ -376,7 +376,7 @@ namespace TwitchDownloaderCore
                     }
                     catch (Exception e)
                     {
-                        logger.LogVerbose($"An exception occurred while loading {emoteData.name} from embedded data: {e.Message}.");
+                        logger.LogVerbose($"An exception occurred while loading embedded emote '{emoteData.name}': {e.Message}.");
                     }
                 }
             }
@@ -497,7 +497,7 @@ namespace TwitchDownloaderCore
                     }
                     catch (Exception e)
                     {
-                        logger.LogVerbose($"An exception occurred while loading {emoteData.name} from embedded data: {e.Message}.");
+                        logger.LogVerbose($"An exception occurred while loading embedded emote '{emoteData.name}': {e.Message}.");
                     }
                 }
             }
@@ -605,7 +605,7 @@ namespace TwitchDownloaderCore
             return badges;
         }
 
-        public static async Task<List<ChatBadge>> GetChatBadges(List<Comment> comments, int streamerId, string cacheFolder, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
+        public static async Task<List<ChatBadge>> GetChatBadges(List<Comment> comments, int streamerId, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
             List<string> alreadyAdded = new List<string>();
@@ -615,9 +615,16 @@ namespace TwitchDownloaderCore
             {
                 foreach (EmbedChatBadge data in embeddedData.twitchBadges)
                 {
-                    ChatBadge newBadge = new ChatBadge(data.name, data.versions);
-                    returnList.Add(newBadge);
-                    alreadyAdded.Add(data.name);
+                    try
+                    {
+                        ChatBadge newBadge = new ChatBadge(data.name, data.versions);
+                        returnList.Add(newBadge);
+                        alreadyAdded.Add(data.name);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogVerbose($"An exception occurred while loading embedded badge '{data.name}': {e.Message}.");
+                    }
                 }
             }
 
