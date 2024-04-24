@@ -367,6 +367,8 @@ namespace TwitchDownloaderCore
             {
                 foreach (EmbedEmoteData emoteData in embeddedData.thirdParty)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.ThirdParty, emoteData.imageScale, emoteData.id, emoteData.name);
@@ -405,8 +407,6 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             if (ffz)
             {
                 try
@@ -418,8 +418,6 @@ namespace TwitchDownloaderCore
                     logger.LogError($"FFZ returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session.");
                 }
             }
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             if (stv)
             {
@@ -489,6 +487,8 @@ namespace TwitchDownloaderCore
             {
                 foreach (EmbedEmoteData emoteData in embeddedData.firstParty)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     try
                     {
                         TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.FirstParty, emoteData.imageScale, emoteData.id, emoteData.name);
@@ -615,6 +615,8 @@ namespace TwitchDownloaderCore
             {
                 foreach (EmbedChatBadge data in embeddedData.twitchBadges)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     try
                     {
                         ChatBadge newBadge = new ChatBadge(data.name, data.versions);
@@ -703,8 +705,9 @@ namespace TwitchDownloaderCore
 
                     foreach (var emoji in emojis)
                     {
-                        var filePath = Path.Combine(emojiFolder,
-                            emoji.Name.ToUpper().Replace(emojiVendor.UnicodeSequenceSeparator(), ' '));
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        var filePath = Path.Combine(emojiFolder, emoji.Name.ToUpper().Replace(emojiVendor.UnicodeSequenceSeparator(), ' '));
                         if (!File.Exists(filePath))
                         {
                             try
@@ -730,6 +733,8 @@ namespace TwitchDownloaderCore
             var failedToDecode = 0;
             foreach (var emojiPath in emojiFiles)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 await using var fs = File.OpenRead(emojiPath);
                 var emojiImage = SKBitmap.Decode(fs);
 
@@ -761,6 +766,8 @@ namespace TwitchDownloaderCore
             {
                 foreach (EmbedCheerEmote data in embeddedData.twitchBits)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
                     CheerEmote newEmote = new CheerEmote() { prefix = data.prefix, tierList = tierList };
                     foreach (KeyValuePair<int, EmbedEmoteData> tier in data.tierList)

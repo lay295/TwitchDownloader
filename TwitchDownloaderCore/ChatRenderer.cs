@@ -1622,6 +1622,8 @@ namespace TwitchDownloaderCore
 
             foreach (var badge in badgeTask)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // Assume badges are always 2x scale, not 1x or 4x
                 var newScale = renderOptions.ReferenceScale * renderOptions.BadgeScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
@@ -1639,6 +1641,8 @@ namespace TwitchDownloaderCore
 
             foreach (var emote in emoteTask)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // Assume emojis are 4x scale
                 double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
@@ -1657,6 +1661,8 @@ namespace TwitchDownloaderCore
 
             foreach (var emote in emoteThirdTask)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // Assume emojis are 4x scale
                 double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
@@ -1674,6 +1680,8 @@ namespace TwitchDownloaderCore
 
             foreach (var cheer in cheerTask)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 //Assume cheermotes are always 2x scale, not 1x or 4x
                 var newScale = renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
@@ -1696,6 +1704,8 @@ namespace TwitchDownloaderCore
             string[] emojiKeys = emojis.Keys.ToArray();
             foreach (var emojiKey in emojiKeys)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 SKBitmap bitmap = emojis[emojiKey];
                 SKImageInfo oldEmojiInfo = bitmap.Info;
                 SKImageInfo imageInfo = new SKImageInfo((int)(oldEmojiInfo.Width * emojiScale), (int)(oldEmojiInfo.Height * emojiScale));

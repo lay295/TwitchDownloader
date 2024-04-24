@@ -409,8 +409,6 @@ namespace TwitchDownloaderCore
                 List<CheerEmote> twitchBits = await TwitchHelper.GetBits(chatRoot.comments, downloadOptions.TempFolder, chatRoot.streamer.id.ToString(), cancellationToken: cancellationToken);
                 _progress.ReportProgress(50);
 
-                cancellationToken.ThrowIfCancellationRequested();
-
                 var totalImageCount = thirdPartyEmotes.Count + firstPartyEmotes.Count + twitchBadges.Count + twitchBits.Count;
                 var imagesProcessed = 0;
 
@@ -427,6 +425,8 @@ namespace TwitchDownloaderCore
                     _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 foreach (TwitchEmote emote in firstPartyEmotes)
                 {
                     EmbedEmoteData newEmote = new EmbedEmoteData();
@@ -440,6 +440,8 @@ namespace TwitchDownloaderCore
                     _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 foreach (ChatBadge badge in twitchBadges)
                 {
                     EmbedChatBadge newBadge = new EmbedChatBadge();
@@ -448,6 +450,8 @@ namespace TwitchDownloaderCore
                     chatRoot.embeddedData.twitchBadges.Add(newBadge);
                     _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
                 }
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 foreach (CheerEmote bit in twitchBits)
                 {
@@ -469,6 +473,8 @@ namespace TwitchDownloaderCore
                     _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
                 }
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (downloadOptions.DownloadFormat is ChatFormat.Json)
             {

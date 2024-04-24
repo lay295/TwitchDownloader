@@ -85,6 +85,8 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateVideoInfo(int totalSteps, int currentStep, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             _progress.SetStatus($"Updating Video Info [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
@@ -175,6 +177,8 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateChatTrim(int totalSteps, int currentStep, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             _progress.SetStatus($"Updating Chat Trim [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
@@ -220,6 +224,8 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateEmbeds(int currentStep, int totalSteps, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             _progress.SetStatus($"Updating Embeds [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
