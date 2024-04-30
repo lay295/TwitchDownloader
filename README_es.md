@@ -2,9 +2,7 @@
   <a href="https://github.com/lay295/TwitchDownloader">
     <img src="TwitchDownloaderWPF/Images/Logo.png" alt="Logo" width="80" height="80">
   </a>
-
   <h3 align="center">Twitch Downloader</h3>
-
   <div align="center">
     Descargador de Twitch VOD/Clip/Chat y Renderizador de Chat
     <br />
@@ -17,7 +15,7 @@
 
 ## Ejemplo de Renderizado de Chat
 
-https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4
+<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
 
 ## ¿Qué puede hacer?
 
@@ -33,11 +31,12 @@ https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-8
 
 ![](https://i.imgur.com/bLegxGX.gif)
 
-### [Ver toda la documentación de WPF aquí](TwitchDownloaderWPF/README.md).
+### [Ver toda la documentación de WPF aquí](TwitchDownloaderWPF/README.md)
 
 ### Funcionalidad
 
 La interfaz gráfica de usuario Windows WPF implementa todas las funciones principales del programa junto con algunas funciones adicionales para mejorar la comodidad de uso:
+
 - Agregar múltiples tareas de descarga/renderizado a la cola para ejecutarlas simultáneamente
 - Crear una lista de tareas de descarga a partir de una lista de enlaces de VODs/Clips
 - Buscar y descargar múltiples VODs/Clips de cualquier streamer sin salir de la aplicación
@@ -52,7 +51,7 @@ La interfaz gráfica de usuario Windows WPF incluye temas claros y oscuros, junt
 
 ### Demostración en Video
 
-https://www.youtube.com/watch?v=0W3MhfhnYjk
+<https://www.youtube.com/watch?v=0W3MhfhnYjk>
 (versión anterior, mismo concepto)
 
 ## ¿Linux?
@@ -65,7 +64,7 @@ Por ahora, no hay una GUI disponible para MacOS :(
 
 # Interfaz de Línea de Comandos (CLI)
 
-### [Ver toda la documentación de la CLI aquí](TwitchDownloaderCLI/README.md).
+### [Ver toda la documentación de la CLI aquí](TwitchDownloaderCLI/README.md)
 
 La interfaz de línea de comandos (CLI) es multiplataforma e implementa las funciones principales del programa. Funciona en Windows, Linux y MacOS<sup>*</sup>.
 
@@ -87,10 +86,13 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 2. Extrae `TwitchDownloaderCLI.exe`.
 3. Navega hasta el lugar donde extrajiste el archivo en la terminal.
 4. Si no tienes FFmpeg, puedes instalarlo a través del [administrador de paquetes Chocolatey](https://community.chocolatey.org/), o puedes obtenerlo como un archivo independiente desde [ffmpeg.org](https://ffmpeg.org/download.html) o utilizando TwitchDownloaderCLI:
+
 ```
 TwitchDownloaderCLI.exe ffmpeg --download
 ```
+
 5. Ahora puedes empezar a usar el descargador, por ejemplo:
+
 ```
 TwitchDownloaderCLI.exe videodownload --id <id-del-vod-aquí> -o out.mp4
 ```
@@ -104,18 +106,25 @@ TwitchDownloaderCLI.exe videodownload --id <id-del-vod-aquí> -o out.mp4
 building-from-source).
 4. Extrae `TwitchDownloaderCLI`.
 5. Navega hasta el lugar donde extrajiste el archivo y dale permisos de ejecución en la terminal:
+
 ```
 sudo chmod +x TwitchDownloaderCLI
 ```
+
 6. a) Si no tienes FFmpeg, debes instalarlo a través del administrador de paquetes de tu distribución, aunque también puedes obtenerlo como un archivo independiente desde [ffmpeg.org](https://ffmpeg.org/download.html) o usando TwitchDownloaderCLI:
+
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
+
 6. b) Si lo descargaste como un archivo independiente, también debes darle permisos de ejecución con:
+
 ```
 sudo chmod +x ffmpeg
 ```
+
 7. Ahora puedes empezar a usar el descargador, por ejemplo:
+
 ```
 ./TwitchDownloaderCLI videodownload --id <id-del-vod-aquí> -o out.mp4
 ```
@@ -125,18 +134,25 @@ sudo chmod +x ffmpeg
 1. Ve a [Releases](https://github.com/lay295/TwitchDownloader/releases/) y descarga el archivo binario más reciente para MacOS o [compila desde el código fuente](#building-from-source).
 2. Extrae `TwitchDownloaderCLI`.
 3. Navega hasta el lugar donde extrajiste el archivo y dale permisos de ejecución en la terminal:
+
 ```
 chmod +x TwitchDownloaderCLI
 ```
+
 4. a) Si no tienes FFmpeg, puedes instalarlo a través del [administrador de paquetes Homebrew](https://brew.sh/), o puedes obtenerlo como un archivo independiente desde [ffmpeg.org](https://ffmpeg.org/download.html) o utilizando TwitchDownloaderCLI:
+
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
+
 4. b) Si lo descargaste como un archivo independiente, también debes darle permisos de ejecución con:
+
 ```
 chmod +x ffmpeg
 ```
+
 5. Ahora puedes empezar a usar el descargador, por ejemplo:
+
 ```
 ./TwitchDownloaderCLI videodownload --id <id-del-vod-aquí> -o out.mp4
 ```
@@ -150,31 +166,45 @@ chmod +x ffmpeg
 ## Instrucciones de Compilación
 
 1. Clona el repositorio:
+
 ```
 git clone https://github.com/lay295/TwitchDownloader.git
 ```
+
 2. Navega hasta la carpeta de la solución:
+
 ```
 cd TwitchDownloader
 ```
+
 3. Restaura la solución:
+
 ```
 dotnet restore
 ```
+
 4. a) Compila la GUI:
+
 ```
 dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
+
 4. b) Compila la CLI:
+
 ```
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Perfil>
 ```
+
 - Perfiles aplicables: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
+
 5. a) Navega hasta la carpeta de la compilación de la GUI:
+
 ```
 cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
 ```
+
 5. b) Navega hasta la carpeta de la compilación de la CLI:
+
 ```
 cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 ```
