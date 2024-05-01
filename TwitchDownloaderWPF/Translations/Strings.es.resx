@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -164,7 +164,7 @@
   <data name="ChatBadges" xml:space="preserve">
     <value>Insignias de chat:</value>
   </data>
-  <data name="ChatCrop" xml:space="preserve">
+  <data name="TrimChat" xml:space="preserve">
     <value>Recortar chat:</value>
   </data>
   <data name="ChatDownload" xml:space="preserve">
@@ -215,13 +215,13 @@
   <data name="TemplateClips" xml:space="preserve">
     <value>Clips:</value>
   </data>
-  <data name="CropEnd" xml:space="preserve">
+  <data name="TrimEnd" xml:space="preserve">
     <value>Fin</value>
   </data>
-  <data name="CropStart" xml:space="preserve">
+  <data name="TrimStart" xml:space="preserve">
     <value>Inicio</value>
   </data>
-  <data name="CropVideo" xml:space="preserve">
+  <data name="TrimVideo" xml:space="preserve">
     <value>Recortar vídeo:</value>
   </data>
   <data name="DateCustomFormatting" xml:space="preserve">
@@ -298,7 +298,7 @@
     <value>Emotes FFZ:</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
-    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {crop_start} {crop_end} {crop_start_custom=""} {crop_end_custom=""} {length} {length_custom=""} {views} {game}</value>
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
     <comment>No traducir</comment>
   </data>
   <data name="FontColor" xml:space="preserve">
@@ -326,7 +326,7 @@
   <data name="InvalidClipLinkIdMessage" xml:space="preserve">
     <value>Por favor, introduzca un clip válido Link/ID\nEjemplos:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
   </data>
-  <data name="InvalidCropInputs" xml:space="preserve">
+  <data name="InvalidTrimInputs" xml:space="preserve">
     <value>Entradas de recorte no válidas</value>
   </data>
   <data name="InvalidStartEndTime" xml:space="preserve">
@@ -733,7 +733,7 @@
     <value>Escala de contorno:</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
-    <value>Los formatos crop_start_custom, crop_end_custom y length_custom se basan en el formato</value>
+    <value>Los formatos trim_start_custom, trim_end_custom y length_custom se basan en el formato</value>
   </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
     <value>Cadenas de formato de intervalo de tiempo estándar de C#</value>
@@ -779,64 +779,96 @@
     <value>Descarga FFmpeg {0}%</value>
   </data>
   <data name="CopyVideoIDToClipboard" xml:space="preserve">
-    <value>Copy ID to clipboard</value>
+    <value>Copiar ID al portapapeles</value>
   </data>
   <data name="CopyVideoURLToClipboard" xml:space="preserve">
-    <value>Copy URL to clipboard</value>
+    <value>Copiar URL al portapapeles</value>
   </data>
   <data name="OpenVideoInBrowser" xml:space="preserve">
-    <value>Open in browser</value>
+    <value>Abrir en el navegador</value>
   </data>
   <data name="ResetSettingsConfirmationMessage" xml:space="preserve">
-    <value>Are you sure you want to restore all settings to their default values?</value>
+    <value>¿Estás seguro de que quieres restaurar todos los ajustes a sus valores por defecto?</value>
   </data>
   <data name="ResetSettingsConfirmation" xml:space="preserve">
-    <value>Restore Settings Confirmation</value>
+    <value>Confirmación de restauración de ajustes</value>
   </data>
   <data name="TheApplicationMustBeRestartedMessage" xml:space="preserve">
-    <value>The application must be restarted for changes to take effect.</value>
+    <value>La aplicación debe reiniciarse para que los cambios surtan efecto.</value>
   </data>
   <data name="RestartTheApplication" xml:space="preserve">
-    <value>Please restart {0}</value><comment>{0} is the name of the application.</comment>
+    <value>Por favor, reinicie {0}</value><comment>{0} es el nombre de la aplicación.</comment>
   </data>
   <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
-    <value>Restore Defaults</value>
+    <value>Restaurar valores predeterminados</value>
   </data>
   <data name="ButtonSaveSettings" xml:space="preserve">
-    <value>Save</value>
+    <value>Guardar</value>
   </data>
   <data name="ButtonCancelSettingsChanges" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Cancelar</value>
   </data>
   <data name="ContextMenuRemoveTask" xml:space="preserve">
-    <value>Remove</value>
+    <value>Quitar</value>
   </data>
   <data name="ContextMenuOpenTaskFolder" xml:space="preserve">
-    <value>Open folder
-</value>
+    <value>Abrir carpeta</value>
   </data>
   <data name="PreferredQuality" xml:space="preserve">
-    <value>Preferred Quality:</value>
+    <value>Calidad preferida:</value>
   </data>
   <data name="TitleWindowOldVideoCacheManager" xml:space="preserve">
-    <value>Select Caches To Delete</value>
+    <value>Seleccione las cachés que desea eliminar</value>
   </data>
   <data name="SizeOfAllFiles" xml:space="preserve">
-    <value>Total Size:</value>
+    <value>Tamaño total:</value>
   </data>
   <data name="DeleteCacheColumnHeader" xml:space="preserve">
-    <value>Delete</value>
+    <value>Borrar</value>
   </data>
   <data name="FilePathColumnHeader" xml:space="preserve">
-    <value>Path</value>
+    <value>Ruta</value>
   </data>
   <data name="FileAgeColumnHeader" xml:space="preserve">
-    <value>Age</value>
+    <value>Edad</value>
   </data>
   <data name="FileSizeColumnHeader" xml:space="preserve">
-    <value>Size</value>
+    <value>Tamaño</value>
   </data>
   <data name="FileAgeInDays" xml:space="preserve">
-    <value>{0:N0} days</value>
+    <value>{0:N0} días</value>
+  </data>
+  <data name="LogLevels" xml:space="preserve">
+    <value>Log Levels:</value>
+  </data>
+  <data name="LogLevelVerbose" xml:space="preserve">
+    <value>Verbose</value>
+  </data>
+  <data name="LogLevelInfo" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="LogLevelWarning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="LogLevelError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="LogLevelFfmpeg" xml:space="preserve">
+    <value>FFmpeg</value>
+  </data>
+  <data name="CopyFolderPathToClipboard" xml:space="preserve">
+    <value>Copy path to clipboard</value>
+  </data>
+  <data name="ContextMenuOpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="UnknownUser" xml:space="preserve">
+    <value>Unknown User</value>
+  </data>
+  <data name="UnknownGame" xml:space="preserve">
+    <value>Unknown Game</value>
+  </data>
+  <data name="UnknownVideoLength" xml:space="preserve">
+    <value>Unknown</value>
   </data>
 </root>

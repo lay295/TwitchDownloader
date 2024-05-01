@@ -4,6 +4,7 @@ using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 
@@ -13,20 +14,20 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Update(ChatUpdateArgs inputOptions)
         {
-            var updateOptions = GetUpdateOptions(inputOptions);
+            var progress = new CliTaskProgress(inputOptions.LogLevel);
 
-            ChatUpdater chatUpdater = new(updateOptions);
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
+            var updateOptions = GetUpdateOptions(inputOptions, progress);
+
+            var chatUpdater = new ChatUpdater(updateOptions, progress);
             chatUpdater.ParseJsonAsync().Wait();
-            chatUpdater.UpdateAsync(progress, new CancellationToken()).Wait();
+            chatUpdater.UpdateAsync(new CancellationToken()).Wait();
         }
 
-        private static ChatUpdateOptions GetUpdateOptions(ChatUpdateArgs inputOptions)
+        private static ChatUpdateOptions GetUpdateOptions(ChatUpdateArgs inputOptions, ITaskLogger logger)
         {
             if (!File.Exists(inputOptions.InputFile))
             {
-                Console.WriteLine("[ERROR] - Input file does not exist!");
+                logger.LogError("Input file does not exist!");
                 Environment.Exit(1);
             }
 
@@ -48,13 +49,13 @@ namespace TwitchDownloaderCLI.Modes
             };
             if (inFormat != ChatFormat.Json)
             {
-                Console.WriteLine("[ERROR] - Input file must be .json or .json.gz!");
+                logger.LogError("Input file must be .json or .json.gz!");
                 Environment.Exit(1);
             }
 
             if (Path.GetFullPath(inputOptions.InputFile!) == Path.GetFullPath(inputOptions.OutputFile!))
             {
-                Console.WriteLine("[WARNING] - Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanently overwritten!");
+                logger.LogWarning("Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanently overwritten!");
             }
 
             ChatUpdateOptions updateOptions = new()
@@ -67,10 +68,10 @@ namespace TwitchDownloaderCLI.Modes
                 OutputFormat = outFormat,
                 EmbedMissing = inputOptions.EmbedMissing,
                 ReplaceEmbeds = inputOptions.ReplaceEmbeds,
-                CropBeginning = !double.IsNegative(inputOptions.CropBeginningTime),
-                CropBeginningTime = inputOptions.CropBeginningTime,
-                CropEnding = !double.IsNegative(inputOptions.CropEndingTime),
-                CropEndingTime = inputOptions.CropEndingTime,
+                TrimBeginning = inputOptions.TrimBeginningTime >= TimeSpan.Zero,
+                TrimBeginningTime = ((TimeSpan)inputOptions.TrimBeginningTime).TotalSeconds,
+                TrimEnding = inputOptions.TrimEndingTime >= TimeSpan.Zero,
+                TrimEndingTime = ((TimeSpan)inputOptions.TrimEndingTime).TotalSeconds,
                 BttvEmotes = (bool)inputOptions.BttvEmotes!,
                 FfzEmotes = (bool)inputOptions.FfzEmotes!,
                 StvEmotes = (bool)inputOptions.StvEmotes!,

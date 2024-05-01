@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -164,7 +164,7 @@
   <data name="ChatBadges" xml:space="preserve">
     <value>Sohbet Rozetleri:</value>
   </data>
-  <data name="ChatCrop" xml:space="preserve">
+  <data name="TrimChat" xml:space="preserve">
     <value>Kes:</value>
   </data>
   <data name="ChatDownload" xml:space="preserve">
@@ -215,14 +215,14 @@
   <data name="TemplateClips" xml:space="preserve">
     <value>Klipler:</value>
   </data>
-  <data name="CropEnd" xml:space="preserve">
+  <data name="TrimEnd" xml:space="preserve">
     <value>Sonu</value>
     <comment>I added some space as the gui looks broken</comment>
   </data>
-  <data name="CropStart" xml:space="preserve">
+  <data name="TrimStart" xml:space="preserve">
     <value>Başı</value>
   </data>
-  <data name="CropVideo" xml:space="preserve">
+  <data name="TrimVideo" xml:space="preserve">
     <value>Videoyu Kırp:</value>
   </data>
   <data name="DateCustomFormatting" xml:space="preserve">
@@ -299,7 +299,7 @@
     <value>FFZ Emojileri:</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
-    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {crop_start} {crop_end} {crop_start_custom=""} {crop_end_custom=""} {length} {length_custom=""} {views} {game}</value>
+    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
     <comment>Do not translate</comment>
   </data>
   <data name="FontColor" xml:space="preserve">
@@ -327,7 +327,7 @@
   <data name="InvalidClipLinkIdMessage" xml:space="preserve">
     <value>Lütfen geçerli bir klip Bağlantısı/ID girin\nÖrnek:\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
   </data>
-  <data name="InvalidCropInputs" xml:space="preserve">
+  <data name="InvalidTrimInputs" xml:space="preserve">
     <value>Geçersiz Kırpma Girişleri</value>
   </data>
   <data name="InvalidStartEndTime" xml:space="preserve">
@@ -734,7 +734,7 @@
     <value>Anahat Ölçeği:</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
-    <value>crop_start_custom, crop_end_custom, and length_custom formattings are based on the</value>
+    <value>trim_start_custom, trim_end_custom, and length_custom formattings are based on the</value>
   </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
     <value>C# standart TimeSpan biçim dizeleri</value>
@@ -837,5 +837,38 @@
   </data>
   <data name="FileAgeInDays" xml:space="preserve">
     <value>{0:N0} days</value>
+  </data>
+  <data name="LogLevels" xml:space="preserve">
+    <value>Log Levels:</value>
+  </data>
+  <data name="LogLevelVerbose" xml:space="preserve">
+    <value>Verbose</value>
+  </data>
+  <data name="LogLevelInfo" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="LogLevelWarning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="LogLevelError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="LogLevelFfmpeg" xml:space="preserve">
+    <value>FFmpeg</value>
+  </data>
+  <data name="CopyFolderPathToClipboard" xml:space="preserve">
+    <value>Copy path to clipboard</value>
+  </data>
+  <data name="ContextMenuOpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="UnknownUser" xml:space="preserve">
+    <value>Unknown User</value>
+  </data>
+  <data name="UnknownGame" xml:space="preserve">
+    <value>Unknown Game</value>
+  </data>
+  <data name="UnknownVideoLength" xml:space="preserve">
+    <value>Unknown</value>
   </data>
 </root>

@@ -10,10 +10,10 @@ namespace TwitchDownloaderCore.Options
         public ChatFormat OutputFormat { get; set; } = ChatFormat.Json;
         public bool EmbedMissing { get; set; }
         public bool ReplaceEmbeds { get; set; }
-        public bool CropBeginning { get; set; }
-        public double CropBeginningTime { get; set; }
-        public bool CropEnding { get; set; }
-        public double CropEndingTime { get; set; }
+        public bool TrimBeginning { get; set; }
+        public double TrimBeginningTime { get; set; }
+        public bool TrimEnding { get; set; }
+        public double TrimEndingTime { get; set; }
         public bool BttvEmotes { get; set; }
         public bool FfzEmotes { get; set; }
         public bool StvEmotes { get; set; }

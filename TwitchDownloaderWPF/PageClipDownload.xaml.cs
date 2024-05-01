@@ -13,8 +13,10 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -69,14 +71,14 @@ namespace TwitchDownloaderWPF
                 imgThumbnail.Source = image;
 
                 clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
-                textStreamer.Text = clipData.data.clip.broadcaster.displayName;
+                textStreamer.Text = clipData.data.clip.broadcaster?.displayName ?? Translations.Strings.UnknownUser;
                 var clipCreatedAt = clipData.data.clip.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                 textTitle.Text = clipData.data.clip.title;
                 labelLength.Text = clipLength.ToString("c");
                 viewCount = taskClipInfo.Result.data.clip.viewCount;
-                game = taskClipInfo.Result.data.clip.game?.displayName ?? "Unknown";
+                game = taskClipInfo.Result.data.clip.game?.displayName ?? Translations.Strings.UnknownGame;
 
                 foreach (var quality in taskLinks.Result.data.clip.videoQualities)
                 {
@@ -118,6 +120,20 @@ namespace TwitchDownloaderWPF
                 : null;
         }
 
+        private void SetPercent(int percent)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusProgressBar.Value = percent
+            );
+        }
+
+        private void SetStatus(string message)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusMessage.Text = message
+            );
+        }
+
         private void AppendLog(string message)
         {
             textLog.Dispatcher.BeginInvoke(() =>
@@ -136,22 +152,6 @@ namespace TwitchDownloaderWPF
             comboQuality.IsEnabled = enabled;
             SplitBtnDownload.IsEnabled = enabled;
             CheckMetadata.IsEnabled = enabled;
-        }
-
-        private void OnProgressChanged(ProgressReport progress)
-        {
-            switch (progress.ReportType)
-            {
-                case ReportType.Percent:
-                    statusProgressBar.Value = (int)progress.Data;
-                    break;
-                case ReportType.NewLineStatus or ReportType.SameLineStatus:
-                    statusMessage.Text = (string)progress.Data;
-                    break;
-                case ReportType.Log:
-                    AppendLog((string)progress.Data);
-                    break;
-            }
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -202,7 +202,7 @@ namespace TwitchDownloaderWPF
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "MP4 Files | *.mp4",
-                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, TimeSpan.Zero, clipLength, viewCount.ToString(), game)
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, TimeSpan.Zero, clipLength, viewCount.ToString(), game) + ".mp4"
             };
             if (saveFileDialog.ShowDialog() != true)
             {
@@ -214,26 +214,26 @@ namespace TwitchDownloaderWPF
             ClipDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
             _cancellationTokenSource = new CancellationTokenSource();
 
+            var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
+            var currentDownload = new ClipDownloader(downloadOptions, downloadProgress);
+
             SetImage("Images/ppOverheat.gif", true);
             statusMessage.Text = Translations.Strings.StatusDownloading;
             UpdateActionButtons(true);
             try
             {
-                var downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-                await new ClipDownloader(downloadOptions, downloadProgress)
-                    .DownloadAsync(_cancellationTokenSource.Token);
-
-                statusMessage.Text = Translations.Strings.StatusDone;
+                await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
+                downloadProgress.SetStatus(Translations.Strings.StatusDone);
                 SetImage("Images/ppHop.gif", true);
             }
             catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
             {
-                statusMessage.Text = Translations.Strings.StatusCanceled;
+                downloadProgress.SetStatus(Translations.Strings.StatusCanceled);
                 SetImage("Images/ppHop.gif", true);
             }
             catch (Exception ex)
             {
-                statusMessage.Text = Translations.Strings.StatusError;
+                downloadProgress.SetStatus(Translations.Strings.StatusError);
                 SetImage("Images/peepoSad.png", false);
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
@@ -242,7 +242,7 @@ namespace TwitchDownloaderWPF
                 }
             }
             btnGetInfo.IsEnabled = true;
-            statusProgressBar.Value = 0;
+            downloadProgress.ReportProgress(0);
             _cancellationTokenSource.Dispose();
             UpdateActionButtons(false);
         }

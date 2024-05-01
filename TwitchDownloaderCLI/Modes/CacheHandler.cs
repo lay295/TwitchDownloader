@@ -2,9 +2,9 @@
 using System.IO;
 using TwitchDownloaderCLI.Modes.Arguments;
 
-namespace TwitchDownloaderCLI.Tools
+namespace TwitchDownloaderCLI.Modes
 {
-    public static class CacheHandler
+    internal static class CacheHandler
     {
         public static void ParseArgs(CacheArgs args)
         {

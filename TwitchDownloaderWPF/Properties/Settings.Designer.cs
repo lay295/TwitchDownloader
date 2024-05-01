@@ -516,7 +516,7 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
         public int ChatDownloadThreads {
             get {
                 return ((int)(this["ChatDownloadThreads"]));
@@ -895,6 +895,18 @@ namespace TwitchDownloaderWPF.Properties {
             }
             set {
                 this["EncodeClipMetadata"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public int LogLevels {
+            get {
+                return ((int)(this["LogLevels"]));
+            }
+            set {
+                this["LogLevels"] = value;
             }
         }
     }

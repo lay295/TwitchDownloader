@@ -5,9 +5,11 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using HandyControl.Data;
+using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
-using MessageBox = System.Windows.MessageBox;
+using CheckComboBox = HandyControl.Controls.CheckComboBox;
+using CheckComboBoxItem = HandyControl.Controls.CheckComboBoxItem;
 
 namespace TwitchDownloaderWPF
 {
@@ -83,6 +85,20 @@ namespace TwitchDownloaderWPF
             {
                 ComboLocale.SelectedIndex = selectedIndex;
             }
+
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelVerbose, Tag = LogLevel.Verbose });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelInfo, Tag = LogLevel.Info });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelWarning, Tag = LogLevel.Warning });
+            ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelError, Tag = LogLevel.Error });
+            // ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelFfmpeg, Tag = LogLevel.Ffmpeg });
+            var currentLogLevels = (LogLevel)Settings.Default.LogLevels;
+            foreach (CheckComboBoxItem item in ComboLogLevels.Items)
+            {
+                if (currentLogLevels.HasFlag((Enum)item.Tag))
+                {
+                    ComboLogLevels.SelectedItems.Add(item);
+                }
+            }
         }
 
         private void BtnClearCache_Click(object sender, RoutedEventArgs e)
@@ -114,7 +130,6 @@ namespace TwitchDownloaderWPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Title = Translations.Strings.TitleGlobalSettings;
             App.RequestTitleBarChange();
         }
 
@@ -175,7 +190,6 @@ namespace TwitchDownloaderWPF
                 _refreshCultureOnCancel = true;
                 Settings.Default.GuiCulture = selectedCulture;
                 App.RequestCultureChange();
-                Title = Translations.Strings.TitleGlobalSettings;
             }
         }
 
@@ -306,6 +320,17 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.TemplateChat = TextChatTemplate.Text;
+        }
+
+        private void ComboLogLevels_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            var newLogLevel = ComboLogLevels.SelectedItems
+                .Cast<CheckComboBoxItem>()
+                .Sum(item => (int)item.Tag);
+            Settings.Default.LogLevels = newLogLevel;
         }
     }
 }

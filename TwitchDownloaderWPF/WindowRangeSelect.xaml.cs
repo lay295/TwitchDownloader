@@ -77,7 +77,6 @@ namespace TwitchDownloaderWPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Title = Translations.Strings.TitleRenderRange;
             App.RequestTitleBarChange();
         }
     }

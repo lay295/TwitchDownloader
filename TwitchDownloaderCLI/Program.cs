@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using CommandLine.Text;
+using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -24,11 +25,11 @@ namespace TwitchDownloaderCLI
                 config.HelpWriter = null; // Use null instead of TextWriter.Null due to how CommandLine works internally
             });
 
-            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs>(preParsedArgs);
+            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, FfmpegArgs, CacheArgs, TsMergeArgs>(preParsedArgs);
             parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
 
             CoreLicensor.EnsureFilesExist(AppContext.BaseDirectory);
-            WriteApplicationBanner((ITwitchDownloaderArgs)parserResult.Value, args);
+            WriteApplicationBanner((TwitchDownloaderArgs)parserResult.Value);
 
             parserResult
                 .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
@@ -37,7 +38,8 @@ namespace TwitchDownloaderCLI
                 .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
                 .WithParsed<ChatRenderArgs>(RenderChat.Render)
                 .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
-                .WithParsed<CacheArgs>(CacheHandler.ParseArgs);
+                .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
+                .WithParsed<TsMergeArgs>(MergeTs.Merge);
         }
 
         private static void WriteHelpText(IEnumerable<Error> errors, ParserResult<object> parserResult, ParserSettings parserSettings)
@@ -72,9 +74,9 @@ namespace TwitchDownloaderCLI
             Environment.Exit(1);
         }
 
-        private static void WriteApplicationBanner(ITwitchDownloaderArgs args, string[] argsArray)
+        private static void WriteApplicationBanner(TwitchDownloaderArgs args)
         {
-            if (args.ShowBanner == false || argsArray.Contains("--silent"))
+            if (args.ShowBanner == false || (args.LogLevel & LogLevel.None) != 0)
             {
                 return;
             }

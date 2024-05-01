@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 
@@ -17,12 +18,12 @@ namespace TwitchDownloaderCore.Chat
         /// <summary>
         /// Serializes a chat Html file.
         /// </summary>
-        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, bool embedData = true, CancellationToken cancellationToken = new())
+        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, ITaskLogger logger, bool embedData = true, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
 
             Dictionary<string, EmbedEmoteData> thirdEmoteData = new();
-            await BuildThirdPartyDictionary(chatRoot, embedData, thirdEmoteData, cancellationToken);
+            await BuildThirdPartyDictionary(chatRoot, embedData, thirdEmoteData, logger, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -86,9 +87,9 @@ namespace TwitchDownloaderCore.Chat
             }
         }
 
-        private static async Task BuildThirdPartyDictionary(ChatRoot chatRoot, bool embedData, Dictionary<string, EmbedEmoteData> thirdEmoteData, CancellationToken cancellationToken)
+        private static async Task BuildThirdPartyDictionary(ChatRoot chatRoot, bool embedData, Dictionary<string, EmbedEmoteData> thirdEmoteData, ITaskLogger logger, CancellationToken cancellationToken)
         {
-            EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmotesMetadata(chatRoot.streamer.id, true, true, true, true, cancellationToken);
+            EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmotesMetadata(chatRoot.streamer.id, true, true, true, true, logger, cancellationToken);
             List<EmoteResponseItem> itemList = new();
             itemList.AddRange(emotes.BTTV);
             itemList.AddRange(emotes.FFZ);

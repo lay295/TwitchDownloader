@@ -1,9 +1,10 @@
 ﻿using CommandLine;
+using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("videodownload", HelpText = "Downloads a stream VOD from Twitch")]
-    public class VideoDownloadArgs : ITwitchDownloaderArgs
+    internal sealed class VideoDownloadArgs : TwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD to download.")]
         public string Id { get; set; }
@@ -14,11 +15,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('q', "quality", HelpText = "The quality the program will attempt to download.")]
         public string Quality { get; set; }
 
-        [Option('b', "beginning", HelpText = "Time in seconds to crop beginning.")]
-        public int CropBeginningTime { get; set; }
+        [Option('b', "beginning", HelpText = "Time to trim beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimBeginningTime { get; set; }
 
-        [Option('e', "ending", HelpText = "Time in seconds to crop ending.")]
-        public int CropEndingTime { get; set; }
+        [Option('e', "ending", HelpText = "Time to trim ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimEndingTime { get; set; }
 
         [Option('t', "threads", Default = 4, HelpText = "Number of download threads.")]
         public int DownloadThreads { get; set; }
@@ -34,8 +35,5 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary caching folder.")]
         public string TempFolder { get; set; }
-
-        [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
-        public bool? ShowBanner { get; set; }
     }
 }

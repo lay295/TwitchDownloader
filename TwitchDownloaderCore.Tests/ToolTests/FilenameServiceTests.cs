@@ -5,7 +5,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 {
     public class FilenameServiceTests
     {
-        private static (string title, string id, DateTime date, string channel, TimeSpan cropStart, TimeSpan cropEnd, string viewCount, string game) GetExampleInfo() =>
+        private static (string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, string viewCount, string game) GetExampleInfo() =>
             ("A Title", "abc123", new DateTime(1984, 11, 1, 9, 43, 21), "streamer8", new TimeSpan(0, 1, 2, 3, 4), new TimeSpan(0, 5, 6, 7, 8), "123456789", "A Game");
 
         [Theory]
@@ -13,20 +13,20 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("{id}", "abc123")]
         [InlineData("{channel}", "streamer8")]
         [InlineData("{date}", "11-1-84")]
-        [InlineData("{crop_start}", "01-02-03")]
-        [InlineData("{crop_end}", "05-06-07")]
+        [InlineData("{trim_start}", "01-02-03")]
+        [InlineData("{trim_end}", "05-06-07")]
         [InlineData("{length}", "04-04-04")]
         [InlineData("{views}", "123456789")]
         [InlineData("{game}", "A Game")]
         [InlineData("{date_custom=\"s\"}", "1984-11-01T09_43_21")]
-        [InlineData("{crop_start_custom=\"hh\\-mm\\-ss\"}", "01-02-03")]
-        [InlineData("{crop_end_custom=\"hh\\-mm\\-ss\"}", "05-06-07")]
+        [InlineData("{trim_start_custom=\"hh\\-mm\\-ss\"}", "01-02-03")]
+        [InlineData("{trim_end_custom=\"hh\\-mm\\-ss\"}", "05-06-07")]
         [InlineData("{length_custom=\"hh\\-mm\\-ss\"}", "04-04-04")]
         public void CorrectlyGeneratesIndividualTemplates(string template, string expected)
         {
-            var (title, id, date, channel, cropStart, cropEnd, viewCount, game) = GetExampleInfo();
+            var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(template, title, id, date, channel, cropStart, cropEnd, viewCount, game);
+            var result = FilenameService.GetFilename(template, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(expected, result);
         }
@@ -37,9 +37,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("{title} by {channel} playing {game} on {date_custom=\"M dd, yyyy\"} for {length_custom=\"h'h 'm'm 's's'\"} with {views} views", "A Title by streamer8 playing A Game on 11 01, 1984 for 4h 4m 4s with 123456789 views")]
         public void CorrectlyGeneratesLargeTemplates(string template, string expected)
         {
-            var (title, id, date, channel, cropStart, cropEnd, viewCount, game) = GetExampleInfo();
+            var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(template, title, id, date, channel, cropStart, cropEnd, viewCount, game);
+            var result = FilenameService.GetFilename(template, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(expected, result);
         }
@@ -47,11 +47,11 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [Fact]
         public void CorrectlyInterpretsMultipleCustomParameters()
         {
-            const string TEMPLATE = "{date_custom=\"yyyy\"} {date_custom=\"MM\"} {date_custom=\"dd\"} {crop_start_custom=\"hh\\-mm\\-ss\"} {crop_end_custom=\"hh\\-mm\\-ss\"} {length_custom=\"hh\\-mm\\-ss\"}";
+            const string TEMPLATE = "{date_custom=\"yyyy\"} {date_custom=\"MM\"} {date_custom=\"dd\"} {trim_start_custom=\"hh\\-mm\\-ss\"} {trim_end_custom=\"hh\\-mm\\-ss\"} {length_custom=\"hh\\-mm\\-ss\"}";
             const string EXPECTED = "1984 11 01 01-02-03 05-06-07 04-04-04";
-            var (title, id, date, channel, cropStart, cropEnd, viewCount, game) = GetExampleInfo();
+            var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, cropStart, cropEnd, viewCount, game);
+            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(EXPECTED, result);
         }
@@ -61,9 +61,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             const string TEMPLATE = "{channel}/{date_custom=\"yyyy\"}/{date_custom=\"MM\"}/{date_custom=\"dd\"}/{title}.mp4";
             var expected = Path.Combine("streamer8", "1984", "11", "01", "A Title.mp4");
-            var (title, id, date, channel, cropStart, cropEnd, viewCount, game) = GetExampleInfo();
+            var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, cropStart, cropEnd, viewCount, game);
+            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(expected, result);
         }
@@ -73,9 +73,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             const string TEMPLATE = "{channel}\\{date_custom=\"yyyy\"}\\{date_custom=\"MM\"}\\{date_custom=\"dd\"}\\{title}";
             var expected = Path.Combine("streamer8", "1984", "11", "01", "A Title");
-            var (title, id, date, channel, cropStart, cropEnd, viewCount, game) = GetExampleInfo();
+            var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, cropStart, cropEnd, viewCount, game);
+            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(expected, result);
         }
@@ -98,8 +98,8 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 
         [Theory]
         [InlineData("{date_custom=\"'")]
-        [InlineData("{crop_start_custom=\"'")]
-        [InlineData("{crop_end_custom=\"'")]
+        [InlineData("{trim_start_custom=\"'")]
+        [InlineData("{trim_end_custom=\"'")]
         [InlineData("{length_custom=\"'")]
         public void CorrectlyReplacesInvalidCharactersForCustomTemplates(string templateStart)
         {
@@ -121,9 +121,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             var invalidChars = new string(Path.GetInvalidPathChars());
             var template = invalidChars + "\\{title}";
             var expected = Path.Combine(new string('_', invalidChars.Length), "A Title");
-            var (title, id, date, channel, cropStart, cropEnd, viewCount, game) = GetExampleInfo();
+            var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(template, title, id, date, channel, cropStart, cropEnd, viewCount, game);
+            var result = FilenameService.GetFilename(template, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(expected, result);
         }
@@ -132,10 +132,10 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         public void RandomStringIsRandom()
         {
             const string TEMPLATE = "{random_string}";
-            var (title, id, date, channel, cropStart, cropEnd, viewCount, game) = GetExampleInfo();
+            var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, cropStart, cropEnd, viewCount, game);
-            var result2 = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, cropStart, cropEnd, viewCount, game);
+            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
+            var result2 = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.NotEqual(result, result2);
         }
@@ -145,9 +145,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             const string TEMPLATE = "{foobar}";
             const string EXPECTED = "{foobar}";
-            var (title, id, date, channel, cropStart, cropEnd, viewCount, game) = GetExampleInfo();
+            var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, cropStart, cropEnd, viewCount, game);
+            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(EXPECTED, result);
         }

@@ -4,6 +4,7 @@ using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 
@@ -13,26 +14,26 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Download(ChatDownloadArgs inputOptions)
         {
-            var downloadOptions = GetDownloadOptions(inputOptions);
+            var progress = new CliTaskProgress(inputOptions.LogLevel);
 
-            ChatDownloader chatDownloader = new(downloadOptions);
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
-            chatDownloader.DownloadAsync(progress, new CancellationToken()).Wait();
+            var downloadOptions = GetDownloadOptions(inputOptions, progress);
+
+            var chatDownloader = new ChatDownloader(downloadOptions, progress);
+            chatDownloader.DownloadAsync(CancellationToken.None).Wait();
         }
 
-        private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions)
+        private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions, ITaskLogger logger)
         {
             if (inputOptions.Id is null)
             {
-                Console.WriteLine("[ERROR] - Vod/Clip ID/URL cannot be null!");
+                logger.LogError("Vod/Clip ID/URL cannot be null!");
                 Environment.Exit(1);
             }
 
             var vodClipIdMatch = TwitchRegex.MatchVideoOrClipId(inputOptions.Id);
             if (vodClipIdMatch is not { Success: true })
             {
-                Console.WriteLine("[ERROR] - Unable to parse Vod/Clip ID/URL.");
+                logger.LogError("Unable to parse Vod/Clip ID/URL.");
                 Environment.Exit(1);
             }
 
@@ -48,10 +49,10 @@ namespace TwitchDownloaderCLI.Modes
                     _ => throw new NotSupportedException($"{fileExtension} is not a valid chat file extension.")
                 },
                 Id = vodClipIdMatch.Value,
-                CropBeginning = inputOptions.CropBeginningTime > 0.0,
-                CropBeginningTime = inputOptions.CropBeginningTime,
-                CropEnding = inputOptions.CropEndingTime > 0.0,
-                CropEndingTime = inputOptions.CropEndingTime,
+                TrimBeginning = inputOptions.TrimBeginningTime > TimeSpan.Zero,
+                TrimBeginningTime = ((TimeSpan)inputOptions.TrimBeginningTime).TotalSeconds,
+                TrimEnding = inputOptions.TrimEndingTime > TimeSpan.Zero,
+                TrimEndingTime = ((TimeSpan)inputOptions.TrimEndingTime).TotalSeconds,
                 EmbedData = inputOptions.EmbedData,
                 Filename = inputOptions.Compression is ChatCompression.Gzip
                     ? inputOptions.OutputFile + ".gz"

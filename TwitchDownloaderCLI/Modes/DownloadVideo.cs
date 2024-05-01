@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 
@@ -13,37 +15,28 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Download(VideoDownloadArgs inputOptions)
         {
-            FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath);
+            var progress = new CliTaskProgress(inputOptions.LogLevel);
 
-            Progress<ProgressReport> progress = new();
-            progress.ProgressChanged += ProgressHandler.Progress_ProgressChanged;
+            FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
-            var downloadOptions = GetDownloadOptions(inputOptions);
-            downloadOptions.CacheCleanerCallback = directoryInfos =>
-            {
-                Console.WriteLine(
-                    $"[LOG] - {directoryInfos.Length} unmanaged video caches were found at '{downloadOptions.TempFolder}' and can be safely deleted. " +
-                    "Run 'TwitchDownloaderCLI cache help' for more information.");
+            var downloadOptions = GetDownloadOptions(inputOptions, progress);
 
-                return Array.Empty<DirectoryInfo>();
-            };
-
-            VideoDownloader videoDownloader = new(downloadOptions, progress);
+            var videoDownloader = new VideoDownloader(downloadOptions, progress);
             videoDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
-        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions)
+        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, ITaskLogger logger)
         {
             if (inputOptions.Id is null)
             {
-                Console.WriteLine("[ERROR] - Vod ID/URL cannot be null!");
+                logger.LogError("Vod ID/URL cannot be null!");
                 Environment.Exit(1);
             }
 
             var vodIdMatch = TwitchRegex.MatchVideoId(inputOptions.Id);
             if (vodIdMatch is not { Success: true })
             {
-                Console.WriteLine("[ERROR] - Unable to parse Vod ID/URL.");
+                logger.LogError("Unable to parse Vod ID/URL.");
                 Environment.Exit(1);
             }
 
@@ -70,12 +63,20 @@ namespace TwitchDownloaderCLI.Modes
                     ".m4a" => "Audio",
                     _ => throw new ArgumentException("Only MP4 and M4A audio files are supported.")
                 },
-                CropBeginning = inputOptions.CropBeginningTime > 0.0,
-                CropBeginningTime = inputOptions.CropBeginningTime,
-                CropEnding = inputOptions.CropEndingTime > 0.0,
-                CropEndingTime = inputOptions.CropEndingTime,
+                TrimBeginning = inputOptions.TrimBeginningTime > TimeSpan.Zero,
+                TrimBeginningTime = inputOptions.TrimBeginningTime,
+                TrimEnding = inputOptions.TrimEndingTime > TimeSpan.Zero,
+                TrimEndingTime = inputOptions.TrimEndingTime,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
-                TempFolder = inputOptions.TempFolder
+                TempFolder = inputOptions.TempFolder,
+                CacheCleanerCallback = directoryInfos =>
+                {
+                    logger.LogInfo(
+                        $"{directoryInfos.Length} unmanaged video caches were found at '{directoryInfos.FirstOrDefault()?.Parent?.FullName ?? inputOptions.TempFolder}' and can be safely deleted. " +
+                        "Run 'TwitchDownloaderCLI cache help' for more information.");
+
+                    return Array.Empty<DirectoryInfo>();
+                }
             };
 
             return downloadOptions;

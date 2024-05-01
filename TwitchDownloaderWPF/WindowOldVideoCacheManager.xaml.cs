@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderWPF
@@ -37,7 +39,6 @@ namespace TwitchDownloaderWPF
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            Title = Translations.Strings.TitleWindowOldVideoCacheManager;
             App.RequestTitleBarChange();
 
             // For some stupid reason, this does not work unless I manually set it, even though its a binding
@@ -72,6 +73,31 @@ namespace TwitchDownloaderWPF
             {
                 gridItem.ShouldDelete = true;
             }
+        }
+
+        private void MenuItemOpenFolder_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: GridItem gridItem })
+            {
+                return;
+            }
+
+            if (!Directory.Exists(gridItem.Path))
+            {
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo(gridItem.Path) { UseShellExecute = true });
+        }
+
+        private void MenuItemCopyPath_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: GridItem gridItem })
+            {
+                return;
+            }
+
+            Clipboard.SetText(gridItem.Path);
         }
 
         public DirectoryInfo[] GetItemsToDelete() => GridItems
@@ -132,6 +158,11 @@ namespace TwitchDownloaderWPF
                 var sizeBytes = Directory.EnumerateFiles().Sum(file => file.Length);
                 var sizeString = VideoSizeEstimator.StringifyByteCount(sizeBytes);
                 Size = string.IsNullOrEmpty(sizeString) ? "0B" : sizeString;
+
+                if (sizeBytes == 0)
+                {
+                    ShouldDelete = true;
+                }
 
                 return sizeBytes;
             }

@@ -9,10 +9,10 @@ namespace TwitchDownloaderCore.Options
         public int Id { get; set; }
         public string Quality { get; set; }
         public string Filename { get; set; }
-        public bool CropBeginning { get; set; }
-        public double CropBeginningTime { get; set; }
-        public bool CropEnding { get; set; }
-        public double CropEndingTime { get; set; }
+        public bool TrimBeginning { get; set; }
+        public TimeSpan TrimBeginningTime { get; set; }
+        public bool TrimEnding { get; set; }
+        public TimeSpan TrimEndingTime { get; set; }
         public int DownloadThreads { get; set; }
         public int ThrottleKib { get; set; }
         public string Oauth { get; set; }

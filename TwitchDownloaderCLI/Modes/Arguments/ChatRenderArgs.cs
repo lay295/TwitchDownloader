@@ -1,9 +1,10 @@
 ﻿using CommandLine;
+using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("chatrender", HelpText = "Renders a chat JSON as a video")]
-    public class ChatRenderArgs : ITwitchDownloaderArgs
+    internal sealed class ChatRenderArgs : TwitchDownloaderArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to JSON chat file input.")]
         public string InputFile { get; set; }
@@ -26,11 +27,11 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('h', "chat-height", Default = 600, HelpText = "Height of chat render.")]
         public int ChatHeight { get; set; }
 
-        [Option('b', "beginning", Default = -1, HelpText = "Time in seconds to crop beginning of the render.")]
-        public int CropBeginningTime { get; set; }
+        [Option('b', "beginning", HelpText = "Time to trim the beginning of the render. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimBeginningTime { get; set; } = new(-1);
 
-        [Option('e', "ending", Default = -1, HelpText = "Time in seconds to crop ending of the render.")]
-        public int CropEndingTime { get; set; }
+        [Option('e', "ending", HelpText = "Time to trim the ending of the render. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration TrimEndingTime { get; set; } = new(-1);
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV emotes.")]
         public bool? BttvEmotes { get; set; }
@@ -116,9 +117,6 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
 
-        [Option("verbose-ffmpeg", Default = false, HelpText = "Prints every message from FFmpeg.")]
-        public bool LogFfmpegOutput { get; set; }
-
         [Option("skip-drive-waiting", Default = false, HelpText = "Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives.")]
         public bool SkipDriveWaiting { get; set; }
 
@@ -151,8 +149,5 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("scale-highlight-indent", Default = 1.0, HelpText = "Number to scale highlight indent size (sub messages).")]
         public double ScaleAccentIndent { get; set; }
-
-        [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
-        public bool? ShowBanner { get; set; }
     }
 }

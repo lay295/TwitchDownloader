@@ -83,7 +83,6 @@ namespace TwitchDownloaderCore.Options
         public int AccentStrokeWidth => (int)(8 * ReferenceScale * AccentStrokeScale);
         public int AccentIndentWidth => (int)(32 * ReferenceScale * AccentIndentScale);
         public bool Offline { get; set; }
-        public bool LogFfmpegOutput { get; set; } = false;
         public bool BlockArtPreWrap { get; set; } = false;
         public double BlockArtPreWrapWidth { get; set; }
         public float BlockArtCharWidth { get; set; }

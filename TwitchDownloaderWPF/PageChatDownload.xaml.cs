@@ -10,13 +10,13 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
-using TwitchDownloaderCore.Chat;
-using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
+using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -45,8 +45,8 @@ namespace TwitchDownloaderWPF
         private void Page_Initialized(object sender, EventArgs e)
         {
             SetEnabled(false, false);
-            SetEnabledCropStart(false);
-            SetEnabledCropEnd(false);
+            SetEnabledTrimStart(false);
+            SetEnabledTrimEnd(false);
             checkEmbed.IsChecked = Settings.Default.ChatEmbedEmotes;
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
@@ -62,8 +62,8 @@ namespace TwitchDownloaderWPF
 
         private void SetEnabled(bool isEnabled, bool isClip)
         {
-            checkCropStart.IsEnabled = isEnabled & !isClip;
-            checkCropEnd.IsEnabled = isEnabled & !isClip;
+            CheckTrimStart.IsEnabled = isEnabled & !isClip;
+            CheckTrimEnd.IsEnabled = isEnabled & !isClip;
             radioTimestampRelative.IsEnabled = isEnabled;
             radioTimestampUTC.IsEnabled = isEnabled;
             radioTimestampNone.IsEnabled = isEnabled;
@@ -80,14 +80,14 @@ namespace TwitchDownloaderWPF
             radioHTML.IsEnabled = isEnabled;
         }
 
-        private void SetEnabledCropStart(bool isEnabled)
+        private void SetEnabledTrimStart(bool isEnabled)
         {
             numStartHour.IsEnabled = isEnabled;
             numStartMinute.IsEnabled = isEnabled;
             numStartSecond.IsEnabled = isEnabled;
         }
 
-        private void SetEnabledCropEnd(bool isEnabled)
+        private void SetEnabledTrimEnd(bool isEnabled)
         {
             numEndHour.IsEnabled = isEnabled;
             numEndMinute.IsEnabled = isEnabled;
@@ -133,12 +133,12 @@ namespace TwitchDownloaderWPF
                     currentVideoTime = Settings.Default.UTCVideoTime ? videoTime : videoTime.ToLocalTime();
                     streamerId = int.Parse(videoInfo.data.video.owner.id);
                     viewCount = videoInfo.data.video.viewCount;
-                    game = videoInfo.data.video.game?.displayName ?? "Unknown";
+                    game = videoInfo.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
                     var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
                     if (urlTimeCodeMatch.Success)
                     {
                         var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
-                        checkCropStart.IsChecked = true;
+                        CheckTrimStart.IsChecked = true;
                         numStartHour.Value = time.Hours;
                         numStartMinute.Value = time.Minutes;
                         numStartSecond.Value = time.Seconds;
@@ -172,16 +172,16 @@ namespace TwitchDownloaderWPF
                     imgThumbnail.Source = image;
 
                     TimeSpan clipLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
-                    textStreamer.Text = clipInfo.data.clip.broadcaster.displayName;
+                    textStreamer.Text = clipInfo.data.clip.broadcaster?.displayName ?? Translations.Strings.UnknownUser;
                     var clipCreatedAt = clipInfo.data.clip.createdAt;
                     textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                     currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                     textTitle.Text = clipInfo.data.clip.title;
-                    streamerId = int.Parse(clipInfo.data.clip.broadcaster.id);
+                    streamerId = int.Parse(clipInfo.data.clip.broadcaster?.id ?? "-1");
                     labelLength.Text = clipLength.ToString("c");
                     SetEnabled(true, true);
-                    SetEnabledCropStart(false);
-                    SetEnabledCropEnd(false);
+                    SetEnabledTrimStart(false);
+                    SetEnabledTrimEnd(false);
                 }
 
                 btnGetInfo.IsEnabled = true;
@@ -218,6 +218,20 @@ namespace TwitchDownloaderWPF
                 : null;
         }
 
+        private void SetPercent(int percent)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusProgressBar.Value = percent
+            );
+        }
+
+        private void SetStatus(string message)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusMessage.Text = message
+            );
+        }
+
         private void AppendLog(string message)
         {
             textLog.Dispatcher.BeginInvoke(() =>
@@ -248,22 +262,6 @@ namespace TwitchDownloaderWPF
             options.Filename = filename;
             options.ConnectionCount = (int)numChatDownloadConnections.Value;
             return options;
-        }
-
-        private void OnProgressChanged(ProgressReport progress)
-        {
-            switch (progress.ReportType)
-            {
-                case ReportType.Percent:
-                    statusProgressBar.Value = (int)progress.Data;
-                    break;
-                case ReportType.NewLineStatus or ReportType.SameLineStatus:
-                    statusMessage.Text = (string)progress.Data;
-                    break;
-                case ReportType.Log:
-                    AppendLog((string)progress.Data);
-                    break;
-            }
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -402,7 +400,7 @@ namespace TwitchDownloaderWPF
                 stackEmbedChecks.Visibility = Visibility.Visible;
                 compressionText.Visibility = Visibility.Visible;
                 compressionOptions.Visibility = Visibility.Visible;
-                textCrop.Margin = new Thickness(0, 12, 0, 36);
+                textTrim.Margin = new Thickness(0, 12, 0, 36);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Json;
                 Settings.Default.Save();
@@ -419,7 +417,7 @@ namespace TwitchDownloaderWPF
                 stackEmbedChecks.Visibility = Visibility.Visible;
                 compressionText.Visibility = Visibility.Collapsed;
                 compressionOptions.Visibility = Visibility.Collapsed;
-                textCrop.Margin = new Thickness(0, 17, 0, 36);
+                textTrim.Margin = new Thickness(0, 17, 0, 36);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Html;
                 Settings.Default.Save();
@@ -436,7 +434,7 @@ namespace TwitchDownloaderWPF
                 stackEmbedChecks.Visibility = Visibility.Collapsed;
                 compressionText.Visibility = Visibility.Collapsed;
                 compressionOptions.Visibility = Visibility.Collapsed;
-                textCrop.Margin = new Thickness(0, 12, 0, 41);
+                textTrim.Margin = new Thickness(0, 12, 0, 41);
 
                 Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
                 Settings.Default.Save();
@@ -450,23 +448,37 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            var saveFileDialog = new SaveFileDialog
+            {
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text,
+                    CheckTrimStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
+                    CheckTrimEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
+                    viewCount.ToString(), game)
+            };
+
             if (radioJson.IsChecked == true)
             {
                 if (radioCompressionNone.IsChecked == true)
+                {
                     saveFileDialog.Filter = "JSON Files | *.json";
+                    saveFileDialog.FileName += ".json";
+                }
                 else if (radioCompressionGzip.IsChecked == true)
+                {
                     saveFileDialog.Filter = "GZip JSON Files | *.json.gz";
+                    saveFileDialog.FileName += ".json.gz";
+                }
             }
             else if (radioHTML.IsChecked == true)
-                saveFileDialog.Filter = "HTML Files | *.html;*.htm";
+            {
+                saveFileDialog.Filter = "HTML Files | *.html";
+                saveFileDialog.FileName += ".html";
+            }
             else if (radioText.IsChecked == true)
+            {
                 saveFileDialog.Filter = "TXT Files | *.txt";
-
-            saveFileDialog.FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text,
-                checkCropStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
-                checkCropEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                viewCount.ToString(), game);
+                saveFileDialog.FileName += ".txt";
+            }
 
             if (saveFileDialog.ShowDialog() != true)
             {
@@ -478,18 +490,18 @@ namespace TwitchDownloaderWPF
                 ChatDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
                 if (downloadType == DownloadType.Video)
                 {
-                    if (checkCropStart.IsChecked == true)
+                    if (CheckTrimStart.IsChecked == true)
                     {
-                        downloadOptions.CropBeginning = true;
+                        downloadOptions.TrimBeginning = true;
                         TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                        downloadOptions.CropBeginningTime = (int)start.TotalSeconds;
+                        downloadOptions.TrimBeginningTime = (int)start.TotalSeconds;
                     }
 
-                    if (checkCropEnd.IsChecked == true)
+                    if (CheckTrimEnd.IsChecked == true)
                     {
-                        downloadOptions.CropEnding = true;
+                        downloadOptions.TrimEnding = true;
                         TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                        downloadOptions.CropEndingTime = (int)end.TotalSeconds;
+                        downloadOptions.TrimEndingTime = (int)end.TotalSeconds;
                     }
 
                     downloadOptions.Id = downloadId;
@@ -506,32 +518,31 @@ namespace TwitchDownloaderWPF
                 else if (radioTimestampNone.IsChecked == true)
                     downloadOptions.TimeFormat = TimestampFormat.None;
 
-                ChatDownloader currentDownload = new ChatDownloader(downloadOptions);
+                var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
+                var currentDownload = new ChatDownloader(downloadOptions, downloadProgress);
 
                 btnGetInfo.IsEnabled = false;
                 SetEnabled(false, false);
 
                 SetImage("Images/ppOverheat.gif", true);
-                statusMessage.Text = Translations.Strings.StatusDone;
+                statusMessage.Text = Translations.Strings.StatusDownloading;
                 _cancellationTokenSource = new CancellationTokenSource();
                 UpdateActionButtons(true);
 
-                Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
-
                 try
                 {
-                    await currentDownload.DownloadAsync(downloadProgress, _cancellationTokenSource.Token);
-                    statusMessage.Text = Translations.Strings.StatusDone;
+                    await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
+                    downloadProgress.SetStatus(Translations.Strings.StatusDone);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
                 {
-                    statusMessage.Text = Translations.Strings.StatusCanceled;
+                    downloadProgress.SetStatus(Translations.Strings.StatusCanceled);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex)
                 {
-                    statusMessage.Text = Translations.Strings.StatusError;
+                    downloadProgress.SetStatus(Translations.Strings.StatusError);
                     SetImage("Images/peepoSad.png", false);
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
@@ -540,7 +551,7 @@ namespace TwitchDownloaderWPF
                     }
                 }
                 btnGetInfo.IsEnabled = true;
-                statusProgressBar.Value = 0;
+                downloadProgress.ReportProgress(0);
                 _cancellationTokenSource.Dispose();
                 UpdateActionButtons(false);
 
@@ -563,14 +574,14 @@ namespace TwitchDownloaderWPF
             catch (ObjectDisposedException) { }
         }
 
-        private void checkCropStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
+        private void CheckTrimStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropStart(checkCropStart.IsChecked.GetValueOrDefault());
+            SetEnabledTrimStart(CheckTrimStart.IsChecked.GetValueOrDefault());
         }
 
-        private void checkCropEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
+        private void CheckTrimEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
         {
-            SetEnabledCropEnd(checkCropEnd.IsChecked.GetValueOrDefault());
+            SetEnabledTrimEnd(CheckTrimEnd.IsChecked.GetValueOrDefault());
         }
 
 

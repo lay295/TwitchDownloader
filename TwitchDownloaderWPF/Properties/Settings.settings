@@ -126,7 +126,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ChatDownloadThreads" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">4</Value>
     </Setting>
     <Setting Name="ChatDownloadType" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
@@ -220,6 +220,9 @@
     </Setting>
     <Setting Name="EncodeClipMetadata" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="LogLevels" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">30</Value>
     </Setting>
   </Settings>
 </SettingsFile>

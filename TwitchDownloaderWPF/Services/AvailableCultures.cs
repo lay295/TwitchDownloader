@@ -6,8 +6,8 @@ namespace TwitchDownloaderWPF.Services
     {
         // Notes for translators:
         //
-        // Please create a new record for your culture and place it in the 'All' array in English alphabetical order.
-        // The order of the 'All' array is the order that they will appear in the language dropdown menu.
+        // Please create a new record for your culture and place it in the 'All' array in alphabetical order according to the culture code.
+        // The order of the 'All' array is the order that cultures will appear in the language dropdown menu.
         //
         // If you do not know the code for your culture, you can find it using the Visual Studio ResX Resource Manager extension
         // https://marketplace.visualstudio.com/items?itemName=TomEnglert.ResXManager
@@ -22,6 +22,7 @@ namespace TwitchDownloaderWPF.Services
         public static readonly Culture Spanish;
         public static readonly Culture French;
         public static readonly Culture Italian;
+        public static readonly Culture Japanese;
         public static readonly Culture Polish;
         public static readonly Culture Russian;
         public static readonly Culture Turkish;
@@ -39,11 +40,13 @@ namespace TwitchDownloaderWPF.Services
                 Spanish = new Culture("es-ES", "Español"),
                 French = new Culture("fr-FR", "Français"),
                 Italian = new Culture("it-it", "Italiano"),
+                Japanese = new Culture("ja-JP", "日本語"),
                 Polish = new Culture("pl-PL", "Polski"),
+                Polish = new Culture("pt-BR", "Português (Brasil)"),
                 Russian = new Culture("ru-RU", "Русский"),
                 Turkish = new Culture("tr-TR", "Türkçe"),
                 Ukrainian = new Culture("uk-ua", "Українська"),
-                SimplifiedChinese = new Culture("zh-CN", "简体中文")
+                SimplifiedChinese = new Culture("zh-CN", "简体中文"),
             };
         }
         // ReSharper enable StringLiteralTypo

@@ -25,13 +25,13 @@ namespace TwitchDownloaderWPF
         {
             btnQueue.IsEnabled = false;
             List<string> idList = new List<string>();
-            List<string> urlList = new List<string>(textList.Text.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             List<string> invalidList = new List<string>();
             List<string> errorList = new List<string>();
             List<TaskData> dataList = new List<TaskData>();
             Dictionary<string, string> idDict = new Dictionary<string, string>();
 
-            foreach (var url in urlList)
+            var urls = textList.Text.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            foreach (var url in urls)
             {
                 string id = PageChatDownload.ValidateUrl(url);
 
@@ -49,6 +49,7 @@ namespace TwitchDownloaderWPF
             if (invalidList.Count > 0)
             {
                 MessageBox.Show(Translations.Strings.UnableToParseInputsMessage + Environment.NewLine + string.Join(Environment.NewLine, invalidList.ToArray()), Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                btnQueue.IsEnabled = true;
                 return;
             }
 
@@ -84,9 +85,8 @@ namespace TwitchDownloaderWPF
                     continue;
 
                 string id = taskDict[task.Id];
-                if (!task.IsFaulted)
+                if (!task.IsFaulted && task.Result.data.video is { } videoInfo)
                 {
-                    var videoInfo = task.Result.data.video;
                     var thumbUrl = videoInfo.thumbnailURLs.FirstOrDefault();
                     if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                     {
@@ -101,7 +101,7 @@ namespace TwitchDownloaderWPF
                         Streamer = videoInfo.owner.displayName,
                         Time = Settings.Default.UTCVideoTime ? videoInfo.createdAt : videoInfo.createdAt.ToLocalTime(),
                         Views = videoInfo.viewCount,
-                        Game = videoInfo.game?.displayName ?? "Unknown",
+                        Game = videoInfo.game?.displayName ?? Translations.Strings.UnknownGame,
                         Length = videoInfo.lengthSeconds
                     });
                 }
@@ -123,9 +123,8 @@ namespace TwitchDownloaderWPF
                     continue;
 
                 string id = taskDict[task.Id];
-                if (!task.IsFaulted)
+                if (!task.IsFaulted && task.Result.data.clip is { } clipInfo)
                 {
-                    var clipInfo = task.Result.data.clip;
                     var thumbUrl = clipInfo.thumbnailURL;
                     if (!ThumbnailService.TryGetThumb(thumbUrl, out var thumbnail))
                     {
@@ -140,7 +139,7 @@ namespace TwitchDownloaderWPF
                         Streamer = clipInfo.broadcaster.displayName,
                         Time = Settings.Default.UTCVideoTime ? clipInfo.createdAt : clipInfo.createdAt.ToLocalTime(),
                         Views = clipInfo.viewCount,
-                        Game = clipInfo.game?.displayName ?? "Unknown",
+                        Game = clipInfo.game?.displayName ?? Translations.Strings.UnknownGame,
                         Length = clipInfo.durationSeconds
                     });
                 }
@@ -153,6 +152,7 @@ namespace TwitchDownloaderWPF
             if (errorList.Count > 0)
             {
                 MessageBox.Show(Translations.Strings.UnableToGetInfoMessage + Environment.NewLine + string.Join(Environment.NewLine, errorList.ToArray()), Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                btnQueue.IsEnabled = true;
                 return;
             }
 
@@ -169,7 +169,6 @@ namespace TwitchDownloaderWPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Title = Translations.Strings.TitleUrlList;
             App.RequestTitleBarChange();
         }
     }

@@ -10,14 +10,14 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="Queue Options" MinHeight="280" Height="280" MinWidth="500" Width="500" Loaded="Window_loaded">
+        Title="{lex:Loc TitleEnqueueOptions}" MinHeight="280" Height="280" MinWidth="500" Width="500" SizeToContent="WidthAndHeight" Loaded="Window_loaded" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
         </Style>
     </Window.Resources>
 
-    <Grid Background="{DynamicResource AppBackground}">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6"/>
             <ColumnDefinition Width="*"/>
@@ -51,14 +51,14 @@
             <StackPanel Margin="20,0,0,0">
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                     <TextBlock x:Name="TextDownloadFormat" Text="{lex:Loc DownloadFormat}" IsEnabled="False" Margin="5,0,0,0" Foreground="{DynamicResource AppTextDisabled}"/>
-                    <RadioButton x:Name="radioJson" IsEnabled="False" IsChecked="True" Content="JSON" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Checked="radioJson_Checked" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                    <RadioButton x:Name="radioTxt" IsEnabled="False" Content="TXT" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Checked="radioTxt_Checked" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                    <RadioButton x:Name="radioHTML" IsEnabled="False" Content="HTML" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Checked="radioHTML_Checked" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <RadioButton x:Name="radioJson" IsEnabled="False" IsChecked="True" Content="JSON" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Checked="radioJson_Checked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <RadioButton x:Name="radioTxt" IsEnabled="False" Content="TXT" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Checked="radioTxt_Checked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <RadioButton x:Name="radioHTML" IsEnabled="False" Content="HTML" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Checked="radioHTML_Checked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 </StackPanel>
                 <StackPanel x:Name="StackChatCompression" Orientation="Horizontal" Margin="0,5,0,0">
                     <TextBlock x:Name="TextCompression" Text="{lex:Loc ChatCompression}" Margin="5,0,0,0" Foreground="{DynamicResource AppTextDisabled}"/>
-                    <RadioButton x:Name="RadioCompressionNone" IsEnabled="False" IsChecked="True" Content="{lex:Loc ChatCompressionNone}" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                    <RadioButton x:Name="RadioCompressionGzip" IsEnabled="False" Content="{lex:Loc ChatCompressionGzip}" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" Background="{DynamicResource AppRadio}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <RadioButton x:Name="RadioCompressionNone" IsEnabled="False" IsChecked="True" Content="{lex:Loc ChatCompressionNone}" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <RadioButton x:Name="RadioCompressionGzip" IsEnabled="False" Content="{lex:Loc ChatCompressionGzip}" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 </StackPanel>
                 <CheckBox x:Name="checkEmbed" IsEnabled="False" Content="{lex:Loc EmbedImages}" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}"/>
             </StackPanel>

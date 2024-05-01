@@ -50,20 +50,23 @@
     <EmbeddedResource Include="Themes\README.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Update="Translations\Strings.pt-br.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TwitchDownloaderCore\TwitchDownloaderCore.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DotNetProjects.Extended.Wpf.Toolkit" Version="5.0.113" />
+    <PackageReference Include="DotNetProjects.Extended.Wpf.Toolkit" Version="5.0.115" />
     <PackageReference Include="FontAwesome5" Version="2.1.11" />
-    <PackageReference Include="HandyControl" Version="3.4.0" />
+    <PackageReference Include="HandyControl" Version="3.5.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.10.0" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.6" />
-    <PackageReference Include="Autoupdater.NET.Official" Version="1.8.4" />
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.8.5" />
     <PackageReference Include="Emoji.Wpf" Version="0.3.4" />
     <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
   </ItemGroup>
@@ -105,7 +108,10 @@
     <EmbeddedResource Update="Translations\Strings.ru.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Translations\Strings.zh.resx">
+    <EmbeddedResource Update="Translations\Strings.zh-cn.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Translations\Strings.ja.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

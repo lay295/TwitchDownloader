@@ -1,7 +1,9 @@
 # TwitchDownloaderCLI
 A cross platform command line tool that can do the main functions of the GUI program, which can download VODs/Clips/Chats and render chats.
+Also can concatenate/combine/merge Transport Stream files, either those parts downloaded with the CLI itself or from another source.
 
 - [TwitchDownloaderCLI](#twitchdownloadercli)
+  - [Global arguments](#global-arguments)
   - [Arguments for mode videodownload](#arguments-for-mode-videodownload)
   - [Arguments for mode clipdownload](#arguments-for-mode-clipdownload)
   - [Arguments for mode chatdownload](#arguments-for-mode-chatdownload)
@@ -9,10 +11,27 @@ A cross platform command line tool that can do the main functions of the GUI pro
   - [Arguments for mode chatrender](#arguments-for-mode-chatrender)
   - [Arguments for mode ffmpeg](#arguments-for-mode-ffmpeg)
   - [Arguments for mode cache](#arguments-for-mode-cache)
+  - [Arguments for mode tsmerge](#arguments-for-mode-tsmerge)
   - [Example Commands](#example-commands)
   - [Additional Notes](#additional-notes)
+    - [ID parsing](#id-parsing)
+    - [String arguments](#string-arguments)
+    - [Boolean flags](#boolean-flags)
+    - [Enum flag arguments](#enum-flag-arguments)
+    - [Time durations](#time-durations)
+    - [Rendering prerequisites](#rendering-prerequisites)
+    - [TSMerge notes](#tsmerge-notes)
 
 ---
+
+## Global arguments
+#### Common arguments shared between all the modes
+
+**--banner**
+(Default: `true`) Displays a banner containing version and copyright information.
+
+**--log-level**
+(Default: `Status,Info,Warning,Error`) Sets the log level flags. Applicable values are: `None`, `Status`, `Verbose`, `Info`, `Warning`, `Error`, `Ffmpeg`. When `None` is passed, any other log level flags are ignored and `--banner=false` is implied.
 
 ## Arguments for mode videodownload
 #### Downloads a stream VOD or highlight from Twitch
@@ -24,15 +43,13 @@ The ID or URL of the VOD to download.
 File the program will output to. File extension will be used to determine download type. Valid extensions are: `.mp4` and `.m4a`.
 
 **-q / --quality**
-The quality the program will attempt to download, for example "1080p60", if not found will download highest quality stream.
+The quality that the program will attempt to download, for example "1080p60". If not found, the highest quality stream will be downloaded.
 
 **-b / --beginning**
-Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time to trim beginning. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-e / --ending**
-Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
-
-Extra example, if I wanted only seconds 3-6 in a 10 second stream I would do `-b 3 -e 6`
+Time to trim ending. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-t / --threads**
 (Default: `4`) Number of download threads.
@@ -49,9 +66,6 @@ Path to FFmpeg executable.
 **--temp-path**
 Path to temporary folder for cache.
 
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
-
 ## Arguments for mode clipdownload
 #### Downloads a clip from Twitch
 
@@ -62,7 +76,7 @@ The ID or URL of the Clip to download.
 File the program will output to.
 
 **-q / --quality**
-The quality the program will attempt to download, for example "1080p60", if not found will download highest quality video.
+The quality that the program will attempt to download, for example "1080p60". If not found, the highest quality video will be downloaded.
 
 **--bandwidth**
 (Default: `-1`) The maximum bandwidth the clip downloader is allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
@@ -75,9 +89,6 @@ Path to FFmpeg executable.
 
 **--temp-path**
 Path to temporary folder for cache.
-
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode chatdownload
 #### Downloads the chat of a VOD, highlight, or clip
@@ -92,10 +103,10 @@ File the program will output to. File extension will be used to determine downlo
 (Default: `None`) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-b / --beginning**
-Time in seconds to crop beginning. For example if I had a 10 second stream but only wanted the last 7 seconds of it I would use `-b 3` to skip the first 3 seconds.
+Time to trim beginning. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-e / --ending**
-Time in seconds to crop ending. For example if I had a 10 second stream but only wanted the first 4 seconds of it I would use `-e 4` to end on the 4th second.
+Time to trim ending. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-E / --embed-images**
 (Default: `false`) Embed first party emotes, badges, and cheermotes into the download file for offline rendering. Useful for archival purposes, file size will be larger.
@@ -115,17 +126,11 @@ Time in seconds to crop ending. For example if I had a 10 second stream but only
 **--chat-connections**
 (Default: `4`) The number of parallel downloads for chat.
 
-**--silent**
-(Default: `false`) Suppresses progress console output.
-
 **--temp-path**
 Path to temporary folder for cache.
 
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
-
 ## Arguments for mode chatupdate
-#### Updates the embedded emotes, badges, bits, and crops of a chat download and/or converts a JSON chat to another format
+#### Updates the embedded emotes, badges, bits, and trims a chat JSON and/or converts a JSON chat to another format
 
 **-i / --input (REQUIRED)**
 Path to input file. Valid extensions are: `.json`, `.json.gz`.
@@ -143,10 +148,10 @@ Path to output file. File extension will be used to determine new chat type. Val
 (Default: `false`) Replace all embedded emotes, badges, and cheermotes in the file. All embedded data will be overwritten!
 
 **b / --beginning**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time for chat beginning (`-1` = keep current trim). See [Time durations](#time-durations) for a more detailed explanation. Comments may be added but not removed.
 
 **-e / --ending**
-(Default: `-1`) New time in seconds for chat beginning. Comments may be added but not removed. -1 = No crop.
+(Default: `-1`) New time for chat ending (`-1` = keep current trim). See [Time durations](#time-durations) for a more detailed explanation. Comments may be added but not removed.
 
 **--bttv**
 (Default: `true`) Enable embedding BTTV emotes.
@@ -162,9 +167,6 @@ Path to output file. File extension will be used to determine new chat type. Val
 
 **--temp-path**
 Path to temporary folder for cache.
-
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode chatrender
 #### Renders a chat JSON as a video
@@ -191,10 +193,10 @@ File the program will output to.
 (Default: `600`) Height of chat render.
 
 **-b / --beginning**
-(Default: `-1`) Time in seconds to crop the beginning of the render.
+(Default: `-1`) Time to trim the beginning of the render (`-1` = keep current trim). See [Time durations](#time-durations) for a more detailed explanation.
 
 **-e / --ending**
-(Default: `-1`) Time in seconds to crop the ending of the render.
+(Default: `-1`) Time to trim the ending of the render (`-1` = keep current trim). See [Time durations](#time-durations) for a more detailed explanation.
 
 **--bttv**
 (Default: `true`) Enable BTTV emotes.
@@ -233,7 +235,7 @@ File the program will output to.
 (Default: `bold`) Font style of username. Valid values are **normal**, **bold**, and **italic**.
 
 **--timestamp**
-(Default: `false`) Enables timestamps to left of messages, similar to VOD chat on Twitch.
+(Default: `false`) Enables timestamps to the left of messages, similar to VOD chat on Twitch.
 
 **--generate-mask**
 (Default: `false`) Generates a mask file of the chat in addition to the rendered chat.
@@ -282,9 +284,6 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--temp-path**
 (Default: ` `) Path to temporary folder for cache.
 
-**--verbose-ffmpeg**
-(Default: `false`) Prints every message from FFmpeg.
-
 **--skip-drive-waiting**
 (Default: `false`) Do not wait for the output drive to transmit a ready signal before writing the next frame. Waiting is usually only necessary on low-end USB drives. Skipping can result in 1-5% render speed increases.
 
@@ -318,18 +317,11 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--scale-highlight-indent**
 (Default: `1.0`) Number to scale highlight indent size (sub messages).
 
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
-
-
 ## Arguments for mode ffmpeg
 #### Manage standalone FFmpeg
 
 **-d / --download**
 (Default: `false`) Downloads FFmpeg as a standalone file.
-
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
 
 ## Arguments for mode cache
 #### Manage the working cache.
@@ -340,8 +332,14 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--force-clear**
 (Default: `false`) Clears the default cache folder, bypassing the confirmation prompt.
 
-**--banner**
-(Default: `true`) Displays a banner containing version and copyright information.
+## Arguments for mode tsmerge
+#### Concatenates multiple .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) files into a single file
+
+**-i / --input (REQUIRED)**
+Path a text file containing the absolute paths of the files to concatenate, separated by newlines. M3U/M3U8 is also supported.
+
+**-o / --output (REQUIRED)**
+File the program will output to.
 
 ---
 
@@ -353,6 +351,10 @@ Note: Commands are formatted for unix systems (i.e. Mac, Linux). For usage on Wi
 Download a VOD with defaults
 
     ./TwitchDownloaderCLI videodownload --id 612942303 -o video.mp4
+
+Download a small portion of a VOD
+
+    ./TwitchDownloaderCLI videodownload --id 612942303 -b 0:01:40 -e 0:03:20 -o video.mp4
 
 Download a Clip with defaults
 
@@ -394,6 +396,10 @@ Clear the default TwitchDownloader cache folder
 
     ./TwitchDownloaderCLI cache --clear
 
+Concatenate several ts files into a single output file
+
+    TwitchDownloaderCLI tsmerge -i list.txt -o output.ts
+
 Print the available operations
 
     ./TwitchDownloaderCLI help
@@ -406,12 +412,33 @@ Print the available options for the VOD downloader
 
 ## Additional Notes
 
+### ID parsing
 All `--id` inputs will accept either video/clip IDs or full video/clip URLs. i.e. `--id 612942303` or `--id https://twitch.tv/videos/612942303`.
 
-String arguments that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd>. i.e. `--output 'my output file.mp4'` or `--output "my output file.mp4"`
+### String arguments
+String arguments that contain spaces should be wrapped in either single quotes <kbd>'</kbd> or double quotes <kbd>"</kbd> depending on your shell. i.e. `--output 'my output file.mp4'` or `--output "my output file.mp4"`
 
+### Boolean flags
 Default true boolean flags must be assigned: `--default-true-flag=false`. Default false boolean flags should still be raised normally: `--default-false-flag`.
 
+### Enum flag arguments
+Enum flag arguments may be assigned without spaces `--flag Value1,Value2,Value3` or with spaces when wrapped in quotes `--flag "Value1, Value2, Value3"` (see [String arguments](#string-arguments)).
+
+### Time durations
+Time duration arguments may be formatted in milliseconds `###ms`, seconds `###s`, minutes `###m`, hours `###h`, or [time](https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0) (i.e. `hh:mm:ss`, `hh:mm`, `dd.hh:mm:ss.ms`).
+If the time duration is given as a number without a unit, seconds will be assumed. Decimals are supported.
+
+"Beginning" arguments set when trimming begins. For example, `--beginning 17s` will make the output start 17 seconds after the source begins.
+
+"Ending" arguments set when trimming ends. For example, `--ending 17s` will make the output end at 17 seconds after the source begins.
+
+If `--beginning 17s` and `--ending 27s` are used together, the resulting output will be of seconds `17-27` of the source and will have a duration of 10 seconds.
+
+### Rendering prerequisites
 For Linux users, ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
 
 Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
+
+### TSMerge notes
+The list file for `tsmerge` may contain relative or absolute paths, with one path per line.
+Alternatively, the list file may also be an M3U8 playlist file.

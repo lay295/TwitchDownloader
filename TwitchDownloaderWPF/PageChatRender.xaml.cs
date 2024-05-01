@@ -18,7 +18,9 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
+using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 using MessageBox = System.Windows.MessageBox;
 
@@ -134,7 +136,6 @@ namespace TwitchDownloaderWPF
                 Offline = checkOffline.IsChecked.GetValueOrDefault(),
                 AllowUnlistedEmotes = true,
                 DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault(),
-                LogFfmpegOutput = true
             };
             if (RadioEmojiNotoColor.IsChecked == true)
                 options.EmojiVendor = EmojiVendor.GoogleNotoColor;
@@ -148,25 +149,6 @@ namespace TwitchDownloaderWPF
             }
 
             return options;
-        }
-
-        private void OnProgressChanged(ProgressReport progress)
-        {
-            switch (progress.ReportType)
-            {
-                case ReportType.Percent:
-                    statusProgressBar.Value = (int)progress.Data;
-                    break;
-                case ReportType.NewLineStatus or ReportType.SameLineStatus:
-                    statusMessage.Text = (string)progress.Data;
-                    break;
-                case ReportType.Log:
-                    AppendLog((string)progress.Data);
-                    break;
-                case ReportType.FfmpegLog:
-                    ffmpegLog.Add((string)progress.Data);
-                    break;
-            }
         }
 
         private void LoadSettings()
@@ -423,6 +405,20 @@ namespace TwitchDownloaderWPF
             return true;
         }
 
+        private void SetPercent(int percent)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusProgressBar.Value = percent
+            );
+        }
+
+        private void SetStatus(string message)
+        {
+            Dispatcher.BeginInvoke(() =>
+                statusMessage.Text = message
+            );
+        }
+
         private void AppendLog(string message)
         {
             textLog.Dispatcher.BeginInvoke(() =>
@@ -602,7 +598,7 @@ namespace TwitchDownloaderWPF
 
                 ChatRenderOptions options = GetOptions(saveFileDialog.FileName);
 
-                Progress<ProgressReport> renderProgress = new Progress<ProgressReport>(OnProgressChanged);
+                var renderProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog, s => ffmpegLog.Add(s));
                 ChatRenderer currentRender = new ChatRenderer(options, renderProgress);
                 try
                 {
@@ -650,17 +646,17 @@ namespace TwitchDownloaderWPF
                 try
                 {
                     await currentRender.RenderVideoAsync(_cancellationTokenSource.Token);
-                    statusMessage.Text = Translations.Strings.StatusDone;
+                    renderProgress.SetStatus(Translations.Strings.StatusDone);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
                 {
-                    statusMessage.Text = Translations.Strings.StatusCanceled;
+                    renderProgress.SetStatus(Translations.Strings.StatusCanceled);
                     SetImage("Images/ppHop.gif", true);
                 }
                 catch (Exception ex)
                 {
-                    statusMessage.Text = Translations.Strings.StatusError;
+                    renderProgress.SetStatus(Translations.Strings.StatusError);
                     SetImage("Images/peepoSad.png", false);
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
@@ -676,7 +672,7 @@ namespace TwitchDownloaderWPF
                         }
                     }
                 }
-                statusProgressBar.Value = 0;
+                renderProgress.ReportProgress(0);
                 _cancellationTokenSource.Dispose();
                 UpdateActionButtons(false);
 

@@ -39,7 +39,7 @@ To get started, input a valid link or ID to a VOD or highlight. If the VOD or hi
 
 **Quality**: Selects the quality of the download and provides an estimated file size. Occasionally Twitch calls the highest quality as 'Source' instead of the typical resolution formatting (1080p60 in the case of figure 1.1).
 
-**Crop Video**: Sets the start and end time to crop the video download in the format \[hours\] \[minutes\] \[seconds\]. Cropping the video will result in a smaller total download.
+**Trim**: Sets the start and end time to trim the video download in the format \[hours\] \[minutes\] \[seconds\]. Trimming the video will result in a smaller total download.
 
 **Download Threads**: The amount of download threads to be dispatched.
 
@@ -81,7 +81,7 @@ To get started, input a valid link or ID to a VOD, highlight, or clip. From ther
 
 **Timestamp Format** (Text only): Changes the timestamp format in the text download. The choices are `UTC`, `Relative` to the start of the video, and `None`.
 
-**Crop**: Sets the start and end time to crop the chat download in the format \[hours\] \[minutes\] \[seconds\]. Cropping the chat will result in a smaller total download.
+**Trim**: Sets the start and end time to trim the chat download in the format \[hours\] \[minutes\] \[seconds\]. Trimming the chat will result in a smaller total download.
 
 **Embed Images** (JSON & HTML only): Downloads the emotes and badges of the streamer and saves them inside the downloaded chat. File size will be much larger.
 
@@ -92,7 +92,7 @@ To get started, input a valid link or ID to a VOD, highlight, or clip. From ther
 **Download**: Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
 
 ### Chat Updater
-Updates the embedded emotes, badges, bits, and crops of a JSON chat download and/or converts a JSON chat to another format.
+Updates the embedded emotes, badges, bits, and trimming of a JSON chat download and/or converts a JSON chat to another format.
 
 ![Figure 4.1](Images/chatupdateExample.png)
 <br><sup>*Figure 4.1*</sup>
@@ -108,7 +108,7 @@ To get started, click the **Browse** button and navigate to a previously downloa
 
 **Timestamp Format** (Text only): Changes the timestamp format in the text chat. The choices are `UTC`, `Relative` to the start of the video, and `None`.
 
-**Crop**: Sets the start and end time to crop the updated chat in the format \[hours\] \[minutes\] \[seconds\]. Expanding the crops of a chat will cause the updater to try and fetch comments that were not originally included in the download. Shrinking the crops of a chat will not remove any comments.
+**Trim**: Sets the start and end time to trim the updated chat in the format \[hours\] \[minutes\] \[seconds\]. Expanding the trim of a chat will cause the updater to try and fetch comments that were not originally included in the download. Shrinking the trim of a chat will not remove any comments.
 
 **Embed Missing** (JSON & HTML only): Downloads any emotes or badges that were not originally included in the input JSON chat. Existing emotes or badges will NOT be overwritten.
 
@@ -239,14 +239,15 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 #### <ins>Optimizing Render Speeds</ins>
 
 If render speeds feel like they are too slow, try any of the following:
-- Reduce render width
-- Reduce render height
-- Increase update rate
-- Disable dispersion if update rate is less than 1.0
-- Reduce framerate
-- Disable generate mask
-- Disable image sharpening
-- Disable BTTV, FFZ, 7TV emotes
+
+| Large Impact             | Medium Impact                 | Small Impact                              |
+|--------------------------|-------------------------------|-------------------------------------------|
+| Reduce render width      | Disable BTTV, FFZ, 7TV emotes | Disable dispersion if update rate is <1.0 |
+| Reduce render height     | Increase update rate          | Disable sub messages                      |
+| Reduce framerate         | Switch to system emojis       | Disable outlines                          |
+| Disable generate mask    |                               | Disable alternating backgrounds           |
+| Disable image sharpening |                               |                                           |
+| Change codec to H.264    |                               |                                           |
 
 ### Task Queue
 Create and manage multiple jobs.

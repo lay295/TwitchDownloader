@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
@@ -18,6 +19,7 @@ namespace TwitchDownloaderCore
     public sealed class ChatDownloader
     {
         private readonly ChatDownloadOptions downloadOptions;
+        private readonly ITaskProgress _progress;
 
         private static readonly HttpClient HttpClient = new()
         {
@@ -31,15 +33,16 @@ namespace TwitchDownloaderCore
             Video
         }
 
-        public ChatDownloader(ChatDownloadOptions chatDownloadOptions)
+        public ChatDownloader(ChatDownloadOptions chatDownloadOptions, ITaskProgress progress)
         {
             downloadOptions = chatDownloadOptions;
+            _progress = progress;
             downloadOptions.TempFolder = Path.Combine(
                 string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
                 "TwitchDownloader");
         }
 
-        private static async Task<List<Comment>> DownloadSection(double videoStart, double videoEnd, string videoId, IProgress<ProgressReport> progress, ChatFormat format, CancellationToken cancellationToken)
+        private static async Task<List<Comment>> DownloadSection(double videoStart, double videoEnd, string videoId, IProgress<int> progress, ChatFormat format, CancellationToken cancellationToken)
         {
             var comments = new List<Comment>();
             //GQL only wants ints
@@ -118,7 +121,7 @@ namespace TwitchDownloaderCore
                 if (progress != null)
                 {
                     int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                    progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
+                    progress.Report(percent);
                 }
 
                 if (isFirst)
@@ -145,7 +148,7 @@ namespace TwitchDownloaderCore
                 {
                     _id = oldComment.id,
                     created_at = oldComment.createdAt,
-                    channel_id = video.creator.id,
+                    channel_id = video.creator?.id ?? "", // Deliberate empty string for ChatJson.UpgradeChatJson
                     content_type = "video",
                     content_id = video.id,
                     content_offset_seconds = oldComment.contentOffsetSeconds,
@@ -241,7 +244,7 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public async Task DownloadAsync(IProgress<ProgressReport> progress, CancellationToken cancellationToken)
+        public async Task DownloadAsync(CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(downloadOptions.Id))
             {
@@ -282,8 +285,8 @@ namespace TwitchDownloaderCore
                 chatRoot.video.description = videoInfoResponse.data.video.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
                 videoTitle = videoInfoResponse.data.video.title;
                 videoCreatedAt = videoInfoResponse.data.video.createdAt;
-                videoStart = downloadOptions.CropBeginning ? downloadOptions.CropBeginningTime : 0.0;
-                videoEnd = downloadOptions.CropEnding ? downloadOptions.CropEndingTime : videoInfoResponse.data.video.lengthSeconds;
+                videoStart = downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : 0.0;
+                videoEnd = downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : videoInfoResponse.data.video.lengthSeconds;
                 videoTotalLength = videoInfoResponse.data.video.lengthSeconds;
                 viewCount = videoInfoResponse.data.video.viewCount;
                 game = videoInfoResponse.data.video.game?.displayName ?? "Unknown";
@@ -316,10 +319,10 @@ namespace TwitchDownloaderCore
                 }
 
                 videoId = clipInfoResponse.data.clip.video.id;
-                downloadOptions.CropBeginning = true;
-                downloadOptions.CropBeginningTime = (int)clipInfoResponse.data.clip.videoOffsetSeconds;
-                downloadOptions.CropEnding = true;
-                downloadOptions.CropEndingTime = downloadOptions.CropBeginningTime + clipInfoResponse.data.clip.durationSeconds;
+                downloadOptions.TrimBeginning = true;
+                downloadOptions.TrimBeginningTime = (int)clipInfoResponse.data.clip.videoOffsetSeconds;
+                downloadOptions.TrimEnding = true;
+                downloadOptions.TrimEndingTime = downloadOptions.TrimBeginningTime + clipInfoResponse.data.clip.durationSeconds;
                 chatRoot.streamer.name = clipInfoResponse.data.clip.broadcaster.displayName;
                 chatRoot.streamer.id = int.Parse(clipInfoResponse.data.clip.broadcaster.id);
                 videoTitle = clipInfoResponse.data.clip.title;
@@ -357,7 +360,7 @@ namespace TwitchDownloaderCore
             chatRoot.video.game = game;
             videoDuration = videoEnd - videoStart;
 
-            var tasks = new List<Task<List<Comment>>>();
+            var downloadTasks = new List<Task<List<Comment>>>(connectionCount);
             var percentages = new int[connectionCount];
 
             double chunk = videoDuration / connectionCount;
@@ -365,47 +368,23 @@ namespace TwitchDownloaderCore
             {
                 int tc = i;
 
-                Progress<ProgressReport> taskProgress = null;
-                if (!downloadOptions.Silent)
+                var taskProgress = new Progress<int>(percent =>
                 {
-                    taskProgress = new Progress<ProgressReport>(progressReport =>
-                    {
-                        if (progressReport.ReportType != ReportType.Percent)
-                        {
-                            progress.Report(progressReport);
-                        }
-                        else
-                        {
-                            var percent = (int)progressReport.Data;
-                            if (percent > 100)
-                            {
-                                percent = 100;
-                            }
+                    percentages[tc] = Math.Clamp(percent, 0, 100);
 
-                            percentages[tc] = percent;
-
-                            percent = 0;
-                            for (int j = 0; j < connectionCount; j++)
-                            {
-                                percent += percentages[j];
-                            }
-
-                            percent /= connectionCount;
-
-                            progress.Report(new ProgressReport() { ReportType = ReportType.SameLineStatus, Data = $"Downloading {percent}%" });
-                            progress.Report(new ProgressReport() { ReportType = ReportType.Percent, Data = percent });
-                        }
-                    });
-                }
+                    var reportPercent = percentages.Sum() / connectionCount;
+                    _progress.ReportProgress(reportPercent);
+                });
 
                 double start = videoStart + chunk * i;
-                tasks.Add(DownloadSection(start, start + chunk, videoId, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
+                downloadTasks.Add(DownloadSection(start, start + chunk, videoId, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
             }
 
-            await Task.WhenAll(tasks);
+            _progress.SetTemplateStatus("Downloading {0}%", 0);
+            await Task.WhenAll(downloadTasks);
 
-            var sortedComments = new List<Comment>(tasks.Count);
-            foreach (var commentTask in tasks)
+            var sortedComments = new List<Comment>(downloadTasks.Count);
+            foreach (var commentTask in downloadTasks)
             {
                 sortedComments.AddRange(commentTask.Result);
             }
@@ -416,17 +395,22 @@ namespace TwitchDownloaderCore
 
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
-                progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Downloading + Embedding Images" });
+                _progress.SetTemplateStatus("Downloading + Embedding Images {0}%", 0);
                 chatRoot.embeddedData = new EmbeddedData();
 
                 // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
                 // TODO: Combine this with ChatUpdater in a different file
-                List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
-                List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(chatRoot.comments, downloadOptions.TempFolder, cancellationToken: cancellationToken);
-                List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, cancellationToken: cancellationToken);
+                List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, _progress, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
+                _progress.ReportProgress(50 / 4);
+                List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(chatRoot.comments, downloadOptions.TempFolder, _progress, cancellationToken: cancellationToken);
+                _progress.ReportProgress(50 / 4 * 2);
+                List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, _progress, cancellationToken: cancellationToken);
+                _progress.ReportProgress(50 / 4 * 3);
                 List<CheerEmote> twitchBits = await TwitchHelper.GetBits(chatRoot.comments, downloadOptions.TempFolder, chatRoot.streamer.id.ToString(), cancellationToken: cancellationToken);
+                _progress.ReportProgress(50);
 
-                cancellationToken.ThrowIfCancellationRequested();
+                var totalImageCount = thirdPartyEmotes.Count + firstPartyEmotes.Count + twitchBadges.Count + twitchBits.Count;
+                var imagesProcessed = 0;
 
                 foreach (TwitchEmote emote in thirdPartyEmotes)
                 {
@@ -438,7 +422,11 @@ namespace TwitchDownloaderCore
                     newEmote.width = emote.Width / emote.ImageScale;
                     newEmote.height = emote.Height / emote.ImageScale;
                     chatRoot.embeddedData.thirdParty.Add(newEmote);
+                    _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
                 }
+
+                cancellationToken.ThrowIfCancellationRequested();
+
                 foreach (TwitchEmote emote in firstPartyEmotes)
                 {
                     EmbedEmoteData newEmote = new EmbedEmoteData();
@@ -447,15 +435,24 @@ namespace TwitchDownloaderCore
                     newEmote.data = emote.ImageData;
                     newEmote.width = emote.Width / emote.ImageScale;
                     newEmote.height = emote.Height / emote.ImageScale;
+                    newEmote.isZeroWidth = emote.IsZeroWidth;
                     chatRoot.embeddedData.firstParty.Add(newEmote);
+                    _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
                 }
+
+                cancellationToken.ThrowIfCancellationRequested();
+
                 foreach (ChatBadge badge in twitchBadges)
                 {
                     EmbedChatBadge newBadge = new EmbedChatBadge();
                     newBadge.name = badge.Name;
                     newBadge.versions = badge.VersionsData;
                     chatRoot.embeddedData.twitchBadges.Add(newBadge);
+                    _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
                 }
+
+                cancellationToken.ThrowIfCancellationRequested();
+
                 foreach (CheerEmote bit in twitchBits)
                 {
                     EmbedCheerEmote newBit = new EmbedCheerEmote();
@@ -473,13 +470,16 @@ namespace TwitchDownloaderCore
                         newBit.tierList.Add(emotePair.Key, newEmote);
                     }
                     chatRoot.embeddedData.twitchBits.Add(newBit);
+                    _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
                 }
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (downloadOptions.DownloadFormat is ChatFormat.Json)
             {
                 //Best effort, but if we fail oh well
-                progress.Report(new ProgressReport() { ReportType = ReportType.NewLineStatus, Data = "Backfilling commenter info" });
+                _progress.SetStatus("Backfilling commenter info");
                 List<string> userList = chatRoot.comments.DistinctBy(x => x.commenter._id).Select(x => x.commenter._id).ToList();
                 Dictionary<string, User> userInfo = new Dictionary<string, User>();
                 int batchSize = 100;
@@ -500,7 +500,7 @@ namespace TwitchDownloaderCore
 
                 if (failedInfo)
                 {
-                    progress.Report(new ProgressReport() { ReportType = ReportType.Log, Data = "Failed to backfill some commenter info" });
+                    _progress.LogInfo("Failed to backfill some commenter info");
                 }
 
                 foreach (var comment in chatRoot.comments)
@@ -515,14 +515,14 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            progress.Report(new ProgressReport(ReportType.NewLineStatus, "Writing output file"));
+            _progress.SetStatus("Writing output file");
             switch (downloadOptions.DownloadFormat)
             {
                 case ChatFormat.Json:
                     await ChatJson.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.Compression, cancellationToken);
                     break;
                 case ChatFormat.Html:
-                    await ChatHtml.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.EmbedData, cancellationToken);
+                    await ChatHtml.SerializeAsync(downloadOptions.Filename, chatRoot, _progress, downloadOptions.EmbedData, cancellationToken);
                     break;
                 case ChatFormat.Text:
                     await ChatText.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.TimeFormat);
