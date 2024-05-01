@@ -83,8 +83,6 @@ namespace TwitchDownloaderCore
 
                 await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
 
-                _progress.SetTemplateStatus($"Combining Parts {{0}}% [4/{TOTAL_STEPS}]", 0);
-
                 string captionsPath = null;
                 if (downloadOptions.Captions != CaptionsStyle.None)
                 {
@@ -97,7 +95,7 @@ namespace TwitchDownloaderCore
 
                 await CombineVideoParts(downloadFolder, playlist.Streams, videoListCrop, cancellationToken);
 
-                _progress.SetTemplateStatus($"Finalizing Video {{0}}% [5/{TOTAL_STEPS}]", 0);
+                _progress.SetTemplateStatus($"Finalizing Video {{0}}% [6/{TOTAL_STEPS}]", 0);
 
                 var startOffset = TimeSpan.FromSeconds((double)playlist.Streams
                     .Take(videoListCrop.Start.Value)
