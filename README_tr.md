@@ -2,9 +2,7 @@
   <a href="https://github.com/lay295/TwitchDownloader">
     <img src="TwitchDownloaderWPF/Images/Logo.png" alt="Logo" width="80" height="80">
   </a>
-
   <h3 align="center">Twitch İndirici</h3>
-
   <div align="center">
     Twitch VOD/Clip/Chat İndirici ve Chat Oynatıcı
     <br />
@@ -13,12 +11,9 @@
   </div>
 </div>
 
-[**İspanyolca'da Oku**](README_es.md)  
-[**İngilizce'de Oku**](README.md)
-
 ## Chat Oynatma Örneği
 
-https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4
+<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
 
 ## Neler Yapabilir?
 
@@ -34,11 +29,12 @@ https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-8
 
 ![](https://i.imgur.com/bLegxGX.gif)
 
-### [Full WPF belgelerini buradan görüntüleyin](TwitchDownloaderWPF/README.md).
+### [Full WPF belgelerini buradan görüntüleyin](TwitchDownloaderWPF/README.md)
 
 ### İşlevsellik
 
 Windows WPF GUI, programın tüm ana işlevlerini ve bazı ek yaşam kalitesi işlevlerini uygular:
+
 - Aynı anda çalıştırılacak birden fazla indirme/oynatma işini sıraya alın.
 - VOD/Klip bağlantıları listesinden indirme işlerinin bir listesini oluşturun.
 - Uygulamayı terk etmeden herhangi bir yayıcıdan birden fazla VOD/klip arayın ve indirin.
@@ -53,7 +49,7 @@ Windows WPF GUI, hem açık hem de karanlık temalar ile gelir ve mevcut Windows
 
 ### Video Gösterimi
 
-https://www.youtube.com/watch?v=0W3MhfhnYjk
+<https://www.youtube.com/watch?v=0W3MhfhnYjk>
 (eski sürüm, aynı konsept)
 
 ## Linux?
@@ -66,13 +62,14 @@ Malesef MacOS için henüz bir GUI mevcut değil :(
 
 # CLI
 
-### [Tüm CLI belgelerini buradan inceleyin](TwitchDownloaderCLI/README.md).
+### [Tüm CLI belgelerini buradan inceleyin](TwitchDownloaderCLI/README.md)
 
 CLI, ana program işlevlerini uygulayan ve Windows, Linux ve MacOS<sup>*</sup> üzerinde çalışan çapraz platformlu bir araçtır.
 
 <sup>*Sadece Intel Mac'ler test edilmiştir</sup>
 
 CLI ile, harici komut dosyalarını kullanarak video işleme işlemini otomatikleştirmek mümkündür. Örneğin, Windows'ta bir `.bat` dosyasına aşağıdaki kodu kopyalayarak bir VOD'u ve onun sohbetini indirebilir ve ardından sohbeti renderlayabilirsiniz.
+
 ```bat
 @echo off
 set /p vodid="VOD Kimliğini Girin: "
@@ -87,10 +84,13 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 2. `TwitchDownloaderCLI.exe`'yi çıkartın.
 3. Dosyayı çıkardığınız yerde terminal açın.
 4. FFmpeg'e sahip değilseniz,[Chocolatey package manager](https://community.chocolatey.org/) aracılığı ile indirebilir veya bağımsız bir dosya olarak [ffmpeg.org](https://ffmpeg.org/download.html) adresinden alabilir veya TwitchDownloaderCLI kullanarak alabilirsiniz. Şu komutu kullanarak indirebilirsiniz:
+
 ```
 TwitchDownloaderCLI.exe ffmpeg --download
 ```
+
 5. Artık indirme işlemine başlayabilirsiniz, örneğin:
+
 ```
 TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 ```
@@ -102,37 +102,53 @@ TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 3. [Sürümler](https://github.com/lay295/TwitchDownloader/releases/) sayfasına gidin ve Linux için en son ikili sürümü indirin, Arch Linux için [AUR Paketi](https://aur.archlinux.org/packages/twitch-downloader-bin/)ni alın veya [kaynaktan derleyin](#building-from-source).
 4. `TwitchDownloaderCLI`'yi çıkarın.
 5. Dosyayı çıkardığınız yere gidin ve terminalde çalıştırılabilir izinleri verin:
+
 ```
 sudo chmod +x TwitchDownloaderCLI
 ```
+
 6. a) Eğer FFmpeg'e sahip değilseniz, bunu dağıtım paket yöneticiniz aracılığıyla kurmalısınız. Ayrıca, [ffmpeg.org](https://ffmpeg.org/download.html) adresinden bağımsız bir dosya olarak veya TwitchDownloaderCLI kullanarak da edinebilirsiniz.
+
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
+
 6. b) Bağımsız bir dosya olarak indirildiyse, ona çalıştırılabilir izinler vermelisiniz:
+
 ```
 sudo chmod +x ffmpeg
 ```
+
 7. Şimdi indiriciyi kullanmaya başlayabilirsiniz, örneğin:
+
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
+
 ## MacOS – Başlangıç
+
 1. [Releases](https://github.com/lay295/TwitchDownloader/releases/) sayfasına gidin ve MacOS için en son sürümü indirin veya kaynaktan derleyin.
 2. `TwitchDownloaderCLI` dosyasını çıkarın.
 3. Dosyayı çıkardığınız yere terminalde çalıştırılabilir izinler verin.
+
 ```
 chmod +x TwitchDownloaderCLI
 ```
+
 4. a) Eğer FFmpeg'e sahip değilseniz, [Homebrew paket yöneticisi](https://brew.sh/) aracılığıyla kurabilirsiniz veya bağımsız bir dosya olarak [ffmpeg.org](https://ffmpeg.org/download.html) adresinden veya TwitchDownloaderCLI kullanarak edinebilirsiniz.
+
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
+
 4. b) Bağımsız bir dosya olarak indirildiyse, ona çalıştırılabilir izinler vermelisiniz.
+
 ```
 chmod +x ffmpeg
 ```
+
 5. Şimdi indiriciyi kullanmaya başlayabilirsiniz, örneğin:
+
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
@@ -146,31 +162,45 @@ chmod +x ffmpeg
 ## Derleme Talimatları
 
 1. Depoyu klonlayın:
+
 ```
 git clone https://github.com/lay295/TwitchDownloader.git
 ```
+
 2. Çözüm klasörüne gidin:
+
 ```
 cd TwitchDownloader
 ```
+
 3. Çözümü geri yükleyin:
+
 ```
 dotnet restore
 ```
+
 4. a) GUI'yi oluşturun:
+
 ```
 dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
+
 4. b) CLI'yi oluşturun:
+
 ```
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 ```
+
 - Uygulanabilir Profiller: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
+
 5. a) GUI derleme klasörüne gidin:
+
 ```
 cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
 ```
+
 5. b) CLI derleme klasörüne gidin:
+
 ```
 cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 ```

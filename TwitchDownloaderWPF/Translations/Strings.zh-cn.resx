@@ -118,20 +118,20 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Accept" xml:space="preserve">
-    <value>确认</value>
+    <value>同意</value>
   </data>
   <data name="AddToQueue" xml:space="preserve">
-    <value>添加到</value>
+    <value>添加至队列</value>
   </data>
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
-    <value>您已经为不支持alpha通道的容器/编解码器选择了alpha通道(透明度)。去除透明度或编码与MOV + RLE/PRORES或WEBM + VP8/VP9</value>
+    <value>你为不支持透明度的容器 / 编解码器选择了 alpha 通道（透明度）。移除透明度或使用 MOV + RLE/PRORES 或 WEBM + VP8/VP9 编码</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
-    <value>主题</value>
+    <value>主题 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ApplicationThemeTooltip" xml:space="preserve">
-    <value>点击学习如何制作自己的主题！</value>
+    <value>点击此处了解如何制作自己的主题！</value>
   </data>
   <data name="AvailableParameters" xml:space="preserve">
     <value>可用参数：</value>
@@ -140,32 +140,32 @@
     <value>背景颜色：</value>
   </data>
   <data name="BannedWordsList" xml:space="preserve">
-    <value>屏蔽词列表：</value>
+    <value>屏蔽词列表 </value>
     <comment>Leaving a trailing space</comment>
   </data>
   <data name="BannedWordsListTooltip" xml:space="preserve">
-    <value>禁用的单词或短语列表-逗号分隔，逗号周围的空格被忽略，不区分大小写。</value>
+    <value>禁止使用的单词或短语列表 - 用半角逗号分隔，逗号周围的空格忽略不计，不区分大小写。</value>
   </data>
   <data name="Browse" xml:space="preserve">
     <value>浏览</value>
   </data>
   <data name="BttvEmotes" xml:space="preserve">
-    <value>BTTV表情：</value>
+    <value>BTTV 表情：</value>
   </data>
   <data name="CacheFolder" xml:space="preserve">
-    <value>缓存目录：</value>
+    <value>缓存文件夹：</value>
   </data>
   <data name="TemplateChats" xml:space="preserve">
     <value>聊天：</value>
   </data>
   <data name="ChatBadgeFilter" xml:space="preserve">
-    <value>聊天徽标过滤器</value>
+    <value>聊天徽章过滤器：</value>
   </data>
   <data name="ChatBadges" xml:space="preserve">
-    <value>聊天徽标：</value>
+    <value>聊天徽章：</value>
   </data>
   <data name="TrimChat" xml:space="preserve">
-    <value>剪裁：</value>
+    <value>裁切：</value>
   </data>
   <data name="ChatDownload" xml:space="preserve">
     <value>聊天下载</value>
@@ -198,10 +198,10 @@
     <value>宽度：</value>
   </data>
   <data name="ClearCache" xml:space="preserve">
-    <value>清空</value>
+    <value>清除</value>
   </data>
   <data name="ClearCacheConfirmation" xml:space="preserve">
-    <value>您确定要清除缓存吗?只有当程序不能正常工作时，才应该这样做</value>
+    <value>确定要清除缓存吗？\n只有当程序无法正常运行时，你才应该这样做</value>
   </data>
   <data name="ClipDownload" xml:space="preserve">
     <value>剪辑下载</value>
@@ -210,7 +210,7 @@
     <value>剪辑下载</value>
   </data>
   <data name="ClipLinkId" xml:space="preserve">
-    <value>剪辑链接/ID：</value>
+    <value>剪辑链接 / ID：</value>
   </data>
   <data name="TemplateClips" xml:space="preserve">
     <value>剪辑：</value>
@@ -222,57 +222,57 @@
     <value>开始</value>
   </data>
   <data name="TrimVideo" xml:space="preserve">
-    <value>剪裁视频：</value>
+    <value>裁切：</value>
   </data>
   <data name="DateCustomFormatting" xml:space="preserve">
-    <value>date_custom格式基于</value>
+    <value>date_custom 格式基于 </value>
   </data>
   <data name="DateCustomFormattingHyperlink" xml:space="preserve">
-    <value>C#标准日期和时间格式字符串</value>
+    <value>C# 标准日期和时间格式字符串</value>
   </data>
   <data name="DeleteConfirmation" xml:space="preserve">
-    <value>确认删除</value>
+    <value>删除确认</value>
   </data>
   <data name="DonateTooltip" xml:space="preserve">
-    <value>经常使用这个程序，想支持我吗？请给我买杯咖啡:)</value>
+    <value>经常使用该程序并想支持我？赞助我吧 :)</value>
   </data>
   <data name="Download" xml:space="preserve">
     <value>下载</value>
   </data>
   <data name="DownloadConnections" xml:space="preserve">
-    <value>连接数：</value>
+    <value>连接：</value>
   </data>
   <data name="DownloadFilenameTemplates" xml:space="preserve">
-    <value>下载文件名格式：</value>
+    <value>下载文件名模板：</value>
   </data>
   <data name="DownloadFormat" xml:space="preserve">
     <value>下载格式：</value>
   </data>
   <data name="DownloadThreads" xml:space="preserve">
-    <value>下载线程数：</value>
+    <value>下载线程：</value>
   </data>
   <data name="EmbedImages" xml:space="preserve">
     <value>嵌入图片 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedImagesTooltip" xml:space="preserve">
-    <value>将第表情符号、徽章和cheermotes表情符号嵌入下载文件以进行离线呈现。用于存档目的，文件大小将更大。</value>
+    <value>将第一方表情、徽章和 cheermote 嵌入下载文件，以便离线呈现。可用于存档，但文件大小会增大。</value>
   </data>
   <data name="EmbedMissing" xml:space="preserve">
-    <value>嵌入丢失 </value>
+    <value>嵌入丢失资源 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedMissingTooltip" xml:space="preserve">
-    <value>嵌入缺失的表情，徽章和啦啦队。已经嵌入的图像将不受影响。</value>
+    <value>嵌入丢失的表情、徽章和 cheermote。已嵌入的图像将保持不变。</value>
   </data>
   <data name="EnqueueDownload" xml:space="preserve">
-    <value>队列下载</value>
+    <value>预览下载</value>
   </data>
   <data name="EnqueueRender" xml:space="preserve">
-    <value>队列渲染</value>
+    <value>预览下载</value>
   </data>
   <data name="EnqueueUpdate" xml:space="preserve">
-    <value>队列更新</value>
+    <value>预览更新</value>
   </data>
   <data name="ErrorLog" xml:space="preserve">
     <value>错误： </value>
@@ -282,7 +282,7 @@
     <value>输入参数：</value>
   </data>
   <data name="FfmpegOptionsHyperlink" xml:space="preserve">
-    <value>点击了解FFmpeg设定</value>
+    <value>点击此处了解 FFmpeg 选项</value>
   </data>
   <data name="FfmpegOutputArguments" xml:space="preserve">
     <value>输出参数：</value>
@@ -292,10 +292,10 @@
     <comment>Do not translate</comment>
   </data>
   <data name="FfmpegReset" xml:space="preserve">
-    <value>重置为默认</value>
+    <value>重置为默认值</value>
   </data>
   <data name="FfzEmotes" xml:space="preserve">
-    <value>FFZ Emotes:</value>
+    <value>FFZ 表情符号：</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
     <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
@@ -311,41 +311,41 @@
     <value>获取信息</value>
   </data>
   <data name="HideDonationButton" xml:space="preserve">
-    <value>隐藏捐赠按钮：</value>
+    <value>隐藏赞助按钮：</value>
   </data>
   <data name="IgnoreUsersList" xml:space="preserve">
     <value>屏蔽用户列表 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
-    <value>用户名列表-逗号分隔，逗号周围的空格忽略，不区分大小写。</value>
+    <value>用户名列表 - 用半角逗号分隔，逗号周围的空格忽略不计，不区分大小写。</value>
   </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
-    <value>无效剪辑链接/ID</value>
+    <value>剪辑链接 / ID 无效</value>
   </data>
   <data name="InvalidClipLinkIdMessage" xml:space="preserve">
-    <value>请输入有效的剪辑链接/ID</value>
+    <value>请输入有效的剪辑链接 / ID\n示例：\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
   </data>
   <data name="InvalidTrimInputs" xml:space="preserve">
-    <value>无效剪裁输入</value>
+    <value>裁切输入无效</value>
   </data>
   <data name="InvalidStartEndTime" xml:space="preserve">
-    <value>无效开始或结束时间</value>
+    <value>开始或结束时间无效</value>
   </data>
   <data name="InvalidVideoLinkId" xml:space="preserve">
-    <value>无效视频链接/ID</value>
+    <value>视频链接 / ID 无效</value>
   </data>
   <data name="InvalidVideoLinkIdMessage" xml:space="preserve">
-    <value>请输入有效的视频链接/ID</value>
+    <value>请输入有效的视频链接 / ID\n示例：\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
   </data>
   <data name="JsonFile" xml:space="preserve">
-    <value>JSON文件：</value>
+    <value>JSON 文件：</value>
   </data>
   <data name="Length" xml:space="preserve">
     <value>长度：</value>
   </data>
   <data name="ListOfVodsClips" xml:space="preserve">
-    <value>视频点播/剪辑列表(每行一个)</value>
+    <value>点播 / 剪辑列表（每行一个）</value>
   </data>
   <data name="LogHeader" xml:space="preserve">
     <value>日志：</value>
@@ -354,36 +354,36 @@
     <value>批量下载</value>
   </data>
   <data name="Oauth" xml:space="preserve">
-    <value>OAuth（可选） </value>
+    <value>OAuth （可选） </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="OAuthTooltip" xml:space="preserve">
-    <value>只需要订阅视频点播。所有第三方OAuth令牌将无法工作。点击查看如何获得OAuth令牌的YouTube视频。</value>
+    <value>只适用于订阅限定点播。所有第三方 OAuth 令牌均无法使用。点击观看 YouTube 视频，了解如何获取 OAuth 令牌。</value>
   </data>
   <data name="Offline" xml:space="preserve">
     <value>离线 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="OfflineTooltip" xml:space="preserve">
-    <value>只使用嵌入在聊天json文件中的资源渲染聊天。</value>
+    <value>仅使用聊天 JSON 文件中嵌入的资源渲染聊天。</value>
   </data>
   <data name="Outline" xml:space="preserve">
     <value>边框：</value>
   </data>
   <data name="ParallelTaskLimits" xml:space="preserve">
-    <value>并行任务限制</value>
+    <value>并行任务限制：</value>
   </data>
   <data name="PartialRender" xml:space="preserve">
     <value>部分渲染</value>
   </data>
   <data name="Quality" xml:space="preserve">
-    <value>品质：</value>
+    <value>质量：</value>
   </data>
   <data name="Render" xml:space="preserve">
     <value>渲染</value>
   </data>
   <data name="RenderFfmpegWarning" xml:space="preserve">
-    <value>这只适用于高级用户。如果你得到一个进程结束错误，这可能是原因。</value>
+    <value>这仅供高级用户使用。如果出现管道结束错误，可能就是这个原因。</value>
   </data>
   <data name="RenderFileFormat" xml:space="preserve">
     <value>文件格式：</value>
@@ -392,16 +392,16 @@
     <value>帧速率：</value>
   </data>
   <data name="RenderCodec" xml:space="preserve">
-    <value>编码：</value>
+    <value>编解码器：</value>
   </data>
   <data name="RenderTabEncoding" xml:space="preserve">
-    <value>解码</value>
+    <value>编码</value>
   </data>
   <data name="RenderTabFfmpeg" xml:space="preserve">
     <value>FFmpeg</value>
   </data>
   <data name="RenderTabGeneral" xml:space="preserve">
-    <value>通用</value>
+    <value>一般</value>
   </data>
   <data name="RenderTabPreview" xml:space="preserve">
     <value>预览</value>
@@ -410,17 +410,17 @@
     <value>渲染</value>
   </data>
   <data name="RenderTabScaling" xml:space="preserve">
-    <value>拓展</value>
+    <value>缩放</value>
   </data>
   <data name="RenderWidthHeightMustBeEven" xml:space="preserve">
-    <value>宽度和高度必须相同</value>
+    <value>宽度和高度必须一致</value>
   </data>
   <data name="ReplaceEmbeds" xml:space="preserve">
-    <value>替换嵌入 </value>
+    <value>替换嵌入内容 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ReplaceEmbedsTooltip" xml:space="preserve">
-    <value>替换文件中所有嵌入的表情、徽章和cheermotes。所有嵌入的图像将被覆盖!</value>
+    <value>替换文件中所有嵌入的表情、徽章和 cheermote。所有嵌入的图像都将被覆盖！</value>
   </data>
   <data name="SearchClips" xml:space="preserve">
     <value>搜索剪辑</value>
@@ -429,13 +429,13 @@
     <value>搜索点播</value>
   </data>
   <data name="SelectAll" xml:space="preserve">
-    <value>全选</value>
+    <value>全部选择</value>
   </data>
   <data name="SelectedItems" xml:space="preserve">
-    <value>已选中：</value>
+    <value>已选项目：</value>
   </data>
   <data name="SetChannel" xml:space="preserve">
-    <value>设置你到</value>
+    <value>设置频道</value>
   </data>
   <data name="Sort" xml:space="preserve">
     <value>排序：</value>
@@ -459,13 +459,13 @@
     <value>正在更新</value>
   </data>
   <data name="Streamer" xml:space="preserve">
-    <value>主播：</value>
+    <value>实况主：</value>
   </data>
   <data name="StvEmotes" xml:space="preserve">
-    <value>7TV Emotes:</value>
+    <value>7TV 表情：</value>
   </data>
   <data name="SubMessages" xml:space="preserve">
-    <value>子消息：</value>
+    <value>订阅信息：</value>
   </data>
   <data name="TaskCancel" xml:space="preserve">
     <value>取消</value>
@@ -477,11 +477,11 @@
     <value>任务队列</value>
   </data>
   <data name="ThirdPartyEmotes" xml:space="preserve">
-    <value>第三方Emote </value>
+    <value>第三方表情 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
-    <value>还可以在文件中嵌入第三方表情。文件大小会大得多。</value>
+    <value>还可将第三方表情嵌入文件。文件大小会更大。</value>
   </data>
   <data name="TimestampFormat" xml:space="preserve">
     <value>时间戳格式：</value>
@@ -490,7 +490,7 @@
     <value>无</value>
   </data>
   <data name="TimestampRelative" xml:space="preserve">
-    <value>相对</value>
+    <value>相对值</value>
   </data>
   <data name="Timestamps" xml:space="preserve">
     <value>时间戳：</value>
@@ -499,43 +499,43 @@
     <value>UTC</value>
   </data>
   <data name="TopAllTime" xml:space="preserve">
-    <value>全部最佳</value>
+    <value>历史最高</value>
   </data>
   <data name="TopSevenDays" xml:space="preserve">
-    <value>7天最佳</value>
+    <value>7 天内最高</value>
   </data>
   <data name="TopThirtyDays" xml:space="preserve">
-    <value>30天最佳</value>
+    <value>30 天内最高</value>
   </data>
   <data name="TopTwentyFourHours" xml:space="preserve">
-    <value>24小时最佳</value>
+    <value>24 小时内最高</value>
   </data>
   <data name="UnableToFindThumbnail" xml:space="preserve">
-    <value>找不到略缩图</value>
+    <value>无法找到缩略图</value>
   </data>
   <data name="UnableToGetClipInfo" xml:space="preserve">
-    <value>无法获取剪辑信息。请再次检查Clip ID并重试。</value>
+    <value>无法获取剪辑信息。请仔细检查剪辑 ID 并重试。</value>
   </data>
   <data name="UnableToGetInfo" xml:space="preserve">
     <value>无法获取信息</value>
   </data>
   <data name="UnableToGetInfoMessage" xml:space="preserve">
-    <value>无法获取视频/剪辑信息。请仔细检查您的链接，然后再试一次</value>
+    <value>无法获取视频 / 剪辑信息。请仔细检查剪辑 ID 并重试。</value>
   </data>
   <data name="UnableToGetVideoInfo" xml:space="preserve">
-    <value>无法获取视频信息。请确认链接/ID是否正确，然后重试。</value>
+    <value>无法获取视频信息。请仔细检查链接 / ID 并重试。</value>
   </data>
   <data name="UnableToParseInputs" xml:space="preserve">
     <value>无法解析输入</value>
   </data>
   <data name="UnableToParseInputsMessage" xml:space="preserve">
-    <value>请再次检查您的输入是否有效</value>
+    <value>请仔细检查你的输入是否有效</value>
   </data>
   <data name="UnableToParseLink" xml:space="preserve">
     <value>无法解析链接</value>
   </data>
   <data name="UnableToParseLinkMessage" xml:space="preserve">
-    <value>请仔细检查视频点播/剪辑链接</value>
+    <value>请仔细检查点播 / 剪辑链接</value>
   </data>
   <data name="Unknown" xml:space="preserve">
     <value>未知</value>
@@ -544,10 +544,10 @@
     <value>更新</value>
   </data>
   <data name="UpdateRate" xml:space="preserve">
-    <value>更新速度：</value>
+    <value>更新速率：</value>
   </data>
   <data name="UrlList" xml:space="preserve">
-    <value>链接列表</value>
+    <value>URL 列表</value>
   </data>
   <data name="VerboseErrorOutput" xml:space="preserve">
     <value>详细错误输出</value>
@@ -556,13 +556,13 @@
     <value>详细错误：</value>
   </data>
   <data name="VideoCreatedAt" xml:space="preserve">
-    <value>创建于：</value>
+    <value>创建时间：</value>
   </data>
   <data name="VideoTitle" xml:space="preserve">
     <value>标题：</value>
   </data>
   <data name="VodClipLink" xml:space="preserve">
-    <value>点播/剪辑链接：</value>
+    <value>点播 / 剪辑链接</value>
   </data>
   <data name="VodDownload" xml:space="preserve">
     <value>点播下载</value>
@@ -571,10 +571,10 @@
     <value>点播下载</value>
   </data>
   <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
-    <value>视频过期或嵌入的ID损坏</value>
+    <value>视频过期或嵌入的 ID 损坏</value>
   </data>
   <data name="VodLinkId" xml:space="preserve">
-    <value>点播链接/ID：</value>
+    <value>点播链接 / ID</value>
   </data>
   <data name="TemplateVods" xml:space="preserve">
     <value>点播：</value>
@@ -583,13 +583,13 @@
     <value>下载聊天</value>
   </data>
   <data name="DownloadFolder" xml:space="preserve">
-    <value>下载目录：</value>
+    <value>下载文件夹：</value>
   </data>
   <data name="DownloadVideo" xml:space="preserve">
     <value>下载视频</value>
   </data>
   <data name="ApplicationLanguage" xml:space="preserve">
-    <value>语言</value>
+    <value>语言 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="RenderChat" xml:space="preserve">
@@ -599,52 +599,52 @@
     <value>高亮缩进比例：</value>
   </data>
   <data name="HighlightStrokeScale" xml:space="preserve">
-    <value>高亮描边刻度：</value>
+    <value>高亮描边比例：</value>
   </data>
   <data name="BadgeScale" xml:space="preserve">
-    <value>徽标大小：</value>
+    <value>徽章比例：</value>
   </data>
   <data name="EmojiScale" xml:space="preserve">
-    <value>表情比例：</value>
+    <value>表情符号比例</value>
   </data>
   <data name="EmoteScale" xml:space="preserve">
-    <value>Emote比例：</value>
+    <value>表情比例：</value>
   </data>
   <data name="EmoteSpacingScale" xml:space="preserve">
-    <value>Emote间隔比例：</value>
+    <value>表情间距比例：</value>
   </data>
   <data name="SidePaddingScale" xml:space="preserve">
-    <value>边缘填充规模：</value>
+    <value>边缘填充比例：</value>
   </data>
   <data name="SectionHeightScale" xml:space="preserve">
-    <value>切片高度比例：</value>
+    <value>片段高度比例：</value>
   </data>
   <data name="VerticalSpacingScale" xml:space="preserve">
     <value>垂直间隔比例：</value>
   </data>
   <data name="WordSpacingScale" xml:space="preserve">
-    <value>字间距：</value>
+    <value>字间距比例：</value>
   </data>
   <data name="FileNotFound" xml:space="preserve">
-    <value>文件不存在： </value>
+    <value>未找到文件： </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="FatalError" xml:space="preserve">
     <value>致命错误</value>
   </data>
   <data name="ThemeNotFound" xml:space="preserve">
-    <value>找不到主题</value>
+    <value>未找到主题</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>{theme} was not found. Reverting theme to System</value>
+    <value>未找到 {theme}。将主题还原为系统。</value>
     <comment>Do not translate {theme}</comment>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
-    <value>分布 </value>
+    <value>散布 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="MessageDispersionTooltip" xml:space="preserve">
-    <value>在2022年11月，Twitch API的改变使得聊天信息的下载只需要整整几秒钟。如果一秒钟内有多条消息，它们将被智能地分布在第二秒钟内，以改善聊天流。</value>
+    <value>2022 年 11 月，Twitch API 发生变化，聊天信息只能以整秒为单位下载。该选项使用额外的元数据来尝试将信息还原到实际发送的时间。这可能会导致不同的评论顺序。</value>
   </data>
   <data name="ChatCompression" xml:space="preserve">
     <value>压缩：</value>
@@ -657,34 +657,34 @@
     <comment>Do not translate</comment>
   </data>
   <data name="ThemesFailedToWrite" xml:space="preserve">
-    <value>有些包含的主题无法写出。</value>
+    <value>未能读写一些包含的主题。</value>
   </data>
   <data name="TitleGlobalSettings" xml:space="preserve">
     <value>全局设置</value>
   </data>
   <data name="TitleEnqueueOptions" xml:space="preserve">
-    <value>队列设置</value>
+    <value>等待选项</value>
   </data>
   <data name="TitleRenderRange" xml:space="preserve">
-    <value>选择渲染范围（秒）</value>
+    <value>选择渲染速度（秒）</value>
   </data>
   <data name="TitleUrlList" xml:space="preserve">
-    <value>批量下载链接列表</value>
+    <value>批量下载 URL 列表</value>
   </data>
   <data name="TitleVideoMassDownloader" xml:space="preserve">
-    <value>批量下载视频</value>
+    <value>视频批量下载</value>
   </data>
   <data name="TitleClipMassDownloader" xml:space="preserve">
-    <value>批量下载剪辑</value>
+    <value>剪辑批量下载</value>
   </data>
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
-    <value>TwitchDownloaderWPF在您的母语中不可用吗？点击了解如何帮助翻译！</value>
+    <value>TwitchDownloaderWPF 没有你的母语版本？点击了解如何帮助翻译！</value>
   </data>
   <data name="InvalidFolderPath" xml:space="preserve">
-    <value>无效目录路径</value>
+    <value>文件夹路径无效</value>
   </data>
   <data name="InvaliFolderPathMessage" xml:space="preserve">
-    <value>目录不存在</value>
+    <value>文件夹不存在</value>
   </data>
   <data name="StatusCanceled" xml:space="preserve">
     <value>已取消</value>
@@ -693,10 +693,11 @@
     <value>正在取消</value>
   </data>
   <data name="MaximumThreadBandwidth" xml:space="preserve">
-    <value>最大线程带宽 </value><comment>Leave a trailing space</comment>
+    <value>线程最大带宽 </value>
+      <comment>Leave a trailing space</comment>
   </data>
   <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
-    <value>允许新下载线程使用的最大带宽，单位为千兆字节/秒。</value>
+    <value>允许新下载线程使用的最大带宽（千字节 / 秒）。</value>
   </data>
   <data name="RenderImageSharpening" xml:space="preserve">
     <value>锐化：</value>
@@ -705,16 +706,16 @@
     <value>本地</value>
   </data>
   <data name="SettingsTimeFormat" xml:space="preserve">
-    <value>时间格式：</value>
+    <value>时间格式</value>
   </data>
   <data name="NoJsonFilesSelected" xml:space="preserve">
-    <value>未选择JSON文件</value>
+    <value>未选择 JSON 文件</value>
   </data>
   <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
-    <value>访问权限不足，可能需要OAuth。</value>
+    <value>访问权限不足。可能需要 OAuth。</value>
   </data>
   <data name="EmojiVendor" xml:space="preserve">
-    <value>表情提供方：</value>
+    <value>表情符号提供：</value>
   </data>
   <data name="EmojiVendorNotoColor" xml:space="preserve">
     <value>Google</value>
@@ -726,139 +727,141 @@
     <value>无</value>
   </data>
   <data name="MaskWithNoAlpha" xml:space="preserve">
-    <value>您已经选择了生成不透明背景的蒙版。减少背景色alpha或禁用生成蒙版。</value>
+    <value>你选择了生成不透明背景的遮罩。降低背景颜色 alpha 或禁用生成遮罩。</value>
   </data>
   <data name="OutlineScale" xml:space="preserve">
     <value>边框比例：</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
-    <value>trim_start_custom、trim_end_custom和length_custom格式基于</value>
+    <value>trim_start_custom、trim_end_custom 和 length_custom 格式基于</value>
   </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
-    <value>C#标准的时间跨度格式字符串</value>
+    <value>C# 标准时间范围格式字符串</value>
   </data>
   <data name="UnknownErrorOccurred" xml:space="preserve">
-    <value>An unknown error occurred</value>
+    <value>发生未知错误</value>
   </data>
   <data name="TaskCouldNotBeRemoved" xml:space="preserve">
-    <value>The task could not be removed</value>
+    <value>此任务无法被移除</value>
   </data>
   <data name="CancelTaskBeforeRemoving" xml:space="preserve">
-    <value>Please cancel the task or wait for it to finish before removing it</value>
+    <value>请取消任务或等待任务完成后再将其删除</value>
   </data>
   <data name="UnableToDownloadFfmpeg" xml:space="preserve">
-    <value>Unable to download FFmpeg</value>
+    <value>无法下载 FFmpeg</value>
   </data>
   <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
-    <value>Unable to download FFmpeg. Please manually download it from {0} and place the file at {1}</value>
+    <value>无法下载 FFmpeg。请从 {0} 手动下载，并将文件放在 {1} 处。</value>
   </data>
   <data name="AlternateBackgroundColor" xml:space="preserve">
-    <value>Alt Background Color:</value>
+    <value>交替背景颜色：</value>
   </data>
   <data name="AlternateMessageBackgrounds" xml:space="preserve">
-    <value>Alternate Backgrounds </value><comment>Leave a trailing space</comment>
+    <value>交替背景 </value>
+      <comment>Leave a trailing space</comment>
   </data>
   <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
-    <value>Alternates the background color of every other chat message to help tell them apart.</value>
+    <value>将每个聊天消息的背景颜色交替更改，以帮助区分它们。</value>
   </data>
   <data name="EncodeClipMetadata" xml:space="preserve">
-    <value>Encode Metadata:</value>
+    <value>编码元数据：</value>
   </data>
   <data name="MessageBoxTitleError" xml:space="preserve">
     <value>错误</value>
   </data>
   <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
-    <value>Unable to start Windows application theme watcher. Error code: {0}</value>
+    <value>无法启动 Windows 应用程序主题监视器。已禁用实时 Windows 主题同步。错误代码：{0}</value>
   </data>
   <data name="LabelVideosPerPage" xml:space="preserve">
-    <value>Videos per page:</value>
+    <value>每页视频数：</value>
   </data>
   <data name="StatusDownloaderFFmpeg" xml:space="preserve">
-    <value>Downloading FFmpeg {0}%</value>
+    <value>正在下载 FFmpeg {0}%</value>
   </data>
   <data name="CopyVideoIDToClipboard" xml:space="preserve">
-    <value>Copy ID to clipboard</value>
+    <value>复制 ID 至剪贴板</value>
   </data>
   <data name="CopyVideoURLToClipboard" xml:space="preserve">
-    <value>Copy URL to clipboard</value>
+    <value>复制 URL 至剪贴板</value>
   </data>
   <data name="OpenVideoInBrowser" xml:space="preserve">
-    <value>Open in browser</value>
+    <value>在浏览器中打开</value>
   </data>
   <data name="ResetSettingsConfirmationMessage" xml:space="preserve">
-    <value>Are you sure you want to restore all settings to their default values?</value>
+    <value>确定要将所有设置恢复为默认值吗？</value>
   </data>
   <data name="ResetSettingsConfirmation" xml:space="preserve">
-    <value>Restore Settings Confirmation</value>
+    <value>恢复设置确认</value>
   </data>
   <data name="TheApplicationMustBeRestartedMessage" xml:space="preserve">
-    <value>The application must be restarted for changes to take effect.</value>
+    <value>必须重新启动应用程序才能使更改生效。</value>
   </data>
   <data name="RestartTheApplication" xml:space="preserve">
-    <value>Please restart {0}</value><comment>{0} is the name of the application.</comment>
+    <value>请重新启动 {0}</value>
+      <comment>{0} is the name of the application.</comment>
   </data>
   <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
-    <value>Restore Defaults</value>
+    <value>重置为默认值</value>
   </data>
   <data name="ButtonSaveSettings" xml:space="preserve">
-    <value>Save</value>
+    <value>保存</value>
   </data>
   <data name="ButtonCancelSettingsChanges" xml:space="preserve">
-    <value>Cancel</value>
+    <value>取消</value>
   </data>
   <data name="ContextMenuRemoveTask" xml:space="preserve">
-    <value>Remove</value>
+    <value>移除</value>
   </data>
   <data name="ContextMenuOpenTaskFolder" xml:space="preserve">
-    <value>Open folder</value>
+    <value>打开文件夹</value>
   </data>
   <data name="PreferredQuality" xml:space="preserve">
-    <value>Preferred Quality:</value>
+    <value>首选质量：</value>
   </data>
   <data name="TitleWindowOldVideoCacheManager" xml:space="preserve">
-    <value>Select Caches To Delete</value>
+    <value>选择要删除的缓存</value>
   </data>
   <data name="SizeOfAllFiles" xml:space="preserve">
-    <value>Total Size:</value>
+    <value>总大小：</value>
   </data>
   <data name="DeleteCacheColumnHeader" xml:space="preserve">
-    <value>Delete</value>
+    <value>删除</value>
   </data>
   <data name="FilePathColumnHeader" xml:space="preserve">
-    <value>Path</value>
+    <value>路径</value>
   </data>
   <data name="FileAgeColumnHeader" xml:space="preserve">
-    <value>Age</value>
+    <value>年龄</value>
   </data>
   <data name="FileSizeColumnHeader" xml:space="preserve">
-    <value>Size</value>
+    <value>大小</value>
   </data>
   <data name="FileAgeInDays" xml:space="preserve">
-    <value>{0:N0} days</value>
+    <value>{0:N0} 天</value>
   </data>
   <data name="LogLevels" xml:space="preserve">
-    <value>Log Levels:</value>
+    <value>日志等级：</value>
   </data>
   <data name="LogLevelVerbose" xml:space="preserve">
-    <value>Verbose</value>
+    <value>详细</value>
   </data>
   <data name="LogLevelInfo" xml:space="preserve">
-    <value>Info</value>
+    <value>信息</value>
   </data>
   <data name="LogLevelWarning" xml:space="preserve">
-    <value>Warning</value>
+    <value>警告</value>
   </data>
   <data name="LogLevelError" xml:space="preserve">
-    <value>Error</value>
+    <value>错误</value>
   </data>
   <data name="LogLevelFfmpeg" xml:space="preserve">
     <value>FFmpeg</value>
   </data>
   <data name="CopyFolderPathToClipboard" xml:space="preserve">
-    <value>Copy path to clipboard</value>
+    <value>复制路径至剪贴板</value>
   </data>
   <data name="ContextMenuOpenFolder" xml:space="preserve">
-    <value>Open folder</value>
+    <value>打开文件夹</value>
   </data>
   <data name="UnknownUser" xml:space="preserve">
     <value>Unknown User</value>
