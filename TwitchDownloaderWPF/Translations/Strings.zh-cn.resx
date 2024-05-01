@@ -864,12 +864,12 @@
     <value>打开文件夹</value>
   </data>
   <data name="UnknownUser" xml:space="preserve">
-    <value>Unknown User</value>
+    <value>未知用户</value>
   </data>
   <data name="UnknownGame" xml:space="preserve">
-    <value>Unknown Game</value>
+    <value>未知游戏</value>
   </data>
   <data name="UnknownVideoLength" xml:space="preserve">
-    <value>Unknown</value>
+    <value>未知</value>
   </data>
 </root>
