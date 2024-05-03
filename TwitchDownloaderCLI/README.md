@@ -52,7 +52,7 @@ Time to trim beginning. See [Time durations](#time-durations) for a more detaile
 Time to trim ending. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-t / --threads**
-(Default: `4`) Number of download threads.
+(Default: `4`) Number of parallel download threads. Large values may result in IP rate limiting.
 
 **--bandwidth**
 (Default: `-1`) The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
@@ -123,8 +123,8 @@ Time to trim ending. See [Time durations](#time-durations) for a more detailed e
 **--timestamp-format**
 (Default: `Relative`) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `UtcFull`, `Relative`, and `None`.
 
-**--chat-connections**
-(Default: `4`) The number of parallel downloads for chat.
+**-t / --threads**
+(Default: `4`) Number of parallel download threads. Large values may result in IP rate limiting.
 
 **--temp-path**
 Path to temporary folder for cache.

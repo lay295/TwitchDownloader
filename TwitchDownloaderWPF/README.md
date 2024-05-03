@@ -41,7 +41,7 @@ To get started, input a valid link or ID to a VOD or highlight. If the VOD or hi
 
 **Trim**: Sets the start and end time to trim the video download in the format \[hours\] \[minutes\] \[seconds\]. Trimming the video will result in a smaller total download.
 
-**Download Threads**: The amount of download threads to be dispatched.
+**Download Threads**: The amount of parallel download threads to be dispatched.
 
 **OAuth**: The authorization token to allow downloading sub-only and private VODs or highlights. It is required by us and Twitch in order to prevent unauthorized downloads of paid or private content. Learn how to get your OAuth token at the following video: [https://youtu.be/1MBsUoFGuls](https://www.youtube.com/watch?v=1MBsUoFGuls). <ins>**DO NOT SHARE YOUR OAUTH TOKEN WITH ANYONE**</ins>
 
@@ -87,7 +87,7 @@ To get started, input a valid link or ID to a VOD, highlight, or clip. From ther
 
 **3rd Party Emotes** (JSON & HTML only): Also download emotes from the specified 3rd party providers and save them inside the chat. If the streamer is not registered on a given provider then it is skipped.
 
-**Connections**: The amount of download threads to be dispatched. On some internet connections, Twitch servers may refuse using more than 1 chat download thread.
+**Download Threads**: The amount of parallel download threads to be dispatched. On some internet connections, Twitch servers may refuse using more than 1 chat download thread.
 
 **Download**: Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
 
