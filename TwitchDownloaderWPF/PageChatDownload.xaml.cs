@@ -51,7 +51,7 @@ namespace TwitchDownloaderWPF
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
             checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
-            numChatDownloadConnections.Value = Settings.Default.ChatDownloadThreads;
+            NumChatDownloadThreads.Value = Settings.Default.ChatDownloadThreads;
             _ = (ChatFormat)Settings.Default.ChatDownloadType switch
             {
                 ChatFormat.Text => radioText.IsChecked = true,
@@ -260,7 +260,7 @@ namespace TwitchDownloaderWPF
             options.FfzEmotes = checkFfzEmbed.IsChecked.GetValueOrDefault();
             options.StvEmotes = checkStvEmbed.IsChecked.GetValueOrDefault();
             options.Filename = filename;
-            options.ConnectionCount = (int)numChatDownloadConnections.Value;
+            options.ConnectionCount = (int)NumChatDownloadThreads.Value;
             return options;
         }
 
@@ -302,12 +302,12 @@ namespace TwitchDownloaderWPF
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void numChatDownloadConnections_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        private void NumChatDownloadThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
             if (this.IsInitialized)
             {
-                numChatDownloadConnections.Value = Math.Clamp((int)numChatDownloadConnections.Value, 1, 50);
-                Settings.Default.ChatDownloadThreads = (int)numChatDownloadConnections.Value;
+                NumChatDownloadThreads.Value = Math.Clamp((int)NumChatDownloadThreads.Value, 1, 50);
+                Settings.Default.ChatDownloadThreads = (int)NumChatDownloadThreads.Value;
                 Settings.Default.Save();
             }
         }
