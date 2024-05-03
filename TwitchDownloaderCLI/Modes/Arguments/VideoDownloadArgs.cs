@@ -21,7 +21,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('e', "ending", HelpText = "Time to trim ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
         public TimeDuration TrimEndingTime { get; set; }
 
-        [Option('t', "threads", Default = 4, HelpText = "Number of download threads.")]
+        [Option('t', "threads", Default = 4, HelpText = "Number of parallel download threads. Large values may result in IP rate limiting.")]
         public int DownloadThreads { get; set; }
 
         [Option("bandwidth", Default = -1, HelpText = "The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or -1 for no maximum.")]
