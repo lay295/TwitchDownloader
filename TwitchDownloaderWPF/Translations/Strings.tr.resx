@@ -240,7 +240,7 @@
   <data name="Download" xml:space="preserve">
     <value>İndir</value>
   </data>
-  <data name="DownloadConnections" xml:space="preserve">
+  <data name="ChatDownloadThreads" xml:space="preserve">
     <value>Bağlantılar:</value>
   </data>
   <data name="DownloadFilenameTemplates" xml:space="preserve">
@@ -249,7 +249,7 @@
   <data name="DownloadFormat" xml:space="preserve">
     <value>İndirme Formatı:</value>
   </data>
-  <data name="DownloadThreads" xml:space="preserve">
+  <data name="VideoDownloadThreads" xml:space="preserve">
     <value>İndirme Parçacığı:</value>
   </data>
   <data name="EmbedImages" xml:space="preserve">

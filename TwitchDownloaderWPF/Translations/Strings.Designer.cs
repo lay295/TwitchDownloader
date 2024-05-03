@@ -321,6 +321,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Download Threads:.
+        /// </summary>
+        public static string ChatDownloadThreads {
+            get {
+                return ResourceManager.GetString("ChatDownloadThreads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Font:.
         /// </summary>
         public static string ChatFont {
@@ -555,15 +564,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connections:.
-        /// </summary>
-        public static string DownloadConnections {
-            get {
-                return ResourceManager.GetString("DownloadConnections", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Download Filename Templates:.
         /// </summary>
         public static string DownloadFilenameTemplates {
@@ -587,15 +587,6 @@ namespace TwitchDownloaderWPF.Translations {
         public static string DownloadFormat {
             get {
                 return ResourceManager.GetString("DownloadFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Download Threads:.
-        /// </summary>
-        public static string DownloadThreads {
-            get {
-                return ResourceManager.GetString("DownloadThreads", resourceCulture);
             }
         }
         
@@ -2198,6 +2189,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string VideoCreatedAt {
             get {
                 return ResourceManager.GetString("VideoCreatedAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Download Threads:.
+        /// </summary>
+        public static string VideoDownloadThreads {
+            get {
+                return ResourceManager.GetString("VideoDownloadThreads", resourceCulture);
             }
         }
         

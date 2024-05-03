@@ -239,7 +239,7 @@
   <data name="Download" xml:space="preserve">
     <value>Завантажити</value>
   </data>
-  <data name="DownloadConnections" xml:space="preserve">
+  <data name="ChatDownloadThreads" xml:space="preserve">
     <value>З'єднання:</value>
   </data>
   <data name="DownloadFilenameTemplates" xml:space="preserve">
@@ -248,7 +248,7 @@
   <data name="DownloadFormat" xml:space="preserve">
     <value>Формат завантаження:</value>
   </data>
-  <data name="DownloadThreads" xml:space="preserve">
+  <data name="VideoDownloadThreads" xml:space="preserve">
     <value>Потоків завантаження:</value>
   </data>
   <data name="EmbedImages" xml:space="preserve">
