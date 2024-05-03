@@ -38,7 +38,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public TimestampFormat TimeFormat { get; set; }
 
         [Option('t', "threads", Default = 4, HelpText = "Number of parallel download threads. Large values may result in IP rate limiting.")]
-        public int ChatConnections { get; set; }
+        public int DownloadThreads { get; set; }
 
         [Option("silent", Default = false, HelpText = "Suppresses progress console output")]
         public bool Silent { get; set; }

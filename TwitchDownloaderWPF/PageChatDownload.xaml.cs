@@ -260,7 +260,7 @@ namespace TwitchDownloaderWPF
             options.FfzEmotes = checkFfzEmbed.IsChecked.GetValueOrDefault();
             options.StvEmotes = checkStvEmbed.IsChecked.GetValueOrDefault();
             options.Filename = filename;
-            options.ConnectionCount = (int)NumChatDownloadThreads.Value;
+            options.DownloadThreads = (int)NumChatDownloadThreads.Value;
             return options;
         }
 

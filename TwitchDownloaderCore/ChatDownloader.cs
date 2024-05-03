@@ -270,7 +270,7 @@ namespace TwitchDownloaderCore
             double videoTotalLength;
             int viewCount;
             string game;
-            int connectionCount = downloadOptions.ConnectionCount;
+            int connectionCount = downloadOptions.DownloadThreads;
 
             if (downloadType == DownloadType.Video)
             {
