@@ -444,7 +444,7 @@ namespace TwitchDownloaderCore
                 TrimBeginningTime = sectionStart,
                 TrimEnding = true,
                 TrimEndingTime = sectionEnd,
-                ConnectionCount = 4,
+                DownloadThreads = 4,
                 EmbedData = false,
                 BttvEmotes = false,
                 FfzEmotes = false,

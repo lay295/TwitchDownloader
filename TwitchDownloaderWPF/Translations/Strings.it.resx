@@ -239,8 +239,8 @@
   <data name="Download" xml:space="preserve">
     <value>Scarica</value>
   </data>
-  <data name="DownloadConnections" xml:space="preserve">
-    <value>Connessioni:</value>
+  <data name="ChatDownloadThreads" xml:space="preserve">
+    <value>Threads di Download:</value>
   </data>
   <data name="DownloadFilenameTemplates" xml:space="preserve">
     <value>Scarica i modelli di file:</value>
@@ -248,7 +248,7 @@
   <data name="DownloadFormat" xml:space="preserve">
     <value>Formato del download:</value>
   </data>
-  <data name="DownloadThreads" xml:space="preserve">
+  <data name="VideoDownloadThreads" xml:space="preserve">
     <value>Threads di Download:</value>
   </data>
   <data name="EmbedImages" xml:space="preserve">
