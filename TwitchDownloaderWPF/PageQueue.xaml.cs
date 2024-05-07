@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows;
@@ -313,7 +314,17 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            Process.Start(new ProcessStartInfo(outputFolder) { UseShellExecute = true });
+            var args = File.Exists(task.OutputFile)
+                ? $"/select,\"{task.OutputFile}\""
+                : $"\"{outputFolder}\"";
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe"),
+                Arguments = args,
+                UseShellExecute = true,
+                WorkingDirectory = outputFolder
+            });
         }
     }
 }
