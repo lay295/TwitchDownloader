@@ -28,10 +28,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public int ChatHeight { get; set; }
 
         [Option('b', "beginning", HelpText = "Time to trim the beginning of the render. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
-        public TimeDuration TrimBeginningTime { get; set; } = new(-1);
+        public TimeDuration TrimBeginningTime { get; set; } = TimeDuration.MinusOneSeconds;
 
         [Option('e', "ending", HelpText = "Time to trim the ending of the render. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
-        public TimeDuration TrimEndingTime { get; set; } = new(-1);
+        public TimeDuration TrimEndingTime { get; set; } = TimeDuration.MinusOneSeconds;
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV emotes.")]
         public bool? BttvEmotes { get; set; }

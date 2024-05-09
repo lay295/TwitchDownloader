@@ -23,10 +23,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public bool ReplaceEmbeds { get; set; }
 
         [Option('b', "beginning", HelpText = "New time for chat beginning. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##). Comments may be added but not removed. -1 = Keep current trim.")]
-        public TimeDuration TrimBeginningTime { get; set; } = new(-1);
+        public TimeDuration TrimBeginningTime { get; set; } = TimeDuration.MinusOneSeconds;
 
         [Option('e', "ending", HelpText = "New time for chat ending. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##). Comments may be added but not removed. -1 = Keep current trim.")]
-        public TimeDuration TrimEndingTime { get; set; } = new(-1);
+        public TimeDuration TrimEndingTime { get; set; } = TimeDuration.MinusOneSeconds;
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV embedding in chat download.")]
         public bool? BttvEmotes { get; set; }
