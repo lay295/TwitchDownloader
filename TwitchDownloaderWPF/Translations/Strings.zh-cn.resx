@@ -295,7 +295,7 @@
     <value>重置为默认值</value>
   </data>
   <data name="FfzEmotes" xml:space="preserve">
-    <value>FFZ 表情符号：</value>
+    <value>FFZ 表情：</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
     <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
@@ -383,7 +383,7 @@
     <value>渲染</value>
   </data>
   <data name="RenderFfmpegWarning" xml:space="preserve">
-    <value>这仅供高级用户使用。如果出现管道结束错误，可能就是这个原因。</value>
+    <value>仅供高级用户使用。如果出现管道结束错误，可能就是这个原因。</value>
   </data>
   <data name="RenderFileFormat" xml:space="preserve">
     <value>文件格式：</value>
@@ -605,7 +605,7 @@
     <value>徽章比例：</value>
   </data>
   <data name="EmojiScale" xml:space="preserve">
-    <value>表情符号比例</value>
+    <value>表情符号比例：</value>
   </data>
   <data name="EmoteScale" xml:space="preserve">
     <value>表情比例：</value>
