@@ -27,7 +27,7 @@ namespace TwitchDownloaderCore
         private static readonly HttpClient httpClient = new HttpClient();
         private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
 
-        public static async Task<GqlVideoResponse> GetVideoInfo(int videoId)
+        public static async Task<GqlVideoResponse> GetVideoInfo(long videoId)
         {
             var request = new HttpRequestMessage()
             {
@@ -41,7 +41,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlVideoResponse>();
         }
 
-        public static async Task<GqlVideoTokenResponse> GetVideoToken(int videoId, string authToken)
+        public static async Task<GqlVideoTokenResponse> GetVideoToken(long videoId, string authToken)
         {
             var request = new HttpRequestMessage()
             {
@@ -57,7 +57,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlVideoTokenResponse>();
         }
 
-        public static async Task<string> GetVideoPlaylist(int videoId, string token, string sig)
+        public static async Task<string> GetVideoPlaylist(long videoId, string token, string sig)
         {
             HttpRequestMessage request;
             HttpResponseMessage response;
@@ -1032,7 +1032,7 @@ namespace TwitchDownloaderCore
         }
 
         /// <remarks>When a given video has only 1 chapter, data.video.moments.edges will be empty.</remarks>
-        public static async Task<GqlVideoChapterResponse> GetVideoChapters(int videoId)
+        public static async Task<GqlVideoChapterResponse> GetVideoChapters(long videoId)
         {
             var request = new HttpRequestMessage()
             {
@@ -1056,7 +1056,7 @@ namespace TwitchDownloaderCore
             return chapterResponse;
         }
 
-        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(int videoId, VideoInfo videoInfo)
+        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(long videoId, VideoInfo videoInfo)
         {
             var chapterResponse = await GetVideoChapters(videoId);
 

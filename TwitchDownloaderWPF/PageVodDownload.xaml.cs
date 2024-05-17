@@ -32,7 +32,7 @@ namespace TwitchDownloaderWPF
     public partial class PageVodDownload : Page
     {
         public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = new();
-        public int currentVideoId;
+        public long currentVideoId;
         public DateTime currentVideoTime;
         public TimeSpan vodLength;
         public int viewCount;
@@ -82,7 +82,7 @@ namespace TwitchDownloaderWPF
 
         private async Task GetVideoInfo()
         {
-            int videoId = ValidateUrl(textUrl.Text.Trim());
+            long videoId = ValidateUrl(textUrl.Text.Trim());
             if (videoId <= 0)
             {
                 MessageBox.Show(Translations.Strings.InvalidVideoLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidVideoLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -275,10 +275,10 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private static int ValidateUrl(string text)
+        private static long ValidateUrl(string text)
         {
             var vodIdMatch = TwitchRegex.MatchVideoId(text);
-            if (vodIdMatch is {Success: true} && int.TryParse(vodIdMatch.ValueSpan, out var vodId))
+            if (vodIdMatch is {Success: true} && long.TryParse(vodIdMatch.ValueSpan, out var vodId))
             {
                 return vodId;
             }

@@ -61,7 +61,7 @@ namespace TwitchDownloaderWPF
             {
                 if (id.All(char.IsDigit))
                 {
-                    Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(int.Parse(id));
+                    Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(long.Parse(id));
                     taskVideoList.Add(task);
                     taskDict[task.Id] = id;
                 }

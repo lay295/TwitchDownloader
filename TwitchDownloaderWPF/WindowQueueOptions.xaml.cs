@@ -464,7 +464,7 @@ namespace TwitchDownloaderWPF
                         {
                             Oauth = Settings.Default.OAuth,
                             TempFolder = Settings.Default.TempPath,
-                            Id = int.Parse(taskData.Id),
+                            Id = long.Parse(taskData.Id),
                             Quality = (ComboPreferredQuality.SelectedItem as ComboBoxItem)?.Content as string,
                             FfmpegPath = "ffmpeg",
                             TrimBeginning = false,
