@@ -54,7 +54,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 DownloadThreads = inputOptions.DownloadThreads,
                 ThrottleKib = inputOptions.ThrottleKib,
-                Id = int.Parse(vodIdMatch.ValueSpan),
+                Id = long.Parse(vodIdMatch.ValueSpan),
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
                 Quality = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch

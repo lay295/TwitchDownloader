@@ -115,7 +115,7 @@ namespace TwitchDownloaderWPF
             {
                 if (downloadType == DownloadType.Video)
                 {
-                    GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(int.Parse(downloadId));
+                    GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(long.Parse(downloadId));
 
                     var thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
                     if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))

@@ -97,7 +97,7 @@ namespace TwitchDownloaderCore
 
             if (chatRoot.video.id.All(char.IsDigit))
             {
-                var videoId = int.Parse(chatRoot.video.id);
+                var videoId = long.Parse(chatRoot.video.id);
                 VideoInfo videoInfo = null;
                 try
                 {

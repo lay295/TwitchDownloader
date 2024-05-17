@@ -274,7 +274,7 @@ namespace TwitchDownloaderCore
 
             if (downloadType == DownloadType.Video)
             {
-                GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(int.Parse(videoId));
+                GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(long.Parse(videoId));
                 if (videoInfoResponse.data.video == null)
                 {
                     throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
@@ -291,7 +291,7 @@ namespace TwitchDownloaderCore
                 viewCount = videoInfoResponse.data.video.viewCount;
                 game = videoInfoResponse.data.video.game?.displayName ?? "Unknown";
 
-                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(int.Parse(videoId), videoInfoResponse.data.video);
+                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(long.Parse(videoId), videoInfoResponse.data.video);
                 chatRoot.video.chapters.EnsureCapacity(videoChapterResponse.data.video.moments.edges.Count);
                 foreach (var responseChapter in videoChapterResponse.data.video.moments.edges)
                 {

@@ -5,7 +5,7 @@ namespace TwitchDownloaderCore.Options
 {
     public class VideoDownloadOptions
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Quality { get; set; }
         public string Filename { get; set; }
         public bool TrimBeginning { get; set; }
