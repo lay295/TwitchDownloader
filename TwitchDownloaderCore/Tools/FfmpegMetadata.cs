@@ -8,7 +8,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore.Tools
 {
-    // https://ffmpeg.org/ffmpeg-formats.html#Metadata-1
+    // https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
     public static class FfmpegMetadata
     {
         private const string LINE_FEED = "\u000A";
@@ -16,7 +16,7 @@ namespace TwitchDownloaderCore.Tools
         public static async Task SerializeAsync(string filePath, string streamerName, string videoId, string videoTitle, DateTime videoCreation, int viewCount, string videoDescription = null,
             TimeSpan startOffset = default, IEnumerable<VideoMomentEdge> videoMomentEdges = null, CancellationToken cancellationToken = default)
         {
-            await using var fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
+            await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
             await SerializeGlobalMetadata(sw, streamerName, videoId, videoTitle, videoCreation, viewCount, videoDescription);

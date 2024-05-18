@@ -8,7 +8,6 @@ using HandyControl.Data;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
-using CheckComboBox = HandyControl.Controls.CheckComboBox;
 using CheckComboBoxItem = HandyControl.Controls.CheckComboBoxItem;
 
 namespace TwitchDownloaderWPF
@@ -70,20 +69,11 @@ namespace TwitchDownloaderWPF
             }
 
             // Setup culture dropdown
-            foreach (var culture in AvailableCultures.All)
+            var currentCulture = Settings.Default.GuiCulture;
+            foreach (var (culture, index) in AvailableCultures.All.Select((x, index) => (x, index)))
             {
                 ComboLocale.Items.Add(culture.NativeName);
-            }
-            var currentCulture = Settings.Default.GuiCulture;
-            var selectedIndex = AvailableCultures.All.Select((item, index) => (item, index))
-                .Where(x => x.item.Code == currentCulture)
-                .Select(x => x.index)
-                .DefaultIfEmpty(-1)
-                .First();
-
-            if (selectedIndex > -1)
-            {
-                ComboLocale.SelectedIndex = selectedIndex;
+                if (culture.Code == currentCulture) ComboLocale.SelectedIndex = index;
             }
 
             ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelVerbose, Tag = LogLevel.Verbose });
