@@ -8,7 +8,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore.Tools
 {
-    // https://ffmpeg.org/ffmpeg-formats.html#Metadata-1
+    // https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
     public static class FfmpegMetadata
     {
         private const string LINE_FEED = "\u000A";
