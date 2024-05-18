@@ -68,7 +68,7 @@
                 <TextBlock Text="{lex:Loc Length}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="{lex:Loc DownloadFormat}" HorizontalAlignment="Right" Margin="0,12,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock Visibility="Visible" x:Name="compressionText" Text="{lex:Loc ChatCompression}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock Visibility="Collapsed" x:Name="timeText" Text="{lex:Loc TimestampFormat}" HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" />
+                <TextBlock Visibility="Collapsed" x:Name="timeText" Text="{lex:Loc TimestampFormat}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock x:Name="textTrim" Text="{lex:Loc TrimChat}" HorizontalAlignment="Right" Margin="0,10,0,33" Foreground="{DynamicResource AppText}" />
                 <StackPanel x:Name="stackEmbedText" Visibility="Visible">
                     <TextBlock HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource AppText}" ><Run Text="{lex:Loc EmbedImages}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc EmbedImagesTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
