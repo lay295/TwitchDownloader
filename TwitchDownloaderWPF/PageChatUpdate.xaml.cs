@@ -77,7 +77,7 @@ namespace TwitchDownloaderWPF
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
                 return;
@@ -181,11 +181,11 @@ namespace TwitchDownloaderWPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Translations.Strings.UnableToGetInfoMessage, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToGetInfoMessage, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -534,7 +534,7 @@ namespace TwitchDownloaderWPF
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
                     {
-                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     return;
                 }
@@ -566,7 +566,7 @@ namespace TwitchDownloaderWPF
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
                     {
-                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
                 btnBrowse.IsEnabled = true;
@@ -582,7 +582,7 @@ namespace TwitchDownloaderWPF
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

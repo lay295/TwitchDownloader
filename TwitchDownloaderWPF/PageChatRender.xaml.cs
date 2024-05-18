@@ -579,7 +579,7 @@ namespace TwitchDownloaderWPF
             {
                 if (!ValidateInputs())
                 {
-                    MessageBox.Show(Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -609,7 +609,7 @@ namespace TwitchDownloaderWPF
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
                     {
-                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     return;
                 }
@@ -664,11 +664,11 @@ namespace TwitchDownloaderWPF
                         if (ex.Message.Contains("The pipe has been ended"))
                         {
                             string errorLog = String.Join('\n', ffmpegLog.TakeLast(20).ToArray());
-                            MessageBox.Show(errorLog, Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(Application.Current.MainWindow!, errorLog, Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                         else
                         {
-                            MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                 }
@@ -709,7 +709,7 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                MessageBox.Show(Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

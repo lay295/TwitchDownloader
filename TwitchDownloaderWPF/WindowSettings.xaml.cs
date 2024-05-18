@@ -93,7 +93,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnClearCache_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult messageBoxResult = MessageBox.Show(Translations.Strings.ClearCacheConfirmation.Replace(@"\n", Environment.NewLine), Translations.Strings.DeleteConfirmation, MessageBoxButton.YesNo);
+            var messageBoxResult = MessageBox.Show(this, Translations.Strings.ClearCacheConfirmation.Replace(@"\n", Environment.NewLine), Translations.Strings.DeleteConfirmation, MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
                 //Let's clear the user selected temp folder and the default one
@@ -202,7 +202,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnResetSettings_OnClick(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translations.Strings.ResetSettingsConfirmationMessage, Translations.Strings.ResetSettingsConfirmation, MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+            if (MessageBox.Show(this, Translations.Strings.ResetSettingsConfirmationMessage, Translations.Strings.ResetSettingsConfirmation, MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
                 MessageBoxResult.Yes)
             {
                 Settings.Default.Reset();
@@ -216,7 +216,7 @@ namespace TwitchDownloaderWPF
 
                 if (fileName.EndsWith(".exe"))
                 {
-                    if (MessageBox.Show(Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
+                    if (MessageBox.Show(this, Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
                             MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
                     {
                         // Create a cmd window that waits 2 seconds before restarting the application
@@ -238,7 +238,7 @@ namespace TwitchDownloaderWPF
                 }
                 else
                 {
-                    MessageBox.Show(Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
+                    MessageBox.Show(this, Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
