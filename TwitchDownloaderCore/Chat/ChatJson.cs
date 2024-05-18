@@ -254,7 +254,7 @@ namespace TwitchDownloaderCore.Chat
                 TwitchHelper.CreateDirectory(outputDirectory.FullName);
             }
 
-            await using var fs = File.Create(filePath);
+            await using var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             switch (compression)
             {
                 case ChatCompression.None:
