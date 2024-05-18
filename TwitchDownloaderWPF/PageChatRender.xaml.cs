@@ -351,7 +351,7 @@ namespace TwitchDownloaderWPF
             {
                 if (!File.Exists(fileName))
                 {
-                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.FileNotFound + ' ' + Path.GetFileName(fileName));
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.FileNotFound + Path.GetFileName(fileName));
                     return false;
                 }
             }
