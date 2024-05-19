@@ -645,7 +645,7 @@ namespace TwitchDownloaderWPF
                 UpdateActionButtons(true);
                 try
                 {
-                    await currentRender.RenderVideoAsync(_cancellationTokenSource.Token, true);
+                    await currentRender.RenderVideoAsync(_cancellationTokenSource.Token, false);
                     renderProgress.SetStatus(Translations.Strings.StatusDone);
                     SetImage("Images/ppHop.gif", true);
                 }

@@ -30,7 +30,7 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        public async Task UpdateAsync(CancellationToken cancellationToken, bool skipCheckDup = false)
+        public async Task UpdateAsync(CancellationToken cancellationToken, bool allowOverwrite = true)
         {
             chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (!Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.Equals(".json", StringComparison.OrdinalIgnoreCase))
@@ -38,7 +38,7 @@ namespace TwitchDownloaderCore
                 throw new NotSupportedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
             }
 
-            if (!skipCheckDup)
+            if (allowOverwrite)
             {
                 while (File.Exists(_updateOptions.OutputFile))
                 {

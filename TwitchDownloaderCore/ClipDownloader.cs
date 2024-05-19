@@ -29,9 +29,9 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        public async Task DownloadAsync(CancellationToken cancellationToken, bool skipCheckDup = false)
+        public async Task DownloadAsync(CancellationToken cancellationToken, bool allowOverwrite = false)
         {
-            if (!skipCheckDup) 
+            if (allowOverwrite) 
             {
                 while (File.Exists(downloadOptions.Filename))
                 {

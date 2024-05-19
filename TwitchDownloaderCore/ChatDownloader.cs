@@ -244,14 +244,14 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        public async Task DownloadAsync(CancellationToken cancellationToken, bool skipCheckDup = false)
+        public async Task DownloadAsync(CancellationToken cancellationToken, bool allowOverwrite = true)
         {
             if (string.IsNullOrWhiteSpace(downloadOptions.Id))
             {
                 throw new NullReferenceException("Null or empty video/clip ID");
             }
 
-            if(!skipCheckDup) 
+            if(allowOverwrite) 
             {
                 while (File.Exists(downloadOptions.Filename))
                 {

@@ -69,9 +69,9 @@ namespace TwitchDownloaderCore
             highlightIcons = new HighlightIcons(renderOptions, Purple, outlinePaint);
         }
 
-        public async Task RenderVideoAsync(CancellationToken cancellationToken, bool skipCheckDup = false)
+        public async Task RenderVideoAsync(CancellationToken cancellationToken, bool allowOverwrite = true)
         {
-            if (!skipCheckDup)
+            if (allowOverwrite)
             {
                 while (File.Exists(renderOptions.OutputFile))
                 {
