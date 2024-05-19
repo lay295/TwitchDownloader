@@ -69,9 +69,9 @@ namespace TwitchDownloaderCore
             highlightIcons = new HighlightIcons(renderOptions, Purple, outlinePaint);
         }
 
-        public async Task RenderVideoAsync(CancellationToken cancellationToken, bool isWindowsDownload = false)
+        public async Task RenderVideoAsync(CancellationToken cancellationToken, bool skipCheckDup = false)
         {
-            if (!isWindowsDownload)
+            if (!skipCheckDup)
             {
                 while (File.Exists(renderOptions.OutputFile))
                 {
@@ -85,16 +85,11 @@ namespace TwitchDownloaderCore
                     else if (response == "reject")
                     {
                         _progress.SetStatus("Operation aborted. File not overwritten.");
-                        _progress.LogError("Operation aborted. File not overwritten.");
                         return;
                     }
                     else
                     {
                         _progress.SetStatus("Invalid response. Please enter 'confirm' to overwrite or 'reject' to cancel.");
-                        await Task.Delay(5_000, cancellationToken);
-                        _progress.SetStatus("Operation aborted. File not overwritten.");
-                        _progress.LogError("Operation aborted. File not overwritten.");
-                        return;
                     }
                 }
             }

@@ -30,7 +30,7 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        public async Task UpdateAsync(CancellationToken cancellationToken, bool isWindowsDownload = false)
+        public async Task UpdateAsync(CancellationToken cancellationToken, bool skipCheckDup = false)
         {
             chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (!Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.Equals(".json", StringComparison.OrdinalIgnoreCase))
@@ -38,7 +38,7 @@ namespace TwitchDownloaderCore
                 throw new NotSupportedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
             }
 
-            if (!isWindowsDownload)
+            if (!skipCheckDup)
             {
                 while (File.Exists(_updateOptions.OutputFile))
                 {
@@ -52,16 +52,11 @@ namespace TwitchDownloaderCore
                     else if (response == "reject")
                     {
                         _progress.SetStatus("Operation aborted. File not overwritten.");
-                        _progress.LogError("Operation aborted. File not overwritten.");
                         return;
                     }
                     else
                     {
                         _progress.SetStatus("Invalid response. Please enter 'confirm' to overwrite or 'reject' to cancel.");
-                        await Task.Delay(5_000, cancellationToken);
-                        _progress.SetStatus("Operation aborted. File not overwritten.");
-                        _progress.LogError("Operation aborted. File not overwritten.");
-                        return;
                     }
                 }
             }
