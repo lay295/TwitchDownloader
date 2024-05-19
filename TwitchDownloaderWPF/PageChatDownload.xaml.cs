@@ -531,7 +531,7 @@ namespace TwitchDownloaderWPF
 
                 try
                 {
-                    await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
+                    await currentDownload.DownloadAsync(_cancellationTokenSource.Token, true);
                     downloadProgress.SetStatus(Translations.Strings.StatusDone);
                     SetImage("Images/ppHop.gif", true);
                 }

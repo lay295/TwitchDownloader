@@ -30,12 +30,40 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        public async Task UpdateAsync(CancellationToken cancellationToken)
+        public async Task UpdateAsync(CancellationToken cancellationToken, bool isWindowsDownload = false)
         {
             chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (!Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.Equals(".json", StringComparison.OrdinalIgnoreCase))
             {
                 throw new NotSupportedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
+            }
+
+            if (!isWindowsDownload)
+            {
+                while (File.Exists(_updateOptions.OutputFile))
+                {
+                    _progress.SetStatus("File already exists. Do you want to overwrite it? (Confirm/Reject)");
+                    var response = Console.ReadLine()?.Trim().ToLower();
+
+                    if (response == "confirm")
+                    {
+                        break;
+                    }
+                    else if (response == "reject")
+                    {
+                        _progress.SetStatus("Operation aborted. File not overwritten.");
+                        _progress.LogError("Operation aborted. File not overwritten.");
+                        return;
+                    }
+                    else
+                    {
+                        _progress.SetStatus("Invalid response. Please enter 'confirm' to overwrite or 'reject' to cancel.");
+                        await Task.Delay(5_000, cancellationToken);
+                        _progress.SetStatus("Operation aborted. File not overwritten.");
+                        _progress.LogError("Operation aborted. File not overwritten.");
+                        return;
+                    }
+                }
             }
 
             // Dynamic step count setup

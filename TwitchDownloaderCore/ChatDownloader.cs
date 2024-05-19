@@ -251,8 +251,8 @@ namespace TwitchDownloaderCore
                 throw new NullReferenceException("Null or empty video/clip ID");
             }
 
-            if(!isWindowsDownload) {
-                // Check if already have exists file and want to overwrite or not
+            if(!isWindowsDownload) 
+            {
                 while (File.Exists(downloadOptions.Filename))
                 {
                     _progress.SetStatus("File already exists. Do you want to overwrite it? (Confirm/Reject)");
@@ -260,7 +260,7 @@ namespace TwitchDownloaderCore
         
                     if (response == "confirm")
                     {
-                        break; // Continue with the download
+                        break;
                     }
                     else if (response == "reject")
                     {

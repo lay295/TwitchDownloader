@@ -69,8 +69,36 @@ namespace TwitchDownloaderCore
             highlightIcons = new HighlightIcons(renderOptions, Purple, outlinePaint);
         }
 
-        public async Task RenderVideoAsync(CancellationToken cancellationToken)
+        public async Task RenderVideoAsync(CancellationToken cancellationToken, bool isWindowsDownload = false)
         {
+            if (!isWindowsDownload)
+            {
+                while (File.Exists(renderOptions.OutputFile))
+                {
+                    _progress.SetStatus("File already exists. Do you want to overwrite it? (Confirm/Reject)");
+                    var response = Console.ReadLine()?.Trim().ToLower();
+
+                    if (response == "confirm")
+                    {
+                        break;
+                    }
+                    else if (response == "reject")
+                    {
+                        _progress.SetStatus("Operation aborted. File not overwritten.");
+                        _progress.LogError("Operation aborted. File not overwritten.");
+                        return;
+                    }
+                    else
+                    {
+                        _progress.SetStatus("Invalid response. Please enter 'confirm' to overwrite or 'reject' to cancel.");
+                        await Task.Delay(5_000, cancellationToken);
+                        _progress.SetStatus("Operation aborted. File not overwritten.");
+                        _progress.LogError("Operation aborted. File not overwritten.");
+                        return;
+                    }
+                }
+            }
+
             _progress.SetStatus("Fetching Images [1/2]");
             await Task.Run(() => FetchScaledImages(cancellationToken), cancellationToken);
 

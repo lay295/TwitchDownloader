@@ -549,7 +549,7 @@ namespace TwitchDownloaderWPF
 
                 try
                 {
-                    await currentUpdate.UpdateAsync(_cancellationTokenSource.Token);
+                    await currentUpdate.UpdateAsync(_cancellationTokenSource.Token, true);
                     textJson.Text = "";
                     updateProgress.SetStatus(Translations.Strings.StatusDone);
                     SetImage("Images/ppHop.gif", true);

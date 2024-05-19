@@ -39,15 +39,16 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken, bool isWindowsDownload = false)
         {
-            if (!isWindowsDownload) {
+            if (!isWindowsDownload)
+            {
                 while (File.Exists(downloadOptions.Filename))
                 {
                     _progress.SetStatus("File already exists. Do you want to overwrite it? (Confirm/Reject)");
                     var response = Console.ReadLine()?.Trim().ToLower();
-        
+
                     if (response == "confirm")
                     {
-                        break; // Continue with the download
+                        break;
                     }
                     else if (response == "reject")
                     {
@@ -64,8 +65,8 @@ namespace TwitchDownloaderCore
                         return;
                     }
                 }
-            }  
-                
+            }
+
             await TwitchHelper.CleanupAbandonedVideoCaches(downloadOptions.TempFolder, downloadOptions.CacheCleanerCallback, _progress);
 
             string downloadFolder = Path.Combine(
