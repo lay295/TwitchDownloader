@@ -29,17 +29,33 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        public async Task DownloadAsync(CancellationToken cancellationToken)
+        public async Task DownloadAsync(CancellationToken cancellationToken, bool isWindowsDownload = false)
         {
             // Check if already have exists file and want to overwrite or not
-            if (File.Exists(downloadOptions.Filename))
-            {
-                _progress.SetStatus("File already exists. Do you want to overwrite it? (Y/N)");
-                var response = Console.ReadLine();
-                if (response?.Trim().ToUpper() != "Y")
+            if (!isWindowsDownload) {
+                while (File.Exists(downloadOptions.Filename))
                 {
-                    _progress.SetStatus("Operation aborted. File not overwritten.");
-                    return;
+                    _progress.SetStatus("File already exists. Do you want to overwrite it? (Confirm/Reject)");
+                    var response = Console.ReadLine()?.Trim().ToLower();
+        
+                    if (response == "confirm")
+                    {
+                        break; // Continue with the download
+                    }
+                    else if (response == "reject")
+                    {
+                        _progress.SetStatus("Operation aborted. File not overwritten.");
+                        _progress.LogError("Operation aborted. File not overwritten.");
+                        return;
+                    }
+                    else
+                    {
+                        _progress.SetStatus("Invalid response. Please enter 'confirm' to overwrite or 'reject' to cancel.");
+                        await Task.Delay(5_000, cancellationToken);
+                        _progress.SetStatus("Operation aborted. File not overwritten.");
+                        _progress.LogError("Operation aborted. File not overwritten.");
+                        return;
+                    }
                 }
             }
 
