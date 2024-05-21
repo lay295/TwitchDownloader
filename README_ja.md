@@ -7,30 +7,21 @@
     Twitch VOD/Clip/Chat Downloader and Chat Renderer
     <br />
     <br />
-    <a href="https://github.com/lay295/TwitchDownloader/issues">Report Bug</a>
+    <a href="https://github.com/lay295/TwitchDownloader/issues">バグを報告する</a>
   </div>
 </div>
 
-This document is also available in:
-
-- [**Spanish / Español**](README_es.md)
-- [**Italian / Italiano**](README_it.md)
-- [**Portuguese (Brazil) / Português (Brasil)**](README_pt-br.md)
-- [**Turkish / Türkçe**](README_tr.md)
-- [**Japanese / 日本語 (翻訳作業中 WIP)**](README_ja.md)
-- [**Simplified Chinese / 简体中文**](README_zh-cn.md)
-
-## Chat Render Example
+## チャットレンダリングの例
 
 <https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
 
-## What can it do?
+## なにができる？
 
-- Download Twitch VODs
-- Download Twitch Clips
-- Download chat for VODs and Clips, in either a [JSON with all the original information](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json), a browser HTML file, or a [plain text file](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)
-- Update the contents of a previously generated JSON chat file with an option to save as another format
-- Use a previously generated JSON chat file to render the chat with Twitter Twemoji or Google Noto Color emojis and BTTV, FFZ, 7TV static and animated emotes
+- TwitchのVODsをダウンロードする
+- Twitchのクリップをダウンロードする
+- VODs、クリップのチャットを[全ての情報を含んだJSON](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json)、ブラウザ用のHTMLファイル、[プレーンテキスト](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)でダウンロードする
+- 以前に生成されたJSOn形式のチャットファイルを別の形式で保存し、内容を変更する
+- 生成されたJSON形式のチャットファイルから、Twitter Twemoji・Google Noto Color emoji・BTTV・FFZ・7TV・スタンプ・GIFスタンプと一緒にチャットをレンダリングします
 
 # GUI
 
@@ -38,36 +29,36 @@ This document is also available in:
 
 ![](https://i.imgur.com/bLegxGX.gif)
 
-### [See the full WPF documentation here](TwitchDownloaderWPF/README.md)
+### [完全なWPFのドキュメントを見る](TwitchDownloaderWPF/README.md)
 
-### Functionality
+### 機能性
 
-The Windows WPF GUI implements all of the main functions of the program along with some extra quality of life functions:
+Windows WPF GUIは、プログラムのすべての主要機能といくつかのQOL機能を実装しています:
 
-- Queue up multiple download/render jobs to run simultaneously
-- Create a list of download jobs from a list of vod/clip links
-- Search for and download multiple VODs/clips from any streamer without leaving the app
+- 複数のダウンロード・レンダリングジョブを同時にキューに追加する
+- VODs・クリップのリンクからダウンロードジョブのリストを作成する
+- ストリーマーから複数のVODs・クリップを検索してダウンロードする
 
-### Multi-language Support
+### 複数言語サポート
 
-The Windows WPF GUI is available in multiple languages thanks to community translations. See the [Localization section](TwitchDownloaderWPF/README.md#localization) of the [WPF README](TwitchDownloaderWPF/README.md) for more details.
+Windows WPF GUIは、コミュニティの翻訳により複数の言語で利用可能です。[WPF README](TwitchDownloaderWPF/README.md) の [Localization section](TwitchDownloaderWPF/README.md#localization) で詳細を確認できます。
 
-### Theming
+### テーマ
 
-The Windows WPF GUI comes bundled with both light and dark themes, along with an option to update live according the current Windows theme. It also supports user created themes! See the [Theming section](TwitchDownloaderWPF/README.md#theming) of the [WPF README](TwitchDownloaderWPF/README.md) for more details.
+Windows WPF GUI では、ライトテーマとダークテーマの両方が実装されており、現在のWindowsテーマに同期する設定もあります。また、ユーザーが作成したテーマもサポートされています！[WPF README](TwitchDownloaderWPF/README.md) の [Theming section](TwitchDownloaderWPF/README.md#theming) で詳細を確認できます。
 
-### Video Demonstration
+### ビデオデモンストレーション
 
 <https://www.youtube.com/watch?v=0W3MhfhnYjk>
-(older version, same concept)
+(古いバージョンでも同様です)
 
 ## Linux?
 
-Check twitch-downloader-gui on [github](https://github.com/mohad12211/twitch-downloader-gui) or on the [AUR](https://aur.archlinux.org/packages/twitch-downloader-gui) for a Linux GUI wrapper for the CLI.
+twitch-downloader-gui を [GitHub](https://github.com/mohad12211/twitch-downloader-gui) や [AUR](https://aur.archlinux.org/packages/twitch-downloader-gui) でチェックしてください
 
 ## MacOS?
 
-No GUI is available for MacOS yet :(
+MacOS用のGUIはまだありません。:(
 
 # CLI
 

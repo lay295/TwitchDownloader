@@ -47,9 +47,14 @@ namespace TwitchDownloaderCore.TwitchObjects
             foreach (var (versionName, versionData) in versions)
             {
                 using MemoryStream ms = new MemoryStream(versionData.bytes);
+
                 //For some reason, twitch has corrupted images sometimes :) for example
                 //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
-                SKBitmap badgeImage = SKBitmap.Decode(ms);
+                using var codec = SKCodec.Create(ms, out var result);
+                if (codec is null)
+                    throw new Exception($"Skia was unable to decode badge {versionName} ({name}). Returned: {result}");
+
+                var badgeImage = SKBitmap.Decode(codec);
                 badgeImage.SetImmutable();
                 Versions.Add(versionName, badgeImage);
             }

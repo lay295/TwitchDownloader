@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows;
@@ -263,7 +264,7 @@ namespace TwitchDownloaderWPF
                 errorMessage = taskException.Exception.ToString();
             }
 
-            MessageBox.Show(errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(Application.Current.MainWindow!, errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void BtnRemoveTask_Click(object sender, RoutedEventArgs e)
@@ -290,13 +291,13 @@ namespace TwitchDownloaderWPF
         {
             if (task.CanRun() || task.Status is TwitchTaskStatus.Running or TwitchTaskStatus.Waiting)
             {
-                MessageBox.Show(Translations.Strings.CancelTaskBeforeRemoving, Translations.Strings.TaskCouldNotBeRemoved, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.CancelTaskBeforeRemoving, Translations.Strings.TaskCouldNotBeRemoved, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             if (!taskList.Remove(task))
             {
-                MessageBox.Show(Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -313,7 +314,17 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            Process.Start(new ProcessStartInfo(outputFolder) { UseShellExecute = true });
+            var args = File.Exists(task.OutputFile)
+                ? $"/select,\"{task.OutputFile}\""
+                : $"\"{outputFolder}\"";
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe"),
+                Arguments = args,
+                UseShellExecute = true,
+                WorkingDirectory = outputFolder
+            });
         }
     }
 }

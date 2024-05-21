@@ -8,6 +8,8 @@ namespace TwitchDownloaderCLI.Models
     [DebuggerDisplay("{_timeSpan}")]
     public readonly record struct TimeDuration
     {
+        public static TimeDuration MinusOneSeconds { get; } = new(-1 * TimeSpan.TicksPerSecond);
+
         private readonly TimeSpan _timeSpan;
 
         /// <summary>

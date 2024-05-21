@@ -8,7 +8,6 @@ using HandyControl.Data;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
-using CheckComboBox = HandyControl.Controls.CheckComboBox;
 using CheckComboBoxItem = HandyControl.Controls.CheckComboBoxItem;
 
 namespace TwitchDownloaderWPF
@@ -70,20 +69,11 @@ namespace TwitchDownloaderWPF
             }
 
             // Setup culture dropdown
-            foreach (var culture in AvailableCultures.All)
+            var currentCulture = Settings.Default.GuiCulture;
+            foreach (var (culture, index) in AvailableCultures.All.Select((x, index) => (x, index)))
             {
                 ComboLocale.Items.Add(culture.NativeName);
-            }
-            var currentCulture = Settings.Default.GuiCulture;
-            var selectedIndex = AvailableCultures.All.Select((item, index) => (item, index))
-                .Where(x => x.item.Code == currentCulture)
-                .Select(x => x.index)
-                .DefaultIfEmpty(-1)
-                .First();
-
-            if (selectedIndex > -1)
-            {
-                ComboLocale.SelectedIndex = selectedIndex;
+                if (culture.Code == currentCulture) ComboLocale.SelectedIndex = index;
             }
 
             ComboLogLevels.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.LogLevelVerbose, Tag = LogLevel.Verbose });
@@ -103,7 +93,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnClearCache_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult messageBoxResult = MessageBox.Show(Translations.Strings.ClearCacheConfirmation.Replace(@"\n", Environment.NewLine), Translations.Strings.DeleteConfirmation, MessageBoxButton.YesNo);
+            var messageBoxResult = MessageBox.Show(this, Translations.Strings.ClearCacheConfirmation.Replace(@"\n", Environment.NewLine), Translations.Strings.DeleteConfirmation, MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
                 //Let's clear the user selected temp folder and the default one
@@ -212,7 +202,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnResetSettings_OnClick(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translations.Strings.ResetSettingsConfirmationMessage, Translations.Strings.ResetSettingsConfirmation, MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+            if (MessageBox.Show(this, Translations.Strings.ResetSettingsConfirmationMessage, Translations.Strings.ResetSettingsConfirmation, MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
                 MessageBoxResult.Yes)
             {
                 Settings.Default.Reset();
@@ -226,7 +216,7 @@ namespace TwitchDownloaderWPF
 
                 if (fileName.EndsWith(".exe"))
                 {
-                    if (MessageBox.Show(Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
+                    if (MessageBox.Show(this, Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
                             MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
                     {
                         // Create a cmd window that waits 2 seconds before restarting the application
@@ -248,7 +238,7 @@ namespace TwitchDownloaderWPF
                 }
                 else
                 {
-                    MessageBox.Show(Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
+                    MessageBox.Show(this, Translations.Strings.TheApplicationMustBeRestartedMessage, string.Format(Translations.Strings.RestartTheApplication, nameof(TwitchDownloaderWPF)),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }

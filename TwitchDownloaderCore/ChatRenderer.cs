@@ -219,7 +219,8 @@ namespace TwitchDownloaderCore
             {
                 foreach (var username in renderOptions.IgnoreUsersArray)
                 {
-                    if (username.Equals(comments[i].commenter.name, StringComparison.OrdinalIgnoreCase))
+                    if (username.Equals(comments[i].commenter.name, StringComparison.OrdinalIgnoreCase) // ASCII login name
+                        || (username.Any(IsNotAscii) && username.Equals(comments[i].commenter.display_name, StringComparison.InvariantCultureIgnoreCase))) // Potentially non-ASCII display name
                     {
                         comments.RemoveAt(i);
                         i--;
@@ -1640,10 +1641,12 @@ namespace TwitchDownloaderCore
                 return new List<ChatBadge>();
             }
 
-            var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
+            var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, renderOptions.TempFolder, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var badge in badgeTask)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // Assume badges are always 2x scale, not 1x or 4x
                 var newScale = renderOptions.ReferenceScale * renderOptions.BadgeScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
@@ -1657,10 +1660,12 @@ namespace TwitchDownloaderCore
 
         private async Task<List<TwitchEmote>> GetScaledEmotes(CancellationToken cancellationToken)
         {
-            var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
+            var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, renderOptions.TempFolder, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var emote in emoteTask)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // Assume emojis are 4x scale
                 double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
@@ -1679,6 +1684,8 @@ namespace TwitchDownloaderCore
 
             foreach (var emote in emoteThirdTask)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // Assume emojis are 4x scale
                 double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
@@ -1696,6 +1703,8 @@ namespace TwitchDownloaderCore
 
             foreach (var cheer in cheerTask)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 //Assume cheermotes are always 2x scale, not 1x or 4x
                 var newScale = renderOptions.ReferenceScale * renderOptions.EmoteScale;
                 if (Math.Abs(newScale - 1.0) > 0.01)
@@ -1718,6 +1727,8 @@ namespace TwitchDownloaderCore
             string[] emojiKeys = emojis.Keys.ToArray();
             foreach (var emojiKey in emojiKeys)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 SKBitmap bitmap = emojis[emojiKey];
                 SKImageInfo oldEmojiInfo = bitmap.Info;
                 SKImageInfo imageInfo = new SKImageInfo((int)(oldEmojiInfo.Width * emojiScale), (int)(oldEmojiInfo.Height * emojiScale));

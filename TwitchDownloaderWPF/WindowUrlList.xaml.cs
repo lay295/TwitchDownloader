@@ -48,7 +48,7 @@ namespace TwitchDownloaderWPF
 
             if (invalidList.Count > 0)
             {
-                MessageBox.Show(Translations.Strings.UnableToParseInputsMessage + Environment.NewLine + string.Join(Environment.NewLine, invalidList.ToArray()), Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, Translations.Strings.UnableToParseInputsMessage + Environment.NewLine + string.Join(Environment.NewLine, invalidList.ToArray()), Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
                 btnQueue.IsEnabled = true;
                 return;
             }
@@ -61,7 +61,7 @@ namespace TwitchDownloaderWPF
             {
                 if (id.All(char.IsDigit))
                 {
-                    Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(int.Parse(id));
+                    Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(long.Parse(id));
                     taskVideoList.Add(task);
                     taskDict[task.Id] = id;
                 }
@@ -101,7 +101,7 @@ namespace TwitchDownloaderWPF
                         Streamer = videoInfo.owner.displayName,
                         Time = Settings.Default.UTCVideoTime ? videoInfo.createdAt : videoInfo.createdAt.ToLocalTime(),
                         Views = videoInfo.viewCount,
-                        Game = videoInfo.game?.displayName ?? "Unknown",
+                        Game = videoInfo.game?.displayName ?? Translations.Strings.UnknownGame,
                         Length = videoInfo.lengthSeconds
                     });
                 }
@@ -139,7 +139,7 @@ namespace TwitchDownloaderWPF
                         Streamer = clipInfo.broadcaster.displayName,
                         Time = Settings.Default.UTCVideoTime ? clipInfo.createdAt : clipInfo.createdAt.ToLocalTime(),
                         Views = clipInfo.viewCount,
-                        Game = clipInfo.game?.displayName ?? "Unknown",
+                        Game = clipInfo.game?.displayName ?? Translations.Strings.UnknownGame,
                         Length = clipInfo.durationSeconds
                     });
                 }
@@ -151,7 +151,7 @@ namespace TwitchDownloaderWPF
 
             if (errorList.Count > 0)
             {
-                MessageBox.Show(Translations.Strings.UnableToGetInfoMessage + Environment.NewLine + string.Join(Environment.NewLine, errorList.ToArray()), Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, Translations.Strings.UnableToGetInfoMessage + Environment.NewLine + string.Join(Environment.NewLine, errorList.ToArray()), Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
                 btnQueue.IsEnabled = true;
                 return;
             }

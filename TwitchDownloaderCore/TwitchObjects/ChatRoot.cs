@@ -223,9 +223,11 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int imageScale { get; set; }
         public byte[] data { get; set; }
         public string name { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string url { get; set; }
         public int width { get; set; }
         public int height { get; set; }
+        public bool isZeroWidth { get; set; }
     }
 
     [DebuggerDisplay("{name}")]

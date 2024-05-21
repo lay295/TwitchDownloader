@@ -96,7 +96,7 @@ namespace TwitchDownloaderCore
                     await ChatJson.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.Compression, cancellationToken);
                     break;
                 case ChatFormat.Html:
-                    await ChatHtml.SerializeAsync(_updateOptions.OutputFile, chatRoot, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
+                    await ChatHtml.SerializeAsync(_updateOptions.OutputFile, chatRoot, _progress, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
                     break; // If there is embedded data, it's almost guaranteed to be first party emotes or badges.
                 case ChatFormat.Text:
                     await ChatText.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.TextTimestampFormat);
@@ -108,6 +108,8 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateVideoInfo(int totalSteps, int currentStep, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             _progress.SetStatus($"Updating Video Info [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
@@ -118,7 +120,7 @@ namespace TwitchDownloaderCore
 
             if (chatRoot.video.id.All(char.IsDigit))
             {
-                var videoId = int.Parse(chatRoot.video.id);
+                var videoId = long.Parse(chatRoot.video.id);
                 VideoInfo videoInfo = null;
                 try
                 {
@@ -198,6 +200,8 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateChatTrim(int totalSteps, int currentStep, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             _progress.SetStatus($"Updating Chat Trim [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
@@ -243,6 +247,8 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateEmbeds(int currentStep, int totalSteps, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             _progress.SetStatus($"Updating Embeds [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
@@ -261,7 +267,7 @@ namespace TwitchDownloaderCore
 
         private async Task FirstPartyEmoteTask(CancellationToken cancellationToken = default)
         {
-            List<TwitchEmote> firstPartyEmoteList = await TwitchHelper.GetEmotes(chatRoot.comments, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
+            List<TwitchEmote> firstPartyEmoteList = await TwitchHelper.GetEmotes(chatRoot.comments, _updateOptions.TempFolder, _progress, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
             int inputCount = chatRoot.embeddedData.firstParty.Count;
             chatRoot.embeddedData.firstParty = new List<EmbedEmoteData>();
@@ -293,6 +299,7 @@ namespace TwitchDownloaderCore
                 newEmote.name = emote.Name;
                 newEmote.width = emote.Width / emote.ImageScale;
                 newEmote.height = emote.Height / emote.ImageScale;
+                newEmote.isZeroWidth = emote.IsZeroWidth;
                 chatRoot.embeddedData.thirdParty.Add(newEmote);
             }
             _progress.LogInfo($"Input 3rd party emote count: {inputCount}. Output count: {chatRoot.embeddedData.thirdParty.Count}");
@@ -300,7 +307,7 @@ namespace TwitchDownloaderCore
 
         private async Task ChatBadgeTask(CancellationToken cancellationToken = default)
         {
-            List<ChatBadge> badgeList = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, _updateOptions.TempFolder, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
+            List<ChatBadge> badgeList = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, _updateOptions.TempFolder, _progress, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
             int inputCount = chatRoot.embeddedData.twitchBadges.Count;
             chatRoot.embeddedData.twitchBadges = new List<EmbedChatBadge>();
@@ -460,7 +467,7 @@ namespace TwitchDownloaderCore
                 TrimBeginningTime = sectionStart,
                 TrimEnding = true,
                 TrimEndingTime = sectionEnd,
-                ConnectionCount = 4,
+                DownloadThreads = 4,
                 EmbedData = false,
                 BttvEmotes = false,
                 FfzEmotes = false,

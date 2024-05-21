@@ -239,7 +239,7 @@
   <data name="Download" xml:space="preserve">
     <value>Pobierz</value>
   </data>
-  <data name="DownloadConnections" xml:space="preserve">
+  <data name="ChatDownloadThreads" xml:space="preserve">
     <value>Połączenia:</value>
   </data>
   <data name="DownloadFilenameTemplates" xml:space="preserve">
@@ -248,7 +248,7 @@
   <data name="DownloadFormat" xml:space="preserve">
     <value>Format Pobierania:</value>
   </data>
-  <data name="DownloadThreads" xml:space="preserve">
+  <data name="VideoDownloadThreads" xml:space="preserve">
     <value>Wątki Pobierania:</value>
   </data>
   <data name="EmbedImages" xml:space="preserve">
@@ -860,5 +860,14 @@
   </data>
   <data name="ContextMenuOpenFolder" xml:space="preserve">
     <value>Open folder</value>
+  </data>
+  <data name="UnknownUser" xml:space="preserve">
+    <value>Unknown User</value>
+  </data>
+  <data name="UnknownGame" xml:space="preserve">
+    <value>Unknown Game</value>
+  </data>
+  <data name="UnknownVideoLength" xml:space="preserve">
+    <value>Unknown</value>
   </data>
 </root>

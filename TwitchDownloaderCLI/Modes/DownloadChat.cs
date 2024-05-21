@@ -59,7 +59,7 @@ namespace TwitchDownloaderCLI.Modes
                     : inputOptions.OutputFile,
                 Compression = inputOptions.Compression,
                 TimeFormat = inputOptions.TimeFormat,
-                ConnectionCount = inputOptions.ChatConnections,
+                DownloadThreads = inputOptions.DownloadThreads,
                 Silent = inputOptions.Silent,
                 BttvEmotes = (bool)inputOptions.BttvEmotes!,
                 FfzEmotes = (bool)inputOptions.FfzEmotes!,
