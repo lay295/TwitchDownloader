@@ -42,7 +42,7 @@ namespace TwitchDownloaderCore
             {
                 while (File.Exists(_updateOptions.OutputFile))
                 {
-                    _progress.SetStatus("File already exists. Do you want to overwrite it? (Confirm/Reject)");
+                    _progress.SetStatusWarning("File already exists. Do you want to overwrite it? (Confirm/Reject)");
                     var response = Console.ReadLine()?.Trim().ToLower();
 
                     if (response == "confirm")
@@ -51,12 +51,12 @@ namespace TwitchDownloaderCore
                     }
                     else if (response == "reject")
                     {
-                        _progress.SetStatus("Operation aborted. File not overwritten.");
+                        _progress.SetStatusWarning("Operation aborted. File not overwritten.");
                         return;
                     }
                     else
                     {
-                        _progress.SetStatus("Invalid response. Please enter 'confirm' to overwrite or 'reject' to cancel.");
+                        _progress.SetStatusWarning("Invalid response. Please enter 'confirm' to overwrite or 'reject' to cancel.");
                     }
                 }
             }

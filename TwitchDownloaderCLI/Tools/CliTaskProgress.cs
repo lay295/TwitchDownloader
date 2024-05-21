@@ -46,6 +46,17 @@ namespace TwitchDownloaderCLI.Tools
             }
         }
 
+        public void SetStatusWarning(string status)
+        {
+            lock (this)
+            {
+                _status = status;
+                _statusIsTemplate = false;
+
+                WriteNewLineMessage(WARNING_LOG_PREAMBLE, status);
+            }
+        }
+
         public void SetTemplateStatus(string status, int initialPercent)
         {
             if ((_logLevel & LogLevel.Status) == 0) return;

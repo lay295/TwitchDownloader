@@ -30,6 +30,7 @@ namespace TwitchDownloaderCore.Tools
 
         public void SetStatus(string status) { }
 
+        public void SetStatusWarning(string status){ }
         public void SetTemplateStatus(string status, int initialPercent) { }
 
         public void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2) { }

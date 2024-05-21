@@ -6,6 +6,7 @@ namespace TwitchDownloaderCore.Interfaces
     public interface ITaskProgress : ITaskLogger
     {
         void SetStatus(string status);
+        void SetStatusWarning(string status);
         void SetTemplateStatus(string status, int initialPercent);
         void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2);
         void ReportProgress(int percent);
