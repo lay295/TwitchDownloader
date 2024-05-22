@@ -63,10 +63,13 @@ namespace TwitchDownloaderWPF
             Main.Content = pageQueue;
         }
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_OnSourceInitialized(object sender, EventArgs e)
         {
             App.RequestAppThemeChange();
+        }
 
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
             Main.Content = pageVodDownload;
             if (Settings.Default.UpgradeRequired)
             {

@@ -111,19 +111,6 @@ namespace TwitchDownloaderWPF.Services
                     _ = NativeFunctions.SetWindowAttribute(windowHandle, darkTitleBarAttribute, &shouldUseDarkTitleBar, sizeof(int));
                 }
             }
-
-            Window wnd = new()
-            {
-                SizeToContent = SizeToContent.WidthAndHeight,
-                Top = int.MinValue + 1,
-                WindowStyle = WindowStyle.None,
-                ShowInTaskbar = false
-            };
-            wnd.Show();
-            wnd.Close();
-            // Dark title bar is a bit buggy, requires window redraw (focus change, resize, transparency change) to fully apply.
-            // We *could* send a repaint message to win32.dll, but this solution works and is way easier.
-            // Win11 might not have this issue but Win10 does so please leave this
         }
 
         private void ChangeThemePath(string newTheme)

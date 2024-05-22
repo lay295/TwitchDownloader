@@ -10,7 +10,7 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleRenderRange}" Height="150" Width="400" Background="#FFEFEFEF" Initialized="Window_Initialized" Loaded="Window_Loaded">
+        Title="{lex:Loc TitleRenderRange}" Height="150" Width="400" Background="#FFEFEFEF" Initialized="Window_Initialized" SourceInitialized="Window_OnSourceInitialized">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />

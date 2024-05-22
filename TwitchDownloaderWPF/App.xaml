@@ -41,7 +41,7 @@
             <SolidColorBrush x:Key="StatusBarText" Color="#212121" />
             <SolidColorBrush x:Key="ProgressBarForeground" Color="#326CF3" />
 
-            <Style TargetType="{x:Type Window}">
+            <Style TargetType="{x:Type local:MainWindow}">
                 <Setter Property="behave:WindowIntegrityCheckBehavior.IntegrityCheck" Value="True"></Setter>
             </Style>
         </ResourceDictionary>

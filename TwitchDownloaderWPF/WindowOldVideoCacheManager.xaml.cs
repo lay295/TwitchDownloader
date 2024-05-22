@@ -37,16 +37,17 @@ namespace TwitchDownloaderWPF
             InitializeComponent();
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        private void OnSourceInitialized(object sender, EventArgs e)
         {
             App.RequestTitleBarChange();
+        }
 
-            // For some stupid reason, this does not work unless I manually set it, even though its a binding
-            DataGrid.ItemsSource = GridItems;
-
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
             // Do this the dumb way because bindings are annoying without view models
             var sizeString = VideoSizeEstimator.StringifyByteCount(_totalSize);
             TextTotalSize.Text = string.IsNullOrEmpty(sizeString) ? "0B" : sizeString;
+            DataGrid.ItemsSource = GridItems;
         }
 
         private void OnClosing(object sender, CancelEventArgs e)

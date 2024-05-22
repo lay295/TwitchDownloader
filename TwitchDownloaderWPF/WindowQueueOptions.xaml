@@ -10,7 +10,7 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleEnqueueOptions}" MinHeight="280" Height="280" MinWidth="500" Width="500" SizeToContent="WidthAndHeight" Loaded="Window_loaded" Background="{DynamicResource AppBackground}">
+        Title="{lex:Loc TitleEnqueueOptions}" MinHeight="280" Height="280" MinWidth="500" Width="500" SizeToContent="WidthAndHeight" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />

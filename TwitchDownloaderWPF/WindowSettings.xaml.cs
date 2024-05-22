@@ -118,7 +118,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_OnSourceInitialized(object sender, EventArgs e)
         {
             App.RequestTitleBarChange();
         }
