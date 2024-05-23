@@ -91,7 +91,8 @@ namespace TwitchDownloaderCLI.Modes
                 AccentIndentScale = inputOptions.ScaleAccentIndent,
                 AccentStrokeScale = inputOptions.ScaleAccentStroke,
                 DisperseCommentOffsets = inputOptions.DisperseCommentOffsets,
-                AlternateMessageBackgrounds = inputOptions.AlternateMessageBackgrounds
+                AlternateMessageBackgrounds = inputOptions.AlternateMessageBackgrounds,
+                AdjustUsernameVisibility = inputOptions.AdjustUsernameVisibility,
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255 && !(renderOptions.AlternateMessageBackgrounds! && renderOptions.AlternateBackgroundColor.Alpha != 255))

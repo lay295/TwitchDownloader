@@ -909,5 +909,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["LogLevels"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AdjustUsernameVisibility {
+            get {
+                return ((bool)(this["AdjustUsernameVisibility"]));
+            }
+            set {
+                this["AdjustUsernameVisibility"] = value;
+            }
+        }
     }
 }
