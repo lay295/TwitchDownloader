@@ -294,6 +294,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.Offline = checkOffline.IsChecked.GetValueOrDefault();
             Settings.Default.DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault();
             Settings.Default.AlternateMessageBackgrounds = checkAlternateMessageBackgrounds.IsChecked.GetValueOrDefault();
+            Settings.Default.AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault();
             if (comboFormat.SelectedItem != null)
             {
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
