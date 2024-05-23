@@ -162,7 +162,7 @@ namespace TwitchDownloaderWPF
             {
                 _refreshThemeOnCancel = true;
                 Settings.Default.GuiTheme = (string)ComboTheme.SelectedItem;
-                App.RequestAppThemeChange();
+                App.RequestAppThemeChange(true);
             }
         }
 

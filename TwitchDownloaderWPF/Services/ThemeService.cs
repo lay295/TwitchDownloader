@@ -66,11 +66,11 @@ namespace TwitchDownloaderWPF.Services
 
             if (Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
             {
-                ChangeAppTheme();
+                ChangeAppTheme(true);
             }
         }
 
-        public void ChangeAppTheme()
+        public void ChangeAppTheme(bool forceRepaint = false)
         {
             var newTheme = Settings.Default.GuiTheme;
             if (newTheme.Equals("System", StringComparison.OrdinalIgnoreCase))
@@ -86,6 +86,20 @@ namespace TwitchDownloaderWPF.Services
             if (_wpfApplication.Windows.Count > 0)
             {
                 SetTitleBarTheme(_wpfApplication.Windows);
+            }
+
+            if (forceRepaint)
+            {
+                // Cause an NC repaint by changing focus
+                var wnd = new Window
+                {
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    Top = int.MinValue + 1,
+                    WindowStyle = WindowStyle.None,
+                    ShowInTaskbar = false
+                };
+                wnd.Show();
+                wnd.Close();
             }
         }
 
