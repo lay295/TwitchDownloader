@@ -871,4 +871,7 @@
   <data name="UnknownVideoLength" xml:space="preserve">
     <value>Unknown</value>
   </data>
+  <data name="IncreaseUsernameReadability" xml:space="preserve">
+    <value>Increase Username Readability:</value>
+  </data>
 </root>
