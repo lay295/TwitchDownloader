@@ -54,8 +54,8 @@ namespace TwitchDownloaderWPF
             Current?.Shutdown();
         }
 
-        public static void RequestAppThemeChange()
-            => ThemeServiceSingleton.ChangeAppTheme();
+        public static void RequestAppThemeChange(bool forceRepaint = false)
+            => ThemeServiceSingleton.ChangeAppTheme(forceRepaint);
 
         public static void RequestTitleBarChange()
             => ThemeServiceSingleton.SetTitleBarTheme(Current.Windows);

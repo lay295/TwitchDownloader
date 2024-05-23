@@ -13,7 +13,7 @@
         xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
         xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
-        Title="Mass Downloader" MinHeight="250" Height="700" MinWidth="775" Width="1100" Loaded="Window_Loaded">
+        Title="Mass Downloader" MinHeight="250" Height="700" MinWidth="775" Width="1100" Loaded="Window_Loaded" SourceInitialized="Window_OnSourceInitialized">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />

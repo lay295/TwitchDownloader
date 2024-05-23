@@ -254,12 +254,16 @@ namespace TwitchDownloaderWPF
             textCount.Text = selectedItems.Count.ToString();
         }
 
+        private void Window_OnSourceInitialized(object sender, EventArgs e)
+        {
+            App.RequestTitleBarChange();
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Title = downloaderType == DownloadType.Video
                 ? Translations.Strings.TitleVideoMassDownloader
                 : Translations.Strings.TitleClipMassDownloader;
-            App.RequestTitleBarChange();
         }
 
         private async void TextChannel_OnKeyDown(object sender, KeyEventArgs e)

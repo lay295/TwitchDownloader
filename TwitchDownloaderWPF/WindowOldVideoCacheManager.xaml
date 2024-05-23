@@ -11,7 +11,7 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleWindowOldVideoCacheManager}" MinHeight="350" MinWidth="500" Height="450" Width="800" Loaded="OnLoaded" Closing="OnClosing" d:DataContext="{d:DesignInstance local:WindowOldVideoCacheManager}">
+        Title="{lex:Loc TitleWindowOldVideoCacheManager}" MinHeight="350" MinWidth="500" Height="450" Width="800" Loaded="OnLoaded" SourceInitialized="OnSourceInitialized" Closing="OnClosing" d:DataContext="{d:DesignInstance local:WindowOldVideoCacheManager}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />

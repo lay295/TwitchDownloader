@@ -118,7 +118,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_OnSourceInitialized(object sender, EventArgs e)
         {
             App.RequestTitleBarChange();
         }
@@ -162,7 +162,7 @@ namespace TwitchDownloaderWPF
             {
                 _refreshThemeOnCancel = true;
                 Settings.Default.GuiTheme = (string)ComboTheme.SelectedItem;
-                App.RequestAppThemeChange();
+                App.RequestAppThemeChange(true);
             }
         }
 
