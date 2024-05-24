@@ -1465,16 +1465,16 @@ namespace TwitchDownloaderCore
             if (background.RelativeLuminance() > 0.5)
             {
                 // Bright background
-                if (fgLight > 65)
+                if (fgLight > 60)
                 {
-                    fgLight = 65;
+                    fgLight = 60;
                 }
 
                 if (bgSat <= 28)
                 {
                     fgHue = fgHue switch
                     {
-                        > 55 and < 90 => AdjustHue(fgHue, 55, 90), // Yellow-Lime
+                        > 48 and < 90 => AdjustHue(fgHue, 48, 90), // Yellow-Lime
                         > 164 and < 186 => AdjustHue(fgHue, 164, 186), // Turquoise
                         _ => fgHue
                     };
@@ -1483,9 +1483,9 @@ namespace TwitchDownloaderCore
             else
             {
                 // Dark background
-                if (fgLight < 35)
+                if (fgLight < 40)
                 {
-                    fgLight = 35;
+                    fgLight = 40;
                 }
 
                 if (bgSat <= 28)
