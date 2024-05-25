@@ -1,7 +1,13 @@
 # TwitchDownloaderWPF
 A Windows WPF desktop application that implements the core functionality wrapped in various quality of life features.
 
+This document is also available in:
+
+- [**Japanese / 日本語**](README_ja.md)
+
+## Table of Contents
 - [TwitchDownloaderWPF](#twitchdownloaderwpf)
+  - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
     - [VOD Download](#vod-download)
     - [Clip Download](#clip-download)
