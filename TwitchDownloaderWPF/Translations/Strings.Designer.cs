@@ -933,6 +933,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Increase Username Readability:.
+        /// </summary>
+        public static string IncreaseUsernameReadability {
+            get {
+                return ResourceManager.GetString("IncreaseUsernameReadability", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Insufficient access. OAuth may be required..
         /// </summary>
         public static string InsufficientAccessMayNeedOauth {

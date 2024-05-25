@@ -82,6 +82,7 @@
                             <TextBlock Text="{lex:Loc UpdateRate}" HorizontalAlignment="Right" Margin="0,13,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock HorizontalAlignment="Right" Margin="0,12,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MessageDispersion}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MessageDispersionTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                             <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" MaxWidth="120" TextWrapping="Wrap" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc AlternateMessageBackgrounds}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc AlternateMessageBackgroundsTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                            <TextBlock Text="{lex:Loc IncreaseUsernameReadability}" HorizontalAlignment="Right" Margin="0,6,0,0" MaxWidth="120" TextWrapping="Wrap" Foreground="{DynamicResource AppText}"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="0,10,0,5">
                             <CheckBox x:Name="checkOutline" HorizontalAlignment="Left" Margin="0,0,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
@@ -90,7 +91,8 @@
                             <CheckBox x:Name="checkBadge" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                             <TextBox x:Name="textUpdateTime" Text="0.5" Width="50" HorizontalAlignment="Left" Margin="0,7,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <CheckBox x:Name="checkDispersion" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
-                            <CheckBox x:Name="checkAlternateMessageBackgrounds" HorizontalAlignment="Left" Margin="0,21,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+                            <CheckBox x:Name="checkAlternateMessageBackgrounds" HorizontalAlignment="Left" Margin="0,22,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+                            <CheckBox x:Name="checkAdjustUsernameVisibility" HorizontalAlignment="Left" Margin="0,22,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="15,10,5,2">
                             <TextBlock Text="{lex:Loc BttvEmotes}" HorizontalAlignment="Right" Margin="0,0,0,0" Foreground="{DynamicResource AppText}"/>

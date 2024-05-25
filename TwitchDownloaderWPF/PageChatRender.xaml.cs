@@ -136,6 +136,7 @@ namespace TwitchDownloaderWPF
                 Offline = checkOffline.IsChecked.GetValueOrDefault(),
                 AllowUnlistedEmotes = true,
                 DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault(),
+                AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault(),
             };
             if (RadioEmojiNotoColor.IsChecked == true)
                 options.EmojiVendor = EmojiVendor.GoogleNotoColor;
@@ -189,6 +190,7 @@ namespace TwitchDownloaderWPF
                 checkOffline.IsChecked = Settings.Default.Offline;
                 checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
                 checkAlternateMessageBackgrounds.IsChecked = Settings.Default.AlternateMessageBackgrounds;
+                checkAdjustUsernameVisibility.IsChecked = Settings.Default.AdjustUsernameVisibility;
                 RadioEmojiNotoColor.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.GoogleNotoColor;
                 RadioEmojiTwemoji.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.TwitterTwemoji;
                 RadioEmojiNone.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.None;
@@ -292,6 +294,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.Offline = checkOffline.IsChecked.GetValueOrDefault();
             Settings.Default.DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault();
             Settings.Default.AlternateMessageBackgrounds = checkAlternateMessageBackgrounds.IsChecked.GetValueOrDefault();
+            Settings.Default.AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault();
             if (comboFormat.SelectedItem != null)
             {
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;

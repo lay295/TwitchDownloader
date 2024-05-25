@@ -588,14 +588,14 @@ namespace TwitchDownloaderCore
                     return null;
                 }
 
-                DrawAccentedMessage(comment, sectionImages, emoteSectionList, highlightType, ref drawPos, defaultPos);
+                DrawAccentedMessage(comment, sectionImages, emoteSectionList, highlightType, commentIndex, ref drawPos, defaultPos);
             }
             else
             {
-                DrawNonAccentedMessage(comment, sectionImages, emoteSectionList, false, ref drawPos, ref defaultPos);
+                DrawNonAccentedMessage(comment, sectionImages, emoteSectionList, false, commentIndex, ref drawPos, ref defaultPos);
             }
 
-            SKBitmap finalBitmap = CombineImages(sectionImages, highlightType);
+            SKBitmap finalBitmap = CombineImages(sectionImages, highlightType, commentIndex);
             newSection.Image = finalBitmap;
             newSection.Emotes = emoteSectionList;
             newSection.CommentIndex = commentIndex;
@@ -603,7 +603,7 @@ namespace TwitchDownloaderCore
             return newSection;
         }
 
-        private SKBitmap CombineImages(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, HighlightType highlightType)
+        private SKBitmap CombineImages(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, HighlightType highlightType, int commentIndex)
         {
             SKBitmap finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.info.Height));
             var finalBitmapInfo = finalBitmap.Info;
@@ -621,8 +621,9 @@ namespace TwitchDownloaderCore
                 else if (highlightType is not HighlightType.None)
                 {
                     const int OPAQUE_THRESHOLD = 245;
-                    if (!(renderOptions.BackgroundColor.Alpha < OPAQUE_THRESHOLD ||
-                        (renderOptions.AlternateMessageBackgrounds && renderOptions.AlternateBackgroundColor.Alpha < OPAQUE_THRESHOLD)))
+                    var useAlternateBackground = renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1;
+                    if (!((!useAlternateBackground && renderOptions.BackgroundColor.Alpha < OPAQUE_THRESHOLD) ||
+                          (useAlternateBackground && renderOptions.AlternateBackgroundColor.Alpha < OPAQUE_THRESHOLD)))
                     {
                         // Draw the highlight background only if the message background is opaque enough
                         var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
@@ -652,7 +653,7 @@ namespace TwitchDownloaderCore
             return string.Join(' ', codepointList);
         }
 
-        private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, ref Point defaultPos)
+        private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, int commentIndex, ref Point drawPos, ref Point defaultPos)
         {
             if (renderOptions.Timestamp)
             {
@@ -662,7 +663,7 @@ namespace TwitchDownloaderCore
             {
                 DrawBadges(comment, sectionImages, ref drawPos);
             }
-            DrawUsername(comment, sectionImages, ref drawPos, defaultPos);
+            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, commentIndex: commentIndex);
             DrawMessage(comment, sectionImages, emotePositionList, highlightWords, ref drawPos, defaultPos);
 
             foreach (var (_, bitmap) in sectionImages)
@@ -671,7 +672,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, ref Point drawPos, Point defaultPos)
+        private void DrawAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, int commentIndex, ref Point drawPos, Point defaultPos)
         {
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
@@ -688,13 +689,13 @@ namespace TwitchDownloaderCore
             {
                 case HighlightType.SubscribedTier:
                 case HighlightType.SubscribedPrime:
-                    DrawSubscribeMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    DrawSubscribeMessage(comment, sectionImages, emotePositionList, commentIndex, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.BitBadgeTierNotification:
                     DrawBitsBadgeTierMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.WatchStreak:
-                    DrawWatchStreakMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    DrawWatchStreakMessage(comment, sectionImages, emotePositionList, commentIndex, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.CharityDonation:
                     DrawCharityDonationMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
@@ -705,7 +706,7 @@ namespace TwitchDownloaderCore
                     DrawGiftMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.ChannelPointHighlight:
-                    DrawNonAccentedMessage(comment, sectionImages, emotePositionList, true, ref drawPos, ref defaultPos);
+                    DrawNonAccentedMessage(comment, sectionImages, emotePositionList, true, commentIndex, ref drawPos, ref defaultPos);
                     break;
                 case HighlightType.ContinuingGift:
                 case HighlightType.PayingForward:
@@ -721,7 +722,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawSubscribeMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawSubscribeMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             using SKCanvas canvas = new(sectionImages.Last().bitmap);
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
@@ -757,7 +758,7 @@ namespace TwitchDownloaderCore
             AddImageSection(sectionImages, ref drawPos, defaultPos);
             drawPos = customMessagePos;
             defaultPos = customMessagePos;
-            DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
+            DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, commentIndex, ref drawPos, ref defaultPos);
         }
 
         private void DrawBitsBadgeTierMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
@@ -795,7 +796,7 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private void DrawWatchStreakMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawWatchStreakMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             using SKCanvas canvas = new(sectionImages.Last().bitmap);
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
@@ -831,7 +832,7 @@ namespace TwitchDownloaderCore
             AddImageSection(sectionImages, ref drawPos, defaultPos);
             drawPos = customMessagePos;
             defaultPos = customMessagePos;
-            DrawNonAccentedMessage(customMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
+            DrawNonAccentedMessage(customMessage, sectionImages, emotePositionList, false, commentIndex, ref drawPos, ref defaultPos);
         }
 
         private void DrawCharityDonationMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
@@ -1417,11 +1418,15 @@ namespace TwitchDownloaderCore
             return measure.Width;
         }
 
-        private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null)
+        private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null, int commentIndex = 0)
         {
             var userColor = colorOverride ?? SKColor.Parse(comment.message.user_color ?? DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
-            if (colorOverride is null)
-                userColor = AdjustColorVisibility(userColor, renderOptions.BackgroundColor, renderOptions);
+            if (colorOverride is null && renderOptions.AdjustUsernameVisibility)
+            {
+                var useAlternateBackground = renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1;
+                var backgroundColor = useAlternateBackground ? renderOptions.AlternateBackgroundColor : renderOptions.BackgroundColor;
+                userColor = AdjustUsernameVisibility(userColor, backgroundColor);
+            }
 
             using SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
                 ? GetFallbackFont(comment.commenter.display_name.First(IsNotAscii)).Clone()
@@ -1435,30 +1440,86 @@ namespace TwitchDownloaderCore
             DrawText(userName, userPaint, true, sectionImages, ref drawPos, defaultPos, false);
         }
 
-        private static SKColor AdjustColorVisibility(SKColor userColor, SKColor backgroundColor, ChatRenderOptions renderOptions)
+        private SKColor AdjustUsernameVisibility(SKColor userColor, SKColor backgroundColor)
         {
-            backgroundColor.ToHsl(out _, out _, out float backgroundBrightness);
-            userColor.ToHsl(out float userHue, out float userSaturation, out float userBrightness);
-
-            if (backgroundBrightness < 25 || renderOptions.Outline)
+            const int OPAQUE_THRESHOLD = 200;
+            if (!renderOptions.Outline && backgroundColor.Alpha < OPAQUE_THRESHOLD)
             {
-                //Dark background or black outline
-                if (userBrightness < 45)
-                    userBrightness = 45;
-                if (userSaturation > 80)
-                    userSaturation = 80;
-                SKColor newColor = SKColor.FromHsl(userHue, userSaturation, userBrightness);
-                return newColor;
+                // Background lightness cannot be truly known.
+                return userColor;
             }
 
-            if (Math.Abs(backgroundBrightness - userBrightness) < 10 && backgroundBrightness > 50)
+            var newUserColor = AdjustColorVisibility(userColor, renderOptions.Outline ? outlinePaint.Color : backgroundColor);
+
+            return renderOptions.Outline || backgroundColor.Alpha == byte.MaxValue
+                ? newUserColor
+                : userColor.Lerp(newUserColor, (float)backgroundColor.Alpha / byte.MaxValue);
+        }
+
+        private static SKColor AdjustColorVisibility(SKColor foreground, SKColor background)
+        {
+            background.ToHsl(out var bgHue, out var bgSat, out _);
+            foreground.ToHsl(out var fgHue, out var fgSat, out var fgLight);
+
+            // Adjust lightness
+            if (background.RelativeLuminance() > 0.5)
             {
-                userBrightness -= 20;
-                SKColor newColor = SKColor.FromHsl(userHue, userSaturation, userBrightness);
-                return newColor;
+                // Bright background
+                if (fgLight > 60)
+                {
+                    fgLight = 60;
+                }
+
+                if (bgSat <= 28)
+                {
+                    fgHue = fgHue switch
+                    {
+                        > 48 and < 90 => AdjustHue(fgHue, 48, 90), // Yellow-Lime
+                        > 164 and < 186 => AdjustHue(fgHue, 164, 186), // Turquoise
+                        _ => fgHue
+                    };
+                }
+            }
+            else
+            {
+                // Dark background
+                if (fgLight < 40)
+                {
+                    fgLight = 40;
+                }
+
+                if (bgSat <= 28)
+                {
+                    fgHue = fgHue switch
+                    {
+                        > 224 and < 263 => AdjustHue(fgHue, 224, 264), // Blue-Purple
+                        _ => fgHue
+                    };
+                }
             }
 
-            return userColor;
+            // Adjust hue on colored backgrounds
+            if (bgSat > 28 && fgSat > 28)
+            {
+                var hueDiff = fgHue - bgHue;
+                const int HUE_THRESHOLD = 25;
+                if (Math.Abs(hueDiff) < HUE_THRESHOLD)
+                {
+                    var diffSign = hueDiff < 0 ? -1 : 1; // Math.Sign returns 1, -1, or 0. We only want 1 or -1.
+                    fgHue = bgHue + HUE_THRESHOLD * diffSign;
+
+                    if (fgHue < 0) fgHue += 360;
+                    fgHue %= 360;
+                }
+            }
+
+            return SKColor.FromHsl(fgHue, Math.Min(fgSat, 90), fgLight);
+
+            static float AdjustHue(float hue, float lowerClamp, float upperClamp)
+            {
+                var midpoint = (upperClamp + lowerClamp) / 2;
+                return hue >= midpoint ? upperClamp : lowerClamp;
+            }
         }
 
         private void DrawBadges(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos)
