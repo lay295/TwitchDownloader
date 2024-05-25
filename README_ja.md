@@ -17,9 +17,9 @@
 
 ## なにができる？
 
-- TwitchのVODsをダウンロードする
+- Twitchのアーカイブをダウンロードする
 - Twitchのクリップをダウンロードする
-- VODs、クリップのチャットを[全ての情報を含んだJSON](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json)、ブラウザ用のHTMLファイル、[プレーンテキスト](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)でダウンロードする
+- アーカイブ、クリップのチャットを[全ての情報を含んだJSON](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json)、ブラウザ用のHTMLファイル、[プレーンテキスト](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)でダウンロードする
 - 以前に生成されたJSOn形式のチャットファイルを別の形式で保存し、内容を変更する
 - 生成されたJSON形式のチャットファイルから、Twitter Twemoji・Google Noto Color emoji・BTTV・FFZ・7TV・スタンプ・GIFスタンプと一緒にチャットをレンダリングします
 
@@ -36,8 +36,8 @@
 Windows WPF GUIは、プログラムのすべての主要機能といくつかのQOL機能を実装しています:
 
 - 複数のダウンロード・レンダリングジョブを同時にキューに追加する
-- VODs・クリップのリンクからダウンロードジョブのリストを作成する
-- ストリーマーから複数のVODs・クリップを検索してダウンロードする
+- アーカイブ・クリップのリンクからダウンロードジョブのリストを作成する
+- ストリーマーから複数のアーカイブ・クリップを検索してダウンロードする
 
 ### 複数言語サポート
 
@@ -69,7 +69,7 @@ CLIはクロスプラットフォームであり、プログラムの主要な�
 <sup>*Intel Macのみでテストされています。</sup>
 
 CLIを使用すると、外部スクリプトを使用してビデオ処理を自動化することができます。  
-例えば、以下のコードをWindowsの`.bat`ファイルにコピーペーストすると、VODとそのチャットをダウンロードし、チャットをレンダリングすることができます。
+例えば、以下のコードをWindowsの`.bat`ファイルにコピーペーストすると、アーカイブとそのチャットをダウンロードし、チャットをレンダリングすることができます。
 
 ```bat
 @echo off

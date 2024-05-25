@@ -147,7 +147,7 @@
     <value>BANされたワードやフレーズのリスト - カンマ区切り、カンマの周りのスペースは無視、大文字と小文字は区別しない。</value>
   </data>
   <data name="Browse" xml:space="preserve">
-    <value>Browse</value>
+    <value>参照</value>
   </data>
   <data name="BttvEmotes" xml:space="preserve">
     <value>BTTV スタンプ:</value>
@@ -272,7 +272,7 @@
     <value>レンダリングをキューに追加</value>
   </data>
   <data name="EnqueueUpdate" xml:space="preserve">
-    <value>をキューに追加</value>
+    <value>更新をキューに追加</value>
   </data>
   <data name="ErrorLog" xml:space="preserve">
     <value>エラー: </value>
@@ -345,7 +345,7 @@
     <value>長さ:</value>
   </data>
   <data name="ListOfVodsClips" xml:space="preserve">
-    <value>VODs/クリップのリスト (１行に１つ)</value>
+    <value>アーカイブ/クリップのリスト (１行に１つ)</value>
   </data>
   <data name="LogHeader" xml:space="preserve">
     <value>ログ:</value>
@@ -358,7 +358,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="OAuthTooltip" xml:space="preserve">
-    <value>サブスクライバーのみのVODsにのみ必要です。サードパーティのOAuthトークンは使用できません。OAuthトークンの取得方法はYouTubeのビデオをご覧ください。</value>
+    <value>サブスクライバーのみのアーカイブにのみ必要です。サードパーティのOAuthトークンは使用できません。OAuthトークンの取得方法はYouTubeのビデオをご覧ください。</value>
   </data>
   <data name="Offline" xml:space="preserve">
     <value>オフライン </value>
@@ -426,7 +426,7 @@
     <value>クリップを検索</value>
   </data>
   <data name="SearchVods" xml:space="preserve">
-    <value>VODsを検索</value>
+    <value>アーカイブを検索</value>
   </data>
   <data name="SelectAll" xml:space="preserve">
     <value>全て選択</value>
@@ -535,7 +535,7 @@
     <value>リンクを解析できませんでした</value>
   </data>
   <data name="UnableToParseLinkMessage" xml:space="preserve">
-    <value>VOD/クリップのリンクが正しいか再度確認してください</value>
+    <value>アーカイブ/クリップのリンクが正しいか再度確認してください</value>
   </data>
   <data name="Unknown" xml:space="preserve">
     <value>不明</value>
@@ -562,22 +562,22 @@
     <value>タイトル:</value>
   </data>
   <data name="VodClipLink" xml:space="preserve">
-    <value>VOD/クリップのリンク:</value>
+    <value>アーカイブ/クリップのリンク:</value>
   </data>
   <data name="VodDownload" xml:space="preserve">
-    <value>VODのダウンロード</value>
+    <value>アーカイブのダウンロード</value>
   </data>
   <data name="VodDownloads" xml:space="preserve">
-    <value>VODのダウンロード</value>
+    <value>アーカイブのダウンロード</value>
   </data>
   <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
     <value>ビデオの有効期限が切れているか、埋め込みIDが壊れている</value>
   </data>
   <data name="VodLinkId" xml:space="preserve">
-    <value>VOD リンク/ID:</value>
+    <value>アーカイブ リンク/ID:</value>
   </data>
   <data name="TemplateVods" xml:space="preserve">
-    <value>VODs:</value>
+    <value>アーカイブ:</value>
   </data>
   <data name="DownloadChat" xml:space="preserve">
     <value>チャットのダウンロード</value>
