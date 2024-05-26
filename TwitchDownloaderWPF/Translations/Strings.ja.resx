@@ -861,12 +861,15 @@
     <value>フォルダを開く</value>
   </data>
   <data name="UnknownUser" xml:space="preserve">
-    <value>Unknown User</value>
+    <value>不明なユーザー</value>
   </data>
   <data name="UnknownGame" xml:space="preserve">
-    <value>Unknown Game</value>
+    <value>不明なゲーム</value>
   </data>
   <data name="UnknownVideoLength" xml:space="preserve">
-    <value>Unknown</value>
+    <value>不明</value>
+  </data>
+  <data name="IncreaseUsernameReadability" xml:space="preserve">
+    <value>ユーザー名の読みやすさを向上する:</value>
   </data>
 </root>
