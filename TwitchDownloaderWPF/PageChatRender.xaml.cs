@@ -20,6 +20,7 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Translations;
 using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 using MessageBox = System.Windows.MessageBox;
@@ -146,7 +147,7 @@ namespace TwitchDownloaderWPF
                 options.EmojiVendor = EmojiVendor.None;
             foreach (var item in comboBadges.SelectedItems)
             {
-                options.ChatBadgeMask += (int)((ChatBadgeListItem)item).Type;
+                options.ChatBadgeMask += (int)((CheckComboBoxItem)item).Tag;
             }
 
             return options;
@@ -196,19 +197,22 @@ namespace TwitchDownloaderWPF
                 RadioEmojiNone.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.None;
 
                 comboBadges.Items.Clear();
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Broadcaster, Name = "Broadcaster" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Moderator, Name = "Mods" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.VIP, Name = "VIPs" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Subscriber, Name = "Subs" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Predictions, Name = "Predictions" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.NoAudioVisual, Name = "No Audio/No Video" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.PrimeGaming, Name = "Prime" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Other, Name = "Others" });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskBroadcaster, Tag = ChatBadgeType.Broadcaster });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskModerator, Tag = ChatBadgeType.Moderator });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskVIP, Tag = ChatBadgeType.VIP });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskSubscriber, Tag = ChatBadgeType.Subscriber });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskPredictions, Tag = ChatBadgeType.Predictions });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskNoAudioNoVideo, Tag = ChatBadgeType.NoAudioVisual });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskTwitchPrime, Tag = ChatBadgeType.PrimeGaming });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskOthers, Tag = ChatBadgeType.Other });
 
-                foreach (ChatBadgeListItem item in comboBadges.Items)
+                var badgeMask = (ChatBadgeType)Settings.Default.ChatBadgeMask;
+                foreach (CheckComboBoxItem item in comboBadges.Items)
                 {
-                    if (((ChatBadgeType)Settings.Default.ChatBadgeMask).HasFlag(item.Type))
+                    if (badgeMask.HasFlag((Enum)item.Tag))
+                    {
                         comboBadges.SelectedItems.Add(item);
+                    }
                 }
 
                 foreach (VideoContainer container in comboFormat.Items)
@@ -317,7 +321,7 @@ namespace TwitchDownloaderWPF
             int newMask = 0;
             foreach (var item in comboBadges.SelectedItems)
             {
-                newMask += (int)((ChatBadgeListItem)item).Type;
+                newMask += (int)((CheckComboBoxItem)item).Tag;
             }
             Settings.Default.ChatBadgeMask = newMask;
 
@@ -736,17 +740,6 @@ namespace TwitchDownloaderWPF
         {
             FileNames = textJson.Text.Split("&&", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             UpdateActionButtons(false);
-        }
-    }
-
-    public class ChatBadgeListItem
-    {
-        public ChatBadgeType Type { get; set; }
-        public string Name { get; set; }
-
-        public override string ToString()
-        {
-            return Name;
         }
     }
 
