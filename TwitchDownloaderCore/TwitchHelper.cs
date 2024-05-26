@@ -22,7 +22,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public static class TwitchHelper
+    public static partial class TwitchHelper
     {
         private static readonly HttpClient httpClient = new HttpClient();
         private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
@@ -671,6 +671,9 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
+        [GeneratedRegex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft)]
+        private static partial Regex EmojiExtensionRegex();
+
         public static async Task<Dictionary<string, SKBitmap>> GetEmojis(string cacheFolder, EmojiVendor emojiVendor, ITaskLogger logger, CancellationToken cancellationToken = default)
         {
             var returnCache = new Dictionary<string, SKBitmap>();
@@ -679,13 +682,12 @@ namespace TwitchDownloaderCore
                 return returnCache;
 
             var emojiFolder = Path.Combine(cacheFolder, "emojis", emojiVendor.EmojiFolder());
-            var emojiExtensions = new Regex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
 
             if (!Directory.Exists(emojiFolder))
                 CreateDirectory(emojiFolder);
 
             var emojiFiles = Directory.GetFiles(emojiFolder)
-                .Where(i => emojiExtensions.IsMatch(i)).ToArray();
+                .Where(i => EmojiExtensionRegex().IsMatch(i)).ToArray();
 
             if (emojiFiles.Length < emojiVendor.EmojiCount())
             {
@@ -719,7 +721,7 @@ namespace TwitchDownloaderCore
                     }
 
                     emojiFiles = Directory.GetFiles(emojiFolder)
-                        .Where(i => emojiExtensions.IsMatch(i)).ToArray();
+                        .Where(i => EmojiExtensionRegex().IsMatch(i)).ToArray();
                 }
                 finally
                 {

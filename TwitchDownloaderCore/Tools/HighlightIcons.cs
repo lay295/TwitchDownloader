@@ -27,7 +27,7 @@ namespace TwitchDownloaderCore.Tools
         Unknown
     }
 
-    public sealed class HighlightIcons : IDisposable
+    public sealed partial class HighlightIcons : IDisposable
     {
         public bool Disposed { get; private set; }
 
@@ -43,9 +43,14 @@ namespace TwitchDownloaderCore.Tools
 
         private const int ICON_SIZE = 72; // Icon SVG strings are scaled for 72x72
 
-        private static readonly Regex SubMessageRegex = new(@"^((?:\w+ )?subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d{1,3} months(?:, currently on a \d{1,3} month streak)?! )(.+)$", RegexOptions.Compiled);
-        private static readonly Regex GiftAnonymousRegex = new(@"^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d", RegexOptions.Compiled);
-        private static readonly Regex WatchStreakRegex = new(@"^((?:\w+ )?watched \d+ consecutive streams this month and sparked a watch streak! )(.+)$", RegexOptions.Compiled);
+        [GeneratedRegex(@"^((?:\w+ )?subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d{1,3} months(?:, currently on a \d{1,3} month streak)?! )(.+)$")]
+        private static partial Regex SubMessageRegex();
+
+        [GeneratedRegex(@"^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d")]
+        private static partial Regex GiftAnonymousRegex();
+
+        [GeneratedRegex(@"^((?:\w+ )?watched \d+ consecutive streams this month and sparked a watch streak! )(.+)$")]
+        private static partial Regex WatchStreakRegex();
 
         private SKImage _subscribedTierIcon;
         private SKImage _subscribedPrimeIcon;
@@ -118,20 +123,20 @@ namespace TwitchDownloaderCore.Tools
 
                 if (bodyWithoutName.StartsWith(" converted from a"))
                 {
-                    // TODO: use bodyWithoutName when .NET 7
-                    var convertedToMatch = Regex.Match(comment.message.body, $@"(?<=^{comment.commenter.display_name} converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
-                    if (!convertedToMatch.Success)
-                        return HighlightType.None;
-
-                    // TODO: use ValueSpan when .NET 7
-                    return convertedToMatch.Value switch
+                    var slice = bodyWithoutName[17..];
+                    foreach (var match in Regex.EnumerateMatches(slice, @"(?<= (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)"))
                     {
-                        "Prime" => HighlightType.SubscribedPrime,
-                        "Tier 1" => HighlightType.SubscribedTier,
-                        "Tier 2" => HighlightType.SubscribedTier,
-                        "Tier 3" => HighlightType.SubscribedTier,
-                        _ => HighlightType.None
-                    };
+                        return slice.Slice(match.Index, match.Length) switch
+                        {
+                            "Prime" => HighlightType.SubscribedPrime,
+                            "Tier 1" => HighlightType.SubscribedTier,
+                            "Tier 2" => HighlightType.SubscribedTier,
+                            "Tier 3" => HighlightType.SubscribedTier,
+                            _ => HighlightType.None
+                        };
+                    }
+
+                    return HighlightType.None;
                 }
             }
 
@@ -140,13 +145,12 @@ namespace TwitchDownloaderCore.Tools
 
             if (char.IsDigit(bodySpan[0]) && bodySpan.EndsWith(" have joined! "))
             {
-                // TODO: use bodySpan when .NET 7
-                if (Regex.IsMatch(comment.message.body, $@"^\d+ raiders from {comment.commenter.display_name} have joined! "))
+                if (Regex.IsMatch(bodySpan, $@"^\d+ raiders from {comment.commenter.display_name} have joined! "))
                     return HighlightType.Raid;
             }
 
             const string ANONYMOUS_GIFT_ACCOUNT_ID = "274598607"; // Display name is 'AnAnonymousGifter'
-            if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
+            if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID && GiftAnonymousRegex().IsMatch(comment.message.body))
                 return HighlightType.GiftedAnonymous;
 
             return HighlightType.None;
@@ -243,7 +247,7 @@ namespace TwitchDownloaderCore.Tools
         /// </returns>
         public static (Comment subMessage, Comment customMessage) SplitSubComment(Comment comment)
         {
-            var subMessageMatch = SubMessageRegex.Match(comment.message.body);
+            var subMessageMatch = SubMessageRegex().Match(comment.message.body);
             if (!subMessageMatch.Success)
             {
                 // Return the original comment + null if there is no custom sub message
@@ -291,7 +295,7 @@ namespace TwitchDownloaderCore.Tools
         /// </returns>
         public static (Comment subMessage, Comment customMessage) SplitWatchStreakComment(Comment comment)
         {
-            var watchStreakMatch = WatchStreakRegex.Match(comment.message.body);
+            var watchStreakMatch = WatchStreakRegex().Match(comment.message.body);
             if (!watchStreakMatch.Success)
             {
                 // Return the original comment + null if there is no custom watch streak message

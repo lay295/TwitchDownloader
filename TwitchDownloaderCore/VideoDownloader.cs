@@ -19,7 +19,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public sealed class VideoDownloader
+    public sealed partial class VideoDownloader
     {
         private readonly VideoDownloadOptions downloadOptions;
         private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
@@ -348,7 +348,6 @@ namespace TwitchDownloaderCore
                 }
             };
 
-            var encodingTimeRegex = new Regex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)", RegexOptions.Compiled);
             var logQueue = new ConcurrentQueue<string>();
 
             process.ErrorDataReceived += (sender, e) =>
@@ -358,7 +357,7 @@ namespace TwitchDownloaderCore
 
                 logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
-                HandleFfmpegOutput(e.Data, encodingTimeRegex, seekDuration);
+                HandleFfmpegOutput(e.Data, seekDuration);
             };
 
             process.Start();
@@ -377,9 +376,12 @@ namespace TwitchDownloaderCore
             return process.ExitCode;
         }
 
-        private void HandleFfmpegOutput(string output, Regex encodingTimeRegex, TimeSpan videoLength)
+        [GeneratedRegex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)")]
+        private static partial Regex EncodingTimeRegex();
+
+        private void HandleFfmpegOutput(string output, TimeSpan videoLength)
         {
-            var encodingTimeMatch = encodingTimeRegex.Match(output);
+            var encodingTimeMatch = EncodingTimeRegex().Match(output);
             if (!encodingTimeMatch.Success)
                 return;
 

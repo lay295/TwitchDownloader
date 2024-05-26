@@ -231,7 +231,7 @@ namespace TwitchDownloaderCore.Chat
             {
                 foreach (var comment in chatRoot.comments)
                 {
-                    var bitMatch = TwitchRegex.BitsRegex.Match(comment.message.body);
+                    var bitMatch = TwitchRegex.BitsRegex().Match(comment.message.body);
                     if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
                     {
                         comment.message.bits_spent = result;

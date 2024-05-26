@@ -134,7 +134,7 @@ namespace TwitchDownloaderWPF
                     streamerId = int.Parse(videoInfo.data.video.owner.id);
                     viewCount = videoInfo.data.video.viewCount;
                     game = videoInfo.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
-                    var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
+                    var urlTimeCodeMatch = TwitchRegex.UrlTimeCode().Match(textUrl.Text);
                     if (urlTimeCodeMatch.Success)
                     {
                         var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);

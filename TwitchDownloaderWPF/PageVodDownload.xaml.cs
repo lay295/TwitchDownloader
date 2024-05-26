@@ -140,7 +140,7 @@ namespace TwitchDownloaderWPF
                 var videoCreatedAt = taskVideoInfo.Result.data.video.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
-                var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
+                var urlTimeCodeMatch = TwitchRegex.UrlTimeCode().Match(textUrl.Text);
                 if (urlTimeCodeMatch.Success)
                 {
                     var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);

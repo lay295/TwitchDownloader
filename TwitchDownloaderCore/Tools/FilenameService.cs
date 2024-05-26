@@ -6,8 +6,20 @@ using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderCore.Tools
 {
-    public static class FilenameService
+    public static partial class FilenameService
     {
+        [GeneratedRegex("{date_custom=\"(.*?)\"}")]
+        private static partial Regex DateCustomRegex();
+
+        [GeneratedRegex("{trim_start_custom=\"(.*?)\"}")]
+        private static partial Regex TrimStartCustomRegex();
+
+        [GeneratedRegex("{trim_end_custom=\"(.*?)\"}")]
+        private static partial Regex TrimEndCustomRegex();
+
+        [GeneratedRegex("{length_custom=\"(.*?)\"}")]
+        private static partial Regex LengthCustomRegex();
+
         public static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, string viewCount, string game)
         {
             var videoLength = trimEnd - trimStart;
@@ -26,26 +38,22 @@ namespace TwitchDownloaderCore.Tools
 
             if (template.Contains("{date_custom="))
             {
-                var dateRegex = new Regex("{date_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, dateRegex, date);
+                ReplaceCustomWithFormattable(stringBuilder, DateCustomRegex(), date);
             }
 
             if (template.Contains("{trim_start_custom="))
             {
-                var trimStartRegex = new Regex("{trim_start_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, trimStartRegex, trimStart);
+                ReplaceCustomWithFormattable(stringBuilder, TrimStartCustomRegex(), trimStart);
             }
 
             if (template.Contains("{trim_end_custom="))
             {
-                var trimEndRegex = new Regex("{trim_end_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, trimEndRegex, trimEnd);
+                ReplaceCustomWithFormattable(stringBuilder, TrimEndCustomRegex(), trimEnd);
             }
 
             if (template.Contains("{length_custom="))
             {
-                var lengthRegex = new Regex("{length_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, lengthRegex, videoLength);
+                ReplaceCustomWithFormattable(stringBuilder, LengthCustomRegex(), videoLength);
             }
 
             var fileName = stringBuilder.ToString();
@@ -58,7 +66,6 @@ namespace TwitchDownloaderCore.Tools
             do
             {
                 // There's probably a better way to do this that doesn't require calling ToString()
-                // However we need .NET7+ for span support in the regex matcher.
                 var match = regex.Match(sb.ToString());
                 if (!match.Success)
                     break;
