@@ -195,7 +195,7 @@ You can find more example commands in the [CLI README](TwitchDownloaderCLI/READM
 
 ## Requirements
 
-- [.NET 6.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [.NET 8.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 - About 1GB of disk space
 
 ## Build Instructions
