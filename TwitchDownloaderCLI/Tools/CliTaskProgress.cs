@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCore.Interfaces;
@@ -46,13 +47,13 @@ namespace TwitchDownloaderCLI.Tools
             }
         }
 
-        public void SetTemplateStatus(string status, int initialPercent)
+        public void SetTemplateStatus([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string statusTemplate, int initialPercent)
         {
             if ((_logLevel & LogLevel.Status) == 0) return;
 
             lock (this)
             {
-                _status = status;
+                _status = statusTemplate;
                 _statusIsTemplate = true;
 
                 if (!_lastWriteHadNewLine)
@@ -65,13 +66,13 @@ namespace TwitchDownloaderCLI.Tools
             }
         }
 
-        public void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2)
+        public void SetTemplateStatus([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string statusTemplate, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2)
         {
             if ((_logLevel & LogLevel.Status) == 0) return;
 
             lock (this)
             {
-                _status = status;
+                _status = statusTemplate;
                 _statusIsTemplate = true;
 
                 if (!_lastWriteHadNewLine)
