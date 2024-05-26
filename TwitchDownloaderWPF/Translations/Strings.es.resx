@@ -874,4 +874,28 @@
   <data name="IncreaseUsernameReadability" xml:space="preserve">
     <value>Increase Username Readability:</value>
   </data>
+  <data name="BadgeMaskBroadcaster" xml:space="preserve">
+    <value>Broadcaster</value>
+  </data>
+  <data name="BadgeMaskModerator" xml:space="preserve">
+    <value>Mods</value>
+  </data>
+  <data name="BadgeMaskVIP" xml:space="preserve">
+    <value>VIPs</value>
+  </data>
+  <data name="BadgeMaskSubscriber" xml:space="preserve">
+    <value>Subs</value>
+  </data>
+  <data name="BadgeMaskPredictions" xml:space="preserve">
+    <value>Predictions</value>
+  </data>
+  <data name="BadgeMaskNoAudioNoVideo" xml:space="preserve">
+    <value>No Audio/No Video</value>
+  </data>
+  <data name="BadgeMaskTwitchPrime" xml:space="preserve">
+    <value>Prime</value>
+  </data>
+  <data name="BadgeMaskOthers" xml:space="preserve">
+    <value>Others</value>
+  </data>
 </root>

@@ -168,6 +168,78 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Broadcaster.
+        /// </summary>
+        public static string BadgeMaskBroadcaster {
+            get {
+                return ResourceManager.GetString("BadgeMaskBroadcaster", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mods.
+        /// </summary>
+        public static string BadgeMaskModerator {
+            get {
+                return ResourceManager.GetString("BadgeMaskModerator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Audio/No Video.
+        /// </summary>
+        public static string BadgeMaskNoAudioNoVideo {
+            get {
+                return ResourceManager.GetString("BadgeMaskNoAudioNoVideo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Others.
+        /// </summary>
+        public static string BadgeMaskOthers {
+            get {
+                return ResourceManager.GetString("BadgeMaskOthers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Predictions.
+        /// </summary>
+        public static string BadgeMaskPredictions {
+            get {
+                return ResourceManager.GetString("BadgeMaskPredictions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subs.
+        /// </summary>
+        public static string BadgeMaskSubscriber {
+            get {
+                return ResourceManager.GetString("BadgeMaskSubscriber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Prime.
+        /// </summary>
+        public static string BadgeMaskTwitchPrime {
+            get {
+                return ResourceManager.GetString("BadgeMaskTwitchPrime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VIPs.
+        /// </summary>
+        public static string BadgeMaskVIP {
+            get {
+                return ResourceManager.GetString("BadgeMaskVIP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Badge Scale:.
         /// </summary>
         public static string BadgeScale {
