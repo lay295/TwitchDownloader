@@ -103,7 +103,6 @@ namespace TwitchDownloaderCore
             // Rough estimation of the width of a single block art character
             renderOptions.BlockArtCharWidth = GetFallbackFont('█').MeasureText("█");
 
-
             RemoveRestrictedComments(chatRoot.comments);
 
             (int startTick, int totalTicks) = GetVideoTicks();
@@ -185,38 +184,27 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            var bannedWordRegexes = new Regex[renderOptions.BannedWordsArray.Length];
-            for (var i = 0; i < renderOptions.BannedWordsArray.Length; i++)
+            var ignoredUsers = new HashSet<string>(renderOptions.IgnoreUsersArray, StringComparer.InvariantCultureIgnoreCase);
+
+            Regex bannedWordsRegex = null;
+            if (renderOptions.BannedWordsArray.Length > 0)
             {
-                bannedWordRegexes[i] = new Regex(@$"(?<=^|[\s\d\p{{P}}\p{{S}}]){Regex.Escape(renderOptions.BannedWordsArray[i])}(?=$|[\s\d\p{{P}}\p{{S}}])",
+                var bannedWords = string.Join('|', renderOptions.BannedWordsArray.Select(Regex.Escape));
+                bannedWordsRegex = new Regex(@$"(?<=^|[\s\d\p{{P}}\p{{S}}]){bannedWords}(?=$|[\s\d\p{{P}}\p{{S}}])",
                     RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             }
 
-            for (var i = 0; i < comments.Count; i++)
+            for (var i = comments.Count - 1; i >= 0; i--)
             {
-                foreach (var username in renderOptions.IgnoreUsersArray)
-                {
-                    if (username.Equals(comments[i].commenter.name, StringComparison.OrdinalIgnoreCase) // ASCII login name
-                        || (username.Any(IsNotAscii) && username.Equals(comments[i].commenter.display_name, StringComparison.InvariantCultureIgnoreCase))) // Potentially non-ASCII display name
-                    {
-                        comments.RemoveAt(i);
-                        i--;
-                        goto NextComment;
-                    }
-                }
+                var comment = comments[i];
+                var commenter = comment.commenter;
 
-                foreach (var bannedWordRegex in bannedWordRegexes)
+                if (ignoredUsers.Contains(commenter.name) // ASCII login name
+                    || (commenter.display_name.Any(IsNotAscii) && ignoredUsers.Contains(commenter.display_name)) // Potentially non-ASCII display name
+                    || (bannedWordsRegex is not null && bannedWordsRegex.IsMatch(comment.message.body))) // Banned words
                 {
-                    if (bannedWordRegex.IsMatch(comments[i].message.body))
-                    {
-                        comments.RemoveAt(i);
-                        i--;
-                        goto NextComment;
-                    }
+                    comments.RemoveAt(i);
                 }
-
-                // goto is cheaper and more readable than using a boolean + branch check after each operation
-                NextComment: ;
             }
         }
 
