@@ -131,31 +131,30 @@ namespace TwitchDownloaderCore.Chat
 
                 stream.Seek(-RENT_LENGTH, SeekOrigin.Current);
 
-                // TODO: use list patterns when .NET 7+
                 // https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
-                switch (rentedBuffer[0], rentedBuffer[1], rentedBuffer[2], rentedBuffer[3])
+                switch (rentedBuffer)
                 {
-                    case (0x1F, 0x8B, _, _): // https://docs.fileformat.com/compression/gz/#gz-file-header
+                    case [0x1F, 0x8B, ..]: // https://docs.fileformat.com/compression/gz/#gz-file-header
                     {
                         await using var gs = new GZipStream(stream, CompressionMode.Decompress);
                         return await GetJsonDocumentAsync(gs, filePath, deserializationOptions, cancellationToken);
                     }
-                    case (0x00, 0x00, 0xFE, 0xFF): // UTF-32 BE
-                    case (0xFF, 0xFE, 0x00, 0x00): // UTF-32 LE
+                    case [0x00, 0x00, 0xFE, 0xFF]: // UTF-32 BE
+                    case [0xFF, 0xFE, 0x00, 0x00]: // UTF-32 LE
                     {
                         using var sr = new StreamReader(stream, Encoding.UTF32);
-                        var jsonString = await sr.ReadToEndAsync();
+                        var jsonString = await sr.ReadToEndAsync(cancellationToken);
                         return JsonDocument.Parse(jsonString.AsMemory(), deserializationOptions);
                     }
-                    case (0xFE, 0xFF, _, _): // UTF-16 BE
-                    case (0xFF, 0xFE, _, _): // UTF-16 LE
+                    case [0xFE, 0xFF, ..]: // UTF-16 BE
+                    case [0xFF, 0xFE, ..]: // UTF-16 LE
                     {
                         using var sr = new StreamReader(stream, Encoding.Unicode);
-                        var jsonString = await sr.ReadToEndAsync();
+                        var jsonString = await sr.ReadToEndAsync(cancellationToken);
                         return JsonDocument.Parse(jsonString.AsMemory(), deserializationOptions);
                     }
-                    case (0xEF, 0xBB, 0xBF, _): // UTF-8
-                    case ((byte)'{', _, _, _): // Starts with a '{', probably JSON
+                    case [0xEF, 0xBB, 0xBF, ..]: // UTF-8
+                    case [(byte)'{', ..]: // Starts with a '{', probably JSON
                     {
                         return await JsonDocument.ParseAsync(stream, deserializationOptions, cancellationToken);
                     }
