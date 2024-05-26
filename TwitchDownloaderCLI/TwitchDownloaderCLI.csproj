@@ -7,7 +7,7 @@
     <Description>Download and render Twitch VODs, clips, and chats</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Platforms>AnyCPU;x64</Platforms>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 
