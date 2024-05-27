@@ -29,7 +29,7 @@ namespace TwitchDownloaderCore
         public ChatRoot chatRoot { get; private set; } = new ChatRoot();
 
         private static readonly SKColor Purple = SKColor.Parse("#7B2CF2");
-        private static readonly string[] DefaultUsernameColors = { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
+        private static readonly SKColor[] DefaultUsernameColors = { SKColor.Parse("#FF0000"), SKColor.Parse("#0000FF"), SKColor.Parse("#00FF00"), SKColor.Parse("#B22222"), SKColor.Parse("#FF7F50"), SKColor.Parse("#9ACD32"), SKColor.Parse("#FF4500"), SKColor.Parse("#2E8B57"), SKColor.Parse("#DAA520"), SKColor.Parse("#D2691E"), SKColor.Parse("#5F9EA0"), SKColor.Parse("#1E90FF"), SKColor.Parse("#FF69B4"), SKColor.Parse("#8A2BE2"), SKColor.Parse("#00FF7F") };
 
         private static readonly Regex RtlRegex = new("[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]", RegexOptions.Compiled);
         private static readonly Regex BlockArtRegex = new("[\u2500-\u257F\u2580-\u259F\u2800-\u28FF]", RegexOptions.Compiled);
@@ -1408,7 +1408,10 @@ namespace TwitchDownloaderCore
 
         private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null, int commentIndex = 0)
         {
-            var userColor = colorOverride ?? SKColor.Parse(comment.message.user_color ?? DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
+            var userColor = colorOverride ?? (comment.message.user_color is not null
+                ? SKColor.Parse(comment.message.user_color)
+                : DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
+
             if (colorOverride is null && renderOptions.AdjustUsernameVisibility)
             {
                 var useAlternateBackground = renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1;
@@ -1430,7 +1433,7 @@ namespace TwitchDownloaderCore
 
         private SKColor AdjustUsernameVisibility(SKColor userColor, SKColor backgroundColor)
         {
-            const int OPAQUE_THRESHOLD = 200;
+            const byte OPAQUE_THRESHOLD = byte.MaxValue / 2;
             if (!renderOptions.Outline && backgroundColor.Alpha < OPAQUE_THRESHOLD)
             {
                 // Background lightness cannot be truly known.
