@@ -873,30 +873,30 @@
     <value>未知</value>
   </data>
   <data name="IncreaseUsernameReadability" xml:space="preserve">
-    <value>Increase Username Readability:</value>
+    <value>提高用户名可读性：</value>
   </data>
   <data name="BadgeMaskBroadcaster" xml:space="preserve">
-    <value>Broadcaster</value>
+    <value>实况主</value>
   </data>
   <data name="BadgeMaskModerator" xml:space="preserve">
-    <value>Mods</value>
+    <value>管理员</value>
   </data>
   <data name="BadgeMaskVIP" xml:space="preserve">
-    <value>VIPs</value>
+    <value>VIP</value>
   </data>
   <data name="BadgeMaskSubscriber" xml:space="preserve">
-    <value>Subs</value>
+    <value>订阅者</value>
   </data>
   <data name="BadgeMaskPredictions" xml:space="preserve">
-    <value>Predictions</value>
+    <value>预测</value>
   </data>
   <data name="BadgeMaskNoAudioNoVideo" xml:space="preserve">
-    <value>No Audio/No Video</value>
+    <value>无音频 / 视频</value>
   </data>
   <data name="BadgeMaskTwitchPrime" xml:space="preserve">
     <value>Prime</value>
   </data>
   <data name="BadgeMaskOthers" xml:space="preserve">
-    <value>Others</value>
+    <value>其他</value>
   </data>
 </root>
