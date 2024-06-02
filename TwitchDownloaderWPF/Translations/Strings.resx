@@ -666,7 +666,7 @@
     <value>Enqueue Options</value>
   </data>
   <data name="TitleRenderRange" xml:space="preserve">
-    <value>Select Render Rage (Seconds)</value>
+    <value>Select Render Range (Seconds)</value>
   </data>
   <data name="TitleUrlList" xml:space="preserve">
     <value>Mass Download URL List</value>
