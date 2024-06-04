@@ -71,6 +71,24 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
         {
+            var outputFileInfo = TwitchHelper.ClaimFile(renderOptions.OutputFile, renderOptions.FileOverwriteCallback, _progress);
+            var maskFileInfo = renderOptions.GenerateMask ? TwitchHelper.ClaimFile(renderOptions.MaskFile, renderOptions.FileOverwriteCallback, _progress) : null;
+            if (outputFileInfo is null)
+            {
+                _progress.LogWarning("No destination file was provided, aborting.");
+                return;
+            }
+
+            if (renderOptions.GenerateMask && maskFileInfo is null)
+            {
+                _progress.LogWarning("No mask file was provided, aborting.");
+                return;
+            }
+
+            // Open the destination files so that they exist in the filesystem.
+            await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+            await using var maskFs = maskFileInfo?.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+
             _progress.SetStatus("Fetching Images [1/2]");
             await Task.Run(() => FetchScaledImages(cancellationToken), cancellationToken);
 
@@ -107,20 +125,17 @@ namespace TwitchDownloaderCore
 
             (int startTick, int totalTicks) = GetVideoTicks();
 
-            var renderFileDirectory = Directory.GetParent(Path.GetFullPath(renderOptions.OutputFile))!;
-            if (!renderFileDirectory.Exists)
-            {
-                TwitchHelper.CreateDirectory(renderFileDirectory.FullName);
-            }
+            // Delete the files as it is not guaranteed that the overwrite flag is passed in the FFmpeg args.
+            outputFs.Close();
+            if (outputFileInfo.Exists)
+                outputFileInfo.Delete();
 
-            if (File.Exists(renderOptions.OutputFile))
-                File.Delete(renderOptions.OutputFile);
+            maskFs?.Close();
+            if (renderOptions.GenerateMask && maskFileInfo!.Exists)
+                maskFileInfo.Delete();
 
-            if (renderOptions.GenerateMask && File.Exists(renderOptions.MaskFile))
-                File.Delete(renderOptions.MaskFile);
-
-            FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false);
-            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(0, true) : null;
+            FfmpegProcess ffmpegProcess = GetFfmpegProcess(outputFileInfo);
+            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(maskFileInfo) : null;
             _progress.SetTemplateStatus(@"Rendering Video {0}% ({1:h\hm\ms\s} Elapsed | {2:h\hm\ms\s} Remaining)", 0, TimeSpan.Zero, TimeSpan.Zero);
 
             try
@@ -323,22 +338,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private FfmpegProcess GetFfmpegProcess(int partNumber, bool isMask)
+        private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo)
         {
-            string savePath;
-            if (partNumber == 0)
-            {
-                if (isMask)
-                    savePath = renderOptions.MaskFile;
-                else
-                    savePath = renderOptions.OutputFile;
-            }
-            else
-            {
-                savePath = Path.Combine(renderOptions.TempFolder, Path.GetRandomFileName() + (isMask ? "_mask" : "") + Path.GetExtension(renderOptions.OutputFile));
-            }
-
-            savePath = Path.GetFullPath(savePath);
+            string savePath = fileInfo.FullName;
 
             string inputArgs = new StringBuilder(renderOptions.InputArgs)
                 .Replace("{fps}", renderOptions.Framerate.ToString())

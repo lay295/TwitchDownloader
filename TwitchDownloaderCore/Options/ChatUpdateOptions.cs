@@ -1,4 +1,6 @@
-﻿using TwitchDownloaderCore.Tools;
+﻿using System;
+using System.IO;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Options
 {
@@ -33,5 +35,6 @@ namespace TwitchDownloaderCore.Options
             }
         }
         public string TempFolder { get; set; }
+        public Func<FileInfo, FileInfo> FileOverwriteCallback { get; set; } = info => info;
     }
 }

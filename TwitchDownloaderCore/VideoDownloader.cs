@@ -39,6 +39,16 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
         {
+            var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename, downloadOptions.FileOverwriteCallback, _progress);
+            if (outputFileInfo is null)
+            {
+                _progress.LogWarning("No destination file was provided, aborting.");
+                return;
+            }
+
+            // Open the destination file so that it exists in the filesystem.
+            await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+
             await TwitchHelper.CleanupAbandonedVideoCaches(downloadOptions.TempFolder, downloadOptions.CacheCleanerCallback, _progress);
 
             string downloadFolder = Path.Combine(
@@ -49,8 +59,6 @@ namespace TwitchDownloaderCore
 
             try
             {
-                ServicePointManager.DefaultConnectionLimit = downloadOptions.DownloadThreads;
-
                 GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(downloadOptions.Id);
                 if (videoInfoResponse.data.video == null)
                 {
@@ -100,17 +108,13 @@ namespace TwitchDownloaderCore
                     videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
                     videoChapterResponse.data.video.moments.edges, cancellationToken);
 
-                var finalizedFileDirectory = Directory.GetParent(Path.GetFullPath(downloadOptions.Filename))!;
-                if (!finalizedFileDirectory.Exists)
-                {
-                    TwitchHelper.CreateDirectory(finalizedFileDirectory.FullName);
-                }
+                outputFs.Close();
 
                 int ffmpegExitCode;
                 var ffmpegRetries = 0;
                 do
                 {
-                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, metadataPath, startOffset, seekDuration > TimeSpan.Zero ? seekDuration : videoLength), cancellationToken);
+                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, metadataPath, startOffset, seekDuration > TimeSpan.Zero ? seekDuration : videoLength), cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
                         _progress.LogError($"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds...");
@@ -118,7 +122,7 @@ namespace TwitchDownloaderCore
                     }
                 } while (ffmpegExitCode != 0 && ffmpegRetries++ < 1);
 
-                if (ffmpegExitCode != 0 || !File.Exists(downloadOptions.Filename))
+                if (ffmpegExitCode != 0 || !outputFileInfo.Exists)
                 {
                     _shouldClearCache = false;
                     throw new Exception($"Failed to finalize video. The download cache has not been cleared and can be found at {downloadFolder} along with a log file.");
@@ -329,7 +333,7 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private int RunFfmpegVideoCopy(string downloadFolder, string metadataPath, TimeSpan startOffset, TimeSpan seekDuration)
+        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string metadataPath, TimeSpan startOffset, TimeSpan seekDuration)
         {
             var process = new Process
             {
@@ -338,7 +342,7 @@ namespace TwitchDownloaderCore
                     FileName = downloadOptions.FfmpegPath,
                     Arguments = string.Format(
                         "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.TrimBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i \"{1}\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.TrimEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"",
-                        Path.Combine(downloadFolder, "output.ts"), metadataPath, startOffset.TotalSeconds.ToString(CultureInfo.InvariantCulture), int.MaxValue, seekDuration.TotalSeconds.ToString(CultureInfo.InvariantCulture), Path.GetFullPath(downloadOptions.Filename)),
+                        Path.Combine(tempFolder, "output.ts"), metadataPath, startOffset.TotalSeconds.ToString(CultureInfo.InvariantCulture), int.MaxValue, seekDuration.TotalSeconds.ToString(CultureInfo.InvariantCulture), outputFile.FullName),
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardInput = false,
@@ -363,7 +367,7 @@ namespace TwitchDownloaderCore
             process.Start();
             process.BeginErrorReadLine();
 
-            using var logWriter = File.AppendText(Path.Combine(downloadFolder, "ffmpegLog.txt"));
+            using var logWriter = File.AppendText(Path.Combine(tempFolder, "ffmpegLog.txt"));
             do // We cannot handle logging inside the ErrorDataReceived lambda because more than 1 can come in at once and cause a race condition. lay295#598
             {
                 Thread.Sleep(100);

@@ -18,10 +18,8 @@ namespace TwitchDownloaderCore.Chat
         /// <summary>
         /// Serializes a chat Html file.
         /// </summary>
-        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, ITaskLogger logger, bool embedData = true, CancellationToken cancellationToken = default)
+        public static async Task SerializeAsync(FileStream fileStream, string filePath, ChatRoot chatRoot, ITaskLogger logger, bool embedData = true, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
-
             Dictionary<string, EmbedEmoteData> thirdEmoteData = new();
             await BuildThirdPartyDictionary(chatRoot, embedData, thirdEmoteData, logger, cancellationToken);
 
@@ -35,14 +33,7 @@ namespace TwitchDownloaderCore.Chat
             using var templateStream = new MemoryStream(Properties.Resources.chat_template);
             using var templateReader = new StreamReader(templateStream);
 
-            var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
-            if (!outputDirectory.Exists)
-            {
-                TwitchHelper.CreateDirectory(outputDirectory.FullName);
-            }
-
-            await using var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-            await using var sw = new StreamWriter(fs);
+            await using var sw = new StreamWriter(fileStream);
 
             while (!templateReader.EndOfStream)
             {

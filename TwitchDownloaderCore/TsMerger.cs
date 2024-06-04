@@ -26,6 +26,16 @@ namespace TwitchDownloaderCore
                 throw new FileNotFoundException("Input file does not exist");
             }
 
+            var outputFileInfo = TwitchHelper.ClaimFile(mergeOptions.OutputFile, mergeOptions.FileOverwriteCallback, _progress);
+            if (outputFileInfo is null)
+            {
+                _progress.LogWarning("No destination file was provided, aborting.");
+                return;
+            }
+
+            // Open the destination file so that it exists in the filesystem.
+            await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+
             var isM3U8 = false;
             var fileList = new List<string>();
             await using (var fs = File.Open(mergeOptions.InputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -54,7 +64,7 @@ namespace TwitchDownloaderCore
 
             _progress.SetTemplateStatus("Combining Parts {0}% [2/2]", 0);
 
-            await CombineVideoParts(fileList, cancellationToken);
+            await CombineVideoParts(fileList, outputFs, cancellationToken);
 
             _progress.ReportProgress(100);
         }
@@ -111,7 +121,7 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
+        private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, FileStream outputStream, CancellationToken cancellationToken)
         {
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(mergeOptions.OutputFile);
             string outputFile = mergeOptions.OutputFile;
@@ -119,7 +129,6 @@ namespace TwitchDownloaderCore
             int partCount = fileList.Count;
             int doneCount = 0;
 
-            await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.Read);
             foreach (var partFile in fileList)
             {
                 await DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken);
