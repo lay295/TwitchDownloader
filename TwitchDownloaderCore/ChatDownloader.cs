@@ -252,6 +252,7 @@ namespace TwitchDownloaderCore
             }
 
             var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename, downloadOptions.FileOverwriteCallback, _progress);
+            downloadOptions.Filename = outputFileInfo.FullName;
 
             // Open the destination file so that it exists in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);

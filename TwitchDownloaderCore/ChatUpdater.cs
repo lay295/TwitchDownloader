@@ -33,6 +33,7 @@ namespace TwitchDownloaderCore
         public async Task UpdateAsync(CancellationToken cancellationToken)
         {
             var outputFileInfo = TwitchHelper.ClaimFile(_updateOptions.OutputFile, _updateOptions.FileOverwriteCallback, _progress);
+            _updateOptions.OutputFile = outputFileInfo.FullName;
 
             // Open the destination file so that it exists in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
