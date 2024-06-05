@@ -4,7 +4,7 @@ using TwitchDownloaderCLI.Models;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("videodownload", HelpText = "Downloads a stream VOD from Twitch")]
-    internal sealed class VideoDownloadArgs : TwitchDownloaderArgs, IFileOverwriteArgs
+    internal sealed class VideoDownloadArgs : IFileOverwriteArgs, ITwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD to download.")]
         public string Id { get; set; }
@@ -36,6 +36,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("temp-path", Default = "", HelpText = "Path to temporary caching folder.")]
         public string TempFolder { get; set; }
 
+        // Interface args
         public OverwriteBehavior OverwriteBehavior { get; set; }
+        public bool? ShowBanner { get; set; }
+        public LogLevel LogLevel { get; set; }
     }
 }

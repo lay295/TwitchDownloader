@@ -5,7 +5,7 @@ using TwitchDownloaderCore.Tools;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("chatdownload", HelpText = "Downloads the chat from a VOD or clip")]
-    internal sealed class ChatDownloadArgs : TwitchDownloaderArgs, IFileOverwriteArgs
+    internal sealed class ChatDownloadArgs : IFileOverwriteArgs, ITwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD or clip to download that chat of.")]
         public string Id { get; set; }
@@ -46,6 +46,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
 
+        // Interface args
         public OverwriteBehavior OverwriteBehavior { get; set; }
+        public bool? ShowBanner { get; set; }
+        public LogLevel LogLevel { get; set; }
     }
 }

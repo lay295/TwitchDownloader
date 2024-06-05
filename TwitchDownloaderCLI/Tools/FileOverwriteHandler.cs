@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using TwitchDownloaderCLI.Models;
+using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Tools
