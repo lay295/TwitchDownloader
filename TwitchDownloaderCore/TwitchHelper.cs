@@ -867,10 +867,11 @@ namespace TwitchDownloaderCore
                 else
                 {
                     fileInfo = fileAlreadyExistsCallback(fileInfo);
+                    logger.LogVerbose($"{path} will be renamed to {fileInfo?.FullName}.");
                 }
             }
 
-            var directory = fileInfo.Directory;
+            var directory = fileInfo?.Directory;
             if (directory is not null && !directory.Exists)
             {
                 CreateDirectory(directory.FullName);
