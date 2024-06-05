@@ -19,13 +19,14 @@ namespace TwitchDownloaderCLI.Modes
 
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
-            var downloadOptions = GetDownloadOptions(inputOptions, progress);
+            var overwriteHandler = new FileOverwriteHandler(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions, overwriteHandler, progress);
 
             var videoDownloader = new VideoDownloader(downloadOptions, progress);
             videoDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
-        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, ITaskLogger logger)
+        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, FileOverwriteHandler overwriteHandler, ITaskLogger logger)
         {
             if (inputOptions.Id is null)
             {
@@ -76,7 +77,8 @@ namespace TwitchDownloaderCLI.Modes
                         "Run 'TwitchDownloaderCLI cache help' for more information.");
 
                     return Array.Empty<DirectoryInfo>();
-                }
+                },
+                FileOverwriteCallback = overwriteHandler.HandleOverwriteCallback,
             };
 
             return downloadOptions;

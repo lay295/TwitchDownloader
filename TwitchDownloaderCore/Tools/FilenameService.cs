@@ -86,5 +86,24 @@ namespace TwitchDownloaderCore.Tools
         private static readonly char[] FilenameInvalidChars = Path.GetInvalidFileNameChars();
 
         private static string RemoveInvalidFilenameChars(string filename) => filename.ReplaceAny(FilenameInvalidChars, '_');
+
+        public static FileInfo GetNonCollidingName(FileInfo fileInfo)
+        {
+            var fi = fileInfo;
+
+            var parentDir = Path.GetDirectoryName(fi.FullName)!;
+            var oldName = Path.GetFileNameWithoutExtension(fi.Name.AsSpan());
+            var extension = Path.GetExtension(fi.Name.AsSpan());
+
+            var i = 1;
+            while (fi.Exists)
+            {
+                var newName = Path.Combine(parentDir, $"{oldName} ({i}){extension}");
+                fi = new FileInfo(newName);
+                i++;
+            }
+
+            return fi;
+        }
     }
 }
