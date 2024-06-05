@@ -96,7 +96,7 @@ namespace TwitchDownloaderWPF.Services
 
         private static void Hyperlink_OnClicked(object sender, HyperlinkClickedEventArgs e)
         {
-            Process.Start(new ProcessStartInfo(e.Href) { UseShellExecute = true });
+            FileService.OpenExplorerForFile(new FileInfo(e.Href));
         }
     }
 }
