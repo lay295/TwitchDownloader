@@ -16,7 +16,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             var progress = new CliTaskProgress(inputOptions.LogLevel);
 
-            var overwriteHandler = new FileOverwriteHandler(inputOptions);
+            var overwriteHandler = new FileCollisionHandler(inputOptions);
             var updateOptions = GetUpdateOptions(inputOptions, overwriteHandler, progress);
 
             var chatUpdater = new ChatUpdater(updateOptions, progress);
@@ -24,7 +24,7 @@ namespace TwitchDownloaderCLI.Modes
             chatUpdater.UpdateAsync(new CancellationToken()).Wait();
         }
 
-        private static ChatUpdateOptions GetUpdateOptions(ChatUpdateArgs inputOptions, FileOverwriteHandler overwriteHandler, ITaskLogger logger)
+        private static ChatUpdateOptions GetUpdateOptions(ChatUpdateArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             if (!File.Exists(inputOptions.InputFile))
             {
@@ -78,7 +78,7 @@ namespace TwitchDownloaderCLI.Modes
                 StvEmotes = (bool)inputOptions.StvEmotes!,
                 TextTimestampFormat = inputOptions.TimeFormat,
                 TempFolder = inputOptions.TempFolder,
-                FileOverwriteCallback = overwriteHandler.HandleOverwriteCallback,
+                FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
 
             return updateOptions;

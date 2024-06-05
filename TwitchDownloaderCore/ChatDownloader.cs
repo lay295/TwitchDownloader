@@ -251,7 +251,7 @@ namespace TwitchDownloaderCore
                 throw new NullReferenceException("Null or empty video/clip ID");
             }
 
-            var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename, downloadOptions.FileOverwriteCallback, _progress);
+            var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename, downloadOptions.FileCollisionCallback, _progress);
             downloadOptions.Filename = outputFileInfo.FullName;
 
             // Open the destination file so that it exists in the filesystem.

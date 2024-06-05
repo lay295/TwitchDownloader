@@ -4,7 +4,7 @@ using TwitchDownloaderCLI.Models;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("videodownload", HelpText = "Downloads a stream VOD from Twitch")]
-    internal sealed class VideoDownloadArgs : IFileOverwriteArgs, ITwitchDownloaderArgs
+    internal sealed class VideoDownloadArgs : IFileCollisionArgs, ITwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD to download.")]
         public string Id { get; set; }

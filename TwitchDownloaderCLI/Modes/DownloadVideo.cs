@@ -19,14 +19,14 @@ namespace TwitchDownloaderCLI.Modes
 
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
-            var overwriteHandler = new FileOverwriteHandler(inputOptions);
+            var overwriteHandler = new FileCollisionHandler(inputOptions);
             var downloadOptions = GetDownloadOptions(inputOptions, overwriteHandler, progress);
 
             var videoDownloader = new VideoDownloader(downloadOptions, progress);
             videoDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
-        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, FileOverwriteHandler overwriteHandler, ITaskLogger logger)
+        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             if (inputOptions.Id is null)
             {
@@ -78,7 +78,7 @@ namespace TwitchDownloaderCLI.Modes
 
                     return Array.Empty<DirectoryInfo>();
                 },
-                FileOverwriteCallback = overwriteHandler.HandleOverwriteCallback,
+                FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
 
             return downloadOptions;

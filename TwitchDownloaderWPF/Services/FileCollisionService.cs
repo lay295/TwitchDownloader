@@ -7,9 +7,9 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderWPF.Services
 {
-    public static class FileOverwriteService
+    public static class FileCollisionService
     {
-        private enum OverwriteCommand
+        private enum CollisionCommand
         {
             Prompt,
             Overwrite,
@@ -17,27 +17,27 @@ namespace TwitchDownloaderWPF.Services
             Cancel
         }
 
-        private static OverwriteCommand _overwriteCommand = OverwriteCommand.Prompt;
+        private static CollisionCommand _collisionCommand = CollisionCommand.Prompt;
 
         [return: MaybeNull]
-        public static FileInfo HandleOverwriteCallback(FileInfo fileInfo, Window owner)
+        public static FileInfo HandleCollisionCallback(FileInfo fileInfo, Window owner)
         {
-            if (_overwriteCommand is not OverwriteCommand.Prompt)
+            if (_collisionCommand is not CollisionCommand.Prompt)
             {
-                return GetResult(fileInfo, _overwriteCommand);
+                return GetResult(fileInfo, _collisionCommand);
             }
 
             var result = ShowDialog(fileInfo, owner, out var rememberChoice);
 
             if (rememberChoice)
             {
-                _overwriteCommand = result;
+                _collisionCommand = result;
             }
 
             return GetResult(fileInfo, result);
         }
 
-        private static OverwriteCommand ShowDialog(FileInfo fileInfo, Window owner, out bool rememberChoice)
+        private static CollisionCommand ShowDialog(FileInfo fileInfo, Window owner, out bool rememberChoice)
         {
             using var dialog = new TaskDialog();
             dialog.WindowTitle = Translations.Strings.TitleFileAlreadyExists;
@@ -70,26 +70,26 @@ namespace TwitchDownloaderWPF.Services
             rememberChoice = dialog.IsVerificationChecked;
 
             if (buttonResult == overwriteButton)
-                return OverwriteCommand.Overwrite;
+                return CollisionCommand.Overwrite;
 
             if (buttonResult == renameButton)
-                return OverwriteCommand.Rename;
+                return CollisionCommand.Rename;
 
             if (buttonResult == cancelButton)
-                return OverwriteCommand.Cancel;
+                return CollisionCommand.Cancel;
 
             // This should never happen
             throw new ArgumentOutOfRangeException();
         }
 
         [return: MaybeNull]
-        private static FileInfo GetResult(FileInfo fileInfo, OverwriteCommand command)
+        private static FileInfo GetResult(FileInfo fileInfo, CollisionCommand command)
         {
             return command switch
             {
-                OverwriteCommand.Overwrite => fileInfo,
-                OverwriteCommand.Rename => FilenameService.GetNonCollidingName(fileInfo),
-                OverwriteCommand.Cancel => null,
+                CollisionCommand.Overwrite => fileInfo,
+                CollisionCommand.Rename => FilenameService.GetNonCollidingName(fileInfo),
+                CollisionCommand.Cancel => null,
                 _ => throw new ArgumentOutOfRangeException(nameof(command), command, null)
             };
         }

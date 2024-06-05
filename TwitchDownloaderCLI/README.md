@@ -66,7 +66,7 @@ Path to FFmpeg executable.
 **--temp-path**
 Path to temporary folder for cache.
 
-**--overwrite**
+**--collision**
 (Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode clipdownload
@@ -93,7 +93,7 @@ Path to FFmpeg executable.
 **--temp-path**
 Path to temporary folder for cache.
 
-**--overwrite**
+**--collision**
 (Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode chatdownload
@@ -135,7 +135,7 @@ Time to trim ending. See [Time durations](#time-durations) for a more detailed e
 **--temp-path**
 Path to temporary folder for cache.
 
-**--overwrite**
+**--collision**
 (Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode chatupdate
@@ -177,7 +177,7 @@ Path to output file. File extension will be used to determine new chat type. Val
 **--temp-path**
 Path to temporary folder for cache.
 
-**--overwrite**
+**--collision**
 (Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode chatrender
@@ -332,7 +332,7 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--scale-highlight-indent**
 (Default: `1.0`) Number to scale highlight indent size (sub messages).
 
-**--overwrite**
+**--collision**
 (Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode ffmpeg
@@ -359,7 +359,7 @@ Path a text file containing the absolute paths of the files to concatenate, sepa
 **-o / --output (REQUIRED)**
 File the program will output to.
 
-**--overwrite**
+**--collision**
 (Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ---

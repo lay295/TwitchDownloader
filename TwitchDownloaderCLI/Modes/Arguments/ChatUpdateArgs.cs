@@ -5,7 +5,7 @@ using TwitchDownloaderCore.Tools;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("chatupdate", HelpText = "Updates the embedded emotes, badges, bits, and trims a chat JSON and/or converts a JSON chat to another format.")]
-    internal sealed class ChatUpdateArgs : IFileOverwriteArgs, ITwitchDownloaderArgs
+    internal sealed class ChatUpdateArgs : IFileCollisionArgs, ITwitchDownloaderArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to input file. Valid extensions are: .json, .json.gz.")]
         public string InputFile { get; set; }

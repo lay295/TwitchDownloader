@@ -4,7 +4,7 @@ using TwitchDownloaderCLI.Models;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("clipdownload", HelpText = "Downloads a clip from Twitch")]
-    internal sealed class ClipDownloadArgs : IFileOverwriteArgs, ITwitchDownloaderArgs
+    internal sealed class ClipDownloadArgs : IFileCollisionArgs, ITwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the clip to download.")]
         public string Id { get; set; }

@@ -12,6 +12,6 @@ namespace TwitchDownloaderCore.Options
         public string TempFolder { get; set; }
         public bool EncodeMetadata { get; set; }
         public string FfmpegPath { get; set; }
-        public Func<FileInfo, FileInfo> FileOverwriteCallback { get; set; } = info => info;
+        public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
     }
 }

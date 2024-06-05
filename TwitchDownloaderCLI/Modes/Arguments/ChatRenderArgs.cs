@@ -4,7 +4,7 @@ using TwitchDownloaderCLI.Models;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("chatrender", HelpText = "Renders a chat JSON as a video")]
-    internal sealed class ChatRenderArgs : IFileOverwriteArgs, ITwitchDownloaderArgs
+    internal sealed class ChatRenderArgs : IFileCollisionArgs, ITwitchDownloaderArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to JSON chat file input.")]
         public string InputFile { get; set; }

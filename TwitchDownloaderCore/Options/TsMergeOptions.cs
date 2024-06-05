@@ -7,6 +7,6 @@ namespace TwitchDownloaderCore.Options
     {
         public string OutputFile { get; set; }
         public string InputFile { get; set; }
-        public Func<FileInfo, FileInfo> FileOverwriteCallback { get; set; } = info => info;
+        public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
     }
 }

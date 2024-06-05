@@ -19,7 +19,7 @@ namespace TwitchDownloaderCLI.Modes
 
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
-            var overwriteHandler = new FileOverwriteHandler(inputOptions);
+            var overwriteHandler = new FileCollisionHandler(inputOptions);
             var renderOptions = GetRenderOptions(inputOptions, overwriteHandler, progress);
 
             using var chatRenderer = new ChatRenderer(renderOptions, progress);
@@ -27,7 +27,7 @@ namespace TwitchDownloaderCLI.Modes
             chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
         }
 
-        private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions, FileOverwriteHandler overwriteHandler, ITaskLogger logger)
+        private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             ChatRenderOptions renderOptions = new()
             {
@@ -95,7 +95,7 @@ namespace TwitchDownloaderCLI.Modes
                 DisperseCommentOffsets = inputOptions.DisperseCommentOffsets,
                 AlternateMessageBackgrounds = inputOptions.AlternateMessageBackgrounds,
                 AdjustUsernameVisibility = inputOptions.AdjustUsernameVisibility,
-                FileOverwriteCallback = overwriteHandler.HandleOverwriteCallback,
+                FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255 && !(renderOptions.AlternateMessageBackgrounds! && renderOptions.AlternateBackgroundColor.Alpha != 255))

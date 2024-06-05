@@ -7,25 +7,25 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Tools
 {
-    internal class FileOverwriteHandler
+    internal class FileCollisionHandler
     {
-        private readonly IFileOverwriteArgs _overwriteArgs;
+        private readonly IFileCollisionArgs _collisionArgs;
 
-        public FileOverwriteHandler(IFileOverwriteArgs overwriteArgs)
+        public FileCollisionHandler(IFileCollisionArgs collisionArgs)
         {
-            _overwriteArgs = overwriteArgs;
+            _collisionArgs = collisionArgs;
         }
 
         [return: MaybeNull]
-        public FileInfo HandleOverwriteCallback(FileInfo fileInfo)
+        public FileInfo HandleCollisionCallback(FileInfo fileInfo)
         {
-            return _overwriteArgs.OverwriteBehavior switch
+            return _collisionArgs.OverwriteBehavior switch
             {
                 OverwriteBehavior.Overwrite => fileInfo,
                 OverwriteBehavior.Exit => null,
                 OverwriteBehavior.Rename => FilenameService.GetNonCollidingName(fileInfo),
                 OverwriteBehavior.Prompt => PromptUser(fileInfo),
-                _ => throw new ArgumentOutOfRangeException(nameof(_overwriteArgs.OverwriteBehavior), _overwriteArgs.OverwriteBehavior, null)
+                _ => throw new ArgumentOutOfRangeException(nameof(_collisionArgs.OverwriteBehavior), _collisionArgs.OverwriteBehavior, null)
             };
         }
 

@@ -14,20 +14,20 @@ namespace TwitchDownloaderCLI.Modes
 
             progress.LogInfo("The TS merger is experimental and is subject to change without notice in future releases.");
 
-            var overwriteHandler = new FileOverwriteHandler(inputOptions);
+            var overwriteHandler = new FileCollisionHandler(inputOptions);
             var mergeOptions = GetMergeOptions(inputOptions, overwriteHandler);
 
             var tsMerger = new TsMerger(mergeOptions, progress);
             tsMerger.MergeAsync(new CancellationToken()).Wait();
         }
 
-        private static TsMergeOptions GetMergeOptions(TsMergeArgs inputOptions, FileOverwriteHandler overwriteHandler)
+        private static TsMergeOptions GetMergeOptions(TsMergeArgs inputOptions, FileCollisionHandler collisionHandler)
         {
             TsMergeOptions mergeOptions = new()
             {
                 OutputFile = inputOptions.OutputFile,
                 InputFile = inputOptions.InputList,
-                FileOverwriteCallback = overwriteHandler.HandleOverwriteCallback,
+                FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
 
             return mergeOptions;

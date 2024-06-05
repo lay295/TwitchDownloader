@@ -26,7 +26,7 @@ namespace TwitchDownloaderCore
                 throw new FileNotFoundException("Input file does not exist");
             }
 
-            var outputFileInfo = TwitchHelper.ClaimFile(mergeOptions.OutputFile, mergeOptions.FileOverwriteCallback, _progress);
+            var outputFileInfo = TwitchHelper.ClaimFile(mergeOptions.OutputFile, mergeOptions.FileCollisionCallback, _progress);
             mergeOptions.OutputFile = outputFileInfo.FullName;
 
             // Open the destination file so that it exists in the filesystem.

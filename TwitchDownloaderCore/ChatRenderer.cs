@@ -71,9 +71,9 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
         {
-            var outputFileInfo = TwitchHelper.ClaimFile(renderOptions.OutputFile, renderOptions.FileOverwriteCallback, _progress);
+            var outputFileInfo = TwitchHelper.ClaimFile(renderOptions.OutputFile, renderOptions.FileCollisionCallback, _progress);
             renderOptions.OutputFile = outputFileInfo.FullName;
-            var maskFileInfo = renderOptions.GenerateMask ? TwitchHelper.ClaimFile(renderOptions.MaskFile, renderOptions.FileOverwriteCallback, _progress) : null;
+            var maskFileInfo = renderOptions.GenerateMask ? TwitchHelper.ClaimFile(renderOptions.MaskFile, renderOptions.FileCollisionCallback, _progress) : null;
 
             // Open the destination files so that they exist in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);

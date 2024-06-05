@@ -5,7 +5,7 @@ using TwitchDownloaderCore.Tools;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("chatdownload", HelpText = "Downloads the chat from a VOD or clip")]
-    internal sealed class ChatDownloadArgs : IFileOverwriteArgs, ITwitchDownloaderArgs
+    internal sealed class ChatDownloadArgs : IFileCollisionArgs, ITwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD or clip to download that chat of.")]
         public string Id { get; set; }
