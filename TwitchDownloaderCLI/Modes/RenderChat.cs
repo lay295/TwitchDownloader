@@ -19,8 +19,8 @@ namespace TwitchDownloaderCLI.Modes
 
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
-            var overwriteHandler = new FileCollisionHandler(inputOptions);
-            var renderOptions = GetRenderOptions(inputOptions, overwriteHandler, progress);
+            var collisionHandler = new FileCollisionHandler(inputOptions);
+            var renderOptions = GetRenderOptions(inputOptions, collisionHandler, progress);
 
             using var chatRenderer = new ChatRenderer(renderOptions, progress);
             chatRenderer.ParseJsonAsync().Wait();

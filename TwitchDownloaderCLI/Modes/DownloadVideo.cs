@@ -19,8 +19,8 @@ namespace TwitchDownloaderCLI.Modes
 
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
-            var overwriteHandler = new FileCollisionHandler(inputOptions);
-            var downloadOptions = GetDownloadOptions(inputOptions, overwriteHandler, progress);
+            var collisionHandler = new FileCollisionHandler(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions, collisionHandler, progress);
 
             var videoDownloader = new VideoDownloader(downloadOptions, progress);
             videoDownloader.DownloadAsync(new CancellationToken()).Wait();
