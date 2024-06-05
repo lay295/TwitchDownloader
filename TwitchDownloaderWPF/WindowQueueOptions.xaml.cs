@@ -100,6 +100,11 @@ namespace TwitchDownloaderWPF
                 textFolder.Text = queueFolder;
         }
 
+        private FileInfo HandleOverwriteCallback(FileInfo fileInfo)
+        {
+            return Dispatcher.Invoke(() => FileOverwriteService.HandleOverwriteCallback(fileInfo, Application.Current.MainWindow));
+        }
+
         private void btnQueue_Click(object sender, RoutedEventArgs e)
         {
             if (_parentPage != null)
@@ -114,6 +119,8 @@ namespace TwitchDownloaderWPF
                     }
 
                     VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text);
+                    downloadOptions.FileOverwriteCallback = HandleOverwriteCallback;
+
                     VodDownloadTask downloadTask = new VodDownloadTask
                     {
                         DownloadOptions = downloadOptions,
@@ -142,6 +149,7 @@ namespace TwitchDownloaderWPF
                             chatOptions.DownloadFormat = ChatFormat.Text;
                         chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
                         chatOptions.Filename = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(downloadOptions.Filename) + "." + chatOptions.DownloadFormat);
+                        chatOptions.FileOverwriteCallback = HandleOverwriteCallback;
 
                         if (downloadOptions.TrimBeginning)
                         {
@@ -180,6 +188,7 @@ namespace TwitchDownloaderWPF
                                 renderOptions.OutputFile = Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), " - CHAT." + MainWindow.pageChatRender.comboFormat.Text.ToLower());
                             }
                             renderOptions.InputFile = chatOptions.Filename;
+                            renderOptions.FileOverwriteCallback = HandleOverwriteCallback;
 
                             ChatRenderTask renderTask = new ChatRenderTask
                             {
@@ -224,7 +233,8 @@ namespace TwitchDownloaderWPF
                             : -1,
                         TempFolder = Settings.Default.TempPath,
                         EncodeMetadata = clipDownloadPage.CheckMetadata.IsChecked!.Value,
-                        FfmpegPath = "ffmpeg"
+                        FfmpegPath = "ffmpeg",
+                        FileOverwriteCallback = HandleOverwriteCallback,
                     };
 
                     ClipDownloadTask downloadTask = new ClipDownloadTask
@@ -258,6 +268,7 @@ namespace TwitchDownloaderWPF
                         chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id,
                             clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, TimeSpan.Zero, clipDownloadPage.clipLength,
                             clipDownloadPage.viewCount.ToString(), clipDownloadPage.game) + "." + chatOptions.FileExtension);
+                        chatOptions.FileOverwriteCallback = HandleOverwriteCallback;
 
                         ChatDownloadTask chatTask = new ChatDownloadTask
                         {
@@ -284,6 +295,7 @@ namespace TwitchDownloaderWPF
                                 renderOptions.OutputFile = Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), " - CHAT." + MainWindow.pageChatRender.comboFormat.Text.ToLower());
                             }
                             renderOptions.InputFile = chatOptions.Filename;
+                            renderOptions.FileOverwriteCallback = HandleOverwriteCallback;
 
                             ChatRenderTask renderTask = new ChatRenderTask
                             {
@@ -322,6 +334,7 @@ namespace TwitchDownloaderWPF
                         chatOptions.TrimBeginning ? TimeSpan.FromSeconds(chatOptions.TrimBeginningTime) : TimeSpan.Zero,
                         chatOptions.TrimEnding ? TimeSpan.FromSeconds(chatOptions.TrimEndingTime) : chatDownloadPage.vodLength,
                         chatDownloadPage.viewCount.ToString(), chatDownloadPage.game) + "." + chatOptions.FileExtension);
+                    chatOptions.FileOverwriteCallback = HandleOverwriteCallback;
 
                     ChatDownloadTask chatTask = new ChatDownloadTask
                     {
@@ -343,6 +356,7 @@ namespace TwitchDownloaderWPF
                     {
                         ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), '.' + MainWindow.pageChatRender.comboFormat.Text.ToLower()));
                         renderOptions.InputFile = chatOptions.Filename;
+                        renderOptions.FileOverwriteCallback = HandleOverwriteCallback;
 
                         ChatRenderTask renderTask = new ChatRenderTask
                         {
@@ -380,6 +394,7 @@ namespace TwitchDownloaderWPF
                         chatOptions.TrimBeginning ? TimeSpan.FromSeconds(chatOptions.TrimBeginningTime) : TimeSpan.Zero,
                         chatOptions.TrimEnding ? TimeSpan.FromSeconds(chatOptions.TrimEndingTime) : chatUpdatePage.VideoLength,
                         chatUpdatePage.ViewCount.ToString(), chatUpdatePage.Game) + "." + chatOptions.FileExtension);
+                    chatOptions.FileOverwriteCallback = HandleOverwriteCallback;
 
                     ChatUpdateTask chatTask = new ChatUpdateTask
                     {
@@ -415,6 +430,8 @@ namespace TwitchDownloaderWPF
                         string filePath = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(fileName) + "." + fileFormat.ToLower());
                         ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(filePath);
                         renderOptions.InputFile = fileName;
+                        renderOptions.FileOverwriteCallback = HandleOverwriteCallback;
+
                         ChatRenderTask renderTask = new ChatRenderTask
                         {
                             DownloadOptions = renderOptions,
@@ -472,7 +489,8 @@ namespace TwitchDownloaderWPF
                             DownloadThreads = Settings.Default.VodDownloadThreads,
                             ThrottleKib = Settings.Default.DownloadThrottleEnabled
                                 ? Settings.Default.MaximumBandwidthKib
-                                : -1
+                                : -1,
+                            FileOverwriteCallback = HandleOverwriteCallback,
                         };
                         downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
                             downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
@@ -508,7 +526,8 @@ namespace TwitchDownloaderWPF
                                 : -1,
                             TempFolder = Settings.Default.TempPath,
                             EncodeMetadata = Settings.Default.EncodeClipMetadata,
-                            FfmpegPath = "ffmpeg"
+                            FfmpegPath = "ffmpeg",
+                            FileOverwriteCallback = HandleOverwriteCallback,
                         };
 
                         ClipDownloadTask downloadTask = new ClipDownloadTask
@@ -538,7 +557,8 @@ namespace TwitchDownloaderWPF
                         TimeFormat = TimestampFormat.Relative,
                         Id = taskData.Id,
                         TrimBeginning = false,
-                        TrimEnding = false
+                        TrimEnding = false,
+                        FileOverwriteCallback = HandleOverwriteCallback,
                     };
                     if (radioJson.IsChecked == true)
                         downloadOptions.DownloadFormat = ChatFormat.Json;
@@ -577,6 +597,7 @@ namespace TwitchDownloaderWPF
                             renderOptions.OutputFile = Path.ChangeExtension(downloadOptions.Filename.Replace(".gz", ""), " - CHAT." + MainWindow.pageChatRender.comboFormat.Text.ToLower());
                         }
                         renderOptions.InputFile = downloadOptions.Filename;
+                        renderOptions.FileOverwriteCallback = HandleOverwriteCallback;
 
                         ChatRenderTask renderTask = new ChatRenderTask
                         {
