@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using Ookii.Dialogs.Wpf;
@@ -19,6 +20,7 @@ namespace TwitchDownloaderWPF.Services
 
         private static OverwriteCommand _overwriteCommand = OverwriteCommand.Prompt;
 
+        [return: MaybeNull]
         public static FileInfo HandleOverwriteCallback(FileInfo fileInfo, Window owner)
         {
             if (_overwriteCommand is not OverwriteCommand.Prompt)
@@ -80,6 +82,7 @@ namespace TwitchDownloaderWPF.Services
             throw new ArgumentOutOfRangeException();
         }
 
+        [return: MaybeNull]
         private static FileInfo GetResult(FileInfo fileInfo, OverwriteCommand command)
         {
             return command switch

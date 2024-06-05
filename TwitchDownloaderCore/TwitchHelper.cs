@@ -854,7 +854,6 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
-        [return: MaybeNull]
         public static FileInfo ClaimFile(string path, Func<FileInfo, FileInfo> fileAlreadyExistsCallback, ITaskLogger logger)
         {
             var fileInfo = new FileInfo(path);
@@ -867,11 +866,18 @@ namespace TwitchDownloaderCore
                 else
                 {
                     fileInfo = fileAlreadyExistsCallback(fileInfo);
-                    logger.LogVerbose($"{path} will be renamed to {fileInfo?.FullName}.");
+
+                    if (fileInfo is null)
+                    {
+                        // I would prefer to not throw here, but the alternative is refactoring the task queue :/
+                        throw new FileNotFoundException("No destination file was provided, aborting.");
+                    }
+
+                    logger.LogVerbose($"{path} will be renamed to {fileInfo.FullName}.");
                 }
             }
 
-            var directory = fileInfo?.Directory;
+            var directory = fileInfo.Directory;
             if (directory is not null && !directory.Exists)
             {
                 CreateDirectory(directory.FullName);

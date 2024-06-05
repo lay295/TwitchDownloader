@@ -89,6 +89,7 @@ namespace TwitchDownloaderCore.Tools
 
         public static FileInfo GetNonCollidingName(FileInfo fileInfo)
         {
+            fileInfo.Refresh();
             var fi = fileInfo;
 
             var parentDir = Path.GetDirectoryName(fi.FullName)!;

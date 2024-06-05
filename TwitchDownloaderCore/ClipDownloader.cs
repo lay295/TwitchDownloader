@@ -31,13 +31,7 @@ namespace TwitchDownloaderCore
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
         {
-
             var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename, downloadOptions.FileOverwriteCallback, _progress);
-            if (outputFileInfo is null)
-            {
-                _progress.LogWarning("No destination file was provided, aborting.");
-                return;
-            }
 
             // Open the destination file so that it exists in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
@@ -77,6 +71,7 @@ namespace TwitchDownloaderCore
                 var clipChapter = TwitchHelper.GenerateClipChapter(clipInfo.data.clip);
                 await EncodeClipWithMetadata(tempFile, outputFileInfo.FullName, clipInfo.data.clip, clipChapter, cancellationToken);
 
+                outputFileInfo.Refresh();
                 if (!outputFileInfo.Exists)
                 {
                     File.Move(tempFile, outputFileInfo.FullName);

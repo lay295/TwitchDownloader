@@ -73,17 +73,6 @@ namespace TwitchDownloaderCore
         {
             var outputFileInfo = TwitchHelper.ClaimFile(renderOptions.OutputFile, renderOptions.FileOverwriteCallback, _progress);
             var maskFileInfo = renderOptions.GenerateMask ? TwitchHelper.ClaimFile(renderOptions.MaskFile, renderOptions.FileOverwriteCallback, _progress) : null;
-            if (outputFileInfo is null)
-            {
-                _progress.LogWarning("No destination file was provided, aborting.");
-                return;
-            }
-
-            if (renderOptions.GenerateMask && maskFileInfo is null)
-            {
-                _progress.LogWarning("No mask file was provided, aborting.");
-                return;
-            }
 
             // Open the destination files so that they exist in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
@@ -127,10 +116,12 @@ namespace TwitchDownloaderCore
 
             // Delete the files as it is not guaranteed that the overwrite flag is passed in the FFmpeg args.
             outputFs.Close();
+            outputFileInfo.Refresh();
             if (outputFileInfo.Exists)
                 outputFileInfo.Delete();
 
             maskFs?.Close();
+            maskFileInfo?.Refresh();
             if (renderOptions.GenerateMask && maskFileInfo!.Exists)
                 maskFileInfo.Delete();
 
