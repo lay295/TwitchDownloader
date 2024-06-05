@@ -32,7 +32,7 @@ namespace TwitchDownloaderCLI.Tools
         [return: MaybeNull]
         private static FileInfo PromptUser(FileInfo fileInfo)
         {
-            Console.WriteLine($"{fileInfo.FullName} already exists.");
+            Console.WriteLine($"The file '{fileInfo.FullName}' already exists.");
 
             while (true)
             {
