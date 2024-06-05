@@ -151,5 +151,45 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 
             Assert.Equal(EXPECTED, result);
         }
+
+        [Fact]
+        public void GetNonCollidingNameWorks_WhenNoCollisionExists()
+        {
+            var expected = Path.Combine(Path.GetTempPath(), "foo.txt");
+            var path = Path.Combine(Path.GetTempPath(), "foo.txt");
+            var fileInfo = new FileInfo(path);
+
+            try
+            {
+                var actual = FilenameService.GetNonCollidingName(fileInfo);
+
+                Assert.Equal(expected, actual.FullName);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void GetNonCollidingNameWorks_WhenCollisionExists()
+        {
+            var expected = Path.Combine(Path.GetTempPath(), "foo (1).txt");
+            var path = Path.Combine(Path.GetTempPath(), "foo.txt");
+            var fileInfo = new FileInfo(path);
+
+            try
+            {
+                fileInfo.Create().Close();
+
+                var actual = FilenameService.GetNonCollidingName(fileInfo);
+
+                Assert.Equal(expected, actual.FullName);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
     }
 }
