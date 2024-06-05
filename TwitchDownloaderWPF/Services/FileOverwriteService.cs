@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
@@ -41,9 +40,9 @@ namespace TwitchDownloaderWPF.Services
         private static OverwriteCommand ShowDialog(FileInfo fileInfo, Window owner, out bool rememberChoice)
         {
             using var dialog = new TaskDialog();
-            dialog.WindowTitle = "File already exists";
-            dialog.MainInstruction = $"{fileInfo.Name} already exists.";
-            dialog.Content = $"The file <a href=\"{fileInfo.FullName}\">{fileInfo.FullName}</a> already exists. Do you want to overwrite it?";
+            dialog.WindowTitle = Translations.Strings.TitleFileAlreadyExists;
+            dialog.MainInstruction = string.Format(Translations.Strings.FileAlreadyExistsHeader, fileInfo.Name);
+            dialog.Content = string.Format(Translations.Strings.FileAlreadyExistsBody, $"<a href=\"{fileInfo.FullName}\">{fileInfo.FullName}</a>");
             dialog.MainIcon = TaskDialogIcon.Information;
 
             dialog.EnableHyperlinks = true;
@@ -51,19 +50,19 @@ namespace TwitchDownloaderWPF.Services
             
             dialog.ButtonStyle = TaskDialogButtonStyle.CommandLinks;
 
-            var overwriteButton = new TaskDialogButton("Overwrite");
-            overwriteButton.CommandLinkNote = "The existing file will be overwritten.";
+            var overwriteButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsOverwrite);
+            overwriteButton.CommandLinkNote = Translations.Strings.FileAlreadyExistsOverwriteDescription;
             dialog.Buttons.Add(overwriteButton);
 
-            var renameButton = new TaskDialogButton("Rename");
-            renameButton.CommandLinkNote = "The new file will be renamed.";
+            var renameButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsRename);
+            renameButton.CommandLinkNote = Translations.Strings.FileAlreadyExistsRenameDescription;
             dialog.Buttons.Add(renameButton);
 
-            var cancelButton = new TaskDialogButton("Cancel");
-            cancelButton.CommandLinkNote = "The task will be canceled.";
+            var cancelButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsCancel);
+            cancelButton.CommandLinkNote = Translations.Strings.FileAlreadyExistsCancelDescription;
             dialog.Buttons.Add(cancelButton);
 
-            dialog.VerificationText = "Remember my choice";
+            dialog.VerificationText = Translations.Strings.FileAlreadyExistsRememberMyChoice;
             dialog.IsVerificationChecked = false;
 
             var buttonResult = dialog.ShowDialog(owner);
