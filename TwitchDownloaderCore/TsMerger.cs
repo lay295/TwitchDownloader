@@ -27,6 +27,7 @@ namespace TwitchDownloaderCore
             }
 
             var isM3U8 = false;
+            var isFirst = true;
             var fileList = new List<string>();
             await using (var fs = File.Open(mergeOptions.InputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -35,14 +36,11 @@ namespace TwitchDownloaderCore
                 {
                     if (string.IsNullOrWhiteSpace(line)) continue;
 
-                    if (isM3U8)
-                    {
-                        if (line.StartsWith('#')) continue;
-                    }
-                    else
-                    {
-                        if (line.StartsWith("#EXTM3U")) isM3U8 = true;
-                    }
+                    if (isFirst && line.StartsWith("#EXTM3U")) isM3U8 = true;
+
+                    isFirst = false;
+
+                    if (isM3U8 && line.StartsWith('#')) continue;
 
                     fileList.Add(line);
                 }
