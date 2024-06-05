@@ -43,7 +43,8 @@ namespace TwitchDownloaderWPF.Services
             using var dialog = new TaskDialog();
             dialog.WindowTitle = "File already exists";
             dialog.MainInstruction = $"{fileInfo.Name} already exists.";
-            dialog.Content = $"The file <a href=\"{fileInfo.FullName}\">{fileInfo.FullName}</a> already exists. What would you like to do?";
+            dialog.Content = $"The file <a href=\"{fileInfo.FullName}\">{fileInfo.FullName}</a> already exists. Do you want to overwrite it?";
+            dialog.MainIcon = TaskDialogIcon.Information;
 
             dialog.EnableHyperlinks = true;
             dialog.HyperlinkClicked += Hyperlink_OnClicked;
