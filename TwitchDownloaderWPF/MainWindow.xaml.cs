@@ -89,7 +89,11 @@ namespace TwitchDownloaderWPF
             FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
 
             var currentVersion = Version.Parse("1.54.3");
+#if DEBUG
+            Title = $"Twitch Downloader v{currentVersion} - DEBUG";
+#else
             Title = $"Twitch Downloader v{currentVersion}";
+#endif
 
             // TODO: extract FFmpeg handling to a dedicated service
             if (!File.Exists("ffmpeg.exe"))
