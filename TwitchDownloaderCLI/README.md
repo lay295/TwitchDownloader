@@ -138,7 +138,7 @@ Path to input file. Valid extensions are: `.json`, `.json.gz`.
 **-o / --output (REQUIRED)**
 Path to output file. File extension will be used to determine new chat type. Valid extensions are: `.json`, `.html`, and `.txt`.
 
-**-c / --compression**
+**--compression**
 (Default: `None`) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-E / --embed-missing**
