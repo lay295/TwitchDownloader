@@ -951,7 +951,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remember my choice.
+        ///   Looks up a localized string similar to Remember my choice for this session.
         /// </summary>
         public static string FileAlreadyExistsRememberMyChoice {
             get {

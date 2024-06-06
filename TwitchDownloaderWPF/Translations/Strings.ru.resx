@@ -925,6 +925,6 @@
     <value>The task will be canceled.</value>
   </data>
   <data name="FileAlreadyExistsRememberMyChoice" xml:space="preserve">
-    <value>Remember my choice</value>
+    <value>Remember my choice for this session</value>
   </data>
 </root>
