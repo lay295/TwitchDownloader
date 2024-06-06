@@ -95,7 +95,7 @@ namespace TwitchDownloaderCore.Extensions
         public static int UnEscapedIndexOf(this ReadOnlySpan<char> str, char character)
         {
             if (character is '\\' or '\'' or '\"')
-                throw new ArgumentOutOfRangeException("Escape characters are not supported.", nameof(character));
+                throw new ArgumentOutOfRangeException(nameof(character), character, "Escape characters are not supported.");
 
             var firstIndex = str.IndexOf(character);
             if (firstIndex == -1)
@@ -146,7 +146,7 @@ namespace TwitchDownloaderCore.Extensions
             const string ESCAPE_CHARS = @"\'""";
 
             if (characters.IndexOfAny(ESCAPE_CHARS) != -1)
-                throw new ArgumentOutOfRangeException("Escape characters are not supported.", nameof(characters));
+                throw new ArgumentOutOfRangeException(nameof(characters), characters.ToString(), "Escape characters are not supported.");
 
             var firstIndex = str.IndexOfAny(characters);
             if (firstIndex == -1)
