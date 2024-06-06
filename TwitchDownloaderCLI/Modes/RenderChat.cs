@@ -77,7 +77,7 @@ namespace TwitchDownloaderCLI.Modes
                     "twitter" or "twemoji" => EmojiVendor.TwitterTwemoji,
                     "google" or "notocolor" => EmojiVendor.GoogleNotoColor,
                     "system" or "none" => EmojiVendor.None,
-                    _ => throw new NotSupportedException("Invalid emoji vendor. Valid values are: 'twitter' / 'twemoji', and 'google' / 'notocolor'")
+                    _ => throw new NotSupportedException("Invalid emoji vendor. Valid values are: 'twitter' / 'twemoji', 'google' / 'notocolor', and 'system' / 'none'")
                 },
                 SkipDriveWaiting = inputOptions.SkipDriveWaiting,
                 EmoteScale = inputOptions.ScaleEmote,

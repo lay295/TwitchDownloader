@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -17,24 +18,14 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public int Progress
         {
             get => _progress;
-            set
-            {
-                if (value == _progress) return;
-                _progress = value;
-                OnPropertyChanged();
-            }
+            private set => SetField(ref _progress, value);
         }
 
         private TwitchTaskStatus _status = TwitchTaskStatus.Ready;
         public TwitchTaskStatus Status
         {
             get => _status;
-            private set
-            {
-                if (value == _status) return;
-                _status = value;
-                OnPropertyChanged();
-            }
+            private set => SetField(ref _status, value);
         }
 
         public ChatUpdateOptions UpdateOptions { get; init; }
@@ -46,12 +37,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public TwitchTaskException Exception
         {
             get => _exception;
-            private set
-            {
-                if (Equals(value, _exception)) return;
-                _exception = value;
-                OnPropertyChanged();
-            }
+            private set => SetField(ref _exception, value);
         }
 
         public string OutputFile => UpdateOptions.OutputFile;
@@ -60,12 +46,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public bool CanCancel
         {
             get => _canCancel;
-            private set
-            {
-                if (value == _canCancel) return;
-                _canCancel = value;
-                OnPropertyChanged();
-            }
+            private set => SetField(ref _canCancel, value);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -147,6 +128,14 @@ namespace TwitchDownloaderWPF.TwitchTasks
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }
