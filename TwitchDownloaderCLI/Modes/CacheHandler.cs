@@ -27,21 +27,15 @@ namespace TwitchDownloaderCLI.Modes
             Console.WriteLine("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly.");
             while (true)
             {
-                Console.Write("[Y]es / [N]o: ");
+                Console.Write("[Y] Yes / [N] No: ");
                 var userInput = Console.ReadLine()!.Trim().ToLower();
                 switch (userInput)
                 {
-                    case "y":
-                    case "ye":
-                    case "yes":
+                    case "y" or "yes":
                         ClearTempCache();
                         return;
-                    case "n":
-                    case "no":
+                    case "n" or "no":
                         return;
-                    default:
-                        Console.Write("Invalid input. ");
-                        continue;
                 }
             }
         }
