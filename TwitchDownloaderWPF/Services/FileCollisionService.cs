@@ -43,7 +43,7 @@ namespace TwitchDownloaderWPF.Services
             dialog.WindowTitle = Translations.Strings.TitleFileAlreadyExists;
             dialog.MainInstruction = string.Format(Translations.Strings.FileAlreadyExistsHeader, fileInfo.Name);
             dialog.Content = string.Format(Translations.Strings.FileAlreadyExistsBody, $"<a href=\"{fileInfo.FullName}\">{fileInfo.FullName}</a>");
-            dialog.MainIcon = TaskDialogIcon.Information;
+            dialog.MainIcon = TaskDialogIcon.Warning;
 
             dialog.EnableHyperlinks = true;
             dialog.HyperlinkClicked += Hyperlink_OnClicked;
