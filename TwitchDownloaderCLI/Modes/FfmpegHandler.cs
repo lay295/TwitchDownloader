@@ -86,6 +86,8 @@ namespace TwitchDownloaderCLI.Modes
                 progress.SetTemplateStatus("Downloading FFmpeg {0}%", 0);
                 _timer = new Timer(_ =>
                 {
+                    if (_percentQueue.IsEmpty) return;
+
                     progress.ReportProgress(_percentQueue.Max());
                 }, null, 0, 100);
             }
