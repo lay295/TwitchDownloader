@@ -92,5 +92,6 @@ namespace TwitchDownloaderCore.Options
         public EmojiVendor EmojiVendor { get; set; } = EmojiVendor.GoogleNotoColor;
         public int[] TimestampWidths { get; set; }
         public bool AdjustUsernameVisibility { get; set; }
+        public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
     }
 }

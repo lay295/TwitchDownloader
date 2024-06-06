@@ -251,6 +251,12 @@ namespace TwitchDownloaderCore
                 throw new NullReferenceException("Null or empty video/clip ID");
             }
 
+            var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename, downloadOptions.FileCollisionCallback, _progress);
+            downloadOptions.Filename = outputFileInfo.FullName;
+
+            // Open the destination file so that it exists in the filesystem.
+            await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+
             DownloadType downloadType = downloadOptions.Id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
 
             ChatRoot chatRoot = new()
@@ -519,13 +525,13 @@ namespace TwitchDownloaderCore
             switch (downloadOptions.DownloadFormat)
             {
                 case ChatFormat.Json:
-                    await ChatJson.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.Compression, cancellationToken);
+                    await ChatJson.SerializeAsync(outputFs, chatRoot, downloadOptions.Compression, cancellationToken);
                     break;
                 case ChatFormat.Html:
-                    await ChatHtml.SerializeAsync(downloadOptions.Filename, chatRoot, _progress, downloadOptions.EmbedData, cancellationToken);
+                    await ChatHtml.SerializeAsync(outputFs, outputFileInfo.FullName, chatRoot, _progress, downloadOptions.EmbedData, cancellationToken);
                     break;
                 case ChatFormat.Text:
-                    await ChatText.SerializeAsync(downloadOptions.Filename, chatRoot, downloadOptions.TimeFormat);
+                    await ChatText.SerializeAsync(outputFs, chatRoot, downloadOptions.TimeFormat);
                     break;
                 default:
                     throw new NotSupportedException($"{downloadOptions.DownloadFormat} is not a supported output format.");

@@ -32,6 +32,12 @@ namespace TwitchDownloaderCore
 
         public async Task UpdateAsync(CancellationToken cancellationToken)
         {
+            var outputFileInfo = TwitchHelper.ClaimFile(_updateOptions.OutputFile, _updateOptions.FileCollisionCallback, _progress);
+            _updateOptions.OutputFile = outputFileInfo.FullName;
+
+            // Open the destination file so that it exists in the filesystem.
+            await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+
             chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (!Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.Equals(".json", StringComparison.OrdinalIgnoreCase))
             {
@@ -70,13 +76,13 @@ namespace TwitchDownloaderCore
             switch (_updateOptions.OutputFormat)
             {
                 case ChatFormat.Json:
-                    await ChatJson.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.Compression, cancellationToken);
+                    await ChatJson.SerializeAsync(outputFs, chatRoot, _updateOptions.Compression, cancellationToken);
                     break;
                 case ChatFormat.Html:
-                    await ChatHtml.SerializeAsync(_updateOptions.OutputFile, chatRoot, _progress, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
+                    await ChatHtml.SerializeAsync(outputFs, outputFileInfo.FullName, chatRoot, _progress, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
                     break; // If there is embedded data, it's almost guaranteed to be first party emotes or badges.
                 case ChatFormat.Text:
-                    await ChatText.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.TextTimestampFormat);
+                    await ChatText.SerializeAsync(outputFs, chatRoot, _updateOptions.TextTimestampFormat);
                     break;
                 default:
                     throw new NotSupportedException($"{_updateOptions.OutputFormat} is not a supported output format.");

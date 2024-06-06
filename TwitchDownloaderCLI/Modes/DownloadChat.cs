@@ -16,13 +16,14 @@ namespace TwitchDownloaderCLI.Modes
         {
             var progress = new CliTaskProgress(inputOptions.LogLevel);
 
-            var downloadOptions = GetDownloadOptions(inputOptions, progress);
+            var collisionHandler = new FileCollisionHandler(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions, collisionHandler, progress);
 
             var chatDownloader = new ChatDownloader(downloadOptions, progress);
             chatDownloader.DownloadAsync(CancellationToken.None).Wait();
         }
 
-        private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions, ITaskLogger logger)
+        private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             if (inputOptions.Id is null)
             {
@@ -64,7 +65,8 @@ namespace TwitchDownloaderCLI.Modes
                 BttvEmotes = (bool)inputOptions.BttvEmotes!,
                 FfzEmotes = (bool)inputOptions.FfzEmotes!,
                 StvEmotes = (bool)inputOptions.StvEmotes!,
-                TempFolder = inputOptions.TempFolder
+                TempFolder = inputOptions.TempFolder,
+                FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
 
             return downloadOptions;

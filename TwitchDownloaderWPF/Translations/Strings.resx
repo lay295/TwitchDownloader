@@ -896,4 +896,34 @@
   <data name="BadgeMaskOthers" xml:space="preserve">
     <value>Others</value>
   </data>
+  <data name="TitleFileAlreadyExists" xml:space="preserve">
+    <value>File already exists</value>
+  </data>
+  <data name="FileAlreadyExistsHeader" xml:space="preserve">
+    <value>{0} already exists.</value>
+  </data>
+  <data name="FileAlreadyExistsBody" xml:space="preserve">
+    <value>The file {0} already exists. Do you want to overwrite it?</value>
+  </data>
+  <data name="FileAlreadyExistsOverwrite" xml:space="preserve">
+    <value>Overwrite</value>
+  </data>
+  <data name="FileAlreadyExistsOverwriteDescription" xml:space="preserve">
+    <value>The existing file will be overwritten.</value>
+  </data>
+  <data name="FileAlreadyExistsRename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="FileAlreadyExistsRenameDescription" xml:space="preserve">
+    <value>The new file will be renamed.</value>
+  </data>
+  <data name="FileAlreadyExistsCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="FileAlreadyExistsCancelDescription" xml:space="preserve">
+    <value>The task will be canceled.</value>
+  </data>
+  <data name="FileAlreadyExistsRememberMyChoice" xml:space="preserve">
+    <value>Remember my choice for this session</value>
+  </data>
 </root>

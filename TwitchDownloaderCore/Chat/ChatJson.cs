@@ -244,25 +244,16 @@ namespace TwitchDownloaderCore.Chat
         /// <summary>
         /// Asynchronously serializes a chat json file.
         /// </summary>
-        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, ChatCompression compression, CancellationToken cancellationToken)
+        public static async Task SerializeAsync(FileStream fileStream, ChatRoot chatRoot, ChatCompression compression, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(chatRoot, nameof(chatRoot));
-
-            var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
-            if (!outputDirectory.Exists)
-            {
-                TwitchHelper.CreateDirectory(outputDirectory.FullName);
-            }
-
-            await using var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             switch (compression)
             {
                 case ChatCompression.None:
-                    await JsonSerializer.SerializeAsync(fs, chatRoot, _jsonSerializerOptions, cancellationToken);
+                    await JsonSerializer.SerializeAsync(fileStream, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
                 case ChatCompression.Gzip:
                 {
-                    await using var gs = new GZipStream(fs, CompressionLevel.SmallestSize);
+                    await using var gs = new GZipStream(fileStream, CompressionLevel.SmallestSize);
                     await JsonSerializer.SerializeAsync(gs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
                 }

@@ -18,5 +18,6 @@ namespace TwitchDownloaderCore.Options
         public string FfmpegPath { get; set; }
         public string TempFolder { get; set; }
         public Func<DirectoryInfo[], DirectoryInfo[]> CacheCleanerCallback { get; set; }
+        public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
     }
 }

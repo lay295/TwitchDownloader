@@ -1,7 +1,7 @@
 ﻿using SkiaSharp;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -852,6 +852,38 @@ namespace TwitchDownloaderCore
             }
 
             return returnList;
+        }
+
+        public static FileInfo ClaimFile(string path, Func<FileInfo, FileInfo> fileAlreadyExistsCallback, ITaskLogger logger)
+        {
+            var fileInfo = new FileInfo(path);
+            if (fileInfo.Exists)
+            {
+                if (fileAlreadyExistsCallback is null)
+                {
+                    logger.LogWarning($"{nameof(fileAlreadyExistsCallback)} was null.");
+                }
+                else
+                {
+                    fileInfo = fileAlreadyExistsCallback(fileInfo);
+
+                    if (fileInfo is null)
+                    {
+                        // I would prefer to not throw here, but the alternative is refactoring the task queue :/
+                        throw new FileNotFoundException("No destination file was provided, aborting.");
+                    }
+
+                    logger.LogVerbose($"{path} will be renamed to {fileInfo.FullName}.");
+                }
+            }
+
+            var directory = fileInfo.Directory;
+            if (directory is not null && !directory.Exists)
+            {
+                CreateDirectory(directory.FullName);
+            }
+
+            return fileInfo;
         }
 
         public static DirectoryInfo CreateDirectory(string path)

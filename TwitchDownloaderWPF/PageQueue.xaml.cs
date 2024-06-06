@@ -8,6 +8,7 @@ using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderWPF.Properties;
 using System.Diagnostics;
 using System.IO;
+using TwitchDownloaderWPF.Services;
 
 namespace TwitchDownloaderWPF
 {
@@ -308,23 +309,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            var outputFolder = Path.GetDirectoryName(task.OutputFile);
-            if (!Directory.Exists(outputFolder))
-            {
-                return;
-            }
-
-            var args = File.Exists(task.OutputFile)
-                ? $"/select,\"{task.OutputFile}\""
-                : $"\"{outputFolder}\"";
-
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe"),
-                Arguments = args,
-                UseShellExecute = true,
-                WorkingDirectory = outputFolder
-            });
+            FileService.OpenExplorerForFile(new FileInfo(task.OutputFile));
         }
     }
 }

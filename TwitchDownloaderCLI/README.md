@@ -66,6 +66,9 @@ Path to FFmpeg executable.
 **--temp-path**
 Path to temporary folder for cache.
 
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
+
 ## Arguments for mode clipdownload
 #### Downloads a clip from Twitch
 
@@ -89,6 +92,9 @@ Path to FFmpeg executable.
 
 **--temp-path**
 Path to temporary folder for cache.
+
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode chatdownload
 #### Downloads the chat of a VOD, highlight, or clip
@@ -129,6 +135,9 @@ Time to trim ending. See [Time durations](#time-durations) for a more detailed e
 **--temp-path**
 Path to temporary folder for cache.
 
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
+
 ## Arguments for mode chatupdate
 #### Updates the embedded emotes, badges, bits, and trims a chat JSON and/or converts a JSON chat to another format
 
@@ -167,6 +176,9 @@ Path to output file. File extension will be used to determine new chat type. Val
 
 **--temp-path**
 Path to temporary folder for cache.
+
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode chatrender
 #### Renders a chat JSON as a video
@@ -320,6 +332,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--scale-highlight-indent**
 (Default: `1.0`) Number to scale highlight indent size (sub messages).
 
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
+
 ## Arguments for mode ffmpeg
 #### Manage standalone FFmpeg
 
@@ -343,6 +358,9 @@ Path a text file containing the absolute paths of the files to concatenate, sepa
 
 **-o / --output (REQUIRED)**
 File the program will output to.
+
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ---
 
