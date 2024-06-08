@@ -888,7 +888,7 @@ namespace TwitchDownloaderCore
             return fileInfo;
         }
 
-        public static DirectoryInfo CreateDirectory(string path)
+        public static DirectoryInfo CreateDirectory(string path, ITaskLogger logger = null)
         {
             DirectoryInfo directoryInfo = Directory.CreateDirectory(path);
 
@@ -896,19 +896,19 @@ namespace TwitchDownloaderCore
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    SetDirectoryPermissions(path);
+                    directoryInfo.UnixFileMode = UnixFileMode.OtherExecute | UnixFileMode.OtherWrite | UnixFileMode.OtherRead
+                                                 | UnixFileMode.GroupExecute | UnixFileMode.GroupWrite | UnixFileMode.GroupRead
+                                                 | UnixFileMode.UserExecute | UnixFileMode.UserWrite | UnixFileMode.UserRead;
+
+                    directoryInfo.Refresh();
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                logger?.LogVerbose($"Failed to set unix file mode for {directoryInfo.FullName}: {e.Message}");
+            }
 
             return directoryInfo;
-        }
-
-        public static void SetDirectoryPermissions(string path)
-        {
-            var folderInfo = new Mono.Unix.UnixFileInfo(path);
-            folderInfo.FileAccessPermissions = Mono.Unix.FileAccessPermissions.AllPermissions;
-            folderInfo.Refresh();
         }
 
         /// <summary>
