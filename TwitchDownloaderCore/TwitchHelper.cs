@@ -1137,7 +1137,7 @@ namespace TwitchDownloaderCore
         }
 
         /// <inheritdoc cref="Directory.CreateDirectory"/>
-        public static DirectoryInfo CreateDirectory(string path)
+        public static DirectoryInfo CreateDirectory(string path, ITaskLogger logger = null)
         {
             DirectoryInfo directoryInfo = Directory.CreateDirectory(path);
 
@@ -1145,23 +1145,19 @@ namespace TwitchDownloaderCore
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    SetDirectoryPermissions(path);
+                    directoryInfo.UnixFileMode = UnixFileMode.OtherExecute | UnixFileMode.OtherWrite | UnixFileMode.OtherRead
+                                                 | UnixFileMode.GroupExecute | UnixFileMode.GroupWrite | UnixFileMode.GroupRead
+                                                 | UnixFileMode.UserExecute | UnixFileMode.UserWrite | UnixFileMode.UserRead;
+
+                    directoryInfo.Refresh();
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                logger?.LogVerbose($"Failed to set unix file mode for {directoryInfo.FullName}: {e.Message}");
+            }
 
             return directoryInfo;
-        }
-
-        [SupportedOSPlatform("linux")]
-        [SupportedOSPlatform("osx")]
-        private static void SetDirectoryPermissions(string path)
-        {
-            var folderInfo = new UnixFileInfo(path);
-            folderInfo.FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute |
-                                               FileAccessPermissions.GroupRead | FileAccessPermissions.GroupWrite |
-                                               FileAccessPermissions.OtherRead | FileAccessPermissions.OtherWrite;
-            folderInfo.Refresh();
         }
 
         /// <summary>
