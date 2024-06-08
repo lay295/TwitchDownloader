@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using HandyControl.Data;
+using Microsoft.Win32;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderWPF.Extensions;
 using TwitchDownloaderWPF.Models;
@@ -33,10 +34,15 @@ namespace TwitchDownloaderWPF
 
         private void BtnTempBrowse_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+            var dialog = new OpenFolderDialog();
+            if (Directory.Exists(TextTempPath.Text))
+            {
+                dialog.InitialDirectory = TextTempPath.Text;
+            }
+
             if (dialog.ShowDialog(this).GetValueOrDefault())
             {
-                TextTempPath.Text = dialog.SelectedPath;
+                TextTempPath.Text = dialog.FolderName;
             }
         }
 
