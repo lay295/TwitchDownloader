@@ -62,10 +62,9 @@ namespace TwitchDownloaderCLI.Modes
             ChatUpdateOptions updateOptions = new()
             {
                 InputFile = inputOptions.InputFile,
-                OutputFile = FilenameService.ReplaceInvalidFilenameChars(
-                    inputOptions.Compression is ChatCompression.Gzip
-                        ? inputOptions.OutputFile + ".gz"
-                        : inputOptions.OutputFile),
+                OutputFile = inputOptions.Compression is ChatCompression.Gzip
+                    ? inputOptions.OutputFile + ".gz"
+                    : inputOptions.OutputFile,
                 Compression = inputOptions.Compression,
                 OutputFormat = outFormat,
                 EmbedMissing = inputOptions.EmbedMissing,

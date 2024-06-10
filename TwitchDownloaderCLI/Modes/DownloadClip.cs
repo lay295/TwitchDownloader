@@ -46,7 +46,7 @@ namespace TwitchDownloaderCLI.Modes
             ClipDownloadOptions downloadOptions = new()
             {
                 Id = clipIdMatch.Value,
-                Filename = FilenameService.ReplaceInvalidFilenameChars(inputOptions.OutputFile),
+                Filename = inputOptions.OutputFile,
                 Quality = inputOptions.Quality,
                 ThrottleKib = inputOptions.ThrottleKib,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
