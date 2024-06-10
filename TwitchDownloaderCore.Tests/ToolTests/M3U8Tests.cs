@@ -401,19 +401,19 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             var streams = new M3U8.Stream[]
             {
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "1080p60", "1080p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 9878400, "avc1.64002A,mp4a.40.2", (1920, 1080), "1080p60", 0m),
+                    new M3U8.Stream.ExtStreamInfo(1, 9878400, "avc1.64002A,mp4a.40.2", (1920, 1080), "1080p60", 60m),
                     "1080p60/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 3330599, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p60", 0m),
+                    new M3U8.Stream.ExtStreamInfo(1, 3330599, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p60", 60m),
                     "720p60/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 1335600, "avc1.4D401F,mp4a.40.2", (852, 480), "480p30", 0m),
+                    new M3U8.Stream.ExtStreamInfo(1, 1335600, "avc1.4D401F,mp4a.40.2", (852, 480), "480p30", 30m),
                     "480p30/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 630000, "avc1.4D401F,mp4a.40.2", (640, 360), "360p30", 0m),
+                    new M3U8.Stream.ExtStreamInfo(1, 630000, "avc1.4D401F,mp4a.40.2", (640, 360), "360p30", 30m),
                     "360p30/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "160p30", "160p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 230000, "avc1.4D401F,mp4a.40.2", (284, 160), "160p30", 0m),
+                    new M3U8.Stream.ExtStreamInfo(1, 230000, "avc1.4D401F,mp4a.40.2", (284, 160), "160p30", 30m),
                     "160p30/playlist.m3u8")
             };
 
