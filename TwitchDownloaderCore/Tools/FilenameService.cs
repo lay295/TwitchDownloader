@@ -87,7 +87,8 @@ namespace TwitchDownloaderCore.Tools
 
         private static string ReplaceInvalidFilenameChars(string filename)
         {
-            var newName = filename;
+            const string TIMESTAMP_PATTERN = /*lang=regex*/ @"(?<=\d):(?=\d\d)";
+            var newName = Regex.Replace(filename, TIMESTAMP_PATTERN, "_");
 
             if (newName.AsSpan().IndexOfAny("\"*:<>?|/\\") != -1)
             {
