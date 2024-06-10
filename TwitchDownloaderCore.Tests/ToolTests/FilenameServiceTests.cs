@@ -5,8 +5,8 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 {
     public class FilenameServiceTests
     {
-        private static (string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, string viewCount, string game) GetExampleInfo() =>
-            ("A Title", "abc123", new DateTime(1984, 11, 1, 9, 43, 21), "streamer8", new TimeSpan(0, 1, 2, 3, 4), new TimeSpan(0, 5, 6, 7, 8), "123456789", "A Game");
+        private static (string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, int viewCount, string game) GetExampleInfo() =>
+            ("A Title", "abc123", new DateTime(1984, 11, 1, 9, 43, 21), "streamer8", new TimeSpan(0, 1, 2, 3, 4), new TimeSpan(0, 5, 6, 7, 8), 123456789, "A Game");
 
         [Theory]
         [InlineData("{title}", "A Title")]
@@ -81,19 +81,17 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         }
 
         [Theory]
-        [InlineData("{title}")]
-        [InlineData("{id}")]
-        [InlineData("{channel}")]
-        [InlineData("{views}")]
-        [InlineData("{game}")]
-        public void CorrectlyReplacesInvalidCharactersForNonCustomTemplates(string template)
+        [InlineData("{title}", "＂＊：＜＞？｜／＼")]
+        [InlineData("{id}", "＂＊：＜＞？｜／＼")]
+        [InlineData("{channel}", "＂＊：＜＞？｜／＼")]
+        [InlineData("{game}", "＂＊：＜＞？｜／＼")]
+        public void CorrectlyReplacesInvalidCharactersForNonCustomTemplates(string template, string expected)
         {
-            const char EXPECTED = '_';
-            var invalidChars = new string(Path.GetInvalidFileNameChars());
+            const string INVALID_CHARS = "\"*:<>?|/\\";
 
-            var result = FilenameService.GetFilename(template, invalidChars, invalidChars, default, invalidChars, default, default, invalidChars, invalidChars);
+            var result = FilenameService.GetFilename(template, INVALID_CHARS, INVALID_CHARS, default, INVALID_CHARS, default, default, default, INVALID_CHARS);
 
-            Assert.All(result, c => Assert.Equal(EXPECTED, c));
+            Assert.Equal(expected, result);
         }
 
         [Theory]
@@ -103,27 +101,25 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("{length_custom=\"'")]
         public void CorrectlyReplacesInvalidCharactersForCustomTemplates(string templateStart)
         {
-            const char EXPECTED = '_';
-            var invalidChars = new string(Path.GetInvalidFileNameChars());
-            var template = string.Concat(
-                templateStart,
-                invalidChars.ReplaceAny("\r\n", EXPECTED), // newline chars are not supported by the custom parameters. This will not change.
-                "'\"}");
+            const string EXPECTED = "＂＊：＜＞？｜／＼";
+            const string INVALID_CHARS = "\"*:<>?|/\\\\";
+            var template = templateStart + INVALID_CHARS + "'\"}";
 
-            var result = FilenameService.GetFilename(template, invalidChars, invalidChars, default, invalidChars, default, default, invalidChars, invalidChars);
+            var result = FilenameService.GetFilename(template, INVALID_CHARS, INVALID_CHARS, default, INVALID_CHARS, default, default, default, INVALID_CHARS);
 
-            Assert.All(result, c => Assert.Equal(EXPECTED, c));
+            Assert.Equal(EXPECTED, result);
         }
 
         [Fact]
         public void CorrectlyReplacesInvalidCharactersForSubFolders()
         {
-            var invalidChars = new string(Path.GetInvalidPathChars());
-            var template = invalidChars + "\\{title}";
-            var expected = Path.Combine(new string('_', invalidChars.Length), "A Title");
+            const string INVALID_CHARS = "\"*:<>?|";
+            const string FULL_WIDTH_CHARS = "＂＊：＜＞？｜";
+            const string TEMPLATE = INVALID_CHARS + "\\{title}";
+            var expected = Path.Combine(FULL_WIDTH_CHARS, "A Title");
             var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(template, title, id, date, channel, trimStart, trimEnd, viewCount, game);
+            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(expected, result);
         }
@@ -150,6 +146,24 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(EXPECTED, result);
+        }
+
+        [Theory]
+        [InlineData("\"", "＂")]
+        [InlineData("*", "＊")]
+        [InlineData(":", "：")]
+        [InlineData("<", "＜")]
+        [InlineData(">", "＞")]
+        [InlineData("?", "？")]
+        [InlineData("|", "｜")]
+        [InlineData("/", "／")]
+        [InlineData("\\", "＼")]
+        [InlineData("\0", "_")]
+        public void CorrectlyReplacesInvalidFilenameCharacters(string str, string expected)
+        {
+            var actual = FilenameService.ReplaceInvalidFilenameChars(str);
+
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
