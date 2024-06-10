@@ -15,7 +15,7 @@ namespace TwitchDownloaderCore.Tools
 
             var stringBuilder = new StringBuilder(template)
                 .Replace("{title}", ReplaceInvalidFilenameChars(title))
-                .Replace("{id}", id)
+                .Replace("{id}", ReplaceInvalidFilenameChars(id))
                 .Replace("{channel}", ReplaceInvalidFilenameChars(channel))
                 .Replace("{date}", date.ToString("M-d-yy"))
                 .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
