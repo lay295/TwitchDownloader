@@ -188,7 +188,7 @@ Puoi trovare altri esempi nel [CLI README](TwitchDownloaderCLI/README.md#example
 
 ## Requisiti
 
-- [.NET 6.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [.NET 8.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 - Circa 1GB di spazio su disco
 
 ## Istruzioni

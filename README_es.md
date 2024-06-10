@@ -161,7 +161,7 @@ chmod +x ffmpeg
 
 ## Requisitos
 
-- [.NET 6.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [.NET 8.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
 ## Instrucciones de Compilación
 

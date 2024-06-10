@@ -3,28 +3,33 @@ using System.Text.RegularExpressions;
 
 namespace TwitchDownloaderCore.Tools
 {
-    public static class TwitchRegex
+    public static partial class TwitchRegex
     {
-        // TODO: Use source generators when .NET7
-        private static readonly Regex VideoId = new(@"(?<=^|twitch\.tv\/videos\/)\d+(?=$|\?|\s)", RegexOptions.Compiled);
-        private static readonly Regex HighlightId = new(@"(?<=^|twitch\.tv\/\w+\/v(?:ideo)?\/)\d+(?=$|\?|\s)", RegexOptions.Compiled);
-        private static readonly Regex ClipId = new(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\w+\/clip\/)?)[\w-]+?(?=$|\?|\s)", RegexOptions.Compiled);
+        [GeneratedRegex("@\"(?<=^|twitch\\.tv\\/videos\\/)\\d+(?=$|\\?|\\s)\"")]
+        private static partial Regex VideoId();
 
-        public static readonly Regex UrlTimeCode = new(@"(?<=(?:\?|&)t=)\d+h\d+m\d+s(?=$|\?|\s)", RegexOptions.Compiled);
-        public static readonly Regex BitsRegex = new(
-            @"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d{0,6}(?=\s|$)",
-            RegexOptions.Compiled);
+        [GeneratedRegex(@"(?<=^|twitch\.tv\/\w+\/v(?:ideo)?\/)\d+(?=$|\?|\s)")]
+        private static partial Regex HighlightId();
+
+        [GeneratedRegex(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\w+\/clip\/)?)[\w-]+?(?=$|\?|\s)")]
+        private static partial Regex ClipId();
+
+        [GeneratedRegex(@"(?<=(?:\?|&)t=)\d+h\d+m\d+s(?=$|\?|\s)")]
+        public static partial Regex UrlTimeCode();
+
+        [GeneratedRegex(@"(?<=(?:\s|^)(?:4Head|Anon|Bi(?:bleThumb|tBoss)|bday|C(?:h(?:eer|arity)|orgo)|cheerwal|D(?:ansGame|oodleCheer)|EleGiggle|F(?:rankerZ|ailFish)|Goal|H(?:eyGuys|olidayCheer)|K(?:appa|reygasm)|M(?:rDestructoid|uxy)|NotLikeThis|P(?:arty|ride|JSalt)|RIPCheer|S(?:coops|h(?:owLove|amrock)|eemsGood|wiftRage|treamlabs)|TriHard|uni|VoHiYo))[1-9]\d{0,6}(?=\s|$)")]
+        public static partial Regex BitsRegex();
 
         /// <returns>A <see cref="Match"/> of the video's id or <see langword="null"/>.</returns>
         public static Match MatchVideoId(string text)
         {
-            var videoIdMatch = VideoId.Match(text);
+            var videoIdMatch = VideoId().Match(text);
             if (videoIdMatch.Success)
             {
                 return videoIdMatch;
             }
 
-            var highlightIdMatch = HighlightId.Match(text);
+            var highlightIdMatch = HighlightId().Match(text);
             if (highlightIdMatch.Success)
             {
                 return highlightIdMatch;
@@ -36,7 +41,7 @@ namespace TwitchDownloaderCore.Tools
         /// <returns>A <see cref="Match"/> of the clip's id or <see langword="null"/>.</returns>
         public static Match MatchClipId(string text)
         {
-            var clipIdMatch = ClipId.Match(text);
+            var clipIdMatch = ClipId().Match(text);
             if (clipIdMatch.Success && !clipIdMatch.Value.All(char.IsDigit))
             {
                 return clipIdMatch;

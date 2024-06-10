@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Microsoft.Win32;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderWPF.Properties;
@@ -625,12 +626,15 @@ namespace TwitchDownloaderWPF
 
         private void btnFolder_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+            var dialog = new OpenFolderDialog();
             if (Directory.Exists(textFolder.Text))
-                dialog.RootFolder = dialog.RootFolder;
+            {
+                dialog.InitialDirectory = textFolder.Text;
+            }
+
             if (dialog.ShowDialog(this).GetValueOrDefault())
             {
-                textFolder.Text = dialog.SelectedPath;
+                textFolder.Text = dialog.FolderName;
                 Settings.Default.QueueFolder = textFolder.Text;
                 Settings.Default.Save();
             }

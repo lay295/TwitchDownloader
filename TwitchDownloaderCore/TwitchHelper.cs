@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -22,7 +23,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public static class TwitchHelper
+    public static partial class TwitchHelper
     {
         private static readonly HttpClient httpClient = new HttpClient();
         private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
@@ -671,6 +672,9 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
+        [GeneratedRegex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft)]
+        private static partial Regex EmojiExtensionRegex();
+
         public static async Task<Dictionary<string, SKBitmap>> GetEmojis(string cacheFolder, EmojiVendor emojiVendor, ITaskLogger logger, CancellationToken cancellationToken = default)
         {
             var returnCache = new Dictionary<string, SKBitmap>();
@@ -679,13 +683,12 @@ namespace TwitchDownloaderCore
                 return returnCache;
 
             var emojiFolder = Path.Combine(cacheFolder, "emojis", emojiVendor.EmojiFolder());
-            var emojiExtensions = new Regex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
 
             if (!Directory.Exists(emojiFolder))
                 CreateDirectory(emojiFolder);
 
             var emojiFiles = Directory.GetFiles(emojiFolder)
-                .Where(i => emojiExtensions.IsMatch(i)).ToArray();
+                .Where(i => EmojiExtensionRegex().IsMatch(i)).ToArray();
 
             if (emojiFiles.Length < emojiVendor.EmojiCount())
             {
@@ -719,7 +722,7 @@ namespace TwitchDownloaderCore
                     }
 
                     emojiFiles = Directory.GetFiles(emojiFolder)
-                        .Where(i => emojiExtensions.IsMatch(i)).ToArray();
+                        .Where(i => EmojiExtensionRegex().IsMatch(i)).ToArray();
                 }
                 finally
                 {
@@ -886,7 +889,7 @@ namespace TwitchDownloaderCore
             return fileInfo;
         }
 
-        public static DirectoryInfo CreateDirectory(string path)
+        public static DirectoryInfo CreateDirectory(string path, ITaskLogger logger = null)
         {
             DirectoryInfo directoryInfo = Directory.CreateDirectory(path);
 
@@ -894,19 +897,26 @@ namespace TwitchDownloaderCore
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    SetDirectoryPermissions(path);
+                    Set777UnixFilePermissions(directoryInfo);
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                logger?.LogVerbose($"Failed to set unix file mode for {directoryInfo.FullName}: {e.Message}");
+            }
 
             return directoryInfo;
         }
 
-        public static void SetDirectoryPermissions(string path)
+        [UnsupportedOSPlatform("windows")]
+        public static FileSystemInfo Set777UnixFilePermissions(FileSystemInfo fileSystemInfo)
         {
-            var folderInfo = new Mono.Unix.UnixFileInfo(path);
-            folderInfo.FileAccessPermissions = Mono.Unix.FileAccessPermissions.AllPermissions;
-            folderInfo.Refresh();
+            fileSystemInfo.UnixFileMode = UnixFileMode.OtherExecute | UnixFileMode.OtherWrite | UnixFileMode.OtherRead
+                                          | UnixFileMode.GroupExecute | UnixFileMode.GroupWrite | UnixFileMode.GroupRead
+                                          | UnixFileMode.UserExecute | UnixFileMode.UserWrite | UnixFileMode.UserRead;
+
+            fileSystemInfo.Refresh();
+            return fileSystemInfo;
         }
 
         /// <summary>

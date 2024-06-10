@@ -5,7 +5,7 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Extensions
 {
-    public static class M3U8Extensions
+    public static partial class M3U8Extensions
     {
         public static void SortStreamsByQuality(this M3U8 m3u8)
         {
@@ -21,8 +21,8 @@ namespace TwitchDownloaderCore.Extensions
             }
         }
 
-        private static readonly Regex UserQualityStringRegex = new(@"(?:^|\s)(?:(?<Width>\d{3,4})x)?(?<Height>\d{3,4})p?(?<Framerate>\d{1,3})?(?:$|\s)",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        [GeneratedRegex(@"(?:^|\s)(?:(?<Width>\d{3,4})x)?(?<Height>\d{3,4})p?(?<Framerate>\d{1,3})?(?:$|\s)", RegexOptions.IgnoreCase)]
+        private static partial Regex UserQualityStringRegex();
 
         public static M3U8.Stream GetStreamOfQuality(this M3U8 m3u8, string qualityString)
         {
@@ -48,7 +48,7 @@ namespace TwitchDownloaderCore.Extensions
                 }
             }
 
-            var qualityStringMatch = UserQualityStringRegex.Match(qualityString);
+            var qualityStringMatch = UserQualityStringRegex().Match(qualityString);
             if (!qualityStringMatch.Success)
             {
                 return m3u8.BestQualityStream();
@@ -105,27 +105,28 @@ namespace TwitchDownloaderCore.Extensions
             return false;
         }
 
+        [GeneratedRegex(@"\d{3,4}p\d{2,3}")]
+        private static partial Regex ResolutionFramerateRegex();
+
         /// <returns>
         /// A <see cref="string"/> representing the <paramref name="stream"/>'s <see cref="M3U8.Stream.ExtStreamInfo.Resolution"/>
         /// and <see cref="M3U8.Stream.ExtStreamInfo.Framerate"/> in the format of "{resolution}p{framerate}" or <see langword="null"/>
         /// </returns>
         public static string GetResolutionFramerateString(this M3U8.Stream stream)
         {
-            const string RESOLUTION_FRAMERATE_PATTERN = /*lang=regex*/@"\d{3,4}p\d{2,3}";
-
             var mediaInfo = stream.MediaInfo;
-            if (stream.IsAudioOnly() || Regex.IsMatch(mediaInfo.Name, RESOLUTION_FRAMERATE_PATTERN))
+            if (stream.IsAudioOnly() || ResolutionFramerateRegex().IsMatch(mediaInfo.Name))
             {
                 return mediaInfo.Name;
             }
 
             var streamInfo = stream.StreamInfo;
-            if (Regex.IsMatch(streamInfo.Video, RESOLUTION_FRAMERATE_PATTERN))
+            if (ResolutionFramerateRegex().IsMatch(streamInfo.Video))
             {
                 return streamInfo.Video;
             }
 
-            if (Regex.IsMatch(mediaInfo.GroupId, RESOLUTION_FRAMERATE_PATTERN))
+            if (ResolutionFramerateRegex().IsMatch(mediaInfo.GroupId))
             {
                 return mediaInfo.GroupId;
             }

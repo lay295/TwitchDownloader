@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TwitchDownloaderCore.Interfaces;
 
@@ -30,9 +31,9 @@ namespace TwitchDownloaderCore.Tools
 
         public void SetStatus(string status) { }
 
-        public void SetTemplateStatus(string status, int initialPercent) { }
+        public void SetTemplateStatus([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string statusTemplate, int initialPercent) { }
 
-        public void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2) { }
+        public void SetTemplateStatus([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string statusTemplate, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2) { }
 
         public void ReportProgress(int percent) { }
 

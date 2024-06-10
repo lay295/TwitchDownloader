@@ -230,7 +230,7 @@ namespace TwitchDownloaderCore
 
                 message.body = bodyStringBuilder.ToString();
 
-                var bitMatch = TwitchRegex.BitsRegex.Match(message.body);
+                var bitMatch = TwitchRegex.BitsRegex().Match(message.body);
                 if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
                 {
                     message.bits_spent = result;

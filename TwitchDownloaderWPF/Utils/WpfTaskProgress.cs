@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderWPF.Models;
@@ -57,11 +58,11 @@ namespace TwitchDownloaderWPF.Utils
             }
         }
 
-        public void SetTemplateStatus(string status, int initialPercent)
+        public void SetTemplateStatus([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string statusTemplate, int initialPercent)
         {
             lock (this)
             {
-                _status = status;
+                _status = statusTemplate;
                 _statusIsTemplate = true;
 
                 _lastPercent = -1; // Ensure that the progress report runs
@@ -69,11 +70,11 @@ namespace TwitchDownloaderWPF.Utils
             }
         }
 
-        public void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2)
+        public void SetTemplateStatus([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string statusTemplate, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2)
         {
             lock (this)
             {
-                _status = status;
+                _status = statusTemplate;
                 _statusIsTemplate = true;
 
                 _lastPercent = -1; // Ensure that the progress report runs

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using TwitchDownloaderCore.Extensions;
 
@@ -20,7 +21,7 @@ namespace TwitchDownloaderCore.Tools
                 return null;
         }
 
-        public string Format(string format, object arg, IFormatProvider formatProvider = null)
+        public string Format([StringSyntax(StringSyntaxAttribute.TimeSpanFormat)] string format, object arg, IFormatProvider formatProvider = null)
         {
             if (arg is TimeSpan timeSpan)
             {
@@ -32,7 +33,7 @@ namespace TwitchDownloaderCore.Tools
 
         /// <summary>Provides an identical output to <see cref="Format(string,object,IFormatProvider)"/> but without boxing the <paramref name="timeSpan"/>.</summary>
         /// <remarks>This method is not part of the <see cref="ICustomFormatter"/> interface.</remarks>
-        public string Format(string format, TimeSpan timeSpan, IFormatProvider formatProvider = null)
+        public string Format([StringSyntax(StringSyntaxAttribute.TimeSpanFormat)] string format, TimeSpan timeSpan, IFormatProvider formatProvider = null)
         {
             if (string.IsNullOrEmpty(format))
             {
