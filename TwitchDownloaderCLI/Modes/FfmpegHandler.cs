@@ -54,7 +54,7 @@ namespace TwitchDownloaderCLI.Modes
             catch
             {
                 var chmodCommand = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "chmod +x ffmpeg" : "sudo chmod +x ffmpeg";
-                progress.LogError($"Unable to update FFmpeg file permissions. Run '{chmodCommand}' if further FFmpeg errors occur.");
+                progress.LogError($"Unable to automatically update FFmpeg file permissions. Please run \"{chmodCommand}\" to allow FFmpeg to be executed.");
             }
         }
 
@@ -65,7 +65,8 @@ namespace TwitchDownloaderCLI.Modes
                 return;
             }
 
-            logger.LogError("Unable to find FFmpeg, exiting. You can download FFmpeg automatically with the command \"TwitchDownloaderCLI ffmpeg -d\"");
+            var processFileName = Path.GetFileName(Environment.ProcessPath);
+            logger.LogError($"Unable to find FFmpeg, exiting. You can download FFmpeg automatically with the command \"{processFileName} ffmpeg -d\"");
             Environment.Exit(1);
         }
 

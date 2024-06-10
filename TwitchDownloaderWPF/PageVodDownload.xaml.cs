@@ -204,7 +204,7 @@ namespace TwitchDownloaderWPF
                 Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    viewCount.ToString(), game) + (comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? ".m4a" : ".mp4")),
+                    viewCount, game) + (comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? ".m4a" : ".mp4")),
                 Oauth = TextOauth.Text,
                 Quality = GetQualityWithoutSize(comboQuality.Text),
                 Id = currentVideoId,
@@ -412,7 +412,7 @@ namespace TwitchDownloaderWPF
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    viewCount.ToString(), game) + ".mp4"
+                    viewCount, game) + ".mp4"
             };
             if (saveFileDialog.ShowDialog() == false)
             {
