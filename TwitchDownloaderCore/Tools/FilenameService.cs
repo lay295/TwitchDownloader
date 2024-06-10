@@ -85,7 +85,30 @@ namespace TwitchDownloaderCore.Tools
 
         private static readonly char[] FilenameInvalidChars = Path.GetInvalidFileNameChars();
 
-        private static string RemoveInvalidFilenameChars(string filename) => filename.ReplaceAny(FilenameInvalidChars, '_');
+        private static string RemoveInvalidFilenameChars(string filename)
+        {
+            var newName = filename;
+
+            if (newName.AsSpan().IndexOfAny("\"*:<>?|/\\") != -1)
+            {
+                newName = string.Create(filename.Length, filename, (span, str) =>
+                {
+                    const int FULL_WIDTH_OFFSET = 0xFEE0; // https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
+                    for (var i = 0; i < str.Length; i++)
+                    {
+                        var ch = str[i];
+                        span[i] = ch switch
+                        {
+                            '\"' or '*' or ':' or '<' or '>' or '?' or '|' or '/' or '\\' => (char)(ch + FULL_WIDTH_OFFSET),
+                            _ => ch
+                        };
+                    }
+                });
+            }
+
+            // In case there are additional invalid chars such as control codes
+            return newName.ReplaceAny(FilenameInvalidChars, '_');
+        }
 
         public static FileInfo GetNonCollidingName(FileInfo fileInfo)
         {
