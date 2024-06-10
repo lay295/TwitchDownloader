@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,7 +9,7 @@ namespace TwitchDownloaderCore.Tools
 {
     public static class FilenameService
     {
-        public static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, string viewCount, string game)
+        public static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, long viewCount, string game)
         {
             var videoLength = trimEnd - trimStart;
 
@@ -21,7 +22,7 @@ namespace TwitchDownloaderCore.Tools
                 .Replace("{trim_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
                 .Replace("{trim_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimEnd))
                 .Replace("{length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", videoLength))
-                .Replace("{views}", viewCount)
+                .Replace("{views}", viewCount.ToString(CultureInfo.CurrentCulture))
                 .Replace("{game}", ReplaceInvalidFilenameChars(game));
 
             if (template.Contains("{date_custom="))
