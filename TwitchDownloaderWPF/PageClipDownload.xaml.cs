@@ -202,7 +202,7 @@ namespace TwitchDownloaderWPF
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "MP4 Files | *.mp4",
-                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, TimeSpan.Zero, clipLength, viewCount.ToString(), game) + ".mp4"
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, TimeSpan.Zero, clipLength, viewCount, game) + ".mp4"
             };
             if (saveFileDialog.ShowDialog() != true)
             {
