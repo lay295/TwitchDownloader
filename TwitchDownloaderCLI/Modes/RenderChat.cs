@@ -8,6 +8,7 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -32,7 +33,7 @@ namespace TwitchDownloaderCLI.Modes
             ChatRenderOptions renderOptions = new()
             {
                 InputFile = inputOptions.InputFile,
-                OutputFile = inputOptions.OutputFile,
+                OutputFile = FilenameService.ReplaceInvalidFilenameChars(inputOptions.OutputFile),
                 BackgroundColor = SKColor.Parse(inputOptions.BackgroundColor),
                 AlternateBackgroundColor = SKColor.Parse(inputOptions.AlternateBackgroundColor),
                 MessageColor = SKColor.Parse(inputOptions.MessageColor),

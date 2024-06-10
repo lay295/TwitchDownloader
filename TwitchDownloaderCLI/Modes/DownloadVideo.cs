@@ -57,7 +57,7 @@ namespace TwitchDownloaderCLI.Modes
                 ThrottleKib = inputOptions.ThrottleKib,
                 Id = long.Parse(vodIdMatch.ValueSpan),
                 Oauth = inputOptions.Oauth,
-                Filename = inputOptions.OutputFile,
+                Filename = FilenameService.ReplaceInvalidFilenameChars(inputOptions.OutputFile),
                 Quality = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
                 {
                     ".mp4" => inputOptions.Quality,

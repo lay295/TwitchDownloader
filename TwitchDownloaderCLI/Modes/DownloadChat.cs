@@ -55,9 +55,10 @@ namespace TwitchDownloaderCLI.Modes
                 TrimEnding = inputOptions.TrimEndingTime > TimeSpan.Zero,
                 TrimEndingTime = ((TimeSpan)inputOptions.TrimEndingTime).TotalSeconds,
                 EmbedData = inputOptions.EmbedData,
-                Filename = inputOptions.Compression is ChatCompression.Gzip
-                    ? inputOptions.OutputFile + ".gz"
-                    : inputOptions.OutputFile,
+                Filename = FilenameService.ReplaceInvalidFilenameChars(
+                    inputOptions.Compression is ChatCompression.Gzip
+                        ? inputOptions.OutputFile + ".gz"
+                        : inputOptions.OutputFile),
                 Compression = inputOptions.Compression,
                 TimeFormat = inputOptions.TimeFormat,
                 DownloadThreads = inputOptions.DownloadThreads,

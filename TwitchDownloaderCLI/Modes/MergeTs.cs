@@ -3,6 +3,7 @@ using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -25,7 +26,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             TsMergeOptions mergeOptions = new()
             {
-                OutputFile = inputOptions.OutputFile,
+                OutputFile = FilenameService.ReplaceInvalidFilenameChars(inputOptions.OutputFile),
                 InputFile = inputOptions.InputList,
                 FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
