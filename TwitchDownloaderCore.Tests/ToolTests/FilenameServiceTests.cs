@@ -1,5 +1,4 @@
-﻿using TwitchDownloaderCore.Extensions;
-using TwitchDownloaderCore.Tools;
+﻿using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Tests.ToolTests
 {
@@ -148,6 +147,17 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        [Fact]
+        public void GetFilenameDoesNotThrow_WhenNullOrDefaultInput()
+        {
+            const string TEMPLATE = "{title}_{id}_{date}_{channel}_{trim_start}_{trim_end}_{length}_{views}_{game}_{date_custom=\"s\"}_{trim_start_custom=\"hh\\-mm\\-ss\"}_{trim_end_custom=\"hh\\-mm\\-ss\"}_{length_custom=\"hh\\-mm\\-ss\"}";
+            const string EXPECTED = "__1-1-01__00-00-00_00-00-00_00-00-00_0__0001-01-01T00_00_00_00-00-00_00-00-00_00-00-00";
+
+            var result = FilenameService.GetFilename(TEMPLATE, default, default, default, default, default, default, default, default);
+
+            Assert.Equal(EXPECTED, result);
+        }
+
         [Theory]
         [InlineData("\"", "＂")]
         [InlineData("*", "＊")]
@@ -164,6 +174,17 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             var actual = FilenameService.ReplaceInvalidFilenameChars(str);
 
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ReplaceInvalidFilenameCharactersDoesNotThrow_WhenNullInput()
+        {
+            const string? STR = null;
+            const string? EXPECTED = null;
+
+            var actual = FilenameService.ReplaceInvalidFilenameChars(STR);
+
+            Assert.Equal(EXPECTED, actual);
         }
 
         [Fact]
