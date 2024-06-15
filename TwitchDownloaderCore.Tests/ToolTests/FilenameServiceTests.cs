@@ -150,8 +150,8 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [Fact]
         public void GetFilenameDoesNotThrow_WhenNullOrDefaultInput()
         {
-            const string TEMPLATE = "{title}-{id}-{date}-{channel}-{trim_start}-{trim_end}-{length}-{views}-{game}-{date_custom=\"s\"}-{trim_start_custom=\"hh\\-mm\\-ss\"}-{trim_end_custom=\"hh\\-mm\\-ss\"}-{length_custom=\"hh\\-mm\\-ss\"}";
-            const string EXPECTED = "--1-1-01--00-00-00-00-00-00-00-00-00-0--0001-01-01T00_00_00-00-00-00-00-00-00-00-00-00";
+            const string TEMPLATE = "{title}_{id}_{date}_{channel}_{trim_start}_{trim_end}_{length}_{views}_{game}_{date_custom=\"s\"}_{trim_start_custom=\"hh\\-mm\\-ss\"}_{trim_end_custom=\"hh\\-mm\\-ss\"}_{length_custom=\"hh\\-mm\\-ss\"}";
+            const string EXPECTED = "__1-1-01__00-00-00_00-00-00_00-00-00_0__0001-01-01T00_00_00_00-00-00_00-00-00_00-00-00";
 
             var result = FilenameService.GetFilename(TEMPLATE, default, default, default, default, default, default, default, default);
 
