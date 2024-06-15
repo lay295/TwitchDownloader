@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -9,7 +10,7 @@ namespace TwitchDownloaderCore.Tools
 {
     public static class FilenameService
     {
-        public static string GetFilename(string template, string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, long viewCount, string game)
+        public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date, [AllowNull] string channel, TimeSpan trimStart, TimeSpan trimEnd, long viewCount, [AllowNull] string game)
         {
             var videoLength = trimEnd - trimStart;
 
@@ -86,8 +87,14 @@ namespace TwitchDownloaderCore.Tools
 
         private static readonly char[] FilenameInvalidChars = Path.GetInvalidFileNameChars();
 
-        public static string ReplaceInvalidFilenameChars(string filename)
+        [return: NotNullIfNotNull(nameof(filename))]
+        public static string ReplaceInvalidFilenameChars([AllowNull] string filename)
         {
+            if (string.IsNullOrEmpty(filename))
+            {
+                return filename;
+            }
+
             const string TIMESTAMP_PATTERN = /*lang=regex*/ @"(?<=\d):(?=\d\d)";
             var newName = Regex.Replace(filename, TIMESTAMP_PATTERN, "_");
 
