@@ -986,7 +986,7 @@ namespace TwitchDownloaderCore
             catch { return ""; }
         }
 
-        public static async Task<GqlUserInfoResponse> GetUserInfo(List<string> idList)
+        public static async Task<GqlUserInfoResponse> GetUserInfo(IEnumerable<string> idList)
         {
             var request = new HttpRequestMessage()
             {

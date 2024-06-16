@@ -523,8 +523,9 @@ namespace TwitchDownloaderCore
         private async Task BackfillUserInfo(ChatRoot chatRoot)
         {
             // Best effort, but if we fail oh well
-            _progress.SetStatus("Backfilling commenter info");
-            var userIds = chatRoot.comments.DistinctBy(x => x.commenter._id).Select(x => x.commenter._id).ToArray();
+            _progress.SetTemplateStatus("Backfilling Commenter Info {0}", 0);
+
+            var userIds = chatRoot.comments.Select(x => x.commenter._id).Distinct().ToArray();
             var userInfo = new Dictionary<string, User>(userIds.Length);
 
             var failedInfo = false;
@@ -540,9 +541,18 @@ namespace TwitchDownloaderCore
                     {
                         userInfo[user.id] = user;
                     }
+
+                    var percent = (i + BATCH_SIZE) * 100f / userIds.Length;
+                    _progress.ReportProgress((int)percent);
                 }
-                catch { failedInfo = true; }
+                catch (Exception e)
+                {
+                    _progress.LogVerbose($"An error occurred while backfilling commenters {i}-{i + BATCH_SIZE}: {e.Message}");
+                    failedInfo = true;
+                }
             }
+
+            _progress.ReportProgress(100);
 
             if (failedInfo)
             {
