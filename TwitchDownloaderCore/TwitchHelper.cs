@@ -881,7 +881,10 @@ namespace TwitchDownloaderCore
                         throw new FileNotFoundException("No destination file was provided, aborting.");
                     }
 
-                    logger.LogVerbose($"{path} will be renamed to {fileInfo.FullName}.");
+                    if (path != fileInfo.FullName)
+                    {
+                        logger.LogInfo($"'{path}' will be renamed to '{fileInfo.FullName}'");
+                    }
                 }
             }
 
