@@ -756,7 +756,7 @@ namespace TwitchDownloaderCore
             return returnCache;
         }
 
-        public static async Task<List<CheerEmote>> GetBits(List<Comment> comments, string cacheFolder, string channelId = "", EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
+        public static async Task<List<CheerEmote>> GetBits(List<Comment> comments, string cacheFolder, string channelId, ITaskLogger logger, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<CheerEmote> returnList = new List<CheerEmote>();
             List<string> alreadyAdded = new List<string>();
@@ -768,15 +768,23 @@ namespace TwitchDownloaderCore
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
-                    CheerEmote newEmote = new CheerEmote() { prefix = data.prefix, tierList = tierList };
-                    foreach (KeyValuePair<int, EmbedEmoteData> tier in data.tierList)
+                    try
                     {
-                        TwitchEmote tierEmote = new TwitchEmote(tier.Value.data, EmoteProvider.FirstParty, tier.Value.imageScale, tier.Value.id, tier.Value.name);
-                        tierList.Add(new KeyValuePair<int, TwitchEmote>(tier.Key, tierEmote));
+                        List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
+                        CheerEmote newEmote = new CheerEmote() { prefix = data.prefix, tierList = tierList };
+                        foreach (KeyValuePair<int, EmbedEmoteData> tier in data.tierList)
+                        {
+                            TwitchEmote tierEmote = new TwitchEmote(tier.Value.data, EmoteProvider.FirstParty, tier.Value.imageScale, tier.Value.id, tier.Value.name);
+                            tierList.Add(new KeyValuePair<int, TwitchEmote>(tier.Key, tierEmote));
+                        }
+
+                        returnList.Add(newEmote);
+                        alreadyAdded.Add(data.prefix);
                     }
-                    returnList.Add(newEmote);
-                    alreadyAdded.Add(data.prefix);
+                    catch (Exception e)
+                    {
+                        logger.LogVerbose($"An exception occurred while loading embedded cheermote '{data.prefix}': {e.Message}.");
+                    }
                 }
             }
 

@@ -1722,7 +1722,7 @@ namespace TwitchDownloaderCore
 
         private async Task<List<CheerEmote>> GetScaledBits(CancellationToken cancellationToken)
         {
-            var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
+            var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, renderOptions.TempFolder, chatRoot.streamer.id.ToString(), _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var cheer in cheerTask)
             {
