@@ -79,6 +79,33 @@ namespace TwitchDownloaderCore
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var maskFs = maskFileInfo?.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
 
+            try
+            {
+                await RenderAsyncImpl(outputFileInfo, outputFs, maskFileInfo, maskFs, cancellationToken);
+            }
+            catch
+            {
+                outputFileInfo.Refresh();
+                if (outputFileInfo.Exists && outputFileInfo.Length == 0)
+                {
+                    outputFileInfo.Delete();
+                }
+
+                if (maskFileInfo is not null)
+                {
+                    maskFileInfo.Refresh();
+                    if (maskFileInfo.Exists && maskFileInfo.Length == 0)
+                    {
+                        maskFileInfo.Delete();
+                    }
+                }
+
+                throw;
+            }
+        }
+
+        private async Task RenderAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, FileInfo maskFileInfo, FileStream maskFs, CancellationToken cancellationToken)
+        {
             _progress.SetStatus("Fetching Images [1/2]");
             await Task.Run(() => FetchScaledImages(cancellationToken), cancellationToken);
 
