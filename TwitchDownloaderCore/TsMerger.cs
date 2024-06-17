@@ -32,6 +32,24 @@ namespace TwitchDownloaderCore
             // Open the destination file so that it exists in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
 
+            try
+            {
+                await MergeAsyncImpl(outputFs, cancellationToken);
+            }
+            catch
+            {
+                outputFileInfo.Refresh();
+                if (outputFileInfo.Exists && outputFileInfo.Length == 0)
+                {
+                    outputFileInfo.Delete();
+                }
+
+                throw;
+            }
+        }
+
+        private async Task MergeAsyncImpl(FileStream outputFs, CancellationToken cancellationToken)
+        {
             var isM3U8 = false;
             var isFirst = true;
             var fileList = new List<string>();

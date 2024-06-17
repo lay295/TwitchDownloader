@@ -38,6 +38,24 @@ namespace TwitchDownloaderCore
             // Open the destination file so that it exists in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
 
+            try
+            {
+                await UpdateAsyncImpl(outputFileInfo, outputFs, cancellationToken);
+            }
+            catch
+            {
+                outputFileInfo.Refresh();
+                if (outputFileInfo.Exists && outputFileInfo.Length == 0)
+                {
+                    outputFileInfo.Delete();
+                }
+
+                throw;
+            }
+        }
+
+        private async Task UpdateAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, CancellationToken cancellationToken)
+        {
             chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (!Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.Equals(".json", StringComparison.OrdinalIgnoreCase))
             {
