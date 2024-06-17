@@ -1,7 +1,6 @@
 ﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -9,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -389,9 +389,9 @@ namespace TwitchDownloaderCore
                 return returnList;
             }
 
-            string bttvFolder = Path.Combine(cacheFolder, "bttv");
-            string ffzFolder = Path.Combine(cacheFolder, "ffz");
-            string stvFolder = Path.Combine(cacheFolder, "stv");
+            DirectoryInfo bttvFolder = new DirectoryInfo(Path.Combine(cacheFolder, "bttv"));
+            DirectoryInfo ffzFolder = new DirectoryInfo(Path.Combine(cacheFolder, "ffz"));
+            DirectoryInfo stvFolder = new DirectoryInfo(Path.Combine(cacheFolder, "stv"));
 
             EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, logger, cancellationToken);
 
@@ -434,10 +434,10 @@ namespace TwitchDownloaderCore
             return returnList;
 
             static async Task FetchEmoteImages(IReadOnlyCollection<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, ICollection<TwitchEmote> returnList,
-                ICollection<string> alreadyAdded, string cacheFolder, ITaskLogger logger, CancellationToken cancellationToken)
+                ICollection<string> alreadyAdded, DirectoryInfo cacheFolder, ITaskLogger logger, CancellationToken cancellationToken)
             {
-                if (!Directory.Exists(cacheFolder))
-                    CreateDirectory(cacheFolder);
+                if (!cacheFolder.Exists)
+                    cacheFolder = CreateDirectory(cacheFolder.FullName);
 
                 IEnumerable<EmoteResponseItem> emoteResponseQuery;
                 if (comments.Count == 0)
@@ -457,7 +457,7 @@ namespace TwitchDownloaderCore
                 {
                     try
                     {
-                        var imageData = await GetImage(cacheFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, "2", emote.ImageType, cancellationToken);
+                        var imageData = await GetImage(cacheFolder, emote.ImageUrl.Replace("[scale]", "2"), emote.Id, 2, emote.ImageType, logger, cancellationToken);
                         var newEmote = new TwitchEmote(imageData, EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
                         newEmote.IsZeroWidth = emote.IsZeroWidth;
 
@@ -478,9 +478,9 @@ namespace TwitchDownloaderCore
             List<string> alreadyAdded = new List<string>();
             List<string> failedEmotes = new List<string>();
 
-            string emoteFolder = Path.Combine(cacheFolder, "emotes");
-            if (!Directory.Exists(emoteFolder))
-                TwitchHelper.CreateDirectory(emoteFolder);
+            DirectoryInfo emoteFolder = new DirectoryInfo(Path.Combine(cacheFolder, "emotes"));
+            if (!emoteFolder.Exists)
+                emoteFolder = CreateDirectory(emoteFolder.FullName);
 
             // Load our embedded emotes
             if (embeddedData?.firstParty != null)
@@ -518,7 +518,7 @@ namespace TwitchDownloaderCore
                 {
                     try
                     {
-                        byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, "2", "png", cancellationToken);
+                        byte[] bytes = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, 2, "png", logger, cancellationToken);
                         TwitchEmote newEmote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, id, id);
                         alreadyAdded.Add(id);
                         returnList.Add(newEmote);
@@ -638,9 +638,9 @@ namespace TwitchDownloaderCore
 
             List<EmbedChatBadge> badgesData = await GetChatBadgesData(comments, streamerId, cancellationToken);
 
-            string badgeFolder = Path.Combine(cacheFolder, "badges");
-            if (!Directory.Exists(badgeFolder))
-                TwitchHelper.CreateDirectory(badgeFolder);
+            DirectoryInfo badgeFolder = new DirectoryInfo(Path.Combine(cacheFolder, "badges"));
+            if (!badgeFolder.Exists)
+                badgeFolder = CreateDirectory(badgeFolder.FullName);
 
             foreach(var badge in badgesData)
             {
@@ -654,7 +654,7 @@ namespace TwitchDownloaderCore
                     foreach (var (version, data) in badge.versions)
                     {
                         string id = data.url.Split('/')[^2];
-                        byte[] bytes = await GetImage(badgeFolder, data.url, id, "2", "png", cancellationToken);
+                        byte[] bytes = await GetImage(badgeFolder, data.url, id, 2, "png", logger, cancellationToken);
                         versions.Add(version, new ChatBadgeData
                         {
                             title = data.title,
@@ -805,9 +805,9 @@ namespace TwitchDownloaderCore
             cheerResponseMessage.EnsureSuccessStatusCode();
             var cheerResponse = await cheerResponseMessage.Content.ReadFromJsonAsync<GqlCheerResponse>(cancellationToken: cancellationToken);
 
-            string bitFolder = Path.Combine(cacheFolder, "bits");
-            if (!Directory.Exists(bitFolder))
-                TwitchHelper.CreateDirectory(bitFolder);
+            DirectoryInfo bitFolder = new DirectoryInfo(Path.Combine(cacheFolder, "bits"));
+            if (!bitFolder.Exists)
+                bitFolder = CreateDirectory(bitFolder.FullName);
 
             if (cheerResponse?.data != null)
             {
@@ -849,7 +849,8 @@ namespace TwitchDownloaderCore
                             {
                                 int minBits = tier.bits;
                                 string url = templateURL.Replace("PREFIX", node.prefix.ToLower()).Replace("BACKGROUND", "dark").Replace("ANIMATION", "animated").Replace("TIER", tier.bits.ToString()).Replace("SCALE.EXTENSION", "2.gif");
-                                TwitchEmote emote = new TwitchEmote(await GetImage(bitFolder, url, node.id + tier.bits, "2", "gif", cancellationToken), EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
+                                var bytes = await GetImage(bitFolder, url, node.id + tier.bits, 2, "gif", logger, cancellationToken);
+                                TwitchEmote emote = new TwitchEmote(bytes, EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
                                 tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
                             }
                             returnList.Add(newEmote);
@@ -1011,65 +1012,64 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlUserInfoResponse>();
         }
 
-        public static async Task<byte[]> GetImage(string cachePath, string imageUrl, string imageId, string imageScale, string imageType, CancellationToken cancellationToken = new())
+        public static async Task<byte[]> GetImage(DirectoryInfo cacheDir, string imageUrl, string imageId, int imageScale, string imageType, ITaskLogger logger, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            byte[] imageBytes = null;
+            cacheDir.Refresh();
+            if (!cacheDir.Exists)
+            {
+                CreateDirectory(cacheDir.FullName);
+                cacheDir.Refresh();
+            }
 
-            if (!Directory.Exists(cachePath))
-                CreateDirectory(cachePath);
+            byte[] imageBytes;
 
-            string filePath = Path.Combine(cachePath!, imageId + "_" + imageScale + "." + imageType);
-            if (File.Exists(filePath))
+            var filePath = Path.Combine(cacheDir.FullName, $"{imageId}_{imageScale}.{imageType}");
+            var file = new FileInfo(filePath);
+
+            if (file.Exists)
             {
                 try
                 {
-                    await using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    byte[] bytes = new byte[stream.Length];
-                    stream.Seek(0, SeekOrigin.Begin);
-                    _ = await stream.ReadAsync(bytes, cancellationToken);
+                    await using var fs = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+                    imageBytes = new byte[fs.Length];
+                    _ = await fs.ReadAsync(imageBytes, cancellationToken);
 
-                    //Check if image file is not corrupt
-                    if (bytes.Length > 0)
+                    if (imageBytes.Length > 0)
                     {
-                        using SKImage image = SKImage.FromEncodedData(bytes);
-                        if (image != null)
+                        using var ms = new MemoryStream(imageBytes);
+                        using var codec = SKCodec.Create(ms, out var result);
+
+                        if (codec is not null)
                         {
-                            imageBytes = bytes;
+                            return imageBytes;
                         }
-                        else
-                        {
-                            //Try to delete the corrupted image
-                            try
-                            {
-                                await stream.DisposeAsync();
-                                File.Delete(filePath);
-                            }
-                            catch { }
-                        }
+
+                        logger.LogVerbose($"Failed to decode {imageId} from cache: {result}");
                     }
+
+                    // Delete the corrupted image
+                    file.Delete();
                 }
-                catch (IOException)
+                catch (Exception e) when (e is IOException or SecurityException)
                 {
-                    //File being written to by parallel process? Maybe. Can just fallback to HTTP request.
+                    // File being written to by parallel process? Maybe. Can just fallback to HTTP request.
+                    logger.LogVerbose($"Failed to read from or delete {file.Name}: {e.Message}");
                 }
             }
 
-            // If fetching from cache failed
-            if (imageBytes != null)
-                return imageBytes;
-
-            // Fallback to HTTP request
             imageBytes = await httpClient.GetByteArrayAsync(imageUrl, cancellationToken);
 
-            //Let's save this image to the cache
             try
             {
-                await using var stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-                await stream.WriteAsync(imageBytes, cancellationToken);
+                await using var fs = file.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+                await fs.WriteAsync(imageBytes, cancellationToken);
             }
-            catch { }
+            catch (Exception e)
+            {
+                logger.LogVerbose($"Failed to open or write to {file.Name}: {e.Message}");
+            }
 
             return imageBytes;
         }
