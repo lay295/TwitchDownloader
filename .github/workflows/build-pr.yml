@@ -27,7 +27,7 @@ jobs:
     - name: Download FFmpeg To Workspace
       # You may pin to the exact commit or the version.
       # uses: carlosperate/download-file-action@e85e0aa6262f13571d17a4a39687b26981c583dc
-      uses: carlosperate/download-file-action@v1.1.2
+      uses: carlosperate/download-file-action@v2.0.1
       with:
         # URL of the file to download
         file-url: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
