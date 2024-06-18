@@ -56,7 +56,7 @@ namespace TwitchDownloaderCore.Tools
         private SKImage _watchStreakIcon;
         private SKImage _charityDonationIcon;
 
-        private readonly string _cachePath;
+        private readonly DirectoryInfo _cacheDir;
         private readonly SKColor _purple;
         private readonly bool _offline;
         private readonly double _fontSize;
@@ -66,7 +66,7 @@ namespace TwitchDownloaderCore.Tools
 
         public HighlightIcons(ChatRenderOptions renderOptions, SKColor iconPurple, SKPaint outlinePaint)
         {
-            _cachePath = Path.Combine(renderOptions.TempFolder, "icons");
+            _cacheDir = new DirectoryInfo(Path.Combine(renderOptions.TempFolder, "icons"));
             _purple = iconPurple;
             _offline = renderOptions.Offline;
             _fontSize = renderOptions.FontSize;
@@ -184,7 +184,7 @@ namespace TwitchDownloaderCore.Tools
                 return SKImage.FromBitmap(offlineBitmap);
             }
 
-            var taskIconBytes = TwitchHelper.GetImage(_cachePath, GIFTED_MANY_ICON_URL, "gift-illus", "3", "png");
+            var taskIconBytes = TwitchHelper.GetImage(_cacheDir, GIFTED_MANY_ICON_URL, "gift-illus", 3, "png", StubTaskProgress.Instance);
             taskIconBytes.Wait();
             using var ms = new MemoryStream(taskIconBytes.Result); // Illustration is 72x72
             using var codec = SKCodec.Create(ms);

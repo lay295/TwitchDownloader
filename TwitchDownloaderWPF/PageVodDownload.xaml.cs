@@ -32,7 +32,7 @@ namespace TwitchDownloaderWPF
     public partial class PageVodDownload : Page
     {
         public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = new();
-        public int currentVideoId;
+        public long currentVideoId;
         public DateTime currentVideoTime;
         public TimeSpan vodLength;
         public int viewCount;
@@ -82,10 +82,10 @@ namespace TwitchDownloaderWPF
 
         private async Task GetVideoInfo()
         {
-            int videoId = ValidateUrl(textUrl.Text.Trim());
+            long videoId = ValidateUrl(textUrl.Text.Trim());
             if (videoId <= 0)
             {
-                MessageBox.Show(Translations.Strings.InvalidVideoLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidVideoLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.InvalidVideoLinkIdMessage.Replace(@"\n", Environment.NewLine), Translations.Strings.InvalidVideoLinkId, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -173,10 +173,10 @@ namespace TwitchDownloaderWPF
             {
                 btnGetInfo.IsEnabled = true;
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
-                MessageBox.Show(Translations.Strings.UnableToGetVideoInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToGetVideoInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -204,7 +204,7 @@ namespace TwitchDownloaderWPF
                 Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    viewCount.ToString(), game) + (comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? ".m4a" : ".mp4")),
+                    viewCount, game) + (comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? ".m4a" : ".mp4")),
                 Oauth = TextOauth.Text,
                 Quality = GetQualityWithoutSize(comboQuality.Text),
                 Id = currentVideoId,
@@ -275,10 +275,10 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private static int ValidateUrl(string text)
+        private static long ValidateUrl(string text)
         {
             var vodIdMatch = TwitchRegex.MatchVideoId(text);
-            if (vodIdMatch is {Success: true} && int.TryParse(vodIdMatch.ValueSpan, out var vodId))
+            if (vodIdMatch is {Success: true} && long.TryParse(vodIdMatch.ValueSpan, out var vodId))
             {
                 return vodId;
             }
@@ -412,7 +412,7 @@ namespace TwitchDownloaderWPF
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    viewCount.ToString(), game) + ".mp4"
+                    viewCount, game) + ".mp4"
             };
             if (saveFileDialog.ShowDialog() == false)
             {
@@ -450,7 +450,7 @@ namespace TwitchDownloaderWPF
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             btnGetInfo.IsEnabled = true;

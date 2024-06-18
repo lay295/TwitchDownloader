@@ -32,6 +32,30 @@ namespace TwitchDownloaderCore
 
         public async Task UpdateAsync(CancellationToken cancellationToken)
         {
+            var outputFileInfo = TwitchHelper.ClaimFile(_updateOptions.OutputFile, _updateOptions.FileCollisionCallback, _progress);
+            _updateOptions.OutputFile = outputFileInfo.FullName;
+
+            // Open the destination file so that it exists in the filesystem.
+            await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+
+            try
+            {
+                await UpdateAsyncImpl(outputFileInfo, outputFs, cancellationToken);
+            }
+            catch
+            {
+                outputFileInfo.Refresh();
+                if (outputFileInfo.Exists && outputFileInfo.Length == 0)
+                {
+                    outputFileInfo.Delete();
+                }
+
+                throw;
+            }
+        }
+
+        private async Task UpdateAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, CancellationToken cancellationToken)
+        {
             chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
             if (!Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.Equals(".json", StringComparison.OrdinalIgnoreCase))
             {
@@ -70,13 +94,13 @@ namespace TwitchDownloaderCore
             switch (_updateOptions.OutputFormat)
             {
                 case ChatFormat.Json:
-                    await ChatJson.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.Compression, cancellationToken);
+                    await ChatJson.SerializeAsync(outputFs, chatRoot, _updateOptions.Compression, cancellationToken);
                     break;
                 case ChatFormat.Html:
-                    await ChatHtml.SerializeAsync(_updateOptions.OutputFile, chatRoot, _progress, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
+                    await ChatHtml.SerializeAsync(outputFs, outputFileInfo.FullName, chatRoot, _progress, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
                     break; // If there is embedded data, it's almost guaranteed to be first party emotes or badges.
                 case ChatFormat.Text:
-                    await ChatText.SerializeAsync(_updateOptions.OutputFile, chatRoot, _updateOptions.TextTimestampFormat);
+                    await ChatText.SerializeAsync(outputFs, chatRoot, _updateOptions.TextTimestampFormat);
                     break;
                 default:
                     throw new NotSupportedException($"{_updateOptions.OutputFormat} is not a supported output format.");
@@ -97,7 +121,7 @@ namespace TwitchDownloaderCore
 
             if (chatRoot.video.id.All(char.IsDigit))
             {
-                var videoId = int.Parse(chatRoot.video.id);
+                var videoId = long.Parse(chatRoot.video.id);
                 VideoInfo videoInfo = null;
                 try
                 {
@@ -300,7 +324,7 @@ namespace TwitchDownloaderCore
 
         private async Task BitTask(CancellationToken cancellationToken = default)
         {
-            List<CheerEmote> bitList = await TwitchHelper.GetBits(chatRoot.comments, _updateOptions.TempFolder, chatRoot.streamer.id.ToString(), _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
+            List<CheerEmote> bitList = await TwitchHelper.GetBits(chatRoot.comments, _updateOptions.TempFolder, chatRoot.streamer.id.ToString(), _progress, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
             int inputCount = chatRoot.embeddedData.twitchBits.Count;
             chatRoot.embeddedData.twitchBits = new List<EmbedCheerEmote>();
@@ -444,7 +468,7 @@ namespace TwitchDownloaderCore
                 TrimBeginningTime = sectionStart,
                 TrimEnding = true,
                 TrimEndingTime = sectionEnd,
-                ConnectionCount = 4,
+                DownloadThreads = 4,
                 EmbedData = false,
                 BttvEmotes = false,
                 FfzEmotes = false,

@@ -91,5 +91,7 @@ namespace TwitchDownloaderCore.Options
         public bool SkipDriveWaiting { get; set; } = false;
         public EmojiVendor EmojiVendor { get; set; } = EmojiVendor.GoogleNotoColor;
         public int[] TimestampWidths { get; set; }
+        public bool AdjustUsernameVisibility { get; set; }
+        public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
     }
 }

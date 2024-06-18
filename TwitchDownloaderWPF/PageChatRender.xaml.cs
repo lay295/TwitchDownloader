@@ -20,6 +20,7 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Translations;
 using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 using MessageBox = System.Windows.MessageBox;
@@ -136,6 +137,7 @@ namespace TwitchDownloaderWPF
                 Offline = checkOffline.IsChecked.GetValueOrDefault(),
                 AllowUnlistedEmotes = true,
                 DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault(),
+                AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault(),
             };
             if (RadioEmojiNotoColor.IsChecked == true)
                 options.EmojiVendor = EmojiVendor.GoogleNotoColor;
@@ -145,7 +147,7 @@ namespace TwitchDownloaderWPF
                 options.EmojiVendor = EmojiVendor.None;
             foreach (var item in comboBadges.SelectedItems)
             {
-                options.ChatBadgeMask += (int)((ChatBadgeListItem)item).Type;
+                options.ChatBadgeMask += (int)((CheckComboBoxItem)item).Tag;
             }
 
             return options;
@@ -189,23 +191,28 @@ namespace TwitchDownloaderWPF
                 checkOffline.IsChecked = Settings.Default.Offline;
                 checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
                 checkAlternateMessageBackgrounds.IsChecked = Settings.Default.AlternateMessageBackgrounds;
+                checkAdjustUsernameVisibility.IsChecked = Settings.Default.AdjustUsernameVisibility;
                 RadioEmojiNotoColor.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.GoogleNotoColor;
                 RadioEmojiTwemoji.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.TwitterTwemoji;
                 RadioEmojiNone.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.None;
 
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Broadcaster, Name = "Broadcaster" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Moderator, Name = "Mods" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.VIP, Name = "VIPs" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Subscriber, Name = "Subs" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Predictions, Name = "Predictions" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.NoAudioVisual, Name = "No Audio/No Video" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.PrimeGaming, Name = "Prime" });
-                comboBadges.Items.Add(new ChatBadgeListItem() { Type = ChatBadgeType.Other, Name = "Others" });
+                comboBadges.Items.Clear();
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskBroadcaster, Tag = ChatBadgeType.Broadcaster });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskModerator, Tag = ChatBadgeType.Moderator });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskVIP, Tag = ChatBadgeType.VIP });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskSubscriber, Tag = ChatBadgeType.Subscriber });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskPredictions, Tag = ChatBadgeType.Predictions });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskNoAudioNoVideo, Tag = ChatBadgeType.NoAudioVisual });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskTwitchPrime, Tag = ChatBadgeType.PrimeGaming });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskOthers, Tag = ChatBadgeType.Other });
 
-                foreach (ChatBadgeListItem item in comboBadges.Items)
+                var badgeMask = (ChatBadgeType)Settings.Default.ChatBadgeMask;
+                foreach (CheckComboBoxItem item in comboBadges.Items)
                 {
-                    if (((ChatBadgeType)Settings.Default.ChatBadgeMask).HasFlag(item.Type))
+                    if (badgeMask.HasFlag((Enum)item.Tag))
+                    {
                         comboBadges.SelectedItems.Add(item);
+                    }
                 }
 
                 foreach (VideoContainer container in comboFormat.Items)
@@ -292,6 +299,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.Offline = checkOffline.IsChecked.GetValueOrDefault();
             Settings.Default.DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault();
             Settings.Default.AlternateMessageBackgrounds = checkAlternateMessageBackgrounds.IsChecked.GetValueOrDefault();
+            Settings.Default.AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault();
             if (comboFormat.SelectedItem != null)
             {
                 Settings.Default.VideoContainer = ((VideoContainer)comboFormat.SelectedItem).Name;
@@ -313,7 +321,7 @@ namespace TwitchDownloaderWPF
             int newMask = 0;
             foreach (var item in comboBadges.SelectedItems)
             {
-                newMask += (int)((ChatBadgeListItem)item).Type;
+                newMask += (int)((CheckComboBoxItem)item).Tag;
             }
             Settings.Default.ChatBadgeMask = newMask;
 
@@ -351,7 +359,7 @@ namespace TwitchDownloaderWPF
             {
                 if (!File.Exists(fileName))
                 {
-                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.FileNotFound + ' ' + Path.GetFileName(fileName));
+                    AppendLog(Translations.Strings.ErrorLog + Translations.Strings.FileNotFound + Path.GetFileName(fileName));
                     return false;
                 }
             }
@@ -579,7 +587,7 @@ namespace TwitchDownloaderWPF
             {
                 if (!ValidateInputs())
                 {
-                    MessageBox.Show(Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -609,7 +617,7 @@ namespace TwitchDownloaderWPF
                     AppendLog(Translations.Strings.ErrorLog + ex.Message);
                     if (Settings.Default.VerboseErrors)
                     {
-                        MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     return;
                 }
@@ -664,11 +672,11 @@ namespace TwitchDownloaderWPF
                         if (ex.Message.Contains("The pipe has been ended"))
                         {
                             string errorLog = String.Join('\n', ffmpegLog.TakeLast(20).ToArray());
-                            MessageBox.Show(errorLog, Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(Application.Current.MainWindow!, errorLog, Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                         else
                         {
-                            MessageBox.Show(ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                 }
@@ -709,7 +717,7 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                MessageBox.Show(Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -732,17 +740,6 @@ namespace TwitchDownloaderWPF
         {
             FileNames = textJson.Text.Split("&&", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             UpdateActionButtons(false);
-        }
-    }
-
-    public class ChatBadgeListItem
-    {
-        public ChatBadgeType Type { get; set; }
-        public string Name { get; set; }
-
-        public override string ToString()
-        {
-            return Name;
         }
     }
 

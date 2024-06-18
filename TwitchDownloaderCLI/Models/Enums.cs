@@ -13,4 +13,12 @@ namespace TwitchDownloaderCLI.Models
         Error = 1 << 5,
         Ffmpeg = 1 << 6,
     }
+
+    public enum OverwriteBehavior
+    {
+        Overwrite,
+        Exit,
+        Rename,
+        Prompt,
+    }
 }

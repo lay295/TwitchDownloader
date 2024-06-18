@@ -52,7 +52,7 @@ Time to trim beginning. See [Time durations](#time-durations) for a more detaile
 Time to trim ending. See [Time durations](#time-durations) for a more detailed explanation.
 
 **-t / --threads**
-(Default: `4`) Number of download threads.
+(Default: `4`) Number of parallel download threads. Large values may result in IP rate limiting.
 
 **--bandwidth**
 (Default: `-1`) The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
@@ -65,6 +65,9 @@ Path to FFmpeg executable.
 
 **--temp-path**
 Path to temporary folder for cache.
+
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode clipdownload
 #### Downloads a clip from Twitch
@@ -89,6 +92,9 @@ Path to FFmpeg executable.
 
 **--temp-path**
 Path to temporary folder for cache.
+
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode chatdownload
 #### Downloads the chat of a VOD, highlight, or clip
@@ -123,11 +129,14 @@ Time to trim ending. See [Time durations](#time-durations) for a more detailed e
 **--timestamp-format**
 (Default: `Relative`) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `UtcFull`, `Relative`, and `None`.
 
-**--chat-connections**
-(Default: `4`) The number of parallel downloads for chat.
+**-t / --threads**
+(Default: `4`) Number of parallel download threads. Large values may result in IP rate limiting.
 
 **--temp-path**
 Path to temporary folder for cache.
+
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode chatupdate
 #### Updates the embedded emotes, badges, bits, and trims a chat JSON and/or converts a JSON chat to another format
@@ -138,7 +147,7 @@ Path to input file. Valid extensions are: `.json`, `.json.gz`.
 **-o / --output (REQUIRED)**
 Path to output file. File extension will be used to determine new chat type. Valid extensions are: `.json`, `.html`, and `.txt`.
 
-**-c / --compression**
+**--compression**
 (Default: `None`) Compresses an output json chat file using a specified compression, usually resulting in 40-90% size reductions. Valid values are: `None`, `Gzip`. More formats will be supported in the future.
 
 **-E / --embed-missing**
@@ -167,6 +176,9 @@ Path to output file. File extension will be used to determine new chat type. Val
 
 **--temp-path**
 Path to temporary folder for cache.
+
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ## Arguments for mode chatrender
 #### Renders a chat JSON as a video
@@ -272,6 +284,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--alternate-backgrounds**
 (Default: `false`) Alternates the background color of every other chat message to help tell them apart.
 
+**--readable-colors**
+(Default: `false`) Increases the contrast of usernames against the background or outline color.
+
 **--offline**
 (Default: `false`) Render completely offline using only embedded emotes, badges, and bits from the input json.
 
@@ -317,6 +332,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--scale-highlight-indent**
 (Default: `1.0`) Number to scale highlight indent size (sub messages).
 
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
+
 ## Arguments for mode ffmpeg
 #### Manage standalone FFmpeg
 
@@ -340,6 +358,9 @@ Path a text file containing the absolute paths of the files to concatenate, sepa
 
 **-o / --output (REQUIRED)**
 File the program will output to.
+
+**--collision**
+(Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
 ---
 

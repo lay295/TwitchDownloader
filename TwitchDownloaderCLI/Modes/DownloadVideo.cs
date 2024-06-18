@@ -19,13 +19,14 @@ namespace TwitchDownloaderCLI.Modes
 
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
-            var downloadOptions = GetDownloadOptions(inputOptions, progress);
+            var collisionHandler = new FileCollisionHandler(inputOptions);
+            var downloadOptions = GetDownloadOptions(inputOptions, collisionHandler, progress);
 
             var videoDownloader = new VideoDownloader(downloadOptions, progress);
             videoDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
-        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, ITaskLogger logger)
+        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             if (inputOptions.Id is null)
             {
@@ -54,7 +55,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 DownloadThreads = inputOptions.DownloadThreads,
                 ThrottleKib = inputOptions.ThrottleKib,
-                Id = int.Parse(vodIdMatch.ValueSpan),
+                Id = long.Parse(vodIdMatch.ValueSpan),
                 Oauth = inputOptions.Oauth,
                 Filename = inputOptions.OutputFile,
                 Quality = Path.GetExtension(inputOptions.OutputFile)!.ToLower() switch
@@ -76,7 +77,8 @@ namespace TwitchDownloaderCLI.Modes
                         "Run 'TwitchDownloaderCLI cache help' for more information.");
 
                     return Array.Empty<DirectoryInfo>();
-                }
+                },
+                FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
 
             return downloadOptions;

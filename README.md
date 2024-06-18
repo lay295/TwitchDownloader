@@ -17,7 +17,7 @@ This document is also available in:
 - [**Italian / Italiano**](README_it.md)
 - [**Portuguese (Brazil) / Português (Brasil)**](README_pt-br.md)
 - [**Turkish / Türkçe**](README_tr.md)
-- [**Japanese / 日本語 (翻訳作業中 WIP)**](README_ja.md)
+- [**Japanese / 日本語**](README_ja.md)
 - [**Simplified Chinese / 简体中文**](README_zh-cn.md)
 
 ## Chat Render Example

@@ -19,13 +19,15 @@ namespace TwitchDownloaderCLI.Modes
 
             FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
 
-            var renderOptions = GetRenderOptions(inputOptions, progress);
+            var collisionHandler = new FileCollisionHandler(inputOptions);
+            var renderOptions = GetRenderOptions(inputOptions, collisionHandler, progress);
+
             using var chatRenderer = new ChatRenderer(renderOptions, progress);
             chatRenderer.ParseJsonAsync().Wait();
             chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
         }
 
-        private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions, ITaskLogger logger)
+        private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             ChatRenderOptions renderOptions = new()
             {
@@ -77,7 +79,7 @@ namespace TwitchDownloaderCLI.Modes
                     "twitter" or "twemoji" => EmojiVendor.TwitterTwemoji,
                     "google" or "notocolor" => EmojiVendor.GoogleNotoColor,
                     "system" or "none" => EmojiVendor.None,
-                    _ => throw new NotSupportedException("Invalid emoji vendor. Valid values are: 'twitter' / 'twemoji', and 'google' / 'notocolor'")
+                    _ => throw new NotSupportedException("Invalid emoji vendor. Valid values are: 'twitter' / 'twemoji', 'google' / 'notocolor', and 'system' / 'none'")
                 },
                 SkipDriveWaiting = inputOptions.SkipDriveWaiting,
                 EmoteScale = inputOptions.ScaleEmote,
@@ -91,7 +93,9 @@ namespace TwitchDownloaderCLI.Modes
                 AccentIndentScale = inputOptions.ScaleAccentIndent,
                 AccentStrokeScale = inputOptions.ScaleAccentStroke,
                 DisperseCommentOffsets = inputOptions.DisperseCommentOffsets,
-                AlternateMessageBackgrounds = inputOptions.AlternateMessageBackgrounds
+                AlternateMessageBackgrounds = inputOptions.AlternateMessageBackgrounds,
+                AdjustUsernameVisibility = inputOptions.AdjustUsernameVisibility,
+                FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255 && !(renderOptions.AlternateMessageBackgrounds! && renderOptions.AlternateBackgroundColor.Alpha != 255))

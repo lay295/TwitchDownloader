@@ -250,5 +250,15 @@ namespace TwitchDownloaderCLI.Tools
             Console.WriteLine(message);
             _lastWriteHadNewLine = true;
         }
+
+        ~CliTaskProgress()
+        {
+            if (!_lastWriteHadNewLine)
+            {
+                // Some shells don't like when an application exits without writing a newline to the end of stdout
+                Console.WriteLine();
+                _lastWriteHadNewLine = true;
+            }
+        }
     }
 }

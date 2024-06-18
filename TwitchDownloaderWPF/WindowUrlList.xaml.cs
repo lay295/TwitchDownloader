@@ -48,7 +48,7 @@ namespace TwitchDownloaderWPF
 
             if (invalidList.Count > 0)
             {
-                MessageBox.Show(Translations.Strings.UnableToParseInputsMessage + Environment.NewLine + string.Join(Environment.NewLine, invalidList.ToArray()), Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, Translations.Strings.UnableToParseInputsMessage + Environment.NewLine + string.Join(Environment.NewLine, invalidList.ToArray()), Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
                 btnQueue.IsEnabled = true;
                 return;
             }
@@ -61,7 +61,7 @@ namespace TwitchDownloaderWPF
             {
                 if (id.All(char.IsDigit))
                 {
-                    Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(int.Parse(id));
+                    Task<GqlVideoResponse> task = TwitchHelper.GetVideoInfo(long.Parse(id));
                     taskVideoList.Add(task);
                     taskDict[task.Id] = id;
                 }
@@ -151,7 +151,7 @@ namespace TwitchDownloaderWPF
 
             if (errorList.Count > 0)
             {
-                MessageBox.Show(Translations.Strings.UnableToGetInfoMessage + Environment.NewLine + string.Join(Environment.NewLine, errorList.ToArray()), Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, Translations.Strings.UnableToGetInfoMessage + Environment.NewLine + string.Join(Environment.NewLine, errorList.ToArray()), Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
                 btnQueue.IsEnabled = true;
                 return;
             }
@@ -167,7 +167,7 @@ namespace TwitchDownloaderWPF
             btnQueue.IsEnabled = true;
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_OnSourceInitialized(object sender, EventArgs e)
         {
             App.RequestTitleBarChange();
         }

@@ -37,16 +37,17 @@ namespace TwitchDownloaderWPF
             InitializeComponent();
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        private void OnSourceInitialized(object sender, EventArgs e)
         {
             App.RequestTitleBarChange();
+        }
 
-            // For some stupid reason, this does not work unless I manually set it, even though its a binding
-            DataGrid.ItemsSource = GridItems;
-
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
             // Do this the dumb way because bindings are annoying without view models
             var sizeString = VideoSizeEstimator.StringifyByteCount(_totalSize);
             TextTotalSize.Text = string.IsNullOrEmpty(sizeString) ? "0B" : sizeString;
+            DataGrid.ItemsSource = GridItems;
         }
 
         private void OnClosing(object sender, CancelEventArgs e)
@@ -121,12 +122,7 @@ namespace TwitchDownloaderWPF
             public bool ShouldDelete
             {
                 get => _shouldDelete;
-                set
-                {
-                    if (value == _shouldDelete) return;
-                    _shouldDelete = value;
-                    OnPropertyChanged();
-                }
+                set => SetField(ref _shouldDelete, value);
             }
 
             public int Age { get; }
@@ -138,12 +134,7 @@ namespace TwitchDownloaderWPF
             public string Size
             {
                 get => _size;
-                private set
-                {
-                    if (value == _size) return;
-                    _size = value;
-                    OnPropertyChanged();
-                }
+                private set => SetField(ref _size, value);
             }
 
             public event PropertyChangedEventHandler PropertyChanged;
@@ -151,6 +142,14 @@ namespace TwitchDownloaderWPF
             private void OnPropertyChanged([CallerMemberName] string propertyName = null)
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
+
+            private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+            {
+                if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+                field = value;
+                OnPropertyChanged(propertyName);
+                return true;
             }
 
             public long CalculateSize()

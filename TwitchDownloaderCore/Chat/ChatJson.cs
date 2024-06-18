@@ -171,7 +171,7 @@ namespace TwitchDownloaderCore.Chat
             }
         }
 
-#pragma warning disable CS0618
+#pragma warning disable CS0618 // Type or member is obsolete
         private static async Task UpgradeChatJson(ChatRoot chatRoot)
         {
             const int MAX_STREAM_LENGTH = 172_800; // 48 hours in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
@@ -239,30 +239,21 @@ namespace TwitchDownloaderCore.Chat
                 }
             }
         }
-#pragma warning restore CS0618
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Asynchronously serializes a chat json file.
         /// </summary>
-        public static async Task SerializeAsync(string filePath, ChatRoot chatRoot, ChatCompression compression, CancellationToken cancellationToken)
+        public static async Task SerializeAsync(FileStream fileStream, ChatRoot chatRoot, ChatCompression compression, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(chatRoot, nameof(chatRoot));
-
-            var outputDirectory = Directory.GetParent(Path.GetFullPath(filePath))!;
-            if (!outputDirectory.Exists)
-            {
-                TwitchHelper.CreateDirectory(outputDirectory.FullName);
-            }
-
-            await using var fs = File.Create(filePath);
             switch (compression)
             {
                 case ChatCompression.None:
-                    await JsonSerializer.SerializeAsync(fs, chatRoot, _jsonSerializerOptions, cancellationToken);
+                    await JsonSerializer.SerializeAsync(fileStream, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
                 case ChatCompression.Gzip:
                 {
-                    await using var gs = new GZipStream(fs, CompressionLevel.SmallestSize);
+                    await using var gs = new GZipStream(fileStream, CompressionLevel.SmallestSize);
                     await JsonSerializer.SerializeAsync(gs, chatRoot, _jsonSerializerOptions, cancellationToken);
                     break;
                 }

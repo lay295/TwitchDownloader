@@ -6,7 +6,7 @@ namespace TwitchDownloaderCore.Options
 {
     public class VideoDownloadOptions
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Quality { get; set; }
         public string Filename { get; set; }
         public bool TrimBeginning { get; set; }
@@ -20,5 +20,6 @@ namespace TwitchDownloaderCore.Options
         public string FfmpegPath { get; set; }
         public string TempFolder { get; set; }
         public Func<DirectoryInfo[], DirectoryInfo[]> CacheCleanerCallback { get; set; }
+        public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
     }
 }

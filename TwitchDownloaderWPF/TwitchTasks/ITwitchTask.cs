@@ -18,7 +18,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
     public interface ITwitchTask : INotifyPropertyChanged
     {
         TaskData Info { get; set; }
-        int Progress { get; set; }
+        int Progress { get; }
         TwitchTaskStatus Status { get; }
         CancellationTokenSource TokenSource { get; set; }
         ITwitchTask DependantTask { get; set; }

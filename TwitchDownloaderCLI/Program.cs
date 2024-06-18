@@ -29,7 +29,7 @@ namespace TwitchDownloaderCLI
             parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
 
             CoreLicensor.EnsureFilesExist(AppContext.BaseDirectory);
-            WriteApplicationBanner((TwitchDownloaderArgs)parserResult.Value);
+            WriteApplicationBanner((ITwitchDownloaderArgs)parserResult.Value);
 
             parserResult
                 .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
@@ -74,7 +74,7 @@ namespace TwitchDownloaderCLI
             Environment.Exit(1);
         }
 
-        private static void WriteApplicationBanner(TwitchDownloaderArgs args)
+        private static void WriteApplicationBanner(ITwitchDownloaderArgs args)
         {
             if (args.ShowBanner == false || (args.LogLevel & LogLevel.None) != 0)
             {

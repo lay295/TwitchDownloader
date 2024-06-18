@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows;
@@ -7,6 +8,7 @@ using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderWPF.Properties;
 using System.Diagnostics;
 using System.IO;
+using TwitchDownloaderWPF.Services;
 
 namespace TwitchDownloaderWPF
 {
@@ -263,7 +265,7 @@ namespace TwitchDownloaderWPF
                 errorMessage = taskException.Exception.ToString();
             }
 
-            MessageBox.Show(errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(Application.Current.MainWindow!, errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void BtnRemoveTask_Click(object sender, RoutedEventArgs e)
@@ -290,13 +292,13 @@ namespace TwitchDownloaderWPF
         {
             if (task.CanRun() || task.Status is TwitchTaskStatus.Running or TwitchTaskStatus.Waiting)
             {
-                MessageBox.Show(Translations.Strings.CancelTaskBeforeRemoving, Translations.Strings.TaskCouldNotBeRemoved, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.CancelTaskBeforeRemoving, Translations.Strings.TaskCouldNotBeRemoved, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             if (!taskList.Remove(task))
             {
-                MessageBox.Show(Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -307,13 +309,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            var outputFolder = Path.GetDirectoryName(task.OutputFile);
-            if (!Directory.Exists(outputFolder))
-            {
-                return;
-            }
-
-            Process.Start(new ProcessStartInfo(outputFolder) { UseShellExecute = true });
+            FileService.OpenExplorerForFile(new FileInfo(task.OutputFile));
         }
     }
 }

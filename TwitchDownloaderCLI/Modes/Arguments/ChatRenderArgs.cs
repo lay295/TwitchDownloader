@@ -4,7 +4,7 @@ using TwitchDownloaderCLI.Models;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("chatrender", HelpText = "Renders a chat JSON as a video")]
-    internal sealed class ChatRenderArgs : TwitchDownloaderArgs
+    internal sealed class ChatRenderArgs : IFileCollisionArgs, ITwitchDownloaderArgs
     {
         [Option('i', "input", Required = true, HelpText = "Path to JSON chat file input.")]
         public string InputFile { get; set; }
@@ -28,10 +28,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public int ChatHeight { get; set; }
 
         [Option('b', "beginning", HelpText = "Time to trim the beginning of the render. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
-        public TimeDuration TrimBeginningTime { get; set; } = new(-1);
+        public TimeDuration TrimBeginningTime { get; set; } = TimeDuration.MinusOneSeconds;
 
         [Option('e', "ending", HelpText = "Time to trim the ending of the render. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
-        public TimeDuration TrimEndingTime { get; set; } = new(-1);
+        public TimeDuration TrimEndingTime { get; set; } = TimeDuration.MinusOneSeconds;
 
         [Option("bttv", Default = true, HelpText = "Enable BTTV emotes.")]
         public bool? BttvEmotes { get; set; }
@@ -105,6 +105,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("alternate-backgrounds", Default = false, HelpText = "Alternates the background color of every other chat message to help tell them apart.")]
         public bool AlternateMessageBackgrounds { get; set; }
 
+        [Option("readable-colors", Default = false, HelpText = "Increases the contrast of usernames against the background or outline color.")]
+        public bool AdjustUsernameVisibility { get; set; }
+
         [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, and bits from the input json.")]
         public bool Offline { get; set; }
 
@@ -149,5 +152,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("scale-highlight-indent", Default = 1.0, HelpText = "Number to scale highlight indent size (sub messages).")]
         public double ScaleAccentIndent { get; set; }
+
+        // Interface args
+        public OverwriteBehavior OverwriteBehavior { get; set; }
+        public bool? ShowBanner { get; set; }
+        public LogLevel LogLevel { get; set; }
     }
 }

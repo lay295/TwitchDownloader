@@ -3,7 +3,7 @@ using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-    internal abstract class TwitchDownloaderArgs
+    internal interface ITwitchDownloaderArgs
     {
         [Option("banner", Default = true, HelpText = "Displays a banner containing version and copyright information.")]
         public bool? ShowBanner { get; set; }

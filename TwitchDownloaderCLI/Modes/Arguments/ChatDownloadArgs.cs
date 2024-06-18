@@ -5,7 +5,7 @@ using TwitchDownloaderCore.Tools;
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("chatdownload", HelpText = "Downloads the chat from a VOD or clip")]
-    internal sealed class ChatDownloadArgs : TwitchDownloaderArgs
+    internal sealed class ChatDownloadArgs : IFileCollisionArgs, ITwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD or clip to download that chat of.")]
         public string Id { get; set; }
@@ -37,13 +37,18 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("timestamp-format", Default = TimestampFormat.Relative, HelpText = "Sets the timestamp format for .txt chat logs. Valid values are: Utc, UtcFull, Relative, and None")]
         public TimestampFormat TimeFormat { get; set; }
 
-        [Option("chat-connections", Default = 4, HelpText = "Number of downloading connections for chat")]
-        public int ChatConnections { get; set; }
+        [Option('t', "threads", Default = 4, HelpText = "Number of parallel download threads. Large values may result in IP rate limiting.")]
+        public int DownloadThreads { get; set; }
 
         [Option("silent", Default = false, HelpText = "Suppresses progress console output")]
         public bool Silent { get; set; }
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
+
+        // Interface args
+        public OverwriteBehavior OverwriteBehavior { get; set; }
+        public bool? ShowBanner { get; set; }
+        public LogLevel LogLevel { get; set; }
     }
 }

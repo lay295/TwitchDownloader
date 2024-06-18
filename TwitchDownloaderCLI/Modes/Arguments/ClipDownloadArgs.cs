@@ -1,9 +1,10 @@
 ﻿using CommandLine;
+using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
     [Verb("clipdownload", HelpText = "Downloads a clip from Twitch")]
-    internal sealed class ClipDownloadArgs : TwitchDownloaderArgs
+    internal sealed class ClipDownloadArgs : IFileCollisionArgs, ITwitchDownloaderArgs
     {
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the clip to download.")]
         public string Id { get; set; }
@@ -25,5 +26,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("temp-path", Default = "", HelpText = "Path to temporary caching folder.")]
         public string TempFolder { get; set; }
+
+        // Interface args
+        public OverwriteBehavior OverwriteBehavior { get; set; }
+        public bool? ShowBanner { get; set; }
+        public LogLevel LogLevel { get; set; }
     }
 }

@@ -29,7 +29,7 @@ namespace TwitchDownloaderCore
         public ChatRoot chatRoot { get; private set; } = new ChatRoot();
 
         private static readonly SKColor Purple = SKColor.Parse("#7B2CF2");
-        private static readonly string[] DefaultUsernameColors = { "#FF0000", "#0000FF", "#00FF00", "#B22222", "#FF7F50", "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F" };
+        private static readonly SKColor[] DefaultUsernameColors = { SKColor.Parse("#FF0000"), SKColor.Parse("#0000FF"), SKColor.Parse("#00FF00"), SKColor.Parse("#B22222"), SKColor.Parse("#FF7F50"), SKColor.Parse("#9ACD32"), SKColor.Parse("#FF4500"), SKColor.Parse("#2E8B57"), SKColor.Parse("#DAA520"), SKColor.Parse("#D2691E"), SKColor.Parse("#5F9EA0"), SKColor.Parse("#1E90FF"), SKColor.Parse("#FF69B4"), SKColor.Parse("#8A2BE2"), SKColor.Parse("#00FF7F") };
 
         private static readonly Regex RtlRegex = new("[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]", RegexOptions.Compiled);
         private static readonly Regex BlockArtRegex = new("[\u2500-\u257F\u2580-\u259F\u2800-\u28FF]", RegexOptions.Compiled);
@@ -71,6 +71,41 @@ namespace TwitchDownloaderCore
 
         public async Task RenderVideoAsync(CancellationToken cancellationToken)
         {
+            var outputFileInfo = TwitchHelper.ClaimFile(renderOptions.OutputFile, renderOptions.FileCollisionCallback, _progress);
+            renderOptions.OutputFile = outputFileInfo.FullName;
+            var maskFileInfo = renderOptions.GenerateMask ? TwitchHelper.ClaimFile(renderOptions.MaskFile, renderOptions.FileCollisionCallback, _progress) : null;
+
+            // Open the destination files so that they exist in the filesystem.
+            await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+            await using var maskFs = maskFileInfo?.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+
+            try
+            {
+                await RenderAsyncImpl(outputFileInfo, outputFs, maskFileInfo, maskFs, cancellationToken);
+            }
+            catch
+            {
+                outputFileInfo.Refresh();
+                if (outputFileInfo.Exists && outputFileInfo.Length == 0)
+                {
+                    outputFileInfo.Delete();
+                }
+
+                if (maskFileInfo is not null)
+                {
+                    maskFileInfo.Refresh();
+                    if (maskFileInfo.Exists && maskFileInfo.Length == 0)
+                    {
+                        maskFileInfo.Delete();
+                    }
+                }
+
+                throw;
+            }
+        }
+
+        private async Task RenderAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, FileInfo maskFileInfo, FileStream maskFs, CancellationToken cancellationToken)
+        {
             _progress.SetStatus("Fetching Images [1/2]");
             await Task.Run(() => FetchScaledImages(cancellationToken), cancellationToken);
 
@@ -103,25 +138,23 @@ namespace TwitchDownloaderCore
             // Rough estimation of the width of a single block art character
             renderOptions.BlockArtCharWidth = GetFallbackFont('█').MeasureText("█");
 
-
             RemoveRestrictedComments(chatRoot.comments);
 
             (int startTick, int totalTicks) = GetVideoTicks();
 
-            var renderFileDirectory = Directory.GetParent(Path.GetFullPath(renderOptions.OutputFile))!;
-            if (!renderFileDirectory.Exists)
-            {
-                TwitchHelper.CreateDirectory(renderFileDirectory.FullName);
-            }
+            // Delete the files as it is not guaranteed that the overwrite flag is passed in the FFmpeg args.
+            outputFs.Close();
+            outputFileInfo.Refresh();
+            if (outputFileInfo.Exists)
+                outputFileInfo.Delete();
 
-            if (File.Exists(renderOptions.OutputFile))
-                File.Delete(renderOptions.OutputFile);
+            maskFs?.Close();
+            maskFileInfo?.Refresh();
+            if (renderOptions.GenerateMask && maskFileInfo!.Exists)
+                maskFileInfo.Delete();
 
-            if (renderOptions.GenerateMask && File.Exists(renderOptions.MaskFile))
-                File.Delete(renderOptions.MaskFile);
-
-            FfmpegProcess ffmpegProcess = GetFfmpegProcess(0, false);
-            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(0, true) : null;
+            FfmpegProcess ffmpegProcess = GetFfmpegProcess(outputFileInfo);
+            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(maskFileInfo) : null;
             _progress.SetTemplateStatus(@"Rendering Video {0}% ({1:h\hm\ms\s} Elapsed | {2:h\hm\ms\s} Remaining)", 0, TimeSpan.Zero, TimeSpan.Zero);
 
             try
@@ -185,38 +218,27 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            var bannedWordRegexes = new Regex[renderOptions.BannedWordsArray.Length];
-            for (var i = 0; i < renderOptions.BannedWordsArray.Length; i++)
+            var ignoredUsers = new HashSet<string>(renderOptions.IgnoreUsersArray, StringComparer.InvariantCultureIgnoreCase);
+
+            Regex bannedWordsRegex = null;
+            if (renderOptions.BannedWordsArray.Length > 0)
             {
-                bannedWordRegexes[i] = new Regex(@$"(?<=^|[\s\d\p{{P}}\p{{S}}]){Regex.Escape(renderOptions.BannedWordsArray[i])}(?=$|[\s\d\p{{P}}\p{{S}}])",
+                var bannedWords = string.Join('|', renderOptions.BannedWordsArray.Select(Regex.Escape));
+                bannedWordsRegex = new Regex(@$"(?<=^|[\s\d\p{{P}}\p{{S}}]){bannedWords}(?=$|[\s\d\p{{P}}\p{{S}}])",
                     RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             }
 
-            for (var i = 0; i < comments.Count; i++)
+            for (var i = comments.Count - 1; i >= 0; i--)
             {
-                foreach (var username in renderOptions.IgnoreUsersArray)
-                {
-                    if (username.Equals(comments[i].commenter.name, StringComparison.OrdinalIgnoreCase) // ASCII login name
-                        || (username.Any(IsNotAscii) && username.Equals(comments[i].commenter.display_name, StringComparison.InvariantCultureIgnoreCase))) // Potentially non-ASCII display name
-                    {
-                        comments.RemoveAt(i);
-                        i--;
-                        goto NextComment;
-                    }
-                }
+                var comment = comments[i];
+                var commenter = comment.commenter;
 
-                foreach (var bannedWordRegex in bannedWordRegexes)
+                if (ignoredUsers.Contains(commenter.name) // ASCII login name
+                    || (commenter.display_name.Any(IsNotAscii) && ignoredUsers.Contains(commenter.display_name)) // Potentially non-ASCII display name
+                    || (bannedWordsRegex is not null && bannedWordsRegex.IsMatch(comment.message.body))) // Banned words
                 {
-                    if (bannedWordRegex.IsMatch(comments[i].message.body))
-                    {
-                        comments.RemoveAt(i);
-                        i--;
-                        goto NextComment;
-                    }
+                    comments.RemoveAt(i);
                 }
-
-                // goto is cheaper and more readable than using a boolean + branch check after each operation
-                NextComment: ;
             }
         }
 
@@ -335,22 +357,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private FfmpegProcess GetFfmpegProcess(int partNumber, bool isMask)
+        private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo)
         {
-            string savePath;
-            if (partNumber == 0)
-            {
-                if (isMask)
-                    savePath = renderOptions.MaskFile;
-                else
-                    savePath = renderOptions.OutputFile;
-            }
-            else
-            {
-                savePath = Path.Combine(renderOptions.TempFolder, Path.GetRandomFileName() + (isMask ? "_mask" : "") + Path.GetExtension(renderOptions.OutputFile));
-            }
-
-            savePath = Path.GetFullPath(savePath);
+            string savePath = fileInfo.FullName;
 
             string inputArgs = new StringBuilder(renderOptions.InputArgs)
                 .Replace("{fps}", renderOptions.Framerate.ToString())
@@ -588,14 +597,14 @@ namespace TwitchDownloaderCore
                     return null;
                 }
 
-                DrawAccentedMessage(comment, sectionImages, emoteSectionList, highlightType, ref drawPos, defaultPos);
+                DrawAccentedMessage(comment, sectionImages, emoteSectionList, highlightType, commentIndex, ref drawPos, defaultPos);
             }
             else
             {
-                DrawNonAccentedMessage(comment, sectionImages, emoteSectionList, false, ref drawPos, ref defaultPos);
+                DrawNonAccentedMessage(comment, sectionImages, emoteSectionList, false, commentIndex, ref drawPos, ref defaultPos);
             }
 
-            SKBitmap finalBitmap = CombineImages(sectionImages, highlightType);
+            SKBitmap finalBitmap = CombineImages(sectionImages, highlightType, commentIndex);
             newSection.Image = finalBitmap;
             newSection.Emotes = emoteSectionList;
             newSection.CommentIndex = commentIndex;
@@ -603,7 +612,7 @@ namespace TwitchDownloaderCore
             return newSection;
         }
 
-        private SKBitmap CombineImages(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, HighlightType highlightType)
+        private SKBitmap CombineImages(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, HighlightType highlightType, int commentIndex)
         {
             SKBitmap finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.info.Height));
             var finalBitmapInfo = finalBitmap.Info;
@@ -621,8 +630,9 @@ namespace TwitchDownloaderCore
                 else if (highlightType is not HighlightType.None)
                 {
                     const int OPAQUE_THRESHOLD = 245;
-                    if (!(renderOptions.BackgroundColor.Alpha < OPAQUE_THRESHOLD ||
-                        (renderOptions.AlternateMessageBackgrounds && renderOptions.AlternateBackgroundColor.Alpha < OPAQUE_THRESHOLD)))
+                    var useAlternateBackground = renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1;
+                    if (!((!useAlternateBackground && renderOptions.BackgroundColor.Alpha < OPAQUE_THRESHOLD) ||
+                          (useAlternateBackground && renderOptions.AlternateBackgroundColor.Alpha < OPAQUE_THRESHOLD)))
                     {
                         // Draw the highlight background only if the message background is opaque enough
                         var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
@@ -652,7 +662,7 @@ namespace TwitchDownloaderCore
             return string.Join(' ', codepointList);
         }
 
-        private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, ref Point defaultPos)
+        private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, int commentIndex, ref Point drawPos, ref Point defaultPos)
         {
             if (renderOptions.Timestamp)
             {
@@ -662,7 +672,7 @@ namespace TwitchDownloaderCore
             {
                 DrawBadges(comment, sectionImages, ref drawPos);
             }
-            DrawUsername(comment, sectionImages, ref drawPos, defaultPos);
+            DrawUsername(comment, sectionImages, ref drawPos, defaultPos, commentIndex: commentIndex);
             DrawMessage(comment, sectionImages, emotePositionList, highlightWords, ref drawPos, defaultPos);
 
             foreach (var (_, bitmap) in sectionImages)
@@ -671,7 +681,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, ref Point drawPos, Point defaultPos)
+        private void DrawAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, int commentIndex, ref Point drawPos, Point defaultPos)
         {
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
@@ -688,13 +698,13 @@ namespace TwitchDownloaderCore
             {
                 case HighlightType.SubscribedTier:
                 case HighlightType.SubscribedPrime:
-                    DrawSubscribeMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    DrawSubscribeMessage(comment, sectionImages, emotePositionList, commentIndex, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.BitBadgeTierNotification:
                     DrawBitsBadgeTierMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.WatchStreak:
-                    DrawWatchStreakMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
+                    DrawWatchStreakMessage(comment, sectionImages, emotePositionList, commentIndex, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.CharityDonation:
                     DrawCharityDonationMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
@@ -705,7 +715,7 @@ namespace TwitchDownloaderCore
                     DrawGiftMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.ChannelPointHighlight:
-                    DrawNonAccentedMessage(comment, sectionImages, emotePositionList, true, ref drawPos, ref defaultPos);
+                    DrawNonAccentedMessage(comment, sectionImages, emotePositionList, true, commentIndex, ref drawPos, ref defaultPos);
                     break;
                 case HighlightType.ContinuingGift:
                 case HighlightType.PayingForward:
@@ -721,7 +731,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawSubscribeMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawSubscribeMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             using SKCanvas canvas = new(sectionImages.Last().bitmap);
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
@@ -757,7 +767,7 @@ namespace TwitchDownloaderCore
             AddImageSection(sectionImages, ref drawPos, defaultPos);
             drawPos = customMessagePos;
             defaultPos = customMessagePos;
-            DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
+            DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, commentIndex, ref drawPos, ref defaultPos);
         }
 
         private void DrawBitsBadgeTierMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
@@ -795,7 +805,7 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private void DrawWatchStreakMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawWatchStreakMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             using SKCanvas canvas = new(sectionImages.Last().bitmap);
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
@@ -831,7 +841,7 @@ namespace TwitchDownloaderCore
             AddImageSection(sectionImages, ref drawPos, defaultPos);
             drawPos = customMessagePos;
             defaultPos = customMessagePos;
-            DrawNonAccentedMessage(customMessage, sectionImages, emotePositionList, false, ref drawPos, ref defaultPos);
+            DrawNonAccentedMessage(customMessage, sectionImages, emotePositionList, false, commentIndex, ref drawPos, ref defaultPos);
         }
 
         private void DrawCharityDonationMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
@@ -1417,11 +1427,18 @@ namespace TwitchDownloaderCore
             return measure.Width;
         }
 
-        private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null)
+        private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null, int commentIndex = 0)
         {
-            var userColor = colorOverride ?? SKColor.Parse(comment.message.user_color ?? DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
-            if (colorOverride is null)
-                userColor = AdjustColorVisibility(userColor, renderOptions.BackgroundColor, renderOptions);
+            var userColor = colorOverride ?? (comment.message.user_color is not null
+                ? SKColor.Parse(comment.message.user_color)
+                : DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
+
+            if (colorOverride is null && renderOptions.AdjustUsernameVisibility)
+            {
+                var useAlternateBackground = renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1;
+                var backgroundColor = useAlternateBackground ? renderOptions.AlternateBackgroundColor : renderOptions.BackgroundColor;
+                userColor = AdjustUsernameVisibility(userColor, backgroundColor);
+            }
 
             using SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
                 ? GetFallbackFont(comment.commenter.display_name.First(IsNotAscii)).Clone()
@@ -1435,30 +1452,86 @@ namespace TwitchDownloaderCore
             DrawText(userName, userPaint, true, sectionImages, ref drawPos, defaultPos, false);
         }
 
-        private static SKColor AdjustColorVisibility(SKColor userColor, SKColor backgroundColor, ChatRenderOptions renderOptions)
+        private SKColor AdjustUsernameVisibility(SKColor userColor, SKColor backgroundColor)
         {
-            backgroundColor.ToHsl(out _, out _, out float backgroundBrightness);
-            userColor.ToHsl(out float userHue, out float userSaturation, out float userBrightness);
-
-            if (backgroundBrightness < 25 || renderOptions.Outline)
+            const byte OPAQUE_THRESHOLD = byte.MaxValue / 2;
+            if (!renderOptions.Outline && backgroundColor.Alpha < OPAQUE_THRESHOLD)
             {
-                //Dark background or black outline
-                if (userBrightness < 45)
-                    userBrightness = 45;
-                if (userSaturation > 80)
-                    userSaturation = 80;
-                SKColor newColor = SKColor.FromHsl(userHue, userSaturation, userBrightness);
-                return newColor;
+                // Background lightness cannot be truly known.
+                return userColor;
             }
 
-            if (Math.Abs(backgroundBrightness - userBrightness) < 10 && backgroundBrightness > 50)
+            var newUserColor = AdjustColorVisibility(userColor, renderOptions.Outline ? outlinePaint.Color : backgroundColor);
+
+            return renderOptions.Outline || backgroundColor.Alpha == byte.MaxValue
+                ? newUserColor
+                : userColor.Lerp(newUserColor, (float)backgroundColor.Alpha / byte.MaxValue);
+        }
+
+        private static SKColor AdjustColorVisibility(SKColor foreground, SKColor background)
+        {
+            background.ToHsl(out var bgHue, out var bgSat, out _);
+            foreground.ToHsl(out var fgHue, out var fgSat, out var fgLight);
+
+            // Adjust lightness
+            if (background.RelativeLuminance() > 0.5)
             {
-                userBrightness -= 20;
-                SKColor newColor = SKColor.FromHsl(userHue, userSaturation, userBrightness);
-                return newColor;
+                // Bright background
+                if (fgLight > 60)
+                {
+                    fgLight = 60;
+                }
+
+                if (bgSat <= 28)
+                {
+                    fgHue = fgHue switch
+                    {
+                        > 48 and < 90 => AdjustHue(fgHue, 48, 90), // Yellow-Lime
+                        > 164 and < 186 => AdjustHue(fgHue, 164, 186), // Turquoise
+                        _ => fgHue
+                    };
+                }
+            }
+            else
+            {
+                // Dark background
+                if (fgLight < 40)
+                {
+                    fgLight = 40;
+                }
+
+                if (bgSat <= 28)
+                {
+                    fgHue = fgHue switch
+                    {
+                        > 224 and < 263 => AdjustHue(fgHue, 224, 264), // Blue-Purple
+                        _ => fgHue
+                    };
+                }
             }
 
-            return userColor;
+            // Adjust hue on colored backgrounds
+            if (bgSat > 28 && fgSat > 28)
+            {
+                var hueDiff = fgHue - bgHue;
+                const int HUE_THRESHOLD = 25;
+                if (Math.Abs(hueDiff) < HUE_THRESHOLD)
+                {
+                    var diffSign = hueDiff < 0 ? -1 : 1; // Math.Sign returns 1, -1, or 0. We only want 1 or -1.
+                    fgHue = bgHue + HUE_THRESHOLD * diffSign;
+
+                    if (fgHue < 0) fgHue += 360;
+                    fgHue %= 360;
+                }
+            }
+
+            return SKColor.FromHsl(fgHue, Math.Min(fgSat, 90), fgLight);
+
+            static float AdjustHue(float hue, float lowerClamp, float upperClamp)
+            {
+                var midpoint = (upperClamp + lowerClamp) / 2;
+                return hue >= midpoint ? upperClamp : lowerClamp;
+            }
         }
 
         private void DrawBadges(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos)
@@ -1676,7 +1749,7 @@ namespace TwitchDownloaderCore
 
         private async Task<List<CheerEmote>> GetScaledBits(CancellationToken cancellationToken)
         {
-            var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, renderOptions.TempFolder, chatRoot.streamer.id.ToString(), chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
+            var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, renderOptions.TempFolder, chatRoot.streamer.id.ToString(), _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             foreach (var cheer in cheerTask)
             {

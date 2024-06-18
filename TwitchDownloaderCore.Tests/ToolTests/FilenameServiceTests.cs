@@ -1,12 +1,11 @@
-﻿using TwitchDownloaderCore.Extensions;
-using TwitchDownloaderCore.Tools;
+﻿using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Tests.ToolTests
 {
     public class FilenameServiceTests
     {
-        private static (string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, string viewCount, string game) GetExampleInfo() =>
-            ("A Title", "abc123", new DateTime(1984, 11, 1, 9, 43, 21), "streamer8", new TimeSpan(0, 1, 2, 3, 4), new TimeSpan(0, 5, 6, 7, 8), "123456789", "A Game");
+        private static (string title, string id, DateTime date, string channel, TimeSpan trimStart, TimeSpan trimEnd, int viewCount, string game) GetExampleInfo() =>
+            ("A Title", "abc123", new DateTime(1984, 11, 1, 9, 43, 21), "streamer8", new TimeSpan(0, 1, 2, 3, 4), new TimeSpan(0, 5, 6, 7, 8), 123456789, "A Game");
 
         [Theory]
         [InlineData("{title}", "A Title")]
@@ -81,19 +80,17 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         }
 
         [Theory]
-        [InlineData("{title}")]
-        [InlineData("{id}")]
-        [InlineData("{channel}")]
-        [InlineData("{views}")]
-        [InlineData("{game}")]
-        public void CorrectlyReplacesInvalidCharactersForNonCustomTemplates(string template)
+        [InlineData("{title}", "＂＊：＜＞？｜／＼")]
+        [InlineData("{id}", "＂＊：＜＞？｜／＼")]
+        [InlineData("{channel}", "＂＊：＜＞？｜／＼")]
+        [InlineData("{game}", "＂＊：＜＞？｜／＼")]
+        public void CorrectlyReplacesInvalidCharactersForNonCustomTemplates(string template, string expected)
         {
-            const char EXPECTED = '_';
-            var invalidChars = new string(Path.GetInvalidFileNameChars());
+            const string INVALID_CHARS = "\"*:<>?|/\\";
 
-            var result = FilenameService.GetFilename(template, invalidChars, invalidChars, default, invalidChars, default, default, invalidChars, invalidChars);
+            var result = FilenameService.GetFilename(template, INVALID_CHARS, INVALID_CHARS, default, INVALID_CHARS, default, default, default, INVALID_CHARS);
 
-            Assert.All(result, c => Assert.Equal(EXPECTED, c));
+            Assert.Equal(expected, result);
         }
 
         [Theory]
@@ -103,27 +100,25 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("{length_custom=\"'")]
         public void CorrectlyReplacesInvalidCharactersForCustomTemplates(string templateStart)
         {
-            const char EXPECTED = '_';
-            var invalidChars = new string(Path.GetInvalidFileNameChars());
-            var template = string.Concat(
-                templateStart,
-                invalidChars.ReplaceAny("\r\n", EXPECTED), // newline chars are not supported by the custom parameters. This will not change.
-                "'\"}");
+            const string EXPECTED = "＂＊：＜＞？｜／＼";
+            const string INVALID_CHARS = "\"*:<>?|/\\\\";
+            var template = templateStart + INVALID_CHARS + "'\"}";
 
-            var result = FilenameService.GetFilename(template, invalidChars, invalidChars, default, invalidChars, default, default, invalidChars, invalidChars);
+            var result = FilenameService.GetFilename(template, INVALID_CHARS, INVALID_CHARS, default, INVALID_CHARS, default, default, default, INVALID_CHARS);
 
-            Assert.All(result, c => Assert.Equal(EXPECTED, c));
+            Assert.Equal(EXPECTED, result);
         }
 
         [Fact]
         public void CorrectlyReplacesInvalidCharactersForSubFolders()
         {
-            var invalidChars = new string(Path.GetInvalidPathChars());
-            var template = invalidChars + "\\{title}";
-            var expected = Path.Combine(new string('_', invalidChars.Length), "A Title");
+            const string INVALID_CHARS = "\"*:<>?|";
+            const string FULL_WIDTH_CHARS = "＂＊：＜＞？｜";
+            const string TEMPLATE = INVALID_CHARS + "\\{title}";
+            var expected = Path.Combine(FULL_WIDTH_CHARS, "A Title");
             var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
-            var result = FilenameService.GetFilename(template, title, id, date, channel, trimStart, trimEnd, viewCount, game);
+            var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(expected, result);
         }
@@ -150,6 +145,86 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             var result = FilenameService.GetFilename(TEMPLATE, title, id, date, channel, trimStart, trimEnd, viewCount, game);
 
             Assert.Equal(EXPECTED, result);
+        }
+
+        [Fact]
+        public void GetFilenameDoesNotThrow_WhenNullOrDefaultInput()
+        {
+            const string TEMPLATE = "{title}_{id}_{date}_{channel}_{trim_start}_{trim_end}_{length}_{views}_{game}_{date_custom=\"s\"}_{trim_start_custom=\"hh\\-mm\\-ss\"}_{trim_end_custom=\"hh\\-mm\\-ss\"}_{length_custom=\"hh\\-mm\\-ss\"}";
+            const string EXPECTED = "__1-1-01__00-00-00_00-00-00_00-00-00_0__0001-01-01T00_00_00_00-00-00_00-00-00_00-00-00";
+
+            var result = FilenameService.GetFilename(TEMPLATE, default, default, default, default, default, default, default, default);
+
+            Assert.Equal(EXPECTED, result);
+        }
+
+        [Theory]
+        [InlineData("\"", "＂")]
+        [InlineData("*", "＊")]
+        [InlineData(":", "：")]
+        [InlineData("<", "＜")]
+        [InlineData(">", "＞")]
+        [InlineData("?", "？")]
+        [InlineData("|", "｜")]
+        [InlineData("/", "／")]
+        [InlineData("\\", "＼")]
+        [InlineData("\0", "_")]
+        public void CorrectlyReplacesInvalidFilenameCharacters(string str, string expected)
+        {
+            var actual = FilenameService.ReplaceInvalidFilenameChars(str);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ReplaceInvalidFilenameCharactersDoesNotThrow_WhenNullInput()
+        {
+            const string? STR = null;
+            const string? EXPECTED = null;
+
+            var actual = FilenameService.ReplaceInvalidFilenameChars(STR);
+
+            Assert.Equal(EXPECTED, actual);
+        }
+
+        [Fact]
+        public void GetNonCollidingNameWorks_WhenNoCollisionExists()
+        {
+            var expected = Path.Combine(Path.GetTempPath(), "foo.txt");
+            var path = Path.Combine(Path.GetTempPath(), "foo.txt");
+            var fileInfo = new FileInfo(path);
+
+            try
+            {
+                var actual = FilenameService.GetNonCollidingName(fileInfo);
+
+                Assert.Equal(expected, actual.FullName);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void GetNonCollidingNameWorks_WhenCollisionExists()
+        {
+            var expected = Path.Combine(Path.GetTempPath(), "foo (1).txt");
+            var path = Path.Combine(Path.GetTempPath(), "foo.txt");
+            var fileInfo = new FileInfo(path);
+
+            try
+            {
+                fileInfo.Create().Close();
+
+                var actual = FilenameService.GetNonCollidingName(fileInfo);
+
+                Assert.Equal(expected, actual.FullName);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
         }
     }
 }

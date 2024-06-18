@@ -147,7 +147,7 @@
     <value>BANされたワードやフレーズのリスト - カンマ区切り、カンマの周りのスペースは無視、大文字と小文字は区別しない。</value>
   </data>
   <data name="Browse" xml:space="preserve">
-    <value>Browse</value>
+    <value>参照</value>
   </data>
   <data name="BttvEmotes" xml:space="preserve">
     <value>BTTV スタンプ:</value>
@@ -272,7 +272,7 @@
     <value>レンダリングをキューに追加</value>
   </data>
   <data name="EnqueueUpdate" xml:space="preserve">
-    <value>をキューに追加</value>
+    <value>更新をキューに追加</value>
   </data>
   <data name="ErrorLog" xml:space="preserve">
     <value>エラー: </value>
@@ -345,7 +345,7 @@
     <value>長さ:</value>
   </data>
   <data name="ListOfVodsClips" xml:space="preserve">
-    <value>VODs/クリップのリスト (１行に１つ)</value>
+    <value>アーカイブ/クリップのリスト (１行に１つ)</value>
   </data>
   <data name="LogHeader" xml:space="preserve">
     <value>ログ:</value>
@@ -358,7 +358,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="OAuthTooltip" xml:space="preserve">
-    <value>サブスクライバーのみのVODsにのみ必要です。サードパーティのOAuthトークンは使用できません。OAuthトークンの取得方法はYouTubeのビデオをご覧ください。</value>
+    <value>サブスクライバーのみのアーカイブにのみ必要です。サードパーティのOAuthトークンは使用できません。OAuthトークンの取得方法はYouTubeのビデオをご覧ください。</value>
   </data>
   <data name="Offline" xml:space="preserve">
     <value>オフライン </value>
@@ -426,7 +426,7 @@
     <value>クリップを検索</value>
   </data>
   <data name="SearchVods" xml:space="preserve">
-    <value>VODsを検索</value>
+    <value>アーカイブを検索</value>
   </data>
   <data name="SelectAll" xml:space="preserve">
     <value>全て選択</value>
@@ -535,7 +535,7 @@
     <value>リンクを解析できませんでした</value>
   </data>
   <data name="UnableToParseLinkMessage" xml:space="preserve">
-    <value>VOD/クリップのリンクが正しいか再度確認してください</value>
+    <value>アーカイブ/クリップのリンクが正しいか再度確認してください</value>
   </data>
   <data name="Unknown" xml:space="preserve">
     <value>不明</value>
@@ -562,22 +562,22 @@
     <value>タイトル:</value>
   </data>
   <data name="VodClipLink" xml:space="preserve">
-    <value>VOD/クリップのリンク:</value>
+    <value>アーカイブ/クリップのリンク:</value>
   </data>
   <data name="VodDownload" xml:space="preserve">
-    <value>VODのダウンロード</value>
+    <value>アーカイブのダウンロード</value>
   </data>
   <data name="VodDownloads" xml:space="preserve">
-    <value>VODのダウンロード</value>
+    <value>アーカイブのダウンロード</value>
   </data>
   <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
     <value>ビデオの有効期限が切れているか、埋め込みIDが壊れている</value>
   </data>
   <data name="VodLinkId" xml:space="preserve">
-    <value>VOD リンク/ID:</value>
+    <value>アーカイブ リンク/ID:</value>
   </data>
   <data name="TemplateVods" xml:space="preserve">
-    <value>VODs:</value>
+    <value>アーカイブ:</value>
   </data>
   <data name="DownloadChat" xml:space="preserve">
     <value>チャットのダウンロード</value>
@@ -861,12 +861,69 @@
     <value>フォルダを開く</value>
   </data>
   <data name="UnknownUser" xml:space="preserve">
-    <value>Unknown User</value>
+    <value>不明なユーザー</value>
   </data>
   <data name="UnknownGame" xml:space="preserve">
-    <value>Unknown Game</value>
+    <value>不明なゲーム</value>
   </data>
   <data name="UnknownVideoLength" xml:space="preserve">
-    <value>Unknown</value>
+    <value>不明</value>
+  </data>
+  <data name="IncreaseUsernameReadability" xml:space="preserve">
+    <value>ユーザー名の読みやすさを向上する:</value>
+  </data>
+  <data name="BadgeMaskBroadcaster" xml:space="preserve">
+    <value>Broadcaster</value>
+  </data>
+  <data name="BadgeMaskModerator" xml:space="preserve">
+    <value>Mods</value>
+  </data>
+  <data name="BadgeMaskVIP" xml:space="preserve">
+    <value>VIPs</value>
+  </data>
+  <data name="BadgeMaskSubscriber" xml:space="preserve">
+    <value>Subs</value>
+  </data>
+  <data name="BadgeMaskPredictions" xml:space="preserve">
+    <value>Predictions</value>
+  </data>
+  <data name="BadgeMaskNoAudioNoVideo" xml:space="preserve">
+    <value>No Audio/No Video</value>
+  </data>
+  <data name="BadgeMaskTwitchPrime" xml:space="preserve">
+    <value>Prime</value>
+  </data>
+  <data name="BadgeMaskOthers" xml:space="preserve">
+    <value>Others</value>
+  </data>
+  <data name="TitleFileAlreadyExists" xml:space="preserve">
+    <value>File already exists</value>
+  </data>
+  <data name="FileAlreadyExistsHeader" xml:space="preserve">
+    <value>{0} already exists.</value>
+  </data>
+  <data name="FileAlreadyExistsBody" xml:space="preserve">
+    <value>The file {0} already exists. Do you want to overwrite it?</value>
+  </data>
+  <data name="FileAlreadyExistsOverwrite" xml:space="preserve">
+    <value>Overwrite</value>
+  </data>
+  <data name="FileAlreadyExistsOverwriteDescription" xml:space="preserve">
+    <value>The existing file will be overwritten.</value>
+  </data>
+  <data name="FileAlreadyExistsRename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="FileAlreadyExistsRenameDescription" xml:space="preserve">
+    <value>The new file will be renamed.</value>
+  </data>
+  <data name="FileAlreadyExistsCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="FileAlreadyExistsCancelDescription" xml:space="preserve">
+    <value>The task will be canceled.</value>
+  </data>
+  <data name="FileAlreadyExistsRememberMyChoice" xml:space="preserve">
+    <value>Remember my choice for this session</value>
   </data>
 </root>

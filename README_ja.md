@@ -17,9 +17,9 @@
 
 ## なにができる？
 
-- TwitchのVODsをダウンロードする
+- Twitchのアーカイブをダウンロードする
 - Twitchのクリップをダウンロードする
-- VODs、クリップのチャットを[全ての情報を含んだJSON](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json)、ブラウザ用のHTMLファイル、[プレーンテキスト](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)でダウンロードする
+- アーカイブ、クリップのチャットを[全ての情報を含んだJSON](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json)、ブラウザ用のHTMLファイル、[プレーンテキスト](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)でダウンロードする
 - 以前に生成されたJSOn形式のチャットファイルを別の形式で保存し、内容を変更する
 - 生成されたJSON形式のチャットファイルから、Twitter Twemoji・Google Noto Color emoji・BTTV・FFZ・7TV・スタンプ・GIFスタンプと一緒にチャットをレンダリングします
 
@@ -36,8 +36,8 @@
 Windows WPF GUIは、プログラムのすべての主要機能といくつかのQOL機能を実装しています:
 
 - 複数のダウンロード・レンダリングジョブを同時にキューに追加する
-- VODs・クリップのリンクからダウンロードジョブのリストを作成する
-- ストリーマーから複数のVODs・クリップを検索してダウンロードする
+- アーカイブ・クリップのリンクからダウンロードジョブのリストを作成する
+- ストリーマーから複数のアーカイブ・クリップを検索してダウンロードする
 
 ### 複数言語サポート
 
@@ -62,13 +62,14 @@ MacOS用のGUIはまだありません。:(
 
 # CLI
 
-### [See the full CLI documentation here](TwitchDownloaderCLI/README.md)
+### [完全なCLIのドキュメントを見る](TwitchDownloaderCLI/README.md)
 
-The CLI is cross-platform and implements the main functions of the program. It works on Windows, Linux, and MacOS<sup>*</sup>.
+CLIはクロスプラットフォームであり、プログラムの主要な機能を実装しています。Windows, Linux, MacOSで動作します<sup>*</sup>。
 
-<sup>*Only Intel Macs have been tested</sup>
+<sup>*Intel Macのみでテストされています。</sup>
 
-With the CLI, it is possible to automate video processing using external scripts. For example, you could copy-paste the following code into a `.bat` file on Windows to download a VOD and its chat, and then render the chat, all from a single input.
+CLIを使用すると、外部スクリプトを使用してビデオ処理を自動化することができます。  
+例えば、以下のコードをWindowsの`.bat`ファイルにコピーペーストすると、アーカイブとそのチャットをダウンロードし、チャットをレンダリングすることができます。
 
 ```bat
 @echo off
@@ -78,160 +79,160 @@ TwitchDownloaderCLI.exe chatdownload --id %vodid% -o %vodid%_chat.json -E
 TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framerate 30 --update-rate 0 --font-size 18 -o %vodid%_chat.mp4
 ```
 
-## Windows - Getting started
+## Windows - はじめに
 
-1. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest version for Windows or [build from source](#building-from-source).
-2. Extract `TwitchDownloaderCLI.exe`.
-3. Browse to where you extracted the executable:
+1. [Releases](https://github.com/lay295/TwitchDownloader/releases/)に行き、Windows用の最新バージョンをダウンロードするか[ソースコードからビルドする](#ソースコードからビルドする)
+2. `TwitchDownloaderCLI.exe`を展開する。
+3. 実行ファイルを展開した場所に移動する:
 
 ```
 cd C:\folder\containing\TwitchDownloaderCLI
 ```
 
-4. If you do not have FFmpeg, you can install it via [Chocolatey package manager](https://community.chocolatey.org/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+4. FFmpegを持っていない場合は、[Chocolatey package manager](https://community.chocolatey.org/) でインストールするか、[ffmpeg.org](https://ffmpeg.org/download.html) からスタンドアロンファイルとして入手するか、TwitchDownloaderCLIを使用してください:
 
 ```
 TwitchDownloaderCLI.exe ffmpeg --download
 ```
 
-5. You can now start using TwitchDownloaderCLI, for example:
+1. これで、TwitchDownloaderCLIを使用する準備は整いました。例:
 
 ```
 TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
 ```
 
-You can find more example commands in the [CLI README](TwitchDownloaderCLI/README.md#example-commands).
+その他のコマンド例は [CLI README](TwitchDownloaderCLI/README.md#example-commands) で見つけることができます。
 
-## Linux – Getting started
+## Linux – はじめに
 
-1. Some distros, like Linux Alpine, lack fonts for some languages (Arabic, Persian, Thai, etc.) If this is the case for you, install additional fonts families such as [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) or check your distro's wiki page on fonts as it may have an install command for this specific scenario, such as the [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) font page.
-2. Ensure both `fontconfig` and `libfontconfig1` are installed. `apt-get install fontconfig libfontconfig1` on Ubuntu.
-3. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for Linux, grab the [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/) for Arch Linux, or [build from source](#building-from-source).
-4. Extract `TwitchDownloaderCLI`.
-5. Browse to where you extracted the binary:
+1. いくつかのディストリビューション（例えば、Alpine Linuxなど）には、一部の言語（アラビア語、ペルシャ語、タイ語など）のフォントが含まれていません。  
+   このような場合は、[Noto](https://fonts.google.com/noto/specimen/Noto+Sans) のような追加のフォントファミリーをインストールするか、特定のシナリオに対応したインストールコマンドが記載されているディストリビューションのフォントに関するWiki（例えば、[Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) のフォントページ）を確認してください。
+2. `fontconfig` と `libfontconfig1` の両方がインストールされていることを確認してください。Ubuntuでは、`apt-get install fontconfig libfontconfig1`
+3. [Releases](https://github.com/lay295/TwitchDownloader/releases/) で、Linux用の最新バイナリをダウンロードする。または Arch Linux の場合は [AUR Package](https://aur.archlinux.org/packages/twitch-downloader-bin/) から入手するか、[ソースコードからビルドする](#ソースコードからビルドする)。
+4. `TwitchDownloaderCLI`を展開する。
+5. バイナリを展開した場所に移動する:
 
 ```
 cd directory/containing/TwitchDownloaderCLI
 ```
 
-6. Give the binary executable rights:
+1. バイナリの実行権限を与える:
 
 ```
 sudo chmod +x TwitchDownloaderCLI
 ```
 
-7. a) If you do not have FFmpeg, you should install it system-wide via your distro package manager, however you can also get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+7. a) FFmpegを持っていない場合は、使用しているディストリビューションのパッケージマネージャーからシステム全体にインストールする必要がありますが、[ffmpeg.org](https://ffmpeg.org/download.html) からスタンドアロンファイルとして入手するか、TwitchDownloaderCLIを使用して入手することもできます:
 
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
 
-7. b) If downloaded as a standalone file, you must also give it executable rights with:
+1. b) スタンドアロンファイルとしてダウンロードした場合は、実行権限を与える必要があります。:
 
 ```
 sudo chmod +x ffmpeg
 ```
 
-8. You can now start using TwitchDownloaderCLI, for example:
+9. これで、TwitchDownloaderCLIを使用する準備は整いました。例:
 
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
 
-You can find more example commands in the [CLI README](TwitchDownloaderCLI/README.md#example-commands).
+その他のコマンド例は [CLI README](TwitchDownloaderCLI/README.md#example-commands) で見つけることができます。
 
 ## MacOS – Getting started
 
-1. If your device has an Apple Silicon M-series processor, ensure that you download the arm64 binary, however if you would like to use the x64 binary on Apple Silicon it must be run via a terminal session running under Rosetta 2:
+1. あなたのデバイスが Apple Silicon M シリーズプロセッサを搭載している場合は、arm64 バイナリをダウンロードしてください。ただし、Apple Silicon で x64 バイナリを使用する場合は、Rosetta 2 で実行されたターミナルセッションから実行する必要があります。:
 
 ```
 arch -x86_64 zsh
 ```
 
-2. Go to [Releases](https://github.com/lay295/TwitchDownloader/releases/) and download the latest binary for MacOS or [build from source](#building-from-source).
-3. Extract `TwitchDownloaderCLI`.
-4. Browse to where you extracted the binary:
+1. [Releases](https://github.com/lay295/TwitchDownloader/releases/) で、Mac用の最新バイナリをダウンロードする。または [ソースコードからビルドする](#ソースコードからビルドする)。
+2. `TwitchDownloaderCLI`を展開する。
+3. バイナリを展開した場所に移動する:
 
 ```
 cd directory/containing/TwitchDownloaderCLI
 ```
 
-5. Give the binary executable rights in the terminal:
-
+5. ターミナルでバイナリの実行権限を与える:
 ```
 chmod +x TwitchDownloaderCLI
 ```
 
-6. a) If you do not have FFmpeg, you can install it system-wide via the [Homebrew package manager](https://brew.sh/), or you can get it as a standalone file from [ffmpeg.org](https://ffmpeg.org/download.html) or by using TwitchDownloaderCLI:
+1. a) FFmpegを持っていない場合は [Homebrew package manager](https://brew.sh/) からシステム全体にインストールするか、[ffmpeg.org](https://ffmpeg.org/download.html) からスタンドアロンファイルとして入手するか、TwitchDownloaderCLIを使用してください:
 
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
 
-6. b) If downloaded as a standalone file, you must also give it executable rights with:
+6. b) スタンドアロンファイルとしてダウンロードした場合は、実行権限を与える必要があります:
 
 ```
 chmod +x ffmpeg
 ```
 
-7. You can now start using TwitchDownloaderCLI, for example:
+7. これで、TwitchDownloaderCLIを使用する準備は整いました。例:
 
 ```
 ./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
 ```
 
-You can find more example commands in the [CLI README](TwitchDownloaderCLI/README.md#example-commands).
+その他のコマンド例は [CLI README](TwitchDownloaderCLI/README.md#example-commands) で見つけることができます。
 
-# Building from source
+# ソースコードからビルドする
 
-## Requirements
+## 必要条件
 
 - [.NET 6.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
-- About 1GB of disk space
+- 約1GBのディスク空き容量
 
-## Build Instructions
+## ビルド手順
 
-1. Clone the repository:
+1. リポジトリをクローン:
 
 ```
 git clone https://github.com/lay295/TwitchDownloader.git
 ```
 
-2. Navigate to the solution folder:
+2. ソルーションフォルダに移動する:
 
 ```
 cd TwitchDownloader
 ```
 
-3. Restore the solution:
+3. ソリューションをリストアする:
 
 ```
 dotnet restore
 ```
 
-- Non-Windows devices may need to explicitly specify a project to restore, i.e. `dotnet restore TwitchDownloaderCLI`
+- Windows以外のデバイスでは、リストアするプロジェクトを明示的に指定する必要があります。`dotnet restore TwitchDownloaderCLI`
 
-4. a) Build the GUI:
+1. a) GUIをビルドする:
 
 ```
 dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
 
-4. b) Build the CLI:
+4. b) CLIをビルドする:
 
 ```
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 ```
 
-- Applicable Profiles: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
+- 適用可能なProfile: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
 
-5. a) Navigate to the GUI build folder:
+5. a) GUIのビルドフォルダに移動する:
 
 ```
 cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
 ```
 
-5. b) Navigate to the CLI build folder:
+1. b) CLIのビルドフォルダに移動する:
 
 ```
 cd TwitchDownloaderCLI/bin/Release/net6.0/publish
@@ -259,4 +260,5 @@ For a full list of utilized external libraries, see [THIRD-PARTY-LICENSES.txt](.
 
 [MIT](./LICENSE.txt)
 
-TwitchDownloader is in no way associated with Twitch Interactive, Inc. or its affiliates.
+TwitchDownloaderは、Twitch Interactive, Inc. およびその関連会社とは一切関係ありません。  
+(TwitchDownloader is in no way associated with Twitch Interactive, Inc. or its affiliates.)

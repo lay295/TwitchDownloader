@@ -150,7 +150,7 @@
     <value>浏览</value>
   </data>
   <data name="BttvEmotes" xml:space="preserve">
-    <value>BTTV 表情：</value>
+    <value>BTTV 表情（Emote）：</value>
   </data>
   <data name="CacheFolder" xml:space="preserve">
     <value>缓存文件夹：</value>
@@ -239,7 +239,7 @@
   <data name="Download" xml:space="preserve">
     <value>下载</value>
   </data>
-  <data name="DownloadConnections" xml:space="preserve">
+  <data name="ChatDownloadThreads" xml:space="preserve">
     <value>连接：</value>
   </data>
   <data name="DownloadFilenameTemplates" xml:space="preserve">
@@ -248,7 +248,7 @@
   <data name="DownloadFormat" xml:space="preserve">
     <value>下载格式：</value>
   </data>
-  <data name="DownloadThreads" xml:space="preserve">
+  <data name="VideoDownloadThreads" xml:space="preserve">
     <value>下载线程：</value>
   </data>
   <data name="EmbedImages" xml:space="preserve">
@@ -256,14 +256,14 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedImagesTooltip" xml:space="preserve">
-    <value>将第一方表情、徽章和 cheermote 嵌入下载文件，以便离线呈现。可用于存档，但文件大小会增大。</value>
+    <value>将第一方表情、徽章和 Cheermote 嵌入下载文件，以便离线呈现。可用于存档，但文件大小会增大。</value>
   </data>
   <data name="EmbedMissing" xml:space="preserve">
     <value>嵌入丢失资源 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedMissingTooltip" xml:space="preserve">
-    <value>嵌入丢失的表情、徽章和 cheermote。已嵌入的图像将保持不变。</value>
+    <value>嵌入丢失的表情（Emote）、徽章和 Cheermote。已嵌入的图像将保持不变。</value>
   </data>
   <data name="EnqueueDownload" xml:space="preserve">
     <value>预览下载</value>
@@ -295,7 +295,7 @@
     <value>重置为默认值</value>
   </data>
   <data name="FfzEmotes" xml:space="preserve">
-    <value>FFZ 表情符号：</value>
+    <value>FFZ 表情（Emote）：</value>
   </data>
   <data name="FilenameTemplateParameters" xml:space="preserve">
     <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
@@ -354,7 +354,7 @@
     <value>批量下载</value>
   </data>
   <data name="Oauth" xml:space="preserve">
-    <value>OAuth （可选） </value>
+    <value>OAuth（可选） </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="OAuthTooltip" xml:space="preserve">
@@ -371,7 +371,7 @@
     <value>边框：</value>
   </data>
   <data name="ParallelTaskLimits" xml:space="preserve">
-    <value>并行任务限制：</value>
+    <value>并行任务限制</value>
   </data>
   <data name="PartialRender" xml:space="preserve">
     <value>部分渲染</value>
@@ -383,7 +383,7 @@
     <value>渲染</value>
   </data>
   <data name="RenderFfmpegWarning" xml:space="preserve">
-    <value>这仅供高级用户使用。如果出现管道结束错误，可能就是这个原因。</value>
+    <value>仅供高级用户使用。如果出现管道结束错误，这可能就是原因。</value>
   </data>
   <data name="RenderFileFormat" xml:space="preserve">
     <value>文件格式：</value>
@@ -420,7 +420,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ReplaceEmbedsTooltip" xml:space="preserve">
-    <value>替换文件中所有嵌入的表情、徽章和 cheermote。所有嵌入的图像都将被覆盖！</value>
+    <value>替换文件中所有嵌入的表情（Emote）、徽章和 Cheermote。所有嵌入的图像都将被覆盖！</value>
   </data>
   <data name="SearchClips" xml:space="preserve">
     <value>搜索剪辑</value>
@@ -462,7 +462,7 @@
     <value>实况主：</value>
   </data>
   <data name="StvEmotes" xml:space="preserve">
-    <value>7TV 表情：</value>
+    <value>7TV 表情（Emote）：</value>
   </data>
   <data name="SubMessages" xml:space="preserve">
     <value>订阅信息：</value>
@@ -477,11 +477,11 @@
     <value>任务队列</value>
   </data>
   <data name="ThirdPartyEmotes" xml:space="preserve">
-    <value>第三方表情 </value>
+    <value>第三方表情（Emote） </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
-    <value>还可将第三方表情嵌入文件。文件大小会更大。</value>
+    <value>还可将第三方表情（Emote）嵌入文件。文件大小会更大。</value>
   </data>
   <data name="TimestampFormat" xml:space="preserve">
     <value>时间戳格式：</value>
@@ -562,7 +562,7 @@
     <value>标题：</value>
   </data>
   <data name="VodClipLink" xml:space="preserve">
-    <value>点播 / 剪辑链接</value>
+    <value>点播 / 剪辑链接：</value>
   </data>
   <data name="VodDownload" xml:space="preserve">
     <value>点播下载</value>
@@ -605,13 +605,13 @@
     <value>徽章比例：</value>
   </data>
   <data name="EmojiScale" xml:space="preserve">
-    <value>表情符号比例</value>
+    <value>表情符号（Emoji）比例：</value>
   </data>
   <data name="EmoteScale" xml:space="preserve">
-    <value>表情比例：</value>
+    <value>表情（Emote）比例：</value>
   </data>
   <data name="EmoteSpacingScale" xml:space="preserve">
-    <value>表情间距比例：</value>
+    <value>表情（Emote）间距比例：</value>
   </data>
   <data name="SidePaddingScale" xml:space="preserve">
     <value>边缘填充比例：</value>
@@ -715,7 +715,7 @@
     <value>访问权限不足。可能需要 OAuth。</value>
   </data>
   <data name="EmojiVendor" xml:space="preserve">
-    <value>表情符号提供：</value>
+    <value>表情符号（Emoji）提供者：</value>
   </data>
   <data name="EmojiVendorNotoColor" xml:space="preserve">
     <value>Google</value>
@@ -871,5 +871,62 @@
   </data>
   <data name="UnknownVideoLength" xml:space="preserve">
     <value>未知</value>
+  </data>
+  <data name="IncreaseUsernameReadability" xml:space="preserve">
+    <value>提高用户名可读性：</value>
+  </data>
+  <data name="BadgeMaskBroadcaster" xml:space="preserve">
+    <value>实况主</value>
+  </data>
+  <data name="BadgeMaskModerator" xml:space="preserve">
+    <value>管理员</value>
+  </data>
+  <data name="BadgeMaskVIP" xml:space="preserve">
+    <value>VIP</value>
+  </data>
+  <data name="BadgeMaskSubscriber" xml:space="preserve">
+    <value>订阅者</value>
+  </data>
+  <data name="BadgeMaskPredictions" xml:space="preserve">
+    <value>预测</value>
+  </data>
+  <data name="BadgeMaskNoAudioNoVideo" xml:space="preserve">
+    <value>无音频 / 视频</value>
+  </data>
+  <data name="BadgeMaskTwitchPrime" xml:space="preserve">
+    <value>Prime</value>
+  </data>
+  <data name="BadgeMaskOthers" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="TitleFileAlreadyExists" xml:space="preserve">
+    <value>文件已存在</value>
+  </data>
+  <data name="FileAlreadyExistsHeader" xml:space="preserve">
+    <value>{0} 已存在。</value>
+  </data>
+  <data name="FileAlreadyExistsBody" xml:space="preserve">
+    <value>文件 {0} 已存在。你想要覆盖它吗？</value>
+  </data>
+  <data name="FileAlreadyExistsOverwrite" xml:space="preserve">
+    <value>覆盖</value>
+  </data>
+  <data name="FileAlreadyExistsOverwriteDescription" xml:space="preserve">
+    <value>已存在文件将被覆盖。</value>
+  </data>
+  <data name="FileAlreadyExistsRename" xml:space="preserve">
+    <value>重新命名</value>
+  </data>
+  <data name="FileAlreadyExistsRenameDescription" xml:space="preserve">
+    <value>新文件将被重新命名。</value>
+  </data>
+  <data name="FileAlreadyExistsCancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="FileAlreadyExistsCancelDescription" xml:space="preserve">
+    <value>任务将被取消。</value>
+  </data>
+  <data name="FileAlreadyExistsRememberMyChoice" xml:space="preserve">
+    <value>记住我的选择</value>
   </data>
 </root>

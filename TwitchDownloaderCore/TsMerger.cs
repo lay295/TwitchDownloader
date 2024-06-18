@@ -26,7 +26,32 @@ namespace TwitchDownloaderCore
                 throw new FileNotFoundException("Input file does not exist");
             }
 
+            var outputFileInfo = TwitchHelper.ClaimFile(mergeOptions.OutputFile, mergeOptions.FileCollisionCallback, _progress);
+            mergeOptions.OutputFile = outputFileInfo.FullName;
+
+            // Open the destination file so that it exists in the filesystem.
+            await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+
+            try
+            {
+                await MergeAsyncImpl(outputFs, cancellationToken);
+            }
+            catch
+            {
+                outputFileInfo.Refresh();
+                if (outputFileInfo.Exists && outputFileInfo.Length == 0)
+                {
+                    outputFileInfo.Delete();
+                }
+
+                throw;
+            }
+        }
+
+        private async Task MergeAsyncImpl(FileStream outputFs, CancellationToken cancellationToken)
+        {
             var isM3U8 = false;
+            var isFirst = true;
             var fileList = new List<string>();
             await using (var fs = File.Open(mergeOptions.InputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -35,14 +60,11 @@ namespace TwitchDownloaderCore
                 {
                     if (string.IsNullOrWhiteSpace(line)) continue;
 
-                    if (isM3U8)
-                    {
-                        if (line.StartsWith('#')) continue;
-                    }
-                    else
-                    {
-                        if (line.StartsWith("#EXTM3U")) isM3U8 = true;
-                    }
+                    if (isFirst && line.StartsWith("#EXTM3U")) isM3U8 = true;
+
+                    isFirst = false;
+
+                    if (isM3U8 && line.StartsWith('#')) continue;
 
                     fileList.Add(line);
                 }
@@ -54,7 +76,7 @@ namespace TwitchDownloaderCore
 
             _progress.SetTemplateStatus("Combining Parts {0}% [2/2]", 0);
 
-            await CombineVideoParts(fileList, cancellationToken);
+            await CombineVideoParts(fileList, outputFs, cancellationToken);
 
             _progress.ReportProgress(100);
         }
@@ -111,7 +133,7 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
+        private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, FileStream outputStream, CancellationToken cancellationToken)
         {
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(mergeOptions.OutputFile);
             string outputFile = mergeOptions.OutputFile;
@@ -119,7 +141,6 @@ namespace TwitchDownloaderCore
             int partCount = fileList.Count;
             int doneCount = 0;
 
-            await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.Read);
             foreach (var partFile in fileList)
             {
                 await DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken);
