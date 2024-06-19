@@ -351,7 +351,7 @@ namespace TwitchDownloaderCore
 
         private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, TimeSpan videoLength)
         {
-            var process = new Process
+            using var process = new Process
             {
                 StartInfo =
                 {
