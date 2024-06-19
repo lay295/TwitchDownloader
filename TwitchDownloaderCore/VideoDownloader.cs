@@ -114,7 +114,7 @@ namespace TwitchDownloaderCore
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
                     videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
-                    videoChapterResponse.data.video.moments.edges, cancellationToken);
+                    videoLength, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
                 var concatListPath = Path.Combine(downloadFolder, "concat.txt");
                 await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, cancellationToken);
