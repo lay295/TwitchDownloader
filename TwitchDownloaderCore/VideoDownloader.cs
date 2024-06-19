@@ -493,10 +493,9 @@ namespace TwitchDownloaderCore
                     var videoPart = streamList[i];
                     if (endTime - videoPart.PartInfo.Duration < trimTotalSeconds)
                     {
-                        if (endTime - trimTotalSeconds > 0)
-                        {
-                            endOffset = videoPart.PartInfo.Duration - (endTime - trimTotalSeconds);
-                        }
+                        var offset = endTime - trimTotalSeconds;
+                        if (offset > 0) endOffset = videoPart.PartInfo.Duration - offset;
+
                         break;
                     }
 
