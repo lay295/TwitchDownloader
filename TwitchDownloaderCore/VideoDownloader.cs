@@ -458,6 +458,7 @@ namespace TwitchDownloaderCore
                 "-avoid_negative_ts", "make_zero",
                 "-analyzeduration", $"{int.MaxValue}",
                 "-probesize", $"{int.MaxValue}",
+                "-f", "concat",
                 "-i", concatListPath,
                 "-i", metadataPath,
                 "-map_metadata", "1",
