@@ -601,7 +601,7 @@ namespace TwitchDownloaderCore
             return m3u8.GetStreamOfQuality(downloadOptions.Quality);
         }
 
-        private static void Cleanup(string downloadFolder)
+        private void Cleanup(string downloadFolder)
         {
             try
             {
@@ -610,7 +610,10 @@ namespace TwitchDownloaderCore
                     Directory.Delete(downloadFolder, true);
                 }
             }
-            catch (IOException) { } // Directory is probably being used by another process
+            catch (IOException e)
+            {
+                _progress.LogWarning($"Failed to delete download cache: {e.Message}");
+            }
         }
     }
 }
