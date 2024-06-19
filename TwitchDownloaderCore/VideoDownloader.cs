@@ -75,7 +75,7 @@ namespace TwitchDownloaderCore
                 downloadOptions.TempFolder,
                 $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}");
 
-            _progress.SetStatus("Fetching Video Info [1/5]");
+            _progress.SetStatus("Fetching Video Info [1/4]");
 
             try
             {
@@ -95,7 +95,7 @@ namespace TwitchDownloaderCore
                 var videoInfo = videoInfoResponse.data.video;
                 var (playlist, airDate) = await GetVideoPlaylist(playlistUrl, cancellationToken);
 
-                var videoListCrop = GetStreamListTrim(playlist.Streams, videoInfo, out var videoLength, out var startOffset, out var endOffset);
+                var videoListCrop = GetStreamListTrim(playlist.Streams, videoInfo, out var videoLength, out var startOffset, out _);
 
                 CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
 
@@ -103,19 +103,15 @@ namespace TwitchDownloaderCore
                     Directory.Delete(downloadFolder, true);
                 TwitchHelper.CreateDirectory(downloadFolder);
 
-                _progress.SetTemplateStatus("Downloading {0}% [2/5]", 0);
+                _progress.SetTemplateStatus("Downloading {0}% [2/4]", 0);
 
                 await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
 
-                _progress.SetTemplateStatus("Verifying Parts {0}% [3/5]", 0);
+                _progress.SetTemplateStatus("Verifying Parts {0}% [3/4]", 0);
 
                 await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
 
-                _progress.SetStatus("Applying Trim [4/5]");
-
-                playlist = await ApplyVideoTrim(downloadFolder, playlist, videoListCrop, startOffset, endOffset, cancellationToken);
-
-                _progress.SetTemplateStatus("Finalizing Video {0}% [5/5]", 0);
+                _progress.SetTemplateStatus("Finalizing Video {0}% [4/4]", 0);
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
@@ -131,7 +127,7 @@ namespace TwitchDownloaderCore
                 var ffmpegRetries = 0;
                 do
                 {
-                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, videoLength), cancellationToken);
+                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, startOffset, videoLength), cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
                         _progress.LogError($"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds...");
@@ -157,88 +153,6 @@ namespace TwitchDownloaderCore
                     Cleanup(downloadFolder);
                 }
             }
-        }
-
-        private async Task<M3U8> ApplyVideoTrim(string downloadFolder, M3U8 playlist, Range videoListCrop, decimal startOffset, decimal endOffset, CancellationToken cancellationToken)
-        {
-            if (!downloadOptions.TrimBeginning && !downloadOptions.TrimEnding)
-            {
-                return playlist;
-            }
-
-            var firstPart = playlist.Streams[videoListCrop.Start.Value];
-            var lastPart = playlist.Streams[videoListCrop.End.Value - 1];
-
-            var sharedArgs = $"-hide_banner -y -avoid_negative_ts make_zero -analyzeduration {int.MaxValue} -probesize {int.MaxValue}";
-
-            if (downloadOptions.TrimBeginning && startOffset != 0)
-            {
-                var partPath = Path.Combine(downloadFolder, firstPart.Path);
-                var untrimmedPartPath = Path.ChangeExtension(partPath, "untrimmed.ts");
-                File.Move(partPath, untrimmedPartPath);
-
-                var process = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = downloadOptions.FfmpegPath,
-                        Arguments = $"{sharedArgs} -ss {startOffset} -i {untrimmedPartPath} {partPath}",
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardInput = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    }
-                };
-
-                firstPart = firstPart with
-                {
-                    PartInfo = new M3U8.Stream.ExtPartInfo(firstPart.PartInfo.Duration - startOffset, firstPart.PartInfo.Live)
-                };
-
-                process.Start();
-                await process.WaitForExitAsync(cancellationToken);
-            }
-
-            if (downloadOptions.TrimEnding && endOffset != lastPart.PartInfo.Duration)
-            {
-                var partPath = Path.Combine(downloadFolder, lastPart.Path);
-                var untrimmedPartPath = Path.ChangeExtension(partPath, "untrimmed.ts");
-                File.Move(partPath, untrimmedPartPath);
-
-                var process = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = downloadOptions.FfmpegPath,
-                        Arguments = $"{sharedArgs} -t {endOffset} -i {untrimmedPartPath} {partPath}",
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardInput = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    }
-                };
-
-                lastPart = lastPart with
-                {
-                    PartInfo = new M3U8.Stream.ExtPartInfo(endOffset, lastPart.PartInfo.Live)
-                };
-
-                process.Start();
-                await process.WaitForExitAsync(cancellationToken);
-            }
-
-            var newStreams = playlist.Streams.ToArray();
-            newStreams[videoListCrop.Start.Value] = firstPart;
-            newStreams[videoListCrop.End.Value - 1] = lastPart;
-
-            var newMetadata = playlist.FileMetadata with
-            {
-                TwitchTotalSeconds = playlist.FileMetadata.TwitchTotalSeconds - startOffset - (playlist.Streams[videoListCrop.End.Value - 1].PartInfo.Duration - endOffset)
-            };
-
-            return new M3U8(newMetadata, newStreams);
         }
 
         private void CheckAvailableStorageSpace(int bandwidth, TimeSpan videoLength)
@@ -435,7 +349,7 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, TimeSpan videoLength)
+        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, TimeSpan videoLength)
         {
             var process = new Process
             {
@@ -465,6 +379,19 @@ namespace TwitchDownloaderCore
                 "-c", "copy",
                 outputFile.FullName
             };
+
+            // TODO: Make this optional - "Safe" and "Exact" trimming methods
+            if (downloadOptions.TrimEnding)
+            {
+                args.Insert(0, "-t");
+                args.Insert(1, videoLength.TotalSeconds.ToString(CultureInfo.InvariantCulture));
+            }
+
+            if (downloadOptions.TrimBeginning)
+            {
+                args.Insert(0, "-ss");
+                args.Insert(1, startOffset.ToString(CultureInfo.InvariantCulture));
+            }
 
             foreach (var arg in args)
             {
