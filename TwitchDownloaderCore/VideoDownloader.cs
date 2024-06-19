@@ -95,7 +95,7 @@ namespace TwitchDownloaderCore
                 var videoInfo = videoInfoResponse.data.video;
                 var (playlist, airDate) = await GetVideoPlaylist(playlistUrl, cancellationToken);
 
-                var videoListCrop = GetStreamListTrim(playlist.Streams, videoInfo, out var videoLength, out var startOffset, out _);
+                var videoListCrop = GetStreamListTrim(playlist.Streams, videoInfo, out var videoLength, out var startOffset, out var endOffset);
 
                 CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
 
@@ -127,7 +127,7 @@ namespace TwitchDownloaderCore
                 var ffmpegRetries = 0;
                 do
                 {
-                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, startOffset, videoLength), cancellationToken);
+                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, startOffset, endOffset, videoLength), cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
                         _progress.LogError($"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds...");
@@ -349,7 +349,7 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, TimeSpan videoLength)
+        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endOffset, TimeSpan videoLength)
         {
             using var process = new Process
             {
@@ -381,13 +381,13 @@ namespace TwitchDownloaderCore
             };
 
             // TODO: Make this optional - "Safe" and "Exact" trimming methods
-            if (downloadOptions.TrimEnding)
+            if (endOffset > 0)
             {
                 args.Insert(0, "-t");
                 args.Insert(1, videoLength.TotalSeconds.ToString(CultureInfo.InvariantCulture));
             }
 
-            if (downloadOptions.TrimBeginning)
+            if (startOffset > 0)
             {
                 args.Insert(0, "-ss");
                 args.Insert(1, startOffset.ToString(CultureInfo.InvariantCulture));
@@ -493,7 +493,10 @@ namespace TwitchDownloaderCore
                     var videoPart = streamList[i];
                     if (endTime - videoPart.PartInfo.Duration < trimTotalSeconds)
                     {
-                        endOffset = videoPart.PartInfo.Duration - (endTime - trimTotalSeconds);
+                        if (endTime - trimTotalSeconds > 0)
+                        {
+                            endOffset = videoPart.PartInfo.Duration - (endTime - trimTotalSeconds);
+                        }
                         break;
                     }
 
