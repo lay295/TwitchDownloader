@@ -21,6 +21,8 @@ namespace TwitchDownloaderCore.Tools
 
             foreach (var stream in playlist.Streams.Take(videoListCrop))
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 await sw.WriteAsync("file '");
                 await sw.WriteAsync(stream.Path);
                 await sw.WriteLineAsync('\'');
