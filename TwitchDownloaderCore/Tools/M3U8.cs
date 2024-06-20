@@ -224,7 +224,6 @@ namespace TwitchDownloaderCore.Tools
             // Twitch specific
             public uint TwitchLiveSequence { get; private set; }
             public decimal TwitchElapsedSeconds { get; private set; }
-            public decimal TwitchTotalSeconds { get; private set; }
             public decimal TwitchTotalSeconds { get; internal set; }
 
             // Other headers that we don't have dedicated properties for. Useful for debugging.
