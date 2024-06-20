@@ -14,7 +14,7 @@ namespace TwitchDownloaderCore.Tools
         private const string LINE_FEED = "\u000A";
 
         public static async Task SerializeAsync(string filePath, string streamerName, string videoId, string videoTitle, DateTime videoCreation, int viewCount, string videoDescription = null,
-            TimeSpan startOffset = default, IEnumerable<VideoMomentEdge> videoMomentEdges = null, CancellationToken cancellationToken = default)
+            TimeSpan startOffset = default, TimeSpan videoLength = default, IEnumerable<VideoMomentEdge> videoMomentEdges = null, CancellationToken cancellationToken = default)
         {
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
@@ -22,7 +22,7 @@ namespace TwitchDownloaderCore.Tools
             await SerializeGlobalMetadata(sw, streamerName, videoId, videoTitle, videoCreation, viewCount, videoDescription);
             await fs.FlushAsync(cancellationToken);
 
-            await SerializeChapters(sw, videoMomentEdges, startOffset);
+            await SerializeChapters(sw, videoMomentEdges, startOffset, videoLength);
             await fs.FlushAsync(cancellationToken);
         }
 
@@ -44,14 +44,13 @@ namespace TwitchDownloaderCore.Tools
             await sw.WriteLineAsync(@$"Views: {viewCount}");
         }
 
-        private static async Task SerializeChapters(StreamWriter sw, IEnumerable<VideoMomentEdge> videoMomentEdges, TimeSpan startOffset)
+        private static async Task SerializeChapters(StreamWriter sw, IEnumerable<VideoMomentEdge> videoMomentEdges, TimeSpan startOffset, TimeSpan videoLength)
         {
             if (videoMomentEdges is null)
             {
                 return;
             }
 
-            // Note: FFmpeg automatically handles out of range chapters for us
             var startOffsetMillis = (int)startOffset.TotalMilliseconds;
             foreach (var momentEdge in videoMomentEdges)
             {
@@ -63,6 +62,22 @@ namespace TwitchDownloaderCore.Tools
                 var startMillis = momentEdge.node.positionMilliseconds - startOffsetMillis;
                 var lengthMillis = momentEdge.node.durationMilliseconds;
                 var gameName = momentEdge.node.details.game?.displayName ?? momentEdge.node.description;
+
+                // videoLength may be 0 if it is not passed as an arg
+                if (videoLength > TimeSpan.Zero)
+                {
+                    var chapterStart = TimeSpan.FromMilliseconds(startMillis);
+                    if (chapterStart >= videoLength)
+                    {
+                        continue;
+                    }
+
+                    var chapterEnd = chapterStart + TimeSpan.FromMilliseconds(lengthMillis);
+                    if (chapterEnd > videoLength)
+                    {
+                        lengthMillis = (int)(videoLength - chapterStart).TotalMilliseconds;
+                    }
+                }
 
                 await sw.WriteLineAsync("[CHAPTER]");
                 await sw.WriteLineAsync("TIMEBASE=1/1000");

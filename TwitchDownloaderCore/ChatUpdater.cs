@@ -44,10 +44,16 @@ namespace TwitchDownloaderCore
             }
             catch
             {
+                await Task.Delay(100, CancellationToken.None);
+
                 outputFileInfo.Refresh();
                 if (outputFileInfo.Exists && outputFileInfo.Length == 0)
                 {
-                    outputFileInfo.Delete();
+                    try
+                    {
+                        outputFileInfo.Delete();
+                    }
+                    catch { }
                 }
 
                 throw;

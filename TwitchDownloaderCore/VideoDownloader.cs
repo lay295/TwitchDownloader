@@ -51,10 +51,16 @@ namespace TwitchDownloaderCore
             }
             catch
             {
+                await Task.Delay(100, CancellationToken.None);
+
                 outputFileInfo.Refresh();
                 if (outputFileInfo.Exists && outputFileInfo.Length == 0)
                 {
-                    outputFileInfo.Delete();
+                    try
+                    {
+                        outputFileInfo.Delete();
+                    }
+                    catch { }
                 }
 
                 throw;
@@ -69,7 +75,7 @@ namespace TwitchDownloaderCore
                 downloadOptions.TempFolder,
                 $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}");
 
-            _progress.SetStatus("Fetching Video Info [1/5]");
+            _progress.SetStatus("Fetching Video Info [1/4]");
 
             try
             {
@@ -86,41 +92,34 @@ namespace TwitchDownloaderCore
                 var playlistUrl = qualityPlaylist.Path;
                 var baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
 
-                var videoLength = TimeSpan.FromSeconds(videoInfoResponse.data.video.lengthSeconds);
-                CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
+                var videoInfo = videoInfoResponse.data.video;
+                var (playlist, airDate) = await GetVideoPlaylist(playlistUrl, cancellationToken);
 
-                var (playlist, videoListCrop, airDate) = await GetVideoPlaylist(playlistUrl, cancellationToken);
+                var videoListCrop = GetStreamListTrim(playlist.Streams, videoInfo, out var videoLength, out var startOffset, out var endOffset);
+
+                CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
 
                 if (Directory.Exists(downloadFolder))
                     Directory.Delete(downloadFolder, true);
                 TwitchHelper.CreateDirectory(downloadFolder);
 
-                _progress.SetTemplateStatus("Downloading {0}% [2/5]", 0);
+                _progress.SetTemplateStatus("Downloading {0}% [2/4]", 0);
 
                 await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
 
-                _progress.SetTemplateStatus("Verifying Parts {0}% [3/5]", 0);
+                _progress.SetTemplateStatus("Verifying Parts {0}% [3/4]", 0);
 
                 await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
 
-                _progress.SetTemplateStatus("Combining Parts {0}% [4/5]", 0);
-
-                await CombineVideoParts(downloadFolder, playlist.Streams, videoListCrop, cancellationToken);
-
-                _progress.SetTemplateStatus("Finalizing Video {0}% [5/5]", 0);
-
-                var startOffset = TimeSpan.FromSeconds((double)playlist.Streams
-                    .Take(videoListCrop.Start.Value)
-                    .Sum(x => x.PartInfo.Duration));
-
-                startOffset = downloadOptions.TrimBeginningTime - startOffset;
-                var seekDuration = downloadOptions.TrimEndingTime - downloadOptions.TrimBeginningTime;
+                _progress.SetTemplateStatus("Finalizing Video {0}% [4/4]", 0);
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
-                VideoInfo videoInfo = videoInfoResponse.data.video;
                 await FfmpegMetadata.SerializeAsync(metadataPath, videoInfo.owner.displayName, downloadOptions.Id.ToString(), videoInfo.title, videoInfo.createdAt, videoInfo.viewCount,
                     videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd(), downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
-                    videoChapterResponse.data.video.moments.edges, cancellationToken);
+                    videoLength, videoChapterResponse.data.video.moments.edges, cancellationToken);
+
+                var concatListPath = Path.Combine(downloadFolder, "concat.txt");
+                await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, cancellationToken);
 
                 outputFs.Close();
 
@@ -128,7 +127,7 @@ namespace TwitchDownloaderCore
                 var ffmpegRetries = 0;
                 do
                 {
-                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, metadataPath, startOffset, seekDuration > TimeSpan.Zero ? seekDuration : videoLength), cancellationToken);
+                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, startOffset, endOffset, videoLength), cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
                         _progress.LogError($"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds...");
@@ -147,6 +146,8 @@ namespace TwitchDownloaderCore
             }
             finally
             {
+                await Task.Delay(100, CancellationToken.None);
+
                 if (_shouldClearCache)
                 {
                     Cleanup(downloadFolder);
@@ -348,23 +349,54 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string metadataPath, TimeSpan startOffset, TimeSpan seekDuration)
+        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endOffset, TimeSpan videoLength)
         {
-            var process = new Process
+            using var process = new Process
             {
                 StartInfo =
                 {
                     FileName = downloadOptions.FfmpegPath,
-                    Arguments = string.Format(
-                        "-hide_banner -stats -y -avoid_negative_ts make_zero " + (downloadOptions.TrimBeginning ? "-ss {2} " : "") + "-i \"{0}\" -i \"{1}\" -map_metadata 1 -analyzeduration {3} -probesize {3} " + (downloadOptions.TrimEnding ? "-t {4} " : "") + "-c:v copy \"{5}\"",
-                        Path.Combine(tempFolder, "output.ts"), metadataPath, startOffset.TotalSeconds.ToString(CultureInfo.InvariantCulture), int.MaxValue, seekDuration.TotalSeconds.ToString(CultureInfo.InvariantCulture), outputFile.FullName),
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardInput = false,
                     RedirectStandardOutput = true,
-                    RedirectStandardError = true
+                    RedirectStandardError = true,
+                    WorkingDirectory = tempFolder
                 }
             };
+
+            var args = new List<string>
+            {
+                "-stats",
+                "-y",
+                "-avoid_negative_ts", "make_zero",
+                "-analyzeduration", $"{int.MaxValue}",
+                "-probesize", $"{int.MaxValue}",
+                "-f", "concat",
+                "-i", concatListPath,
+                "-i", metadataPath,
+                "-map_metadata", "1",
+                "-c", "copy",
+                outputFile.FullName
+            };
+
+            // TODO: Make this optional - "Safe" and "Exact" trimming methods
+            if (endOffset > 0)
+            {
+                args.Insert(0, "-t");
+                args.Insert(1, videoLength.TotalSeconds.ToString(CultureInfo.InvariantCulture));
+            }
+
+            if (startOffset > 0)
+            {
+                args.Insert(0, "-ss");
+                args.Insert(1, startOffset.ToString(CultureInfo.InvariantCulture));
+            }
+
+            foreach (var arg in args)
+            {
+                process.StartInfo.ArgumentList.Add(arg);
+            }
 
             var encodingTimeRegex = new Regex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)", RegexOptions.Compiled);
             var logQueue = new ConcurrentQueue<string>();
@@ -376,7 +408,7 @@ namespace TwitchDownloaderCore
 
                 logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
-                HandleFfmpegOutput(e.Data, encodingTimeRegex, seekDuration);
+                HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength);
             };
 
             process.Start();
@@ -413,7 +445,7 @@ namespace TwitchDownloaderCore
             _progress.ReportProgress(Math.Clamp(percent, 0, 100));
         }
 
-        private async Task<(M3U8 playlist, Range cropRange, DateTimeOffset airDate)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
+        private async Task<(M3U8 playlist, DateTimeOffset airDate)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
             var playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
             var playlist = M3U8.Parse(playlistString);
@@ -425,22 +457,26 @@ namespace TwitchDownloaderCore
                 airDate = vodAirDate;
             }
 
-            var videoListCrop = GetStreamListCrop(playlist.Streams, downloadOptions);
-
-            return (playlist, videoListCrop, airDate);
+            return (playlist, airDate);
         }
 
-        private static Range GetStreamListCrop(IList<M3U8.Stream> streamList, VideoDownloadOptions downloadOptions)
+        private Range GetStreamListTrim(IList<M3U8.Stream> streamList, VideoInfo videoInfo, out TimeSpan videoLength, out decimal startOffset, out decimal endOffset)
         {
+            startOffset = 0;
+            endOffset = 0;
+
             var startIndex = 0;
             if (downloadOptions.TrimBeginning)
             {
                 var startTime = 0m;
-                var cropTotalSeconds = (decimal)downloadOptions.TrimBeginningTime.TotalSeconds;
+                var trimTotalSeconds = (decimal)downloadOptions.TrimBeginningTime.TotalSeconds;
                 foreach (var videoPart in streamList)
                 {
-                    if (startTime + videoPart.PartInfo.Duration > cropTotalSeconds)
+                    if (startTime + videoPart.PartInfo.Duration > trimTotalSeconds)
+                    {
+                        startOffset = trimTotalSeconds - startTime;
                         break;
+                    }
 
                     startIndex++;
                     startTime += videoPart.PartInfo.Duration;
@@ -451,16 +487,26 @@ namespace TwitchDownloaderCore
             if (downloadOptions.TrimEnding)
             {
                 var endTime = streamList.Sum(x => x.PartInfo.Duration);
-                var cropTotalSeconds = (decimal)downloadOptions.TrimEndingTime.TotalSeconds;
+                var trimTotalSeconds = (decimal)downloadOptions.TrimEndingTime.TotalSeconds;
                 for (var i = streamList.Count - 1; i >= 0; i--)
                 {
-                    if (endTime - streamList[i].PartInfo.Duration < cropTotalSeconds)
+                    var videoPart = streamList[i];
+                    if (endTime - videoPart.PartInfo.Duration < trimTotalSeconds)
+                    {
+                        var offset = endTime - trimTotalSeconds;
+                        if (offset > 0) endOffset = videoPart.PartInfo.Duration - offset;
+
                         break;
+                    }
 
                     endIndex--;
-                    endTime -= streamList[i].PartInfo.Duration;
+                    endTime -= videoPart.PartInfo.Duration;
                 }
             }
+
+            videoLength =
+                (downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : TimeSpan.FromSeconds(videoInfo.lengthSeconds))
+                - (downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero);
 
             return new Range(startIndex, endIndex);
         }
@@ -485,43 +531,7 @@ namespace TwitchDownloaderCore
             return m3u8.GetStreamOfQuality(downloadOptions.Quality);
         }
 
-        private async Task CombineVideoParts(string downloadFolder, IEnumerable<M3U8.Stream> playlist, Range videoListCrop, CancellationToken cancellationToken)
-        {
-            DriveInfo outputDrive = DriveHelper.GetOutputDrive(downloadFolder);
-            string outputFile = Path.Combine(downloadFolder, "output.ts");
-
-            int partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
-            int doneCount = 0;
-
-            await using var outputStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.Read);
-            foreach (var part in playlist.Take(videoListCrop))
-            {
-                await DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken);
-
-                string partFile = Path.Combine(downloadFolder, DownloadTools.RemoveQueryString(part.Path));
-                if (File.Exists(partFile))
-                {
-                    await using (var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    {
-                        await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
-                    }
-
-                    try
-                    {
-                        File.Delete(partFile);
-                    }
-                    catch { /* If we can't delete, oh well. It should get cleanup up later anyways */ }
-                }
-
-                doneCount++;
-                int percent = (int)(doneCount / (double)partCount * 100);
-                _progress.ReportProgress(percent);
-
-                cancellationToken.ThrowIfCancellationRequested();
-            }
-        }
-
-        private static void Cleanup(string downloadFolder)
+        private void Cleanup(string downloadFolder)
         {
             try
             {
@@ -530,7 +540,10 @@ namespace TwitchDownloaderCore
                     Directory.Delete(downloadFolder, true);
                 }
             }
-            catch (IOException) { } // Directory is probably being used by another process
+            catch (IOException e)
+            {
+                _progress.LogWarning($"Failed to delete download cache: {e.Message}");
+            }
         }
     }
 }
