@@ -322,7 +322,7 @@ namespace TwitchDownloaderCore
                 {
                     // 19/20 parts failed to verify. Either the VOD is heavily corrupted or something went horribly wrong.
                     // TODO: Somehow let the user bypass this. Maybe with callbacks?
-                    throw new Exception($"Too many parts are corrupted or missing ({failedParts}/{partCount}), aborting.");
+                    throw new Exception($"Too many parts are corrupted or missing ({failedParts.Count}/{partCount}), aborting.");
                 }
 
                 _progress.LogInfo($"The following parts will be redownloaded: {string.Join(", ", failedParts)}");
