@@ -415,6 +415,7 @@ namespace TwitchDownloaderCore
             process.BeginErrorReadLine();
 
             using var logWriter = File.AppendText(Path.Combine(tempFolder, "ffmpegLog.txt"));
+            logWriter.AutoFlush = true;
             do // We cannot handle logging inside the ErrorDataReceived lambda because more than 1 can come in at once and cause a race condition. lay295#598
             {
                 Thread.Sleep(100);
