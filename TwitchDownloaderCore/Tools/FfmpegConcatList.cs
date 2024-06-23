@@ -24,7 +24,7 @@ namespace TwitchDownloaderCore.Tools
                 cancellationToken.ThrowIfCancellationRequested();
 
                 await sw.WriteAsync("file '");
-                await sw.WriteAsync(stream.Path);
+                await sw.WriteAsync(DownloadTools.RemoveQueryString(stream.Path));
                 await sw.WriteLineAsync('\'');
 
                 await sw.WriteAsync("duration ");
