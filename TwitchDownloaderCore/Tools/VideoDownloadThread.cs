@@ -97,6 +97,7 @@ namespace TwitchDownloaderCore.Tools
             var tryUnmute = VodAge < TimeSpan.FromHours(24);
             var errorCount = 0;
             var timeoutCount = 0;
+            var lengthFailureCount = 0;
             while (true)
             {
                 cancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -104,14 +105,40 @@ namespace TwitchDownloaderCore.Tools
                 try
                 {
                     var partFile = Path.Combine(_cacheFolder, DownloadTools.RemoveQueryString(videoPartName));
+                    long expectedLength;
                     if (tryUnmute && videoPartName.Contains("-muted"))
                     {
                         var unmutedPartName = videoPartName.Replace("-muted", "");
-                        await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, unmutedPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
+                        expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, unmutedPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
                     }
                     else
                     {
-                        await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, videoPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
+                        expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, videoPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
+                    }
+
+                    if (expectedLength is not -1)
+                    {
+                        // I would love to compare hashes here but unfortunately Twitch doesn't give us a ContentMD5 header
+                        var actualLength = new FileInfo(partFile).Length;
+                        if (actualLength != expectedLength)
+                        {
+                            const int MAX_RETRIES = 1;
+
+                            _logger.LogVerbose($"{partFile}: expected {expectedLength:N0}B, got {actualLength:N0}B.");
+                            if (++lengthFailureCount > MAX_RETRIES)
+                            {
+                                throw new Exception($"Failed to download {partFile}: expected {expectedLength:N0}B, got {actualLength:N0}B.");
+                            }
+
+                            await Task.Delay(1_000, cancellationTokenSource.Token);
+                            continue;
+                        }
+
+                        const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
+                        if (expectedLength % TS_PACKET_LENGTH != 0)
+                        {
+                            _logger.LogVerbose($"{partFile} contains malformed packets and may cause encoding issues.");
+                        }
                     }
 
                     return;
