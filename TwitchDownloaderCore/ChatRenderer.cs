@@ -85,10 +85,17 @@ namespace TwitchDownloaderCore
             }
             catch
             {
+                await Task.Delay(100, CancellationToken.None);
+
                 outputFileInfo.Refresh();
                 if (outputFileInfo.Exists && outputFileInfo.Length == 0)
                 {
-                    outputFileInfo.Delete();
+                    try
+                    {
+                        await outputFs.DisposeAsync();
+                        outputFileInfo.Delete();
+                    }
+                    catch { }
                 }
 
                 if (maskFileInfo is not null)
@@ -96,7 +103,12 @@ namespace TwitchDownloaderCore
                     maskFileInfo.Refresh();
                     if (maskFileInfo.Exists && maskFileInfo.Length == 0)
                     {
-                        maskFileInfo.Delete();
+                        try
+                        {
+                            await maskFs.DisposeAsync();
+                            maskFileInfo.Delete();
+                        }
+                        catch { }
                     }
                 }
 

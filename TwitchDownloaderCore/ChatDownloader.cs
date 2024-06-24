@@ -263,10 +263,17 @@ namespace TwitchDownloaderCore
             }
             catch
             {
+                await Task.Delay(100, CancellationToken.None);
+
                 outputFileInfo.Refresh();
                 if (outputFileInfo.Exists && outputFileInfo.Length == 0)
                 {
-                    outputFileInfo.Delete();
+                    try
+                    {
+                        await outputFs.DisposeAsync();
+                        outputFileInfo.Delete();
+                    }
+                    catch { }
                 }
 
                 throw;
@@ -444,19 +451,21 @@ namespace TwitchDownloaderCore
 
         private async Task EmbedImages(ChatRoot chatRoot, CancellationToken cancellationToken)
         {
-            _progress.SetTemplateStatus("Downloading + Embedding Images {0}%", 0);
+            _progress.SetTemplateStatus("Downloading Embed Images {0}%", 0);
             chatRoot.embeddedData = new EmbeddedData();
 
             // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
             // TODO: Combine this with ChatUpdater in a different file
             List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, _progress, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
-            _progress.ReportProgress(50 / 4);
+            _progress.ReportProgress(25);
             List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(chatRoot.comments, downloadOptions.TempFolder, _progress, cancellationToken: cancellationToken);
-            _progress.ReportProgress(50 / 4 * 2);
-            List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, _progress, cancellationToken: cancellationToken);
-            _progress.ReportProgress(50 / 4 * 3);
-            List<CheerEmote> twitchBits = await TwitchHelper.GetBits(chatRoot.comments, downloadOptions.TempFolder, chatRoot.streamer.id.ToString(), _progress, cancellationToken: cancellationToken);
             _progress.ReportProgress(50);
+            List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, _progress, cancellationToken: cancellationToken);
+            _progress.ReportProgress(75);
+            List<CheerEmote> twitchBits = await TwitchHelper.GetBits(chatRoot.comments, downloadOptions.TempFolder, chatRoot.streamer.id.ToString(), _progress, cancellationToken: cancellationToken);
+            _progress.ReportProgress(100);
+
+            _progress.SetTemplateStatus("Embedding Images {0}%", 0);
 
             var totalImageCount = thirdPartyEmotes.Count + firstPartyEmotes.Count + twitchBadges.Count + twitchBits.Count;
             var imagesProcessed = 0;
@@ -474,7 +483,7 @@ namespace TwitchDownloaderCore
                 };
 
                 chatRoot.embeddedData.thirdParty.Add(newEmote);
-                _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
+                _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -492,7 +501,7 @@ namespace TwitchDownloaderCore
                 };
 
                 chatRoot.embeddedData.firstParty.Add(newEmote);
-                _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
+                _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -506,7 +515,7 @@ namespace TwitchDownloaderCore
                 };
 
                 chatRoot.embeddedData.twitchBadges.Add(newBadge);
-                _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
+                _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -534,14 +543,14 @@ namespace TwitchDownloaderCore
                 }
 
                 chatRoot.embeddedData.twitchBits.Add(newBit);
-                _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount + 50);
+                _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount);
             }
         }
 
         private async Task BackfillUserInfo(ChatRoot chatRoot)
         {
             // Best effort, but if we fail oh well
-            _progress.SetTemplateStatus("Backfilling Commenter Info {0}", 0);
+            _progress.SetTemplateStatus("Backfilling Commenter Info {0}%", 0);
 
             var userIds = chatRoot.comments.Select(x => x.commenter._id).Distinct().ToArray();
             var userInfo = new Dictionary<string, User>(userIds.Length);

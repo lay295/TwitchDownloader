@@ -865,7 +865,8 @@ namespace TwitchDownloaderCore
 
         public static FileInfo ClaimFile(string path, Func<FileInfo, FileInfo> fileAlreadyExistsCallback, ITaskLogger logger)
         {
-            var fileInfo = new FileInfo(path);
+            var fullPath = Path.GetFullPath(path);
+            var fileInfo = new FileInfo(fullPath);
             if (fileInfo.Exists)
             {
                 if (fileAlreadyExistsCallback is null)
@@ -882,9 +883,9 @@ namespace TwitchDownloaderCore
                         throw new FileNotFoundException("No destination file was provided, aborting.");
                     }
 
-                    if (path != fileInfo.FullName)
+                    if (fullPath != fileInfo.FullName)
                     {
-                        logger.LogInfo($"'{path}' will be renamed to '{fileInfo.FullName}'");
+                        logger.LogInfo($"'{fullPath}' will be renamed to '{fileInfo.FullName}'");
                     }
                 }
             }

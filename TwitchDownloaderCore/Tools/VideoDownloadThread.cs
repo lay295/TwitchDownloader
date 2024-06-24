@@ -77,8 +77,7 @@ namespace TwitchDownloaderCore.Tools
                     throw;
                 }
 
-                const int A_PRIME_NUMBER = 71;
-                Thread.Sleep(A_PRIME_NUMBER);
+                Thread.Sleep(Random.Shared.Next(50, 150));
             }
         }
 
@@ -97,6 +96,7 @@ namespace TwitchDownloaderCore.Tools
             var tryUnmute = VodAge < TimeSpan.FromHours(24);
             var errorCount = 0;
             var timeoutCount = 0;
+            var lengthFailureCount = 0;
             while (true)
             {
                 cancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -104,14 +104,40 @@ namespace TwitchDownloaderCore.Tools
                 try
                 {
                     var partFile = Path.Combine(_cacheFolder, DownloadTools.RemoveQueryString(videoPartName));
+                    long expectedLength;
                     if (tryUnmute && videoPartName.Contains("-muted"))
                     {
                         var unmutedPartName = videoPartName.Replace("-muted", "");
-                        await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, unmutedPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
+                        expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, unmutedPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
                     }
                     else
                     {
-                        await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, videoPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
+                        expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, videoPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
+                    }
+
+                    if (expectedLength is not -1)
+                    {
+                        // I would love to compare hashes here but unfortunately Twitch doesn't give us a ContentMD5 header
+                        var actualLength = new FileInfo(partFile).Length;
+                        if (actualLength != expectedLength)
+                        {
+                            const int MAX_RETRIES = 1;
+
+                            _logger.LogVerbose($"{partFile} failed to verify: expected {expectedLength:N0}B, got {actualLength:N0}B.");
+                            if (++lengthFailureCount > MAX_RETRIES)
+                            {
+                                throw new Exception($"Failed to download {partFile}: expected {expectedLength:N0}B, got {actualLength:N0}B.");
+                            }
+
+                            await Delay(1_000, cancellationTokenSource.Token);
+                            continue;
+                        }
+
+                        const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
+                        if (expectedLength % TS_PACKET_LENGTH != 0)
+                        {
+                            _logger.LogVerbose($"{partFile} contains malformed packets and may cause encoding issues.");
+                        }
                     }
 
                     return;
@@ -121,7 +147,7 @@ namespace TwitchDownloaderCore.Tools
                     _logger.LogVerbose($"Received {ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
                     tryUnmute = false;
 
-                    await Task.Delay(100, cancellationTokenSource.Token);
+                    await Delay(100, cancellationTokenSource.Token);
                 }
                 catch (HttpRequestException ex)
                 {
@@ -133,7 +159,7 @@ namespace TwitchDownloaderCore.Tools
                         throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_RETRIES} retries");
                     }
 
-                    await Task.Delay(1_000 * errorCount, cancellationTokenSource.Token);
+                    await Delay(1_000 * errorCount, cancellationTokenSource.Token);
                 }
                 catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
                 {
@@ -145,9 +171,15 @@ namespace TwitchDownloaderCore.Tools
                         throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_RETRIES} times");
                     }
 
-                    await Task.Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
+                    await Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
                 }
             }
+        }
+
+        private static Task Delay(int millis, CancellationToken cancellationToken)
+        {
+            var jitteredMillis = millis + Random.Shared.Next(-200, 200);
+            return Task.Delay(Math.Max(millis / 2, jitteredMillis), cancellationToken);
         }
     }
 }
