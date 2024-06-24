@@ -130,7 +130,8 @@ namespace TwitchDownloaderCore
                     videoLength, videoChapterResponse.data.video.moments.edges, cancellationToken);
 
                 var concatListPath = Path.Combine(downloadFolder, "concat.txt");
-                await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, cancellationToken);
+                var toConcat = playlist.Streams.Take(videoListCrop).Select(x => (x.Path, x.PartInfo.Duration));
+                await FfmpegConcatList.SerializeAsync(concatListPath, toConcat, cancellationToken);
 
                 outputFs.Close();
 
