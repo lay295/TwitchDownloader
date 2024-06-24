@@ -18,8 +18,9 @@ namespace TwitchDownloaderCore.Tools
         /// <param name="throttleKib">The maximum download speed in kibibytes per second, or -1 for no maximum.</param>
         /// <param name="logger">Logger.</param>
         /// <param name="cancellationTokenSource">A <see cref="CancellationTokenSource"/> containing a <see cref="CancellationToken"/> to cancel the operation.</param>
+        /// <returns>The expected length of the downloaded file, or -1 if the content length header is not present.</returns>
         /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
-        public static async Task DownloadFileAsync(HttpClient httpClient, Uri url, string destinationFile, int throttleKib, ITaskLogger logger, CancellationTokenSource cancellationTokenSource = null)
+        public static async Task<long> DownloadFileAsync(HttpClient httpClient, Uri url, string destinationFile, int throttleKib, ITaskLogger logger, CancellationTokenSource cancellationTokenSource = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
 
@@ -74,6 +75,8 @@ namespace TwitchDownloaderCore.Tools
             // Reset the cts timer so it can be reused for the next download on this thread.
             // Is there a friendlier way to do this? Yes. Does it involve creating and destroying 4,000 CancellationTokenSources that are almost never cancelled? Also Yes.
             cancellationTokenSource?.CancelAfter(TimeSpan.FromMilliseconds(uint.MaxValue - 1));
+
+            return response.Content.Headers.ContentLength ?? -1;
         }
 
 
