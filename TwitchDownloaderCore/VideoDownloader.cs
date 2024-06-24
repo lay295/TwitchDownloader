@@ -298,7 +298,8 @@ namespace TwitchDownloaderCore
             foreach (var part in playlist.Take(videoListCrop))
             {
                 var filePath = Path.Combine(downloadFolder, DownloadTools.RemoveQueryString(part.Path));
-                if (!VerifyVideoPart(filePath))
+                var fi = new FileInfo(filePath);
+                if (!fi.Exists || fi.Length == 0)
                 {
                     failedParts.Add(part);
                 }
@@ -312,41 +313,16 @@ namespace TwitchDownloaderCore
 
             if (failedParts.Count != 0)
             {
-                if (playlist.Count == 1)
-                {
-                    // The video is only 1 part, it probably won't be a complete file.
-                    return;
-                }
-
                 if (partCount > 20 && failedParts.Count >= partCount * 0.95)
                 {
-                    // 19/20 parts failed to verify. Either the VOD is heavily corrupted or something went horribly wrong.
+                    // 19/20 parts are missing or empty, something went horribly wrong.
                     // TODO: Somehow let the user bypass this. Maybe with callbacks?
-                    throw new Exception($"Too many parts are corrupted or missing ({failedParts.Count}/{partCount}), aborting.");
+                    throw new Exception($"Too many parts are missing ({failedParts.Count}/{partCount}), aborting.");
                 }
 
                 _progress.LogInfo($"The following parts will be redownloaded: {string.Join(", ", failedParts)}");
                 await DownloadVideoPartsAsync(failedParts, videoListCrop, baseUrl, downloadFolder, vodAirDate, cancellationToken);
             }
-        }
-
-        private static bool VerifyVideoPart(string filePath)
-        {
-            const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
-
-            if (!File.Exists(filePath))
-            {
-                return false;
-            }
-
-            using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var fileLength = fs.Length;
-            if (fileLength == 0 || fileLength % TS_PACKET_LENGTH != 0)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endOffset, TimeSpan videoLength)

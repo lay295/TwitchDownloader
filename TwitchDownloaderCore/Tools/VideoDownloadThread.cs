@@ -123,7 +123,7 @@ namespace TwitchDownloaderCore.Tools
                         {
                             const int MAX_RETRIES = 1;
 
-                            _logger.LogVerbose($"{partFile}: expected {expectedLength:N0}B, got {actualLength:N0}B.");
+                            _logger.LogVerbose($"{partFile} failed to verify: expected {expectedLength:N0}B, got {actualLength:N0}B.");
                             if (++lengthFailureCount > MAX_RETRIES)
                             {
                                 throw new Exception($"Failed to download {partFile}: expected {expectedLength:N0}B, got {actualLength:N0}B.");
