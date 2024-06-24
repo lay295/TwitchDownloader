@@ -270,6 +270,7 @@ namespace TwitchDownloaderCore
                 {
                     try
                     {
+                        await outputFs.DisposeAsync();
                         outputFileInfo.Delete();
                     }
                     catch { }

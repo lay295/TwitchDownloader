@@ -92,6 +92,7 @@ namespace TwitchDownloaderCore
                 {
                     try
                     {
+                        await outputFs.DisposeAsync();
                         outputFileInfo.Delete();
                     }
                     catch { }
@@ -104,6 +105,7 @@ namespace TwitchDownloaderCore
                     {
                         try
                         {
+                            await maskFs.DisposeAsync();
                             maskFileInfo.Delete();
                         }
                         catch { }
