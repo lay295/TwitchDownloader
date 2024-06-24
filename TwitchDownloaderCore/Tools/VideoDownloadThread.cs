@@ -77,8 +77,7 @@ namespace TwitchDownloaderCore.Tools
                     throw;
                 }
 
-                const int A_PRIME_NUMBER = 71;
-                Thread.Sleep(A_PRIME_NUMBER);
+                Thread.Sleep(Random.Shared.Next(50, 150));
             }
         }
 
@@ -130,7 +129,7 @@ namespace TwitchDownloaderCore.Tools
                                 throw new Exception($"Failed to download {partFile}: expected {expectedLength:N0}B, got {actualLength:N0}B.");
                             }
 
-                            await Task.Delay(1_000, cancellationTokenSource.Token);
+                            await Delay(1_000, cancellationTokenSource.Token);
                             continue;
                         }
 
@@ -148,7 +147,7 @@ namespace TwitchDownloaderCore.Tools
                     _logger.LogVerbose($"Received {ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
                     tryUnmute = false;
 
-                    await Task.Delay(100, cancellationTokenSource.Token);
+                    await Delay(100, cancellationTokenSource.Token);
                 }
                 catch (HttpRequestException ex)
                 {
@@ -160,7 +159,7 @@ namespace TwitchDownloaderCore.Tools
                         throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_RETRIES} retries");
                     }
 
-                    await Task.Delay(1_000 * errorCount, cancellationTokenSource.Token);
+                    await Delay(1_000 * errorCount, cancellationTokenSource.Token);
                 }
                 catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
                 {
@@ -172,9 +171,15 @@ namespace TwitchDownloaderCore.Tools
                         throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_RETRIES} times");
                     }
 
-                    await Task.Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
+                    await Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
                 }
             }
+        }
+
+        private static Task Delay(int millis, CancellationToken cancellationToken)
+        {
+            var jitteredMillis = millis + Random.Shared.Next(-200, 200);
+            return Task.Delay(Math.Max(millis / 2, jitteredMillis), cancellationToken);
         }
     }
 }
