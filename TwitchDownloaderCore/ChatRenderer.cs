@@ -579,6 +579,7 @@ namespace TwitchDownloaderCore
             {
                 if (comment.message.user_notice_params.msg_id is not "highlighted-message" and not "sub" and not "resub" and not "subgift" and not "")
                 {
+                    _progress.LogVerbose($"{comment._id} has invalid {nameof(comment.message.user_notice_params)}: {comment.message.user_notice_params.msg_id}.");
                     return null;
                 }
 
@@ -595,6 +596,7 @@ namespace TwitchDownloaderCore
 
             if (comment.message.fragments == null || comment.commenter == null)
             {
+                _progress.LogVerbose($"{comment._id} lacks fragments and/or a commenter.");
                 return null;
             }
 
