@@ -119,7 +119,7 @@ namespace TwitchDownloaderCore
                 {
                     _progress.SetTemplateStatus($"Extracting captions {{0}}% [4/{TOTAL_STEPS}]", 0);
 
-                    captionsPath = await ExtractCaptions(playlist.Streams, videoListCrop, downloadFolder, cancellationToken);
+                    captionsPath = await ExtractCaptions(playlist.Streams, videoListCrop, downloadFolder, startOffset, endOffset, videoLength, cancellationToken);
                 }
 
                 _progress.SetTemplateStatus($"Finalizing Video {{0}}% [5/{TOTAL_STEPS}]", 0);
@@ -337,59 +337,117 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<string> ExtractCaptions(ICollection<M3U8.Stream> playlist, Range videoListCrop, string downloadFolder, CancellationToken cancellationToken)
+        private async Task<string> ExtractCaptions(ICollection<M3U8.Stream> playlist, Range videoListCrop, string downloadFolder, decimal startOffset, decimal endOffset, TimeSpan videoLength, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var doneCount = 0;
-            var captionFilePath = Path.Combine(downloadFolder, "captions.srt");
-            await using var finalCaptionFile = new FileStream(captionFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            var concatList = new List<(string, decimal)>(partCount);
 
-            foreach (var videoPart in playlist)
+            foreach (var videoPart in playlist.Take(videoListCrop))
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var videoPartPath = Path.Combine(downloadFolder, DownloadTools.RemoveQueryString(videoPart.Path));
-                var videoPartCaptionPath = $"{videoPartPath}.srt";
-                // TODO: Implement custom caption scanner instead of using FFmpeg. FFmpeg is so slow :/
-                var process = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = downloadOptions.FfmpegPath,
-                        Arguments = $"-y -f lavfi -loglevel quiet -i movie={videoPartPath}[out+subcc] -map 0:1 {videoPartCaptionPath}",
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    }
-                };
-                process.Start();
-                await process.WaitForExitAsync(cancellationToken);
-
-                // TODO: renumber/re-time caption segments, then write to finalCaptionFile
-
-                doneCount++;
-                var percent = (int)(doneCount / (double)partCount * 100);
-                _progress.ReportProgress(percent);
+                doneCount = await RunFfmpegSubtitleExtract(downloadFolder, cancellationToken, videoPart, concatList, partCount, doneCount);
             }
 
-            return captionFilePath;
+            var finalCaptionPath = Path.Combine(downloadFolder, "captions.srt");
+            var concatListPath = Path.Combine(downloadFolder, "srt_concat.txt");
+            await FfmpegConcatList.SerializeAsync(concatListPath, concatList, cancellationToken);
+
+            await RunFfmpegSubtitleConcat(downloadFolder, concatListPath, finalCaptionPath, startOffset, endOffset, videoLength, cancellationToken);
+
+            var fi = new FileInfo(finalCaptionPath);
+            if (!fi.Exists || fi.Length == 0)
+            {
+                // Video does not contain captions or something went wrong during the concat
+                return null;
+            }
+
+            return finalCaptionPath;
+        }
+
+        private static Process GetFfmpegProcess(string ffmpegPath, string workingDirectory, IEnumerable<string> args)
+        {
+            var process = new Process
+            {
+                StartInfo =
+                {
+                    FileName = ffmpegPath,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    WorkingDirectory = workingDirectory
+                }
+            };
+
+            foreach (var arg in args)
+            {
+                process.StartInfo.ArgumentList.Add(arg);
+            }
+
+            return process;
+        }
+
+        private async Task<int> RunFfmpegSubtitleExtract(string tempFolder, CancellationToken cancellationToken, M3U8.Stream videoPart, List<(string, decimal)> concatList, int partCount, int doneCount)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var partName = DownloadTools.RemoveQueryString(videoPart.Path);
+            var captionPath = $"{partName}.srt";
+
+            // movie=file.ts[out+subcc] is super slow, but `-i file.ts file.srt` doesn't seem to work on TS files :/
+            var args = new List<string>
+            {
+                "-y",
+                "-f", "lavfi",
+                "-i", $"movie={partName}[out+subcc]",
+                "-map", "0:1",
+                captionPath
+            };
+
+            using var process = GetFfmpegProcess(downloadOptions.FfmpegPath, tempFolder, args);
+
+            process.Start();
+            await process.WaitForExitAsync(cancellationToken);
+
+            concatList.Add((Path.GetFileName(captionPath), videoPart.PartInfo.Duration));
+
+            doneCount++;
+            var percent = (int)(doneCount / (double)partCount * 100);
+            _progress.ReportProgress(percent);
+
+            return doneCount;
+        }
+
+        private async Task RunFfmpegSubtitleConcat(string tempFolder, string concatListPath, string outputPath, decimal startOffset, decimal endOffset, TimeSpan videoLength, CancellationToken cancellationToken)
+        {
+            var args = new List<string>
+            {
+                "-y",
+                "-f", "concat",
+                "-i", concatListPath,
+                outputPath
+            };
+
+            if (endOffset > 0)
+            {
+                args.Insert(0, "-t");
+                args.Insert(1, videoLength.TotalSeconds.ToString(CultureInfo.InvariantCulture));
+            }
+
+            if (startOffset > 0)
+            {
+                args.Insert(0, "-ss");
+                args.Insert(1, startOffset.ToString(CultureInfo.InvariantCulture));
+            }
+
+            using var process = GetFfmpegProcess(downloadOptions.FfmpegPath, tempFolder, args);
+
+            process.Start();
+            await process.WaitForExitAsync(cancellationToken);
         }
 
         private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, string captionsPath, decimal startOffset, decimal endOffset, TimeSpan videoLength)
         {
-            using var process = new Process
-            {
-                StartInfo =
-                {
-                    FileName = downloadOptions.FfmpegPath,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardInput = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    WorkingDirectory = tempFolder
-                }
-            };
-
             var args = new List<string>
             {
                 "-stats",
@@ -418,10 +476,7 @@ namespace TwitchDownloaderCore
                 args.Insert(1, startOffset.ToString(CultureInfo.InvariantCulture));
             }
 
-            foreach (var arg in args)
-            {
-                process.StartInfo.ArgumentList.Add(arg);
-            }
+            using var process = GetFfmpegProcess(downloadOptions.FfmpegPath, tempFolder, args);
 
             var encodingTimeRegex = new Regex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)", RegexOptions.Compiled);
             var logQueue = new ConcurrentQueue<string>();
