@@ -581,13 +581,18 @@ namespace TwitchDownloaderCore
                 {
                     return null;
                 }
-                if (comment.message.user_notice_params.msg_id == "highlighted-message" && comment.message.fragments == null && comment.message.body != null)
+
+                if (comment.message.user_notice_params.msg_id == "highlighted-message")
                 {
-                    comment.message.fragments = new List<Fragment> { new Fragment() };
-                    comment.message.fragments[0].text = comment.message.body;
+                    if (comment.message.fragments == null && comment.message.body != null)
+                    {
+                        comment.message.fragments = new List<Fragment> { new() { text = comment.message.body } };
+                    }
+
                     highlightType = HighlightType.ChannelPointHighlight;
                 }
             }
+
             if (comment.message.fragments == null || comment.commenter == null)
             {
                 return null;
