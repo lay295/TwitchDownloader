@@ -579,17 +579,24 @@ namespace TwitchDownloaderCore
             {
                 if (comment.message.user_notice_params.msg_id is not "highlighted-message" and not "sub" and not "resub" and not "subgift" and not "")
                 {
+                    _progress.LogVerbose($"{comment._id} has invalid {nameof(comment.message.user_notice_params)}: {comment.message.user_notice_params.msg_id}.");
                     return null;
                 }
-                if (comment.message.user_notice_params.msg_id == "highlighted-message" && comment.message.fragments == null && comment.message.body != null)
+
+                if (comment.message.user_notice_params.msg_id == "highlighted-message")
                 {
-                    comment.message.fragments = new List<Fragment> { new Fragment() };
-                    comment.message.fragments[0].text = comment.message.body;
+                    if (comment.message.fragments == null && comment.message.body != null)
+                    {
+                        comment.message.fragments = new List<Fragment> { new() { text = comment.message.body } };
+                    }
+
                     highlightType = HighlightType.ChannelPointHighlight;
                 }
             }
+
             if (comment.message.fragments == null || comment.commenter == null)
             {
+                _progress.LogVerbose($"{comment._id} lacks fragments and/or a commenter.");
                 return null;
             }
 
