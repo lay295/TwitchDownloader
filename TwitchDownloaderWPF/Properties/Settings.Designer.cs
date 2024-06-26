@@ -921,5 +921,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["AdjustUsernameVisibility"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int VodTrimMode {
+            get {
+                return ((int)(this["VodTrimMode"]));
+            }
+            set {
+                this["VodTrimMode"] = value;
+            }
+        }
     }
 }
