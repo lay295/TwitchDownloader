@@ -68,7 +68,7 @@
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock Text="{lex:Loc Length}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="{lex:Loc Quality}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"><Run Text="Trim Mode "/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video."/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBlock HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc VideoTrimMode}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc VideoTrimModeTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 <TextBlock Text="{lex:Loc TrimVideo}" HorizontalAlignment="Right" Margin="0,11,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="{lex:Loc VideoDownloadThreads}" HorizontalAlignment="Right" Margin="0,46,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock HorizontalAlignment="Right" Margin="0,21,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc Oauth}"/><Hyperlink NavigateUri="https://www.youtube.com/watch?v=1MBsUoFGuls" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc OauthTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
@@ -78,8 +78,8 @@
                 <ComboBox x:Name="comboQuality" Margin="5,10,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 <StackPanel Margin="5,8,0,0">
                     <StackPanel Orientation="Horizontal">
-                        <RadioButton x:Name="RadioTrimSafe" Content="Safe" Margin="3,0,0,0" Checked="RadioTrimSafe_OnCheckedStateChanged" Unchecked="RadioTrimSafe_OnCheckedStateChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                        <RadioButton x:Name="RadioTrimExact" Content="Exact" IsChecked="True" Margin="3,0,0,0" Checked="RadioTrimExact_OnCheckedStateChanged" Unchecked="RadioTrimExact_OnCheckedStateChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        <RadioButton x:Name="RadioTrimSafe" Content="{lex:Loc VideoTrimModeSafe}" Margin="3,0,0,0" Checked="RadioTrimSafe_OnCheckedStateChanged" Unchecked="RadioTrimSafe_OnCheckedStateChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        <RadioButton x:Name="RadioTrimExact" Content="{lex:Loc VideoTrimModeExact}" IsChecked="True" Margin="3,0,0,0" Checked="RadioTrimExact_OnCheckedStateChanged" Unchecked="RadioTrimExact_OnCheckedStateChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                         <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkStart_OnCheckStateChanged" Unchecked="checkStart_OnCheckStateChanged" BorderBrush="{DynamicResource AppElementBorder}"/>

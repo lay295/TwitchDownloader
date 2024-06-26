@@ -927,4 +927,16 @@
   <data name="FileAlreadyExistsRememberMyChoice" xml:space="preserve">
     <value>Remember my choice for this session</value>
   </data>
+  <data name="VideoTrimMode" xml:space="preserve">
+    <value>Trim Mode </value><comment>Leave a trailing space</comment>
+  </data>
+  <data name="VideoTrimModeSafe" xml:space="preserve">
+    <value>Safe</value>
+  </data>
+  <data name="VideoTrimModeExact" xml:space="preserve">
+    <value>Exact</value>
+  </data>
+  <data name="VideoTrimModeTooltip" xml:space="preserve">
+    <value>Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video.</value>
+  </data>
 </root>
