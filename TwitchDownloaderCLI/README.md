@@ -57,6 +57,9 @@ Time to trim ending. See [Time durations](#time-durations) for a more detailed e
 **--bandwidth**
 (Default: `-1`) The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or `-1` for no maximum.
 
+**--trim-mode**
+(Default: `Exact`) Sets the video trim handling. Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video. Valid values are: `Safe`, `Exact`.
+
 **--oauth**
 OAuth access token to download subscriber only VODs. <ins>**DO NOT SHARE YOUR OAUTH TOKEN WITH ANYONE.**</ins>
 
