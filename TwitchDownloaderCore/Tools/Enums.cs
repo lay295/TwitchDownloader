@@ -21,4 +21,10 @@
         None,
         UtcFull
     }
+
+    public enum VideoTrimMode
+    {
+        Safe,
+        Exact
+    }
 }

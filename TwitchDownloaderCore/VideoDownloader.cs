@@ -483,6 +483,11 @@ namespace TwitchDownloaderCore
                 }
             }
 
+            if (downloadOptions.TrimMode == VideoTrimMode.Safe)
+            {
+                startOffset = endOffset = endDuration = 0;
+            }
+
             videoLength = TimeSpan.FromSeconds((double)((endTime - endOffset) - (startTime + startOffset)));
 
             return new Range(startIndex, endIndex);

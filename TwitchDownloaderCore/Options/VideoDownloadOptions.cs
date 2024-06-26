@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Options
 {
@@ -19,5 +20,6 @@ namespace TwitchDownloaderCore.Options
         public string TempFolder { get; set; }
         public Func<DirectoryInfo[], DirectoryInfo[]> CacheCleanerCallback { get; set; }
         public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
+        public VideoTrimMode TrimMode { get; set; }
     }
 }
