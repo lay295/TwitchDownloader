@@ -45,6 +45,8 @@ To get started, input a valid link or ID to a VOD or highlight. If the VOD or hi
 
 **Quality**: Selects the quality of the download and provides an estimated file size. Occasionally Twitch calls the highest quality as 'Source' instead of the typical resolution formatting (1080p60 in the case of figure 1.1).
 
+**Trim Mode**: Sets the video trim handling. Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video.
+
 **Trim**: Sets the start and end time to trim the video download in the format \[hours\] \[minutes\] \[seconds\]. Trimming the video will result in a smaller total download.
 
 **Download Threads**: The amount of parallel download threads to be dispatched.

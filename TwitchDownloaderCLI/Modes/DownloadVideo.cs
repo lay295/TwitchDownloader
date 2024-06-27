@@ -68,6 +68,7 @@ namespace TwitchDownloaderCLI.Modes
                 TrimBeginningTime = inputOptions.TrimBeginningTime,
                 TrimEnding = inputOptions.TrimEndingTime > TimeSpan.Zero,
                 TrimEndingTime = inputOptions.TrimEndingTime,
+                TrimMode = inputOptions.TrimMode,
                 FfmpegPath = string.IsNullOrWhiteSpace(inputOptions.FfmpegPath) ? FfmpegHandler.FfmpegExecutableName : Path.GetFullPath(inputOptions.FfmpegPath),
                 TempFolder = inputOptions.TempFolder,
                 CacheCleanerCallback = directoryInfos =>

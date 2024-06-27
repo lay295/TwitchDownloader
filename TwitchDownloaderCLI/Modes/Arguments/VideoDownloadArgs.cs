@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using TwitchDownloaderCLI.Models;
+using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
@@ -26,6 +27,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("bandwidth", Default = -1, HelpText = "The maximum bandwidth a thread will be allowed to use in kibibytes per second (KiB/s), or -1 for no maximum.")]
         public int ThrottleKib { get; set; }
+
+        [Option("trim-mode", Default = VideoTrimMode.Exact, HelpText = "Sets the trim handling. Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video. Valid values are: Safe, Exact")]
+        public VideoTrimMode TrimMode { get; set; }
 
         [Option("oauth", HelpText = "OAuth access token to download subscriber only VODs. DO NOT SHARE THIS WITH ANYONE.")]
         public string Oauth { get; set; }
