@@ -32,6 +32,6 @@
     {
         None,
         Embedded,
-        SeparateSrt
+        OutputSrt
     }
 }

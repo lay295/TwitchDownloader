@@ -43,13 +43,17 @@ namespace TwitchDownloaderCore
         {
             var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename, downloadOptions.FileCollisionCallback, _progress);
             downloadOptions.Filename = outputFileInfo.FullName;
+            var subtitleFileInfo = downloadOptions.SubtitlesStyle == SubtitlesStyle.OutputSrt
+                ? TwitchHelper.ClaimFile(Path.ChangeExtension(downloadOptions.Filename, "srt"), downloadOptions.FileCollisionCallback, _progress)
+                : null;
 
-            // Open the destination file so that it exists in the filesystem.
+            // Open the destination files so that it exists in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+            await using var subtitlesFs = subtitleFileInfo?.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
 
             try
             {
-                await DownloadAsyncImpl(outputFileInfo, outputFs, cancellationToken);
+                await DownloadAsyncImpl(outputFileInfo, outputFs, subtitleFileInfo, subtitlesFs, cancellationToken);
             }
             catch
             {
@@ -66,11 +70,25 @@ namespace TwitchDownloaderCore
                     catch { }
                 }
 
+                if (subtitleFileInfo is not null)
+                {
+                    subtitleFileInfo.Refresh();
+                    if (subtitleFileInfo.Exists && subtitleFileInfo.Length == 0)
+                    {
+                        try
+                        {
+                            await subtitlesFs.DisposeAsync();
+                            subtitleFileInfo.Delete();
+                        }
+                        catch { }
+                    }
+                }
+
                 throw;
             }
         }
 
-        private async Task DownloadAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, CancellationToken cancellationToken)
+        private async Task DownloadAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, FileInfo subtitleFileInfo, FileStream subtitlesFs, CancellationToken cancellationToken)
         {
             await TwitchHelper.CleanupAbandonedVideoCaches(downloadOptions.TempFolder, downloadOptions.CacheCleanerCallback, _progress);
 
@@ -124,6 +142,11 @@ namespace TwitchDownloaderCore
                     subtitlesPath = await ConcatSubtitles(subtitlesConcatListPath, downloadFolder, startOffset, endDuration, videoLength, cancellationToken);
                 }
 
+                if (downloadOptions.SubtitlesStyle == SubtitlesStyle.OutputSrt && subtitlesPath != null)
+                {
+                    _shouldClearCache = await TryCopySubtitlesToOutput(subtitlesPath, subtitleFileInfo, subtitlesFs);
+                }
+
                 _progress.SetTemplateStatus($"Finalizing Video {{0}}% [5/{TOTAL_STEPS}]", 0);
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
@@ -167,6 +190,22 @@ namespace TwitchDownloaderCore
                     Cleanup(downloadFolder);
                 }
             }
+        }
+
+        private async Task<bool> TryCopySubtitlesToOutput(string subtitlesPath, FileInfo subtitleFileInfo, FileStream subtitlesFs)
+        {
+            try
+            {
+                await subtitlesFs.DisposeAsync();
+                File.Copy(subtitlesPath, subtitleFileInfo.FullName, true);
+            }
+            catch (Exception e)
+            {
+                _progress.LogError($"Failed to copy subtitles to {subtitleFileInfo.FullName}, the subtitle file can be found at {subtitlesPath}. Error message: {e.Message}");
+                return false;
+            }
+
+            return true;
         }
 
         private void CheckAvailableStorageSpace(int bandwidth, TimeSpan videoLength)
