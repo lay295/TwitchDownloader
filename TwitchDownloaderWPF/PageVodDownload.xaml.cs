@@ -215,6 +215,12 @@ namespace TwitchDownloaderWPF
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath
             };
+
+            if (RadioTrimSafe.IsChecked == true)
+                options.TrimMode = VideoTrimMode.Safe;
+            else if (RadioTrimExact.IsChecked == true)
+                options.TrimMode = VideoTrimMode.Exact;
+
             return options;
         }
 
@@ -338,6 +344,11 @@ namespace TwitchDownloaderWPF
             WebRequest.DefaultWebProxy = null;
             numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
             TextOauth.Text = Settings.Default.OAuth;
+            _ = (VideoTrimMode)Settings.Default.VodTrimMode switch
+            {
+                VideoTrimMode.Exact => RadioTrimExact.IsChecked = true,
+                _ => RadioTrimSafe.IsChecked = true,
+            };
         }
 
         private void numDownloadThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
@@ -545,6 +556,24 @@ namespace TwitchDownloaderWPF
             {
                 await GetVideoInfo();
                 e.Handled = true;
+            }
+        }
+
+        private void RadioTrimSafe_OnCheckedStateChanged(object sender, RoutedEventArgs e)
+        {
+            if (IsInitialized)
+            {
+                Settings.Default.VodTrimMode = (int)VideoTrimMode.Safe;
+                Settings.Default.Save();
+            }
+        }
+
+        private void RadioTrimExact_OnCheckedStateChanged(object sender, RoutedEventArgs e)
+        {
+            if (IsInitialized)
+            {
+                Settings.Default.VodTrimMode = (int)VideoTrimMode.Exact;
+                Settings.Default.Save();
             }
         }
     }

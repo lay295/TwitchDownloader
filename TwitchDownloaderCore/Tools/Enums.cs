@@ -22,6 +22,12 @@
         UtcFull
     }
 
+    public enum VideoTrimMode
+    {
+        Safe,
+        Exact
+    }
+    
     public enum CaptionsStyle
     {
         None,

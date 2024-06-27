@@ -45,6 +45,8 @@ To get started, input a valid link or ID to a VOD or highlight. If the VOD or hi
 
 **Quality**: Selects the quality of the download and provides an estimated file size. Occasionally Twitch calls the highest quality as 'Source' instead of the typical resolution formatting (1080p60 in the case of figure 1.1).
 
+**Trim Mode**: Sets the video trim handling. Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video.
+
 **Trim**: Sets the start and end time to trim the video download in the format \[hours\] \[minutes\] \[seconds\]. Trimming the video will result in a smaller total download.
 
 **Download Threads**: The amount of parallel download threads to be dispatched.
@@ -182,6 +184,8 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Alternate Backgrounds**: Alternates the background color of every other chat message to help tell them apart.
 
+**Increase Username Visibility**: Increases the contrast between usernames and the background, similarly to the _Readable Colors_ option in Twitch chat. If render outlines are enabled, this option will increase username contrast against the outline instead of the background.
+
 **BTTV Emotes**: Enables emotes from BTTV in the render.
 
 **FFZ Emotes**: Enables emotes from FFZ in the render.
@@ -205,6 +209,8 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 **Badge Scale**: The scale of badges.
 
 **Emoji Scale**: The scale of emojis.
+
+**Outline Scale**: The thickness of render outlines.
 
 **Vertical Spacing Scale**: The scale of the space between messages.
 
@@ -305,6 +311,8 @@ Manage the application's behavior.
 
 **Hide Donation Button**: Hides the donation button.
 
+**Time Format**: Dictates how time is handled within the UI and filename templates.
+
 **Verbose Errors**: Enables descriptive popups when an error occurs.
 
 **Theme**: The application theme. See [Theming](#theming) for more details.
@@ -313,7 +321,15 @@ Manage the application's behavior.
 
 **Maximum Thread Bandwidth**: The maximum bandwidth that new download threads will be allowed to use, in kibibytes per second (KiB/s).
 
+**Log Levels**: Enables different levels of logging to allow for easier debugging.
+
 **Download Filename Templates**: The templates used to generate the default file names when downloading.
+
+**Restore Defaults**: Restores the default value for all settings, including the remembered settings for each individual page. An application restart is required to apply the changes.
+
+**Save**: Saves the current changes in the settings window and closes the window.
+
+**Cancel**: Discards the current changes in the settings window and closes the window.
 
 ## Troubleshooting
 

@@ -2040,7 +2040,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select Render Rage (Seconds).
+        ///   Looks up a localized string similar to Select Render Range (Seconds).
         /// </summary>
         public static string TitleRenderRange {
             get {
@@ -2378,6 +2378,42 @@ namespace TwitchDownloaderWPF.Translations {
         public static string VideoTitle {
             get {
                 return ResourceManager.GetString("VideoTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trim Mode .
+        /// </summary>
+        public static string VideoTrimMode {
+            get {
+                return ResourceManager.GetString("VideoTrimMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exact.
+        /// </summary>
+        public static string VideoTrimModeExact {
+            get {
+                return ResourceManager.GetString("VideoTrimModeExact", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Safe.
+        /// </summary>
+        public static string VideoTrimModeSafe {
+            get {
+                return ResourceManager.GetString("VideoTrimModeSafe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video..
+        /// </summary>
+        public static string VideoTrimModeTooltip {
+            get {
+                return ResourceManager.GetString("VideoTrimModeTooltip", resourceCulture);
             }
         }
         
