@@ -28,7 +28,7 @@
         Exact
     }
     
-    public enum CaptionsStyle
+    public enum SubtitlesStyle
     {
         None,
         Embedded,

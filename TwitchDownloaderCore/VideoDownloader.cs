@@ -114,12 +114,12 @@ namespace TwitchDownloaderCore
 
                 await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
 
-                string captionsPath = null;
-                if (downloadOptions.Captions != CaptionsStyle.None)
+                string subtitlesPath = null;
+                if (downloadOptions.SubtitlesStyle != SubtitlesStyle.None)
                 {
-                    _progress.SetTemplateStatus($"Extracting captions {{0}}% [4/{TOTAL_STEPS}]", 0);
+                    _progress.SetTemplateStatus($"Extracting subtitles {{0}}% [4/{TOTAL_STEPS}]", 0);
 
-                    captionsPath = await ExtractCaptions(playlist.Streams, videoListCrop, downloadFolder, startOffset, endOffset, videoLength, cancellationToken);
+                    subtitlesPath = await ExtractSubtitles(playlist.Streams, videoListCrop, downloadFolder, startOffset, endDuration, videoLength, cancellationToken);
                 }
 
                 _progress.SetTemplateStatus($"Finalizing Video {{0}}% [5/{TOTAL_STEPS}]", 0);
@@ -139,7 +139,7 @@ namespace TwitchDownloaderCore
                 var ffmpegRetries = 0;
                 do
                 {
-                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, captionsPath, startOffset, endDuration, videoLength), cancellationToken);
+                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, subtitlesPath, startOffset, endDuration, videoLength), cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
                         _progress.LogError($"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds...");
@@ -337,8 +337,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-
-        private async Task<string> ExtractCaptions(ICollection<M3U8.Stream> playlist, Range videoListCrop, string downloadFolder, decimal startOffset, decimal endOffset, TimeSpan videoLength, CancellationToken cancellationToken)
+        private async Task<string> ExtractSubtitles(ICollection<M3U8.Stream> playlist, Range videoListCrop, string downloadFolder, decimal startOffset, decimal endOffset, TimeSpan videoLength, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var doneCount = 0;
@@ -349,21 +348,21 @@ namespace TwitchDownloaderCore
                 doneCount = await RunFfmpegSubtitleExtract(downloadFolder, cancellationToken, videoPart, concatList, partCount, doneCount);
             }
 
-            var finalCaptionPath = Path.Combine(downloadFolder, "captions.srt");
+            var finalSubtitlePath = Path.Combine(downloadFolder, "subtitles.srt");
             var concatListPath = Path.Combine(downloadFolder, "srt_concat.txt");
             await FfmpegConcatList.SerializeAsync(concatListPath, concatList, cancellationToken);
 
-            await RunFfmpegSubtitleConcat(downloadFolder, concatListPath, finalCaptionPath, startOffset, endOffset, videoLength, cancellationToken);
+            await RunFfmpegSubtitleConcat(downloadFolder, concatListPath, finalSubtitlePath, startOffset, endOffset, videoLength, cancellationToken);
 
-            var fi = new FileInfo(finalCaptionPath);
+            var fi = new FileInfo(finalSubtitlePath);
             if (!fi.Exists || fi.Length == 0)
             {
-                // Video does not contain captions or something went wrong during the concat
-                _progress.LogInfo("Video does not contain any captions.");
+                // Video does not contain subtitles or something went wrong during the concat
+                _progress.LogInfo("Video does not contain any subtitles.");
                 return null;
             }
 
-            return finalCaptionPath;
+            return finalSubtitlePath;
         }
 
         private static Process GetFfmpegProcess(string ffmpegPath, string workingDirectory, IEnumerable<string> args)
@@ -394,7 +393,7 @@ namespace TwitchDownloaderCore
             cancellationToken.ThrowIfCancellationRequested();
 
             var partName = DownloadTools.RemoveQueryString(videoPart.Path);
-            var captionPath = $"{partName}.srt";
+            var subtitlePath = $"{partName}.srt";
 
             // movie=file.ts[out+subcc] is super slow, but `-i file.ts file.srt` doesn't seem to work on TS files :/
             var args = new List<string>
@@ -403,7 +402,7 @@ namespace TwitchDownloaderCore
                 "-f", "lavfi",
                 "-i", $"movie={partName}[out+subcc]",
                 "-map", "0:1",
-                captionPath
+                subtitlePath
             };
 
             using var process = GetFfmpegProcess(downloadOptions.FfmpegPath, tempFolder, args);
@@ -411,7 +410,7 @@ namespace TwitchDownloaderCore
             process.Start();
             await process.WaitForExitAsync(cancellationToken);
 
-            concatList.Add((Path.GetFileName(captionPath), videoPart.PartInfo.Duration));
+            concatList.Add((Path.GetFileName(subtitlePath), videoPart.PartInfo.Duration));
 
             doneCount++;
             var percent = (int)(doneCount / (double)partCount * 100);
@@ -448,7 +447,7 @@ namespace TwitchDownloaderCore
             await process.WaitForExitAsync(cancellationToken);
         }
 
-        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, string captionsPath, decimal startOffset, decimal endDuration, TimeSpan videoLength)
+        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, string subtitlesPath, decimal startOffset, decimal endDuration, TimeSpan videoLength)
         {
             var args = new List<string>
             {

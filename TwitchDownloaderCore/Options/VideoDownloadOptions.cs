@@ -16,7 +16,7 @@ namespace TwitchDownloaderCore.Options
         public int DownloadThreads { get; set; }
         public int ThrottleKib { get; set; }
         public string Oauth { get; set; }
-        public CaptionsStyle Captions { get; set; }
+        public SubtitlesStyle SubtitlesStyle { get; set; }
         public string FfmpegPath { get; set; }
         public string TempFolder { get; set; }
         public Func<DirectoryInfo[], DirectoryInfo[]> CacheCleanerCallback { get; set; }
