@@ -119,7 +119,9 @@ namespace TwitchDownloaderCore
                 {
                     _progress.SetTemplateStatus($"Extracting subtitles {{0}}% [4/{TOTAL_STEPS}]", 0);
 
-                    subtitlesPath = await ExtractSubtitles(playlist.Streams, videoListCrop, downloadFolder, startOffset, endDuration, videoLength, cancellationToken);
+                    var subtitlesConcatListPath = await ExtractSubtitles(playlist.Streams, videoListCrop, downloadFolder, cancellationToken);
+
+                    subtitlesPath = await ConcatSubtitles(subtitlesConcatListPath, downloadFolder, startOffset, endDuration, videoLength, cancellationToken);
                 }
 
                 _progress.SetTemplateStatus($"Finalizing Video {{0}}% [5/{TOTAL_STEPS}]", 0);
@@ -337,7 +339,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<string> ExtractSubtitles(ICollection<M3U8.Stream> playlist, Range videoListCrop, string downloadFolder, decimal startOffset, decimal endOffset, TimeSpan videoLength, CancellationToken cancellationToken)
+        private async Task<string> ExtractSubtitles(ICollection<M3U8.Stream> playlist, Range videoListCrop, string downloadFolder, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var doneCount = 0;
@@ -348,21 +350,10 @@ namespace TwitchDownloaderCore
                 doneCount = await RunFfmpegSubtitleExtract(downloadFolder, cancellationToken, videoPart, concatList, partCount, doneCount);
             }
 
-            var finalSubtitlePath = Path.Combine(downloadFolder, "subtitles.srt");
             var concatListPath = Path.Combine(downloadFolder, "srt_concat.txt");
             await FfmpegConcatList.SerializeAsync(concatListPath, concatList, cancellationToken);
 
-            await RunFfmpegSubtitleConcat(downloadFolder, concatListPath, finalSubtitlePath, startOffset, endOffset, videoLength, cancellationToken);
-
-            var fi = new FileInfo(finalSubtitlePath);
-            if (!fi.Exists || fi.Length == 0)
-            {
-                // Video does not contain subtitles or something went wrong during the concat
-                _progress.LogInfo("Video does not contain any subtitles.");
-                return null;
-            }
-
-            return finalSubtitlePath;
+            return concatListPath;
         }
 
         private static Process GetFfmpegProcess(string ffmpegPath, string workingDirectory, IEnumerable<string> args)
@@ -417,6 +408,23 @@ namespace TwitchDownloaderCore
             _progress.ReportProgress(percent);
 
             return doneCount;
+        }
+
+        private async Task<string> ConcatSubtitles(string concatListPath, string downloadFolder, decimal startOffset, decimal endOffset, TimeSpan videoLength, CancellationToken cancellationToken)
+        {
+            var finalSubtitlePath = Path.Combine(downloadFolder, "subtitles.srt");
+
+            await RunFfmpegSubtitleConcat(downloadFolder, concatListPath, finalSubtitlePath, startOffset, endOffset, videoLength, cancellationToken);
+
+            var fi = new FileInfo(finalSubtitlePath);
+            if (!fi.Exists || fi.Length == 0)
+            {
+                // Video does not contain subtitles or something went wrong during the concat
+                _progress.LogInfo("Video does not contain any subtitles.");
+                return null;
+            }
+
+            return finalSubtitlePath;
         }
 
         private async Task RunFfmpegSubtitleConcat(string tempFolder, string concatListPath, string outputPath, decimal startOffset, decimal endOffset, TimeSpan videoLength, CancellationToken cancellationToken)
