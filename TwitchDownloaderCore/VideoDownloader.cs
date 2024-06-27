@@ -358,6 +358,7 @@ namespace TwitchDownloaderCore
             if (!fi.Exists || fi.Length == 0)
             {
                 // Video does not contain captions or something went wrong during the concat
+                _progress.LogInfo("Video does not contain any captions.");
                 return null;
             }
 
