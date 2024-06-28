@@ -930,15 +930,15 @@
     <value>记住我的选择</value>
   </data>
   <data name="VideoTrimMode" xml:space="preserve">
-    <value>Trim Mode </value><comment>Leave a trailing space</comment>
+    <value>修剪模式 </value><comment>Leave a trailing space</comment>
   </data>
   <data name="VideoTrimModeSafe" xml:space="preserve">
-    <value>Safe</value>
+    <value>安全</value>
   </data>
   <data name="VideoTrimModeExact" xml:space="preserve">
-    <value>Exact</value>
+    <value>精确</value>
   </data>
   <data name="VideoTrimModeTooltip" xml:space="preserve">
-    <value>Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video.</value>
+    <value>使用精确模式修剪的视频在前几秒或最后几秒可能会出现视频 / 音频卡顿。安全模式保证不会出现卡顿，但可能会导致视频稍长。</value>
   </data>
 </root>
