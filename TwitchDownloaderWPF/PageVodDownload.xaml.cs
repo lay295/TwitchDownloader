@@ -51,6 +51,9 @@ namespace TwitchDownloaderWPF
             checkEnd.IsEnabled = isEnabled;
             SplitBtnDownload.IsEnabled = isEnabled;
             MenuItemEnqueue.IsEnabled = isEnabled;
+            RadioTrimSafe.IsEnabled = isEnabled;
+            RadioTrimExact.IsEnabled = isEnabled;
+            CheckExtractSubtitles.IsEnabled = isEnabled;
             SetEnabledTrimStart(isEnabled & checkStart.IsChecked.GetValueOrDefault());
             SetEnabledTrimEnd(isEnabled & checkEnd.IsChecked.GetValueOrDefault());
         }
@@ -221,6 +224,11 @@ namespace TwitchDownloaderWPF
             else if (RadioTrimExact.IsChecked == true)
                 options.TrimMode = VideoTrimMode.Exact;
 
+            if (CheckExtractSubtitles.IsChecked.GetValueOrDefault())
+                options.SubtitlesStyle = SubtitlesStyle.OutputSrt;
+            else
+                options.SubtitlesStyle = SubtitlesStyle.None;
+
             return options;
         }
 
@@ -349,6 +357,7 @@ namespace TwitchDownloaderWPF
                 VideoTrimMode.Exact => RadioTrimExact.IsChecked = true,
                 _ => RadioTrimSafe.IsChecked = true,
             };
+            CheckExtractSubtitles.IsChecked = Settings.Default.ExtractVideoSubtitles;
         }
 
         private void numDownloadThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
@@ -573,6 +582,15 @@ namespace TwitchDownloaderWPF
             if (IsInitialized)
             {
                 Settings.Default.VodTrimMode = (int)VideoTrimMode.Exact;
+                Settings.Default.Save();
+            }
+        }
+
+        private void CheckExtractSubtitles_OnCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (IsInitialized)
+            {
+                Settings.Default.ExtractVideoSubtitles = CheckExtractSubtitles.IsChecked.GetValueOrDefault();
                 Settings.Default.Save();
             }
         }
