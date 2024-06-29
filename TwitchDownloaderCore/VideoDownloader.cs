@@ -128,7 +128,7 @@ namespace TwitchDownloaderCore
                 var ffmpegRetries = 0;
                 do
                 {
-                    ffmpegExitCode = await Task.Run(() => RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, startOffset, endDuration, videoLength), cancellationToken);
+                    ffmpegExitCode = await RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, startOffset, endDuration, videoLength, cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
                         _progress.LogError($"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds...");
@@ -326,7 +326,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private int RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endDuration, TimeSpan videoLength)
+        private async Task<int> RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endDuration, TimeSpan videoLength, CancellationToken cancellationToken)
         {
             using var process = new Process
             {
@@ -391,14 +391,14 @@ namespace TwitchDownloaderCore
             process.Start();
             process.BeginErrorReadLine();
 
-            using var logWriter = File.AppendText(Path.Combine(tempFolder, "ffmpegLog.txt"));
+            await using var logWriter = File.AppendText(Path.Combine(tempFolder, "ffmpegLog.txt"));
             logWriter.AutoFlush = true;
             do // We cannot handle logging inside the ErrorDataReceived lambda because more than 1 can come in at once and cause a race condition. lay295#598
             {
-                Thread.Sleep(100);
+                await Task.Delay(200, cancellationToken);
                 while (!logQueue.IsEmpty && logQueue.TryDequeue(out var logMessage))
                 {
-                    logWriter.WriteLine(logMessage);
+                    await logWriter.WriteLineAsync(logMessage);
                 }
             } while (!process.HasExited || !logQueue.IsEmpty);
 
