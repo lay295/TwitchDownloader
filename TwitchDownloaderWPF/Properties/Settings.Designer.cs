@@ -933,5 +933,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["VodTrimMode"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ExtractVideoSubtitles {
+            get {
+                return ((bool)(this["ExtractVideoSubtitles"]));
+            }
+            set {
+                this["ExtractVideoSubtitles"] = value;
+            }
+        }
     }
 }

@@ -27,4 +27,11 @@
         Safe,
         Exact
     }
+    
+    public enum SubtitlesStyle
+    {
+        None,
+        Embedded,
+        OutputSrt
+    }
 }
