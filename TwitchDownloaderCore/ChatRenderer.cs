@@ -87,30 +87,8 @@ namespace TwitchDownloaderCore
             {
                 await Task.Delay(100, CancellationToken.None);
 
-                outputFileInfo.Refresh();
-                if (outputFileInfo.Exists && outputFileInfo.Length == 0)
-                {
-                    try
-                    {
-                        await outputFs.DisposeAsync();
-                        outputFileInfo.Delete();
-                    }
-                    catch { }
-                }
-
-                if (maskFileInfo is not null)
-                {
-                    maskFileInfo.Refresh();
-                    if (maskFileInfo.Exists && maskFileInfo.Length == 0)
-                    {
-                        try
-                        {
-                            await maskFs.DisposeAsync();
-                            maskFileInfo.Delete();
-                        }
-                        catch { }
-                    }
-                }
+                TwitchHelper.CleanUpClaimedFile(outputFileInfo, outputFs, _progress);
+                TwitchHelper.CleanUpClaimedFile(maskFileInfo, maskFs, _progress);
 
                 throw;
             }

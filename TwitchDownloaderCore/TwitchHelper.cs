@@ -1,6 +1,7 @@
 ﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -897,6 +898,36 @@ namespace TwitchDownloaderCore
             }
 
             return fileInfo;
+        }
+
+        public static void CleanUpClaimedFile([AllowNull] FileInfo fileInfo, [AllowNull] FileStream fileStream, ITaskLogger logger)
+        {
+            if (fileInfo is null)
+            {
+                return;
+            }
+
+            fileInfo.Refresh();
+            if (fileInfo.Exists && fileInfo.Length == 0)
+            {
+                try
+                {
+                    fileStream?.Dispose();
+                }
+                catch
+                {
+                    // Ignored
+                }
+
+                try
+                {
+                    fileInfo.Delete();
+                }
+                catch (Exception e)
+                {
+                    logger.LogWarning($"Failed to clean up {fileInfo.FullName}: {e.Message}");
+                }
+            }
         }
 
         public static DirectoryInfo CreateDirectory(string path)
