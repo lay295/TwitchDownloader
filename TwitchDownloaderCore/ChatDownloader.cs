@@ -273,7 +273,10 @@ namespace TwitchDownloaderCore
                         await outputFs.DisposeAsync();
                         outputFileInfo.Delete();
                     }
-                    catch { }
+                    catch (Exception e)
+                    {
+                        _progress.LogWarning($"Failed to clean up empty output file: {e.Message}");
+                    }
                 }
 
                 throw;
