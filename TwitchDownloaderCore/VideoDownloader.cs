@@ -26,7 +26,7 @@ namespace TwitchDownloaderCore
         private readonly ITaskProgress _progress;
         private bool _shouldClearCache = true;
 
-        private const string TOTAL_STEPS = "6";
+        private const string TOTAL_STEPS = "5";
 
         public VideoDownloader(VideoDownloadOptions videoDownloadOptions, ITaskProgress progress = default)
         {
