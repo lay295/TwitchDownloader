@@ -357,7 +357,6 @@ namespace TwitchDownloaderCore
                 outputFile.FullName
             };
 
-            // TODO: Make this optional - "Safe" and "Exact" trimming methods
             if (endDuration > 0)
             {
                 args.Insert(0, "-t");
