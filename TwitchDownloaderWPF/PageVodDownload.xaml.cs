@@ -51,6 +51,8 @@ namespace TwitchDownloaderWPF
             checkEnd.IsEnabled = isEnabled;
             SplitBtnDownload.IsEnabled = isEnabled;
             MenuItemEnqueue.IsEnabled = isEnabled;
+            RadioTrimSafe.IsEnabled = isEnabled;
+            RadioTrimExact.IsEnabled = isEnabled;
             SetEnabledTrimStart(isEnabled & checkStart.IsChecked.GetValueOrDefault());
             SetEnabledTrimEnd(isEnabled & checkEnd.IsChecked.GetValueOrDefault());
         }
