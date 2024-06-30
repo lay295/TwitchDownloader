@@ -44,8 +44,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
-    - name: Restore Dependencies
-      run: dotnet restore TwitchDownloaderWPF
     - name: Build Windows GUI
       run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=Embedded
     
@@ -99,8 +97,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
-    - name: Restore Dependencies
-      run: dotnet restore TwitchDownloaderCLI
     - name: Build Windows CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows -p:DebugType=Embedded
     - name: Build Linux CLI
@@ -212,8 +208,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
-    - name: Restore Dependencies
-      run: dotnet restore TwitchDownloaderCLI
     - name: Build MacOS CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=Embedded
     - name: Build MacOSArm64 CLI
