@@ -119,7 +119,7 @@ namespace TwitchDownloaderCore
                 var ffmpegRetries = 0;
                 do
                 {
-                    ffmpegExitCode = await RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, startOffset, endDuration, videoLength, cancellationToken);
+                    ffmpegExitCode = await RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, startOffset, endDuration, videoLength, ffmpegRetries > 0, cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
                         _progress.LogError($"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds...");
@@ -317,7 +317,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<int> RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endDuration, TimeSpan videoLength, CancellationToken cancellationToken)
+        private async Task<int> RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endDuration, TimeSpan videoLength, bool disableAudioCopy, CancellationToken cancellationToken)
         {
             using var process = new Process
             {
@@ -344,9 +344,15 @@ namespace TwitchDownloaderCore
                 "-i", concatListPath,
                 "-i", metadataPath,
                 "-map_metadata", "1",
-                "-c", "copy",
+                (disableAudioCopy ? "-c:v" : "-c"), "copy",
                 outputFile.FullName
             };
+
+            if (disableAudioCopy)
+            {
+                // Some VODs have bad audio data which FFmpeg doesn't like in copy mode. See lay295#1121 for more info
+                _progress.LogVerbose("Running with audio copy disabled.");
+            }
 
             if (endDuration > 0)
             {
