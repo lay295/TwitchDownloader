@@ -75,7 +75,7 @@ jobs:
         
     - name: Read URL
       id: url
-      uses: juliangruber/read-file-action@1.1.7
+      uses: juliangruber/read-file-action@v1.1.7
       with:
         path: upload_url.txt
         
@@ -149,7 +149,7 @@ jobs:
         
     - name: Read URL
       id: url
-      uses: juliangruber/read-file-action@1.1.7
+      uses: juliangruber/read-file-action@v1.1.7
       with:
         path: upload_url.txt
     
@@ -238,7 +238,7 @@ jobs:
         
     - name: Read URL
       id: url
-      uses: juliangruber/read-file-action@1.1.7
+      uses: juliangruber/read-file-action@v1.1.7
       with:
         path: upload_url.txt
     
