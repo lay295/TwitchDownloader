@@ -29,7 +29,7 @@ jobs:
     - name: Upload URL
       uses: actions/upload-artifact@v4.3.3
       with:
-        name: upload_url
+        name: upload_url.txt
         path: upload_url.txt
   
   build-gui:
@@ -69,7 +69,7 @@ jobs:
     - name: Download URL
       uses: actions/download-artifact@v2
       with:
-        name: upload_url
+        name: upload_url.txt
         
     - name: Read URL
       id: url
@@ -141,7 +141,7 @@ jobs:
     - name: Download URL
       uses: actions/download-artifact@v2
       with:
-        name: upload_url
+        name: upload_url.txt
         
     - name: Read URL
       id: url
@@ -228,7 +228,7 @@ jobs:
     - name: Download URL
       uses: actions/download-artifact@v2
       with:
-        name: upload_url
+        name: upload_url.txt
         
     - name: Read URL
       id: url
