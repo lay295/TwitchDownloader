@@ -16,7 +16,6 @@ jobs:
         with:
           dotnet-version: 6.0.x
       - run: dotnet test TwitchDownloaderWPF.sln
-        continue-on-error: true
 
   build-gui:
     runs-on: windows-latest
