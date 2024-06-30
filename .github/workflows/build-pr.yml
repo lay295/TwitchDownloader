@@ -7,9 +7,15 @@ on:
     types: [ opened, reopened ]
 
 jobs:
-  
+  run-tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - run: dotnet test
+        continue-on-error: true
+
   build-gui:
     runs-on: windows-latest
+    needs: [run-tests]
     env:
      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
  

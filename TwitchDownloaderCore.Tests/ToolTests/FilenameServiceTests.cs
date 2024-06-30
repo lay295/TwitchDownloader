@@ -23,6 +23,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("{length_custom=\"hh\\-mm\\-ss\"}", "04-04-04")]
         public void CorrectlyGeneratesIndividualTemplates(string template, string expected)
         {
+            Assert.Fail();
             var (title, id, date, channel, trimStart, trimEnd, viewCount, game) = GetExampleInfo();
 
             var result = FilenameService.GetFilename(template, title, id, date, channel, trimStart, trimEnd, viewCount, game);
