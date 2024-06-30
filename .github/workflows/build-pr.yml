@@ -10,7 +10,12 @@ jobs:
   run-tests:
     runs-on: ubuntu-20.04
     steps:
-      - run: dotnet test
+      - uses: actions/checkout@v4.1.7
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+      - run: dotnet test TwitchDownloaderWPF.sln
         continue-on-error: true
 
   build-gui:
