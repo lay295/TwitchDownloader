@@ -27,9 +27,9 @@ jobs:
       run: |
         expr "${{ steps.create_release.outputs.upload_url }}" > upload_url.txt
     - name: Upload URL
-      uses: actions/upload-artifact@v4.3.3
+      uses: actions/upload-artifact@v4
       with:
-        name: upload_url
+        name: upload_url.txt
         path: upload_url.txt
   
   build-gui:
@@ -44,8 +44,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
-    - name: Restore Dependencies
-      run: dotnet restore TwitchDownloaderWPF
     - name: Build Windows GUI
       run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=Embedded
     
@@ -69,9 +67,9 @@ jobs:
         dest: TwitchDownloaderGUI-${{ github.event.inputs.release_tag }}-Windows-x64.zip
     
     - name: Download URL
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: upload_url
+        name: upload_url.txt
         
     - name: Read URL
       id: url
@@ -99,8 +97,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
-    - name: Restore Dependencies
-      run: dotnet restore TwitchDownloaderCLI
     - name: Build Windows CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows -p:DebugType=Embedded
     - name: Build Linux CLI
@@ -143,9 +139,9 @@ jobs:
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
     
     - name: Download URL
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: upload_url
+        name: upload_url.txt
         
     - name: Read URL
       id: url
@@ -212,8 +208,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
-    - name: Restore Dependencies
-      run: dotnet restore TwitchDownloaderCLI
     - name: Build MacOS CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=Embedded
     - name: Build MacOSArm64 CLI
@@ -232,9 +226,9 @@ jobs:
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOSArm64.zip
     
     - name: Download URL
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: upload_url
+        name: upload_url.txt
         
     - name: Read URL
       id: url

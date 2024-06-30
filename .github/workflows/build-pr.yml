@@ -19,8 +19,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
-    - name: Restore Dependencies
-      run: dotnet restore TwitchDownloaderWPF
     - name: Build Windows GUI
       run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=Portable
     
@@ -44,7 +42,7 @@ jobs:
         dest: TwitchDownloaderGUI-Windows-x64.zip
 
     - name: Upload Windows GUI Artifact Asset
-      uses: actions/upload-artifact@v4.3.3
+      uses: actions/upload-artifact@v4
       with:
         name: TwitchDownloaderGUI-Windows-x64.zip
         path: TwitchDownloaderGUI-Windows-x64.zip
@@ -58,8 +56,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
-    - name: Restore Dependencies
-      run: dotnet restore TwitchDownloaderCLI
     - name: Build Windows CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows -p:DebugType=Portable
     - name: Build Linux CLI
@@ -102,31 +98,31 @@ jobs:
         dest: TwitchDownloaderCLI-LinuxArm64.zip
 
     - name: Upload Windows CLI Artifact Asset
-      uses: actions/upload-artifact@v4.3.3
+      uses: actions/upload-artifact@v4
       with:
         name: TwitchDownloaderCLI-Windows-x64.zip
         path: TwitchDownloaderCLI-Windows-x64.zip
 
     - name: Upload Linux CLI Artifact Asset
-      uses: actions/upload-artifact@v4.3.3
+      uses: actions/upload-artifact@v4
       with:
         name: TwitchDownloaderCLI-Linux-x64.zip
         path: TwitchDownloaderCLI-Linux-x64.zip
 
     - name: Upload LinuxAlpine CLI Artifact Asset
-      uses: actions/upload-artifact@v4.3.3
+      uses: actions/upload-artifact@v4
       with:
         name: TwitchDownloaderCLI-LinuxAlpine-x64.zip
         path: TwitchDownloaderCLI-LinuxAlpine-x64.zip
 
     - name: Upload LinuxArm CLI Artifact Asset
-      uses: actions/upload-artifact@v4.3.3
+      uses: actions/upload-artifact@v4
       with:
         name: TwitchDownloaderCLI-LinuxArm.zip
         path: TwitchDownloaderCLI-LinuxArm.zip
         
     - name: Upload LinuxArm64 CLI Artifact Asset
-      uses: actions/upload-artifact@v4.3.3
+      uses: actions/upload-artifact@v4
       with:
         name: TwitchDownloaderCLI-LinuxArm64.zip
         path: TwitchDownloaderCLI-LinuxArm64.zip
@@ -140,8 +136,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
-    - name: Restore Dependencies
-      run: dotnet restore TwitchDownloaderCLI
     - name: Build MacOS CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=Portable
     - name: Build MacOSArm64 CLI
@@ -160,13 +154,13 @@ jobs:
         dest: TwitchDownloaderCLI-MacOSArm64.zip
 
     - name: Upload MacOS CLI Artifact Asset
-      uses: actions/upload-artifact@v4.3.3
+      uses: actions/upload-artifact@v4
       with:
         name: TwitchDownloaderCLI-MacOS-x64.zip
         path: TwitchDownloaderCLI-MacOS-x64.zip
 
     - name: Upload MacOSArm64 CLI Artifact Asset
-      uses: actions/upload-artifact@v4.3.3
+      uses: actions/upload-artifact@v4
       with:
         name: TwitchDownloaderCLI-MacOSArm64.zip
         path: TwitchDownloaderCLI-MacOSArm64.zip
