@@ -128,7 +128,7 @@ namespace TwitchDownloaderCore
                 } while (ffmpegExitCode != 0 && ffmpegRetries++ < 1);
 
                 outputFileInfo.Refresh();
-                if (ffmpegExitCode != 0 || !outputFileInfo.Exists)
+                if (ffmpegExitCode != 0 || !outputFileInfo.Exists || outputFileInfo.Length == 0)
                 {
                     _shouldClearCache = false;
                     throw new Exception($"Failed to finalize video. The download cache has not been cleared and can be found at {downloadFolder} along with a log file.");
