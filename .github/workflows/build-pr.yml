@@ -15,8 +15,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 6.0.x
-      - run: dotnet test TwitchDownloaderCLI.Tests
-      - run: dotnet test TwitchDownloaderCore.Tests
+      - name: Run TwitchDownloaderCLI Tests
+        run: dotnet test TwitchDownloaderCLI.Tests
+      - name: Run TwitchDownloaderCore Tests
+        run: dotnet test TwitchDownloaderCore.Tests
 
   build-gui:
     runs-on: windows-latest
