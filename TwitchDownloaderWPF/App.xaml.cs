@@ -4,63 +4,58 @@ using System.Windows;
 using System.Windows.Threading;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Translations;
 
-namespace TwitchDownloaderWPF
-{
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
-    {
-        public static ThemeService ThemeServiceSingleton { get; private set; }
-        public static CultureService CultureServiceSingleton { get; private set; }
+namespace TwitchDownloaderWPF;
 
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            base.OnStartup(e);
+/// <summary>
+///     Interaction logic for App.xaml
+/// </summary>
+public partial class App : Application {
+    public static ThemeService ThemeServiceSingleton { get; private set; }
+    public static CultureService CultureServiceSingleton { get; private set; }
 
-            Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+    protected override void OnStartup(StartupEventArgs e) {
+        base.OnStartup(e);
 
-            // Set the working dir to the app dir in case we inherited a different working dir
-            Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+        Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            CultureServiceSingleton = new CultureService();
-            RequestCultureChange();
+        // Set the working dir to the app dir in case we inherited a different working dir
+        Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
-            var windowsThemeService = new WindowsThemeService();
-            ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
+        App.CultureServiceSingleton = new();
+        RequestCultureChange();
 
-            MainWindow = new MainWindow
-            {
-                WindowStartupLocation = WindowStartupLocation.CenterScreen
-            };
-            MainWindow.Show();
-        }
+        var windowsThemeService = new WindowsThemeService();
+        App.ThemeServiceSingleton = new(this, windowsThemeService);
 
-        private static void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-        {
-            var ex = e.Exception;
-            MessageBox.Show(ex.ToString(), Translations.Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
-
-            Current?.Shutdown();
-        }
-
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            var ex = (Exception)e.ExceptionObject;
-            MessageBox.Show(ex.ToString(), Translations.Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
-
-            Current?.Shutdown();
-        }
-
-        public static void RequestAppThemeChange(bool forceRepaint = false)
-            => ThemeServiceSingleton.ChangeAppTheme(forceRepaint);
-
-        public static void RequestTitleBarChange()
-            => ThemeServiceSingleton.SetTitleBarTheme(Current.Windows);
-
-        public static void RequestCultureChange()
-            => CultureServiceSingleton.SetApplicationCulture(Settings.Default.GuiCulture);
+        this.MainWindow = new MainWindow {
+            WindowStartupLocation = WindowStartupLocation.CenterScreen
+        };
+        this.MainWindow.Show();
     }
+
+    private static void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
+        var ex = e.Exception;
+        MessageBox.Show(ex.ToString(), Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
+
+        Application.Current?.Shutdown();
+    }
+
+    private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e) {
+        var ex = (Exception)e.ExceptionObject;
+        MessageBox.Show(ex.ToString(), Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
+
+        Application.Current?.Shutdown();
+    }
+
+    public static void RequestAppThemeChange(bool forceRepaint = false)
+        => App.ThemeServiceSingleton.ChangeAppTheme(forceRepaint);
+
+    public static void RequestTitleBarChange()
+        => App.ThemeServiceSingleton.SetTitleBarTheme(Application.Current.Windows);
+
+    public static void RequestCultureChange()
+        => App.CultureServiceSingleton.SetApplicationCulture(Settings.Default.GuiCulture);
 }

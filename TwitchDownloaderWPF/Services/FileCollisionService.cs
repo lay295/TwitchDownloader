@@ -4,99 +4,92 @@ using System.IO;
 using System.Windows;
 using Ookii.Dialogs.Wpf;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderWPF.Translations;
 
-namespace TwitchDownloaderWPF.Services
-{
-    public static class FileCollisionService
-    {
-        private enum CollisionCommand
-        {
-            Prompt,
-            Overwrite,
-            Rename,
-            Cancel
-        }
+namespace TwitchDownloaderWPF.Services;
 
-        private static CollisionCommand _collisionCommand = CollisionCommand.Prompt;
+public static class FileCollisionService {
 
-        [return: MaybeNull]
-        public static FileInfo HandleCollisionCallback(FileInfo fileInfo, Window owner)
-        {
-            if (_collisionCommand is not CollisionCommand.Prompt)
-            {
-                return GetResult(fileInfo, _collisionCommand);
-            }
+    private static CollisionCommand _collisionCommand = CollisionCommand.Prompt;
 
-            var result = ShowDialog(fileInfo, owner, out var rememberChoice);
+    [return: MaybeNull]
+    public static FileInfo HandleCollisionCallback(FileInfo fileInfo, Window owner) {
+        if (FileCollisionService._collisionCommand is not CollisionCommand.Prompt)
+            return GetResult(fileInfo, FileCollisionService._collisionCommand);
 
-            if (rememberChoice)
-            {
-                _collisionCommand = result;
-            }
+        var result = ShowDialog(fileInfo, owner, out var rememberChoice);
 
-            return GetResult(fileInfo, result);
-        }
+        if (rememberChoice)
+            FileCollisionService._collisionCommand = result;
 
-        private static CollisionCommand ShowDialog(FileInfo fileInfo, Window owner, out bool rememberChoice)
-        {
-            using var dialog = new TaskDialog();
-            dialog.WindowTitle = Translations.Strings.TitleFileAlreadyExists;
-            dialog.MainInstruction = string.Format(Translations.Strings.FileAlreadyExistsHeader, fileInfo.Name);
-            dialog.Content = string.Format(Translations.Strings.FileAlreadyExistsBody, $"<a href=\"{fileInfo.FullName}\">{fileInfo.FullName}</a>");
-            dialog.MainIcon = TaskDialogIcon.Warning;
+        return GetResult(fileInfo, result);
+    }
 
-            dialog.EnableHyperlinks = true;
-            dialog.HyperlinkClicked += Hyperlink_OnClicked;
-            
-            dialog.ButtonStyle = TaskDialogButtonStyle.CommandLinks;
+    private static CollisionCommand ShowDialog(FileInfo fileInfo, Window owner, out bool rememberChoice) {
+        using var dialog = new TaskDialog();
+        dialog.WindowTitle = Strings.TitleFileAlreadyExists;
+        dialog.MainInstruction = string.Format(Strings.FileAlreadyExistsHeader, fileInfo.Name);
+        dialog.Content = string.Format(
+            Strings.FileAlreadyExistsBody,
+            $"<a href=\"{fileInfo.FullName}\">{fileInfo.FullName}</a>"
+        );
+        dialog.MainIcon = TaskDialogIcon.Warning;
 
-            var overwriteButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsOverwrite);
-            overwriteButton.CommandLinkNote = Translations.Strings.FileAlreadyExistsOverwriteDescription;
-            dialog.Buttons.Add(overwriteButton);
+        dialog.EnableHyperlinks = true;
+        dialog.HyperlinkClicked += Hyperlink_OnClicked;
 
-            var renameButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsRename);
-            renameButton.CommandLinkNote = Translations.Strings.FileAlreadyExistsRenameDescription;
-            dialog.Buttons.Add(renameButton);
+        dialog.ButtonStyle = TaskDialogButtonStyle.CommandLinks;
 
-            var cancelButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsCancel);
-            cancelButton.CommandLinkNote = Translations.Strings.FileAlreadyExistsCancelDescription;
-            dialog.Buttons.Add(cancelButton);
+        var overwriteButton = new TaskDialogButton(Strings.FileAlreadyExistsOverwrite);
+        overwriteButton.CommandLinkNote = Strings.FileAlreadyExistsOverwriteDescription;
+        dialog.Buttons.Add(overwriteButton);
 
-            dialog.VerificationText = Translations.Strings.FileAlreadyExistsRememberMyChoice;
-            dialog.IsVerificationChecked = false;
+        var renameButton = new TaskDialogButton(Strings.FileAlreadyExistsRename);
+        renameButton.CommandLinkNote = Strings.FileAlreadyExistsRenameDescription;
+        dialog.Buttons.Add(renameButton);
 
-            var buttonResult = dialog.ShowDialog(owner);
+        var cancelButton = new TaskDialogButton(Strings.FileAlreadyExistsCancel);
+        cancelButton.CommandLinkNote = Strings.FileAlreadyExistsCancelDescription;
+        dialog.Buttons.Add(cancelButton);
 
-            rememberChoice = dialog.IsVerificationChecked;
+        dialog.VerificationText = Strings.FileAlreadyExistsRememberMyChoice;
+        dialog.IsVerificationChecked = false;
 
-            if (buttonResult == overwriteButton)
-                return CollisionCommand.Overwrite;
+        var buttonResult = dialog.ShowDialog(owner);
 
-            if (buttonResult == renameButton)
-                return CollisionCommand.Rename;
+        rememberChoice = dialog.IsVerificationChecked;
 
-            if (buttonResult == cancelButton)
-                return CollisionCommand.Cancel;
+        if (buttonResult == overwriteButton)
+            return CollisionCommand.Overwrite;
 
-            // This should never happen
-            throw new ArgumentOutOfRangeException();
-        }
+        if (buttonResult == renameButton)
+            return CollisionCommand.Rename;
 
-        [return: MaybeNull]
-        private static FileInfo GetResult(FileInfo fileInfo, CollisionCommand command)
-        {
-            return command switch
-            {
-                CollisionCommand.Overwrite => fileInfo,
-                CollisionCommand.Rename => FilenameService.GetNonCollidingName(fileInfo),
-                CollisionCommand.Cancel => null,
-                _ => throw new ArgumentOutOfRangeException(nameof(command), command, null)
-            };
-        }
+        if (buttonResult == cancelButton)
+            return CollisionCommand.Cancel;
 
-        private static void Hyperlink_OnClicked(object sender, HyperlinkClickedEventArgs e)
-        {
-            FileService.OpenExplorerForFile(new FileInfo(e.Href));
-        }
+        // This should never happen
+        throw new ArgumentOutOfRangeException();
+    }
+
+    [return: MaybeNull]
+    private static FileInfo GetResult(FileInfo fileInfo, CollisionCommand command) {
+        return command switch {
+            CollisionCommand.Overwrite => fileInfo,
+            CollisionCommand.Rename => FilenameService.GetNonCollidingName(fileInfo),
+            CollisionCommand.Cancel => null,
+            _ => throw new ArgumentOutOfRangeException(nameof(command), command, null)
+        };
+    }
+
+    private static void Hyperlink_OnClicked(object sender, HyperlinkClickedEventArgs e) {
+        FileService.OpenExplorerForFile(new(e.Href));
+    }
+
+    private enum CollisionCommand {
+        Prompt,
+        Overwrite,
+        Rename,
+        Cancel
     }
 }

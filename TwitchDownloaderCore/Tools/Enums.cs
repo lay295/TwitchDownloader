@@ -1,30 +1,25 @@
-﻿namespace TwitchDownloaderCore.Tools
-{
-    // TODO: Add Bzip2 and possibly 7Zip support
-    public enum ChatCompression
-    {
-        None,
-        Gzip
-    }
+﻿namespace TwitchDownloaderCore.Tools;
 
-    public enum ChatFormat
-    {
-        Json,
-        Text,
-        Html
-    }
+// TODO: Add Bzip2 and possibly 7Zip support
+public enum ChatCompression {
+    None,
+    Gzip
+}
 
-    public enum TimestampFormat
-    {
-        Utc,
-        Relative,
-        None,
-        UtcFull
-    }
+public enum ChatFormat {
+    Json,
+    Text,
+    Html
+}
 
-    public enum VideoTrimMode
-    {
-        Safe,
-        Exact
-    }
+public enum TimestampFormat {
+    Utc,
+    Relative,
+    None,
+    UtcFull
+}
+
+public enum VideoTrimMode {
+    Safe,
+    Exact
 }

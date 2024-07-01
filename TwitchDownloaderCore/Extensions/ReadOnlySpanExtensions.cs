@@ -1,11 +1,18 @@
 using System;
 
 namespace TwitchDownloaderCore.Extensions;
-public static class ReadOnlySpanExtensions
-{
-    /// <summary>Replaces all occurrences of <paramref name="oldChar"/> not prepended by a backslash or contained within quotation marks with <paramref name="newChar"/>.</summary>
-    public static bool TryReplaceNonEscaped(this ReadOnlySpan<char> str, Span<char> destination, char oldChar, char newChar)
-    {
+
+public static class ReadOnlySpanExtensions {
+    /// <summary>
+    ///     Replaces all occurrences of <paramref name="oldChar" /> not prepended by a backslash or contained within
+    ///     quotation marks with <paramref name="newChar" />.
+    /// </summary>
+    public static bool TryReplaceNonEscaped(
+        this ReadOnlySpan<char> str,
+        Span<char> destination,
+        char oldChar,
+        char newChar
+    ) {
         const string ESCAPE_CHARS = @"\'""";
 
         if (oldChar is '\\' or '\'' or '\"')
@@ -30,30 +37,27 @@ public static class ReadOnlySpanExtensions
             lastIndex = lastEscapeIndex;
 
         ++lastIndex;
-        for (var i = firstIndex; i < lastIndex; ++i)
-        {
+        for (var i = firstIndex; i < lastIndex; ++i) {
             var readChar = destination[i];
 
-            switch (readChar)
-            {
+            switch (readChar) {
                 case '\\':
                     ++i;
                     break;
+
                 case '\'':
-                case '\"':
-                {
+                case '\"': {
                     i = FindCloseQuoteChar(destination, i, lastIndex, readChar);
 
-                    if (i == -1)
-                    {
+                    if (i == -1) {
                         destination.Clear();
                         return false;
                     }
 
                     break;
                 }
-                default:
-                {
+
+                default: {
                     if (readChar == oldChar)
                         destination[i] = newChar;
 
@@ -65,16 +69,18 @@ public static class ReadOnlySpanExtensions
         return true;
     }
 
-    private static int FindCloseQuoteChar(ReadOnlySpan<char> destination, int openQuoteIndex, int endIndex, char openQuoteChar)
-    {
+    private static int FindCloseQuoteChar(
+        ReadOnlySpan<char> destination,
+        int openQuoteIndex,
+        int endIndex,
+        char openQuoteChar
+    ) {
         var i = openQuoteIndex + 1;
-        while (i < endIndex)
-        {
+        while (i < endIndex) {
             var readChar = destination[i];
             ++i;
 
-            if (readChar == '\\')
-            {
+            if (readChar == '\\') {
                 ++i;
                 continue;
             }
@@ -89,8 +95,7 @@ public static class ReadOnlySpanExtensions
         return -1;
     }
 
-    public static int UnEscapedIndexOf(this ReadOnlySpan<char> str, char character)
-    {
+    public static int UnEscapedIndexOf(this ReadOnlySpan<char> str, char character) {
         if (character is '\\' or '\'' or '\"')
             throw new ArgumentOutOfRangeException(nameof(character), character, "Escape characters are not supported.");
 
@@ -103,18 +108,16 @@ public static class ReadOnlySpanExtensions
             return firstIndex;
 
         var length = str.Length;
-        for (var i = firstEscapeIndex; i < length; i++)
-        {
+        for (var i = firstEscapeIndex; i < length; i++) {
             var readChar = str[i];
 
-            switch (readChar)
-            {
+            switch (readChar) {
                 case '\\':
                     i++;
                     break;
+
                 case '\'':
-                case '\"':
-                {
+                case '\"': {
                     var closeQuoteMark = FindCloseQuoteChar(str, i, length, readChar);
                     if (closeQuoteMark == -1)
                         throw new FormatException($"Unbalanced quote mark at {i}.");
@@ -123,8 +126,8 @@ public static class ReadOnlySpanExtensions
 
                     break;
                 }
-                default:
-                {
+
+                default: {
                     if (readChar == character)
                         return i;
 
@@ -136,12 +139,15 @@ public static class ReadOnlySpanExtensions
         return -1;
     }
 
-    public static int UnEscapedIndexOfAny(this ReadOnlySpan<char> str, ReadOnlySpan<char> characters)
-    {
+    public static int UnEscapedIndexOfAny(this ReadOnlySpan<char> str, ReadOnlySpan<char> characters) {
         const string ESCAPE_CHARS = @"\'""";
 
         if (characters.IndexOfAny(ESCAPE_CHARS) != -1)
-            throw new ArgumentOutOfRangeException(nameof(characters), characters.ToString(), "Escape characters are not supported.");
+            throw new ArgumentOutOfRangeException(
+                nameof(characters),
+                characters.ToString(),
+                "Escape characters are not supported."
+            );
 
         var firstIndex = str.IndexOfAny(characters);
         if (firstIndex == -1)
@@ -152,18 +158,16 @@ public static class ReadOnlySpanExtensions
             return firstIndex;
 
         var length = str.Length;
-        for (var i = firstEscapeIndex; i < length; i++)
-        {
+        for (var i = firstEscapeIndex; i < length; i++) {
             var readChar = str[i];
 
-            switch (readChar)
-            {
+            switch (readChar) {
                 case '\\':
                     ++i;
                     break;
+
                 case '\'':
-                case '\"':
-                {
+                case '\"': {
                     var closeQuoteMark = FindCloseQuoteChar(str, i, length, readChar);
                     if (closeQuoteMark == -1)
                         throw new FormatException($"Unbalanced quote mark at {i}.");
@@ -172,8 +176,8 @@ public static class ReadOnlySpanExtensions
 
                     break;
                 }
-                default:
-                {
+
+                default: {
                     if (characters.Contains(readChar))
                         return i;
 
@@ -185,8 +189,7 @@ public static class ReadOnlySpanExtensions
         return -1;
     }
 
-    public static int Count(this ReadOnlySpan<char> str, char character)
-    {
+    public static int Count(this ReadOnlySpan<char> str, char character) {
         if (str.IsEmpty)
             return -1;
 
@@ -194,8 +197,7 @@ public static class ReadOnlySpanExtensions
         var temp = str;
         int index;
 
-        while ((index = temp.IndexOf(character)) != -1)
-        {
+        while ((index = temp.IndexOf(character)) != -1) {
             ++count;
             temp = temp[(index + 1)..];
         }

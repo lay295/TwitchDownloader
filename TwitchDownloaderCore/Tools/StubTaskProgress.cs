@@ -2,40 +2,38 @@ using System;
 using System.Runtime.CompilerServices;
 using TwitchDownloaderCore.Interfaces;
 
-namespace TwitchDownloaderCore.Tools
-{
-    public class StubTaskProgress : ITaskProgress
-    {
-        public static readonly StubTaskProgress Instance = new();
+namespace TwitchDownloaderCore.Tools;
 
-        private StubTaskProgress() { }
+public class StubTaskProgress : ITaskProgress {
+    public static readonly StubTaskProgress Instance = new();
 
-        public void LogVerbose(string logMessage) { }
+    private StubTaskProgress() { }
 
-        public void LogVerbose(DefaultInterpolatedStringHandler logMessage) { }
+    public void LogVerbose(string logMessage) { }
 
-        public void LogInfo(string logMessage) { }
+    public void LogVerbose(DefaultInterpolatedStringHandler logMessage) { }
 
-        public void LogInfo(DefaultInterpolatedStringHandler logMessage) { }
+    public void LogInfo(string logMessage) { }
 
-        public void LogWarning(string logMessage) { }
+    public void LogInfo(DefaultInterpolatedStringHandler logMessage) { }
 
-        public void LogWarning(DefaultInterpolatedStringHandler logMessage) { }
+    public void LogWarning(string logMessage) { }
 
-        public void LogError(string logMessage) { }
+    public void LogWarning(DefaultInterpolatedStringHandler logMessage) { }
 
-        public void LogError(DefaultInterpolatedStringHandler logMessage) { }
+    public void LogError(string logMessage) { }
 
-        public void LogFfmpeg(string logMessage) { }
+    public void LogError(DefaultInterpolatedStringHandler logMessage) { }
 
-        public void SetStatus(string status) { }
+    public void LogFfmpeg(string logMessage) { }
 
-        public void SetTemplateStatus(string status, int initialPercent) { }
+    public void SetStatus(string status) { }
 
-        public void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2) { }
+    public void SetTemplateStatus(string status, int initialPercent) { }
 
-        public void ReportProgress(int percent) { }
+    public void SetTemplateStatus(string status, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2) { }
 
-        public void ReportProgress(int percent, TimeSpan time1, TimeSpan time2) { }
-    }
+    public void ReportProgress(int percent) { }
+
+    public void ReportProgress(int percent, TimeSpan time1, TimeSpan time2) { }
 }

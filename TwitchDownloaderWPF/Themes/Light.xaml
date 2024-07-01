@@ -8,36 +8,36 @@
     <system:Boolean x:Key="DarkHandyControl">false</system:Boolean>
 
     <!--Standard app and app element colors-->
-    <SolidColorBrush x:Key="AppBackground" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="AppElementBackground" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="AppElementBorder" Color="#E0E0E0"/>
-    <SolidColorBrush x:Key="AppText" Color="#212121"/>
-    <SolidColorBrush x:Key="AppTextDisabled" Color="#A6A6A6"/>
-    <SolidColorBrush x:Key="AppElementInnerBackground" Color="#D1D1D1"/>
-    <SolidColorBrush x:Key="AppElementInnerBorder" Color="#BABABA"/>
-    <SolidColorBrush x:Key="AppInnerText" Color="#212121"/>
-    <SolidColorBrush x:Key="AppInnerTextDisabled" Color="#A6A6A6"/>
-    <SolidColorBrush x:Key="AppHyperlink" Color="#0066CC"/>
-    <SolidColorBrush x:Key="AppCheckBox" Color="#3A96F2"/>
+    <SolidColorBrush x:Key="AppBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AppElementBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AppElementBorder" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="AppText" Color="#212121" />
+    <SolidColorBrush x:Key="AppTextDisabled" Color="#A6A6A6" />
+    <SolidColorBrush x:Key="AppElementInnerBackground" Color="#D1D1D1" />
+    <SolidColorBrush x:Key="AppElementInnerBorder" Color="#BABABA" />
+    <SolidColorBrush x:Key="AppInnerText" Color="#212121" />
+    <SolidColorBrush x:Key="AppInnerTextDisabled" Color="#A6A6A6" />
+    <SolidColorBrush x:Key="AppHyperlink" Color="#0066CC" />
+    <SolidColorBrush x:Key="AppCheckBox" Color="#3A96F2" />
     <!-- <SolidColorBrush x:Key="AppRadio" Color="#2388ED"/> DEPRECATED -->
-    <SolidColorBrush x:Key="AppDivider" Color="#E0E0E0"/>
-    <SolidColorBrush x:Key="AppDividerText" Color="#212121"/>
+    <SolidColorBrush x:Key="AppDivider" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="AppDividerText" Color="#212121" />
 
     <!--Big buttons at the top of the window-->
-    <SolidColorBrush x:Key="BigButtonBackground" Color="#326CF3"/>
-    <SolidColorBrush x:Key="BigButtonBorder" Color="#326CF3"/>
-    <SolidColorBrush x:Key="BigButtonText" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BigButtonBackground" Color="#326CF3" />
+    <SolidColorBrush x:Key="BigButtonBorder" Color="#326CF3" />
+    <SolidColorBrush x:Key="BigButtonText" Color="#FFFFFF" />
 
     <!--Basically every other button-->
-    <SolidColorBrush x:Key="ActionButtonBackground" Color="#00BCD4"/>
-    <SolidColorBrush x:Key="ActionButtonBorder" Color="#E0E0E0"/>
-    <SolidColorBrush x:Key="ActionButtonText" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ActionButtonBackground" Color="#00BCD4" />
+    <SolidColorBrush x:Key="ActionButtonBorder" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="ActionButtonText" Color="#FFFFFF" />
 
     <!--Bottom status bar and progress bar-->
-    <SolidColorBrush x:Key="StatusBarBackground" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="StatusBarBorder" Color="#E0E0E0"/>
-    <SolidColorBrush x:Key="StatusBarElement" Color="#EEEEEE"/>
-    <SolidColorBrush x:Key="StatusBarElementBorder" Color="#E0E0E0"/>
-    <SolidColorBrush x:Key="StatusBarText" Color="#212121"/>
-    <SolidColorBrush x:Key="ProgressBarForeground" Color="#326CF3"/>
+    <SolidColorBrush x:Key="StatusBarBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="StatusBarBorder" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="StatusBarElement" Color="#EEEEEE" />
+    <SolidColorBrush x:Key="StatusBarElementBorder" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="StatusBarText" Color="#212121" />
+    <SolidColorBrush x:Key="ProgressBarForeground" Color="#326CF3" />
 </ResourceDictionary>

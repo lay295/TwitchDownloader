@@ -9,7 +9,6 @@
       lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
       lex:ResxLocalizationProvider.DefaultDictionary="Strings"
       xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
-      xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       xmlns:hc="https://handyorg.github.io/handycontrol"
       xmlns:fa="http://schemas.fontawesome.com/icons/"
       mc:Ignorable="d"
@@ -18,45 +17,61 @@
 
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="20"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="15"/>
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="15" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="10"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="10"/>
+            <RowDefinition Height="10" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" Grid.RowSpan="2" BorderThickness="1" BorderBrush="{DynamicResource AppElementBorder}" Margin="0,0,0,10">
+        <Border Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" Grid.RowSpan="2" BorderThickness="1"
+                BorderBrush="{DynamicResource AppElementBorder}" Margin="0,0,0,10">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ItemsControl x:Name="queueList" ItemsSource="{Binding taskList}" Margin="0,10" d:DataContext="{d:DesignInstance local:PageQueue}">
+                <ItemsControl x:Name="queueList" ItemsSource="{Binding taskList}" Margin="0,10"
+                              d:DataContext="{d:DesignInstance local:PageQueue}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border BorderThickness="1" CornerRadius="8" Margin="8,8,8,8" Padding="4" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+                            <Border BorderThickness="1" CornerRadius="8" Margin="8,8,8,8" Padding="4"
+                                    Background="{DynamicResource AppElementBackground}"
+                                    BorderBrush="{DynamicResource AppElementBorder}">
                                 <Border.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Header="{lex:Loc TaskCancel}" Click="MenuItemCancelTask_Click" IsEnabled="{Binding CanCancel}" Foreground="{DynamicResource AppText}">
+                                        <MenuItem Header="{lex:Loc TaskCancel}" Click="MenuItemCancelTask_Click"
+                                                  IsEnabled="{Binding CanCancel}"
+                                                  Foreground="{DynamicResource AppText}">
                                             <MenuItem.Icon>
-                                                <fa:SvgAwesome Icon="Solid_StopCircle" Foreground="{DynamicResource AppText}" />
+                                                <fa:SvgAwesome Icon="Solid_StopCircle"
+                                                               Foreground="{DynamicResource AppText}" />
                                             </MenuItem.Icon>
                                         </MenuItem>
-                                        <MenuItem Header="{lex:Loc TaskErrorButton}" Click="MenuItemTaskError_Click" Visibility="{Binding Exception.Visibility}" Foreground="{DynamicResource AppText}">
+                                        <MenuItem Header="{lex:Loc TaskErrorButton}" Click="MenuItemTaskError_Click"
+                                                  Visibility="{Binding Exception.Visibility}"
+                                                  Foreground="{DynamicResource AppText}">
                                             <MenuItem.Icon>
-                                                <fa:SvgAwesome Icon="Solid_ExclamationTriangle" Foreground="{DynamicResource AppText}" />
+                                                <fa:SvgAwesome Icon="Solid_ExclamationTriangle"
+                                                               Foreground="{DynamicResource AppText}" />
                                             </MenuItem.Icon>
                                         </MenuItem>
-                                        <MenuItem Header="{lex:Loc ContextMenuRemoveTask}" Click="MenuItemRemoveTask_Click" Foreground="{DynamicResource AppText}">
+                                        <MenuItem Header="{lex:Loc ContextMenuRemoveTask}"
+                                                  Click="MenuItemRemoveTask_Click"
+                                                  Foreground="{DynamicResource AppText}">
                                             <MenuItem.Icon>
-                                                <fa:SvgAwesome Icon="Solid_Times" Foreground="{DynamicResource AppText}" />
+                                                <fa:SvgAwesome Icon="Solid_Times"
+                                                               Foreground="{DynamicResource AppText}" />
                                             </MenuItem.Icon>
                                         </MenuItem>
-                                        <MenuItem Header="{lex:Loc ContextMenuOpenTaskFolder}" Click="MenuItemOpenTaskFolder_Click" Foreground="{DynamicResource AppText}">
+                                        <MenuItem Header="{lex:Loc ContextMenuOpenTaskFolder}"
+                                                  Click="MenuItemOpenTaskFolder_Click"
+                                                  Foreground="{DynamicResource AppText}">
                                             <MenuItem.Icon>
-                                                <fa:SvgAwesome Icon="Solid_FolderOpen" Foreground="{DynamicResource AppText}" />
+                                                <fa:SvgAwesome Icon="Solid_FolderOpen"
+                                                               Foreground="{DynamicResource AppText}" />
                                             </MenuItem.Icon>
                                         </MenuItem>
                                     </ContextMenu>
@@ -68,17 +83,39 @@
                                         <ColumnDefinition Width="auto" />
                                     </Grid.ColumnDefinitions>
                                     <Image Grid.Column="0" Source="{Binding Info.Thumbnail}" MaxHeight="74" />
-                                    <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" >
-                                        <emoji:TextBlock Text="{Binding Info.Title, StringFormat=Title: {0}}" TextWrapping="Wrap" Foreground="{DynamicResource AppText}"></emoji:TextBlock>
-                                        <TextBlock Text="{Binding TaskType, StringFormat=Task Type: {0}}" Foreground="{DynamicResource AppText}"></TextBlock>
-                                        <TextBlock Text="{Binding Status, StringFormat=Status: {0}, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Foreground="{DynamicResource AppText}"></TextBlock>
+                                    <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0">
+                                        <emoji:TextBlock Text="{Binding Info.Title, StringFormat=Title: {0}}"
+                                                         TextWrapping="Wrap" Foreground="{DynamicResource AppText}" />
+                                        <TextBlock Text="{Binding TaskType, StringFormat=Task Type: {0}}"
+                                                   Foreground="{DynamicResource AppText}" />
+                                        <TextBlock
+                                            Text="{Binding Status, StringFormat=Status: {0}, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                                            Foreground="{DynamicResource AppText}" />
                                         <StackPanel Orientation="Horizontal" Margin="1,1,0,1">
-                                            <Button Content="{lex:Loc TaskCancel}" Margin="0,0,4,0" MinWidth="60" Height="28" FontSize="12" Click="BtnCancelTask_Click" IsEnabled="{Binding CanCancel}" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
-                                            <Button Visibility="{Binding Exception.Visibility}" Content="{lex:Loc TaskErrorButton}" Margin="0,0,4,0" MinWidth="60" Height="28" FontSize="12" Click="BtnTaskError_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
-                                            <ProgressBar Height="16" Width="200" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Background="{DynamicResource AppElementInnerBackground}" Foreground="{DynamicResource ProgressBarForeground}" />
+                                            <Button Content="{lex:Loc TaskCancel}" Margin="0,0,4,0" MinWidth="60"
+                                                    Height="28" FontSize="12" Click="BtnCancelTask_Click"
+                                                    IsEnabled="{Binding CanCancel}"
+                                                    Background="{DynamicResource ActionButtonBackground}"
+                                                    Foreground="{DynamicResource ActionButtonText}"
+                                                    BorderBrush="{DynamicResource ActionButtonBorder}" />
+                                            <Button Visibility="{Binding Exception.Visibility}"
+                                                    Content="{lex:Loc TaskErrorButton}" Margin="0,0,4,0" MinWidth="60"
+                                                    Height="28" FontSize="12" Click="BtnTaskError_Click"
+                                                    Background="{DynamicResource ActionButtonBackground}"
+                                                    Foreground="{DynamicResource ActionButtonText}"
+                                                    BorderBrush="{DynamicResource ActionButtonBorder}" />
+                                            <ProgressBar Height="16" Width="200" Minimum="0" Maximum="100"
+                                                         Value="{Binding Progress, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                                                         HorizontalAlignment="Left"
+                                                         Background="{DynamicResource AppElementInnerBackground}"
+                                                         Foreground="{DynamicResource ProgressBarForeground}" />
                                         </StackPanel>
                                     </StackPanel>
-                                    <Button Grid.Column="2" Padding="7, 0" VerticalAlignment="Top" Height="24" FontSize="12" Content="X" Click="BtnRemoveTask_Click" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppTextDisabled}" BorderBrush="{DynamicResource AppElementBorder}" />
+                                    <Button Grid.Column="2" Padding="7, 0" VerticalAlignment="Top" Height="24"
+                                            FontSize="12" Content="X" Click="BtnRemoveTask_Click"
+                                            Background="{DynamicResource AppElementBackground}"
+                                            Foreground="{DynamicResource AppTextDisabled}"
+                                            BorderBrush="{DynamicResource AppElementBorder}" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -88,31 +125,69 @@
         </Border>
         <StackPanel Grid.Column="4" Grid.Row="1">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,5,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}"
+                        Height="26" Width="40" Click="btnDonate_Click"
+                        Background="{DynamicResource AppElementBackground}"
+                        BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,5,0"
+                        Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}"
+                        BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel HorizontalAlignment="Center">
-                <hc:Divider Content="{lex:Loc ParallelTaskLimits}" HorizontalAlignment="Center" Margin="0,10,0,0" FontWeight="Bold" MinWidth="180" LineStroke="{DynamicResource AppDivider}" Foreground="{DynamicResource AppDividerText}"/>
+                <hc:Divider Content="{lex:Loc ParallelTaskLimits}" HorizontalAlignment="Center" Margin="0,10,0,0"
+                            FontWeight="Bold" MinWidth="180" LineStroke="{DynamicResource AppDivider}"
+                            Foreground="{DynamicResource AppDividerText}" />
                 <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,8,0,0">
-                    <TextBlock Text="{lex:Loc VodDownloads}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}" TextWrapping="Wrap" />
-                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" Name="numVod" Width="70" ValueChanged="numVod_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <TextBlock Text="{lex:Loc VodDownloads}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"
+                               TextWrapping="Wrap" />
+                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" Name="numVod" Width="70"
+                                      ValueChanged="numVod_ValueChanged"
+                                      Background="{DynamicResource AppElementBackground}"
+                                      BorderBrush="{DynamicResource AppElementBorder}"
+                                      Foreground="{DynamicResource AppText}" />
                 </WrapPanel>
                 <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,2,0,0">
-                    <TextBlock Text="{lex:Loc ClipDownloads}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}" TextWrapping="Wrap" />
-                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" x:Name="numClip" Width="70" ValueChanged="numClip_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <TextBlock Text="{lex:Loc ClipDownloads}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"
+                               TextWrapping="Wrap" />
+                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" x:Name="numClip" Width="70"
+                                      ValueChanged="numClip_ValueChanged"
+                                      Background="{DynamicResource AppElementBackground}"
+                                      BorderBrush="{DynamicResource AppElementBorder}"
+                                      Foreground="{DynamicResource AppText}" />
                 </WrapPanel>
                 <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,2,0,0">
-                    <TextBlock Text="{lex:Loc ChatDownloads}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}" TextWrapping="Wrap" />
-                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" x:Name="numChat" Width="70" ValueChanged="numChat_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <TextBlock Text="{lex:Loc ChatDownloads}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"
+                               TextWrapping="Wrap" />
+                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" x:Name="numChat" Width="70"
+                                      ValueChanged="numChat_ValueChanged"
+                                      Background="{DynamicResource AppElementBackground}"
+                                      BorderBrush="{DynamicResource AppElementBorder}"
+                                      Foreground="{DynamicResource AppText}" />
                 </WrapPanel>
                 <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,2,0,0">
-                    <TextBlock Text="{lex:Loc ChatRenders}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}" TextWrapping="Wrap" />
-                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" x:Name="numRender" Width="70" ValueChanged="numRender_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <TextBlock Text="{lex:Loc ChatRenders}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"
+                               TextWrapping="Wrap" />
+                    <hc:NumericUpDown Margin="5,0,0,0" Value="1" Minimum="1" x:Name="numRender" Width="70"
+                                      ValueChanged="numRender_ValueChanged"
+                                      Background="{DynamicResource AppElementBackground}"
+                                      BorderBrush="{DynamicResource AppElementBorder}"
+                                      Foreground="{DynamicResource AppText}" />
                 </WrapPanel>
-                <hc:Divider Content="{lex:Loc MassDownloads}" HorizontalAlignment="Center" Margin="0,10,0,0" FontWeight="Bold" MinWidth="180" LineStroke="{DynamicResource AppDivider}" Foreground="{DynamicResource AppDividerText}"/>
-                <Button x:Name="btnUrlList" Content="{lex:Loc UrlList}" Margin="0,11,0,0" Width="165" Click="btnUrlList_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-                <Button x:Name="btnVods" Content="{lex:Loc SearchVods}" Margin="0,8,0,0" Width="165" Click="btnVods_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-                <Button x:Name="btnClips" Content="{lex:Loc SearchClips}" Margin="0,8,0,0" Width="165" Click="btnClips_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <hc:Divider Content="{lex:Loc MassDownloads}" HorizontalAlignment="Center" Margin="0,10,0,0"
+                            FontWeight="Bold" MinWidth="180" LineStroke="{DynamicResource AppDivider}"
+                            Foreground="{DynamicResource AppDividerText}" />
+                <Button x:Name="btnUrlList" Content="{lex:Loc UrlList}" Margin="0,11,0,0" Width="165"
+                        Click="btnUrlList_Click" Background="{DynamicResource ActionButtonBackground}"
+                        Foreground="{DynamicResource ActionButtonText}"
+                        BorderBrush="{DynamicResource ActionButtonBorder}" />
+                <Button x:Name="btnVods" Content="{lex:Loc SearchVods}" Margin="0,8,0,0" Width="165"
+                        Click="btnVods_Click" Background="{DynamicResource ActionButtonBackground}"
+                        Foreground="{DynamicResource ActionButtonText}"
+                        BorderBrush="{DynamicResource ActionButtonBorder}" />
+                <Button x:Name="btnClips" Content="{lex:Loc SearchClips}" Margin="0,8,0,0" Width="165"
+                        Click="btnClips_Click" Background="{DynamicResource ActionButtonBackground}"
+                        Foreground="{DynamicResource ActionButtonText}"
+                        BorderBrush="{DynamicResource ActionButtonBorder}" />
             </StackPanel>
         </StackPanel>
     </Grid>

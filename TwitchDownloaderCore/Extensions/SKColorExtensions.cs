@@ -3,38 +3,46 @@ using System.Numerics;
 using SkiaSharp;
 
 namespace TwitchDownloaderCore.Extensions;
+
 // ReSharper disable once InconsistentNaming
-public static class SKColorExtensions
-{
-    public static SKColor Lerp(this SKColor from, SKColor to, float factor)
-    {
+public static class SKColorExtensions {
+    public static SKColor Lerp(this SKColor from, SKColor to, float factor) {
         var result = Vector4.Lerp(ToVector4(from), ToVector4(to), factor);
         return FromVector4(result);
 
-        static Vector4 ToVector4(SKColor color)
-        {
+        static Vector4 ToVector4(SKColor color) {
             var colorF = color.ToSKColorF();
-            return new Vector4(colorF.Red, colorF.Green, colorF.Blue, colorF.Alpha);
+            return new(colorF.Red, colorF.Green, colorF.Blue, colorF.Alpha);
         }
 
-        static SKColor FromVector4(Vector4 color)
-        {
+        static SKColor FromVector4(Vector4 color) {
             var colorF = new SKColorF(color.X, color.Y, color.Z, color.W);
             return colorF.ToSKColor();
         }
     }
 
     // ReSharper disable once InconsistentNaming
-    public static SKColorF ToSKColorF(this SKColor color) => new((float)color.Red / byte.MaxValue, (float)color.Green / byte.MaxValue, (float)color.Blue / byte.MaxValue, (float)color.Alpha / byte.MaxValue);
+    public static SKColorF ToSKColorF(this SKColor color) => new(
+        (float)color.Red / byte.MaxValue,
+        (float)color.Green / byte.MaxValue,
+        (float)color.Blue / byte.MaxValue,
+        (float)color.Alpha / byte.MaxValue
+    );
 
     // ReSharper disable once InconsistentNaming
-    public static SKColor ToSKColor(this SKColorF color) => new((byte)(color.Red * byte.MaxValue), (byte)(color.Green * byte.MaxValue), (byte)(color.Blue * byte.MaxValue), (byte)(color.Alpha * byte.MaxValue));
+    public static SKColor ToSKColor(this SKColorF color) => new(
+        (byte)(color.Red * byte.MaxValue),
+        (byte)(color.Green * byte.MaxValue),
+        (byte)(color.Blue * byte.MaxValue),
+        (byte)(color.Alpha * byte.MaxValue)
+    );
 
     // https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
-    public static double RelativeLuminance(this SKColor color)
-    {
+    public static double RelativeLuminance(this SKColor color) {
         var colorF = color.ToSKColorF();
-        return 0.2126 * ConvertColor(colorF.Red) + 0.7152 * ConvertColor(colorF.Green) + 0.0722 * ConvertColor(colorF.Blue);
+        return 0.2126 * ConvertColor(colorF.Red)
+            + 0.7152 * ConvertColor(colorF.Green)
+            + 0.0722 * ConvertColor(colorF.Blue);
 
         static double ConvertColor(float v) => v <= 0.04045
             ? v / 12.92

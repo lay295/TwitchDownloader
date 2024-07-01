@@ -4,12 +4,9 @@ using SkiaSharp;
 namespace TwitchDownloaderCore.Extensions;
 
 // ReSharper disable once InconsistentNaming
-public static class SKCanvasExtensions
-{
-    public static void DrawText(this SKCanvas canvas, ReadOnlySpan<char> text, float x, float y, SKPaint paint)
-    {
-        if (paint.TextAlign != SKTextAlign.Left)
-        {
+public static class SKCanvasExtensions {
+    public static void DrawText(this SKCanvas canvas, ReadOnlySpan<char> text, float x, float y, SKPaint paint) {
+        if (paint.TextAlign != SKTextAlign.Left) {
             var num = paint.MeasureText(text);
             if (paint.TextAlign == SKTextAlign.Center)
                 num *= 0.5f;

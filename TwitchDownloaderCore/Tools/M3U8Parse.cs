@@ -6,522 +6,570 @@ using System.Text;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
 
-namespace TwitchDownloaderCore.Tools
-{
-    public partial record M3U8
-    {
-        public static M3U8 Parse(System.IO.Stream stream, Encoding streamEncoding, string basePath = "")
-        {
-            var sr = new StreamReader(stream, streamEncoding);
-            if (!ParsingHelpers.TryParseM3UHeader(sr.ReadLine(), out _))
-            {
-                throw new FormatException("Invalid playlist, M3U header is missing.");
+namespace TwitchDownloaderCore.Tools;
+
+public partial record M3U8 {
+    public static M3U8 Parse(System.IO.Stream stream, Encoding streamEncoding, string basePath = "") {
+        var sr = new StreamReader(stream, streamEncoding);
+        if (!ParsingHelpers.TryParseM3UHeader(sr.ReadLine(), out _))
+            throw new FormatException("Invalid playlist, M3U header is missing.");
+
+        var streams = new List<Stream>();
+
+        Stream.ExtMediaInfo currentExtMediaInfo = null;
+        Stream.ExtStreamInfo currentExtStreamInfo = null;
+
+        Metadata.Builder metadataBuilder = new();
+        DateTimeOffset currentExtProgramDateTime = default;
+        Stream.ExtByteRange currentByteRange = default;
+        Stream.ExtPartInfo currentExtPartInfo = null;
+
+        while (sr.ReadLine() is { } line) {
+            if (string.IsNullOrWhiteSpace(line)) {
+                ClearStreamMetadata(
+                    out currentExtMediaInfo,
+                    out currentExtStreamInfo,
+                    out currentExtProgramDateTime,
+                    out currentByteRange,
+                    out currentExtPartInfo
+                );
+                continue;
             }
 
-            var streams = new List<Stream>();
+            if (line[0] != '#') {
+                var path = Path.Combine(basePath, line);
+                streams.Add(
+                    new(
+                        currentExtMediaInfo,
+                        currentExtStreamInfo,
+                        currentExtPartInfo,
+                        currentExtProgramDateTime,
+                        currentByteRange,
+                        path
+                    )
+                );
+                ClearStreamMetadata(
+                    out currentExtMediaInfo,
+                    out currentExtStreamInfo,
+                    out currentExtProgramDateTime,
+                    out currentByteRange,
+                    out currentExtPartInfo
+                );
 
-            Stream.ExtMediaInfo currentExtMediaInfo = null;
-            Stream.ExtStreamInfo currentExtStreamInfo = null;
-
-            Metadata.Builder metadataBuilder = new();
-            DateTimeOffset currentExtProgramDateTime = default;
-            Stream.ExtByteRange currentByteRange = default;
-            Stream.ExtPartInfo currentExtPartInfo = null;
-
-            while (sr.ReadLine() is { } line)
-            {
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
-                    continue;
-                }
-
-                if (line[0] != '#')
-                {
-                    var path = Path.Combine(basePath, line);
-                    streams.Add(new Stream(currentExtMediaInfo, currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
-                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
-
-                    continue;
-                }
-
-                if (!ParseM3U8Key(line, metadataBuilder, ref currentExtMediaInfo, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
-                    break;
+                continue;
             }
 
-            return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
+            if (!ParseM3U8Key(
+                    line,
+                    metadataBuilder,
+                    ref currentExtMediaInfo,
+                    ref currentExtStreamInfo,
+                    ref currentExtProgramDateTime,
+                    ref currentByteRange,
+                    ref currentExtPartInfo
+                ))
+                break;
         }
 
-        public static M3U8 Parse(ReadOnlySpan<char> text, string basePath = "")
-        {
-            if (!ParsingHelpers.TryParseM3UHeader(text, out text))
-                throw new FormatException("Invalid playlist, M3U header is missing.");
+        return new(metadataBuilder.ToMetadata(), streams.ToArray());
+    }
 
-            var streams = new List<Stream>();
+    public static M3U8 Parse(ReadOnlySpan<char> text, string basePath = "") {
+        if (!ParsingHelpers.TryParseM3UHeader(text, out text))
+            throw new FormatException("Invalid playlist, M3U header is missing.");
 
-            Stream.ExtMediaInfo currentExtMediaInfo = null;
-            Stream.ExtStreamInfo currentExtStreamInfo = null;
+        var streams = new List<Stream>();
 
-            Metadata.Builder metadataBuilder = new();
-            DateTimeOffset currentExtProgramDateTime = default;
-            Stream.ExtByteRange currentByteRange = default;
-            Stream.ExtPartInfo currentExtPartInfo = null;
+        Stream.ExtMediaInfo currentExtMediaInfo = null;
+        Stream.ExtStreamInfo currentExtStreamInfo = null;
 
-            var textStart = -1;
-            var textEnd = text.Length;
-            var lineEnd = -1; // not assigned
-            var iterations = 0;
-            var maxIterations = text.Count('\n') + 1;
-            do
-            {
-                ++textStart;
-                ++iterations;
-                if (iterations > maxIterations)
-                    throw new Exception("Infinite loop encountered while decoding M3U8 playlist.");
+        Metadata.Builder metadataBuilder = new();
+        DateTimeOffset currentExtProgramDateTime = default;
+        Stream.ExtByteRange currentByteRange = default;
+        Stream.ExtPartInfo currentExtPartInfo = null;
 
-                if (textStart >= textEnd)
-                    break;
+        var textStart = -1;
+        var textEnd = text.Length;
+        var lineEnd = -1; // not assigned
+        var iterations = 0;
+        var maxIterations = text.Count('\n') + 1;
+        do {
+            ++textStart;
+            ++iterations;
+            if (iterations > maxIterations)
+                throw new("Infinite loop encountered while decoding M3U8 playlist.");
 
-                var workingSlice = text[textStart..];
-                lineEnd = workingSlice.IndexOf('\n');
-                if (lineEnd != -1)
-                    workingSlice = workingSlice[..lineEnd].TrimEnd('\r');
+            if (textStart >= textEnd)
+                break;
 
-                if (workingSlice.IsWhiteSpace())
-                {
-                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
-                    continue;
-                }
+            var workingSlice = text[textStart..];
+            lineEnd = workingSlice.IndexOf('\n');
+            if (lineEnd != -1)
+                workingSlice = workingSlice[..lineEnd].TrimEnd('\r');
 
-                if (workingSlice[0] != '#')
-                {
-                    var path = Path.Combine(basePath, workingSlice.ToString());
-                    streams.Add(new Stream(currentExtMediaInfo, currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
-                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
+            if (workingSlice.IsWhiteSpace()) {
+                ClearStreamMetadata(
+                    out currentExtMediaInfo,
+                    out currentExtStreamInfo,
+                    out currentExtProgramDateTime,
+                    out currentByteRange,
+                    out currentExtPartInfo
+                );
+                continue;
+            }
 
-                    if (lineEnd == -1)
-                        break;
-
-                    continue;
-                }
-
-                if (!ParseM3U8Key(workingSlice, metadataBuilder, ref currentExtMediaInfo, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
-                    break;
+            if (workingSlice[0] != '#') {
+                var path = Path.Combine(basePath, workingSlice.ToString());
+                streams.Add(
+                    new(
+                        currentExtMediaInfo,
+                        currentExtStreamInfo,
+                        currentExtPartInfo,
+                        currentExtProgramDateTime,
+                        currentByteRange,
+                        path
+                    )
+                );
+                ClearStreamMetadata(
+                    out currentExtMediaInfo,
+                    out currentExtStreamInfo,
+                    out currentExtProgramDateTime,
+                    out currentByteRange,
+                    out currentExtPartInfo
+                );
 
                 if (lineEnd == -1)
                     break;
-                
-            } while ((textStart += lineEnd) < textEnd);
 
-            return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
+                continue;
+            }
+
+            if (!ParseM3U8Key(
+                    workingSlice,
+                    metadataBuilder,
+                    ref currentExtMediaInfo,
+                    ref currentExtStreamInfo,
+                    ref currentExtProgramDateTime,
+                    ref currentByteRange,
+                    ref currentExtPartInfo
+                ))
+                break;
+
+            if (lineEnd == -1)
+                break;
+
+        } while ((textStart += lineEnd) < textEnd);
+
+        return new(metadataBuilder.ToMetadata(), streams.ToArray());
+    }
+
+    private static void ClearStreamMetadata(
+        out Stream.ExtMediaInfo currentExtMediaInfo,
+        out Stream.ExtStreamInfo currentExtStreamInfo,
+        out DateTimeOffset currentExtProgramDateTime,
+        out Stream.ExtByteRange currentByteRange,
+        out Stream.ExtPartInfo currentExtPartInfo
+    ) {
+        currentExtMediaInfo = null;
+        currentExtStreamInfo = null;
+        currentExtProgramDateTime = default;
+        currentByteRange = default;
+        currentExtPartInfo = null;
+    }
+
+    private static bool ParseM3U8Key(
+        ReadOnlySpan<char> text,
+        Metadata.Builder metadataBuilder,
+        ref Stream.ExtMediaInfo extMediaInfo,
+        ref Stream.ExtStreamInfo extStreamInfo,
+        ref DateTimeOffset extProgramDateTime,
+        ref Stream.ExtByteRange byteRange,
+        ref Stream.ExtPartInfo extPartInfo
+    ) {
+        const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
+        const string END_LIST_KEY = "#EXT-X-ENDLIST";
+        if (text.StartsWith(Stream.ExtMediaInfo.MEDIA_INFO_KEY))
+            extMediaInfo = Stream.ExtMediaInfo.Parse(text);
+        else if (text.StartsWith(Stream.ExtStreamInfo.STREAM_INFO_KEY))
+            extStreamInfo = Stream.ExtStreamInfo.Parse(text);
+        else if (text.StartsWith(PROGRAM_DATE_TIME_KEY))
+            extProgramDateTime = ParsingHelpers.ParseDateTimeOffset(text, PROGRAM_DATE_TIME_KEY, false);
+        else if (text.StartsWith(Stream.ExtByteRange.BYTE_RANGE_KEY))
+            byteRange = Stream.ExtByteRange.Parse(text);
+        else if (text.StartsWith(Stream.ExtPartInfo.PART_INFO_KEY))
+            extPartInfo = Stream.ExtPartInfo.Parse(text);
+        else if (text.StartsWith(END_LIST_KEY))
+            return false;
+        else
+            metadataBuilder.ParseAndAppend(text);
+
+        return true;
+    }
+
+    public partial record Metadata {
+        public sealed class Builder {
+            private Metadata _metadata;
+
+            public Builder ParseAndAppend(ReadOnlySpan<char> text) {
+                text = text.Trim();
+
+                if (!text.IsEmpty)
+                    this.ParseAndAppendCore(text);
+
+                return this;
+            }
+
+            private void ParseAndAppendCore(ReadOnlySpan<char> text) {
+                if (text.StartsWith(Metadata.TARGET_VERSION_KEY)) {
+                    this._metadata ??= new();
+                    this._metadata.Version = ParsingHelpers.ParseUIntValue(text, Metadata.TARGET_VERSION_KEY);
+                } else if (text.StartsWith(Metadata.TARGET_DURATION_KEY)) {
+                    this._metadata ??= new();
+                    this._metadata.StreamTargetDuration
+                        = ParsingHelpers.ParseUIntValue(text, Metadata.TARGET_DURATION_KEY);
+                } else if (text.StartsWith(Metadata.PLAYLIST_TYPE_KEY)) {
+                    this._metadata ??= new();
+                    var temp = text[Metadata.PLAYLIST_TYPE_KEY.Length..];
+                    if (temp.StartsWith(Metadata.PLAYLIST_TYPE_VOD))
+                        this._metadata.Type = PlaylistType.Vod;
+                    else if (temp.StartsWith(Metadata.PLAYLIST_TYPE_EVENT))
+                        this._metadata.Type = PlaylistType.Event;
+                    else
+                        throw new FormatException($"Unable to parse PlaylistType from: {text}");
+                } else if (text.StartsWith(Metadata.MEDIA_SEQUENCE_KEY)) {
+                    this._metadata ??= new();
+                    this._metadata.MediaSequence = ParsingHelpers.ParseUIntValue(text, Metadata.MEDIA_SEQUENCE_KEY);
+                } else if (text.StartsWith(Metadata.TWITCH_LIVE_SEQUENCE_KEY)) {
+                    this._metadata ??= new();
+                    this._metadata.TwitchLiveSequence = ParsingHelpers.ParseUIntValue(
+                        text,
+                        Metadata.TWITCH_LIVE_SEQUENCE_KEY
+                    );
+                } else if (text.StartsWith(Metadata.TWITCH_ELAPSED_SECS_KEY)) {
+                    this._metadata ??= new();
+                    this._metadata.TwitchElapsedSeconds
+                        = ParsingHelpers.ParseDecimalValue(text, Metadata.TWITCH_ELAPSED_SECS_KEY);
+                } else if (text.StartsWith(Metadata.TWITCH_TOTAL_SECS_KEY)) {
+                    this._metadata ??= new();
+                    this._metadata.TwitchTotalSeconds
+                        = ParsingHelpers.ParseDecimalValue(text, Metadata.TWITCH_TOTAL_SECS_KEY);
+                } else if (text.StartsWith(Metadata.TWITCH_INFO_KEY)) {
+                    // Do nothing. This header includes response related info that we don't need.
+                } else if (text[0] == '#') {
+                    this._metadata ??= new();
+                    var colonIndex = text.IndexOf(':');
+                    if (colonIndex != -1) {
+                        var kvp = new KeyValuePair<string, string>(
+                            text[..(colonIndex + 1)].ToString(),
+                            text[(colonIndex + 1)..].ToString()
+                        );
+                        this._metadata._unparsedValues.Add(kvp);
+                    } else {
+                        var kvp = new KeyValuePair<string, string>("", text.ToString());
+                        this._metadata._unparsedValues.Add(kvp);
+                    }
+                }
+            }
+
+            public Metadata ToMetadata() => this._metadata;
+        }
+    }
+
+    public partial record Stream {
+        public partial record struct ExtByteRange {
+            public static ExtByteRange Parse(ReadOnlySpan<char> text) {
+                if (text.StartsWith(ExtByteRange.BYTE_RANGE_KEY))
+                    text = text[17..];
+
+                var separatorIndex = text.IndexOf('@');
+                if (separatorIndex != -1
+                    && separatorIndex != text.Length
+                    && uint.TryParse(
+                        text[..separatorIndex],
+                        NumberStyles.Integer,
+                        CultureInfo.InvariantCulture,
+                        out var start
+                    )
+                    && uint.TryParse(
+                        text[(separatorIndex + 1)..],
+                        NumberStyles.Integer,
+                        CultureInfo.InvariantCulture,
+                        out var end
+                    ))
+                    return new(start, end);
+
+                throw new FormatException($"Unable to parse ByteRange from {text}.");
+            }
         }
 
-        private static void ClearStreamMetadata(out Stream.ExtMediaInfo currentExtMediaInfo, out Stream.ExtStreamInfo currentExtStreamInfo, out DateTimeOffset currentExtProgramDateTime,
-            out Stream.ExtByteRange currentByteRange, out Stream.ExtPartInfo currentExtPartInfo)
-        {
-            currentExtMediaInfo = null;
-            currentExtStreamInfo = null;
-            currentExtProgramDateTime = default;
-            currentByteRange = default;
-            currentExtPartInfo = null;
+        public partial record ExtMediaInfo {
+            public static ExtMediaInfo Parse(ReadOnlySpan<char> text) {
+                var mediaInfo = new ExtMediaInfo();
+
+                if (text.StartsWith(ExtMediaInfo.MEDIA_INFO_KEY))
+                    text = text[13..];
+
+                const string KEY_TYPE = "TYPE=";
+                const string KEY_GROUP_ID = "GROUP-ID=\"";
+                const string KEY_NAME = "NAME=\"";
+                const string KEY_AUTOSELECT = "AUTOSELECT=";
+                const string KEY_DEFAULT = "DEFAULT=";
+                do {
+                    text = text.TrimStart();
+
+                    if (text.StartsWith(KEY_TYPE)) {
+                        var temp = text[KEY_TYPE.Length..];
+                        if (temp.StartsWith(ExtMediaInfo.MEDIA_TYPE_VIDEO))
+                            mediaInfo.Type = MediaType.Video;
+                        else if (temp.StartsWith(ExtMediaInfo.MEDIA_TYPE_AUDIO))
+                            mediaInfo.Type = MediaType.Audio;
+                        else
+                            throw new FormatException($"Unable to parse MediaType from: {text}");
+                    } else if (text.StartsWith(KEY_GROUP_ID))
+                        mediaInfo.GroupId = ParsingHelpers.ParseStringValue(text, KEY_GROUP_ID);
+                    else if (text.StartsWith(KEY_NAME))
+                        mediaInfo.Name = ParsingHelpers.ParseStringValue(text, KEY_NAME);
+                    else if (text.StartsWith(KEY_AUTOSELECT))
+                        mediaInfo.AutoSelect = ParsingHelpers.ParseBooleanValue(text, KEY_AUTOSELECT);
+                    else if (text.StartsWith(KEY_DEFAULT))
+                        mediaInfo.Default = ParsingHelpers.ParseBooleanValue(text, KEY_DEFAULT);
+
+                    var nextIndex = text.UnEscapedIndexOf(',');
+                    if (nextIndex == -1)
+                        break;
+
+                    text = text[(nextIndex + 1)..];
+                } while (true);
+
+                return mediaInfo;
+            }
         }
 
-        private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtMediaInfo extMediaInfo, ref Stream.ExtStreamInfo extStreamInfo,
-            ref DateTimeOffset extProgramDateTime, ref Stream.ExtByteRange byteRange, ref Stream.ExtPartInfo extPartInfo)
-        {
-            const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
-            const string END_LIST_KEY = "#EXT-X-ENDLIST";
-            if (text.StartsWith(Stream.ExtMediaInfo.MEDIA_INFO_KEY))
-                extMediaInfo = Stream.ExtMediaInfo.Parse(text);
-            else if (text.StartsWith(Stream.ExtStreamInfo.STREAM_INFO_KEY))
-                extStreamInfo = Stream.ExtStreamInfo.Parse(text);
-            else if (text.StartsWith(PROGRAM_DATE_TIME_KEY))
-                extProgramDateTime = ParsingHelpers.ParseDateTimeOffset(text, PROGRAM_DATE_TIME_KEY, false);
-            else if (text.StartsWith(Stream.ExtByteRange.BYTE_RANGE_KEY))
-                byteRange = Stream.ExtByteRange.Parse(text);
-            else if (text.StartsWith(Stream.ExtPartInfo.PART_INFO_KEY))
-                extPartInfo = Stream.ExtPartInfo.Parse(text);
-            else if (text.StartsWith(END_LIST_KEY))
+        public partial record ExtStreamInfo {
+
+            public static ExtStreamInfo Parse(ReadOnlySpan<char> text) {
+                var streamInfo = new ExtStreamInfo();
+
+                if (text.StartsWith(ExtStreamInfo.STREAM_INFO_KEY))
+                    text = text[18..];
+
+                const string KEY_PROGRAM_ID = "PROGRAM-ID=";
+                const string KEY_BANDWIDTH = "BANDWIDTH=";
+                const string KEY_CODECS = "CODECS=\"";
+                const string KEY_RESOLUTION = "RESOLUTION=";
+                const string KEY_VIDEO = "VIDEO=\"";
+                const string KEY_FRAMERATE = "FRAME-RATE=";
+                do {
+                    text = text.TrimStart();
+
+                    if (text.StartsWith(KEY_PROGRAM_ID))
+                        streamInfo.ProgramId = ParsingHelpers.ParseIntValue(text, KEY_PROGRAM_ID, false);
+                    else if (text.StartsWith(KEY_BANDWIDTH))
+                        streamInfo.Bandwidth = ParsingHelpers.ParseIntValue(text, KEY_BANDWIDTH, false);
+                    else if (text.StartsWith(KEY_CODECS))
+                        streamInfo.Codecs = ParsingHelpers.ParseStringValue(text, KEY_CODECS);
+                    else if (text.StartsWith(KEY_RESOLUTION))
+                        streamInfo.Resolution = ParsingHelpers.ParseResolution(text, KEY_RESOLUTION);
+                    else if (text.StartsWith(KEY_VIDEO))
+                        streamInfo.Video = ParsingHelpers.ParseStringValue(text, KEY_VIDEO);
+                    else if (text.StartsWith(KEY_FRAMERATE))
+                        streamInfo.Framerate = ParsingHelpers.ParseDecimalValue(text, KEY_FRAMERATE, false);
+
+                    var nextIndex = text.UnEscapedIndexOf(',');
+                    if (nextIndex == -1)
+                        break;
+
+                    text = text[(nextIndex + 1)..];
+                } while (true);
+
+                // Sometimes Twitch's M3U8 response lacks a Framerate value, among other things. We can just guess the framerate using the Video value.
+                if (streamInfo.Framerate != 0
+                    || !Regex.IsMatch(streamInfo.Video, @"p\d+$", RegexOptions.RightToLeft))
+                    return streamInfo;
+
+                var index = streamInfo.Video.LastIndexOf('p');
+                streamInfo.Framerate = int.Parse(streamInfo.Video.AsSpan(index + 1));
+
+                return streamInfo;
+            }
+
+            public partial record struct StreamResolution {
+                public static StreamResolution Parse(ReadOnlySpan<char> text) {
+                    if (text.StartsWith("RESOLUTION="))
+                        text = text[11..];
+
+                    var separatorIndex = text.IndexOfAny("x");
+                    if (separatorIndex != -1
+                        && separatorIndex != text.Length
+                        && uint.TryParse(
+                            text[..separatorIndex],
+                            NumberStyles.Integer,
+                            CultureInfo.InvariantCulture,
+                            out var width
+                        )
+                        && uint.TryParse(
+                            text[(separatorIndex + 1)..],
+                            NumberStyles.Integer,
+                            CultureInfo.InvariantCulture,
+                            out var height
+                        ))
+                        return new(width, height);
+
+                    throw new FormatException($"Unable to parse Resolution from {text}.");
+                }
+            }
+        }
+
+        public partial record ExtPartInfo {
+            public static ExtPartInfo Parse(ReadOnlySpan<char> text) {
+                var partInfo = new ExtPartInfo();
+
+                if (text.StartsWith(ExtPartInfo.PART_INFO_KEY))
+                    text = text[8..];
+
+                do {
+                    text = text.TrimStart();
+
+                    if (!text.IsEmpty && char.IsDigit(text[0]))
+                        partInfo.Duration = ParsingHelpers.ParseDecimalValue(text, "");
+                    else if (text.StartsWith("live"))
+                        partInfo.Live = true;
+
+                    var nextIndex = text.UnEscapedIndexOf(',');
+                    if (nextIndex == -1)
+                        break;
+
+                    text = text[(nextIndex + 1)..];
+                } while (true);
+
+                return partInfo;
+            }
+        }
+    }
+
+    private static class ParsingHelpers {
+        public static bool TryParseM3UHeader(ReadOnlySpan<char> text, out ReadOnlySpan<char> textWithoutHeader) {
+            const string M3U_HEADER = "#EXTM3U";
+            if (!text.StartsWith(M3U_HEADER)) {
+                textWithoutHeader = default;
                 return false;
-            else
-                metadataBuilder.ParseAndAppend(text);
+            }
 
+            textWithoutHeader = text[7..].TrimStart(" \r\n");
             return true;
         }
 
-        public partial record Metadata
-        {
-            public sealed class Builder
-            {
-                private Metadata _metadata;
+        public static string ParseStringValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName) {
+            var temp = text[keyName.Length..];
 
-                public Builder ParseAndAppend(ReadOnlySpan<char> text)
-                {
-                    text = text.Trim();
+            if (temp.Contains("\\\"", StringComparison.Ordinal))
+                throw new NotSupportedException(
+                    "Escaped quotes are not supported. Please report this as a bug: https://github.com/lay295/TwitchDownloader/issues/new/choose"
+                );
 
-                    if (!text.IsEmpty)
-                        this.ParseAndAppendCore(text);
+            var closeQuote = temp.IndexOf('"');
+            if (closeQuote == -1)
+                throw new FormatException("Expected close quote was not found.");
 
-                    return this;
-                }
-
-                private void ParseAndAppendCore(ReadOnlySpan<char> text)
-                {
-                    if (text.StartsWith(TARGET_VERSION_KEY))
-                    {
-                        this._metadata ??= new();
-                        this._metadata.Version = ParsingHelpers.ParseUIntValue(text, TARGET_VERSION_KEY);
-                    }
-                    else if (text.StartsWith(TARGET_DURATION_KEY))
-                    {
-                        this._metadata ??= new Metadata();
-                        this._metadata.StreamTargetDuration = ParsingHelpers.ParseUIntValue(text, TARGET_DURATION_KEY);
-                    }
-                    else if (text.StartsWith(PLAYLIST_TYPE_KEY))
-                    {
-                        this._metadata ??= new Metadata();
-                        var temp = text[PLAYLIST_TYPE_KEY.Length..];
-                        if (temp.StartsWith(PLAYLIST_TYPE_VOD))
-                            this._metadata.Type = PlaylistType.Vod;
-                        else if (temp.StartsWith(PLAYLIST_TYPE_EVENT))
-                            this._metadata.Type = PlaylistType.Event;
-                        else
-                            throw new FormatException($"Unable to parse PlaylistType from: {text}");
-                    }
-                    else if (text.StartsWith(MEDIA_SEQUENCE_KEY))
-                    {
-                        this._metadata ??= new Metadata();
-                        this._metadata.MediaSequence = ParsingHelpers.ParseUIntValue(text, MEDIA_SEQUENCE_KEY);
-                    }
-                    else if (text.StartsWith(TWITCH_LIVE_SEQUENCE_KEY))
-                    {
-                        this._metadata ??= new Metadata();
-                        this._metadata.TwitchLiveSequence = ParsingHelpers.ParseUIntValue(text, TWITCH_LIVE_SEQUENCE_KEY);
-                    }
-                    else if (text.StartsWith(TWITCH_ELAPSED_SECS_KEY))
-                    {
-                        this._metadata ??= new Metadata();
-                        this._metadata.TwitchElapsedSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_ELAPSED_SECS_KEY);
-                    }
-                    else if (text.StartsWith(TWITCH_TOTAL_SECS_KEY))
-                    {
-                        this._metadata ??= new Metadata();
-                        this._metadata.TwitchTotalSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_TOTAL_SECS_KEY);
-                    }
-                    else if (text.StartsWith(TWITCH_INFO_KEY))
-                    {
-                        // Do nothing. This header includes response related info that we don't need.
-                    }
-                    else if (text[0] == '#')
-                    {
-                        this._metadata ??= new Metadata();
-                        var colonIndex = text.IndexOf(':');
-                        if (colonIndex != -1)
-                        {
-                            var kvp = new KeyValuePair<string, string>(text[..(colonIndex + 1)].ToString(), text[(colonIndex + 1)..].ToString());
-                            this._metadata._unparsedValues.Add(kvp);
-                        }
-                        else
-                        {
-                            var kvp = new KeyValuePair<string, string>("", text.ToString());
-                            this._metadata._unparsedValues.Add(kvp);
-                        }
-                    }
-                }
-
-                public Metadata ToMetadata() => this._metadata;
-            }
+            return temp[..closeQuote].ToString();
         }
 
-        public partial record Stream
-        {
-            public partial record struct ExtByteRange
-            {
-                public static ExtByteRange Parse(ReadOnlySpan<char> text)
-                {
-                    if (text.StartsWith(BYTE_RANGE_KEY))
-                        text = text[17..];
+        public static int ParseIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true) {
+            var temp = text[keyName.Length..];
+            temp = temp[..NextKeyStart(temp)];
 
-                    var separatorIndex = text.IndexOf('@');
-                    if (separatorIndex != -1
-                        && separatorIndex != text.Length
-                        && uint.TryParse(text[..separatorIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var start)
-                        && uint.TryParse(text[(separatorIndex + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var end))
-                        return new ExtByteRange(start, end);
+            if (int.TryParse(temp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue))
+                return intValue;
 
-                    throw new FormatException($"Unable to parse ByteRange from {text}.");
-                }
-            }
+            if (!strict)
+                return default;
 
-            public partial record ExtMediaInfo
-            {
-                public static Stream.ExtMediaInfo Parse(ReadOnlySpan<char> text)
-                {
-                    var mediaInfo = new Stream.ExtMediaInfo();
-
-                    if (text.StartsWith(MEDIA_INFO_KEY))
-                        text = text[13..];
-
-                    const string KEY_TYPE = "TYPE=";
-                    const string KEY_GROUP_ID = "GROUP-ID=\"";
-                    const string KEY_NAME = "NAME=\"";
-                    const string KEY_AUTOSELECT = "AUTOSELECT=";
-                    const string KEY_DEFAULT = "DEFAULT=";
-                    do
-                    {
-                        text = text.TrimStart();
-
-                        if (text.StartsWith(KEY_TYPE))
-                        {
-                            var temp = text[KEY_TYPE.Length..];
-                            if (temp.StartsWith(MEDIA_TYPE_VIDEO))
-                                mediaInfo.Type = MediaType.Video;
-                            else if (temp.StartsWith(MEDIA_TYPE_AUDIO))
-                                mediaInfo.Type = MediaType.Audio;
-                            else
-                                throw new FormatException($"Unable to parse MediaType from: {text}");
-                        } else if (text.StartsWith(KEY_GROUP_ID))
-                            mediaInfo.GroupId = ParsingHelpers.ParseStringValue(text, KEY_GROUP_ID);
-                        else if (text.StartsWith(KEY_NAME))
-                            mediaInfo.Name = ParsingHelpers.ParseStringValue(text, KEY_NAME);
-                        else if (text.StartsWith(KEY_AUTOSELECT))
-                            mediaInfo.AutoSelect = ParsingHelpers.ParseBooleanValue(text, KEY_AUTOSELECT);
-                        else if (text.StartsWith(KEY_DEFAULT))
-                            mediaInfo.Default = ParsingHelpers.ParseBooleanValue(text, KEY_DEFAULT);
-
-                        var nextIndex = text.UnEscapedIndexOf(',');
-                        if (nextIndex == -1)
-                            break;
-
-                        text = text[(nextIndex + 1)..];
-                    } while (true);
-
-                    return mediaInfo;
-                }
-            }
-
-            public partial record ExtStreamInfo
-            {
-                public partial record struct StreamResolution
-                {
-                    public static StreamResolution Parse(ReadOnlySpan<char> text)
-                    {
-                        if (text.StartsWith("RESOLUTION="))
-                            text = text[11..];
-
-                        var separatorIndex = text.IndexOfAny("x");
-                        if (separatorIndex != -1
-                            && separatorIndex != text.Length
-                            && uint.TryParse(text[..separatorIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var width)
-                            && uint.TryParse(text[(separatorIndex + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var height))
-                            return new StreamResolution(width, height);
-
-                        throw new FormatException($"Unable to parse Resolution from {text}.");
-                    }
-                }
-
-                public static ExtStreamInfo Parse(ReadOnlySpan<char> text)
-                {
-                    var streamInfo = new ExtStreamInfo();
-
-                    if (text.StartsWith(STREAM_INFO_KEY))
-                        text = text[18..];
-
-                    const string KEY_PROGRAM_ID = "PROGRAM-ID=";
-                    const string KEY_BANDWIDTH = "BANDWIDTH=";
-                    const string KEY_CODECS = "CODECS=\"";
-                    const string KEY_RESOLUTION = "RESOLUTION=";
-                    const string KEY_VIDEO = "VIDEO=\"";
-                    const string KEY_FRAMERATE = "FRAME-RATE=";
-                    do
-                    {
-                        text = text.TrimStart();
-
-                        if (text.StartsWith(KEY_PROGRAM_ID))
-                            streamInfo.ProgramId = ParsingHelpers.ParseIntValue(text, KEY_PROGRAM_ID, false);
-                        else if (text.StartsWith(KEY_BANDWIDTH))
-                            streamInfo.Bandwidth = ParsingHelpers.ParseIntValue(text, KEY_BANDWIDTH, false);
-                        else if (text.StartsWith(KEY_CODECS))
-                            streamInfo.Codecs = ParsingHelpers.ParseStringValue(text, KEY_CODECS);
-                        else if (text.StartsWith(KEY_RESOLUTION))
-                            streamInfo.Resolution = ParsingHelpers.ParseResolution(text, KEY_RESOLUTION);
-                        else if (text.StartsWith(KEY_VIDEO))
-                            streamInfo.Video = ParsingHelpers.ParseStringValue(text, KEY_VIDEO);
-                        else if (text.StartsWith(KEY_FRAMERATE))
-                            streamInfo.Framerate = ParsingHelpers.ParseDecimalValue(text, KEY_FRAMERATE, false);
-
-                        var nextIndex = text.UnEscapedIndexOf(',');
-                        if (nextIndex == -1)
-                            break;
-
-                        text = text[(nextIndex + 1)..];
-                    } while (true);
-
-                    // Sometimes Twitch's M3U8 response lacks a Framerate value, among other things. We can just guess the framerate using the Video value.
-                    if (streamInfo.Framerate != 0
-                        || !Regex.IsMatch(streamInfo.Video, @"p\d+$", RegexOptions.RightToLeft))
-                        return streamInfo;
-
-                    var index = streamInfo.Video.LastIndexOf('p');
-                    streamInfo.Framerate = int.Parse(streamInfo.Video.AsSpan(index + 1));
-
-                    return streamInfo;
-                }
-            }
-
-            public partial record ExtPartInfo
-            {
-                public static ExtPartInfo Parse(ReadOnlySpan<char> text)
-                {
-                    var partInfo = new ExtPartInfo();
-
-                    if (text.StartsWith(PART_INFO_KEY))
-                        text = text[8..];
-
-                    do
-                    {
-                        text = text.TrimStart();
-
-                        if (!text.IsEmpty && char.IsDigit(text[0]))
-                            partInfo.Duration = ParsingHelpers.ParseDecimalValue(text, "");
-                        else if (text.StartsWith("live"))
-                            partInfo.Live = true;
-
-                        var nextIndex = text.UnEscapedIndexOf(',');
-                        if (nextIndex == -1)
-                            break;
-
-                        text = text[(nextIndex + 1)..];
-                    } while (true);
-
-                    return partInfo;
-                }
-            }
+            throw new FormatException($"Unable to parse integer from: {text}");
         }
 
-        private static class ParsingHelpers
-        {
-            public static bool TryParseM3UHeader(ReadOnlySpan<char> text, out ReadOnlySpan<char> textWithoutHeader)
-            {
-                const string M3U_HEADER = "#EXTM3U";
-                if (!text.StartsWith(M3U_HEADER))
-                {
-                    textWithoutHeader = default;
-                    return false;
-                }
+        public static uint ParseUIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true) {
+            var temp = text[keyName.Length..];
+            temp = temp[..NextKeyStart(temp)];
 
-                textWithoutHeader = text[7..].TrimStart(" \r\n");
+            if (uint.TryParse(temp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var uIntValue))
+                return uIntValue;
+
+            if (!strict)
+                return default;
+
+            throw new FormatException($"Unable to parse integer from: {text}");
+        }
+
+        public static decimal ParseDecimalValue(
+            ReadOnlySpan<char> text,
+            ReadOnlySpan<char> keyName,
+            bool strict = true
+        ) {
+            var temp = text[keyName.Length..];
+            temp = temp[..NextKeyStart(temp)];
+
+            if (decimal.TryParse(temp, NumberStyles.Number, CultureInfo.InvariantCulture, out var decimalValue))
+                return decimalValue;
+
+            if (!strict)
+                return default;
+
+            throw new FormatException($"Unable to parse decimal from: {text}");
+        }
+
+        public static bool ParseBooleanValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true) {
+            var temp = text[keyName.Length..];
+
+            if (temp.StartsWith("NO"))
+                return false;
+
+            if (temp.StartsWith("YES"))
                 return true;
-            }
 
-            public static string ParseStringValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
-            {
-                var temp = text[keyName.Length..];
+            temp = temp[..NextKeyStart(temp)];
 
-                if (temp.Contains("\\\"", StringComparison.Ordinal))
-                    throw new NotSupportedException("Escaped quotes are not supported. Please report this as a bug: https://github.com/lay295/TwitchDownloader/issues/new/choose");
+            if (bool.TryParse(temp, out var booleanValue))
+                return booleanValue;
 
-                var closeQuote = temp.IndexOf('"');
-                if (closeQuote == -1)
-                    throw new FormatException("Expected close quote was not found.");
+            if (!strict)
+                return default;
 
-                return temp[..closeQuote].ToString();
-            }
+            throw new FormatException($"Unable to parse boolean from: {text}");
+        }
 
-            public static int ParseIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
-            {
-                var temp = text[keyName.Length..];
-                temp = temp[..NextKeyStart(temp)];
+        public static Stream.ExtStreamInfo.StreamResolution ParseResolution(
+            ReadOnlySpan<char> text,
+            ReadOnlySpan<char> keyName
+        ) {
+            var temp = text[keyName.Length..];
+            temp = temp[..NextKeyStart(temp)];
 
-                if (int.TryParse(temp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue))
-                    return intValue;
+            return Stream.ExtStreamInfo.StreamResolution.Parse(temp);
+        }
 
-                if (!strict)
-                    return default;
+        public static DateTimeOffset ParseDateTimeOffset(
+            ReadOnlySpan<char> text,
+            ReadOnlySpan<char> keyName,
+            bool strict = true
+        ) {
+            var temp = text[keyName.Length..];
+            temp = temp[..NextKeyStart(temp)];
 
-                throw new FormatException($"Unable to parse integer from: {text}");
-            }
+            if (DateTimeOffset.TryParse(temp, null, DateTimeStyles.AssumeUniversal, out var dateTimeOffset))
+                return dateTimeOffset;
 
-            public static uint ParseUIntValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
-            {
-                var temp = text[keyName.Length..];
-                temp = temp[..NextKeyStart(temp)];
+            if (!strict)
+                return default;
 
-                if (uint.TryParse(temp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var uIntValue))
-                    return uIntValue;
+            throw new FormatException($"Unable to parse DateTimeOffset from: {text}");
+        }
 
-                if (!strict)
-                    return default;
-
-                throw new FormatException($"Unable to parse integer from: {text}");
-            }
-
-            public static decimal ParseDecimalValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
-            {
-                var temp = text[keyName.Length..];
-                temp = temp[..NextKeyStart(temp)];
-
-                if (decimal.TryParse(temp, NumberStyles.Number, CultureInfo.InvariantCulture, out var decimalValue))
-                    return decimalValue;
-
-                if (!strict)
-                    return default;
-
-                throw new FormatException($"Unable to parse decimal from: {text}");
-            }
-
-            public static bool ParseBooleanValue(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
-            {
-                var temp = text[keyName.Length..];
-
-                if (temp.StartsWith("NO"))
-                    return false;
-
-                if (temp.StartsWith("YES"))
-                    return true;
-
-                temp = temp[..NextKeyStart(temp)];
-
-                if (bool.TryParse(temp, out var booleanValue))
-                    return booleanValue;
-
-                if (!strict)
-                    return default;
-
-                throw new FormatException($"Unable to parse boolean from: {text}");
-            }
-
-            public static Stream.ExtStreamInfo.StreamResolution ParseResolution(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
-            {
-                var temp = text[keyName.Length..];
-                temp = temp[..NextKeyStart(temp)];
-
-                return Stream.ExtStreamInfo.StreamResolution.Parse(temp);
-            }
-
-            public static DateTimeOffset ParseDateTimeOffset(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName, bool strict = true)
-            {
-                var temp = text[keyName.Length..];
-                temp = temp[..NextKeyStart(temp)];
-
-                if (DateTimeOffset.TryParse(temp, null, DateTimeStyles.AssumeUniversal, out var dateTimeOffset))
-                    return dateTimeOffset;
-
-                if (!strict)
-                    return default;
-
-                throw new FormatException($"Unable to parse DateTimeOffset from: {text}");
-            }
-
-            private static Index NextKeyStart(ReadOnlySpan<char> text)
-            {
-                var nextKey = text.UnEscapedIndexOfAny(",\r\n");
-                return nextKey switch
-                {
-                    -1 => text.Length, // This is probably the last value
-                    _ => nextKey
-                };
-            }
+        private static Index NextKeyStart(ReadOnlySpan<char> text) {
+            var nextKey = text.UnEscapedIndexOfAny(",\r\n");
+            return nextKey switch {
+                -1 => text.Length, // This is probably the last value
+                _ => nextKey
+            };
         }
     }
 }

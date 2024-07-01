@@ -1,106 +1,96 @@
 using TwitchDownloaderCore.Extensions;
 
-namespace TwitchDownloaderCore.Tests.ExtensionTests
-{
-    // ReSharper disable StringLiteralTypo
-    public class ReadOnlySpanTryReplaceNonEscapedTests
-    {
-        [Fact]
-        public void ReturnsFalse_WhenDestinationTooShort()
-        {
-            ReadOnlySpan<char> str = @"SORRY FOR TRAFFIC NaM";
-            var destination = Array.Empty<char>();
+namespace TwitchDownloaderCore.Tests.ExtensionTests;
 
-            var success = str.TryReplaceNonEscaped(destination, 'r', 'w');
+// ReSharper disable StringLiteralTypo
+public class ReadOnlySpanTryReplaceNonEscapedTests {
+    [Fact]
+    public void ReturnsFalse_WhenDestinationTooShort() {
+        ReadOnlySpan<char> str = @"SORRY FOR TRAFFIC NaM";
+        var destination = Array.Empty<char>();
 
-            Assert.False(success);
-        }
+        var success = str.TryReplaceNonEscaped(destination, 'r', 'w');
 
-        [Fact]
-        public void MatchesOriginalString_WhenOldCharNotFound()
-        {
-            ReadOnlySpan<char> str = @"SORRY FOR TRAFFIC NaM";
-            var destination = new char[str.Length];
-            const string EXPECTED = @"SORRY FOR TRAFFIC NaM";
+        Assert.False(success);
+    }
 
-            var success = str.TryReplaceNonEscaped(destination, 'r', 'w');
+    [Fact]
+    public void MatchesOriginalString_WhenOldCharNotFound() {
+        ReadOnlySpan<char> str = @"SORRY FOR TRAFFIC NaM";
+        var destination = new char[str.Length];
+        const string EXPECTED = @"SORRY FOR TRAFFIC NaM";
 
-            Assert.True(success);
-            Assert.Equal(EXPECTED.AsSpan(), destination);
-        }
+        var success = str.TryReplaceNonEscaped(destination, 'r', 'w');
 
-        [Fact]
-        public void CorrectlyEscapeCharsPrependedByBackslash()
-        {
-            ReadOnlySpan<char> str = @"SO\RRY FO\R TRAFFIC NaM";
-            var destination = new char[str.Length];
-            const string EXPECTED = @"SO\RWY FO\R TWAFFIC NaM";
+        Assert.True(success);
+        Assert.Equal(EXPECTED.AsSpan(), destination);
+    }
 
-            var success = str.TryReplaceNonEscaped(destination, 'R', 'W');
+    [Fact]
+    public void CorrectlyEscapeCharsPrependedByBackslash() {
+        ReadOnlySpan<char> str = @"SO\RRY FO\R TRAFFIC NaM";
+        var destination = new char[str.Length];
+        const string EXPECTED = @"SO\RWY FO\R TWAFFIC NaM";
 
-            Assert.True(success);
-            Assert.Equal(EXPECTED.AsSpan(), destination);
-        }
+        var success = str.TryReplaceNonEscaped(destination, 'R', 'W');
 
-        [Fact]
-        public void CorrectlyEscapeSingleCharsContainedWithinQuotes()
-        {
-            ReadOnlySpan<char> str = "SO\"R\"RY FO'R' TRAFFIC NaM";
-            var destination = new char[str.Length];
-            const string EXPECTED = "SO\"R\"WY FO'R' TWAFFIC NaM";
+        Assert.True(success);
+        Assert.Equal(EXPECTED.AsSpan(), destination);
+    }
 
-            var success = str.TryReplaceNonEscaped(destination, 'R', 'W');
+    [Fact]
+    public void CorrectlyEscapeSingleCharsContainedWithinQuotes() {
+        ReadOnlySpan<char> str = "SO\"R\"RY FO'R' TRAFFIC NaM";
+        var destination = new char[str.Length];
+        const string EXPECTED = "SO\"R\"WY FO'R' TWAFFIC NaM";
 
-            Assert.True(success);
-            Assert.Equal(EXPECTED.AsSpan(), destination);
-        }
+        var success = str.TryReplaceNonEscaped(destination, 'R', 'W');
 
-        [Fact]
-        public void CorrectlyEscapeManyCharsContainedWithinQuotes()
-        {
-            ReadOnlySpan<char> str = "SORRY \"FOR\" 'TRAFFIC' NaM";
-            var destination = new char[str.Length];
-            const string EXPECTED = "SOWWY \"FOR\" 'TRAFFIC' NaM";
+        Assert.True(success);
+        Assert.Equal(EXPECTED.AsSpan(), destination);
+    }
 
-            var success = str.TryReplaceNonEscaped(destination, 'R', 'W');
+    [Fact]
+    public void CorrectlyEscapeManyCharsContainedWithinQuotes() {
+        ReadOnlySpan<char> str = "SORRY \"FOR\" 'TRAFFIC' NaM";
+        var destination = new char[str.Length];
+        const string EXPECTED = "SOWWY \"FOR\" 'TRAFFIC' NaM";
 
-            Assert.True(success);
-            Assert.Equal(EXPECTED.AsSpan(), destination);
-        }
+        var success = str.TryReplaceNonEscaped(destination, 'R', 'W');
 
-        [Fact]
-        public void CorrectlyEscapesEndQuotesPrependedByBackslashes()
-        {
-            ReadOnlySpan<char> str = @"'It\'s finally over.' It truly is over.";
-            var destination = new char[str.Length];
-            const string EXPECTED = @"'It\'s finally over.' It twuly is ovew.";
+        Assert.True(success);
+        Assert.Equal(EXPECTED.AsSpan(), destination);
+    }
 
-            var success = str.TryReplaceNonEscaped(destination, 'r', 'w');
+    [Fact]
+    public void CorrectlyEscapesEndQuotesPrependedByBackslashes() {
+        ReadOnlySpan<char> str = @"'It\'s finally over.' It truly is over.";
+        var destination = new char[str.Length];
+        const string EXPECTED = @"'It\'s finally over.' It twuly is ovew.";
 
-            Assert.True(success);
-            Assert.Equal(EXPECTED.AsSpan(), destination);
-        }
+        var success = str.TryReplaceNonEscaped(destination, 'r', 'w');
 
-        [Fact]
-        public void DoesNotEscapeDifferingQuotes()
-        {
-            ReadOnlySpan<char> str = "\"SORRY FOR TRAFFIC NaM.'";
-            var destination = new char[str.Length];
+        Assert.True(success);
+        Assert.Equal(EXPECTED.AsSpan(), destination);
+    }
 
-            var success = str.TryReplaceNonEscaped(destination, 'R', 'W');
+    [Fact]
+    public void DoesNotEscapeDifferingQuotes() {
+        ReadOnlySpan<char> str = "\"SORRY FOR TRAFFIC NaM.'";
+        var destination = new char[str.Length];
 
-            Assert.False(success);
-        }
+        var success = str.TryReplaceNonEscaped(destination, 'R', 'W');
 
-        [Fact]
-        public void DoesNotSupportReplacingEscapeChars()
-        {
-            ReadOnlySpan<char> str = "\"SORRY FOR\" TRAFFIC NaM.\"";
-            var destination = new char[str.Length];
+        Assert.False(success);
+    }
 
-            var success = str.TryReplaceNonEscaped(destination, '\"', 'W');
+    [Fact]
+    public void DoesNotSupportReplacingEscapeChars() {
+        ReadOnlySpan<char> str = "\"SORRY FOR\" TRAFFIC NaM.\"";
+        var destination = new char[str.Length];
 
-            Assert.False(success);
-        }
+        var success = str.TryReplaceNonEscaped(destination, '\"', 'W');
+
+        Assert.False(success);
     }
 }

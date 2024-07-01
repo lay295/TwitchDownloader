@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TwitchDownloaderWPF"
         xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
         lex:LocalizeDictionary.DesignCulture=""
@@ -12,7 +11,9 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleGlobalSettings}" MinWidth="400" MinHeight="500" Width="500" Height="592" SizeToContent="Height" Initialized="Window_Initialized" Closing="Window_Closing" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
+        Title="{lex:Loc TitleGlobalSettings}" MinWidth="400" MinHeight="500" Width="500" Height="592"
+        SizeToContent="Height" Initialized="Window_Initialized" Closing="Window_Closing"
+        SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
@@ -21,57 +22,124 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="8"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="8" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="8" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="5"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="8"/>
+            <RowDefinition Height="5" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="8" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical">
             <WrapPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,9,3,3" Text="{lex:Loc CacheFolder}" Foreground="{DynamicResource AppText}"/>
-                <Button x:Name="BtnClearCache" Margin="2" MinWidth="50" Content="{lex:Loc ClearCache}" Click="BtnClearCache_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}"/>
-                <Button x:Name="BtnTempBrowse" Margin="2" MinWidth="50" Content="{lex:Loc Browse}" Click="BtnTempBrowse_Click" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
-                <TextBox x:Name="TextTempPath" Margin="2" MinWidth="250" MaxWidth="400" TextChanged="TextTempPath_OnTextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3,9,3,3" Text="{lex:Loc CacheFolder}" Foreground="{DynamicResource AppText}" />
+                <Button x:Name="BtnClearCache" Margin="2" MinWidth="50" Content="{lex:Loc ClearCache}"
+                        Click="BtnClearCache_Click" Background="{DynamicResource ActionButtonBackground}"
+                        BorderBrush="{DynamicResource ActionButtonBorder}"
+                        Foreground="{DynamicResource ActionButtonText}" />
+                <Button x:Name="BtnTempBrowse" Margin="2" MinWidth="50" Content="{lex:Loc Browse}"
+                        Click="BtnTempBrowse_Click" Background="{DynamicResource ActionButtonBackground}"
+                        BorderBrush="{DynamicResource ActionButtonBorder}"
+                        Foreground="{DynamicResource ActionButtonText}" />
+                <TextBox x:Name="TextTempPath" Margin="2" MinWidth="250" MaxWidth="400"
+                         TextChanged="TextTempPath_OnTextChanged" Background="{DynamicResource AppElementBackground}"
+                         BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,4,3,3" Text="{lex:Loc HideDonationButton}" Foreground="{DynamicResource AppText}" />
-                <CheckBox x:Name="CheckDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckDonation_OnCheckedChanged" Unchecked="CheckDonation_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
+                <CheckBox x:Name="CheckDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0"
+                          Checked="CheckDonation_OnCheckedChanged" Unchecked="CheckDonation_OnCheckedChanged"
+                          BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,3,3,4" Text="{lex:Loc SettingsTimeFormat}" Foreground="{DynamicResource AppText}" />
-                <RadioButton x:Name="RadioTimeFormatUtc" Content="{lex:Loc TimestampUtc}" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                <RadioButton x:Name="RadioTimeFormatLocal" IsChecked="True" Content="{lex:Loc TimestampLocal}" Margin="3,0,0,0" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <RadioButton x:Name="RadioTimeFormatUtc" Content="{lex:Loc TimestampUtc}"
+                             Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged"
+                             BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <RadioButton x:Name="RadioTimeFormatLocal" IsChecked="True" Content="{lex:Loc TimestampLocal}"
+                             Margin="3,0,0,0" Checked="RadioTimeFormat_OnCheckedChanged"
+                             Unchecked="RadioTimeFormat_OnCheckedChanged"
+                             BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,3,3,2" Text="{lex:Loc VerboseErrors}" Foreground="{DynamicResource AppText}" />
-                <CheckBox x:Name="CheckVerboseErrors" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckVerboseErrors_OnCheckedChanged" Unchecked="CheckVerboseErrors_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
+                <CheckBox x:Name="CheckVerboseErrors" VerticalAlignment="Center" HorizontalAlignment="Left"
+                          Margin="0,2,0,0" Checked="CheckVerboseErrors_OnCheckedChanged"
+                          Unchecked="CheckVerboseErrors_OnCheckedChanged"
+                          BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <!--TODO: Add theme creation window instead of just opening the theme folder-->
-                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc ApplicationTheme}"/><Hyperlink ToolTipService.ShowDuration="30000" NavigateUri="Themes" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ApplicationThemeTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
-                <ComboBox x:Name="ComboTheme" MinWidth="100" MaxWidth="345" HorizontalAlignment="Left" SelectionChanged="ComboTheme_OnSelectionChanged" Margin="3,0,3,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}">
+                    <Run Text="{lex:Loc ApplicationTheme}" />
+                    <Hyperlink ToolTipService.ShowDuration="30000" NavigateUri="Themes"
+                               RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}">
+                        <Hyperlink.ToolTip>
+                            <Run Text="{lex:Loc ApplicationThemeTooltip}" />
+                        </Hyperlink.ToolTip>
+                        (?)
+                    </Hyperlink>
+                    :
+                </TextBlock>
+                <ComboBox x:Name="ComboTheme" MinWidth="100" MaxWidth="345" HorizontalAlignment="Left"
+                          SelectionChanged="ComboTheme_OnSelectionChanged" Margin="3,0,3,0"
+                          Background="{DynamicResource AppElementBackground}"
+                          BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <fa:SvgAwesome Margin="3,0,1,-2" Icon="Solid_Language" Width="32" Height="26" Foreground="{DynamicResource AppText}" />
-                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc ApplicationLanguage}"/><Hyperlink ToolTipService.ShowDuration="30000" NavigateUri="https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderWPF/README.md#localization" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ApplicationLanguageTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
-                <ComboBox x:Name="ComboLocale" MinWidth="100" MaxWidth="330" HorizontalAlignment="Left" SelectionChanged="ComboLocale_OnSelectionChanged" Margin="3,0,3,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <fa:SvgAwesome Margin="3,0,1,-2" Icon="Solid_Language" Width="32" Height="26"
+                               Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}">
+                    <Run Text="{lex:Loc ApplicationLanguage}" />
+                    <Hyperlink ToolTipService.ShowDuration="30000"
+                               NavigateUri="https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderWPF/README.md#localization"
+                               RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}">
+                        <Hyperlink.ToolTip>
+                            <Run Text="{lex:Loc ApplicationLanguageTooltip}" />
+                        </Hyperlink.ToolTip>
+                        (?)
+                    </Hyperlink>
+                    :
+                </TextBlock>
+                <ComboBox x:Name="ComboLocale" MinWidth="100" MaxWidth="330" HorizontalAlignment="Left"
+                          SelectionChanged="ComboLocale_OnSelectionChanged" Margin="3,0,3,0"
+                          Background="{DynamicResource AppElementBackground}"
+                          BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MaximumThreadBandwidth}" /><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MaximumThreadBandwidthTooltip}" /></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
-                <CheckBox x:Name="CheckThrottleEnabled" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="1, 6, 3, 3" Checked="CheckThrottleEnabled_OnCheckedChanged" Unchecked="CheckThrottleEnabled_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
-                <hc:NumericUpDown x:Name="NumMaximumBandwidth" Value="4096" Minimum="1" Maximum="122070" ValueChanged="NumMaximumBandwidth_OnValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}">
+                    <Run Text="{lex:Loc MaximumThreadBandwidth}" />
+                    <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}">
+                        <Hyperlink.ToolTip>
+                            <Run Text="{lex:Loc MaximumThreadBandwidthTooltip}" />
+                        </Hyperlink.ToolTip>
+                        (?)
+                    </Hyperlink>
+                    :
+                </TextBlock>
+                <CheckBox x:Name="CheckThrottleEnabled" VerticalAlignment="Center" HorizontalAlignment="Left"
+                          Margin="1, 6, 3, 3" Checked="CheckThrottleEnabled_OnCheckedChanged"
+                          Unchecked="CheckThrottleEnabled_OnCheckedChanged"
+                          BorderBrush="{DynamicResource AppElementBorder}" />
+                <hc:NumericUpDown x:Name="NumMaximumBandwidth" Value="4096" Minimum="1" Maximum="122070"
+                                  ValueChanged="NumMaximumBandwidth_OnValueChanged"
+                                  Background="{DynamicResource AppElementBackground}"
+                                  BorderBrush="{DynamicResource AppElementBorder}"
+                                  Foreground="{DynamicResource AppText}" />
                 <TextBlock Margin="3,7,0,0" Text="KiB/s" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,6,3,3" Text="{lex:Loc LogLevels}" Foreground="{DynamicResource AppText}" />
-                <hc:CheckComboBox x:Name="ComboLogLevels" MinWidth="100" HorizontalAlignment="Left" Margin="3,0,3,0" SelectionChanged="ComboLogLevels_OnSelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <hc:CheckComboBox x:Name="ComboLogLevels" MinWidth="100" HorizontalAlignment="Left" Margin="3,0,3,0"
+                                  SelectionChanged="ComboLogLevels_OnSelectionChanged"
+                                  Background="{DynamicResource AppElementBackground}"
+                                  BorderBrush="{DynamicResource AppElementBorder}"
+                                  Foreground="{DynamicResource AppText}" />
             </StackPanel>
-            <TextBlock Margin="3,5,3,3" Text="{lex:Loc DownloadFilenameTemplates}" Foreground="{DynamicResource AppText}" />
+            <TextBlock Margin="3,5,3,3" Text="{lex:Loc DownloadFilenameTemplates}"
+                       Foreground="{DynamicResource AppText}" />
             <StackPanel Margin="0" Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Margin="3,10,3,3" Text="{lex:Loc TemplateVods}" Foreground="{DynamicResource AppText}" />
@@ -79,20 +147,37 @@
                     <TextBlock Margin="3,18,3,3" Text="{lex:Loc TemplateChats}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
                 <StackPanel Orientation="Vertical">
-                    <TextBox x:Name="TextVodTemplate" Margin="3,5,3,3" MinWidth="300" MaxWidth="420" TextChanged="TextVodTemplate_OnTextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <TextBox x:Name="TextClipTemplate" Margin="3" MinWidth="300" MaxWidth="420" TextChanged="TextClipTemplate_OnTextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <TextBox x:Name="TextChatTemplate" Margin="3" MinWidth="300" MaxWidth="420" TextChanged="TextChatTemplate_OnTextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <TextBox x:Name="TextVodTemplate" Margin="3,5,3,3" MinWidth="300" MaxWidth="420"
+                             TextChanged="TextVodTemplate_OnTextChanged"
+                             Background="{DynamicResource AppElementBackground}"
+                             BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <TextBox x:Name="TextClipTemplate" Margin="3" MinWidth="300" MaxWidth="420"
+                             TextChanged="TextClipTemplate_OnTextChanged"
+                             Background="{DynamicResource AppElementBackground}"
+                             BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <TextBox x:Name="TextChatTemplate" Margin="3" MinWidth="300" MaxWidth="420"
+                             TextChanged="TextChatTemplate_OnTextChanged"
+                             Background="{DynamicResource AppElementBackground}"
+                             BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
             </StackPanel>
             <TextBlock Margin="3,5,3,3" Foreground="{DynamicResource AppText}" TextWrapping="Wrap">
                 <Run Text="{lex:Loc AvailableParameters}" />
                 <Run Text="{lex:Loc FilenameTemplateParameters}" FontWeight="Bold" />
-                <LineBreak/>
+                <LineBreak />
                 <Run Text="{lex:Loc DateCustomFormatting}" />
-                <Hyperlink NavigateUri="https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc DateCustomFormattingHyperlink}" /></Hyperlink>
-                <LineBreak/>
+                <Hyperlink
+                    NavigateUri="https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings"
+                    RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}">
+                    <Run Text="{lex:Loc DateCustomFormattingHyperlink}" />
+                </Hyperlink>
+                <LineBreak />
                 <Run Text="{lex:Loc TimeSpanCustomFormatting}" />
-                <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-timespan-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc TimeSpanCustomFormattingHyperlink}" /></Hyperlink>
+                <Hyperlink
+                    NavigateUri="https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-timespan-format-strings"
+                    RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}">
+                    <Run Text="{lex:Loc TimeSpanCustomFormattingHyperlink}" />
+                </Hyperlink>
             </TextBlock>
         </StackPanel>
         <Grid Grid.Row="2" Grid.Column="1" VerticalAlignment="Bottom" MinHeight="30">
@@ -100,10 +185,20 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" x:Name="BtnResetSettings" Content="{lex:Loc ButtonRestoreDefaultSettings}" HorizontalAlignment="Left" Click="BtnResetSettings_OnClick" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
+            <Button Grid.Column="0" x:Name="BtnResetSettings" Content="{lex:Loc ButtonRestoreDefaultSettings}"
+                    HorizontalAlignment="Left" Click="BtnResetSettings_OnClick"
+                    Background="{DynamicResource ActionButtonBackground}"
+                    BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="BtnSaveSettings" Margin="2,0,2,0" MinWidth="50" Content="{lex:Loc ButtonSaveSettings}" Click="BtnSaveSettings_OnClick" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
-                <Button x:Name="BtnCancelSettings" Margin="2,0,0, 0" MinWidth="50" Content="{lex:Loc ButtonCancelSettingsChanges}" Click="BtnCancelSettings_OnClick" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" Foreground="{DynamicResource ActionButtonText}" />
+                <Button x:Name="BtnSaveSettings" Margin="2,0,2,0" MinWidth="50" Content="{lex:Loc ButtonSaveSettings}"
+                        Click="BtnSaveSettings_OnClick" Background="{DynamicResource ActionButtonBackground}"
+                        BorderBrush="{DynamicResource ActionButtonBorder}"
+                        Foreground="{DynamicResource ActionButtonText}" />
+                <Button x:Name="BtnCancelSettings" Margin="2,0,0, 0" MinWidth="50"
+                        Content="{lex:Loc ButtonCancelSettingsChanges}" Click="BtnCancelSettings_OnClick"
+                        Background="{DynamicResource ActionButtonBackground}"
+                        BorderBrush="{DynamicResource ActionButtonBorder}"
+                        Foreground="{DynamicResource ActionButtonText}" />
             </StackPanel>
         </Grid>
     </Grid>

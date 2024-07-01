@@ -11,7 +11,9 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleWindowOldVideoCacheManager}" MinHeight="350" MinWidth="500" Height="450" Width="800" Loaded="OnLoaded" SourceInitialized="OnSourceInitialized" Closing="OnClosing" d:DataContext="{d:DesignInstance local:WindowOldVideoCacheManager}">
+        Title="{lex:Loc TitleWindowOldVideoCacheManager}" MinHeight="350" MinWidth="500" Height="450" Width="800"
+        Loaded="OnLoaded" SourceInitialized="OnSourceInitialized" Closing="OnClosing"
+        d:DataContext="{d:DesignInstance local:WindowOldVideoCacheManager}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
@@ -24,15 +26,19 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="0" x:Name="DataGrid" Margin="6, 6, 6, 0" ItemsSource="{Binding GridItems}" IsReadOnly="False" AutoGenerateColumns="False" Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+        <DataGrid Grid.Row="0" x:Name="DataGrid" Margin="6, 6, 6, 0" ItemsSource="{Binding GridItems}"
+                  IsReadOnly="False" AutoGenerateColumns="False" Foreground="{DynamicResource AppText}"
+                  Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
             <DataGrid.Resources>
                 <ContextMenu x:Key="RowMenu">
-                    <MenuItem Header="{lex:Loc ContextMenuOpenFolder}" Click="MenuItemOpenFolder_OnClick" Foreground="{DynamicResource AppText}">
+                    <MenuItem Header="{lex:Loc ContextMenuOpenFolder}" Click="MenuItemOpenFolder_OnClick"
+                              Foreground="{DynamicResource AppText}">
                         <MenuItem.Icon>
                             <fa:SvgAwesome Icon="Solid_FolderOpen" Foreground="{DynamicResource AppText}" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="{lex:Loc CopyFolderPathToClipboard}" Click="MenuItemCopyPath_OnClick" Foreground="{DynamicResource AppText}">
+                    <MenuItem Header="{lex:Loc CopyFolderPathToClipboard}" Click="MenuItemCopyPath_OnClick"
+                              Foreground="{DynamicResource AppText}">
                         <MenuItem.Icon>
                             <fa:SvgAwesome Icon="Solid_Copy" Foreground="{DynamicResource AppText}" />
                         </MenuItem.Icon>
@@ -49,22 +55,35 @@
                 <DataGridTemplateColumn Header="{lex:Loc DeleteCacheColumnHeader}" MinWidth="55">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <CheckBox HorizontalAlignment="Center" IsChecked="{Binding ShouldDelete, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox HorizontalAlignment="Center"
+                                      IsChecked="{Binding ShouldDelete, UpdateSourceTrigger=PropertyChanged}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FilePathColumnHeader}" MinWidth="60" Width="*" Binding="{Binding Path}" Foreground="{DynamicResource AppText}" />
-                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileAgeColumnHeader}" MinWidth="60" Binding="{Binding Age, StringFormat={lex:Loc FileAgeInDays}}" Foreground="{DynamicResource AppText}" />
-                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileSizeColumnHeader}" MinWidth="75" Binding="{Binding Size}" Foreground="{DynamicResource AppText}" />
+                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FilePathColumnHeader}" MinWidth="60" Width="*"
+                                    Binding="{Binding Path}" Foreground="{DynamicResource AppText}" />
+                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileAgeColumnHeader}" MinWidth="60"
+                                    Binding="{Binding Age, StringFormat={lex:Loc FileAgeInDays}}"
+                                    Foreground="{DynamicResource AppText}" />
+                <DataGridTextColumn IsReadOnly="True" Header="{lex:Loc FileSizeColumnHeader}" MinWidth="75"
+                                    Binding="{Binding Size}" Foreground="{DynamicResource AppText}" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <Button Grid.Row="1" x:Name="BtnSelectAll" Content="{lex:Loc SelectAll}" Margin="6,6,0,6" HorizontalAlignment="Left" MinWidth="80" Click="BtnSelectAll_OnClick" Foreground="{DynamicResource ActionButtonText}" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" />
-        <Button Grid.Row="1" x:Name="BtnAccept" Content="{lex:Loc Accept}" Margin="0, 5, 0, 6" MinWidth="70" Click="BtnAccept_OnClick" Foreground="{DynamicResource ActionButtonText}" Background="{DynamicResource ActionButtonBackground}" BorderBrush="{DynamicResource ActionButtonBorder}" />
-        <Label Grid.Row="1" x:Name="LabelTotalSize" Margin="0,5,6,6" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+        <Button Grid.Row="1" x:Name="BtnSelectAll" Content="{lex:Loc SelectAll}" Margin="6,6,0,6"
+                HorizontalAlignment="Left" MinWidth="80" Click="BtnSelectAll_OnClick"
+                Foreground="{DynamicResource ActionButtonText}" Background="{DynamicResource ActionButtonBackground}"
+                BorderBrush="{DynamicResource ActionButtonBorder}" />
+        <Button Grid.Row="1" x:Name="BtnAccept" Content="{lex:Loc Accept}" Margin="0, 5, 0, 6" MinWidth="70"
+                Click="BtnAccept_OnClick" Foreground="{DynamicResource ActionButtonText}"
+                Background="{DynamicResource ActionButtonBackground}"
+                BorderBrush="{DynamicResource ActionButtonBorder}" />
+        <Label Grid.Row="1" x:Name="LabelTotalSize" Margin="0,5,6,6" HorizontalAlignment="Right"
+               Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}"
+               BorderBrush="{DynamicResource AppElementBorder}">
             <TextBlock>
-                <Run Text="{lex:Loc SizeOfAllFiles}"/>
-                <Run x:Name="TextTotalSize" Text="0B"/>
+                <Run Text="{lex:Loc SizeOfAllFiles}" />
+                <Run x:Name="TextTotalSize" Text="0B" />
             </TextBlock>
         </Label>
     </Grid>

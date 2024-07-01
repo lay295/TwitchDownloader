@@ -3,78 +3,69 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace TwitchDownloaderCLI.Models
-{
-    [DebuggerDisplay("{_timeSpan}")]
-    public readonly record struct TimeDuration
-    {
-        public static TimeDuration MinusOneSeconds { get; } = new(-1 * TimeSpan.TicksPerSecond);
+namespace TwitchDownloaderCLI.Models;
 
-        private readonly TimeSpan _timeSpan;
+[DebuggerDisplay("{_timeSpan}")]
+public readonly record struct TimeDuration {
 
-        /// <summary>
-        /// Constructor used by CommandLineParser
-        /// </summary>
-        public TimeDuration(string str) => this = Parse(str);
+    private readonly TimeSpan _timeSpan;
 
-        public TimeDuration(TimeSpan timeSpan) => this._timeSpan = timeSpan;
+    /// <summary>
+    ///     Constructor used by CommandLineParser
+    /// </summary>
+    public TimeDuration(string str) => this = Parse(str);
 
-        public TimeDuration(long ticks) => this._timeSpan = TimeSpan.FromTicks(ticks);
+    public TimeDuration(TimeSpan timeSpan) => this._timeSpan = timeSpan;
 
-        public static TimeDuration Parse(string str)
-        {
-            if (string.IsNullOrWhiteSpace(str))
-                throw new FormatException();
+    public TimeDuration(long ticks) => this._timeSpan = TimeSpan.FromTicks(ticks);
+    public static TimeDuration MinusOneSeconds { get; } = new(-1 * TimeSpan.TicksPerSecond);
 
-            if (str.Contains(':'))
-            {
-                var timeSpan = TimeSpan.Parse(str);
-                return new TimeDuration(timeSpan);
-            }
+    public static TimeDuration Parse(string str) {
+        if (string.IsNullOrWhiteSpace(str))
+            throw new FormatException();
 
-            var multiplier = GetMultiplier(str, out var span);
-            if (!decimal.TryParse(span, NumberStyles.Number, null, out var result))
-                throw new FormatException();
-
-            var ticks = (long)(result * multiplier);
-            return new TimeDuration(ticks);
-
+        if (str.Contains(':')) {
+            var timeSpan = TimeSpan.Parse(str);
+            return new(timeSpan);
         }
 
-        private static long GetMultiplier(string input, out ReadOnlySpan<char> trimmedInput)
-        {
-            if (char.IsDigit(input[^1]))
-            {
-                trimmedInput = input.AsSpan();
-                return TimeSpan.TicksPerSecond;
-            }
+        var multiplier = GetMultiplier(str, out var span);
+        if (!decimal.TryParse(span, NumberStyles.Number, null, out var result))
+            throw new FormatException();
 
-            if (Regex.IsMatch(input, @"\dms$", RegexOptions.RightToLeft))
-            {
-                trimmedInput = input.AsSpan()[..^2];
-                return TimeSpan.TicksPerMillisecond;
-            }
+        var ticks = (long)(result * multiplier);
+        return new(ticks);
 
-            if (Regex.IsMatch(input, @"\ds$", RegexOptions.RightToLeft))
-            {
-                trimmedInput = input.AsSpan()[..^1];
-                return TimeSpan.TicksPerSecond;
-            }
-
-            if (Regex.IsMatch(input, @"\dm$", RegexOptions.RightToLeft))
-            {
-                trimmedInput = input.AsSpan()[..^1];
-                return TimeSpan.TicksPerMinute;
-            }
-
-            if (!Regex.IsMatch(input, @"\dh$", RegexOptions.RightToLeft))
-                throw new FormatException();
-
-            trimmedInput = input.AsSpan()[..^1];
-            return TimeSpan.TicksPerHour;
-
-        }
-
-        public static implicit operator TimeSpan(TimeDuration timeDuration) => timeDuration._timeSpan;
     }
+
+    private static long GetMultiplier(string input, out ReadOnlySpan<char> trimmedInput) {
+        if (char.IsDigit(input[^1])) {
+            trimmedInput = input.AsSpan();
+            return TimeSpan.TicksPerSecond;
+        }
+
+        if (Regex.IsMatch(input, @"\dms$", RegexOptions.RightToLeft)) {
+            trimmedInput = input.AsSpan()[..^2];
+            return TimeSpan.TicksPerMillisecond;
+        }
+
+        if (Regex.IsMatch(input, @"\ds$", RegexOptions.RightToLeft)) {
+            trimmedInput = input.AsSpan()[..^1];
+            return TimeSpan.TicksPerSecond;
+        }
+
+        if (Regex.IsMatch(input, @"\dm$", RegexOptions.RightToLeft)) {
+            trimmedInput = input.AsSpan()[..^1];
+            return TimeSpan.TicksPerMinute;
+        }
+
+        if (!Regex.IsMatch(input, @"\dh$", RegexOptions.RightToLeft))
+            throw new FormatException();
+
+        trimmedInput = input.AsSpan()[..^1];
+        return TimeSpan.TicksPerHour;
+
+    }
+
+    public static implicit operator TimeSpan(TimeDuration timeDuration) => timeDuration._timeSpan;
 }

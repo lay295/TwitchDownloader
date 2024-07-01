@@ -3,14 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TwitchDownloaderWPF"
         xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
         lex:LocalizeDictionary.DesignCulture=""
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleUrlList}" MinHeight="590" Height="600" MinWidth="485" Width="500" SourceInitialized="Window_OnSourceInitialized">
+        Title="{lex:Loc TitleUrlList}" MinHeight="590" Height="600" MinWidth="485" Width="500"
+        SourceInitialized="Window_OnSourceInitialized">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
@@ -20,11 +20,19 @@
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Content="{lex:Loc ListOfVodsClips}" HorizontalAlignment="Left" Margin="10,10,10,0" VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-        <TextBox Grid.Row="1" x:Name="textList" AcceptsReturn="True" Margin="10,6,10,0" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" Text="" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-        <Button Grid.Row="2" x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Center" VerticalAlignment="Bottom" MinWidth="110" Height="45" Margin="10,6,10,10" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+        <Label Grid.Row="0" Content="{lex:Loc ListOfVodsClips}" HorizontalAlignment="Left" Margin="10,10,10,0"
+               VerticalAlignment="Top" Background="{DynamicResource AppElementBackground}"
+               BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+        <TextBox Grid.Row="1" x:Name="textList" AcceptsReturn="True" Margin="10,6,10,0" VerticalContentAlignment="Top"
+                 VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" Text=""
+                 Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}"
+                 Foreground="{DynamicResource AppText}" />
+        <Button Grid.Row="2" x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Center"
+                VerticalAlignment="Bottom" MinWidth="110" Height="45" Margin="10,6,10,10" Click="btnQueue_Click"
+                Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}"
+                BorderBrush="{DynamicResource ActionButtonBorder}" />
     </Grid>
 </Window>

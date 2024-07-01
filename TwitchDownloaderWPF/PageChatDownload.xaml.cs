@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -9,599 +8,559 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using HandyControl.Controls;
+using HandyControl.Data;
+using Microsoft.Win32;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Translations;
 using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
+using MessageBox = System.Windows.MessageBox;
 
-namespace TwitchDownloaderWPF
-{
-    public enum DownloadType { Clip, Video }
-    /// <summary>
-    /// Interaction logic for PageChatDownload.xaml
-    /// </summary>
-    public partial class PageChatDownload : Page
-    {
+namespace TwitchDownloaderWPF;
 
-        public DownloadType downloadType;
-        public string downloadId;
-        public int streamerId;
-        public DateTime currentVideoTime;
-        public TimeSpan vodLength;
-        public int viewCount;
-        public string game;
-        private CancellationTokenSource _cancellationTokenSource;
+public enum DownloadType {
+    Clip,
+    Video
+}
 
-        public PageChatDownload()
-        {
-            InitializeComponent();
+/// <summary>
+///     Interaction logic for PageChatDownload.xaml
+/// </summary>
+public partial class PageChatDownload : Page {
+    private CancellationTokenSource _cancellationTokenSource;
+    public DateTime currentVideoTime;
+    public string downloadId;
+
+    public DownloadType downloadType;
+    public string game;
+    public int streamerId;
+    public int viewCount;
+    public TimeSpan vodLength;
+
+    public PageChatDownload() { this.InitializeComponent(); }
+
+    private void Page_Initialized(object sender, EventArgs e) {
+        this.SetEnabled(false, false);
+        this.SetEnabledTrimStart(false);
+        this.SetEnabledTrimEnd(false);
+        this.checkEmbed.IsChecked = Settings.Default.ChatEmbedEmotes;
+        this.checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
+        this.checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
+        this.checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
+        this.NumChatDownloadThreads.Value = Settings.Default.ChatDownloadThreads;
+        _ = (ChatFormat)Settings.Default.ChatDownloadType switch {
+            ChatFormat.Text => this.radioText.IsChecked = true,
+            ChatFormat.Html => this.radioHTML.IsChecked = true,
+            _ => this.radioJson.IsChecked = true
+        };
+    }
+
+    private void SetEnabled(bool isEnabled, bool isClip) {
+        this.CheckTrimStart.IsEnabled = isEnabled & !isClip;
+        this.CheckTrimEnd.IsEnabled = isEnabled & !isClip;
+        this.radioTimestampRelative.IsEnabled = isEnabled;
+        this.radioTimestampUTC.IsEnabled = isEnabled;
+        this.radioTimestampNone.IsEnabled = isEnabled;
+        this.radioCompressionNone.IsEnabled = isEnabled;
+        this.radioCompressionGzip.IsEnabled = isEnabled;
+        this.checkEmbed.IsEnabled = isEnabled;
+        this.checkBttvEmbed.IsEnabled = isEnabled;
+        this.checkFfzEmbed.IsEnabled = isEnabled;
+        this.checkStvEmbed.IsEnabled = isEnabled;
+        this.SplitBtnDownload.IsEnabled = isEnabled;
+        this.MenuItemEnqueue.IsEnabled = isEnabled;
+        this.radioJson.IsEnabled = isEnabled;
+        this.radioText.IsEnabled = isEnabled;
+        this.radioHTML.IsEnabled = isEnabled;
+    }
+
+    private void SetEnabledTrimStart(bool isEnabled) {
+        this.numStartHour.IsEnabled = isEnabled;
+        this.numStartMinute.IsEnabled = isEnabled;
+        this.numStartSecond.IsEnabled = isEnabled;
+    }
+
+    private void SetEnabledTrimEnd(bool isEnabled) {
+        this.numEndHour.IsEnabled = isEnabled;
+        this.numEndMinute.IsEnabled = isEnabled;
+        this.numEndSecond.IsEnabled = isEnabled;
+    }
+
+    private async void btnGetInfo_Click(object sender, RoutedEventArgs e) { await this.GetVideoInfo(); }
+
+    private async Task GetVideoInfo() {
+        var id = ValidateUrl(this.textUrl.Text.Trim());
+        if (string.IsNullOrWhiteSpace(id)) {
+            MessageBox.Show(
+                Application.Current.MainWindow!,
+                Strings.UnableToParseLinkMessage,
+                Strings.UnableToParseLink,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+            return;
         }
 
-        private void Page_Initialized(object sender, EventArgs e)
-        {
-            SetEnabled(false, false);
-            SetEnabledTrimStart(false);
-            SetEnabledTrimEnd(false);
-            checkEmbed.IsChecked = Settings.Default.ChatEmbedEmotes;
-            checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
-            checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
-            checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
-            NumChatDownloadThreads.Value = Settings.Default.ChatDownloadThreads;
-            _ = (ChatFormat)Settings.Default.ChatDownloadType switch
-            {
-                ChatFormat.Text => radioText.IsChecked = true,
-                ChatFormat.Html => radioHTML.IsChecked = true,
-                _ => radioJson.IsChecked = true
-            };
-        }
+        this.btnGetInfo.IsEnabled = false;
+        this.downloadId = id;
+        this.downloadType = id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
 
-        private void SetEnabled(bool isEnabled, bool isClip)
-        {
-            CheckTrimStart.IsEnabled = isEnabled & !isClip;
-            CheckTrimEnd.IsEnabled = isEnabled & !isClip;
-            radioTimestampRelative.IsEnabled = isEnabled;
-            radioTimestampUTC.IsEnabled = isEnabled;
-            radioTimestampNone.IsEnabled = isEnabled;
-            radioCompressionNone.IsEnabled = isEnabled;
-            radioCompressionGzip.IsEnabled = isEnabled;
-            checkEmbed.IsEnabled = isEnabled;
-            checkBttvEmbed.IsEnabled = isEnabled;
-            checkFfzEmbed.IsEnabled = isEnabled;
-            checkStvEmbed.IsEnabled = isEnabled;
-            SplitBtnDownload.IsEnabled = isEnabled;
-            MenuItemEnqueue.IsEnabled = isEnabled;
-            radioJson.IsEnabled = isEnabled;
-            radioText.IsEnabled = isEnabled;
-            radioHTML.IsEnabled = isEnabled;
-        }
+        try {
+            if (this.downloadType == DownloadType.Video) {
+                var videoInfo = await TwitchHelper.GetVideoInfo(long.Parse(this.downloadId));
 
-        private void SetEnabledTrimStart(bool isEnabled)
-        {
-            numStartHour.IsEnabled = isEnabled;
-            numStartMinute.IsEnabled = isEnabled;
-            numStartSecond.IsEnabled = isEnabled;
-        }
-
-        private void SetEnabledTrimEnd(bool isEnabled)
-        {
-            numEndHour.IsEnabled = isEnabled;
-            numEndMinute.IsEnabled = isEnabled;
-            numEndSecond.IsEnabled = isEnabled;
-        }
-
-        private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
-        {
-            await GetVideoInfo();
-        }
-
-        private async Task GetVideoInfo()
-        {
-            string id = ValidateUrl(textUrl.Text.Trim());
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToParseLinkMessage, Translations.Strings.UnableToParseLink, MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            btnGetInfo.IsEnabled = false;
-            downloadId = id;
-            downloadType = id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
-
-            try
-            {
-                if (downloadType == DownloadType.Video)
-                {
-                    GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(long.Parse(downloadId));
-
-                    var thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
-                    if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
-                    {
-                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
-                    }
-                    imgThumbnail.Source = image;
-
-                    vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
-                    textTitle.Text = videoInfo.data.video.title;
-                    textStreamer.Text = videoInfo.data.video.owner.displayName;
-                    var videoTime = videoInfo.data.video.createdAt;
-                    textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoTime.ToString(CultureInfo.CurrentCulture) : videoTime.ToLocalTime().ToString(CultureInfo.CurrentCulture);
-                    currentVideoTime = Settings.Default.UTCVideoTime ? videoTime : videoTime.ToLocalTime();
-                    streamerId = int.Parse(videoInfo.data.video.owner.id);
-                    viewCount = videoInfo.data.video.viewCount;
-                    game = videoInfo.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
-                    var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
-                    if (urlTimeCodeMatch.Success)
-                    {
-                        var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
-                        CheckTrimStart.IsChecked = true;
-                        numStartHour.Value = time.Hours;
-                        numStartMinute.Value = time.Minutes;
-                        numStartSecond.Value = time.Seconds;
-                    }
-                    else
-                    {
-                        numStartHour.Value = 0;
-                        numStartMinute.Value = 0;
-                        numStartSecond.Value = 0;
-                    }
-                    numStartHour.Maximum = (int)vodLength.TotalHours;
-
-                    numEndHour.Value = (int)vodLength.TotalHours;
-                    numEndHour.Maximum = (int)vodLength.TotalHours;
-                    numEndMinute.Value = vodLength.Minutes;
-                    numEndSecond.Value = vodLength.Seconds;
-                    labelLength.Text = vodLength.ToString("c");
-                    SetEnabled(true, false);
-                }
-                else if (downloadType == DownloadType.Clip)
-                {
-                    string clipId = downloadId;
-                    GqlClipResponse clipInfo = await TwitchHelper.GetClipInfo(clipId);
-
-                    var thumbUrl = clipInfo.data.clip.thumbnailURL;
-                    if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
-                    {
-                        AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
-                        _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
-                    }
-                    imgThumbnail.Source = image;
-
-                    TimeSpan clipLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
-                    textStreamer.Text = clipInfo.data.clip.broadcaster?.displayName ?? Translations.Strings.UnknownUser;
-                    var clipCreatedAt = clipInfo.data.clip.createdAt;
-                    textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
-                    currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
-                    textTitle.Text = clipInfo.data.clip.title;
-                    streamerId = int.Parse(clipInfo.data.clip.broadcaster?.id ?? "-1");
-                    labelLength.Text = clipLength.ToString("c");
-                    SetEnabled(true, true);
-                    SetEnabledTrimStart(false);
-                    SetEnabledTrimEnd(false);
+                var thumbUrl = videoInfo.data.video.thumbnailURLs.FirstOrDefault();
+                if (!ThumbnailService.TryGetThumb(thumbUrl, out var image)) {
+                    this.AppendLog(Strings.ErrorLog + Strings.UnableToFindThumbnail);
+                    _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
                 }
 
-                btnGetInfo.IsEnabled = true;
+                this.imgThumbnail.Source = image;
+
+                this.vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
+                this.textTitle.Text = videoInfo.data.video.title;
+                this.textStreamer.Text = videoInfo.data.video.owner.displayName;
+                var videoTime = videoInfo.data.video.createdAt;
+                this.textCreatedAt.Text = Settings.Default.UTCVideoTime
+                    ? videoTime.ToString(CultureInfo.CurrentCulture)
+                    : videoTime.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+                this.currentVideoTime = Settings.Default.UTCVideoTime ? videoTime : videoTime.ToLocalTime();
+                this.streamerId = int.Parse(videoInfo.data.video.owner.id);
+                this.viewCount = videoInfo.data.video.viewCount;
+                this.game = videoInfo.data.video.game?.displayName ?? Strings.UnknownGame;
+                var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(this.textUrl.Text);
+                if (urlTimeCodeMatch.Success) {
+                    var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
+                    this.CheckTrimStart.IsChecked = true;
+                    this.numStartHour.Value = time.Hours;
+                    this.numStartMinute.Value = time.Minutes;
+                    this.numStartSecond.Value = time.Seconds;
+                } else {
+                    this.numStartHour.Value = 0;
+                    this.numStartMinute.Value = 0;
+                    this.numStartSecond.Value = 0;
+                }
+
+                this.numStartHour.Maximum = (int)this.vodLength.TotalHours;
+
+                this.numEndHour.Value = (int)this.vodLength.TotalHours;
+                this.numEndHour.Maximum = (int)this.vodLength.TotalHours;
+                this.numEndMinute.Value = this.vodLength.Minutes;
+                this.numEndSecond.Value = this.vodLength.Seconds;
+                this.labelLength.Text = this.vodLength.ToString("c");
+                this.SetEnabled(true, false);
+            } else if (this.downloadType == DownloadType.Clip) {
+                var clipId = this.downloadId;
+                var clipInfo = await TwitchHelper.GetClipInfo(clipId);
+
+                var thumbUrl = clipInfo.data.clip.thumbnailURL;
+                if (!ThumbnailService.TryGetThumb(thumbUrl, out var image)) {
+                    this.AppendLog(Strings.ErrorLog + Strings.UnableToFindThumbnail);
+                    _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out image);
+                }
+
+                this.imgThumbnail.Source = image;
+
+                var clipLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
+                this.textStreamer.Text = clipInfo.data.clip.broadcaster?.displayName ?? Strings.UnknownUser;
+                var clipCreatedAt = clipInfo.data.clip.createdAt;
+                this.textCreatedAt.Text = Settings.Default.UTCVideoTime
+                    ? clipCreatedAt.ToString(CultureInfo.CurrentCulture)
+                    : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+                this.currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
+                this.textTitle.Text = clipInfo.data.clip.title;
+                this.streamerId = int.Parse(clipInfo.data.clip.broadcaster?.id ?? "-1");
+                this.labelLength.Text = clipLength.ToString("c");
+                this.SetEnabled(true, true);
+                this.SetEnabledTrimStart(false);
+                this.SetEnabledTrimEnd(false);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToGetInfoMessage, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
-                AppendLog(Translations.Strings.ErrorLog + ex.Message);
-                btnGetInfo.IsEnabled = true;
+
+            this.btnGetInfo.IsEnabled = true;
+        } catch (Exception ex) {
+            MessageBox.Show(
+                Application.Current.MainWindow!,
+                Strings.UnableToGetInfoMessage,
+                Strings.UnableToGetInfo,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+            this.AppendLog(Strings.ErrorLog + ex.Message);
+            this.btnGetInfo.IsEnabled = true;
+            if (Settings.Default.VerboseErrors)
+                MessageBox.Show(
+                    Application.Current.MainWindow!,
+                    ex.ToString(),
+                    Strings.VerboseErrorOutput,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+        }
+    }
+
+    private void UpdateActionButtons(bool isDownloading) {
+        if (isDownloading) {
+            this.SplitBtnDownload.Visibility = Visibility.Collapsed;
+            this.BtnCancel.Visibility = Visibility.Visible;
+            return;
+        }
+
+        this.SplitBtnDownload.Visibility = Visibility.Visible;
+        this.BtnCancel.Visibility = Visibility.Collapsed;
+    }
+
+    public static string ValidateUrl(string text) {
+        var vodClipIdMatch = TwitchRegex.MatchVideoOrClipId(text);
+        return vodClipIdMatch is { Success: true }
+            ? vodClipIdMatch.Value
+            : null;
+    }
+
+    private void SetPercent(int percent) {
+        this.Dispatcher.BeginInvoke(
+            () => this.statusProgressBar.Value = percent
+        );
+    }
+
+    private void SetStatus(string message) {
+        this.Dispatcher.BeginInvoke(
+            () => this.statusMessage.Text = message
+        );
+    }
+
+    private void AppendLog(string message) {
+        this.textLog.Dispatcher.BeginInvoke(
+            () => this.textLog.AppendText(message + Environment.NewLine)
+        );
+    }
+
+    public ChatDownloadOptions GetOptions(string filename) {
+        var options = new ChatDownloadOptions();
+
+        if (this.radioJson.IsChecked == true)
+            options.DownloadFormat = ChatFormat.Json;
+        else if (this.radioHTML.IsChecked == true)
+            options.DownloadFormat = ChatFormat.Html;
+        else if (this.radioText.IsChecked == true)
+            options.DownloadFormat = ChatFormat.Text;
+
+        if (this.radioCompressionNone.IsChecked == true)
+            options.Compression = ChatCompression.None;
+        else if (this.radioCompressionGzip.IsChecked == true)
+            options.Compression = ChatCompression.Gzip;
+
+        options.EmbedData = this.checkEmbed.IsChecked.GetValueOrDefault();
+        options.BttvEmotes = this.checkBttvEmbed.IsChecked.GetValueOrDefault();
+        options.FfzEmotes = this.checkFfzEmbed.IsChecked.GetValueOrDefault();
+        options.StvEmotes = this.checkStvEmbed.IsChecked.GetValueOrDefault();
+        options.Filename = filename;
+        options.DownloadThreads = (int)this.NumChatDownloadThreads.Value;
+        return options;
+    }
+
+    public void SetImage(string imageUri, bool isGif) {
+        var image = new BitmapImage();
+        image.BeginInit();
+        image.UriSource = new(imageUri, UriKind.Relative);
+        image.EndInit();
+        if (isGif)
+            ImageBehavior.SetAnimatedSource(this.statusImage, image);
+        else {
+            ImageBehavior.SetAnimatedSource(this.statusImage, null);
+            this.statusImage.Source = image;
+        }
+    }
+
+    private void btnDonate_Click(object sender, RoutedEventArgs e) {
+        Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
+    }
+
+    private void btnSettings_Click(object sender, RoutedEventArgs e) {
+        var settings = new WindowSettings {
+            Owner = Application.Current.MainWindow,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+        settings.ShowDialog();
+        this.btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void Page_Loaded(object sender, RoutedEventArgs e) {
+        this.btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void NumChatDownloadThreads_ValueChanged(object sender, FunctionEventArgs<double> e) {
+        if (this.IsInitialized) {
+            this.NumChatDownloadThreads.Value = Math.Clamp((int)this.NumChatDownloadThreads.Value, 1, 50);
+            Settings.Default.ChatDownloadThreads = (int)this.NumChatDownloadThreads.Value;
+            Settings.Default.Save();
+        }
+    }
+
+    private void checkEmbed_Checked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            Settings.Default.ChatEmbedEmotes = true;
+            Settings.Default.Save();
+            this.checkBttvEmbed.IsEnabled = true;
+            this.checkFfzEmbed.IsEnabled = true;
+            this.checkStvEmbed.IsEnabled = true;
+        }
+    }
+
+    private void checkEmbed_Unchecked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            Settings.Default.ChatEmbedEmotes = false;
+            Settings.Default.Save();
+            this.checkBttvEmbed.IsEnabled = false;
+            this.checkFfzEmbed.IsEnabled = false;
+            this.checkStvEmbed.IsEnabled = false;
+        }
+    }
+
+    private void checkBttvEmbed_Checked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            Settings.Default.BTTVEmotes = true;
+            Settings.Default.Save();
+        }
+    }
+
+    private void checkBttvEmbed_Unchecked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            Settings.Default.BTTVEmotes = false;
+            Settings.Default.Save();
+        }
+    }
+
+    private void checkFfzEmbed_Checked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            Settings.Default.FFZEmotes = true;
+            Settings.Default.Save();
+        }
+    }
+
+    private void checkFfzEmbed_Unchecked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            Settings.Default.FFZEmotes = false;
+            Settings.Default.Save();
+        }
+    }
+
+    private void checkStvEmbed_Checked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            Settings.Default.STVEmotes = true;
+            Settings.Default.Save();
+        }
+    }
+
+    private void checkStvEmbed_Unchecked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            Settings.Default.STVEmotes = false;
+            Settings.Default.Save();
+        }
+    }
+
+    private void radioJson_Checked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            this.timeText.Visibility = Visibility.Collapsed;
+            this.timeOptions.Visibility = Visibility.Collapsed;
+            this.stackEmbedText.Visibility = Visibility.Visible;
+            this.stackEmbedChecks.Visibility = Visibility.Visible;
+            this.compressionText.Visibility = Visibility.Visible;
+            this.compressionOptions.Visibility = Visibility.Visible;
+            this.textTrim.Margin = new(0, 10, 0, 33);
+
+            Settings.Default.ChatDownloadType = (int)ChatFormat.Json;
+            Settings.Default.Save();
+        }
+    }
+
+    private void radioHTML_Checked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            this.timeText.Visibility = Visibility.Collapsed;
+            this.timeOptions.Visibility = Visibility.Collapsed;
+            this.stackEmbedText.Visibility = Visibility.Visible;
+            this.stackEmbedChecks.Visibility = Visibility.Visible;
+            this.compressionText.Visibility = Visibility.Collapsed;
+            this.compressionOptions.Visibility = Visibility.Collapsed;
+            this.textTrim.Margin = new(0, 17, 0, 33);
+
+            Settings.Default.ChatDownloadType = (int)ChatFormat.Html;
+            Settings.Default.Save();
+        }
+    }
+
+    private void radioText_Checked(object sender, RoutedEventArgs e) {
+        if (this.IsInitialized) {
+            this.timeText.Visibility = Visibility.Visible;
+            this.timeOptions.Visibility = Visibility.Visible;
+            this.stackEmbedText.Visibility = Visibility.Collapsed;
+            this.stackEmbedChecks.Visibility = Visibility.Collapsed;
+            this.compressionText.Visibility = Visibility.Collapsed;
+            this.compressionOptions.Visibility = Visibility.Collapsed;
+            this.textTrim.Margin = new(0, 10, 0, 36);
+
+            Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
+            Settings.Default.Save();
+        }
+    }
+
+    private async void SplitBtnDownload_Click(object sender, RoutedEventArgs e) {
+        if (((SplitButton)sender).IsDropDownOpen)
+            return;
+
+        var saveFileDialog = new SaveFileDialog {
+            FileName = FilenameService.GetFilename(
+                Settings.Default.TemplateChat,
+                this.textTitle.Text,
+                this.downloadId,
+                this.currentVideoTime,
+                this.textStreamer.Text,
+                this.CheckTrimStart.IsChecked == true
+                    ? new((int)this.numStartHour.Value, (int)this.numStartMinute.Value, (int)this.numStartSecond.Value)
+                    : TimeSpan.Zero,
+                this.CheckTrimEnd.IsChecked == true
+                    ? new((int)this.numEndHour.Value, (int)this.numEndMinute.Value, (int)this.numEndSecond.Value)
+                    : this.vodLength,
+                this.viewCount,
+                this.game
+            )
+        };
+
+        if (this.radioJson.IsChecked == true) {
+            if (this.radioCompressionNone.IsChecked == true) {
+                saveFileDialog.Filter = "JSON Files | *.json";
+                saveFileDialog.FileName += ".json";
+            } else if (this.radioCompressionGzip.IsChecked == true) {
+                saveFileDialog.Filter = "GZip JSON Files | *.json.gz";
+                saveFileDialog.FileName += ".json.gz";
+            }
+        } else if (this.radioHTML.IsChecked == true) {
+            saveFileDialog.Filter = "HTML Files | *.html";
+            saveFileDialog.FileName += ".html";
+        } else if (this.radioText.IsChecked == true) {
+            saveFileDialog.Filter = "TXT Files | *.txt";
+            saveFileDialog.FileName += ".txt";
+        }
+
+        if (saveFileDialog.ShowDialog() != true)
+            return;
+
+        try {
+            var downloadOptions = this.GetOptions(saveFileDialog.FileName);
+            if (this.downloadType == DownloadType.Video) {
+                if (this.CheckTrimStart.IsChecked == true) {
+                    downloadOptions.TrimBeginning = true;
+                    var start = new TimeSpan(
+                        (int)this.numStartHour.Value,
+                        (int)this.numStartMinute.Value,
+                        (int)this.numStartSecond.Value
+                    );
+                    downloadOptions.TrimBeginningTime = (int)start.TotalSeconds;
+                }
+
+                if (this.CheckTrimEnd.IsChecked == true) {
+                    downloadOptions.TrimEnding = true;
+                    var end = new TimeSpan(
+                        (int)this.numEndHour.Value,
+                        (int)this.numEndMinute.Value,
+                        (int)this.numEndSecond.Value
+                    );
+                    downloadOptions.TrimEndingTime = (int)end.TotalSeconds;
+                }
+
+                downloadOptions.Id = this.downloadId;
+            } else
+                downloadOptions.Id = this.downloadId;
+
+            if (this.radioTimestampUTC.IsChecked == true)
+                downloadOptions.TimeFormat = TimestampFormat.Utc;
+            else if (this.radioTimestampRelative.IsChecked == true)
+                downloadOptions.TimeFormat = TimestampFormat.Relative;
+            else if (this.radioTimestampNone.IsChecked == true)
+                downloadOptions.TimeFormat = TimestampFormat.None;
+
+            var downloadProgress = new WpfTaskProgress(
+                (LogLevel)Settings.Default.LogLevels,
+                this.SetPercent,
+                this.SetStatus,
+                this.AppendLog
+            );
+            var currentDownload = new ChatDownloader(downloadOptions, downloadProgress);
+
+            this.btnGetInfo.IsEnabled = false;
+            this.SetEnabled(false, false);
+
+            this.SetImage("Images/ppOverheat.gif", true);
+            this.statusMessage.Text = Strings.StatusDownloading;
+            this._cancellationTokenSource = new();
+            this.UpdateActionButtons(true);
+
+            try {
+                await currentDownload.DownloadAsync(this._cancellationTokenSource.Token);
+                downloadProgress.SetStatus(Strings.StatusDone);
+                this.SetImage("Images/ppHop.gif", true);
+            } catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException
+                && this._cancellationTokenSource.IsCancellationRequested) {
+                downloadProgress.SetStatus(Strings.StatusCanceled);
+                this.SetImage("Images/ppHop.gif", true);
+            } catch (Exception ex) {
+                downloadProgress.SetStatus(Strings.StatusError);
+                this.SetImage("Images/peepoSad.png", false);
+                this.AppendLog(Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
-                {
-                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        private void UpdateActionButtons(bool isDownloading)
-        {
-            if (isDownloading)
-            {
-                SplitBtnDownload.Visibility = Visibility.Collapsed;
-                BtnCancel.Visibility = Visibility.Visible;
-                return;
-            }
-            SplitBtnDownload.Visibility = Visibility.Visible;
-            BtnCancel.Visibility = Visibility.Collapsed;
-        }
-
-        public static string ValidateUrl(string text)
-        {
-            var vodClipIdMatch = TwitchRegex.MatchVideoOrClipId(text);
-            return vodClipIdMatch is { Success: true }
-                ? vodClipIdMatch.Value
-                : null;
-        }
-
-        private void SetPercent(int percent)
-        {
-            Dispatcher.BeginInvoke(() =>
-                statusProgressBar.Value = percent
-            );
-        }
-
-        private void SetStatus(string message)
-        {
-            Dispatcher.BeginInvoke(() =>
-                statusMessage.Text = message
-            );
-        }
-
-        private void AppendLog(string message)
-        {
-            textLog.Dispatcher.BeginInvoke(() =>
-                textLog.AppendText(message + Environment.NewLine)
-            );
-        }
-
-        public ChatDownloadOptions GetOptions(string filename)
-        {
-            ChatDownloadOptions options = new ChatDownloadOptions();
-
-            if (radioJson.IsChecked == true)
-                options.DownloadFormat = ChatFormat.Json;
-            else if (radioHTML.IsChecked == true)
-                options.DownloadFormat = ChatFormat.Html;
-            else if (radioText.IsChecked == true)
-                options.DownloadFormat = ChatFormat.Text;
-
-            if (radioCompressionNone.IsChecked == true)
-                options.Compression = ChatCompression.None;
-            else if (radioCompressionGzip.IsChecked == true)
-                options.Compression = ChatCompression.Gzip;
-
-            options.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
-            options.BttvEmotes = checkBttvEmbed.IsChecked.GetValueOrDefault();
-            options.FfzEmotes = checkFfzEmbed.IsChecked.GetValueOrDefault();
-            options.StvEmotes = checkStvEmbed.IsChecked.GetValueOrDefault();
-            options.Filename = filename;
-            options.DownloadThreads = (int)NumChatDownloadThreads.Value;
-            return options;
-        }
-
-        public void SetImage(string imageUri, bool isGif)
-        {
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.UriSource = new Uri(imageUri, UriKind.Relative);
-            image.EndInit();
-            if (isGif)
-            {
-                ImageBehavior.SetAnimatedSource(statusImage, image);
-            }
-            else
-            {
-                ImageBehavior.SetAnimatedSource(statusImage, null);
-                statusImage.Source = image;
-            }
-        }
-
-        private void btnDonate_Click(object sender, RoutedEventArgs e)
-        {
-            Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
-        }
-
-        private void btnSettings_Click(object sender, RoutedEventArgs e)
-        {
-            var settings = new WindowSettings
-            {
-                Owner = Application.Current.MainWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
-            };
-            settings.ShowDialog();
-            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        private void NumChatDownloadThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
-        {
-            if (this.IsInitialized)
-            {
-                NumChatDownloadThreads.Value = Math.Clamp((int)NumChatDownloadThreads.Value, 1, 50);
-                Settings.Default.ChatDownloadThreads = (int)NumChatDownloadThreads.Value;
-                Settings.Default.Save();
-            }
-        }
-
-        private void checkEmbed_Checked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.ChatEmbedEmotes = true;
-                Settings.Default.Save();
-                checkBttvEmbed.IsEnabled = true;
-                checkFfzEmbed.IsEnabled = true;
-                checkStvEmbed.IsEnabled = true;
-            }
-        }
-
-        private void checkEmbed_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.ChatEmbedEmotes = false;
-                Settings.Default.Save();
-                checkBttvEmbed.IsEnabled = false;
-                checkFfzEmbed.IsEnabled = false;
-                checkStvEmbed.IsEnabled = false;
-            }
-        }
-
-        private void checkBttvEmbed_Checked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.BTTVEmotes = true;
-                Settings.Default.Save();
-            }
-        }
-
-        private void checkBttvEmbed_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.BTTVEmotes = false;
-                Settings.Default.Save();
-            }
-        }
-
-        private void checkFfzEmbed_Checked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.FFZEmotes = true;
-                Settings.Default.Save();
-            }
-        }
-
-        private void checkFfzEmbed_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.FFZEmotes = false;
-                Settings.Default.Save();
-            }
-        }
-
-        private void checkStvEmbed_Checked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.STVEmotes = true;
-                Settings.Default.Save();
-            }
-        }
-
-        private void checkStvEmbed_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.STVEmotes = false;
-                Settings.Default.Save();
-            }
-        }
-
-        private void radioJson_Checked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                timeText.Visibility = Visibility.Collapsed;
-                timeOptions.Visibility = Visibility.Collapsed;
-                stackEmbedText.Visibility = Visibility.Visible;
-                stackEmbedChecks.Visibility = Visibility.Visible;
-                compressionText.Visibility = Visibility.Visible;
-                compressionOptions.Visibility = Visibility.Visible;
-                textTrim.Margin = new Thickness(0, 10, 0, 33);
-
-                Settings.Default.ChatDownloadType = (int)ChatFormat.Json;
-                Settings.Default.Save();
-            }
-        }
-
-        private void radioHTML_Checked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                timeText.Visibility = Visibility.Collapsed;
-                timeOptions.Visibility = Visibility.Collapsed;
-                stackEmbedText.Visibility = Visibility.Visible;
-                stackEmbedChecks.Visibility = Visibility.Visible;
-                compressionText.Visibility = Visibility.Collapsed;
-                compressionOptions.Visibility = Visibility.Collapsed;
-                textTrim.Margin = new Thickness(0, 17, 0, 33);
-
-                Settings.Default.ChatDownloadType = (int)ChatFormat.Html;
-                Settings.Default.Save();
-            }
-        }
-
-        private void radioText_Checked(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                timeText.Visibility = Visibility.Visible;
-                timeOptions.Visibility = Visibility.Visible;
-                stackEmbedText.Visibility = Visibility.Collapsed;
-                stackEmbedChecks.Visibility = Visibility.Collapsed;
-                compressionText.Visibility = Visibility.Collapsed;
-                compressionOptions.Visibility = Visibility.Collapsed;
-                textTrim.Margin = new Thickness(0, 10, 0, 36);
-
-                Settings.Default.ChatDownloadType = (int)ChatFormat.Text;
-                Settings.Default.Save();
-            }
-        }
-
-        private async void SplitBtnDownload_Click(object sender, RoutedEventArgs e)
-        {
-            if (((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
-            {
-                return;
+                    MessageBox.Show(
+                        Application.Current.MainWindow!,
+                        ex.ToString(),
+                        Strings.VerboseErrorOutput,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
             }
 
-            var saveFileDialog = new SaveFileDialog
-            {
-                FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text,
-                    CheckTrimStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
-                    CheckTrimEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    viewCount, game)
-            };
+            this.btnGetInfo.IsEnabled = true;
+            downloadProgress.ReportProgress(0);
+            this._cancellationTokenSource.Dispose();
+            this.UpdateActionButtons(false);
 
-            if (radioJson.IsChecked == true)
-            {
-                if (radioCompressionNone.IsChecked == true)
-                {
-                    saveFileDialog.Filter = "JSON Files | *.json";
-                    saveFileDialog.FileName += ".json";
-                }
-                else if (radioCompressionGzip.IsChecked == true)
-                {
-                    saveFileDialog.Filter = "GZip JSON Files | *.json.gz";
-                    saveFileDialog.FileName += ".json.gz";
-                }
-            }
-            else if (radioHTML.IsChecked == true)
-            {
-                saveFileDialog.Filter = "HTML Files | *.html";
-                saveFileDialog.FileName += ".html";
-            }
-            else if (radioText.IsChecked == true)
-            {
-                saveFileDialog.Filter = "TXT Files | *.txt";
-                saveFileDialog.FileName += ".txt";
-            }
-
-            if (saveFileDialog.ShowDialog() != true)
-            {
-                return;
-            }
-
-            try
-            {
-                ChatDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
-                if (downloadType == DownloadType.Video)
-                {
-                    if (CheckTrimStart.IsChecked == true)
-                    {
-                        downloadOptions.TrimBeginning = true;
-                        TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                        downloadOptions.TrimBeginningTime = (int)start.TotalSeconds;
-                    }
-
-                    if (CheckTrimEnd.IsChecked == true)
-                    {
-                        downloadOptions.TrimEnding = true;
-                        TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                        downloadOptions.TrimEndingTime = (int)end.TotalSeconds;
-                    }
-
-                    downloadOptions.Id = downloadId;
-                }
-                else
-                {
-                    downloadOptions.Id = downloadId;
-                }
-
-                if (radioTimestampUTC.IsChecked == true)
-                    downloadOptions.TimeFormat = TimestampFormat.Utc;
-                else if (radioTimestampRelative.IsChecked == true)
-                    downloadOptions.TimeFormat = TimestampFormat.Relative;
-                else if (radioTimestampNone.IsChecked == true)
-                    downloadOptions.TimeFormat = TimestampFormat.None;
-
-                var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
-                var currentDownload = new ChatDownloader(downloadOptions, downloadProgress);
-
-                btnGetInfo.IsEnabled = false;
-                SetEnabled(false, false);
-
-                SetImage("Images/ppOverheat.gif", true);
-                statusMessage.Text = Translations.Strings.StatusDownloading;
-                _cancellationTokenSource = new CancellationTokenSource();
-                UpdateActionButtons(true);
-
-                try
-                {
-                    await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
-                    downloadProgress.SetStatus(Translations.Strings.StatusDone);
-                    SetImage("Images/ppHop.gif", true);
-                }
-                catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
-                {
-                    downloadProgress.SetStatus(Translations.Strings.StatusCanceled);
-                    SetImage("Images/ppHop.gif", true);
-                }
-                catch (Exception ex)
-                {
-                    downloadProgress.SetStatus(Translations.Strings.StatusError);
-                    SetImage("Images/peepoSad.png", false);
-                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
-                    if (Settings.Default.VerboseErrors)
-                    {
-                        MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-                btnGetInfo.IsEnabled = true;
-                downloadProgress.ReportProgress(0);
-                _cancellationTokenSource.Dispose();
-                UpdateActionButtons(false);
-
-                currentDownload = null;
-                GC.Collect();
-            }
-            catch (Exception ex)
-            {
-                AppendLog(Translations.Strings.ErrorLog + ex.Message);
-            }
+            currentDownload = null;
+            GC.Collect();
+        } catch (Exception ex) {
+            this.AppendLog(Strings.ErrorLog + ex.Message);
         }
+    }
 
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            statusMessage.Text = Translations.Strings.StatusCanceling;
-            try
-            {
-                _cancellationTokenSource.Cancel();
-            }
-            catch (ObjectDisposedException) { }
-        }
+    private void BtnCancel_Click(object sender, RoutedEventArgs e) {
+        this.statusMessage.Text = Strings.StatusCanceling;
+        try {
+            this._cancellationTokenSource.Cancel();
+        } catch (ObjectDisposedException) { }
+    }
 
-        private void CheckTrimStart_OnCheckStateChanged(object sender, RoutedEventArgs e)
-        {
-            SetEnabledTrimStart(CheckTrimStart.IsChecked.GetValueOrDefault());
-        }
+    private void CheckTrimStart_OnCheckStateChanged(object sender, RoutedEventArgs e) {
+        this.SetEnabledTrimStart(this.CheckTrimStart.IsChecked.GetValueOrDefault());
+    }
 
-        private void CheckTrimEnd_OnCheckStateChanged(object sender, RoutedEventArgs e)
-        {
-            SetEnabledTrimEnd(CheckTrimEnd.IsChecked.GetValueOrDefault());
-        }
+    private void CheckTrimEnd_OnCheckStateChanged(object sender, RoutedEventArgs e) {
+        this.SetEnabledTrimEnd(this.CheckTrimEnd.IsChecked.GetValueOrDefault());
+    }
 
+    private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e) {
+        var queueOptions = new WindowQueueOptions(this) {
+            Owner = Application.Current.MainWindow,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+        queueOptions.ShowDialog();
+    }
 
-        private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e)
-        {
-            var queueOptions = new WindowQueueOptions(this)
-            {
-                Owner = Application.Current.MainWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
-            };
-            queueOptions.ShowDialog();
-        }
-
-        private async void TextUrl_OnKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                await GetVideoInfo();
-                e.Handled = true;
-            }
+    private async void TextUrl_OnKeyDown(object sender, KeyEventArgs e) {
+        if (e.Key == Key.Enter) {
+            await this.GetVideoInfo();
+            e.Handled = true;
         }
     }
 }

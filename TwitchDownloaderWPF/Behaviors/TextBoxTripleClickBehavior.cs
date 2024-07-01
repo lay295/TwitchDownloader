@@ -2,72 +2,58 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace TwitchDownloaderWPF.Behaviors
-{
-    public class TextBoxTripleClickBehavior : DependencyObject
-    {
-        public static readonly DependencyProperty TripleClickSelectLineProperty = DependencyProperty.RegisterAttached(
-            nameof(TripleClickSelectLine), typeof(bool), typeof(TextBoxTripleClickBehavior), new PropertyMetadata(false, OnPropertyChanged));
+namespace TwitchDownloaderWPF.Behaviors;
 
-        private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is not TextBox textBox)
-            {
-                return;
-            }
+public class TextBoxTripleClickBehavior : DependencyObject {
+    public static readonly DependencyProperty TripleClickSelectLineProperty = DependencyProperty.RegisterAttached(
+        nameof(TextBoxTripleClickBehavior.TripleClickSelectLine),
+        typeof(bool),
+        typeof(TextBoxTripleClickBehavior),
+        new(false, OnPropertyChanged)
+    );
 
-            var enable = (bool)e.NewValue;
-            if (enable)
-            {
-                textBox.PreviewMouseLeftButtonDown += OnTextBoxMouseDown;
-            }
-            else
-            {
-                textBox.PreviewMouseLeftButtonDown -= OnTextBoxMouseDown;
-            }
+    public bool TripleClickSelectLine {
+        get => (bool)this.GetValue(TextBoxTripleClickBehavior.TripleClickSelectLineProperty);
+        set => this.SetValue(TextBoxTripleClickBehavior.TripleClickSelectLineProperty, value);
+    }
+
+    private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        if (d is not TextBox textBox)
+            return;
+
+        var enable = (bool)e.NewValue;
+        if (enable)
+            textBox.PreviewMouseLeftButtonDown += OnTextBoxMouseDown;
+        else
+            textBox.PreviewMouseLeftButtonDown -= OnTextBoxMouseDown;
+    }
+
+    private static void OnTextBoxMouseDown(object sender, MouseButtonEventArgs e) {
+        if (e.ClickCount == 3 && sender is TextBox textBox) {
+            var (start, length) = GetCurrentLine(textBox);
+            textBox.Select(start, length);
+        }
+    }
+
+    private static (int start, int length) GetCurrentLine(TextBox textBox) {
+        var caretPos = textBox.CaretIndex;
+        var text = textBox.Text;
+
+        var start = -1;
+        var end = -1;
+
+        // CaretIndex can be negative for some reason.
+        if (caretPos >= 0) {
+            start = text.LastIndexOf('\n', caretPos, caretPos);
+            end = text.IndexOf('\n', caretPos);
         }
 
-        private static void OnTextBoxMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ClickCount == 3 && sender is TextBox textBox)
-            {
-                var (start, length) = GetCurrentLine(textBox);
-                textBox.Select(start, length);
-            }
-        }
+        if (start == -1)
+            start = 0;
 
-        private static (int start, int length) GetCurrentLine(TextBox textBox)
-        {
-            var caretPos = textBox.CaretIndex;
-            var text = textBox.Text;
+        if (end == -1)
+            end = text.Length;
 
-            var start = -1;
-            var end = -1;
-
-            // CaretIndex can be negative for some reason.
-            if (caretPos >= 0)
-            {
-                start = text.LastIndexOf('\n', caretPos, caretPos);
-                end = text.IndexOf('\n', caretPos);
-            }
-
-            if (start == -1)
-            {
-                start = 0;
-            }
-
-            if (end == -1)
-            {
-                end = text.Length;
-            }
-
-            return (start, end - start);
-        }
-
-        public bool TripleClickSelectLine
-        {
-            get => (bool)GetValue(TripleClickSelectLineProperty);
-            set => SetValue(TripleClickSelectLineProperty, value);
-        }
+        return (start, end - start);
     }
 }

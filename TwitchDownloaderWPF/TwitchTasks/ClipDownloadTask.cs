@@ -6,135 +6,120 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderWPF.Translations;
 using TwitchDownloaderWPF.Utils;
 
-namespace TwitchDownloaderWPF.TwitchTasks
-{
-    class ClipDownloadTask : ITwitchTask
-    {
-        public TaskData Info { get; set; } = new TaskData();
+namespace TwitchDownloaderWPF.TwitchTasks;
 
-        private int _progress;
-        public int Progress
-        {
-            get => _progress;
-            private set => SetField(ref _progress, value);
+internal class ClipDownloadTask : ITwitchTask {
+
+    private bool _canCancel = true;
+
+    private TwitchTaskException _exception = new();
+
+    private int _progress;
+
+    private TwitchTaskStatus _status = TwitchTaskStatus.Ready;
+
+    public ClipDownloadOptions DownloadOptions { get; init; }
+    public TaskData Info { get; set; } = new();
+
+    public int Progress {
+        get => this._progress;
+        private set => this.SetField(ref this._progress, value);
+    }
+
+    public TwitchTaskStatus Status {
+        get => this._status;
+        private set => this.SetField(ref this._status, value);
+    }
+
+    public CancellationTokenSource TokenSource { get; set; } = new();
+    public ITwitchTask DependantTask { get; set; }
+    public string TaskType { get; } = Strings.ClipDownload;
+
+    public TwitchTaskException Exception {
+        get => this._exception;
+        private set => this.SetField(ref this._exception, value);
+    }
+
+    public string OutputFile => this.DownloadOptions.Filename;
+
+    public bool CanCancel {
+        get => this._canCancel;
+        private set => this.SetField(ref this._canCancel, value);
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public void Cancel() {
+        if (!this.CanCancel)
+            return;
+
+        this.TokenSource.Cancel();
+
+        if (this.Status == TwitchTaskStatus.Running) {
+            this.ChangeStatus(TwitchTaskStatus.Stopping);
+            return;
         }
 
-        private TwitchTaskStatus _status = TwitchTaskStatus.Ready;
-        public TwitchTaskStatus Status
-        {
-            get => _status;
-            private set => SetField(ref _status, value);
+        this.ChangeStatus(TwitchTaskStatus.Canceled);
+    }
+
+    public bool CanRun() => this.Status == TwitchTaskStatus.Ready;
+
+    public async Task RunAsync() {
+        if (this.TokenSource.IsCancellationRequested) {
+            this.TokenSource.Dispose();
+            this.ChangeStatus(TwitchTaskStatus.Canceled);
+            return;
         }
 
-        public ClipDownloadOptions DownloadOptions { get; init; }
-        public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
-        public ITwitchTask DependantTask { get; set; }
-        public string TaskType { get; } = Translations.Strings.ClipDownload;
-
-        private TwitchTaskException _exception = new();
-        public TwitchTaskException Exception
-        {
-            get => _exception;
-            private set => SetField(ref _exception, value);
-        }
-
-        public string OutputFile => DownloadOptions.Filename;
-
-        private bool _canCancel = true;
-        public bool CanCancel
-        {
-            get => _canCancel;
-            private set => SetField(ref _canCancel, value);
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void Cancel()
-        {
-            if (!CanCancel)
-            {
-                return;
+        var progress = new WpfTaskProgress(i => this.Progress = i);
+        var downloader = new ClipDownloader(this.DownloadOptions, progress);
+        this.ChangeStatus(TwitchTaskStatus.Running);
+        try {
+            await downloader.DownloadAsync(this.TokenSource.Token);
+            if (this.TokenSource.IsCancellationRequested)
+                this.ChangeStatus(TwitchTaskStatus.Canceled);
+            else {
+                progress.ReportProgress(100);
+                this.ChangeStatus(TwitchTaskStatus.Finished);
             }
-
-            TokenSource.Cancel();
-
-            if (Status == TwitchTaskStatus.Running)
-            {
-                ChangeStatus(TwitchTaskStatus.Stopping);
-                return;
-            }
-
-            ChangeStatus(TwitchTaskStatus.Canceled);
+        } catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException
+            && this.TokenSource.IsCancellationRequested) {
+            this.ChangeStatus(TwitchTaskStatus.Canceled);
+        } catch (Exception ex) {
+            this.ChangeStatus(TwitchTaskStatus.Failed);
+            this.Exception = new(ex);
         }
 
-        public bool CanRun()
-        {
-            return Status == TwitchTaskStatus.Ready;
-        }
+        downloader = null;
+        this.TokenSource.Dispose();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+    }
 
-        public void ChangeStatus(TwitchTaskStatus newStatus)
-        {
-            Status = newStatus;
+    public void ChangeStatus(TwitchTaskStatus newStatus) {
+        this.Status = newStatus;
 
-            if (CanCancel && newStatus is TwitchTaskStatus.Canceled or TwitchTaskStatus.Failed or TwitchTaskStatus.Finished or TwitchTaskStatus.Stopping)
-            {
-                CanCancel = false;
-            }
-        }
+        if (this.CanCancel
+            && newStatus is TwitchTaskStatus.Canceled
+                or TwitchTaskStatus.Failed
+                or TwitchTaskStatus.Finished
+                or TwitchTaskStatus.Stopping)
+            this.CanCancel = false;
+    }
 
-        public async Task RunAsync()
-        {
-            if (TokenSource.IsCancellationRequested)
-            {
-                TokenSource.Dispose();
-                ChangeStatus(TwitchTaskStatus.Canceled);
-                return;
-            }
+    private void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+        this.PropertyChanged?.Invoke(this, new(propertyName));
+    }
 
-            var progress = new WpfTaskProgress(i => Progress = i);
-            ClipDownloader downloader = new ClipDownloader(DownloadOptions, progress);
-            ChangeStatus(TwitchTaskStatus.Running);
-            try
-            {
-                await downloader.DownloadAsync(TokenSource.Token);
-                if (TokenSource.IsCancellationRequested)
-                {
-                    ChangeStatus(TwitchTaskStatus.Canceled);
-                }
-                else
-                {
-                    progress.ReportProgress(100);
-                    ChangeStatus(TwitchTaskStatus.Finished);
-                }
-            }
-            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && TokenSource.IsCancellationRequested)
-            {
-                ChangeStatus(TwitchTaskStatus.Canceled);
-            }
-            catch (Exception ex)
-            {
-                ChangeStatus(TwitchTaskStatus.Failed);
-                Exception = new TwitchTaskException(ex);
-            }
-            downloader = null;
-            TokenSource.Dispose();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-        }
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null) {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
 
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-            field = value;
-            OnPropertyChanged(propertyName);
-            return true;
-        }
+        field = value;
+        this.OnPropertyChanged(propertyName);
+        return true;
     }
 }
