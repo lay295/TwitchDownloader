@@ -22,9 +22,7 @@ namespace TwitchDownloaderCLI.Modes
             var progress = new CliTaskProgress(args.LogLevel);
 
             if (args.DownloadFfmpeg)
-            {
                 DownloadFfmpeg(progress);
-            }
         }
 
         private static void DownloadFfmpeg(ITaskProgress progress)
@@ -66,9 +64,7 @@ namespace TwitchDownloaderCLI.Modes
         public static void DetectFfmpeg(string ffmpegPath, ITaskLogger logger)
         {
             if (File.Exists(ffmpegPath) || File.Exists(FfmpegExecutableName) || PathUtils.ExistsOnPATH(FfmpegExecutableName))
-            {
                 return;
-            }
 
             var processFileName = Path.GetFileName(Environment.ProcessPath);
             logger.LogError($"Unable to find FFmpeg, exiting. You can download FFmpeg automatically with the command \"{processFileName} ffmpeg -d\"");
@@ -85,9 +81,9 @@ namespace TwitchDownloaderCLI.Modes
             public XabeProgressHandler(ITaskProgress progress)
             {
                 progress.SetTemplateStatus("Downloading FFmpeg {0}%", 0);
-                _timer = new Timer(_ =>
+                this._timer = new Timer(_ =>
                 {
-                    if (_percentQueue.IsEmpty) return;
+                    if (this._percentQueue.IsEmpty) return;
 
                     progress.ReportProgress(_percentQueue.Max());
                 }, null, 0, 100);
@@ -97,17 +93,17 @@ namespace TwitchDownloaderCLI.Modes
             {
                 var percent = (int)(value.DownloadedBytes / (double)value.TotalBytes * 100);
 
-                if (percent > _lastPercent)
-                {
-                    _lastPercent = percent;
-                    _percentQueue.Enqueue(percent);
-                }
+                if (percent <= this._lastPercent)
+                    return;
+
+                this._lastPercent = percent;
+                this._percentQueue.Enqueue(percent);
             }
 
             public void Dispose()
             {
-                _timer?.Dispose();
-                _percentQueue.Clear();
+                this._timer?.Dispose();
+                this._percentQueue.Clear();
             }
         }
     }

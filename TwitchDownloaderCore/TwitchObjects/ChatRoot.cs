@@ -22,19 +22,16 @@ namespace TwitchDownloaderCore.TwitchObjects
         public DateTime updated_at { get; set; }
         public string logo { get; set; }
 
-        public Commenter Clone()
+        public Commenter Clone() => new()
         {
-            return new Commenter()
-            {
-                display_name = display_name,
-                _id = _id,
-                name = name,
-                bio = bio,
-                created_at = created_at,
-                updated_at = updated_at,
-                logo = logo
-            };
-        }
+            display_name = display_name,
+            _id = _id,
+            name = name,
+            bio = bio,
+            created_at = created_at,
+            updated_at = updated_at,
+            logo = logo
+        };
     }
 
     [DebuggerDisplay("{emoticon_id}")]

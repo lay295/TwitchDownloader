@@ -9,9 +9,7 @@ namespace TwitchDownloaderCore.Extensions
         {
             var trimLength = 0;
             while (sb.Length - trimLength > 0 && trimChars.Contains(sb[^(trimLength + 1)]))
-            {
-                trimLength++;
-            }
+                ++trimLength;
 
             return sb.Remove(sb.Length - trimLength, trimLength);
         }

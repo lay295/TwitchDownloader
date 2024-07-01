@@ -18,31 +18,37 @@ namespace TwitchDownloaderCore.Chat
             {
                 var username = comment.commenter.display_name;
                 var message = comment.message.body;
-                if (timeFormat == TimestampFormat.Utc)
-                {
-                    var time = comment.created_at;
-                    await sw.WriteLineAsync($"[{time:yyyy'-'MM'-'dd HH':'mm':'ss 'UTC'}] {username}: {message}");
-                }
-                else if (timeFormat == TimestampFormat.UtcFull)
-                {
-                    var time = comment.created_at;
-                    await sw.WriteLineAsync($"[{time:yyyy'-'MM'-'dd HH':'mm':'ss.fff 'UTC'}] {username}: {message}");
-                }
-                else if (timeFormat == TimestampFormat.Relative)
-                {
-                    var time = TimeSpan.FromSeconds(comment.content_offset_seconds);
-                    if (time.Ticks < 24 * TimeSpan.TicksPerHour)
-                    {
-                        await sw.WriteLineAsync(@$"[{time:h\:mm\:ss}] {username}: {message}");
+                switch (timeFormat) {
+                    case TimestampFormat.Utc: {
+                        var time = comment.created_at;
+                        await sw.WriteLineAsync($"[{time:yyyy'-'MM'-'dd HH':'mm':'ss 'UTC'}] {username}: {message}");
+                        break;
                     }
-                    else
-                    {
-                        await sw.WriteLineAsync(string.Create(TimeSpanHFormat.ReusableInstance, @$"[{time:H\:mm\:ss}] {username}: {message}"));
+
+                    case TimestampFormat.UtcFull: {
+                        var time = comment.created_at;
+                        await sw.WriteLineAsync($"[{time:yyyy'-'MM'-'dd HH':'mm':'ss.fff 'UTC'}] {username}: {message}");
+                        break;
                     }
-                }
-                else if (timeFormat == TimestampFormat.None)
-                {
-                    await sw.WriteLineAsync($"{username}: {message}");
+
+                    case TimestampFormat.Relative: {
+                        var time = TimeSpan.FromSeconds(comment.content_offset_seconds);
+                        if (time.Ticks < 24 * TimeSpan.TicksPerHour)
+                        {
+                            await sw.WriteLineAsync(@$"[{time:h\:mm\:ss}] {username}: {message}");
+                        }
+                        else
+                        {
+                            await sw.WriteLineAsync(string.Create(TimeSpanHFormat.ReusableInstance, @$"[{time:H\:mm\:ss}] {username}: {message}"));
+                        }
+
+                        break;
+                    }
+
+                    case TimestampFormat.None: await sw.WriteLineAsync($"{username}: {message}");
+                        break;
+
+                    default: throw new ArgumentOutOfRangeException(nameof(timeFormat), timeFormat, null);
                 }
             }
         }

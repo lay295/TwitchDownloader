@@ -55,10 +55,8 @@ namespace TwitchDownloaderCLI
                     Console.ReadKey();
                 }
                 else
-                {
                     Console.WriteLine("Usage: {0} [VERB] [OPTIONS]{1}Try \'{2} help\' for more information.",
                         processFileName, Environment.NewLine, processFileName);
-                }
             }
             else
             {
@@ -77,9 +75,7 @@ namespace TwitchDownloaderCLI
         private static void WriteApplicationBanner(ITwitchDownloaderArgs args)
         {
             if (args.ShowBanner == false || (args.LogLevel & LogLevel.None) != 0)
-            {
                 return;
-            }
 
             var nameVersionString = HeadingInfo.Default.ToString();
 

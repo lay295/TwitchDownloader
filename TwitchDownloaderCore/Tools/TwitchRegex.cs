@@ -20,17 +20,11 @@ namespace TwitchDownloaderCore.Tools
         {
             var videoIdMatch = VideoId.Match(text);
             if (videoIdMatch.Success)
-            {
                 return videoIdMatch;
-            }
 
             var highlightIdMatch = HighlightId.Match(text);
-            if (highlightIdMatch.Success)
-            {
-                return highlightIdMatch;
-            }
+            return highlightIdMatch.Success ? highlightIdMatch : null;
 
-            return null;
         }
 
         /// <returns>A <see cref="Match"/> of the clip's id or <see langword="null"/>.</returns>
@@ -38,9 +32,7 @@ namespace TwitchDownloaderCore.Tools
         {
             var clipIdMatch = ClipId.Match(text);
             if (clipIdMatch.Success && !clipIdMatch.Value.All(char.IsDigit))
-            {
                 return clipIdMatch;
-            }
 
             return null;
         }
@@ -50,17 +42,11 @@ namespace TwitchDownloaderCore.Tools
         {
             var videoIdMatch = MatchVideoId(text);
             if (videoIdMatch is { Success: true })
-            {
                 return videoIdMatch;
-            }
 
             var clipIdMatch = MatchClipId(text);
-            if (clipIdMatch is { Success: true })
-            {
-                return clipIdMatch;
-            }
+            return clipIdMatch is { Success: true } ? clipIdMatch : null;
 
-            return null;
         }
     }
 }

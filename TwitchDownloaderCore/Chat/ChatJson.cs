@@ -48,34 +48,22 @@ namespace TwitchDownloaderCore.Chat
             };
 
             await using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
                 jsonDocument = await GetJsonDocumentAsync(fs, filePath, deserializationOptions, cancellationToken);
-            }
 
-            if (jsonDocument.RootElement.TryGetProperty("FileInfo", out JsonElement fileInfoElement))
-            {
-                returnChatRoot.FileInfo = fileInfoElement.Deserialize<ChatRootInfo>(options: _jsonSerializerOptions);
-            }
+            if (jsonDocument.RootElement.TryGetProperty("FileInfo", out var fileInfoElement))
+                returnChatRoot.FileInfo = fileInfoElement.Deserialize<ChatRootInfo>(ChatJson._jsonSerializerOptions);
 
-            if (jsonDocument.RootElement.TryGetProperty("streamer", out JsonElement streamerElement))
-            {
-                returnChatRoot.streamer = streamerElement.Deserialize<Streamer>(options: _jsonSerializerOptions);
-            }
+            if (jsonDocument.RootElement.TryGetProperty("streamer", out var streamerElement))
+                returnChatRoot.streamer = streamerElement.Deserialize<Streamer>(ChatJson._jsonSerializerOptions);
 
-            if (jsonDocument.RootElement.TryGetProperty("video", out JsonElement videoElement))
-            {
-                returnChatRoot.video = videoElement.Deserialize<Video>(options: _jsonSerializerOptions);
-            }
+            if (jsonDocument.RootElement.TryGetProperty("video", out var videoElement))
+                returnChatRoot.video = videoElement.Deserialize<Video>(ChatJson._jsonSerializerOptions);
 
             if (getComments)
-            {
-                if (jsonDocument.RootElement.TryGetProperty("comments", out JsonElement commentsElement))
-                {
+                if (jsonDocument.RootElement.TryGetProperty("comments", out var commentsElement))
                     returnChatRoot.comments = onlyFirstAndLastComments
-                        ? commentsElement.DeserializeFirstAndLastFromList<Comment>(options: _jsonSerializerOptions)
-                        : commentsElement.Deserialize<List<Comment>>(options: _jsonSerializerOptions);
-                }
-            }
+                        ? commentsElement.DeserializeFirstAndLastFromList<Comment>(ChatJson._jsonSerializerOptions)
+                        : commentsElement.Deserialize<List<Comment>>(ChatJson._jsonSerializerOptions);
 
             if (getEmbeds)
             {
@@ -95,16 +83,14 @@ namespace TwitchDownloaderCore.Chat
                             twitchBadges = legacyEmbeddedData?.twitchBadges.Select(item => new EmbedChatBadge
                             {
                                 name = item.name,
-                                versions = item.versions.Select(x => new KeyValuePair<string, ChatBadgeData>(x.Key, new ChatBadgeData { bytes = x.Value })).ToDictionary(k => k.Key, v => v.Value),
+                                versions = item.versions.Select(x => new KeyValuePair<string, ChatBadgeData>(x.Key, new ChatBadgeData { Bytes = x.Value })).ToDictionary(k => k.Key, v => v.Value),
                             }).ToList() ?? new List<EmbedChatBadge>(),
                             twitchBits = legacyEmbeddedData?.twitchBits ?? new List<EmbedCheerEmote>()
                         };
                     }
                 }
-                else if (jsonDocument.RootElement.TryGetProperty("emotes", out JsonElement emotesElement))
-                {
+                else if (jsonDocument.RootElement.TryGetProperty("emotes", out var emotesElement))
                     returnChatRoot.embeddedData = emotesElement.Deserialize<EmbeddedData>(options: _jsonSerializerOptions);
-                }
             }
 
             await UpgradeChatJson(returnChatRoot);
@@ -115,19 +101,15 @@ namespace TwitchDownloaderCore.Chat
         private static async Task<JsonDocument> GetJsonDocumentAsync(Stream stream, string filePath, JsonDocumentOptions deserializationOptions, CancellationToken cancellationToken = default)
         {
             if (!stream.CanSeek)
-            {
                 // We aren't able to verify the file type. Pretend it's JSON.
                 return await JsonDocument.ParseAsync(stream, deserializationOptions, cancellationToken);
-            }
 
             const int RENT_LENGTH = 4;
             var rentedBuffer = ArrayPool<byte>.Shared.Rent(RENT_LENGTH);
             try
             {
                 if (await stream.ReadAsync(rentedBuffer.AsMemory(0, RENT_LENGTH), cancellationToken) != RENT_LENGTH)
-                {
                     throw new EndOfStreamException($"{Path.GetFileName(filePath)} is not a valid chat format.");
-                }
 
                 stream.Seek(-RENT_LENGTH, SeekOrigin.Current);
 
@@ -198,15 +180,9 @@ namespace TwitchDownloaderCore.Chat
                         .FirstOrDefault(x => x.message.user_badges.Any(b => b._id.Equals("broadcaster"))));
 
                 if (!int.TryParse(chatRoot.video.user_id, out var assumedId))
-                {
                     if (chatRoot.comments.FirstOrDefault(x => int.TryParse(x.channel_id, out assumedId)) is null)
-                    {
                         if (!int.TryParse(broadcaster.Value?.commenter._id, out assumedId))
-                        {
                             assumedId = 0;
-                        }
-                    }
-                }
 
                 var assumedName = chatRoot.video.user_name ?? broadcaster.Value?.commenter.display_name ?? await TwitchHelper.GetStreamerName(assumedId);
 
@@ -233,9 +209,7 @@ namespace TwitchDownloaderCore.Chat
                 {
                     var bitMatch = TwitchRegex.BitsRegex.Match(comment.message.body);
                     if (bitMatch.Success && int.TryParse(bitMatch.ValueSpan, out var result))
-                    {
                         comment.message.bits_spent = result;
-                    }
                 }
             }
         }

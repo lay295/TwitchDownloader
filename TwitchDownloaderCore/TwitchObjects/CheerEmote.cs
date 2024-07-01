@@ -14,23 +14,17 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         public KeyValuePair<int, TwitchEmote> getTier(int value)
         {
-            KeyValuePair<int, TwitchEmote> returnPair = tierList.First();
-            foreach (KeyValuePair<int, TwitchEmote> tierPair in tierList)
-            {
-                if (tierPair.Key > value)
-                    break;
+            var returnPair = tierList.First();
+            foreach (var tierPair in this.tierList.TakeWhile(tierPair => tierPair.Key <= value)) {
                 returnPair = tierPair;
             }
 
             return returnPair;
         }
 
-        public void Resize(double newScale)
-        {
-            for (int i = 0; i < tierList.Count; i++)
-            {
-                tierList[i].Value.Resize(newScale);
-            }
+        public void Resize(double newScale) {
+            foreach (var t in this.tierList)
+                t.Value.Resize(newScale);
         }
 
 #region ImplementIDisposable

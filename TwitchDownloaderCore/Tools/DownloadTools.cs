@@ -32,9 +32,7 @@ namespace TwitchDownloaderCore.Tools
             // Why are we setting a CTS CancelAfter timer? See lay295#265
             const int SIXTY_SECONDS = 60;
             if (throttleKib == -1 || !response.Content.Headers.ContentLength.HasValue)
-            {
                 cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(SIXTY_SECONDS));
-            }
             else
             {
                 const double ONE_KIBIBYTE = 1024d;
@@ -86,12 +84,8 @@ namespace TwitchDownloaderCore.Tools
         public static string RemoveQueryString(string inputString)
         {
             var queryIndex = inputString.IndexOf('?');
-            if (queryIndex == -1)
-            {
-                return inputString;
-            }
+            return queryIndex == -1 ? inputString : inputString[..queryIndex];
 
-            return inputString[..queryIndex];
         }
     }
 }

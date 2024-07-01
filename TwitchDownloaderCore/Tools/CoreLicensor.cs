@@ -41,7 +41,9 @@ namespace TwitchDownloaderCore.Tools
                     fileHash = sha256.ComputeHash(fs);
                 }
 
-                if (!resourceHash.AsSpan().SequenceEqual(fileHash))
+                if (resourceHash.AsSpan().SequenceEqual(fileHash))
+                    return;
+
                 {
                     resourceStream.Seek(0, SeekOrigin.Begin);
                     using var fs = File.Create(filePath);

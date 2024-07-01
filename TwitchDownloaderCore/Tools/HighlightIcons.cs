@@ -139,11 +139,9 @@ namespace TwitchDownloaderCore.Tools
                 return HighlightType.BitBadgeTierNotification;
 
             if (char.IsDigit(bodySpan[0]) && bodySpan.EndsWith(" have joined! "))
-            {
                 // TODO: use bodySpan when .NET 7
                 if (Regex.IsMatch(comment.message.body, $@"^\d+ raiders from {comment.commenter.display_name} have joined! "))
                     return HighlightType.Raid;
-            }
 
             const string ANONYMOUS_GIFT_ACCOUNT_ID = "274598607"; // Display name is 'AnAnonymousGifter'
             if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
@@ -173,9 +171,9 @@ namespace TwitchDownloaderCore.Tools
         private SKImage GenerateGiftedManyIcon()
         {
             //int newSize = (int)(fontSize / 0.2727); // 44*44px @ 12pt font // Doesn't work because our image sections aren't tall enough and I'm not rewriting that right now
-            var finalIconSize = (int)(_fontSize / 0.6); // 20x20px @ 12pt font
+            var finalIconSize = (int)(this._fontSize / 0.6); // 20x20px @ 12pt font
 
-            if (_offline)
+            if (this._offline)
             {
                 using var offlineBitmap = new SKBitmap(finalIconSize, finalIconSize);
                 using (var offlineCanvas = new SKCanvas(offlineBitmap))
@@ -184,7 +182,7 @@ namespace TwitchDownloaderCore.Tools
                 return SKImage.FromBitmap(offlineBitmap);
             }
 
-            var taskIconBytes = TwitchHelper.GetImage(_cacheDir, GIFTED_MANY_ICON_URL, "gift-illus", 3, "png", StubTaskProgress.Instance);
+            var taskIconBytes = TwitchHelper.GetImage(this._cacheDir, GIFTED_MANY_ICON_URL, "gift-illus", 3, "png", StubTaskProgress.Instance);
             taskIconBytes.Wait();
             using var ms = new MemoryStream(taskIconBytes.Result); // Illustration is 72x72
             using var codec = SKCodec.Create(ms);
@@ -206,10 +204,8 @@ namespace TwitchDownloaderCore.Tools
             using var iconPath = SKPath.ParseSvgPathData(iconSvgString);
             iconPath.FillType = SKPathFillType.EvenOdd;
 
-            if (_outline)
-            {
-                tempCanvas.DrawPath(iconPath, _outlinePaint);
-            }
+            if (this._outline)
+                tempCanvas.DrawPath(iconPath, this._outlinePaint);
 
             tempCanvas.DrawPath(iconPath, iconPaint);
             var newSize = (int)(_fontSize / 0.6); // 20*20px @ 12pt font
@@ -222,14 +218,14 @@ namespace TwitchDownloaderCore.Tools
 
         private SKPaint GetSvgIconPaint(SKColor iconColor)
         {
-            ref var iconPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(_iconPaints, iconColor, out var exists);
+            ref var iconPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(this._iconPaints, iconColor, out var exists);
 
-            if (!exists)
-            {
-                iconPaint = new SKPaint();
-                iconPaint.Color = iconColor;
-                iconPaint.IsAntialias = true;
-            }
+            if (exists)
+                return iconPaint;
+
+            iconPaint = new SKPaint();
+            iconPaint.Color = iconColor;
+            iconPaint.IsAntialias = true;
 
             return iconPaint;
         }
@@ -245,10 +241,8 @@ namespace TwitchDownloaderCore.Tools
         {
             var subMessageMatch = SubMessageRegex.Match(comment.message.body);
             if (!subMessageMatch.Success)
-            {
                 // Return the original comment + null if there is no custom sub message
                 return (comment, null);
-            }
 
             var subMessage = subMessageMatch.Groups[1].Value;
             var customMessage = subMessageMatch.Groups[2].Value;
@@ -293,10 +287,8 @@ namespace TwitchDownloaderCore.Tools
         {
             var watchStreakMatch = WatchStreakRegex.Match(comment.message.body);
             if (!watchStreakMatch.Success)
-            {
                 // Return the original comment + null if there is no custom watch streak message
                 return (comment, null);
-            }
 
             var streakMessage = watchStreakMatch.Groups[1].Value;
             var customMessage = watchStreakMatch.Groups[2].Value;

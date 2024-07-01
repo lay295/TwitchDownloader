@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
@@ -17,15 +16,13 @@ namespace TwitchDownloaderCLI.Modes
             var progress = new CliTaskProgress(inputOptions.LogLevel);
 
             if (inputOptions.EncodeMetadata == true)
-            {
                 FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
-            }
 
             var collisionHandler = new FileCollisionHandler(inputOptions);
             var downloadOptions = GetDownloadOptions(inputOptions, collisionHandler, progress);
 
             var clipDownloader = new ClipDownloader(downloadOptions, progress);
-            clipDownloader.DownloadAsync(new CancellationToken()).Wait();
+            clipDownloader.DownloadAsync(new()).Wait();
         }
 
         private static ClipDownloadOptions GetDownloadOptions(ClipDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)

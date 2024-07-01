@@ -21,7 +21,7 @@ namespace TwitchDownloaderCLI.Modes
 
             var chatUpdater = new ChatUpdater(updateOptions, progress);
             chatUpdater.ParseJsonAsync().Wait();
-            chatUpdater.UpdateAsync(new CancellationToken()).Wait();
+            chatUpdater.UpdateAsync(new()).Wait();
         }
 
         private static ChatUpdateOptions GetUpdateOptions(ChatUpdateArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
@@ -55,9 +55,7 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             if (Path.GetFullPath(inputOptions.InputFile!) == Path.GetFullPath(inputOptions.OutputFile!))
-            {
                 logger.LogWarning("Output file path is identical to input file. This is not recommended in case something goes wrong. All data will be permanently overwritten!");
-            }
 
             ChatUpdateOptions updateOptions = new()
             {

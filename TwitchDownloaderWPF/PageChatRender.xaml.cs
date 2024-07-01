@@ -199,7 +199,7 @@ namespace TwitchDownloaderWPF
                 comboBadges.Items.Clear();
                 comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskBroadcaster, Tag = ChatBadgeType.Broadcaster });
                 comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskModerator, Tag = ChatBadgeType.Moderator });
-                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskVIP, Tag = ChatBadgeType.VIP });
+                comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskVIP, Tag = ChatBadgeType.Vip });
                 comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskSubscriber, Tag = ChatBadgeType.Subscriber });
                 comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskPredictions, Tag = ChatBadgeType.Predictions });
                 comboBadges.Items.Add(new CheckComboBoxItem { Content = Strings.BadgeMaskNoAudioNoVideo, Tag = ChatBadgeType.NoAudioVisual });

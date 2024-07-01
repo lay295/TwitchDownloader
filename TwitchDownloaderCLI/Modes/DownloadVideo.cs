@@ -23,7 +23,7 @@ namespace TwitchDownloaderCLI.Modes
             var downloadOptions = GetDownloadOptions(inputOptions, collisionHandler, progress);
 
             var videoDownloader = new VideoDownloader(downloadOptions, progress);
-            videoDownloader.DownloadAsync(new CancellationToken()).Wait();
+            videoDownloader.DownloadAsync(new()).Wait();
         }
 
         private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
@@ -77,7 +77,7 @@ namespace TwitchDownloaderCLI.Modes
                         $"{directoryInfos.Length} unmanaged video caches were found at '{directoryInfos.FirstOrDefault()?.Parent?.FullName ?? inputOptions.TempFolder}' and can be safely deleted. " +
                         "Run 'TwitchDownloaderCLI cache help' for more information.");
 
-                    return Array.Empty<DirectoryInfo>();
+                    return [];
                 },
                 FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };

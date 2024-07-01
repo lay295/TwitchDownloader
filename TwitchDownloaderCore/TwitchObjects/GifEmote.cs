@@ -31,7 +31,7 @@ namespace TwitchDownloaderCore.TwitchObjects
             FrameCount = codec.FrameCount;
 
             DurationList = new List<int>();
-            for (int i = 0; i < FrameCount; i++)
+            for (var i = 0; i < FrameCount; ++i)
             {
                 var duration = Codec.FrameInfo[i].Duration / 10;
                 DurationList.Add(duration);
@@ -40,21 +40,21 @@ namespace TwitchDownloaderCore.TwitchObjects
 
             if (TotalDuration == 0 || TotalDuration == FrameCount)
             {
-                for (int i = 0; i < DurationList.Count; i++)
+                for (var i = 0; i < DurationList.Count; ++i)
                 {
                     DurationList.RemoveAt(i);
                     DurationList.Insert(i, 10);
                 }
-                TotalDuration = DurationList.Count * 10;
+
+                this.TotalDuration = DurationList.Count * 10;
             }
 
-            for (int i = 0; i < DurationList.Count; i++)
-            {
-                if (DurationList[i] == 0)
-                {
-                    TotalDuration += 10;
-                    DurationList[i] = 10;
-                }
+            for (var i = 0; i < DurationList.Count; ++i) {
+                if (this.DurationList[i] != 0)
+                    continue;
+
+                this.TotalDuration += 10;
+                this.DurationList[i] = 10;
             }
 
             Width = ImageFrames.First().Width;

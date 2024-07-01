@@ -9,17 +9,14 @@ namespace TwitchDownloaderCLI.Modes
         public static void ParseArgs(CacheArgs args)
         {
             if (args.ForceClearCache)
-            {
                 ClearTempCache();
-            }
+            
             else if (args.ClearCache)
-            {
                 PromptClearCache();
-            }
 
-            // TODO: Add option to print out cache information (i.e. individual sub-directory size, maybe in table form?)
-            // TODO: Add interactive cache delete mode (i.e. loop over each sub-directory with Yes/No delete prompts)
-            // TODO: Allow the user to specify a cache folder so it can be managed with the aforementioned tools
+            // TODO: Add option to print out cache information (i.e. individual subdirectory size, maybe in table form?)
+            // TODO: Add interactive cache delete mode (i.e. loop over each subdirectory with Yes/No delete prompts)
+            // TODO: Allow the user to specify a cache folder, so it can be managed with the aforementioned tools
         }
 
         private static void PromptClearCache()

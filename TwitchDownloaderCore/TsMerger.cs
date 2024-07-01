@@ -23,9 +23,7 @@ namespace TwitchDownloaderCore
         public async Task MergeAsync(CancellationToken cancellationToken)
         {
             if (!File.Exists(mergeOptions.InputFile))
-            {
                 throw new FileNotFoundException("Input file does not exist");
-            }
 
             var outputFileInfo = TwitchHelper.ClaimFile(mergeOptions.OutputFile, mergeOptions.FileCollisionCallback, _progress);
             mergeOptions.OutputFile = outputFileInfo.FullName;
@@ -90,9 +88,7 @@ namespace TwitchDownloaderCore
             {
                 var isValidTs = await VerifyVideoPart(part);
                 if (!isValidTs)
-                {
                     failedParts.Add(part);
-                }
 
                 doneCount++;
                 var percent = (int)(doneCount / (double)partCount * 100);
@@ -104,10 +100,8 @@ namespace TwitchDownloaderCore
             if (failedParts.Count != 0)
             {
                 if (failedParts.Count == fileList.Count)
-                {
                     // Every video part returned corrupted, probably a false positive.
                     return;
-                }
 
                 _progress.LogInfo($"The following TS files are invalid or corrupted: {string.Join(", ", failedParts)}");
             }
@@ -118,40 +112,32 @@ namespace TwitchDownloaderCore
             const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
 
             if (!File.Exists(filePath))
-            {
                 return false;
-            }
 
             await using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             var fileLength = fs.Length;
-            if (fileLength == 0 || fileLength % TS_PACKET_LENGTH != 0)
-            {
-                return false;
-            }
+            return fileLength != 0 && fileLength % TS_PACKET_LENGTH == 0;
 
-            return true;
         }
 
         private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, FileStream outputStream, CancellationToken cancellationToken)
         {
-            DriveInfo outputDrive = DriveHelper.GetOutputDrive(mergeOptions.OutputFile);
-            string outputFile = mergeOptions.OutputFile;
+            var outputDrive = DriveHelper.GetOutputDrive(mergeOptions.OutputFile);
+            var outputFile = mergeOptions.OutputFile;
 
-            int partCount = fileList.Count;
-            int doneCount = 0;
+            var partCount = fileList.Count;
+            var doneCount = 0;
 
             foreach (var partFile in fileList)
             {
                 await DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken);
 
                 await using (var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
                     await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
-                }
 
-                doneCount++;
-                int percent = (int)(doneCount / (double)partCount * 100);
-                _progress.ReportProgress(percent);
+                ++doneCount;
+                var percent = (int)(doneCount / (double)partCount * 100);
+                this._progress.ReportProgress(percent);
 
                 cancellationToken.ThrowIfCancellationRequested();
             }

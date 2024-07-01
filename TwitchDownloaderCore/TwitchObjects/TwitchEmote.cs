@@ -74,42 +74,41 @@ namespace TwitchDownloaderCore.TwitchObjects
                 TotalDuration = EmoteFrameDurations.Count * 10;
             }
 
-            for (int i = 0; i < EmoteFrameDurations.Count; i++)
-            {
-                if (EmoteFrameDurations[i] == 0)
-                {
-                    TotalDuration += 10;
-                    EmoteFrameDurations[i] = 10;
-                }
+            for (var i = 0; i < EmoteFrameDurations.Count; ++i) {
+                if (this.EmoteFrameDurations[i] != 0)
+                    continue;
+
+                this.TotalDuration += 10;
+                this.EmoteFrameDurations[i] = 10;
             }
         }
 
         private void ExtractFrames()
         {
             var codecInfo = Codec.Info;
-            for (int i = 0; i < FrameCount; i++)
+            for (var i = 0; i < FrameCount; ++i)
             {
-                SKImageInfo imageInfo = new SKImageInfo(codecInfo.Width, codecInfo.Height);
-                SKBitmap newBitmap = new SKBitmap(imageInfo);
-                IntPtr pointer = newBitmap.GetPixels();
-                SKCodecOptions codecOptions = new SKCodecOptions(i);
-                Codec.GetPixels(imageInfo, pointer, codecOptions);
+                var imageInfo = new SKImageInfo(codecInfo.Width, codecInfo.Height);
+                var newBitmap = new SKBitmap(imageInfo);
+                var pointer = newBitmap.GetPixels();
+                var codecOptions = new SKCodecOptions(i);
+                this.Codec.GetPixels(imageInfo, pointer, codecOptions);
                 newBitmap.SetImmutable();
-                EmoteFrames.Add(newBitmap);
+                this.EmoteFrames.Add(newBitmap);
             }
         }
 
         public void Resize(double newScale)
         {
-            var codecInfo = Codec.Info;
-            for (int i = 0; i < FrameCount; i++)
+            var codecInfo = this.Codec.Info;
+            for (var i = 0; i < this.FrameCount; ++i)
             {
-                SKImageInfo imageInfo = new SKImageInfo((int)(codecInfo.Width * newScale), (int)(codecInfo.Height * newScale));
-                SKBitmap newBitmap = new SKBitmap(imageInfo);
-                EmoteFrames[i].ScalePixels(newBitmap, SKFilterQuality.High);
-                EmoteFrames[i].Dispose();
+                var imageInfo = new SKImageInfo((int)(codecInfo.Width * newScale), (int)(codecInfo.Height * newScale));
+                var newBitmap = new SKBitmap(imageInfo);
+                this.EmoteFrames[i].ScalePixels(newBitmap, SKFilterQuality.High);
+                this.EmoteFrames[i].Dispose();
                 newBitmap.SetImmutable();
-                EmoteFrames[i] = newBitmap;
+                this.EmoteFrames[i] = newBitmap;
             }
         }
 

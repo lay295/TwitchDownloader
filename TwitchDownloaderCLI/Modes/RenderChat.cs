@@ -24,7 +24,7 @@ namespace TwitchDownloaderCLI.Modes
 
             using var chatRenderer = new ChatRenderer(renderOptions, progress);
             chatRenderer.ParseJsonAsync().Wait();
-            chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
+            chatRenderer.RenderVideoAsync(new()).Wait();
         }
 
         private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
@@ -99,34 +99,25 @@ namespace TwitchDownloaderCLI.Modes
             };
 
             if (renderOptions.GenerateMask && renderOptions.BackgroundColor.Alpha == 255 && !(renderOptions.AlternateMessageBackgrounds! && renderOptions.AlternateBackgroundColor.Alpha != 255))
-            {
                 logger.LogWarning("Generate mask option has been selected with an opaque background. You most likely want to set a transparent background with --background-color \"#00000000\"");
-            }
 
             if (renderOptions.ChatHeight % 2 != 0 || renderOptions.ChatWidth % 2 != 0)
             {
                 logger.LogWarning("Width and Height MUST be even, rounding up to the nearest even number to prevent errors");
                 if (renderOptions.ChatHeight % 2 != 0)
-                {
                     renderOptions.ChatHeight++;
-                }
+                
                 if (renderOptions.ChatWidth % 2 != 0)
-                {
                     renderOptions.ChatWidth++;
-                }
             }
 
             if (inputOptions.IgnoreUsersString != "")
-            {
                 renderOptions.IgnoreUsersArray = inputOptions.IgnoreUsersString.Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            }
 
             if (inputOptions.BannedWordsString != "")
-            {
                 renderOptions.BannedWordsArray = inputOptions.BannedWordsString.Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            }
 
             return renderOptions;
         }

@@ -58,10 +58,7 @@ namespace TwitchDownloaderCore.Tools
             return read;
         }
 
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            return BaseStream.Seek(offset, origin);
-        }
+        public override long Seek(long offset, SeekOrigin origin) => BaseStream.Seek(offset, origin);
 
         public override void SetLength(long value) { }
 
@@ -69,10 +66,7 @@ namespace TwitchDownloaderCore.Tools
 
         public override void Write(ReadOnlySpan<byte> buffer) { }
 
-        private int GetBytesToReturn(int count)
-        {
-            return GetBytesToReturnAsync(count).GetAwaiter().GetResult();
-        }
+        private int GetBytesToReturn(int count) => GetBytesToReturnAsync(count).GetAwaiter().GetResult();
 
         private async Task<int> GetBytesToReturnAsync(int count)
         {

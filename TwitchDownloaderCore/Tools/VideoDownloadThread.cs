@@ -24,27 +24,25 @@ namespace TwitchDownloaderCore.Tools
 
         public VideoDownloadThread(ConcurrentQueue<string> videoPartsQueue, HttpClient httpClient, Uri baseUrl, string cacheFolder, DateTimeOffset vodAirDate, int throttleKib, ITaskLogger logger, CancellationToken cancellationToken)
         {
-            _videoPartsQueue = videoPartsQueue;
-            _client = httpClient;
-            _baseUrl = baseUrl;
-            _cacheFolder = cacheFolder;
-            _vodAirDate = vodAirDate;
-            _throttleKib = throttleKib;
-            _logger = logger;
-            _cancellationToken = cancellationToken;
-            StartDownload();
+            this._videoPartsQueue = videoPartsQueue;
+            this._client = httpClient;
+            this._baseUrl = baseUrl;
+            this._cacheFolder = cacheFolder;
+            this._vodAirDate = vodAirDate;
+            this._throttleKib = throttleKib;
+            this._logger = logger;
+            this._cancellationToken = cancellationToken;
+            this.StartDownload();
         }
 
         public void StartDownload()
         {
-            if (ThreadTask is { Status: TaskStatus.Created or TaskStatus.WaitingForActivation or TaskStatus.WaitingToRun or TaskStatus.Running })
-            {
+            if (this.ThreadTask is { Status: TaskStatus.Created or TaskStatus.WaitingForActivation or TaskStatus.WaitingToRun or TaskStatus.Running })
                 throw new InvalidOperationException($"Tried to start a thread that was already running or waiting to run ({ThreadTask.Status}).");
-            }
 
-            ThreadTask = Task.Factory.StartNew(
-                ExecuteDownloadThread,
-                _cancellationToken,
+            this.ThreadTask = Task.Factory.StartNew(
+                this.ExecuteDownloadThread,
+                this._cancellationToken,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Current);
         }
@@ -52,27 +50,23 @@ namespace TwitchDownloaderCore.Tools
         private void ExecuteDownloadThread()
         {
             using var cts = new CancellationTokenSource();
-            _cancellationToken.Register(PropagateCancel, cts);
+            this._cancellationToken.Register(PropagateCancel, cts);
 
-            while (!_videoPartsQueue.IsEmpty)
+            while (!this._videoPartsQueue.IsEmpty)
             {
-                _cancellationToken.ThrowIfCancellationRequested();
+                this._cancellationToken.ThrowIfCancellationRequested();
 
                 string videoPart = null;
                 try
                 {
-                    if (_videoPartsQueue.TryDequeue(out videoPart))
-                    {
-                        DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
-                    }
+                    if (this._videoPartsQueue.TryDequeue(out videoPart))
+                        this.DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
                 }
                 catch
                 {
-                    if (videoPart != null && !_cancellationToken.IsCancellationRequested)
-                    {
+                    if (videoPart != null && !this._cancellationToken.IsCancellationRequested)
                         // Requeue the video part now instead of deferring to the verifier since we already know it's bad
-                        _videoPartsQueue.Enqueue(videoPart);
-                    }
+                        this._videoPartsQueue.Enqueue(videoPart);
 
                     throw;
                 }
@@ -93,7 +87,7 @@ namespace TwitchDownloaderCore.Tools
         /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
         private async Task DownloadVideoPartAsync(string videoPartName, CancellationTokenSource cancellationTokenSource)
         {
-            var tryUnmute = VodAge < TimeSpan.FromHours(24);
+            var tryUnmute = this.VodAge < TimeSpan.FromHours(24);
             var errorCount = 0;
             var timeoutCount = 0;
             var lengthFailureCount = 0;
@@ -111,40 +105,36 @@ namespace TwitchDownloaderCore.Tools
                         expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, unmutedPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
                     }
                     else
-                    {
                         expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, videoPartName), partFile, _throttleKib, _logger, cancellationTokenSource);
-                    }
 
-                    if (expectedLength is not -1)
+                    if (expectedLength is -1)
+                        return;
+
+                    // I would love to compare hashes here but unfortunately Twitch doesn't give us a ContentMD5 header
+                    var actualLength = new FileInfo(partFile).Length;
+                    if (actualLength != expectedLength)
                     {
-                        // I would love to compare hashes here but unfortunately Twitch doesn't give us a ContentMD5 header
-                        var actualLength = new FileInfo(partFile).Length;
-                        if (actualLength != expectedLength)
+                        const int MAX_RETRIES = 1;
+
+                        this._logger.LogVerbose($"{partFile} failed to verify: expected {expectedLength:N0}B, got {actualLength:N0}B.");
+                        if (++lengthFailureCount > MAX_RETRIES)
                         {
-                            const int MAX_RETRIES = 1;
-
-                            _logger.LogVerbose($"{partFile} failed to verify: expected {expectedLength:N0}B, got {actualLength:N0}B.");
-                            if (++lengthFailureCount > MAX_RETRIES)
-                            {
-                                throw new Exception($"Failed to download {partFile}: expected {expectedLength:N0}B, got {actualLength:N0}B.");
-                            }
-
-                            await Delay(1_000, cancellationTokenSource.Token);
-                            continue;
+                            throw new Exception($"Failed to download {partFile}: expected {expectedLength:N0}B, got {actualLength:N0}B.");
                         }
 
-                        const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
-                        if (expectedLength % TS_PACKET_LENGTH != 0)
-                        {
-                            _logger.LogVerbose($"{partFile} contains malformed packets and may cause encoding issues.");
-                        }
+                        await Delay(1_000, cancellationTokenSource.Token);
+                        continue;
                     }
+
+                    const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
+                    if (expectedLength % TS_PACKET_LENGTH != 0)
+                        this._logger.LogVerbose($"{partFile} contains malformed packets and may cause encoding issues.");
 
                     return;
                 }
                 catch (HttpRequestException ex) when (tryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
                 {
-                    _logger.LogVerbose($"Received {ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
+                    this._logger.LogVerbose($"Received {ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
                     tryUnmute = false;
 
                     await Delay(100, cancellationTokenSource.Token);
@@ -153,7 +143,7 @@ namespace TwitchDownloaderCore.Tools
                 {
                     const int MAX_RETRIES = 10;
 
-                    _logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} for {videoPartName}. {MAX_RETRIES - (errorCount + 1)} retries left.");
+                    this._logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} for {videoPartName}. {MAX_RETRIES - (errorCount + 1)} retries left.");
                     if (++errorCount > MAX_RETRIES)
                     {
                         throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_RETRIES} retries");
@@ -165,11 +155,9 @@ namespace TwitchDownloaderCore.Tools
                 {
                     const int MAX_RETRIES = 3;
 
-                    _logger.LogVerbose($"{videoPartName} timed out. {MAX_RETRIES - (timeoutCount + 1)} retries left.");
+                    this._logger.LogVerbose($"{videoPartName} timed out. {MAX_RETRIES - (timeoutCount + 1)} retries left.");
                     if (++timeoutCount > MAX_RETRIES)
-                    {
                         throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_RETRIES} times");
-                    }
 
                     await Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
                 }

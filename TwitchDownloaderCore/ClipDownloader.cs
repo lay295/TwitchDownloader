@@ -69,17 +69,13 @@ namespace TwitchDownloaderCore
             }
 
             if (!Directory.Exists(downloadOptions.TempFolder))
-            {
                 TwitchHelper.CreateDirectory(downloadOptions.TempFolder);
-            }
 
             var tempFile = Path.Combine(downloadOptions.TempFolder, $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}.mp4");
             try
             {
                 await using (var tempFileStream = File.Open(tempFile, FileMode.Create, FileAccess.Write, FileShare.Read))
-                {
                     await DownloadFileTaskAsync(downloadUrl, tempFileStream, downloadOptions.ThrottleKib, new Progress<StreamCopyProgress>(DownloadProgressHandler), cancellationToken);
-                }
 
                 outputFs.Close();
 
@@ -117,29 +113,21 @@ namespace TwitchDownloaderCore
             var clip = listLinks.data.clip;
 
             if (clip.playbackAccessToken is null)
-            {
                 throw new NullReferenceException("Invalid Clip, deleted possibly?");
-            }
 
             if (clip.videoQualities is null || clip.videoQualities.Length == 0)
-            {
                 throw new NullReferenceException("Clip has no video qualities, deleted possibly?");
-            }
 
-            string downloadUrl = "";
+            var downloadUrl = "";
 
             foreach (var quality in clip.videoQualities)
             {
                 if (quality.quality + "p" + (Math.Round(quality.frameRate) == 30 ? "" : Math.Round(quality.frameRate).ToString("F0")) == downloadOptions.Quality)
-                {
                     downloadUrl = quality.sourceURL;
-                }
             }
 
             if (downloadUrl == "")
-            {
                 downloadUrl = clip.videoQualities.First().sourceURL;
-            }
 
             return downloadUrl + "?sig=" + clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(clip.playbackAccessToken.value);
         }

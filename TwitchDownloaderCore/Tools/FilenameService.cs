@@ -133,7 +133,7 @@ namespace TwitchDownloaderCore.Tools
             {
                 var newName = Path.Combine(parentDir, $"{oldName} ({i}){extension}");
                 fi = new FileInfo(newName);
-                i++;
+                ++i;
             }
 
             return fi;

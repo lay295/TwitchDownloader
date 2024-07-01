@@ -18,30 +18,22 @@ namespace TwitchDownloaderCore.Tools
             var returnTimespan = TimeSpan.Zero;
 
             if (dayIndex != -1 && int.TryParse(input[..dayIndex], out var days))
-            {
                 returnTimespan = returnTimespan.Add(TimeSpan.FromDays(days));
-            }
 
-            dayIndex++;
+            ++dayIndex;
 
             if (hourIndex != -1 && int.TryParse(input[dayIndex..hourIndex], out var hours))
-            {
                 returnTimespan = returnTimespan.Add(TimeSpan.FromHours(hours));
-            }
 
-            hourIndex++;
+            ++hourIndex;
 
             if (minuteIndex != -1 && int.TryParse(input[hourIndex..minuteIndex], out var minutes))
-            {
                 returnTimespan = returnTimespan.Add(TimeSpan.FromMinutes(minutes));
-            }
 
-            minuteIndex++;
+            ++minuteIndex;
 
             if (secondIndex != -1 && int.TryParse(input[minuteIndex..secondIndex], out var seconds))
-            {
                 returnTimespan = returnTimespan.Add(TimeSpan.FromSeconds(seconds));
-            }
 
             return returnTimespan;
         }

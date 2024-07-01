@@ -18,14 +18,10 @@ namespace TwitchDownloaderCore.Tools
             sb.AppendLine("#EXTM3U");
 
             if (FileMetadata?.ToString() is { Length: > 0} metadataString)
-            {
                 sb.AppendLine(metadataString);
-            }
 
             foreach (var stream in Streams)
-            {
                 sb.AppendLine(stream.ToString());
-            }
 
             sb.Append("#EXT-X-ENDLIST");
 
@@ -94,12 +90,8 @@ namespace TwitchDownloaderCore.Tools
                     sb.Append(itemSeparator);
                 }
 
-                if (sb.Length == 0)
-                {
-                    return "";
-                }
+                return sb.Length == 0 ? "" : sb.TrimEnd(itemSeparator).ToString();
 
-                return sb.TrimEnd(itemSeparator).ToString();
             }
         }
 
@@ -115,38 +107,35 @@ namespace TwitchDownloaderCore.Tools
             {
                 var sb = new StringBuilder();
 
-                if (MediaInfo != null)
-                    sb.AppendLine(MediaInfo.ToString());
+                if (this.MediaInfo != null)
+                    sb.AppendLine(this.MediaInfo.ToString());
 
-                if (StreamInfo != null)
-                    sb.AppendLine(StreamInfo.ToString());
+                if (this.StreamInfo != null)
+                    sb.AppendLine(this.StreamInfo.ToString());
 
-                if (PartInfo != null)
-                    sb.AppendLine(PartInfo.ToString());
+                if (this.PartInfo != null)
+                    sb.AppendLine(this.PartInfo.ToString());
 
-                if (ProgramDateTime != default)
-                {
+                if (this.ProgramDateTime != default) {
                     sb.Append("#EXT-X-PROGRAM-DATE-TIME:");
-                    sb.AppendLine(ProgramDateTime.ToString("O"));
+                    sb.AppendLine(this.ProgramDateTime.ToString("O"));
                 }
 
-                if (ByteRange != default)
-                    sb.AppendLine(ByteRange.ToString());
+                if (this.ByteRange != default)
+                    sb.AppendLine(this.ByteRange.ToString());
 
-                if (!string.IsNullOrEmpty(Path))
-                    sb.Append(Path);
+                if (!string.IsNullOrEmpty(this.Path))
+                    sb.Append(this.Path);
 
-                if (sb.Length == 0)
-                    return "";
+                return sb.Length == 0 ? "" : sb.ToString();
 
-                return sb.ToString();
             }
 
             public readonly partial record struct ExtByteRange(uint Start, uint Length)
             {
                 internal const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
 
-                public override string ToString() => $"{BYTE_RANGE_KEY}{Start}@{Length}";
+                public override string ToString() => $"{BYTE_RANGE_KEY}{this.Start}@{this.Length}";
 
                 public static implicit operator ExtByteRange((uint start, uint length) tuple) => new(tuple.start, tuple.length);
             }
@@ -169,11 +158,11 @@ namespace TwitchDownloaderCore.Tools
 
                 public ExtMediaInfo(MediaType type, string groupId, string name, bool autoSelect, bool @default)
                 {
-                    Type = type;
-                    GroupId = groupId;
-                    Name = name;
-                    AutoSelect = autoSelect;
-                    Default = @default;
+                    this.Type = type;
+                    this.GroupId = groupId;
+                    this.Name = name;
+                    this.AutoSelect = autoSelect;
+                    this.Default = @default;
                 }
 
                 public MediaType Type { get; internal set; } = MediaType.Unknown;
@@ -187,7 +176,7 @@ namespace TwitchDownloaderCore.Tools
                     var sb = new StringBuilder(MEDIA_INFO_KEY);
                     ReadOnlySpan<char> keyValueSeparator = stackalloc char[] { ',' };
 
-                    if (Type != MediaType.Unknown)
+                    if (this.Type != MediaType.Unknown)
                     {
                         sb.Append("TYPE=");
                         sb.Append(Type.AsString());
@@ -206,10 +195,7 @@ namespace TwitchDownloaderCore.Tools
 
                     return sb.ToString();
 
-                    static string BooleanToWord(bool b)
-                    {
-                        return b ? "YES" : "NO";
-                    }
+                    static string BooleanToWord(bool b) => b ? "YES" : "NO";
                 }
             }
 
@@ -228,12 +214,12 @@ namespace TwitchDownloaderCore.Tools
 
                 public ExtStreamInfo(int programId, int bandwidth, string codecs, StreamResolution resolution, string video, decimal framerate)
                 {
-                    ProgramId = programId;
-                    Bandwidth = bandwidth;
-                    Codecs = codecs;
-                    Resolution = resolution;
-                    Video = video;
-                    Framerate = framerate;
+                    this.ProgramId = programId;
+                    this.Bandwidth = bandwidth;
+                    this.Codecs = codecs;
+                    this.Resolution = resolution;
+                    this.Video = video;
+                    this.Framerate = framerate;
                 }
 
                 public int ProgramId { get; internal set; }
@@ -267,8 +253,8 @@ namespace TwitchDownloaderCore.Tools
 
                 public ExtPartInfo(decimal duration, bool live)
                 {
-                    Duration = duration;
-                    Live = live;
+                    this.Duration = duration;
+                    this.Live = live;
                 }
 
                 public decimal Duration { get; internal set; }
@@ -278,15 +264,13 @@ namespace TwitchDownloaderCore.Tools
                 {
                     var sb = new StringBuilder(PART_INFO_KEY);
 
-                    sb.Append(Duration.ToString(CultureInfo.InvariantCulture));
+                    sb.Append(this.Duration.ToString(CultureInfo.InvariantCulture));
 
                     // Twitch leaves a trailing comma, so we will too.
                     sb.Append(',');
 
-                    if (Live)
-                    {
+                    if (this.Live)
                         sb.Append("live");
-                    }
 
                     return sb.ToString();
                 }
@@ -343,9 +327,8 @@ namespace TwitchDownloaderCore.Tools
                 sb.Append(keyName);
 
                 if (!keyName.EndsWith('"'))
-                {
                     sb.Append('"');
-                }
+
                 sb.Append(value);
                 sb.Append('"');
                 sb.Append(end);

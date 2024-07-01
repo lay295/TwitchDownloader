@@ -10,10 +10,9 @@ namespace TwitchDownloaderCLI.Tools
         internal static string[] Parse(string[] args, string processFileName)
         {
             if (args.Any(x => x is "-m" or "--mode" or "--embed-emotes" or "--silent" or "--verbose-ffmpeg" or "--chat-connections"))
-            {
                 // A legacy syntax was used, convert to new syntax
                 return Process(ConvertFromOldSyntax(args, processFileName));
-            }
+            
 
             return Process(args);
         }
@@ -21,9 +20,7 @@ namespace TwitchDownloaderCLI.Tools
         private static string[] Process(string[] args)
         {
             if (args.Length > 0)
-            {
                 args[0] = args[0].ToLower();
-            }
 
             return args;
         }

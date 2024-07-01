@@ -47,17 +47,13 @@ namespace TwitchDownloaderCore.Tools
         private static async Task SerializeChapters(StreamWriter sw, IEnumerable<VideoMomentEdge> videoMomentEdges, TimeSpan startOffset, TimeSpan videoLength)
         {
             if (videoMomentEdges is null)
-            {
                 return;
-            }
 
             var startOffsetMillis = (int)startOffset.TotalMilliseconds;
             foreach (var momentEdge in videoMomentEdges)
             {
                 if (momentEdge.node._type != "GAME_CHANGE")
-                {
                     continue;
-                }
 
                 var startMillis = momentEdge.node.positionMilliseconds - startOffsetMillis;
                 var lengthMillis = momentEdge.node.durationMilliseconds;
@@ -68,15 +64,11 @@ namespace TwitchDownloaderCore.Tools
                 {
                     var chapterStart = TimeSpan.FromMilliseconds(startMillis);
                     if (chapterStart >= videoLength)
-                    {
                         continue;
-                    }
 
                     var chapterEnd = chapterStart + TimeSpan.FromMilliseconds(lengthMillis);
                     if (chapterEnd > videoLength)
-                    {
                         lengthMillis = (int)(videoLength - chapterStart).TotalMilliseconds;
-                    }
                 }
 
                 await sw.WriteLineAsync("[CHAPTER]");
@@ -90,14 +82,10 @@ namespace TwitchDownloaderCore.Tools
         private static string SanitizeKeyValue(string str)
         {
             if (string.IsNullOrWhiteSpace(str))
-            {
                 return str;
-            }
 
             if (str.AsSpan().IndexOfAny(@$"=;#\{LINE_FEED}") == -1)
-            {
                 return str;
-            }
 
             return new StringBuilder(str)
                 .Replace("=", @"\=")

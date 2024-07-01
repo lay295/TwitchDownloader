@@ -7,15 +7,11 @@ namespace TwitchDownloaderCore.Extensions
         public static string ReplaceAny(this string str, ReadOnlySpan<char> oldChars, char newChar)
         {
             if (string.IsNullOrEmpty(str))
-            {
                 return str;
-            }
 
             var index = str.AsSpan().IndexOfAny(oldChars);
             if (index == -1)
-            {
                 return str;
-            }
 
             const ushort MAX_STACK_SIZE = 512;
             var span = str.Length <= MAX_STACK_SIZE

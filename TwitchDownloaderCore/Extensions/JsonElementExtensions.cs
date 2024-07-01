@@ -22,9 +22,7 @@ namespace TwitchDownloaderCore.Extensions
             }
 
             if (lastElement.ValueKind != JsonValueKind.Undefined)
-            {
                 list.Add(lastElement.Deserialize<T>(options: options));
-            }
 
             return list;
         }

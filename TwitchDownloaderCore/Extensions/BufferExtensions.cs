@@ -46,6 +46,9 @@ namespace TwitchDownloaderCore.Extensions
                     ArrayPool<char>.Shared.Return(textChars);
                     break;
                 }
+
+                case SKTextEncoding.GlyphId: break;
+
                 default:
                     throw new NotSupportedException("TextEncoding of type GlyphId is not supported.");
             }

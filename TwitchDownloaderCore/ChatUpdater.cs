@@ -306,13 +306,13 @@ namespace TwitchDownloaderCore
 
         private async Task ChatBadgeTask(CancellationToken cancellationToken = default)
         {
-            List<ChatBadge> badgeList = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, _updateOptions.TempFolder, _progress, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
+            var badgeList = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, _updateOptions.TempFolder, _progress, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
-            int inputCount = chatRoot.embeddedData.twitchBadges.Count;
+            var inputCount = chatRoot.embeddedData.twitchBadges.Count;
             chatRoot.embeddedData.twitchBadges = new List<EmbedChatBadge>();
-            foreach (ChatBadge badge in badgeList)
+            foreach (var badge in badgeList)
             {
-                EmbedChatBadge newBadge = new EmbedChatBadge();
+                var newBadge = new EmbedChatBadge();
                 newBadge.name = badge.Name;
                 newBadge.versions = badge.VersionsData;
                 chatRoot.embeddedData.twitchBadges.Add(newBadge);
@@ -322,9 +322,9 @@ namespace TwitchDownloaderCore
 
         private async Task BitTask(CancellationToken cancellationToken = default)
         {
-            List<CheerEmote> bitList = await TwitchHelper.GetBits(chatRoot.comments, _updateOptions.TempFolder, chatRoot.streamer.id.ToString(), _progress, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
+            var bitList = await TwitchHelper.GetBits(chatRoot.comments, _updateOptions.TempFolder, chatRoot.streamer.id.ToString(), _progress, _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData, cancellationToken: cancellationToken);
 
-            int inputCount = chatRoot.embeddedData.twitchBits.Count;
+            var inputCount = chatRoot.embeddedData.twitchBits.Count;
             chatRoot.embeddedData.twitchBits = new List<EmbedCheerEmote>();
             foreach (CheerEmote bit in bitList)
             {
@@ -352,11 +352,9 @@ namespace TwitchDownloaderCore
         private async Task ChatTrimBeginningTask(CancellationToken cancellationToken)
         {
             if (!_updateOptions.TrimBeginning)
-            {
                 return;
-            }
 
-            string tempFile = Path.Combine(_updateOptions.TempFolder, Path.GetRandomFileName());
+            var tempFile = Path.Combine(_updateOptions.TempFolder, Path.GetRandomFileName());
 
             try
             {
@@ -382,18 +380,16 @@ namespace TwitchDownloaderCore
             }
 
             // Adjust the start parameter
-            double beginningTrimClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negative (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+            var beginningTrimClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negative (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
             chatRoot.video.start = Math.Min(Math.Max(_updateOptions.TrimBeginningTime, 0.0), beginningTrimClamp);
         }
 
         private async Task ChatTrimEndingTask(CancellationToken cancellationToken)
         {
             if (!_updateOptions.TrimEnding)
-            {
                 return;
-            }
 
-            string tempFile = Path.Combine(_updateOptions.TempFolder, Path.GetRandomFileName());
+            var tempFile = Path.Combine(_updateOptions.TempFolder, Path.GetRandomFileName());
 
             try
             {
@@ -414,12 +410,10 @@ namespace TwitchDownloaderCore
             }
 
             if (File.Exists(tempFile))
-            {
                 File.Delete(tempFile);
-            }
 
             // Adjust the end parameter
-            double endingTrimClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negative (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
+            var endingTrimClamp = double.IsNegative(chatRoot.video.length) ? 172_800 : chatRoot.video.length; // Get length from chatroot or if negative (N/A) max vod length (48 hours) in seconds. https://help.twitch.tv/s/article/broadcast-guidelines
             chatRoot.video.end = Math.Min(Math.Max(_updateOptions.TrimEndingTime, 0.0), endingTrimClamp);
         }
 
@@ -428,16 +422,12 @@ namespace TwitchDownloaderCore
             var chatDownloader = new ChatDownloader(downloadOptions, StubTaskProgress.Instance);
             await chatDownloader.DownloadAsync(cancellationToken);
 
-            ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, onlyFirstAndLastComments: false, getEmbeds: false, cancellationToken);
+            var newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, onlyFirstAndLastComments: false, getEmbeds: false, cancellationToken);
 
             // Append the new comment section
-            SortedSet<Comment> commentsSet = new SortedSet<Comment>(new CommentOffsetComparer());
-            foreach (var comment in newChatRoot.comments)
-            {
-                if (comment.content_offset_seconds < downloadOptions.TrimEndingTime && comment.content_offset_seconds >= downloadOptions.TrimBeginningTime)
-                {
-                    commentsSet.Add(comment);
-                }
+            var commentsSet = new SortedSet<Comment>(new CommentOffsetComparer());
+            foreach (var comment in newChatRoot.comments.Where(comment => comment.content_offset_seconds < downloadOptions.TrimEndingTime && comment.content_offset_seconds >= downloadOptions.TrimBeginningTime)) {
+                commentsSet.Add(comment);
             }
 
             lock (_trimChatRootLock)
@@ -447,33 +437,30 @@ namespace TwitchDownloaderCore
                     commentsSet.Add(comment);
                 }
 
-                List<Comment> comments = commentsSet.DistinctBy(x => x._id).ToList();
+                var comments = commentsSet.DistinctBy(x => x._id).ToList();
                 commentsSet.Clear();
 
                 chatRoot.comments = comments;
             }
         }
 
-        private ChatDownloadOptions GetTrimDownloadOptions(string videoId, string tempFile, double sectionStart, double sectionEnd)
+        private ChatDownloadOptions GetTrimDownloadOptions(string videoId, string tempFile, double sectionStart, double sectionEnd) => new()
         {
-            return new ChatDownloadOptions()
-            {
-                Id = videoId,
-                DownloadFormat = ChatFormat.Json, // json is required to parse as a new chatroot object
-                Compression = ChatCompression.Gzip,
-                Filename = tempFile,
-                TrimBeginning = true,
-                TrimBeginningTime = sectionStart,
-                TrimEnding = true,
-                TrimEndingTime = sectionEnd,
-                DownloadThreads = 4,
-                EmbedData = false,
-                BttvEmotes = false,
-                FfzEmotes = false,
-                StvEmotes = false,
-                TempFolder = _updateOptions.TempFolder
-            };
-        }
+            Id = videoId,
+            DownloadFormat = ChatFormat.Json, // json is required to parse as a new chatroot object
+            Compression = ChatCompression.Gzip,
+            Filename = tempFile,
+            TrimBeginning = true,
+            TrimBeginningTime = sectionStart,
+            TrimEnding = true,
+            TrimEndingTime = sectionEnd,
+            DownloadThreads = 4,
+            EmbedData = false,
+            BttvEmotes = false,
+            FfzEmotes = false,
+            StvEmotes = false,
+            TempFolder = _updateOptions.TempFolder
+        };
 
         public async Task<ChatRoot> ParseJsonAsync(CancellationToken cancellationToken = new())
         {

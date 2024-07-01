@@ -13,7 +13,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         Other = 1,
         Broadcaster = 2,
         Moderator = 4,
-        VIP = 8,
+        Vip = 8,
         Subscriber = 16,
         Predictions = 32,
         NoAudioVisual = 64,
@@ -22,11 +22,11 @@ namespace TwitchDownloaderCore.TwitchObjects
 
     public class ChatBadgeData
     {
-        public string title { get; set; }
-        public string description { get; set; }
-        public byte[] bytes { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public byte[] Bytes { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string url { get; set; }
+        public string Url { get; set; }
     }
 
     [DebuggerDisplay("{Name}")]
@@ -40,30 +40,31 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         public ChatBadge(string name, Dictionary<string, ChatBadgeData> versions)
         {
-            Name = name;
-            Versions = new Dictionary<string, SKBitmap>();
-            VersionsData = versions;
+            this.Name = name;
+            this.Versions = new Dictionary<string, SKBitmap>();
+            this.VersionsData = versions;
 
             foreach (var (versionName, versionData) in versions)
             {
-                using MemoryStream ms = new MemoryStream(versionData.bytes);
+                using var ms = new MemoryStream(versionData.Bytes);
 
                 //For some reason, twitch has corrupted images sometimes :) for example
                 //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                 using var codec = SKCodec.Create(ms, out var result);
-                if (codec is null)
+                if (codec is not null) {
+                    var badgeImage = SKBitmap.Decode(codec);
+                    badgeImage.SetImmutable();
+                    this.Versions.Add(versionName, badgeImage);
+                } else
                     throw new Exception($"Skia was unable to decode badge {versionName} ({name}). Returned: {result}");
 
-                var badgeImage = SKBitmap.Decode(codec);
-                badgeImage.SetImmutable();
-                Versions.Add(versionName, badgeImage);
             }
 
-            Type = name switch
+            this.Type = name switch
             {
                 "broadcaster" => ChatBadgeType.Broadcaster,
                 "moderator" => ChatBadgeType.Moderator,
-                "vip" => ChatBadgeType.VIP,
+                "vip" => ChatBadgeType.Vip,
                 "subscriber" => ChatBadgeType.Subscriber,
                 "predictions" => ChatBadgeType.Predictions,
                 "no_video" or "no_audio" => ChatBadgeType.NoAudioVisual,
@@ -74,14 +75,14 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         public void Resize(double newScale)
         {
-            foreach (var (versionName, bitmap) in Versions)
+            foreach (var (versionName, bitmap) in this.Versions)
             {
-                SKImageInfo imageInfo = new SKImageInfo((int)(bitmap.Width * newScale), (int)(bitmap.Height * newScale));
-                SKBitmap newBitmap = new SKBitmap(imageInfo);
+                var imageInfo = new SKImageInfo((int)(bitmap.Width * newScale), (int)(bitmap.Height * newScale));
+                var newBitmap = new SKBitmap(imageInfo);
                 bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
                 bitmap.Dispose();
                 newBitmap.SetImmutable();
-                Versions[versionName] = newBitmap;
+                this.Versions[versionName] = newBitmap;
             }
         }
 

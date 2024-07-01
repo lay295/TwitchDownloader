@@ -15,27 +15,16 @@ namespace TwitchDownloaderCLI.Models
         /// <summary>
         /// Constructor used by CommandLineParser
         /// </summary>
-        public TimeDuration(string str)
-        {
-            this = Parse(str);
-        }
+        public TimeDuration(string str) => this = Parse(str);
 
-        public TimeDuration(TimeSpan timeSpan)
-        {
-            _timeSpan = timeSpan;
-        }
+        public TimeDuration(TimeSpan timeSpan) => this._timeSpan = timeSpan;
 
-        public TimeDuration(long ticks)
-        {
-            _timeSpan = TimeSpan.FromTicks(ticks);
-        }
+        public TimeDuration(long ticks) => this._timeSpan = TimeSpan.FromTicks(ticks);
 
         public static TimeDuration Parse(string str)
         {
             if (string.IsNullOrWhiteSpace(str))
-            {
                 throw new FormatException();
-            }
 
             if (str.Contains(':'))
             {
@@ -44,13 +33,12 @@ namespace TwitchDownloaderCLI.Models
             }
 
             var multiplier = GetMultiplier(str, out var span);
-            if (decimal.TryParse(span, NumberStyles.Number, null, out var result))
-            {
-                var ticks = (long)(result * multiplier);
-                return new TimeDuration(ticks);
-            }
+            if (!decimal.TryParse(span, NumberStyles.Number, null, out var result))
+                throw new FormatException();
 
-            throw new FormatException();
+            var ticks = (long)(result * multiplier);
+            return new TimeDuration(ticks);
+
         }
 
         private static long GetMultiplier(string input, out ReadOnlySpan<char> trimmedInput)
@@ -79,13 +67,12 @@ namespace TwitchDownloaderCLI.Models
                 return TimeSpan.TicksPerMinute;
             }
 
-            if (Regex.IsMatch(input, @"\dh$", RegexOptions.RightToLeft))
-            {
-                trimmedInput = input.AsSpan()[..^1];
-                return TimeSpan.TicksPerHour;
-            }
+            if (!Regex.IsMatch(input, @"\dh$", RegexOptions.RightToLeft))
+                throw new FormatException();
 
-            throw new FormatException();
+            trimmedInput = input.AsSpan()[..^1];
+            return TimeSpan.TicksPerHour;
+
         }
 
         public static implicit operator TimeSpan(TimeDuration timeDuration) => timeDuration._timeSpan;
