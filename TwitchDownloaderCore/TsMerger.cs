@@ -134,7 +134,6 @@ namespace TwitchDownloaderCore
         private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, FileStream outputStream, CancellationToken cancellationToken)
         {
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(mergeOptions.OutputFile);
-            string outputFile = mergeOptions.OutputFile;
 
             int partCount = fileList.Count;
             int doneCount = 0;
