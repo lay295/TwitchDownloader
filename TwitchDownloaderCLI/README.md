@@ -31,7 +31,7 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
 (Default: `true`) Displays a banner containing version and copyright information.
 
 **--log-level**
-(Default: `Status,Info,Warning,Error`) Sets the log level flags. Applicable values are: `None`, `Status`, `Verbose`, `Info`, `Warning`, `Error`, `Ffmpeg`. When `None` is passed, any other log level flags are ignored and `--banner=false` is implied.
+(Default: `Status,Info,Warning,Error`) Sets the log level flags. Applicable values are: `None`, `Status`, `Verbose`, `Info`, `Warning`, `Error`, `Ffmpeg`. When `None` is passed, any other log level flags are ignored and `--banner=false` is implied. See [Enum flags](#enum-flag-arguments) for more help.
 
 ## Arguments for mode videodownload
 #### Downloads a stream VOD or highlight from Twitch
