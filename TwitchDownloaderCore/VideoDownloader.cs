@@ -121,8 +121,8 @@ namespace TwitchDownloaderCore
                     ffmpegExitCode = await RunFfmpegVideoCopy(downloadFolder, outputFileInfo, concatListPath, metadataPath, startOffset, endDuration, videoLength, ffmpegRetries > 0, cancellationToken);
                     if (ffmpegExitCode != 0)
                     {
-                        _progress.LogError($"Failed to finalize video (code {ffmpegExitCode}), retrying in 10 seconds...");
-                        await Task.Delay(10_000, cancellationToken);
+                        _progress.LogError($"Failed to finalize video (code {ffmpegExitCode}), retrying in 5 seconds...");
+                        await Task.Delay(5_000, cancellationToken);
                     }
                 } while (ffmpegExitCode != 0 && ffmpegRetries++ < 1);
 
