@@ -28,7 +28,7 @@ namespace TwitchDownloaderCore.Extensions
         {
             if (m3u8.Streams.Length == 0)
             {
-                throw new ArgumentException(nameof(m3u8), "M3U8 does not contain any streams.");
+                throw new ArgumentException("M3U8 does not contain any streams.", nameof(m3u8));
             }
 
             if (TryGetKeywordStream(m3u8, qualityString, out var keywordStream))
