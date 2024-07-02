@@ -21,7 +21,7 @@ namespace TwitchDownloaderCLI.Modes
                 FfmpegHandler.DetectFfmpeg(inputOptions.FfmpegPath, progress);
             }
 
-            var collisionHandler = new FileCollisionHandler(inputOptions);
+            var collisionHandler = new FileCollisionHandler(inputOptions, progress);
             var downloadOptions = GetDownloadOptions(inputOptions, collisionHandler, progress);
 
             var clipDownloader = new ClipDownloader(downloadOptions, progress);
