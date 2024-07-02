@@ -283,9 +283,9 @@ namespace TwitchDownloaderCore.Tools
 
             public partial record ExtMediaInfo
             {
-                public static Stream.ExtMediaInfo Parse(ReadOnlySpan<char> text)
+                public static ExtMediaInfo Parse(ReadOnlySpan<char> text)
                 {
-                    var mediaInfo = new Stream.ExtMediaInfo();
+                    var mediaInfo = new ExtMediaInfo();
 
                     if (text.StartsWith(MEDIA_INFO_KEY))
                         text = text[13..];
