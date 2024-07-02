@@ -7,6 +7,7 @@
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x64</Platforms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>10</LangVersion>
     <!--TODO: <Nullable>enable</Nullable> once we have required keyword-->
   </PropertyGroup>
   <PropertyGroup>
