@@ -7,7 +7,7 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
-        <LangVersion>default</LangVersion>
+        <LangVersion>10</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

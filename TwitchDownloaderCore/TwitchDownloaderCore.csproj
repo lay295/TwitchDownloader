@@ -8,7 +8,7 @@
     <Authors>Lewis Pardo</Authors>
     <Version>1.1.6</Version>
     <Platforms>AnyCPU;x64</Platforms>
-    <LangVersion>default</LangVersion>
+    <LangVersion>10</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!--TODO: <Nullable>enable</Nullable> once we have required keyword-->
   </PropertyGroup>

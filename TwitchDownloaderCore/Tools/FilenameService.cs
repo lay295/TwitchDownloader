@@ -87,7 +87,8 @@ namespace TwitchDownloaderCore.Tools
 
         private static readonly char[] FilenameInvalidChars = Path.GetInvalidFileNameChars();
 
-        [return: NotNullIfNotNull(nameof(filename))]
+        // TODO: Use nameof(filename) when C# 11+
+        [return: NotNullIfNotNull("filename")]
         public static string ReplaceInvalidFilenameChars([AllowNull] string filename)
         {
             if (string.IsNullOrEmpty(filename))
