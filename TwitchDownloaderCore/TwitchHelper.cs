@@ -105,7 +105,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadAsStringAsync();
         }
 
-        static bool IsAuthException(Exception ex)
+        private static bool IsAuthException(Exception ex)
         {
             while (ex != null)
             {
@@ -566,7 +566,7 @@ namespace TwitchDownloaderCore
 
             var nameList = comments.Where(comment => comment.message.user_badges != null)
                 .SelectMany(comment => comment.message.user_badges)
-                .Where(badge => !String.IsNullOrWhiteSpace(badge._id))
+                .Where(badge => !string.IsNullOrWhiteSpace(badge._id))
                 .Where(badge => globalBadges.ContainsKey(badge._id) || subBadges.ContainsKey(badge._id))
                 .Select(badge => badge._id).Distinct();
 
@@ -1011,15 +1011,6 @@ namespace TwitchDownloaderCore
                 : $"{wasDeleted} old video caches were deleted, {toDelete.Length - wasDeleted} could not be deleted.");
         }
 
-        public static int TimestampToSeconds(string input)
-        {
-            // Gets total seconds from timestamp in the format of 0h0m0s
-            input = input.Replace('h', ':').Replace('m', ':').Replace("s", "");
-            TimeSpan returnSpan = TimeSpan.Parse(input);
-
-            return (int)returnSpan.TotalSeconds;
-        }
-
         public static async Task<string> GetStreamerName(int id)
         {
             try
@@ -1036,7 +1027,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{users(ids:[" + String.Join(",", idList.Select(x => "\\\"" + x + "\\\"").ToArray()) + "]){id,login,createdAt,updatedAt,description,profileImageURL(width:300)}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{users(ids:[" + string.Join(",", idList.Select(x => "\\\"" + x + "\\\"").ToArray()) + "]){id,login,createdAt,updatedAt,description,profileImageURL(width:300)}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -1086,7 +1077,7 @@ namespace TwitchDownloaderCore
                 }
                 catch (Exception e) when (e is IOException or SecurityException)
                 {
-                    // File being written to by parallel process? Maybe. Can just fallback to HTTP request.
+                    // File being written to by parallel process? Maybe. Can just fall back to HTTP request.
                     logger.LogVerbose($"Failed to read from or delete {file.Name}: {e.Message}");
                 }
             }

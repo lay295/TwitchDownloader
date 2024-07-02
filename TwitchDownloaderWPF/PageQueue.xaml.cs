@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows;
@@ -17,7 +16,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageQueue : Page
     {
-        public static object taskLock = new object();
+        public static readonly object taskLock = new object();
         public static ObservableCollection<ITwitchTask> taskList { get; set; } = new ObservableCollection<ITwitchTask>();
         BackgroundWorker taskManager = new BackgroundWorker();
 
@@ -33,13 +32,6 @@ namespace TwitchDownloaderWPF
 
             taskManager.DoWork += TaskManager_DoWork;
             taskManager.RunWorkerAsync();
-
-            taskList.CollectionChanged += TaskList_CollectionChanged;
-        }
-
-        private void TaskList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-
         }
 
         private void TaskManager_DoWork(object sender, DoWorkEventArgs e)

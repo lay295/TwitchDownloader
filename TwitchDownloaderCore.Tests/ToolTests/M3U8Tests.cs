@@ -14,7 +14,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData(true, "ru-RU")]
         public void CorrectlyParsesTwitchM3U8OfTransportStreams(bool useStream, string culture)
         {
-            const string ExampleM3U8Twitch =
+            const string EXAMPLE_M3U8_TWITCH =
                 "#EXTM3U" +
                 "\n#EXT-X-VERSION:3" +
                 "\n#EXT-X-TARGETDURATION:10" +
@@ -37,13 +37,13 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             M3U8 m3u8;
             if (useStream)
             {
-                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Twitch);
+                var bytes = Encoding.Unicode.GetBytes(EXAMPLE_M3U8_TWITCH);
                 using var ms = new MemoryStream(bytes);
                 m3u8 = M3U8.Parse(ms, Encoding.Unicode);
             }
             else
             {
-                m3u8 = M3U8.Parse(ExampleM3U8Twitch);
+                m3u8 = M3U8.Parse(EXAMPLE_M3U8_TWITCH);
             }
 
             CultureInfo.CurrentCulture = oldCulture;
@@ -73,7 +73,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData(true, "ru-RU")]
         public void CorrectlyParsesTwitchM3U8OfLiveStreams(bool useStream, string culture)
         {
-            const string ExampleM3U8Twitch =
+            const string EXAMPLE_M3U8_TWITCH =
                 "#EXTM3U" +
                 "\n#EXT-X-VERSION:3" +
                 "\n#EXT-X-TARGETDURATION:5" +
@@ -129,13 +129,13 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             M3U8 m3u8;
             if (useStream)
             {
-                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Twitch);
+                var bytes = Encoding.Unicode.GetBytes(EXAMPLE_M3U8_TWITCH);
                 using var ms = new MemoryStream(bytes);
                 m3u8 = M3U8.Parse(ms, Encoding.Unicode);
             }
             else
             {
-                m3u8 = M3U8.Parse(ExampleM3U8Twitch);
+                m3u8 = M3U8.Parse(EXAMPLE_M3U8_TWITCH);
             }
 
             CultureInfo.CurrentCulture = oldCulture;
@@ -167,7 +167,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData(true, "ru-RU")]
         public void CorrectlyParsesTwitchM3U8OfPlaylists(bool useStream, string culture)
         {
-            const string ExampleM3U8Twitch =
+            const string EXAMPLE_M3U8_TWITCH =
                 "#EXTM3U" +
                 "\n#EXT-X-TWITCH-INFO:ORIGIN=\"s3\",B=\"false\",REGION=\"NA\",USER-IP=\"255.255.255.255\",SERVING-ID=\"123abc456def789ghi012jkl345mno67\",CLUSTER=\"cloudfront_vod\",USER-COUNTRY=\"US\",MANIFEST-CLUSTER=\"cloudfront_vod\"" +
                 "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO" +
@@ -217,13 +217,13 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             M3U8 m3u8;
             if (useStream)
             {
-                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Twitch);
+                var bytes = Encoding.Unicode.GetBytes(EXAMPLE_M3U8_TWITCH);
                 using var ms = new MemoryStream(bytes);
                 m3u8 = M3U8.Parse(ms, Encoding.Unicode);
             }
             else
             {
-                m3u8 = M3U8.Parse(ExampleM3U8Twitch);
+                m3u8 = M3U8.Parse(EXAMPLE_M3U8_TWITCH);
             }
 
             CultureInfo.CurrentCulture = oldCulture;
@@ -280,7 +280,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData(true, "ru-RU")]
         public void CorrectlyParsesKickM3U8OfTransportStreams(bool useStream, string culture)
         {
-            const string ExampleM3U8Kick =
+            const string EXAMPLE_M3U8_KICK =
                 "#EXTM3U" +
                 "\n#EXT-X-VERSION:4" +
                 "\n#EXT-X-MEDIA-SEQUENCE:0" +
@@ -343,13 +343,13 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             M3U8 m3u8;
             if (useStream)
             {
-                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Kick);
+                var bytes = Encoding.Unicode.GetBytes(EXAMPLE_M3U8_KICK);
                 using var ms = new MemoryStream(bytes);
                 m3u8 = M3U8.Parse(ms, Encoding.Unicode);
             }
             else
             {
-                m3u8 = M3U8.Parse(ExampleM3U8Kick);
+                m3u8 = M3U8.Parse(EXAMPLE_M3U8_KICK);
             }
 
             CultureInfo.CurrentCulture = oldCulture;
@@ -378,7 +378,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData(true, "ru-RU")]
         public void CorrectlyParsesKickM3U8OfPlaylists(bool useStream, string culture)
         {
-            const string ExampleM3U8Kick =
+            const string EXAMPLE_M3U8_KICK =
                 "#EXTM3U" +
                 "\n#EXT-X-SESSION-DATA:DATA-ID=\"net.live-video.content.id\",VALUE=\"AbC123dEf456\"" +
                 "\n#EXT-X-SESSION-DATA:DATA-ID=\"net.live-video.customer.id\",VALUE=\"123456789012\"" +
@@ -423,13 +423,13 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             M3U8 m3u8;
             if (useStream)
             {
-                var bytes = Encoding.Unicode.GetBytes(ExampleM3U8Kick);
+                var bytes = Encoding.Unicode.GetBytes(EXAMPLE_M3U8_KICK);
                 using var ms = new MemoryStream(bytes);
                 m3u8 = M3U8.Parse(ms, Encoding.Unicode);
             }
             else
             {
-                m3u8 = M3U8.Parse(ExampleM3U8Kick);
+                m3u8 = M3U8.Parse(EXAMPLE_M3U8_KICK);
             }
 
             CultureInfo.CurrentCulture = oldCulture;

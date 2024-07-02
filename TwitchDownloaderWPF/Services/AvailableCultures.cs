@@ -49,6 +49,6 @@ namespace TwitchDownloaderWPF.Services
                 SimplifiedChinese = new Culture("zh-CN", "简体中文"),
             };
         }
-        // ReSharper enable StringLiteralTypo
+        // ReSharper restore StringLiteralTypo
     }
 }
