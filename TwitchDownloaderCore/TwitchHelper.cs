@@ -1011,15 +1011,6 @@ namespace TwitchDownloaderCore
                 : $"{wasDeleted} old video caches were deleted, {toDelete.Length - wasDeleted} could not be deleted.");
         }
 
-        public static int TimestampToSeconds(string input)
-        {
-            // Gets total seconds from timestamp in the format of 0h0m0s
-            input = input.Replace('h', ':').Replace('m', ':').Replace("s", "");
-            TimeSpan returnSpan = TimeSpan.Parse(input);
-
-            return (int)returnSpan.TotalSeconds;
-        }
-
         public static async Task<string> GetStreamerName(int id)
         {
             try

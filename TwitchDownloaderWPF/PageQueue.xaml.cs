@@ -33,13 +33,6 @@ namespace TwitchDownloaderWPF
 
             taskManager.DoWork += TaskManager_DoWork;
             taskManager.RunWorkerAsync();
-
-            taskList.CollectionChanged += TaskList_CollectionChanged;
-        }
-
-        private void TaskList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-
         }
 
         private void TaskManager_DoWork(object sender, DoWorkEventArgs e)
