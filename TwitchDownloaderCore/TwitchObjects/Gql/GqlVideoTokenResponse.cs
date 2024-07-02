@@ -15,6 +15,5 @@
     {
         public string value { get; set; }
         public string signature { get; set; }
-        public string __typename { get; set; }
     }
 }

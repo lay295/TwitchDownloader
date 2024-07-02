@@ -6,7 +6,6 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
     public class CommentChannel
     {
         public string id { get; set; }
-        public string __typename { get; set; }
     }
 
     public class CommentCommenter
@@ -14,21 +13,18 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string id { get; set; }
         public string login { get; set; }
         public string displayName { get; set; }
-        public string __typename { get; set; }
     }
 
     public class CommentComments
     {
         public List<CommentEdge> edges { get; set; }
         public CommentPageInfo pageInfo { get; set; }
-        public string __typename { get; set; }
     }
 
     public class Creator
     {
         public string id { get; set; }
         public CommentChannel channel { get; set; }
-        public string __typename { get; set; }
     }
 
     public class CommentData
@@ -40,14 +36,12 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
     {
         public string cursor { get; set; }
         public CommentNode node { get; set; }
-        public string __typename { get; set; }
     }
 
     public class CommentFragment
     {
         public CommentEmote emote { get; set; }
         public string text { get; set; }
-        public string __typename { get; set; }
     }
 
     public class CommentEmote
@@ -55,7 +49,6 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string id { get; set; }
         public string emoteID { get; set; }
         public int from { get; set; }
-        public string __typename { get; set; }
     }
 
     public class CommentMessage
@@ -63,7 +56,6 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public List<CommentFragment> fragments { get; set; }
         public List<CommentUserBadge> userBadges { get; set; }
         public string userColor { get; set; }
-        public string __typename { get; set; }
     }
 
     public class CommentNode
@@ -73,14 +65,12 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public int contentOffsetSeconds { get; set; }
         public DateTime createdAt { get; set; }
         public CommentMessage message { get; set; }
-        public string __typename { get; set; }
     }
 
     public class CommentPageInfo
     {
         public bool hasNextPage { get; set; }
         public bool hasPreviousPage { get; set; }
-        public string __typename { get; set; }
     }
 
     public class GqlCommentResponse
@@ -94,7 +84,6 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string id { get; set; }
         public string setID { get; set; }
         public string version { get; set; }
-        public string __typename { get; set; }
     }
 
     public class CommentVideo
@@ -102,6 +91,5 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string id { get; set; }
         public Creator creator { get; set; }
         public CommentComments comments { get; set; }
-        public string __typename { get; set; }
     }
 }
