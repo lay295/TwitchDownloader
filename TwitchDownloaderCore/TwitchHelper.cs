@@ -105,7 +105,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadAsStringAsync();
         }
 
-        static bool IsAuthException(Exception ex)
+        private static bool IsAuthException(Exception ex)
         {
             while (ex != null)
             {
