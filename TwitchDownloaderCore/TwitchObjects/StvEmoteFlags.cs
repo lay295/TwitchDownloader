@@ -10,7 +10,6 @@ namespace TwitchDownloaderCore.TwitchObjects
         Authentic               = 1 << 1, // The emote was verified to be an original creation by the uploader
         ZeroWidth               = 1 << 8, // The emote is recommended to be enabled as Zero-Width
 
-
         // Content Flags
 
         ContentSexual           = 1 << 16, // Sexually Suggestive

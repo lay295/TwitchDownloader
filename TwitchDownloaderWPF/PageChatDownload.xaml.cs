@@ -27,7 +27,6 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageChatDownload : Page
     {
-
         public DownloadType downloadType;
         public string downloadId;
         public int streamerId;
@@ -583,7 +582,6 @@ namespace TwitchDownloaderWPF
         {
             SetEnabledTrimEnd(CheckTrimEnd.IsChecked.GetValueOrDefault());
         }
-
 
         private void MenuItemEnqueue_Click(object sender, RoutedEventArgs e)
         {

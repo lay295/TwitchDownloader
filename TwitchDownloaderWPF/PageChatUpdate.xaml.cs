@@ -28,7 +28,6 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageChatUpdate : Page
     {
-
         public string InputFile;
         public ChatRoot ChatJsonInfo;
         public string VideoId;

@@ -47,7 +47,7 @@ namespace TwitchDownloaderWPF.Services
 
             dialog.EnableHyperlinks = true;
             dialog.HyperlinkClicked += Hyperlink_OnClicked;
-            
+
             dialog.ButtonStyle = TaskDialogButtonStyle.CommandLinks;
 
             var overwriteButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsOverwrite);

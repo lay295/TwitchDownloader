@@ -2,7 +2,6 @@
 
 namespace TwitchDownloaderCore.TwitchObjects.Api
 {
-
     public class FFZEmote
     {
         public int id { get; set; }
