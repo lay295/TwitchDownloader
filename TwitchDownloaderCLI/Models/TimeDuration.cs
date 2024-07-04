@@ -37,6 +37,8 @@ namespace TwitchDownloaderCLI.Models
                 throw new FormatException();
             }
 
+            str = str.Trim();
+
             if (str.Contains(':'))
             {
                 var timeSpan = TimeSpan.Parse(str);
