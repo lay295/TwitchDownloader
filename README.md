@@ -19,6 +19,7 @@ This document is also available in:
 - [**Turkish / Türkçe**](README_tr.md)
 - [**Japanese / 日本語**](README_ja.md)
 - [**Simplified Chinese / 简体中文**](README_zh-cn.md)
+- [**Russian / Русский**](README_ru.md)
 
 ## Chat Render Example
 
