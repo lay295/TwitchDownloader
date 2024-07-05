@@ -41,7 +41,7 @@ namespace TwitchDownloaderCLI.Models
 
             if (str.Contains(':'))
             {
-                var timeSpan = TimeSpan.Parse(str);
+                var timeSpan = ParseTimeSpan(str);
                 return new TimeDuration(timeSpan);
             }
 
@@ -53,6 +53,24 @@ namespace TwitchDownloaderCLI.Models
             }
 
             throw new FormatException();
+        }
+
+        private static TimeSpan ParseTimeSpan(string str)
+        {
+            // TimeSpan.Parse interprets '36:01:02' as 36 days, 1 hour, and 2 minutes, so we need to manually parse it ourselves
+            var match = Regex.Match(str, @"^(?:(\d{1,})[.:])?(\d{2,}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,3})\d*)?$");
+            if (match.Success)
+            {
+                if (!int.TryParse(match.Groups[1].ValueSpan, out var days)) days = 0;
+                if (!int.TryParse(match.Groups[2].ValueSpan, out var hours)) hours = 0;
+                if (!int.TryParse(match.Groups[3].ValueSpan, out var minutes)) minutes = 0;
+                if (!int.TryParse(match.Groups[4].ValueSpan, out var seconds)) seconds = 0;
+                if (!int.TryParse(match.Groups[5].Value.PadRight(3, '0'), out var milliseconds)) milliseconds = 0;
+
+                return new TimeSpan(days, hours, minutes, seconds, milliseconds);
+            }
+
+            return TimeSpan.Parse(str); // Parse formats not covered by the regex
         }
 
         private static long GetMultiplier(string input, out ReadOnlySpan<char> trimmedInput)
