@@ -259,7 +259,7 @@
     <value>Скачивать эмодзи, значки и приветствия в загружаемый файл для офлайн-рендеринга. Полезно для архивации, размер файла будет больше.</value>
   </data>
   <data name="EmbedMissing" xml:space="preserve">
-    <value>Скачивать отсуствующие</value>
+    <value>Скачивать отсуствующие </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedMissingTooltip" xml:space="preserve">
@@ -342,7 +342,7 @@
     <value>JSON Файл:</value>
   </data>
   <data name="Length" xml:space="preserve">
-    <value>Длинна:</value>
+    <value>Длина:</value>
   </data>
   <data name="ListOfVodsClips" xml:space="preserve">
     <value>Список Видео/Клипов (одно на строку)</value>
@@ -459,7 +459,7 @@
     <value>Обновление</value>
   </data>
   <data name="Streamer" xml:space="preserve">
-    <value>Стиммер:</value>
+    <value>Стример:</value>
   </data>
   <data name="StvEmotes" xml:space="preserve">
     <value>7TV Эмодзи:</value>
@@ -599,7 +599,7 @@
     <value>Размер отступа выделения:</value>
   </data>
   <data name="HighlightStrokeScale" xml:space="preserve">
-    <value>Highlight Stroke Scale:</value>
+    <value>Размер обводки выделения:</value>
   </data>
   <data name="BadgeScale" xml:space="preserve">
     <value>Масштаб значков:</value>
@@ -730,7 +730,7 @@
     <value>Вы включили опции генерации маски вместе с непрозрачным фоном. Уменшите прозрачность фона или выключите генерацию маски.</value>
   </data>
   <data name="OutlineScale" xml:space="preserve">
-    <value>Outline Scale:</value>
+    <value>Размер обводки:</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
     <value>trim_start_custom and trim_end_custom форматирование основанно на</value>
@@ -739,204 +739,204 @@
     <value>C# строки стандартного формата TimeSpan</value>
   </data>
   <data name="UnknownErrorOccurred" xml:space="preserve">
-    <value>An unknown error occurred</value>
+    <value>Неизвестная ошибка</value>
   </data>
   <data name="TaskCouldNotBeRemoved" xml:space="preserve">
-    <value>The task could not be removed</value>
+    <value>Убрать задачу не удалось</value>
   </data>
   <data name="CancelTaskBeforeRemoving" xml:space="preserve">
-    <value>Please cancel the task or wait for it to finish before removing it</value>
+    <value>Пожалуйста завершите задачу или подождите пока она выполнится прежде чем убирать её</value>
   </data>
   <data name="UnableToDownloadFfmpeg" xml:space="preserve">
-    <value>Unable to download FFmpeg</value>
+    <value>Не удалось скачать FFmpeg</value>
   </data>
   <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
-    <value>Unable to download FFmpeg. Please manually download it from {0} and place the file at {1}</value>
+    <value>Не удалось скачать FFmpeg. Пожалуйста скачайте самостоятельно его с {0} и положите его в {1}</value>
   </data>
   <data name="AlternateBackgroundColor" xml:space="preserve">
-    <value>Alt Background Color:</value>
+    <value>Другой цвет фона:</value>
   </data>
   <data name="AlternateMessageBackgrounds" xml:space="preserve">
-    <value>Alternate Backgrounds </value><comment>Leave a trailing space</comment>
+    <value>Другие фоны </value><comment>Leave a trailing space</comment>
   </data>
   <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
-    <value>Alternates the background color of every other chat message to help tell them apart.</value>
+    <value>Меняет цвет фона для каждого сообщения чтобы отделить их</value>
   </data>
   <data name="EncodeClipMetadata" xml:space="preserve">
-    <value>Encode Metadata:</value>
+    <value>Зашифровать метаданные:</value>
   </data>
   <data name="MessageBoxTitleError" xml:space="preserve">
     <value>Ошибка</value>
   </data>
   <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
-    <value>Unable to start Windows application theme watcher. Error code: {0}</value>
+    <value>Не получилось запустить Windows application theme watcher. Код ошибки: {0}</value>
   </data>
   <data name="LabelVideosPerPage" xml:space="preserve">
-    <value>Videos per page:</value>
+    <value>Видео на странице:</value>
   </data>
   <data name="StatusDownloaderFFmpeg" xml:space="preserve">
-    <value>Downloading FFmpeg {0}%</value>
+    <value>Скачиваем FFmpeg {0}%</value>
   </data>
   <data name="CopyVideoIDToClipboard" xml:space="preserve">
-    <value>Copy ID to clipboard</value>
+    <value>Скопировать ID в буфер обмена</value>
   </data>
   <data name="CopyVideoURLToClipboard" xml:space="preserve">
-    <value>Copy URL to clipboard</value>
+    <value>Скопировать URL в буфер обмена</value>
   </data>
   <data name="OpenVideoInBrowser" xml:space="preserve">
-    <value>Open in browser</value>
+    <value>Открыть в браузере</value>
   </data>
   <data name="ResetSettingsConfirmationMessage" xml:space="preserve">
-    <value>Are you sure you want to restore all settings to their default values?</value>
+    <value>Ты точно хочешь сбросить все настройки к заводским значениям?</value>
   </data>
   <data name="ResetSettingsConfirmation" xml:space="preserve">
-    <value>Restore Settings Confirmation</value>
+    <value>Подтверждение сброса настроек</value>
   </data>
   <data name="TheApplicationMustBeRestartedMessage" xml:space="preserve">
-    <value>The application must be restarted for changes to take effect.</value>
+    <value>Приложение должно быть перезапущено чтобы применить изменения.</value>
   </data>
   <data name="RestartTheApplication" xml:space="preserve">
-    <value>Please restart {0}</value><comment>{0} is the name of the application.</comment>
+    <value>Пожалуйста перезагрузите {0}</value><comment>{0} is the name of the application.</comment>
   </data>
   <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
-    <value>Restore Defaults</value>
+    <value>Сбросить к заводским</value>
   </data>
   <data name="ButtonSaveSettings" xml:space="preserve">
-    <value>Save</value>
+    <value>Сохранить</value>
   </data>
   <data name="ButtonCancelSettingsChanges" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Отмена</value>
   </data>
   <data name="ContextMenuRemoveTask" xml:space="preserve">
-    <value>Remove</value>
+    <value>Убрать</value>
   </data>
   <data name="ContextMenuOpenTaskFolder" xml:space="preserve">
-    <value>Open folder</value>
+    <value>Открыть папку</value>
   </data>
   <data name="PreferredQuality" xml:space="preserve">
-    <value>Preferred Quality:</value>
+    <value>Предподчтительное качество:</value>
   </data>
   <data name="TitleWindowOldVideoCacheManager" xml:space="preserve">
-    <value>Select Caches To Delete</value>
+    <value>Выберите кэш для удаления</value>
   </data>
   <data name="SizeOfAllFiles" xml:space="preserve">
-    <value>Total Size:</value>
+    <value>Итоговый размер:</value>
   </data>
   <data name="DeleteCacheColumnHeader" xml:space="preserve">
-    <value>Delete</value>
+    <value>Удалить</value>
   </data>
   <data name="FilePathColumnHeader" xml:space="preserve">
-    <value>Path</value>
+    <value>Путь</value>
   </data>
   <data name="FileAgeColumnHeader" xml:space="preserve">
-    <value>Age</value>
+    <value>Возраст</value>
   </data>
   <data name="FileSizeColumnHeader" xml:space="preserve">
-    <value>Size</value>
+    <value>Размер</value>
   </data>
   <data name="FileAgeInDays" xml:space="preserve">
-    <value>{0:N0} days</value>
+    <value>{0:N0} дней</value>
   </data>
   <data name="LogLevels" xml:space="preserve">
-    <value>Log Levels:</value>
+    <value>Уровень логов:</value>
   </data>
   <data name="LogLevelVerbose" xml:space="preserve">
     <value>Verbose</value>
   </data>
   <data name="LogLevelInfo" xml:space="preserve">
-    <value>Info</value>
+    <value>Информация</value>
   </data>
   <data name="LogLevelWarning" xml:space="preserve">
-    <value>Warning</value>
+    <value>Предупреждение</value>
   </data>
   <data name="LogLevelError" xml:space="preserve">
-    <value>Error</value>
+    <value>Ошибка</value>
   </data>
   <data name="LogLevelFfmpeg" xml:space="preserve">
     <value>FFmpeg</value>
   </data>
   <data name="CopyFolderPathToClipboard" xml:space="preserve">
-    <value>Copy path to clipboard</value>
+    <value>Скопировать путь в буфер обмена</value>
   </data>
   <data name="ContextMenuOpenFolder" xml:space="preserve">
-    <value>Open folder</value>
+    <value>Открыть папку</value>
   </data>
   <data name="UnknownUser" xml:space="preserve">
-    <value>Unknown User</value>
+    <value>Неизвестный пользователь</value>
   </data>
   <data name="UnknownGame" xml:space="preserve">
-    <value>Unknown Game</value>
+    <value>Неизвестная категория</value>
   </data>
   <data name="UnknownVideoLength" xml:space="preserve">
-    <value>Unknown</value>
+    <value>Неизвестно</value>
   </data>
   <data name="IncreaseUsernameReadability" xml:space="preserve">
-    <value>Increase Username Readability:</value>
+    <value>Повысить читаемость имени пользователя:</value>
   </data>
   <data name="BadgeMaskBroadcaster" xml:space="preserve">
-    <value>Broadcaster</value>
+    <value>Стример</value>
   </data>
   <data name="BadgeMaskModerator" xml:space="preserve">
-    <value>Mods</value>
+    <value>Модеры</value>
   </data>
   <data name="BadgeMaskVIP" xml:space="preserve">
-    <value>VIPs</value>
+    <value>Випы</value>
   </data>
   <data name="BadgeMaskSubscriber" xml:space="preserve">
-    <value>Subs</value>
+    <value>Подписчики</value>
   </data>
   <data name="BadgeMaskPredictions" xml:space="preserve">
-    <value>Predictions</value>
+    <value>Прогнозы</value>
   </data>
   <data name="BadgeMaskNoAudioNoVideo" xml:space="preserve">
-    <value>No Audio/No Video</value>
+    <value>Нет аудио/Видео</value>
   </data>
   <data name="BadgeMaskTwitchPrime" xml:space="preserve">
-    <value>Prime</value>
+    <value>Подписка Prime</value>
   </data>
   <data name="BadgeMaskOthers" xml:space="preserve">
-    <value>Others</value>
+    <value>Другие</value>
   </data>
   <data name="TitleFileAlreadyExists" xml:space="preserve">
-    <value>File already exists</value>
+    <value>Файл с таким именем уже есть</value>
   </data>
   <data name="FileAlreadyExistsHeader" xml:space="preserve">
-    <value>{0} already exists.</value>
+    <value>{0} уже существует.</value>
   </data>
   <data name="FileAlreadyExistsBody" xml:space="preserve">
-    <value>The file {0} already exists. Do you want to overwrite it?</value>
+    <value>Файл с именем {0} уже существует. Вы хотите заменить его?</value>
   </data>
   <data name="FileAlreadyExistsOverwrite" xml:space="preserve">
-    <value>Overwrite</value>
+    <value>Заменить</value>
   </data>
   <data name="FileAlreadyExistsOverwriteDescription" xml:space="preserve">
-    <value>The existing file will be overwritten.</value>
+    <value>Существующий файл будет заменён.</value>
   </data>
   <data name="FileAlreadyExistsRename" xml:space="preserve">
-    <value>Rename</value>
+    <value>Переименовать</value>
   </data>
   <data name="FileAlreadyExistsRenameDescription" xml:space="preserve">
-    <value>The new file will be renamed.</value>
+    <value>Новый файл будет переименован.</value>
   </data>
   <data name="FileAlreadyExistsCancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Отмена</value>
   </data>
   <data name="FileAlreadyExistsCancelDescription" xml:space="preserve">
-    <value>The task will be canceled.</value>
+    <value>Задача будет отменена.</value>
   </data>
   <data name="FileAlreadyExistsRememberMyChoice" xml:space="preserve">
-    <value>Remember my choice for this session</value>
+    <value>Запомнить выбор на эту сессию</value>
   </data>
   <data name="VideoTrimMode" xml:space="preserve">
-    <value>Trim Mode </value><comment>Leave a trailing space</comment>
+    <value>Режим обрезки </value><comment>Leave a trailing space</comment>
   </data>
   <data name="VideoTrimModeSafe" xml:space="preserve">
-    <value>Safe</value>
+    <value>Безопасный режим</value>
   </data>
   <data name="VideoTrimModeExact" xml:space="preserve">
-    <value>Exact</value>
+    <value>Точный режим</value>
   </data>
   <data name="VideoTrimModeTooltip" xml:space="preserve">
-    <value>Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video.</value>
+    <value>Иногда обрезанное видео может испытывать проблемы с заиканьем в первых/последних нескольких секунд. Безопасная обрезка гарантирует отсутствие заикания, но может немного удлинить видео.</value>
   </data>
 </root>
