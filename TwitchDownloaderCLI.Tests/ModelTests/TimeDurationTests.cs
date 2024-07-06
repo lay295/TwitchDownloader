@@ -16,6 +16,11 @@ namespace TwitchDownloaderCLI.Tests.ModelTests
         [InlineData("0:09:27", 9 * TicksPerMinute + 27 * TicksPerSecond)]
         [InlineData("11:30", 11 * TicksPerHour + 30 * TicksPerMinute)]
         [InlineData("12:03:45", 12 * TicksPerHour + 3 * TicksPerMinute + 45 * TicksPerSecond)]
+        [InlineData("39:23:02", 39 * TicksPerHour + 23 * TicksPerMinute + 2 * TicksPerSecond)]
+        [InlineData("47:22:08.123", 47 * TicksPerHour + 22 * TicksPerMinute + 8 * TicksPerSecond + 123 * TicksPerMillisecond)]
+        [InlineData("47:22:08.12345", 47 * TicksPerHour + 22 * TicksPerMinute + 8 * TicksPerSecond + 123 * TicksPerMillisecond)]
+        [InlineData("1.2:3:4.5", 1 * TicksPerDay + 2 * TicksPerHour + 3 * TicksPerMinute + 4 * TicksPerSecond + 500 * TicksPerMillisecond)]
+        [InlineData("2:03:54:27.26", 2 * TicksPerDay + 3 * TicksPerHour + 54 * TicksPerMinute + 27 * TicksPerSecond + 260 * TicksPerMillisecond)]
         public void CorrectlyParsesTimeStrings(string input, long expectedTicks)
         {
             var expected = new TimeDuration(expectedTicks);
@@ -33,10 +38,7 @@ namespace TwitchDownloaderCLI.Tests.ModelTests
         [InlineData("0:12345")]
         public void ThrowsOnBadFormat(string input)
         {
-            Assert.ThrowsAny<Exception>(() =>
-            {
-                _ = TimeDuration.Parse(input);
-            });
+            Assert.ThrowsAny<Exception>(() => TimeDuration.Parse(input));
         }
     }
 }
