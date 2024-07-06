@@ -1,11 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace TwitchDownloaderCLI.Models
 {
-    [DebuggerDisplay("{_timeSpan}")]
     public readonly record struct TimeDuration
     {
         public static TimeDuration MinusOneSeconds { get; } = new(-1 * TimeSpan.TicksPerSecond);
@@ -29,6 +27,8 @@ namespace TwitchDownloaderCLI.Models
         {
             _timeSpan = TimeSpan.FromTicks(ticks);
         }
+
+        public override string ToString() => _timeSpan.ToString();
 
         public static TimeDuration Parse(string str)
         {
