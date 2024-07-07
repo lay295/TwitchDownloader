@@ -288,7 +288,7 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 (Default: `false`) Alternates the background color of every other chat message to help tell them apart.
 
 **--readable-colors**
-(Default: `false`) Increases the contrast of usernames against the background or outline color.
+(Default: `true`) Increases the contrast of usernames against the background or outline color.
 
 **--offline**
 (Default: `false`) Render completely offline using only embedded emotes, badges, and bits from the input json.

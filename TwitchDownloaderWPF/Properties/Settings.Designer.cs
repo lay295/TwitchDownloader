@@ -108,7 +108,7 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.2")]
         public double UpdateTime {
             get {
                 return ((double)(this["UpdateTime"]));
@@ -912,7 +912,7 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool AdjustUsernameVisibility {
             get {
                 return ((bool)(this["AdjustUsernameVisibility"]));

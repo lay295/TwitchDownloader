@@ -24,7 +24,7 @@
       <Value Profile="(Default)">700</Value>
     </Setting>
     <Setting Name="UpdateTime" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0.1</Value>
+      <Value Profile="(Default)">0.2</Value>
     </Setting>
     <Setting Name="FFZEmotes" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -225,7 +225,7 @@
       <Value Profile="(Default)">30</Value>
     </Setting>
     <Setting Name="AdjustUsernameVisibility" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="VodTrimMode" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1</Value>
