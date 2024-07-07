@@ -79,7 +79,6 @@ namespace TwitchDownloaderCore.Tools
             return response.Content.Headers.ContentLength ?? -1;
         }
 
-
         /// <summary>
         /// Some old twitch VODs have files with a query string at the end such as 1.ts?offset=blah which isn't a valid filename
         /// </summary>

@@ -97,5 +97,6 @@ resharper_formatter_off_tag = @formatter:off
 resharper_formatter_on_tag = @formatter:on
 resharper_formatter_tags_enabled = true
 resharper_place_field_attribute_on_same_line = false
+resharper_place_simple_anonymousmethod_on_single_line = false
 resharper_trailing_comma_in_multiline_lists = true
 resharper_use_indent_from_vs = false

@@ -517,7 +517,6 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Throws<FormatException>(() => M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(byteRangeString));
         }
 
-
         [Theory]
         [InlineData("en-GB")]
         [InlineData("tr-TR")]

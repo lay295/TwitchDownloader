@@ -1882,7 +1882,6 @@ namespace TwitchDownloaderCore
             return chatRoot;
         }
 
-
 #region ImplementIDisposable
 
         public void Dispose()

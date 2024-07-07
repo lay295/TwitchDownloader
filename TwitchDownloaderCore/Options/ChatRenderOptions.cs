@@ -63,7 +63,6 @@ namespace TwitchDownloaderCore.Options
         public double EmoteSpacingScale { get; set; } = 1.0;
         public double AccentStrokeScale { get; set; } = 1.0;
         public double AccentIndentScale { get; set; } = 1.0;
-        public int RenderThreads { get; set; } = 1;
         public int ChatBadgeMask { get; set; } = 0;
         public int StartOverride { get; set; } = -1;
         public int EndOverride { get; set; } = -1;
