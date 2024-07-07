@@ -31,16 +31,7 @@ namespace TwitchDownloaderCore.Options
         public bool Timestamp { get; set; }
         public int Framerate { get; set; }
         public double UpdateRate { get; set; }
-        public int UpdateFrame
-        {
-            get
-            {
-                if (UpdateRate == 0)
-                    return 1;
-                else
-                    return (int)(UpdateRate * Framerate);
-            }
-        }
+        public int UpdateFrame => Math.Max(1, (int)(UpdateRate * Framerate));
         public bool GenerateMask { get; set; }
         public string MaskFile
         {
