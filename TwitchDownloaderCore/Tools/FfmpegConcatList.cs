@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TwitchDownloaderCore.Tools
 {
-    // https://www.ffmpeg.org/ffmpeg-formats.html#toc-concat-1
+    // https://www.ffmpeg.org/ffmpeg-formats.html#concat-1
     public static class FfmpegConcatList
     {
         private const string LINE_FEED = "\u000A";
@@ -26,6 +26,13 @@ namespace TwitchDownloaderCore.Tools
                 await sw.WriteAsync("file '");
                 await sw.WriteAsync(DownloadTools.RemoveQueryString(stream.Path));
                 await sw.WriteLineAsync('\'');
+
+                await sw.WriteLineAsync("stream");
+                await sw.WriteLineAsync("exact_stream_id 0x100"); // Audio
+                await sw.WriteLineAsync("stream");
+                await sw.WriteLineAsync("exact_stream_id 0x101"); // Video
+                await sw.WriteLineAsync("stream");
+                await sw.WriteLineAsync("exact_stream_id 0x102?"); // Subtitle
 
                 await sw.WriteAsync("duration ");
                 await sw.WriteLineAsync(stream.PartInfo.Duration.ToString(CultureInfo.InvariantCulture));
