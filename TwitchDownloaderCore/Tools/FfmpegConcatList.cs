@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TwitchDownloaderCore.Tools
 {
-    // https://www.ffmpeg.org/ffmpeg-formats.html#toc-concat-1
+    // https://www.ffmpeg.org/ffmpeg-formats.html#concat-1
     public static class FfmpegConcatList
     {
         private const string LINE_FEED = "\u000A";
