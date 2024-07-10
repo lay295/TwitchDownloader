@@ -124,7 +124,7 @@
     <value>添加至队列</value>
   </data>
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
-    <value>你为不支持透明度的容器 / 编解码器选择了 alpha 通道（透明度）。移除透明度或使用 MOV + RLE/PRORES 或 WEBM + VP8/VP9 编码</value>
+    <value>你为不支持透明度的容器 / 编解码器选择了 Alpha 通道（透明度）。移除透明度或使用 MOV + RLE/PRORES 或 WEBM + VP8/VP9 编码</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>主题 </value>
@@ -574,7 +574,7 @@
     <value>视频过期或嵌入的 ID 损坏</value>
   </data>
   <data name="VodLinkId" xml:space="preserve">
-    <value>点播链接 / ID</value>
+    <value>点播链接 / ID：</value>
   </data>
   <data name="TemplateVods" xml:space="preserve">
     <value>点播：</value>
@@ -706,7 +706,7 @@
     <value>本地</value>
   </data>
   <data name="SettingsTimeFormat" xml:space="preserve">
-    <value>时间格式</value>
+    <value>时间格式：</value>
   </data>
   <data name="NoJsonFilesSelected" xml:space="preserve">
     <value>未选择 JSON 文件</value>
@@ -727,7 +727,7 @@
     <value>无</value>
   </data>
   <data name="MaskWithNoAlpha" xml:space="preserve">
-    <value>你选择了生成不透明背景的遮罩。降低背景颜色 alpha 或禁用生成遮罩。</value>
+    <value>你选择了生成不透明背景的遮罩。降低背景颜色 Alpha 或禁用生成遮罩。</value>
   </data>
   <data name="OutlineScale" xml:space="preserve">
     <value>边框比例：</value>
@@ -742,7 +742,7 @@
     <value>发生未知错误</value>
   </data>
   <data name="TaskCouldNotBeRemoved" xml:space="preserve">
-    <value>此任务无法被移除</value>
+    <value>无法移除此任务</value>
   </data>
   <data name="CancelTaskBeforeRemoving" xml:space="preserve">
     <value>请取消任务或等待任务完成后再将其删除</value>
