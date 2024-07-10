@@ -27,6 +27,13 @@ namespace TwitchDownloaderCore.Tools
                 await sw.WriteAsync(DownloadTools.RemoveQueryString(stream.Path));
                 await sw.WriteLineAsync('\'');
 
+                await sw.WriteLineAsync("stream");
+                await sw.WriteLineAsync("exact_stream_id 0x100"); // Audio
+                await sw.WriteLineAsync("stream");
+                await sw.WriteLineAsync("exact_stream_id 0x101"); // Video
+                await sw.WriteLineAsync("stream");
+                await sw.WriteLineAsync("exact_stream_id 0x102?"); // Subtitle
+
                 await sw.WriteAsync("duration ");
                 await sw.WriteLineAsync(stream.PartInfo.Duration.ToString(CultureInfo.InvariantCulture));
             }
