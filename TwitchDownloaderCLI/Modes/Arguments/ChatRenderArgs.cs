@@ -106,7 +106,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public bool AlternateMessageBackgrounds { get; set; }
 
         [Option("readable-colors", Default = true, HelpText = "Increases the contrast of usernames against the background or outline color.")]
-        public bool AdjustUsernameVisibility { get; set; }
+        public bool? AdjustUsernameVisibility { get; set; }
 
         [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, and bits from the input json.")]
         public bool Offline { get; set; }
