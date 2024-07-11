@@ -141,9 +141,25 @@ namespace TwitchDownloaderCore
                 return downloadUrl;
             }
 
-            foreach (var quality in clip.videoQualities)
+            if (qualityString.Contains('p'))
             {
-                if (quality.quality + "p" + (Math.Round(quality.frameRate) == 30 ? "" : Math.Round(quality.frameRate).ToString("F0")) == qualityString)
+                foreach (var quality in clip.videoQualities)
+                {
+                    var framerate = (int)Math.Round(quality.frameRate);
+                    var framerateString = qualityString.EndsWith('p') && framerate == 30
+                        ? ""
+                        : framerate.ToString("F0");
+
+                    if ($"{quality.quality}p{framerateString}" == qualityString)
+                    {
+                        return quality.sourceURL;
+                    }
+                }
+            }
+            else
+            {
+                var quality = clip.videoQualities.FirstOrDefault(quality => quality.quality == qualityString);
+                if (quality is not null)
                 {
                     return quality.sourceURL;
                 }
