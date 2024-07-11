@@ -126,23 +126,75 @@ namespace TwitchDownloaderCore
                 throw new NullReferenceException("Clip has no video qualities, deleted possibly?");
             }
 
-            string downloadUrl = "";
-
-            foreach (var quality in clip.videoQualities)
-            {
-                if (quality.quality + "p" + (Math.Round(quality.frameRate) == 30 ? "" : Math.Round(quality.frameRate).ToString("F0")) == downloadOptions.Quality)
-                {
-                    downloadUrl = quality.sourceURL;
-                }
-            }
-
-            if (downloadUrl == "")
-            {
-                downloadUrl = clip.videoQualities.First().sourceURL;
-            }
+            var downloadUrl = GetDownloadUrlForQuality(clip, downloadOptions.Quality);
 
             return downloadUrl + "?sig=" + clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(clip.playbackAccessToken.value);
         }
+
+        private static string GetDownloadUrlForQuality(ClipToken clip, string qualityString)
+        {
+            Debug.Assert(clip.videoQualities.OrderBy(x => x, new ClipQualityComparer()).SequenceEqual(clip.videoQualities));
+
+            if (TryGetKeywordQuality(clip, qualityString, out var downloadUrl))
+            {
+                return downloadUrl;
+            }
+
+            if (qualityString.Contains('p'))
+            {
+                foreach (var quality in clip.videoQualities)
+                {
+                    var framerate = (int)Math.Round(quality.frameRate);
+                    var framerateString = qualityString.EndsWith('p') && framerate == 30
+                        ? ""
+                        : framerate.ToString("F0");
+
+                    if ($"{quality.quality}p{framerateString}" == qualityString)
+                    {
+                        return quality.sourceURL;
+                    }
+                }
+            }
+            else
+            {
+                var quality = clip.videoQualities.FirstOrDefault(quality => quality.quality == qualityString);
+                if (quality is not null)
+                {
+                    return quality.sourceURL;
+                }
+            }
+
+            return BestQuality(clip).sourceURL;
+        }
+
+        private static bool TryGetKeywordQuality(ClipToken clip, string qualityString, out string downloadUrl)
+        {
+            if (string.IsNullOrWhiteSpace(qualityString))
+            {
+                downloadUrl = BestQuality(clip).sourceURL;
+                return true;
+            }
+
+            if (qualityString.Contains("best", StringComparison.OrdinalIgnoreCase)
+                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase))
+            {
+                downloadUrl = BestQuality(clip).sourceURL;
+                return true;
+            }
+
+            if (qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase))
+            {
+                downloadUrl = WorstQuality(clip).sourceURL;
+                return true;
+            }
+
+            downloadUrl = null;
+            return false;
+        }
+
+        private static VideoQuality BestQuality(ClipToken clip) => clip.videoQualities.First();
+
+        private static VideoQuality WorstQuality(ClipToken clip) => clip.videoQualities.Last();
 
         private static async Task DownloadFileTaskAsync(string url, FileStream fs, int throttleKib, IProgress<StreamCopyProgress> progress, CancellationToken cancellationToken)
         {
