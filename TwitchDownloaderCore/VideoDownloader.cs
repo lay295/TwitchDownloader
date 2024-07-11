@@ -340,6 +340,7 @@ namespace TwitchDownloaderCore
                 "-analyzeduration", $"{int.MaxValue}",
                 "-probesize", $"{int.MaxValue}",
                 "-f", "concat",
+                "-max_streams", $"{int.MaxValue}",
                 "-i", concatListPath,
                 "-i", metadataPath,
                 "-map_metadata", "1",
