@@ -45,6 +45,7 @@
                     <ComboBoxItem Content="360p" />
                     <ComboBoxItem Content="160p" />
                     <ComboBoxItem Content="144p" />
+                    <ComboBoxItem Content="Worst" />
                 </ComboBox>
             </StackPanel>
             <CheckBox x:Name="checkChat" Content="{lex:Loc DownloadChat}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Checked="checkChat_Checked" Unchecked="checkChat_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
