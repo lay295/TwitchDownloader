@@ -88,7 +88,7 @@ namespace TwitchDownloaderWPF
             // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
             FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
 
-            var currentVersion = Version.Parse("1.54.8");
+            var currentVersion = Version.Parse("1.54.9");
 #if DEBUG
             Title = $"Twitch Downloader v{currentVersion} - DEBUG";
 #else
