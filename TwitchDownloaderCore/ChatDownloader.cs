@@ -326,7 +326,7 @@ namespace TwitchDownloaderCore
                 await BackfillUserInfo(chatRoot);
             }
 
-            _progress.SetStatus("Writing output file");
+            _progress.SetStatus("Writing Output File");
             switch (downloadOptions.DownloadFormat)
             {
                 case ChatFormat.Json:
