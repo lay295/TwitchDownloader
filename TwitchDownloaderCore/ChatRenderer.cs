@@ -58,7 +58,7 @@ namespace TwitchDownloaderCore
         {
             renderOptions = chatRenderOptions;
             renderOptions.TempFolder = Path.Combine(
-                string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : renderOptions.TempFolder,
+                string.IsNullOrWhiteSpace(renderOptions.TempFolder) ? Path.GetTempPath() : Path.GetFullPath(renderOptions.TempFolder),
                 "TwitchDownloader");
             renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize - renderOptions.SidePadding * 2;
             renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
