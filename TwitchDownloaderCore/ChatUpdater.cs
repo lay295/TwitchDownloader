@@ -26,7 +26,7 @@ namespace TwitchDownloaderCore
             _updateOptions = updateOptions;
             _progress = progress;
             _updateOptions.TempFolder = Path.Combine(
-                string.IsNullOrWhiteSpace(_updateOptions.TempFolder) ? Path.GetTempPath() : _updateOptions.TempFolder,
+                string.IsNullOrWhiteSpace(_updateOptions.TempFolder) ? Path.GetTempPath() : Path.GetFullPath(_updateOptions.TempFolder),
                 "TwitchDownloader");
         }
 

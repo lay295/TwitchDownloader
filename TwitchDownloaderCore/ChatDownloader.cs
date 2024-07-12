@@ -38,7 +38,7 @@ namespace TwitchDownloaderCore
             downloadOptions = chatDownloadOptions;
             _progress = progress;
             downloadOptions.TempFolder = Path.Combine(
-                string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : downloadOptions.TempFolder,
+                string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : Path.GetFullPath(downloadOptions.TempFolder),
                 "TwitchDownloader");
         }
 
