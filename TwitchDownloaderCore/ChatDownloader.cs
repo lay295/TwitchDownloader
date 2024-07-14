@@ -106,10 +106,15 @@ namespace TwitchDownloaderCore
                 var convertedComments = ConvertComments(commentResponse[0].data.video, format);
                 foreach (var comment in convertedComments)
                 {
-                    if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
+                    if (comment.content_offset_seconds >= videoStart && comment.content_offset_seconds < videoEnd)
+                    {
                         comments.Add(comment);
+                    }
 
-                    latestMessage = comment.content_offset_seconds;
+                    if (comment.content_offset_seconds > latestMessage)
+                    {
+                        latestMessage = comment.content_offset_seconds;
+                    }
                 }
 
                 if (!commentResponse[0].data.video.comments.pageInfo.hasNextPage)
