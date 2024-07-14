@@ -42,12 +42,12 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        private static async Task<List<Comment>> DownloadSection(double videoStart, double videoEnd, string videoId, IProgress<int> progress, ChatFormat format, CancellationToken cancellationToken)
+        private static async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, IProgress<int> progress, ChatFormat format, CancellationToken cancellationToken)
         {
             var comments = new List<Comment>();
-            //GQL only wants ints
-            videoStart = Math.Floor(videoStart);
-            double videoDuration = videoEnd - videoStart;
+            int videoStart = downloadRange.Start.Value;
+            int videoEnd = downloadRange.End.Value;
+            int videoDuration = videoEnd - videoStart;
             double latestMessage = videoStart - 1;
             bool isFirst = true;
             string cursor = "";
@@ -429,7 +429,8 @@ namespace TwitchDownloaderCore
                 });
 
                 var start = videoStart + chunk * i;
-                downloadTasks.Add(DownloadSection(start, start + chunk, video.id, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
+                var downloadRange = new Range(start, start + chunk);
+                downloadTasks.Add(DownloadSection(downloadRange, video.id, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
             }
 
             await Task.WhenAll(downloadTasks);
