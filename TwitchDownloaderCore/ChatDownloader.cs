@@ -104,7 +104,6 @@ namespace TwitchDownloaderCore
                 }
 
                 var convertedComments = ConvertComments(commentResponse[0].data.video, format);
-                comments.EnsureCapacity(Math.Min(0, comments.Capacity + convertedComments.Count));
                 foreach (var comment in convertedComments)
                 {
                     if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
