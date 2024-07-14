@@ -275,42 +275,8 @@ namespace TwitchDownloaderCore
             DownloadType downloadType = downloadOptions.Id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
 
             var (chatRoot, connectionCount) = await InitChatRoot(downloadType);
-            var videoStart = chatRoot.video.start;
-            var videoEnd = chatRoot.video.end;
-            var videoId = chatRoot.video.id;
-            var videoDuration = videoEnd - videoStart;
 
-            var downloadTasks = new List<Task<List<Comment>>>(connectionCount);
-            var percentages = new int[connectionCount];
-
-            double chunk = videoDuration / connectionCount;
-            for (int i = 0; i < connectionCount; i++)
-            {
-                int tc = i;
-
-                var taskProgress = new Progress<int>(percent =>
-                {
-                    percentages[tc] = Math.Clamp(percent, 0, 100);
-
-                    var reportPercent = percentages.Sum() / connectionCount;
-                    _progress.ReportProgress(reportPercent);
-                });
-
-                double start = videoStart + chunk * i;
-                downloadTasks.Add(DownloadSection(start, start + chunk, videoId, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
-            }
-
-            _progress.SetTemplateStatus("Downloading {0}%", 0);
-            await Task.WhenAll(downloadTasks);
-
-            _progress.ReportProgress(100);
-
-            chatRoot.comments = downloadTasks
-                .SelectMany(task => task.Result)
-                .ToHashSet(new CommentIdEqualityComparer())
-                .ToList();
-
-            chatRoot.comments.Sort(new CommentOffsetComparer());
+            chatRoot.comments = await DownloadComments(cancellationToken, chatRoot.video, connectionCount);
 
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
@@ -436,6 +402,47 @@ namespace TwitchDownloaderCore
             chatRoot.video.id = videoId;
 
             return (chatRoot, connectionCount);
+        }
+
+        private async Task<List<Comment>> DownloadComments(CancellationToken cancellationToken, Video video, int connectionCount)
+        {
+            _progress.SetTemplateStatus("Downloading {0}%", 0);
+
+            var videoStart = (int)Math.Floor(video.start);
+            var videoEnd = (int)Math.Ceiling(video.end);
+            var videoDuration = videoEnd - videoStart;
+
+            var downloadTasks = new List<Task<List<Comment>>>(connectionCount);
+            var percentages = new int[connectionCount];
+
+            var chunk = videoDuration / connectionCount;
+            for (var i = 0; i < connectionCount; i++)
+            {
+                var tc = i;
+
+                var taskProgress = new Progress<int>(percent =>
+                {
+                    percentages[tc] = Math.Clamp(percent, 0, 100);
+
+                    var reportPercent = percentages.Sum() / connectionCount;
+                    _progress.ReportProgress(reportPercent);
+                });
+
+                var start = videoStart + chunk * i;
+                downloadTasks.Add(DownloadSection(start, start + chunk, video.id, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
+            }
+
+            await Task.WhenAll(downloadTasks);
+
+            _progress.ReportProgress(100);
+
+            var commentList = downloadTasks
+                .SelectMany(task => task.Result)
+                .ToHashSet(new CommentIdEqualityComparer())
+                .ToList();
+
+            commentList.Sort(new CommentOffsetComparer());
+            return commentList;
         }
 
         private async Task EmbedImages(ChatRoot chatRoot, CancellationToken cancellationToken)
