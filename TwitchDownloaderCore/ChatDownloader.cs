@@ -305,15 +305,12 @@ namespace TwitchDownloaderCore
 
             _progress.ReportProgress(100);
 
-            var sortedComments = new List<Comment>(downloadTasks.Count);
-            foreach (var commentTask in downloadTasks)
-            {
-                sortedComments.AddRange(commentTask.Result);
-            }
+            chatRoot.comments = downloadTasks
+                .SelectMany(task => task.Result)
+                .ToHashSet(new CommentIdEqualityComparer())
+                .ToList();
 
-            sortedComments.Sort(new CommentOffsetComparer());
-
-            chatRoot.comments = sortedComments.DistinctBy(x => x._id).ToList();
+            chatRoot.comments.Sort(new CommentOffsetComparer());
 
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {

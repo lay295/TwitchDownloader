@@ -431,24 +431,18 @@ namespace TwitchDownloaderCore
             ChatRoot newChatRoot = await ChatJson.DeserializeAsync(inputFile, getComments: true, onlyFirstAndLastComments: false, getEmbeds: false, cancellationToken);
 
             // Append the new comment section
-            SortedSet<Comment> commentsSet = new SortedSet<Comment>(new CommentOffsetComparer());
-            foreach (var comment in newChatRoot.comments)
-            {
-                if (comment.content_offset_seconds < downloadOptions.TrimEndingTime && comment.content_offset_seconds >= downloadOptions.TrimBeginningTime)
-                {
-                    commentsSet.Add(comment);
-                }
-            }
+            var commentsSet = newChatRoot.comments.ToHashSet(new CommentIdEqualityComparer());
 
             lock (_trimChatRootLock)
             {
+                commentsSet.EnsureCapacity(commentsSet.Count + chatRoot.comments.Count);
                 foreach (var comment in chatRoot.comments)
                 {
                     commentsSet.Add(comment);
                 }
 
-                List<Comment> comments = commentsSet.DistinctBy(x => x._id).ToList();
-                commentsSet.Clear();
+                var comments = commentsSet.ToList();
+                comments.Sort(new CommentOffsetComparer());
 
                 chatRoot.comments = comments;
             }
