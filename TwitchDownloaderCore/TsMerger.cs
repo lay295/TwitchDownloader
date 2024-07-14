@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore
 
             try
             {
-                await MergeAsyncImpl(outputFs, cancellationToken);
+                await MergeAsyncImpl(outputFileInfo, outputFs, cancellationToken);
             }
             catch
             {
@@ -46,7 +46,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task MergeAsyncImpl(FileStream outputFs, CancellationToken cancellationToken)
+        private async Task MergeAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, CancellationToken cancellationToken)
         {
             var isM3U8 = false;
             var isFirst = true;
@@ -74,7 +74,7 @@ namespace TwitchDownloaderCore
 
             _progress.SetTemplateStatus("Combining Parts {0}% [2/2]", 0);
 
-            await CombineVideoParts(fileList, outputFs, cancellationToken);
+            await CombineVideoParts(fileList, outputFileInfo, outputFs, cancellationToken);
         }
 
         private async Task VerifyVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
@@ -131,9 +131,9 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, FileStream outputStream, CancellationToken cancellationToken)
+        private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, FileInfo outputFileInfo, FileStream outputStream, CancellationToken cancellationToken)
         {
-            DriveInfo outputDrive = DriveHelper.GetOutputDrive(mergeOptions.OutputFile);
+            DriveInfo outputDrive = DriveHelper.GetOutputDrive(outputFileInfo.FullName);
 
             int partCount = fileList.Count;
             int doneCount = 0;
