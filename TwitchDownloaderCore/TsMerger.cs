@@ -75,8 +75,6 @@ namespace TwitchDownloaderCore
             _progress.SetTemplateStatus("Combining Parts {0}% [2/2]", 0);
 
             await CombineVideoParts(fileList, outputFs, cancellationToken);
-
-            _progress.ReportProgress(100);
         }
 
         private async Task VerifyVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
@@ -99,6 +97,8 @@ namespace TwitchDownloaderCore
 
                 cancellationToken.ThrowIfCancellationRequested();
             }
+
+            _progress.ReportProgress(100);
 
             if (failedParts.Count != 0)
             {
@@ -153,6 +153,8 @@ namespace TwitchDownloaderCore
 
                 cancellationToken.ThrowIfCancellationRequested();
             }
+
+            _progress.ReportProgress(100);
         }
     }
 }

@@ -303,6 +303,8 @@ namespace TwitchDownloaderCore
             _progress.SetTemplateStatus("Downloading {0}%", 0);
             await Task.WhenAll(downloadTasks);
 
+            _progress.ReportProgress(100);
+
             var sortedComments = new List<Comment>(downloadTasks.Count);
             foreach (var commentTask in downloadTasks)
             {
