@@ -414,7 +414,7 @@ namespace TwitchDownloaderCore
             _progress.SetTemplateStatus("Downloading {0}%", 0);
 
             var videoStart = (int)Math.Floor(video.start);
-            var videoEnd = (int)Math.Ceiling(video.end);
+            var videoEnd = (int)Math.Ceiling(video.end) + 1; // Exclusive end
             var videoDuration = videoEnd - videoStart;
 
             var downloadTasks = new List<Task<List<Comment>>>(connectionCount);
