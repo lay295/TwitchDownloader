@@ -42,12 +42,12 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        private static async Task<List<Comment>> DownloadSection(double videoStart, double videoEnd, string videoId, IProgress<int> progress, ChatFormat format, CancellationToken cancellationToken)
+        private static async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, IProgress<int> progress, ChatFormat format, CancellationToken cancellationToken)
         {
             var comments = new List<Comment>();
-            //GQL only wants ints
-            videoStart = Math.Floor(videoStart);
-            double videoDuration = videoEnd - videoStart;
+            int videoStart = downloadRange.Start.Value;
+            int videoEnd = downloadRange.End.Value;
+            int videoDuration = videoEnd - videoStart;
             double latestMessage = videoStart - 1;
             bool isFirst = true;
             string cursor = "";
@@ -104,13 +104,17 @@ namespace TwitchDownloaderCore
                 }
 
                 var convertedComments = ConvertComments(commentResponse[0].data.video, format);
-                comments.EnsureCapacity(Math.Min(0, comments.Capacity + convertedComments.Count));
                 foreach (var comment in convertedComments)
                 {
-                    if (latestMessage < videoEnd && comment.content_offset_seconds > videoStart)
+                    if (comment.content_offset_seconds >= videoStart && comment.content_offset_seconds < videoEnd)
+                    {
                         comments.Add(comment);
+                    }
 
-                    latestMessage = comment.content_offset_seconds;
+                    if (comment.content_offset_seconds > latestMessage)
+                    {
+                        latestMessage = comment.content_offset_seconds;
+                    }
                 }
 
                 if (!commentResponse[0].data.video.comments.pageInfo.hasNextPage)
@@ -118,11 +122,8 @@ namespace TwitchDownloaderCore
 
                 cursor = commentResponse[0].data.video.comments.edges.Last().cursor;
 
-                if (progress != null)
-                {
-                    int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                    progress.Report(percent);
-                }
+                var percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
+                progress.Report(percent);
 
                 if (isFirst)
                 {
@@ -276,43 +277,8 @@ namespace TwitchDownloaderCore
             DownloadType downloadType = downloadOptions.Id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
 
             var (chatRoot, connectionCount) = await InitChatRoot(downloadType);
-            var videoStart = chatRoot.video.start;
-            var videoEnd = chatRoot.video.end;
-            var videoId = chatRoot.video.id;
-            var videoDuration = videoEnd - videoStart;
 
-            var downloadTasks = new List<Task<List<Comment>>>(connectionCount);
-            var percentages = new int[connectionCount];
-
-            double chunk = videoDuration / connectionCount;
-            for (int i = 0; i < connectionCount; i++)
-            {
-                int tc = i;
-
-                var taskProgress = new Progress<int>(percent =>
-                {
-                    percentages[tc] = Math.Clamp(percent, 0, 100);
-
-                    var reportPercent = percentages.Sum() / connectionCount;
-                    _progress.ReportProgress(reportPercent);
-                });
-
-                double start = videoStart + chunk * i;
-                downloadTasks.Add(DownloadSection(start, start + chunk, videoId, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
-            }
-
-            _progress.SetTemplateStatus("Downloading {0}%", 0);
-            await Task.WhenAll(downloadTasks);
-
-            var sortedComments = new List<Comment>(downloadTasks.Count);
-            foreach (var commentTask in downloadTasks)
-            {
-                sortedComments.AddRange(commentTask.Result);
-            }
-
-            sortedComments.Sort(new CommentOffsetComparer());
-
-            chatRoot.comments = sortedComments.DistinctBy(x => x._id).ToList();
+            chatRoot.comments = await DownloadComments(cancellationToken, chatRoot.video, connectionCount);
 
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
@@ -326,7 +292,7 @@ namespace TwitchDownloaderCore
                 await BackfillUserInfo(chatRoot);
             }
 
-            _progress.SetStatus("Writing output file");
+            _progress.SetStatus("Writing Output File");
             switch (downloadOptions.DownloadFormat)
             {
                 case ChatFormat.Json:
@@ -438,6 +404,49 @@ namespace TwitchDownloaderCore
             chatRoot.video.id = videoId;
 
             return (chatRoot, connectionCount);
+        }
+
+        private async Task<List<Comment>> DownloadComments(CancellationToken cancellationToken, Video video, int connectionCount)
+        {
+            _progress.SetTemplateStatus("Downloading {0}%", 0);
+
+            var videoStart = (int)Math.Floor(video.start);
+            var videoEnd = (int)Math.Ceiling(video.end) + 1; // Exclusive end
+            var videoDuration = videoEnd - videoStart;
+
+            var downloadTasks = new List<Task<List<Comment>>>(connectionCount);
+            var percentages = new int[connectionCount];
+
+            var chunkSize = (int)Math.Ceiling(videoDuration / (double)connectionCount);
+            for (var i = 0; i < connectionCount; i++)
+            {
+                var tc = i;
+
+                var taskProgress = new Progress<int>(percent =>
+                {
+                    percentages[tc] = Math.Clamp(percent, 0, 100);
+
+                    var reportPercent = percentages.Sum() / connectionCount;
+                    _progress.ReportProgress(reportPercent);
+                });
+
+                var start = videoStart + chunkSize * i;
+                var end = Math.Min(videoEnd, start + chunkSize);
+                var downloadRange = new Range(start, end);
+                downloadTasks.Add(DownloadSection(downloadRange, video.id, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
+            }
+
+            await Task.WhenAll(downloadTasks);
+
+            _progress.ReportProgress(100);
+
+            var commentList = downloadTasks
+                .SelectMany(task => task.Result)
+                .ToHashSet(new CommentIdEqualityComparer())
+                .ToList();
+
+            commentList.Sort(new CommentOffsetComparer());
+            return commentList;
         }
 
         private async Task EmbedImages(ChatRoot chatRoot, CancellationToken cancellationToken)
