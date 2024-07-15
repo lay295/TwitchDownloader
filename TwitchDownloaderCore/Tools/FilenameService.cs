@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore.Tools
             return Path.Combine(Path.Combine(additionalSubfolders), ReplaceInvalidFilenameChars(fileName));
         }
 
-        private static void ReplaceCustomWithFormattable(StringBuilder sb, Regex regex, IFormattable formattable, IFormatProvider formatProvider = null)
+        private static void ReplaceCustomWithFormattable<TFormattable>(StringBuilder sb, Regex regex, TFormattable formattable, IFormatProvider formatProvider = null) where TFormattable : IFormattable
         {
             do
             {
