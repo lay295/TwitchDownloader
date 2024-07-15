@@ -35,19 +35,19 @@ namespace TwitchDownloaderCore.Tools
             if (template.Contains("{trim_start_custom="))
             {
                 var trimStartRegex = new Regex("{trim_start_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, trimStartRegex, trimStart);
+                ReplaceCustomWithFormattable(stringBuilder, trimStartRegex, trimStart, TimeSpanHFormat.ReusableInstance);
             }
 
             if (template.Contains("{trim_end_custom="))
             {
                 var trimEndRegex = new Regex("{trim_end_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, trimEndRegex, trimEnd);
+                ReplaceCustomWithFormattable(stringBuilder, trimEndRegex, trimEnd, TimeSpanHFormat.ReusableInstance);
             }
 
             if (template.Contains("{length_custom="))
             {
                 var lengthRegex = new Regex("{length_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, lengthRegex, videoLength);
+                ReplaceCustomWithFormattable(stringBuilder, lengthRegex, videoLength, TimeSpanHFormat.ReusableInstance);
             }
 
             var fileName = stringBuilder.ToString();
@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore.Tools
             return Path.Combine(Path.Combine(additionalSubfolders), ReplaceInvalidFilenameChars(fileName));
         }
 
-        private static void ReplaceCustomWithFormattable<TFormattable>(StringBuilder sb, Regex regex, TFormattable formattable, IFormatProvider formatProvider = null) where TFormattable : IFormattable
+        private static void ReplaceCustomWithFormattable<TFormattable>(StringBuilder sb, Regex regex, TFormattable formattable, [AllowNull] IFormatProvider formatProvider = null) where TFormattable : IFormattable
         {
             do
             {
@@ -66,8 +66,12 @@ namespace TwitchDownloaderCore.Tools
                     break;
 
                 var formatString = match.Groups[1].Value;
+                var formattedString = formatProvider?.GetFormat(typeof(ICustomFormatter)) is ICustomFormatter customFormatter
+                    ? customFormatter.Format(formatString, formattable, formatProvider)
+                    : formattable.ToString(formatString, formatProvider);
+
                 sb.Remove(match.Groups[0].Index, match.Groups[0].Length);
-                sb.Insert(match.Groups[0].Index, ReplaceInvalidFilenameChars(formattable.ToString(formatString, formatProvider)));
+                sb.Insert(match.Groups[0].Index, ReplaceInvalidFilenameChars(formattedString));
             } while (true);
         }
 
