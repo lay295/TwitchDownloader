@@ -122,11 +122,8 @@ namespace TwitchDownloaderCore
 
                 cursor = commentResponse[0].data.video.comments.edges.Last().cursor;
 
-                if (progress != null)
-                {
-                    int percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                    progress.Report(percent);
-                }
+                var percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
+                progress.Report(percent);
 
                 if (isFirst)
                 {
