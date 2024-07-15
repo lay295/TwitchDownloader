@@ -441,10 +441,8 @@ namespace TwitchDownloaderCore
                     commentsSet.Add(comment);
                 }
 
-                var comments = commentsSet.ToList();
-                comments.Sort(new CommentOffsetComparer());
-
-                chatRoot.comments = comments;
+                chatRoot.comments = commentsSet.ToList();
+                chatRoot.comments.Sort(new CommentOffsetComparer());
             }
         }
 
