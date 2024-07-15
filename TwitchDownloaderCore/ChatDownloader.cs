@@ -420,7 +420,7 @@ namespace TwitchDownloaderCore
             var downloadTasks = new List<Task<List<Comment>>>(connectionCount);
             var percentages = new int[connectionCount];
 
-            var chunk = videoDuration / connectionCount;
+            var chunkSize = (int)Math.Ceiling(videoDuration / (double)connectionCount);
             for (var i = 0; i < connectionCount; i++)
             {
                 var tc = i;
@@ -433,8 +433,9 @@ namespace TwitchDownloaderCore
                     _progress.ReportProgress(reportPercent);
                 });
 
-                var start = videoStart + chunk * i;
-                var downloadRange = new Range(start, start + chunk);
+                var start = videoStart + chunkSize * i;
+                var end = Math.Min(videoEnd, start + chunkSize);
+                var downloadRange = new Range(start, end);
                 downloadTasks.Add(DownloadSection(downloadRange, video.id, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
             }
 
