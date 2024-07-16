@@ -957,5 +957,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ChatTextTimestampStyle"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PreferredQuality {
+            get {
+                return ((string)(this["PreferredQuality"]));
+            }
+            set {
+                this["PreferredQuality"] = value;
+            }
+        }
     }
 }

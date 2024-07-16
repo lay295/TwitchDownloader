@@ -98,6 +98,16 @@ namespace TwitchDownloaderWPF
             string queueFolder = Settings.Default.QueueFolder;
             if (Directory.Exists(queueFolder))
                 textFolder.Text = queueFolder;
+
+            var preferredQuality = Settings.Default.PreferredQuality;
+            for (var i = 0; i < ComboPreferredQuality.Items.Count; i++)
+            {
+                if (ComboPreferredQuality.Items[i] is ComboBoxItem { Content: string quality } && quality == preferredQuality)
+                {
+                    ComboPreferredQuality.SelectedIndex = i;
+                    break;
+                }
+            }
         }
 
         private FileInfo HandleFileCollisionCallback(FileInfo fileInfo)
@@ -719,6 +729,17 @@ namespace TwitchDownloaderWPF
                     TextPreferredQuality.Foreground = newBrush;
                 }
                 catch { /* Ignored */ }
+            }
+        }
+
+        private void ComboPreferredQuality_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            if (ComboPreferredQuality.SelectedItem is ComboBoxItem { Content: string preferredQuality })
+            {
+                Settings.Default.PreferredQuality = preferredQuality;
             }
         }
     }
