@@ -933,5 +933,29 @@ namespace TwitchDownloaderWPF.Properties {
                 this["VodTrimMode"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ChatJsonCompression {
+            get {
+                return ((int)(this["ChatJsonCompression"]));
+            }
+            set {
+                this["ChatJsonCompression"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ChatTextTimestampStyle {
+            get {
+                return ((int)(this["ChatTextTimestampStyle"]));
+            }
+            set {
+                this["ChatTextTimestampStyle"] = value;
+            }
+        }
     }
 }
