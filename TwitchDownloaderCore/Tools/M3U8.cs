@@ -54,18 +54,18 @@ namespace TwitchDownloaderCore.Tools
             private const string TWITCH_INFO_KEY = "#EXT-X-TWITCH-INFO:";
 
             // Generic M3U headers
-            public uint? Version { get; internal set; }
-            public uint? StreamTargetDuration { get; internal set; }
-            public PlaylistType Type { get; internal set; } = PlaylistType.Unknown;
-            public uint? MediaSequence { get; internal set; }
+            public uint? Version { get; init; }
+            public uint? StreamTargetDuration { get; init; }
+            public PlaylistType? Type { get; init; }
+            public uint? MediaSequence { get; init; }
 
             // Twitch specific
-            public uint? TwitchLiveSequence { get; internal set; }
-            public decimal? TwitchElapsedSeconds { get; internal set; }
-            public decimal? TwitchTotalSeconds { get; internal set; }
+            public uint? TwitchLiveSequence { get; init; }
+            public decimal? TwitchElapsedSeconds { get; init; }
+            public decimal? TwitchTotalSeconds { get; init; }
 
             // Other headers that we don't have dedicated properties for. Useful for debugging.
-            private readonly List<KeyValuePair<string, string>> _unparsedValues = new();
+            private List<KeyValuePair<string, string>> _unparsedValues = new();
             public IReadOnlyList<KeyValuePair<string, string>> UnparsedValues => _unparsedValues;
 
             public override string ToString()
@@ -79,8 +79,8 @@ namespace TwitchDownloaderCore.Tools
                 if (StreamTargetDuration.HasValue)
                     sb.AppendKeyValue(TARGET_DURATION_KEY, StreamTargetDuration.Value, itemSeparator);
 
-                if (Type != PlaylistType.Unknown)
-                    sb.AppendKeyValue(PLAYLIST_TYPE_KEY, Type.AsString(), itemSeparator);
+                if (Type.HasValue)
+                    sb.AppendKeyValue(PLAYLIST_TYPE_KEY, Type.Value.AsString(), itemSeparator);
 
                 if (MediaSequence.HasValue)
                     sb.AppendKeyValue(MEDIA_SEQUENCE_KEY, MediaSequence.Value, itemSeparator);

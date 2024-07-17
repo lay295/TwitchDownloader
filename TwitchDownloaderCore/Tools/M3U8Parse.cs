@@ -174,7 +174,19 @@ namespace TwitchDownloaderCore.Tools
         {
             public sealed class Builder
             {
-                private Metadata _metadata;
+                // Generic M3U headers
+                private uint? _version;
+                private uint? _streamTargetDuration;
+                private PlaylistType? _type;
+                private uint? _mediaSequence;
+
+                // Twitch specific
+                private uint? _twitchLiveSequence;
+                private decimal? _twitchElapsedSeconds;
+                private decimal? _twitchTotalSeconds;
+
+                // Other headers that we don't have dedicated properties for. Useful for debugging.
+                private readonly List<KeyValuePair<string, string>> _unparsedValues = new();
 
                 public Builder ParseAndAppend(ReadOnlySpan<char> text)
                 {
@@ -192,44 +204,37 @@ namespace TwitchDownloaderCore.Tools
                 {
                     if (text.StartsWith(TARGET_VERSION_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.Version = ParsingHelpers.ParseUIntValue(text, TARGET_VERSION_KEY);
+                        _version = ParsingHelpers.ParseUIntValue(text, TARGET_VERSION_KEY);
                     }
                     else if (text.StartsWith(TARGET_DURATION_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.StreamTargetDuration = ParsingHelpers.ParseUIntValue(text, TARGET_DURATION_KEY);
+                        _streamTargetDuration = ParsingHelpers.ParseUIntValue(text, TARGET_DURATION_KEY);
                     }
                     else if (text.StartsWith(PLAYLIST_TYPE_KEY))
                     {
-                        _metadata ??= new Metadata();
                         var temp = text[PLAYLIST_TYPE_KEY.Length..];
                         if (temp.StartsWith(PLAYLIST_TYPE_VOD))
-                            _metadata.Type = PlaylistType.Vod;
+                            _type = PlaylistType.Vod;
                         else if (temp.StartsWith(PLAYLIST_TYPE_EVENT))
-                            _metadata.Type = PlaylistType.Event;
+                            _type = PlaylistType.Event;
                         else
                             throw new FormatException($"Unable to parse PlaylistType from: {text}");
                     }
                     else if (text.StartsWith(MEDIA_SEQUENCE_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.MediaSequence = ParsingHelpers.ParseUIntValue(text, MEDIA_SEQUENCE_KEY);
+                        _mediaSequence = ParsingHelpers.ParseUIntValue(text, MEDIA_SEQUENCE_KEY);
                     }
                     else if (text.StartsWith(TWITCH_LIVE_SEQUENCE_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.TwitchLiveSequence = ParsingHelpers.ParseUIntValue(text, TWITCH_LIVE_SEQUENCE_KEY);
+                        _twitchLiveSequence = ParsingHelpers.ParseUIntValue(text, TWITCH_LIVE_SEQUENCE_KEY);
                     }
                     else if (text.StartsWith(TWITCH_ELAPSED_SECS_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.TwitchElapsedSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_ELAPSED_SECS_KEY);
+                        _twitchElapsedSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_ELAPSED_SECS_KEY);
                     }
                     else if (text.StartsWith(TWITCH_TOTAL_SECS_KEY))
                     {
-                        _metadata ??= new Metadata();
-                        _metadata.TwitchTotalSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_TOTAL_SECS_KEY);
+                        _twitchTotalSeconds = ParsingHelpers.ParseDecimalValue(text, TWITCH_TOTAL_SECS_KEY);
                     }
                     else if (text.StartsWith(TWITCH_INFO_KEY))
                     {
@@ -237,24 +242,33 @@ namespace TwitchDownloaderCore.Tools
                     }
                     else if (text[0] == '#')
                     {
-                        _metadata ??= new Metadata();
                         var colonIndex = text.IndexOf(':');
                         if (colonIndex != -1)
                         {
                             var kvp = new KeyValuePair<string, string>(text[..(colonIndex + 1)].ToString(), text[(colonIndex + 1)..].ToString());
-                            _metadata._unparsedValues.Add(kvp);
+                            _unparsedValues.Add(kvp);
                         }
                         else
                         {
                             var kvp = new KeyValuePair<string, string>("", text.ToString());
-                            _metadata._unparsedValues.Add(kvp);
+                            _unparsedValues.Add(kvp);
                         }
                     }
                 }
 
                 public Metadata ToMetadata()
                 {
-                    return _metadata;
+                    return new Metadata
+                    {
+                        Version = _version,
+                        StreamTargetDuration = _streamTargetDuration,
+                        Type = _type,
+                        MediaSequence = _mediaSequence,
+                        TwitchLiveSequence = _twitchLiveSequence,
+                        TwitchElapsedSeconds = _twitchElapsedSeconds,
+                        TwitchTotalSeconds = _twitchTotalSeconds,
+                        _unparsedValues = _unparsedValues
+                    };
                 }
             }
         }
