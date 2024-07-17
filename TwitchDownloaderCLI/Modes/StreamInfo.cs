@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
@@ -39,11 +40,11 @@ namespace TwitchDownloaderCLI.Modes
         private static void HandleVod(StreamInfoArgs inputOptions)
         {
             var videoId = int.Parse(inputOptions.Id);
-            var (videoInfo, playlistString) = GetPlaylistInfo(videoId, inputOptions.Oauth, inputOptions.Format != StreamInfoArgs.PrintFormat.Raw).GetAwaiter().GetResult();
+            var (videoInfo, playlistString) = GetPlaylistInfo(videoId, inputOptions.Oauth, inputOptions.Format != StreamInfoPrintFormat.Raw).GetAwaiter().GetResult();
 
             switch (inputOptions.Format)
             {
-                case StreamInfoArgs.PrintFormat.Raw:
+                case StreamInfoPrintFormat.Raw:
                 {
                     var stdOut = Console.OpenStandardOutput();
                     JsonSerializer.Serialize(stdOut, videoInfo);
@@ -51,7 +52,7 @@ namespace TwitchDownloaderCLI.Modes
                     Console.Write(playlistString);
                     break;
                 }
-                case StreamInfoArgs.PrintFormat.Table:
+                case StreamInfoPrintFormat.Table:
                 {
                     var m3u8 = M3U8.Parse(playlistString);
                     m3u8.SortStreamsByQuality();
@@ -86,14 +87,14 @@ namespace TwitchDownloaderCLI.Modes
 
                     break;
                 }
-                case StreamInfoArgs.PrintFormat.M3U8:
+                case StreamInfoPrintFormat.M3U8:
                 {
                     // Parse as m3u8 to verify that it is a valid playlist
                     var m3u8 = M3U8.Parse(playlistString);
                     Console.Write(m3u8.ToString());
                     break;
                 }
-                case StreamInfoArgs.PrintFormat.Json:
+                case StreamInfoPrintFormat.Json:
                 {
                     var m3u8 = M3U8.Parse(playlistString);
                     throw new NotImplementedException("JSON format is not yet supported");
@@ -132,11 +133,11 @@ namespace TwitchDownloaderCLI.Modes
 
         private static void HandleClip(StreamInfoArgs inputOptions)
         {
-            var (clipInfo, clipQualities) = GetClipInfo(inputOptions.Id, inputOptions.Format != StreamInfoArgs.PrintFormat.Raw).GetAwaiter().GetResult();
+            var (clipInfo, clipQualities) = GetClipInfo(inputOptions.Id, inputOptions.Format != StreamInfoPrintFormat.Raw).GetAwaiter().GetResult();
 
             switch (inputOptions.Format)
             {
-                case StreamInfoArgs.PrintFormat.Raw:
+                case StreamInfoPrintFormat.Raw:
                 {
                     var stdOut = Console.OpenStandardOutput();
                     JsonSerializer.Serialize(stdOut, clipInfo);
@@ -144,7 +145,7 @@ namespace TwitchDownloaderCLI.Modes
                     JsonSerializer.Serialize(stdOut, clipQualities);
                     break;
                 }
-                case StreamInfoArgs.PrintFormat.Table:
+                case StreamInfoPrintFormat.Table:
                 {
                     const string DEFAULT_STRING = "-";
                     var clip = clipQualities.data.clip;
@@ -190,7 +191,7 @@ namespace TwitchDownloaderCLI.Modes
 
                     break;
                 }
-                case StreamInfoArgs.PrintFormat.M3U8:
+                case StreamInfoPrintFormat.M3U8:
                 {
                     var clip = clipQualities.data.clip;
 
@@ -215,7 +216,7 @@ namespace TwitchDownloaderCLI.Modes
                     Console.Write(m3u8.ToString());
                     break;
                 }
-                case StreamInfoArgs.PrintFormat.Json:
+                case StreamInfoPrintFormat.Json:
                 {
                     throw new NotImplementedException("JSON format is not yet supported");
                     break;

@@ -21,4 +21,13 @@ namespace TwitchDownloaderCLI.Models
         Rename,
         Prompt,
     }
+
+    public enum StreamInfoPrintFormat
+    {
+        Raw,
+        Table,
+        M3U8,
+        M3U = M3U8,
+        Json
+    }
 }
