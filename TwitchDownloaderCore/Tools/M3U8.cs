@@ -17,7 +17,7 @@ namespace TwitchDownloaderCore.Tools
 
             sb.AppendLine("#EXTM3U");
 
-            if (FileMetadata?.ToString() is { Length: > 0} metadataString)
+            if (FileMetadata?.ToString() is { Length: > 0 } metadataString)
             {
                 sb.AppendLine(metadataString);
             }
@@ -54,15 +54,15 @@ namespace TwitchDownloaderCore.Tools
             private const string TWITCH_INFO_KEY = "#EXT-X-TWITCH-INFO:";
 
             // Generic M3U headers
-            public uint Version { get; internal set; }
-            public uint StreamTargetDuration { get; internal set; }
+            public uint? Version { get; internal set; }
+            public uint? StreamTargetDuration { get; internal set; }
             public PlaylistType Type { get; internal set; } = PlaylistType.Unknown;
-            public uint MediaSequence { get; internal set; }
+            public uint? MediaSequence { get; internal set; }
 
             // Twitch specific
-            public uint TwitchLiveSequence { get; internal set; }
-            public decimal TwitchElapsedSeconds { get; internal set; }
-            public decimal TwitchTotalSeconds { get; internal set; }
+            public uint? TwitchLiveSequence { get; internal set; }
+            public decimal? TwitchElapsedSeconds { get; internal set; }
+            public decimal? TwitchTotalSeconds { get; internal set; }
 
             // Other headers that we don't have dedicated properties for. Useful for debugging.
             private readonly List<KeyValuePair<string, string>> _unparsedValues = new();
@@ -73,25 +73,30 @@ namespace TwitchDownloaderCore.Tools
                 var sb = new StringBuilder();
                 var itemSeparator = Environment.NewLine;
 
-                StringBuilderHelpers.AppendIfNotDefault(sb, TARGET_VERSION_KEY, Version, itemSeparator);
-                StringBuilderHelpers.AppendIfNotDefault(sb, TARGET_DURATION_KEY, StreamTargetDuration, itemSeparator);
-                if (Type != PlaylistType.Unknown)
-                {
-                    sb.Append(PLAYLIST_TYPE_KEY);
-                    sb.Append(Type.AsString());
-                    sb.Append(itemSeparator);
-                }
+                if (Version.HasValue)
+                    sb.AppendKeyValue(TARGET_VERSION_KEY, Version.Value, itemSeparator);
 
-                StringBuilderHelpers.AppendIfNotDefault(sb, MEDIA_SEQUENCE_KEY, MediaSequence, itemSeparator);
-                StringBuilderHelpers.AppendIfNotDefault(sb, TWITCH_LIVE_SEQUENCE_KEY, TwitchLiveSequence, itemSeparator);
-                StringBuilderHelpers.AppendIfNotDefault(sb, TWITCH_ELAPSED_SECS_KEY, TwitchElapsedSeconds, itemSeparator);
-                StringBuilderHelpers.AppendIfNotDefault(sb, TWITCH_TOTAL_SECS_KEY, TwitchTotalSeconds, itemSeparator);
+                if (StreamTargetDuration.HasValue)
+                    sb.AppendKeyValue(TARGET_DURATION_KEY, StreamTargetDuration.Value, itemSeparator);
+
+                if (Type != PlaylistType.Unknown)
+                    sb.AppendKeyValue(PLAYLIST_TYPE_KEY, Type.AsString(), itemSeparator);
+
+                if (MediaSequence.HasValue)
+                    sb.AppendKeyValue(MEDIA_SEQUENCE_KEY, MediaSequence.Value, itemSeparator);
+
+                if (TwitchLiveSequence.HasValue)
+                    sb.AppendKeyValue(TWITCH_LIVE_SEQUENCE_KEY, TwitchLiveSequence.Value, itemSeparator);
+
+                if (TwitchElapsedSeconds.HasValue)
+                    sb.AppendKeyValue(TWITCH_ELAPSED_SECS_KEY, TwitchElapsedSeconds.Value, itemSeparator);
+
+                if (TwitchTotalSeconds.HasValue)
+                    sb.AppendKeyValue(TWITCH_TOTAL_SECS_KEY, TwitchTotalSeconds.Value, itemSeparator);
 
                 foreach (var (key, value) in _unparsedValues)
                 {
-                    sb.Append(key);
-                    sb.Append(value);
-                    sb.Append(itemSeparator);
+                    sb.AppendKeyValue(key, value, itemSeparator);
                 }
 
                 if (sb.Length == 0)
@@ -125,10 +130,7 @@ namespace TwitchDownloaderCore.Tools
                     sb.AppendLine(PartInfo.ToString());
 
                 if (ProgramDateTime != default)
-                {
-                    sb.Append("#EXT-X-PROGRAM-DATE-TIME:");
-                    sb.AppendLine(ProgramDateTime.ToString("O"));
-                }
+                    sb.AppendKeyValue("#EXT-X-PROGRAM-DATE-TIME:", ProgramDateTime.ToString("O"), default);
 
                 if (ByteRange != default)
                     sb.AppendLine(ByteRange.ToString());
@@ -188,21 +190,17 @@ namespace TwitchDownloaderCore.Tools
                     ReadOnlySpan<char> keyValueSeparator = stackalloc char[] { ',' };
 
                     if (Type != MediaType.Unknown)
-                    {
-                        sb.Append("TYPE=");
-                        sb.Append(Type.AsString());
-                        sb.Append(keyValueSeparator);
-                    }
+                        sb.AppendKeyValue("TYPE=", Type.AsString(), keyValueSeparator);
 
-                    StringBuilderHelpers.AppendStringIfNotNullOrEmpty(sb, "GROUP-ID=", GroupId, keyValueSeparator);
-                    StringBuilderHelpers.AppendStringIfNotNullOrEmpty(sb, "NAME=", Name, keyValueSeparator);
+                    if (!string.IsNullOrWhiteSpace(GroupId))
+                        sb.AppendKeyQuoteValue("GROUP-ID=", GroupId, keyValueSeparator);
 
-                    sb.Append("AUTOSELECT=");
-                    sb.Append(BooleanToWord(AutoSelect));
-                    sb.Append(keyValueSeparator);
+                    if (!string.IsNullOrWhiteSpace(Name))
+                        sb.AppendKeyQuoteValue("NAME=", Name, keyValueSeparator);
 
-                    sb.Append("DEFAULT=");
-                    sb.Append(BooleanToWord(Default));
+                    sb.AppendKeyValue("AUTOSELECT=", BooleanToWord(AutoSelect), keyValueSeparator);
+
+                    sb.AppendKeyValue("DEFAULT=", BooleanToWord(Default), default);
 
                     return sb.ToString();
 
@@ -248,12 +246,23 @@ namespace TwitchDownloaderCore.Tools
                     var sb = new StringBuilder(STREAM_INFO_KEY);
                     ReadOnlySpan<char> keyValueSeparator = stackalloc char[] { ',' };
 
-                    StringBuilderHelpers.AppendIfNotDefault(sb, "PROGRAM-ID=", ProgramId, keyValueSeparator);
-                    StringBuilderHelpers.AppendIfNotDefault(sb, "BANDWIDTH=", Bandwidth, keyValueSeparator);
-                    StringBuilderHelpers.AppendStringIfNotNullOrEmpty(sb, "CODECS=", Codecs, keyValueSeparator);
-                    StringBuilderHelpers.AppendIfNotDefault(sb, "RESOLUTION=", Resolution, keyValueSeparator);
-                    StringBuilderHelpers.AppendStringIfNotNullOrEmpty(sb, "VIDEO=", Video, keyValueSeparator);
-                    StringBuilderHelpers.AppendIfNotDefault(sb, "FRAME-RATE=", Framerate, default);
+                    if (ProgramId != default)
+                        sb.AppendKeyValue("PROGRAM-ID=", ProgramId, keyValueSeparator);
+
+                    if (Bandwidth != default)
+                        sb.AppendKeyValue("BANDWIDTH=", Bandwidth, keyValueSeparator);
+
+                    if (!string.IsNullOrWhiteSpace(Codecs))
+                        sb.AppendKeyQuoteValue("CODECS=", Codecs, keyValueSeparator);
+
+                    if (Resolution != default)
+                        sb.AppendKeyValue("RESOLUTION=", Resolution, keyValueSeparator);
+
+                    if (!string.IsNullOrWhiteSpace(Video))
+                        sb.AppendKeyQuoteValue("VIDEO=", Video, keyValueSeparator);
+
+                    if (Framerate != default)
+                        sb.AppendKeyValue("FRAME-RATE=", Framerate, default);
 
                     return sb.ToString();
                 }
@@ -284,76 +293,60 @@ namespace TwitchDownloaderCore.Tools
                     sb.Append(',');
 
                     if (Live)
-                    {
                         sb.Append("live");
-                    }
 
                     return sb.ToString();
                 }
             }
         }
+    }
 
-        private static class StringBuilderHelpers
+    internal static class StringBuilderExtensions
+    {
+        public static void AppendKeyValue(this StringBuilder sb, string keyName, int value, ReadOnlySpan<char> end)
         {
-            public static void AppendIfNotDefault(StringBuilder sb, string keyName, uint value, ReadOnlySpan<char> end)
+            sb.Append(keyName);
+            sb.Append(value);
+            sb.Append(end);
+        }
+
+        public static void AppendKeyValue(this StringBuilder sb, string keyName, decimal value, ReadOnlySpan<char> end)
+        {
+            sb.Append(keyName);
+            sb.Append(value.ToString(CultureInfo.InvariantCulture));
+            sb.Append(end);
+        }
+
+        public static void AppendKeyValue(this StringBuilder sb, string keyName, M3U8.Stream.ExtStreamInfo.StreamResolution value, ReadOnlySpan<char> end)
+        {
+            sb.Append(keyName);
+            sb.Append(value.ToString());
+            sb.Append(end);
+        }
+
+        public static void AppendKeyValue(this StringBuilder sb, string keyName, string value, ReadOnlySpan<char> end)
+        {
+            sb.Append(keyName);
+            sb.Append(value);
+            sb.Append(end);
+        }
+
+        public static void AppendKeyQuoteValue(this StringBuilder sb, string keyName, string value, ReadOnlySpan<char> end)
+        {
+            sb.Append(keyName);
+
+            if (!keyName.EndsWith('"'))
             {
-                if (value == default)
-                    return;
-
-                sb.Append(keyName);
-                sb.Append(value);
-                sb.Append(end);
-            }
-
-            public static void AppendIfNotDefault(StringBuilder sb, string keyName, int value, ReadOnlySpan<char> end)
-            {
-                if (value == default)
-                    return;
-
-                sb.Append(keyName);
-                sb.Append(value);
-                sb.Append(end);
-            }
-
-            public static void AppendIfNotDefault(StringBuilder sb, string keyName, decimal value, ReadOnlySpan<char> end)
-            {
-                if (value == default)
-                    return;
-
-                sb.Append(keyName);
-                sb.Append(value.ToString(CultureInfo.InvariantCulture));
-                sb.Append(end);
-            }
-
-            public static void AppendIfNotDefault(StringBuilder sb, string keyName, Stream.ExtStreamInfo.StreamResolution value, ReadOnlySpan<char> end)
-            {
-                if (value == default)
-                    return;
-
-                sb.Append(keyName);
-                sb.Append(value.ToString());
-                sb.Append(end);
-            }
-
-            public static void AppendStringIfNotNullOrEmpty(StringBuilder sb, string keyName, string value, ReadOnlySpan<char> end)
-            {
-                if (string.IsNullOrEmpty(value))
-                    return;
-
-                sb.Append(keyName);
-
-                if (!keyName.EndsWith('"'))
-                {
-                    sb.Append('"');
-                }
-                sb.Append(value);
                 sb.Append('"');
-                sb.Append(end);
             }
+
+            sb.Append(value);
+            sb.Append('"');
+            sb.Append(end);
         }
     }
 
-    public static class EnumExtensions
+    internal static class EnumExtensions
     {
         public static string AsString(this M3U8.Stream.ExtMediaInfo.MediaType mediaType)
         {
