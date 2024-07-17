@@ -215,7 +215,21 @@ namespace TwitchDownloaderWPF
             {
                 ChatFormat.Text => radioText.IsChecked = true,
                 ChatFormat.Html => radioHTML.IsChecked = true,
-                _ => radioJson.IsChecked = true
+                ChatFormat.Json => radioJson.IsChecked = true,
+                _ => null,
+            };
+            _ = (ChatCompression)Settings.Default.ChatJsonCompression switch
+            {
+                ChatCompression.None => radioCompressionNone.IsChecked = true,
+                ChatCompression.Gzip => radioCompressionGzip.IsChecked = true,
+                _ => null,
+            };
+            _ = (TimestampFormat)Settings.Default.ChatTextTimestampStyle switch
+            {
+                TimestampFormat.Utc => radioTimestampUTC.IsChecked = true,
+                TimestampFormat.Relative => radioTimestampRelative.IsChecked = true,
+                TimestampFormat.None => radioTimestampNone.IsChecked = true,
+                _ => null,
             };
         }
 
@@ -665,6 +679,51 @@ namespace TwitchDownloaderWPF
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             queueOptions.ShowDialog();
+        }
+
+        private void RadioCompressionNone_OnCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.ChatJsonCompression = (int)ChatCompression.None;
+            Settings.Default.Save();
+        }
+
+        private void RadioCompressionGzip_OnCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.ChatJsonCompression = (int)ChatCompression.Gzip;
+            Settings.Default.Save();
+        }
+
+        private void RadioTimestampUTC_OnCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.ChatTextTimestampStyle = (int)TimestampFormat.Utc;
+            Settings.Default.Save();
+        }
+
+        private void RadioTimestampRelative_OnCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.ChatTextTimestampStyle = (int)TimestampFormat.Relative;
+            Settings.Default.Save();
+        }
+
+        private void RadioTimestampNone_OnCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.ChatTextTimestampStyle = (int)TimestampFormat.None;
+            Settings.Default.Save();
         }
     }
 }
