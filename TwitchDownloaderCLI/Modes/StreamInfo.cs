@@ -10,6 +10,7 @@ using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
@@ -19,28 +20,30 @@ namespace TwitchDownloaderCLI.Modes
     {
         public static void PrintInfo(StreamInfoArgs inputOptions)
         {
+            var progress = new CliTaskProgress(inputOptions.LogLevel);
+
             var vodClipIdMatch = TwitchRegex.MatchVideoOrClipId(inputOptions.Id);
             if (vodClipIdMatch is not { Success: true })
             {
-                Console.WriteLine("[ERROR] - Unable to parse VOD/Clip ID/URL.");
+                progress.LogError("Unable to parse VOD/Clip ID/URL.");
                 Environment.Exit(1);
             }
 
             var videoId = vodClipIdMatch.Value;
             if (videoId.All(char.IsDigit))
             {
-                HandleVod(inputOptions);
+                HandleVod(inputOptions, progress);
             }
             else
             {
-                HandleClip(inputOptions);
+                HandleClip(inputOptions, progress);
             }
         }
 
-        private static void HandleVod(StreamInfoArgs inputOptions)
+        private static void HandleVod(StreamInfoArgs inputOptions, CliTaskProgress progress)
         {
             var videoId = int.Parse(inputOptions.Id);
-            var (videoInfo, playlistString) = GetPlaylistInfo(videoId, inputOptions.Oauth, inputOptions.Format != StreamInfoPrintFormat.Raw).GetAwaiter().GetResult();
+            var (videoInfo, playlistString) = GetPlaylistInfo(videoId, inputOptions.Oauth, inputOptions.Format != StreamInfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
 
             switch (inputOptions.Format)
             {
@@ -105,9 +108,9 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static async Task<(GqlVideoResponse videoInfo, string playlistString)> GetPlaylistInfo(int videoId, string oauth, bool canThrow)
+        private static async Task<(GqlVideoResponse videoInfo, string playlistString)> GetPlaylistInfo(int videoId, string oauth, bool canThrow, ITaskProgress progress)
         {
-            Console.WriteLine("[INFO] Fetching Video Info [1/1]");
+            progress.SetStatus("Fetching Video Info [1/1]");
 
             var videoInfo = await TwitchHelper.GetVideoInfo(videoId);
             var accessToken = await TwitchHelper.GetVideoToken(videoId, oauth);
@@ -131,9 +134,9 @@ namespace TwitchDownloaderCLI.Modes
             return (videoInfo, playlistString);
         }
 
-        private static void HandleClip(StreamInfoArgs inputOptions)
+        private static void HandleClip(StreamInfoArgs inputOptions, CliTaskProgress progress)
         {
-            var (clipInfo, clipQualities) = GetClipInfo(inputOptions.Id, inputOptions.Format != StreamInfoPrintFormat.Raw).GetAwaiter().GetResult();
+            var (clipInfo, clipQualities) = GetClipInfo(inputOptions.Id, inputOptions.Format != StreamInfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
 
             switch (inputOptions.Format)
             {
@@ -226,9 +229,9 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static async Task<(GqlClipResponse clipInfo, GqlClipTokenResponse listLinks)> GetClipInfo(string clipId, bool canThrow)
+        private static async Task<(GqlClipResponse clipInfo, GqlClipTokenResponse listLinks)> GetClipInfo(string clipId, bool canThrow, ITaskProgress progress)
         {
-            Console.WriteLine("[INFO] Fetching Clip Info [1/1]");
+            progress.SetStatus("Fetching Clip Info [1/1]");
 
             var clipInfo = await TwitchHelper.GetClipInfo(clipId);
             var listLinks = await TwitchHelper.GetClipLinks(clipId);
