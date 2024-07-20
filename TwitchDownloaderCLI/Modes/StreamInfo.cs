@@ -169,9 +169,7 @@ namespace TwitchDownloaderCLI.Modes
             var chapterTableTitle = new TableTitle("Video Chapters");
             var chapterTable = new Table()
                 .Title(chapterTableTitle)
-                // .AddColumn(new TableColumn("Thumbnail"))
                 .AddColumn(new TableColumn("Category"))
-                // .AddColumn(new TableColumn("Category Art"))
                 .AddColumn(new TableColumn("Type"))
                 .AddColumn(new TableColumn("Start"))
                 .AddColumn(new TableColumn("End"))
@@ -179,9 +177,7 @@ namespace TwitchDownloaderCLI.Modes
 
             foreach (var chapter in chapters.data.video.moments.edges)
             {
-                // var thumbnail = chapter.node.thumbnailURL;
                 var category = chapter.node.details.game?.displayName ?? DEFAULT_STRING;
-                // var categoryArt = chapter.node.details.game?.boxArtURL ?? DEFAULT_STRING;
                 var type = chapter.node._type;
                 var start = TimeSpan.FromMilliseconds(chapter.node.positionMilliseconds);
                 var length = TimeSpan.FromMilliseconds(chapter.node.durationMilliseconds);
@@ -193,8 +189,6 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             AnsiConsole.Write(chapterTable);
-
-            Console.ReadLine();
         }
 
         private static void HandleVodM3U8(string playlistString)
