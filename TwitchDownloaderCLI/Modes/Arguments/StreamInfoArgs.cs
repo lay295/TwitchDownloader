@@ -9,7 +9,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('u', "id", Required = true, HelpText = "The ID or URL of the VOD or clip to print the stream info about.")]
         public string Id { get; set; }
 
-        [Option("format", Default = StreamInfoPrintFormat.Table, HelpText = "The format in which the information should be printed. Valid values are: Raw, Table, M3U/M3U8, and JSON")]
+        [Option("format", Default = StreamInfoPrintFormat.Table, HelpText = "The format in which the information should be printed. Valid values are: Raw, Table, and M3U/M3U8")]
         public StreamInfoPrintFormat Format { get; set; }
 
         [Option("oauth", HelpText = "OAuth access token to access subscriber only VODs. DO NOT SHARE THIS WITH ANYONE.")]
