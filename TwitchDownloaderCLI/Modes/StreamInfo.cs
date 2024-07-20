@@ -155,7 +155,7 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("Value"))
                 .AddRow(new Markup("Streamer"), new Markup(infoVideo.owner.displayName, Style.Plain.Link($"https://twitch.tv/{infoVideo.owner.login}")))
                 .AddRow("Title", infoVideo.title)
-                .AddRow("Length", TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", TimeSpan.FromSeconds(infoVideo.lengthSeconds)))
+                .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoVideo.lengthSeconds)))
                 .AddRow("Category", infoVideo.game?.displayName ?? DEFAULT_STRING)
                 .AddRow("Views", infoVideo.viewCount.ToString("N0", CultureInfo.CurrentCulture))
                 .AddRow("Created at", $"{infoVideo.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC")
@@ -171,9 +171,9 @@ namespace TwitchDownloaderCLI.Modes
                 .Title(chapterTableTitle)
                 .AddColumn(new TableColumn("Category"))
                 .AddColumn(new TableColumn("Type"))
-                .AddColumn(new TableColumn("Start"))
-                .AddColumn(new TableColumn("End"))
-                .AddColumn(new TableColumn("Length"));
+                .AddColumn(new TableColumn("Start").RightAligned())
+                .AddColumn(new TableColumn("End").RightAligned())
+                .AddColumn(new TableColumn("Length").RightAligned());
 
             foreach (var chapter in chapters.data.video.moments.edges)
             {
@@ -182,9 +182,9 @@ namespace TwitchDownloaderCLI.Modes
                 var start = TimeSpan.FromMilliseconds(chapter.node.positionMilliseconds);
                 var length = TimeSpan.FromMilliseconds(chapter.node.durationMilliseconds);
                 var end = start + length;
-                var startString = TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", start);
-                var endString = TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", end);
-                var lengthString = TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", length);
+                var startString = StringifyTimestamp(start);
+                var endString = StringifyTimestamp(end);
+                var lengthString = StringifyTimestamp(length);
                 chapterTable.AddRow(category, type, startString, endString, lengthString);
             }
 
@@ -289,7 +289,7 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("Value"))
                 .AddRow(new Markup("Streamer"), new Markup(infoClip.broadcaster?.displayName ?? DEFAULT_STRING, Style.Plain.Link($"https://twitch.tv/{infoClip.broadcaster?.login}")))
                 .AddRow("Title", infoClip.title)
-                .AddRow("Length", TimeSpan.FromSeconds(infoClip.durationSeconds).ToString(@"mm\:ss"))
+                .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoClip.durationSeconds)))
                 .AddRow(new Markup("Clipped by"), new Markup(infoClip.curator?.displayName ?? DEFAULT_STRING, Style.Plain.Link($"https://twitch.tv/{infoClip.curator?.login}")))
                 .AddRow("Category", infoClip.game?.displayName ?? DEFAULT_STRING)
                 .AddRow("Views", infoClip.viewCount.ToString("N0", CultureInfo.CurrentCulture))
@@ -297,7 +297,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (infoClip.video != null)
             {
-                var videoOffset = infoClip.videoOffsetSeconds.StringifyOrDefault(x => TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", TimeSpan.FromSeconds(x)), DEFAULT_STRING);
+                var videoOffset = infoClip.videoOffsetSeconds.StringifyOrDefault(x => StringifyTimestamp(TimeSpan.FromSeconds(x)), DEFAULT_STRING);
                 infoTable
                     .AddRow("VOD ID", infoClip.video.id)
                     .AddRow("VOD offset", videoOffset);
@@ -354,6 +354,17 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             return defaultString;
+        }
+
+        private static string StringifyTimestamp(TimeSpan timeSpan)
+        {
+            return timeSpan.Ticks switch
+            {
+                < TimeSpan.TicksPerSecond => "0:00",
+                < TimeSpan.TicksPerMinute => timeSpan.ToString(@"s\s"),
+                < TimeSpan.TicksPerHour => timeSpan.ToString(@"m\:ss"),
+                _ => TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", timeSpan)
+            };
         }
     }
 }
