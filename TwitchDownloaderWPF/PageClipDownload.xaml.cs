@@ -113,7 +113,7 @@ namespace TwitchDownloaderWPF
 
         private static string ValidateUrl(string text)
         {
-            var clipIdMatch = TwitchRegex.MatchClipId(text);
+            var clipIdMatch = IdParse.MatchClipId(text);
             return clipIdMatch is { Success: true }
                 ? clipIdMatch.Value
                 : null;
