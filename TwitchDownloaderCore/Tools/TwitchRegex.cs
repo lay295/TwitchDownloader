@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -16,6 +17,7 @@ namespace TwitchDownloaderCore.Tools
             RegexOptions.Compiled);
 
         /// <returns>A <see cref="Match"/> of the video's id or <see langword="null"/>.</returns>
+        [return: MaybeNull]
         public static Match MatchVideoId(string text)
         {
             var videoIdMatch = VideoId.Match(text);
@@ -34,6 +36,7 @@ namespace TwitchDownloaderCore.Tools
         }
 
         /// <returns>A <see cref="Match"/> of the clip's id or <see langword="null"/>.</returns>
+        [return: MaybeNull]
         public static Match MatchClipId(string text)
         {
             var clipIdMatch = ClipId.Match(text);
@@ -46,6 +49,7 @@ namespace TwitchDownloaderCore.Tools
         }
 
         /// <returns>A <see cref="Match"/> of the video/clip's id or <see langword="null"/>.</returns>
+        [return: MaybeNull]
         public static Match MatchVideoOrClipId(string text)
         {
             var videoIdMatch = MatchVideoId(text);
