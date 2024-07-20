@@ -3,7 +3,7 @@ using TwitchDownloaderCore.Tools;
 namespace TwitchDownloaderCore.Tests.ToolTests
 {
     // ReSharper disable StringLiteralTypo
-    public class TwitchRegexTests
+    public class IdParseTests
     {
         [Theory]
         [InlineData("41546181")] // Oldest VODs - 8
@@ -12,7 +12,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("11987163407")] // Future VODs - 11
         public void CorrectlyParsesVodId(string id)
         {
-            var match = TwitchRegex.MatchVideoId(id);
+            var match = IdParse.MatchVideoId(id);
 
             Assert.NotNull(match);
             Assert.Equal(id, match.Value);
@@ -28,7 +28,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("https://www.twitch.tv/videos/4894164023/", "4894164023")]
         public void CorrectlyParsesVodLink(string link, string expectedId)
         {
-            var match = TwitchRegex.MatchVideoId(link);
+            var match = IdParse.MatchVideoId(link);
 
             Assert.NotNull(match);
             Assert.Equal(expectedId, match.Value);
@@ -39,7 +39,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf")]
         public void CorrectlyParsesClipId(string id)
         {
-            var match = TwitchRegex.MatchClipId(id);
+            var match = IdParse.MatchClipId(id);
 
             Assert.NotNull(match);
             Assert.Equal(id, match.Value);
@@ -56,7 +56,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("https://clips.twitch.tv/FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf/", "FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf")]
         public void CorrectlyParsesClipLink(string link, string expectedId)
         {
-            var match = TwitchRegex.MatchClipId(link);
+            var match = IdParse.MatchClipId(link);
 
             Assert.NotNull(match);
             Assert.Equal(expectedId, match.Value);
@@ -71,7 +71,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf")]
         public void CorrectlyParsesVodOrClipId(string id)
         {
-            var match = TwitchRegex.MatchVideoOrClipId(id);
+            var match = IdParse.MatchVideoOrClipId(id);
 
             Assert.NotNull(match);
             Assert.Equal(id, match.Value);
@@ -95,7 +95,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("https://clips.twitch.tv/FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf/", "FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf")]
         public void CorrectlyParsesVodOrClipLink(string link, string expectedId)
         {
-            var match = TwitchRegex.MatchVideoOrClipId(link);
+            var match = IdParse.MatchVideoOrClipId(link);
 
             Assert.NotNull(match);
             Assert.Equal(expectedId, match.Value);
@@ -106,7 +106,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             const string GARBAGE = "SORRY FOR THE TRAFFIC NaM";
 
-            var match = TwitchRegex.MatchVideoId(GARBAGE);
+            var match = IdParse.MatchVideoId(GARBAGE);
 
             Assert.Null(match);
         }
@@ -116,7 +116,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             const string GARBAGE = "SORRY FOR THE TRAFFIC NaM";
 
-            var match = TwitchRegex.MatchClipId(GARBAGE);
+            var match = IdParse.MatchClipId(GARBAGE);
 
             Assert.Null(match);
         }
@@ -126,7 +126,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             const string GARBAGE = "SORRY FOR THE TRAFFIC NaM";
 
-            var match = TwitchRegex.MatchVideoOrClipId(GARBAGE);
+            var match = IdParse.MatchVideoOrClipId(GARBAGE);
 
             Assert.Null(match);
         }

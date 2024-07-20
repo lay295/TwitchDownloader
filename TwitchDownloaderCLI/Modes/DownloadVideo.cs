@@ -34,7 +34,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var vodIdMatch = TwitchRegex.MatchVideoId(inputOptions.Id);
+            var vodIdMatch = IdParse.MatchVideoId(inputOptions.Id);
             if (vodIdMatch is not { Success: true })
             {
                 logger.LogError("Unable to parse Vod ID/URL.");
