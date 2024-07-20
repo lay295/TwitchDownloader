@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using Spectre.Console;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -29,8 +30,8 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var videoId = vodClipIdMatch.Value;
-            if (videoId.All(char.IsDigit))
+            inputOptions.Id = vodClipIdMatch.Value;
+            if (inputOptions.Id.All(char.IsDigit))
             {
                 HandleVod(inputOptions, progress);
             }
@@ -42,7 +43,7 @@ namespace TwitchDownloaderCLI.Modes
 
         private static void HandleVod(StreamInfoArgs inputOptions, CliTaskProgress progress)
         {
-            var videoId = int.Parse(inputOptions.Id);
+            var videoId = long.Parse(inputOptions.Id);
             var (videoInfo, playlistString) = GetPlaylistInfo(videoId, inputOptions.Oauth, inputOptions.Format != StreamInfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
 
             switch (inputOptions.Format)
@@ -61,33 +62,60 @@ namespace TwitchDownloaderCLI.Modes
                     m3u8.SortStreamsByQuality();
 
                     const string DEFAULT_STRING = "-";
-                    var videoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
+                    var infoVideo = videoInfo.data.video;
+                    var hasBitrate = m3u8.Streams.Any(x => x.StreamInfo.Bandwidth != default);
 
-                    var streams = m3u8.Streams;
-                    var table = new Table(streams.Length, DEFAULT_STRING)
-                        .AddColumn("Name", Table.TextAlign.Left, streams.Select(x => x.GetResolutionFramerateString()))
-                        .AddSeparator()
-                        .AddColumn("Resolution", Table.TextAlign.Left, streams.Select(x => StringifyOrDefault(x.StreamInfo.Resolution, r => r.ToString(), DEFAULT_STRING)))
-                        .AddColumn("FPS", Table.TextAlign.Right, streams.Select(x => StringifyOrDefault(x.StreamInfo.Framerate, f => f.ToString(CultureInfo.CurrentCulture), DEFAULT_STRING)))
-                        .AddColumn("Codecs", Table.TextAlign.Right, streams.Select(x => StringifyOrDefault(x.StreamInfo.Codecs, c => c, DEFAULT_STRING)));
+                    var streamTableTitle = new TableTitle($"{infoVideo.owner.displayName} - {infoVideo.title}", Style.Plain.Link($"https://twitch.tv/videos/{inputOptions.Id}"));
+                    var streamTable = new Table()
+                        .Title(streamTableTitle)
+                        .AddColumn(new TableColumn("Name"))
+                        .AddColumn(new TableColumn("Resolution"))
+                        .AddColumn(new TableColumn("FPS").RightAligned())
+                        .AddColumn(new TableColumn("Codecs").RightAligned());
 
-                    if (streams.Any(x => x.StreamInfo.Bandwidth != default))
+                    if (hasBitrate)
                     {
-                        table.AddSeparator()
-                            .AddColumn("File size", Table.TextAlign.Right, streams.Select(x => StringifyOrDefault(x.StreamInfo.Bandwidth,
-                                b => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(b, TimeSpan.Zero, videoLength))}", DEFAULT_STRING)))
-                            .AddColumn("Bitrate", Table.TextAlign.Right, streams.Select(x => StringifyOrDefault(x.StreamInfo.Bandwidth, b => $"{b / 1000}kbps", DEFAULT_STRING)));
+                        streamTable
+                            .AddColumn(new TableColumn("File size").RightAligned())
+                            .AddColumn(new TableColumn("Bitrate").RightAligned());
                     }
 
-                    var bestQuality = m3u8.BestQualityStream();
-                    table.AddSeparator()
-                        .AddColumn("Source", Table.TextAlign.Left, streams.Select(x => ReferenceEquals(x, bestQuality).ToString()));
-
-                    foreach (var row in table.GetRows())
+                    foreach (var stream in m3u8.Streams)
                     {
-                        Console.WriteLine(row);
+                        var name = stream.GetResolutionFramerateString();
+                        var resolution = stream.StreamInfo.Resolution.StringifyOrDefault(x => x.ToString(), DEFAULT_STRING);
+                        var fps = stream.StreamInfo.Framerate.StringifyOrDefault(x => x.ToString(CultureInfo.CurrentCulture), DEFAULT_STRING);
+                        var codecs = stream.StreamInfo.Codecs.StringifyOrDefault(x => x, DEFAULT_STRING);
+
+                        if (hasBitrate)
+                        {
+                            var videoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
+                            var fileSize = stream.StreamInfo.Bandwidth.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
+                            var bitrate = stream.StreamInfo.Bandwidth.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
+                            streamTable.AddRow(name, resolution, fps, codecs, fileSize, bitrate);
+                        }
+                        else
+                        {
+                            streamTable.AddRow(name, resolution, fps, codecs);
+                        }
                     }
 
+                    AnsiConsole.Write(streamTable);
+
+                    var infoTableTitle = new TableTitle("Video Info");
+                    var infoTable = new Table()
+                        .Title(infoTableTitle)
+                        .AddColumn(new TableColumn("Key"))
+                        .AddColumn(new TableColumn("Value"))
+                        .AddRow(new Markup("Streamer"), new Markup(infoVideo.owner.displayName, Style.Plain.Link($"https://twitch.tv/{infoVideo.owner.login}")))
+                        .AddRow("Title", infoVideo.title)
+                        .AddRow("Length", TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", TimeSpan.FromSeconds(infoVideo.lengthSeconds)))
+                        .AddRow("Category", infoVideo.game?.displayName ?? DEFAULT_STRING)
+                        .AddRow("Views", infoVideo.viewCount.ToString("N0", CultureInfo.CurrentCulture))
+                        .AddRow("Created at", $"{infoVideo.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC")
+                        .AddRow("Description", infoVideo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd() ?? DEFAULT_STRING);
+
+                    AnsiConsole.Write(infoTable);
                     break;
                 }
                 case StreamInfoPrintFormat.M3U8:
@@ -99,16 +127,14 @@ namespace TwitchDownloaderCLI.Modes
                 }
                 case StreamInfoPrintFormat.Json:
                 {
-                    var m3u8 = M3U8.Parse(playlistString);
                     throw new NotImplementedException("JSON format is not yet supported");
-                    break;
                 }
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private static async Task<(GqlVideoResponse videoInfo, string playlistString)> GetPlaylistInfo(int videoId, string oauth, bool canThrow, ITaskProgress progress)
+        private static async Task<(GqlVideoResponse videoInfo, string playlistString)> GetPlaylistInfo(long videoId, string oauth, bool canThrow, ITaskProgress progress)
         {
             progress.SetStatus("Fetching Video Info [1/1]");
 
@@ -151,47 +177,47 @@ namespace TwitchDownloaderCLI.Modes
                 case StreamInfoPrintFormat.Table:
                 {
                     const string DEFAULT_STRING = "-";
-                    var clip = clipQualities.data.clip;
-                    var qualities = clip.videoQualities;
+                    var infoClip = clipInfo.data.clip;
 
-                    var qualityTable = new Table(qualities.Length, DEFAULT_STRING)
-                        .AddColumn("Name", Table.TextAlign.Left, qualities.Select(x => $"{x.quality}p{(Math.Round(x.frameRate) == 30 ? "" : Math.Round(x.frameRate).ToString(CultureInfo.CurrentCulture))}"))
-                        .AddSeparator()
-                        .AddColumn("Height", Table.TextAlign.Left, qualities.Select(x => $"{x.quality}"))
-                        .AddColumn("FPS", Table.TextAlign.Right, qualities.Select(x => StringifyOrDefault(x.frameRate, f => Math.Round(f, 2).ToString(CultureInfo.CurrentCulture), DEFAULT_STRING)));
+                    var qualityTableTitle = new TableTitle($"{infoClip.broadcaster?.displayName} - {infoClip.title}", Style.Plain.Link($"https://clips.twitch.tv/{inputOptions.Id}"));
+                    var qualityTable = new Table()
+                        .Title(qualityTableTitle)
+                        .AddColumn(new TableColumn("Name"))
+                        .AddColumn(new TableColumn("Height"))
+                        .AddColumn(new TableColumn("Fps").RightAligned());
 
-                    var wroteFileSizeColumn = false;
-                    if (clip.videoQualities.FirstOrDefault(x => clip.playbackAccessToken.value.Contains(x.sourceURL)) is { } sourceQuality)
+                    foreach (var quality in clipQualities.data.clip.videoQualities)
                     {
-                        // Get the file size of the highest quality, since it is most likely to be downloaded.
-                        // Don't bother with the other qualities to avoid making too many requests.
-                        var sourceUrl = $"{sourceQuality.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}";
-                        using var httpClient = new HttpClient();
-                        using var request = new HttpRequestMessage(HttpMethod.Get, sourceUrl);
-                        using var response = httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult();
-                        if (response.IsSuccessStatusCode && response.Content.Headers.ContentLength.HasValue)
-                        {
-                            wroteFileSizeColumn = true;
-                            var sourceFileSize = VideoSizeEstimator.StringifyByteCount(response.Content.Headers.ContentLength.Value);
-                            qualityTable.AddSeparator()
-                                .AddColumn("File size", Table.TextAlign.Right,
-                                    qualities.Select(x => ReferenceEquals(sourceQuality, x) && !string.IsNullOrEmpty(sourceFileSize) ? sourceFileSize : DEFAULT_STRING));
-                        }
-
-                        qualityTable.AddSeparator()
-                            .AddColumn("Source", Table.TextAlign.Left, qualities.Select(x => ReferenceEquals(sourceQuality, x).ToString()));
+                        var name = string.Create(CultureInfo.CurrentCulture, $"{quality.quality}p{quality.frameRate:F0}");
+                        var height = quality.quality;
+                        var fps = quality.frameRate.StringifyOrDefault(x => string.Create(CultureInfo.CurrentCulture, $"{x:F2}"), DEFAULT_STRING);
+                        qualityTable.AddRow(name, height, fps);
                     }
 
-                    foreach (var row in qualityTable.GetRows())
+                    AnsiConsole.Write(qualityTable);
+
+                    var infoTableTitle = new TableTitle("Clip Info");
+                    var infoTable = new Table()
+                        .Title(infoTableTitle)
+                        .AddColumn(new TableColumn("Key"))
+                        .AddColumn(new TableColumn("Value"))
+                        .AddRow(new Markup("Streamer"), new Markup(infoClip.broadcaster?.displayName ?? DEFAULT_STRING, Style.Plain.Link($"https://twitch.tv/{infoClip.broadcaster?.login}")))
+                        .AddRow("Title", infoClip.title)
+                        .AddRow("Length", TimeSpan.FromSeconds(infoClip.durationSeconds).ToString(@"mm\:ss"))
+                        .AddRow(new Markup("Clipped by"), new Markup(infoClip.curator?.displayName ?? DEFAULT_STRING, Style.Plain.Link($"https://twitch.tv/{infoClip.curator?.login}")))
+                        .AddRow("Category", infoClip.game?.displayName ?? DEFAULT_STRING)
+                        .AddRow("Views", infoClip.viewCount.ToString("N0", CultureInfo.CurrentCulture))
+                        .AddRow("Created at", $"{infoClip.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC");
+
+                    if (infoClip.video != null)
                     {
-                        Console.WriteLine(row);
+                        var videoOffset = infoClip.videoOffsetSeconds.StringifyOrDefault(x => TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", TimeSpan.FromSeconds(x)), DEFAULT_STRING);
+                        infoTable
+                            .AddRow("VOD ID", infoClip.video.id)
+                            .AddRow("VOD offset", videoOffset);
                     }
 
-                    if (wroteFileSizeColumn)
-                    {
-                        Console.WriteLine("NOTE: Only the source quality file size was checked. This does not mean it is the only available quality.");
-                    }
-
+                    AnsiConsole.Write(infoTable);
                     break;
                 }
                 case StreamInfoPrintFormat.M3U8:
@@ -222,7 +248,6 @@ namespace TwitchDownloaderCLI.Modes
                 case StreamInfoPrintFormat.Json:
                 {
                     throw new NotImplementedException("JSON format is not yet supported");
-                    break;
                 }
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -255,11 +280,21 @@ namespace TwitchDownloaderCLI.Modes
             return (clipInfo, listLinks);
         }
 
-        private static string StringifyOrDefault<T>(T value, Func<T, string> stringify, string defaultString) where T : IEquatable<T>
+        private static string StringifyOrDefault<T>(this T value, Func<T, string> stringify, string defaultString) where T : IEquatable<T>
         {
             if (!value.Equals(default))
             {
                 return stringify(value);
+            }
+
+            return defaultString;
+        }
+
+        private static string StringifyOrDefault<T>(this T? value, Func<T, string> stringify, string defaultString) where T : struct, IEquatable<T>
+        {
+            if (value.HasValue)
+            {
+                return stringify(value.Value);
             }
 
             return defaultString;
