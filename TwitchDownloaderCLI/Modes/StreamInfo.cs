@@ -22,7 +22,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             var progress = new CliTaskProgress(inputOptions.LogLevel);
 
-            var vodClipIdMatch = TwitchRegex.MatchVideoOrClipId(inputOptions.Id);
+            var vodClipIdMatch = IdParse.MatchVideoOrClipId(inputOptions.Id);
             if (vodClipIdMatch is not { Success: true })
             {
                 progress.LogError("Unable to parse VOD/Clip ID/URL.");

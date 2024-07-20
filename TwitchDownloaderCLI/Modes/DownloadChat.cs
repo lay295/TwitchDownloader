@@ -31,7 +31,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var vodClipIdMatch = TwitchRegex.MatchVideoOrClipId(inputOptions.Id);
+            var vodClipIdMatch = IdParse.MatchVideoOrClipId(inputOptions.Id);
             if (vodClipIdMatch is not { Success: true })
             {
                 logger.LogError("Unable to parse Vod/Clip ID/URL.");
@@ -61,7 +61,6 @@ namespace TwitchDownloaderCLI.Modes
                 Compression = inputOptions.Compression,
                 TimeFormat = inputOptions.TimeFormat,
                 DownloadThreads = inputOptions.DownloadThreads,
-                Silent = inputOptions.Silent,
                 BttvEmotes = (bool)inputOptions.BttvEmotes!,
                 FfzEmotes = (bool)inputOptions.FfzEmotes!,
                 StvEmotes = (bool)inputOptions.StvEmotes!,

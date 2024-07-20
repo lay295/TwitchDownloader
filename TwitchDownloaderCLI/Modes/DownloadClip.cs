@@ -36,7 +36,7 @@ namespace TwitchDownloaderCLI.Modes
                 Environment.Exit(1);
             }
 
-            var clipIdMatch = TwitchRegex.MatchClipId(inputOptions.Id);
+            var clipIdMatch = IdParse.MatchClipId(inputOptions.Id);
             if (clipIdMatch is not { Success: true })
             {
                 logger.LogError("Unable to parse Clip ID/URL.");

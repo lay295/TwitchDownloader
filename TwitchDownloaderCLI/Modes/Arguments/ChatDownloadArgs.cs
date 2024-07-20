@@ -40,9 +40,6 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('t', "threads", Default = 4, HelpText = "Number of parallel download threads. Large values may result in IP rate limiting.")]
         public int DownloadThreads { get; set; }
 
-        [Option("silent", Default = false, HelpText = "Suppresses progress console output")]
-        public bool Silent { get; set; }
-
         [Option("temp-path", Default = "", HelpText = "Path to temporary folder to use for cache.")]
         public string TempFolder { get; set; }
 

@@ -225,7 +225,7 @@ namespace TwitchDownloaderWPF
 
         public static string ValidateUrl(string text)
         {
-            var vodClipIdMatch = TwitchRegex.MatchVideoOrClipId(text);
+            var vodClipIdMatch = IdParse.MatchVideoOrClipId(text);
             return vodClipIdMatch is { Success: true }
                 ? vodClipIdMatch.Value
                 : null;
