@@ -43,15 +43,15 @@ namespace TwitchDownloaderCLI.Modes
         private static void HandleVod(StreamInfoArgs inputOptions, CliTaskProgress progress)
         {
             var videoId = long.Parse(inputOptions.Id);
-            var (videoInfo, playlistString) = GetPlaylistInfo(videoId, inputOptions.Oauth, inputOptions.Format != StreamInfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
+            var (videoInfo, chapters, playlistString) = GetVideoInfo(videoId, inputOptions.Oauth, inputOptions.Format != StreamInfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
 
             switch (inputOptions.Format)
             {
                 case StreamInfoPrintFormat.Raw:
-                    HandleVodRaw(videoInfo, playlistString);
+                    HandleVodRaw(videoInfo, chapters, playlistString);
                     break;
                 case StreamInfoPrintFormat.Table:
-                    HandleVodTable(inputOptions, playlistString, videoInfo);
+                    HandleVodTable(videoInfo, chapters, playlistString);
                     break;
                 case StreamInfoPrintFormat.M3U8:
                     HandleVodM3U8(playlistString);
@@ -64,7 +64,7 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static async Task<(GqlVideoResponse videoInfo, string playlistString)> GetPlaylistInfo(long videoId, string oauth, bool canThrow, ITaskProgress progress)
+        private static async Task<(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)> GetVideoInfo(long videoId, string oauth, bool canThrow, ITaskProgress progress)
         {
             progress.SetStatus("Fetching Video Info [1/1]");
 
@@ -78,7 +78,7 @@ namespace TwitchDownloaderCLI.Modes
                     throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
                 }
 
-                return (videoInfo, null);
+                return (videoInfo, null, null);
             }
 
             var playlistString = await TwitchHelper.GetVideoPlaylist(videoId, accessToken.data.videoPlaybackAccessToken.value, accessToken.data.videoPlaybackAccessToken.signature);
@@ -87,18 +87,22 @@ namespace TwitchDownloaderCLI.Modes
                 throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
             }
 
-            return (videoInfo, playlistString);
+            var chapters = await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo.data.video);
+
+            return (videoInfo, chapters, playlistString);
         }
 
-        private static void HandleVodRaw(GqlVideoResponse videoInfo, string playlistString)
+        private static void HandleVodRaw(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)
         {
             var stdOut = Console.OpenStandardOutput();
             JsonSerializer.Serialize(stdOut, videoInfo);
             Console.WriteLine();
+            JsonSerializer.Serialize(stdOut, chapters);
+            Console.WriteLine();
             Console.Write(playlistString);
         }
 
-        private static void HandleVodTable(StreamInfoArgs inputOptions, string playlistString, GqlVideoResponse videoInfo)
+        private static void HandleVodTable(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)
         {
             var m3u8 = M3U8.Parse(playlistString);
             m3u8.SortStreamsByQuality();
@@ -107,7 +111,7 @@ namespace TwitchDownloaderCLI.Modes
             var infoVideo = videoInfo.data.video;
             var hasBitrate = m3u8.Streams.Any(x => x.StreamInfo.Bandwidth != default);
 
-            var streamTableTitle = new TableTitle($"{infoVideo.owner.displayName} - {infoVideo.title}", Style.Plain.Link($"https://twitch.tv/videos/{inputOptions.Id}"));
+            var streamTableTitle = new TableTitle("Video Streams");
             var streamTable = new Table()
                 .Title(streamTableTitle)
                 .AddColumn(new TableColumn("Name"))
@@ -158,6 +162,39 @@ namespace TwitchDownloaderCLI.Modes
                 .AddRow("Description", infoVideo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd() ?? DEFAULT_STRING);
 
             AnsiConsole.Write(infoTable);
+
+            if (chapters.data.video.moments.edges.Count == 0)
+                return;
+
+            var chapterTableTitle = new TableTitle("Video Chapters");
+            var chapterTable = new Table()
+                .Title(chapterTableTitle)
+                // .AddColumn(new TableColumn("Thumbnail"))
+                .AddColumn(new TableColumn("Category"))
+                // .AddColumn(new TableColumn("Category Art"))
+                .AddColumn(new TableColumn("Type"))
+                .AddColumn(new TableColumn("Start"))
+                .AddColumn(new TableColumn("End"))
+                .AddColumn(new TableColumn("Length"));
+
+            foreach (var chapter in chapters.data.video.moments.edges)
+            {
+                // var thumbnail = chapter.node.thumbnailURL;
+                var category = chapter.node.details.game?.displayName ?? DEFAULT_STRING;
+                // var categoryArt = chapter.node.details.game?.boxArtURL ?? DEFAULT_STRING;
+                var type = chapter.node._type;
+                var start = TimeSpan.FromMilliseconds(chapter.node.positionMilliseconds);
+                var length = TimeSpan.FromMilliseconds(chapter.node.durationMilliseconds);
+                var end = start + length;
+                var startString = TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", start);
+                var endString = TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", end);
+                var lengthString = TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", length);
+                chapterTable.AddRow(category, type, startString, endString, lengthString);
+            }
+
+            AnsiConsole.Write(chapterTable);
+
+            Console.ReadLine();
         }
 
         private static void HandleVodM3U8(string playlistString)
@@ -182,7 +219,7 @@ namespace TwitchDownloaderCLI.Modes
                     HandleClipRaw(clipInfo, clipQualities);
                     break;
                 case StreamInfoPrintFormat.Table:
-                    HandleClipTable(inputOptions, clipInfo, clipQualities);
+                    HandleClipTable(clipInfo, clipQualities);
                     break;
                 case StreamInfoPrintFormat.M3U8:
                     HandleClipM3U8(clipQualities, clipInfo);
@@ -229,12 +266,12 @@ namespace TwitchDownloaderCLI.Modes
             JsonSerializer.Serialize(stdOut, clipQualities);
         }
 
-        private static void HandleClipTable(StreamInfoArgs inputOptions, GqlClipResponse clipInfo, GqlClipTokenResponse clipQualities)
+        private static void HandleClipTable(GqlClipResponse clipInfo, GqlClipTokenResponse clipQualities)
         {
             const string DEFAULT_STRING = "-";
             var infoClip = clipInfo.data.clip;
 
-            var qualityTableTitle = new TableTitle($"{infoClip.broadcaster?.displayName} - {infoClip.title}", Style.Plain.Link($"https://clips.twitch.tv/{inputOptions.Id}"));
+            var qualityTableTitle = new TableTitle("Clip Qualities");
             var qualityTable = new Table()
                 .Title(qualityTableTitle)
                 .AddColumn(new TableColumn("Name"))
