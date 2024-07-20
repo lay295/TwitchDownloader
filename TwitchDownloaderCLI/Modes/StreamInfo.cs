@@ -235,7 +235,8 @@ namespace TwitchDownloaderCLI.Modes
             var infoClip = clipInfo.data.clip;
 
             var qualityTableTitle = new TableTitle($"{infoClip.broadcaster?.displayName} - {infoClip.title}", Style.Plain.Link($"https://clips.twitch.tv/{inputOptions.Id}"));
-            var qualityTable = new Table()                .Title(qualityTableTitle)
+            var qualityTable = new Table()
+                .Title(qualityTableTitle)
                 .AddColumn(new TableColumn("Name"))
                 .AddColumn(new TableColumn("Height"))
                 .AddColumn(new TableColumn("Fps").RightAligned());
