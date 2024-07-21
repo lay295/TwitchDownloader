@@ -12,6 +12,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("format", Default = StreamInfoPrintFormat.Table, HelpText = "The format in which the information should be printed. When using table format, use a terminal that supports ANSI escape sequences for best results. Valid values are: Raw, Table, and M3U/M3U8")]
         public StreamInfoPrintFormat Format { get; set; }
 
+        [Option("use-utf8", Default = true, HelpText = "Ensures UTF-8 encoding is used when writing results to standard output.")]
+        public bool? UseUtf8 { get; set; }
+
         [Option("oauth", HelpText = "OAuth access token to access subscriber only VODs. DO NOT SHARE THIS WITH ANYONE.")]
         public string Oauth { get; set; }
 

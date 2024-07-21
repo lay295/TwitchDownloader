@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
@@ -21,6 +22,7 @@ namespace TwitchDownloaderCLI.Modes
         public static void PrintInfo(StreamInfoArgs inputOptions)
         {
             var progress = new CliTaskProgress(inputOptions.LogLevel);
+            SetUtf8Encoding(inputOptions.UseUtf8.GetValueOrDefault(), progress);
 
             var vodClipIdMatch = IdParse.MatchVideoOrClipId(inputOptions.Id);
             if (vodClipIdMatch is not { Success: true })
@@ -381,6 +383,25 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             return $"{displayName} ({login})";
+        }
+
+        // cmd.exe only supports chars from codepage 437, so the default console encoding on Windows is codepage 437 instead of UTF-8
+        private static void SetUtf8Encoding(bool useUtf8, ITaskLogger logger)
+        {
+            if (!useUtf8 || Console.OutputEncoding.CodePage == Encoding.UTF8.CodePage)
+            {
+                return;
+            }
+
+            try
+            {
+                Console.OutputEncoding = Encoding.UTF8;
+                logger.LogVerbose("Output encoding has switched to UTF-8.");
+            }
+            catch
+            {
+                logger.LogWarning("Failed to set UTF-8 encoding. Non-ASCII characters may not render correctly.");
+            }
         }
     }
 }
