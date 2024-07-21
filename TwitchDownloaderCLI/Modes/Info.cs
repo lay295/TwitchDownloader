@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -119,7 +120,7 @@ namespace TwitchDownloaderCLI.Modes
                 .RoundedBorder()
                 .AddColumn(new TableColumn("Key"))
                 .AddColumn(new TableColumn("Value"))
-                .AddRow(new Markup("Streamer"), new Markup(infoVideo.owner.displayName, Style.Plain.Link($"https://twitch.tv/{infoVideo.owner.login}")))
+                .AddRow(new Markup("Streamer"), GetUserNameMarkup(infoVideo.owner.displayName, infoVideo.owner.login, DEFAULT_STRING))
                 .AddRow("Title", infoVideo.title)
                 .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoVideo.lengthSeconds)))
                 .AddRow("Category", infoVideo.game?.displayName ?? DEFAULT_STRING)
@@ -273,10 +274,10 @@ namespace TwitchDownloaderCLI.Modes
                 .Title(infoTableTitle)
                 .AddColumn(new TableColumn("Key"))
                 .AddColumn(new TableColumn("Value"))
-                .AddRow(new Markup("Streamer"), new Markup(GetUserName(infoClip.broadcaster?.displayName, infoClip.broadcaster?.login, DEFAULT_STRING), Style.Plain.Link($"https://twitch.tv/{infoClip.broadcaster?.login}")))
+                .AddRow(new Markup("Streamer"), GetUserNameMarkup(infoClip.broadcaster?.displayName, infoClip.broadcaster?.login, DEFAULT_STRING))
                 .AddRow("Title", infoClip.title)
                 .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoClip.durationSeconds)))
-                .AddRow(new Markup("Clipped by"), new Markup(GetUserName(infoClip.curator?.displayName, infoClip.curator?.login, DEFAULT_STRING), Style.Plain.Link($"https://twitch.tv/{infoClip.curator?.login}")))
+                .AddRow(new Markup("Clipped by"), GetUserNameMarkup(infoClip.curator?.displayName, infoClip.curator?.login, DEFAULT_STRING))
                 .AddRow("Category", infoClip.game?.displayName ?? DEFAULT_STRING)
                 .AddRow("Views", infoClip.viewCount.ToString("N0", CultureInfo.CurrentCulture))
                 .AddRow("Created at", $"{infoClip.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC");
@@ -370,19 +371,24 @@ namespace TwitchDownloaderCLI.Modes
             };
         }
 
-        private static string GetUserName(string displayName, string login, string @default)
+        private static Markup GetUserNameMarkup([AllowNull] string displayName, [AllowNull] string login, string @default)
         {
             if (string.IsNullOrWhiteSpace(displayName))
             {
-                return string.IsNullOrWhiteSpace(login) ? @default : login;
+                return string.IsNullOrWhiteSpace(login) ? new Markup(@default) : new Markup(login, Style.Plain.Link($"https://twitch.tv/{login}"));
             }
 
-            if (string.IsNullOrWhiteSpace(login) || displayName.All(char.IsAscii))
+            if (string.IsNullOrWhiteSpace(login))
             {
-                return displayName;
+                return new Markup(displayName);
             }
 
-            return $"{displayName} ({login})";
+            if (displayName.All(char.IsAscii))
+            {
+                return new Markup(displayName, Style.Plain.Link($"https://twitch.tv/{login}"));
+            }
+
+            return new Markup($"{displayName} ({login})", Style.Plain.Link($"https://twitch.tv/{login}"));
         }
 
         // cmd.exe only supports chars from codepage 437, so the default console encoding on Windows is codepage 437 instead of UTF-8
