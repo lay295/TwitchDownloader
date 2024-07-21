@@ -510,7 +510,7 @@ namespace TwitchDownloaderWPF
                         downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer,
                             downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
                             downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : TimeSpan.FromSeconds(taskData.Length),
-                            taskData.Views, taskData.Game) + (downloadOptions.Quality != null && downloadOptions.Quality.Contains("audio", StringComparison.OrdinalIgnoreCase) ? ".m4a" : ".mp4")); // This is awful
+                            taskData.Views, taskData.Game) + FilenameService.GuessVodFileExtension(downloadOptions.Quality));
 
                         VodDownloadTask downloadTask = new VodDownloadTask
                         {
