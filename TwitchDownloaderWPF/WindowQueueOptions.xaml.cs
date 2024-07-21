@@ -99,6 +99,11 @@ namespace TwitchDownloaderWPF
             if (Directory.Exists(queueFolder))
                 textFolder.Text = queueFolder;
 
+            if (_dataList.Any(x => x.Id.All(char.IsDigit)))
+            {
+                ComboPreferredQuality.Items.Add(new ComboBoxItem { Content = "Audio Only" });
+            }
+
             var preferredQuality = Settings.Default.PreferredQuality;
             for (var i = 0; i < ComboPreferredQuality.Items.Count; i++)
             {
