@@ -342,6 +342,11 @@ namespace TwitchDownloaderCLI.Modes
 
         private static string StringifyOrDefault<T>(this T value, Func<T, string> stringify, string defaultString) where T : IEquatable<T>
         {
+            if (!typeof(T).IsValueType && value is null)
+            {
+                return defaultString;
+            }
+
             if (!value.Equals(default))
             {
                 return stringify(value);
