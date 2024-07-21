@@ -40,7 +40,7 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static void HandleVod(StreamInfoArgs inputOptions, CliTaskProgress progress)
+        private static void HandleVod(StreamInfoArgs inputOptions, ITaskProgress progress)
         {
             var videoId = long.Parse(inputOptions.Id);
             var (videoInfo, chapters, playlistString) = GetVideoInfo(videoId, inputOptions.Oauth, inputOptions.Format != StreamInfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
@@ -111,6 +111,22 @@ namespace TwitchDownloaderCLI.Modes
             var infoVideo = videoInfo.data.video;
             var hasBitrate = m3u8.Streams.Any(x => x.StreamInfo.Bandwidth != default);
 
+            var infoTableTitle = new TableTitle("Video Info");
+            var infoTable = new Table()
+                .Title(infoTableTitle)
+                .RoundedBorder()
+                .AddColumn(new TableColumn("Key"))
+                .AddColumn(new TableColumn("Value"))
+                .AddRow(new Markup("Streamer"), new Markup(infoVideo.owner.displayName, Style.Plain.Link($"https://twitch.tv/{infoVideo.owner.login}")))
+                .AddRow("Title", infoVideo.title)
+                .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoVideo.lengthSeconds)))
+                .AddRow("Category", infoVideo.game?.displayName ?? DEFAULT_STRING)
+                .AddRow("Views", infoVideo.viewCount.ToString("N0", CultureInfo.CurrentCulture))
+                .AddRow("Created at", $"{infoVideo.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC")
+                .AddRow("Description", infoVideo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd() ?? DEFAULT_STRING);
+
+            AnsiConsole.Write(infoTable);
+
             var streamTableTitle = new TableTitle("Video Streams");
             var streamTable = new Table()
                 .Title(streamTableTitle)
@@ -147,21 +163,6 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             AnsiConsole.Write(streamTable);
-
-            var infoTableTitle = new TableTitle("Video Info");
-            var infoTable = new Table()
-                .Title(infoTableTitle)
-                .AddColumn(new TableColumn("Key"))
-                .AddColumn(new TableColumn("Value"))
-                .AddRow(new Markup("Streamer"), new Markup(infoVideo.owner.displayName, Style.Plain.Link($"https://twitch.tv/{infoVideo.owner.login}")))
-                .AddRow("Title", infoVideo.title)
-                .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoVideo.lengthSeconds)))
-                .AddRow("Category", infoVideo.game?.displayName ?? DEFAULT_STRING)
-                .AddRow("Views", infoVideo.viewCount.ToString("N0", CultureInfo.CurrentCulture))
-                .AddRow("Created at", $"{infoVideo.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC")
-                .AddRow("Description", infoVideo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd() ?? DEFAULT_STRING);
-
-            AnsiConsole.Write(infoTable);
 
             if (chapters.data.video.moments.edges.Count == 0)
                 return;
@@ -203,7 +204,7 @@ namespace TwitchDownloaderCLI.Modes
             throw new NotImplementedException("JSON format is not yet supported");
         }
 
-        private static void HandleClip(StreamInfoArgs inputOptions, CliTaskProgress progress)
+        private static void HandleClip(StreamInfoArgs inputOptions, ITaskProgress progress)
         {
             var (clipInfo, clipQualities) = GetClipInfo(inputOptions.Id, inputOptions.Format != StreamInfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
 
@@ -265,32 +266,15 @@ namespace TwitchDownloaderCLI.Modes
             const string DEFAULT_STRING = "-";
             var infoClip = clipInfo.data.clip;
 
-            var qualityTableTitle = new TableTitle("Clip Qualities");
-            var qualityTable = new Table()
-                .Title(qualityTableTitle)
-                .AddColumn(new TableColumn("Name"))
-                .AddColumn(new TableColumn("Height"))
-                .AddColumn(new TableColumn("Fps").RightAligned());
-
-            foreach (var quality in clipQualities.data.clip.videoQualities)
-            {
-                var name = string.Create(CultureInfo.CurrentCulture, $"{quality.quality}p{quality.frameRate:F0}");
-                var height = quality.quality;
-                var fps = quality.frameRate.StringifyOrDefault(x => string.Create(CultureInfo.CurrentCulture, $"{x:F2}"), DEFAULT_STRING);
-                qualityTable.AddRow(name, height, fps);
-            }
-
-            AnsiConsole.Write(qualityTable);
-
             var infoTableTitle = new TableTitle("Clip Info");
             var infoTable = new Table()
                 .Title(infoTableTitle)
                 .AddColumn(new TableColumn("Key"))
                 .AddColumn(new TableColumn("Value"))
-                .AddRow(new Markup("Streamer"), new Markup(infoClip.broadcaster?.displayName ?? DEFAULT_STRING, Style.Plain.Link($"https://twitch.tv/{infoClip.broadcaster?.login}")))
+                .AddRow(new Markup("Streamer"), new Markup(GetUserName(infoClip.broadcaster?.displayName, infoClip.broadcaster?.login, DEFAULT_STRING), Style.Plain.Link($"https://twitch.tv/{infoClip.broadcaster?.login}")))
                 .AddRow("Title", infoClip.title)
                 .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoClip.durationSeconds)))
-                .AddRow(new Markup("Clipped by"), new Markup(infoClip.curator?.displayName ?? DEFAULT_STRING, Style.Plain.Link($"https://twitch.tv/{infoClip.curator?.login}")))
+                .AddRow(new Markup("Clipped by"), new Markup(GetUserName(infoClip.curator?.displayName, infoClip.curator?.login, DEFAULT_STRING), Style.Plain.Link($"https://twitch.tv/{infoClip.curator?.login}")))
                 .AddRow("Category", infoClip.game?.displayName ?? DEFAULT_STRING)
                 .AddRow("Views", infoClip.viewCount.ToString("N0", CultureInfo.CurrentCulture))
                 .AddRow("Created at", $"{infoClip.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC");
@@ -304,6 +288,23 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             AnsiConsole.Write(infoTable);
+
+            var qualityTableTitle = new TableTitle("Clip Qualities");
+            var qualityTable = new Table()
+                .Title(qualityTableTitle)
+                .AddColumn(new TableColumn("Name"))
+                .AddColumn(new TableColumn("Height"))
+                .AddColumn(new TableColumn("FPS").RightAligned());
+
+            foreach (var quality in clipQualities.data.clip.videoQualities)
+            {
+                var name = string.Create(CultureInfo.CurrentCulture, $"{quality.quality}p{quality.frameRate:F0}");
+                var height = quality.quality;
+                var fps = quality.frameRate.StringifyOrDefault(x => string.Create(CultureInfo.CurrentCulture, $"{x:F2}"), DEFAULT_STRING);
+                qualityTable.AddRow(name, height, fps);
+            }
+
+            AnsiConsole.Write(qualityTable);
         }
 
         private static void HandleClipM3U8(GqlClipTokenResponse clipQualities, GqlClipResponse clipInfo)
@@ -365,6 +366,21 @@ namespace TwitchDownloaderCLI.Modes
                 < TimeSpan.TicksPerHour => timeSpan.ToString(@"m\:ss"),
                 _ => TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", timeSpan)
             };
+        }
+
+        private static string GetUserName(string displayName, string login, string @default)
+        {
+            if (string.IsNullOrWhiteSpace(displayName))
+            {
+                return string.IsNullOrWhiteSpace(login) ? @default : login;
+            }
+
+            if (string.IsNullOrWhiteSpace(login) || displayName.All(char.IsAscii))
+            {
+                return displayName;
+            }
+
+            return $"{displayName} ({login})";
         }
     }
 }
