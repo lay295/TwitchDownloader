@@ -22,7 +22,7 @@ namespace TwitchDownloaderCLI.Models
         Prompt,
     }
 
-    public enum StreamInfoPrintFormat
+    public enum InfoPrintFormat
     {
         Raw,
         Table,

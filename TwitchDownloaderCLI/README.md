@@ -9,7 +9,7 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
   - [Arguments for mode chatdownload](#arguments-for-mode-chatdownload)
   - [Arguments for mode chatupdate](#arguments-for-mode-chatupdate)
   - [Arguments for mode chatrender](#arguments-for-mode-chatrender)
-  - [Arguments for mode streaminfo](#arguments-for-mode-streaminfo)
+  - [Arguments for mode info](#arguments-for-mode-info)
   - [Arguments for mode ffmpeg](#arguments-for-mode-ffmpeg)
   - [Arguments for mode cache](#arguments-for-mode-cache)
   - [Arguments for mode tsmerge](#arguments-for-mode-tsmerge)
@@ -339,7 +339,7 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--collision**
 (Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
-## Arguments for mode streaminfo
+## Arguments for mode info
 #### Prints information about a VOD, highlight, or clip
 
 **-u / --id (REQUIRED)** The ID or URL of the VOD or clip to print the stream info about.
@@ -427,11 +427,11 @@ Render a chat with custom video settings and message outlines
 
 Display the info about a VOD in table format
 
-    ./TwitchDownloaderCLI streaminfo --id 612942303 --format table
+    ./TwitchDownloaderCLI info --id 612942303 --format table
 
 Display the info about a clip in raw format
 
-    ./TwitchDownloaderCLI streaminfo --id NurturingCalmHamburgerVoHiYo --format raw
+    ./TwitchDownloaderCLI info --id NurturingCalmHamburgerVoHiYo --format raw
 
 Render a chat with custom FFmpeg arguments
 

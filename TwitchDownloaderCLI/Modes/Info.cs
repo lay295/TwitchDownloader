@@ -17,9 +17,9 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal static class StreamInfo
+    internal static class Info
     {
-        public static void PrintInfo(StreamInfoArgs inputOptions)
+        public static void PrintInfo(InfoArgs inputOptions)
         {
             var progress = new CliTaskProgress(inputOptions.LogLevel);
             SetUtf8Encoding(inputOptions.UseUtf8.GetValueOrDefault(), progress);
@@ -42,23 +42,23 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static void HandleVod(StreamInfoArgs inputOptions, ITaskProgress progress)
+        private static void HandleVod(InfoArgs inputOptions, ITaskProgress progress)
         {
             var videoId = long.Parse(inputOptions.Id);
-            var (videoInfo, chapters, playlistString) = GetVideoInfo(videoId, inputOptions.Oauth, inputOptions.Format != StreamInfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
+            var (videoInfo, chapters, playlistString) = GetVideoInfo(videoId, inputOptions.Oauth, inputOptions.Format != InfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
 
             switch (inputOptions.Format)
             {
-                case StreamInfoPrintFormat.Raw:
+                case InfoPrintFormat.Raw:
                     HandleVodRaw(videoInfo, chapters, playlistString);
                     break;
-                case StreamInfoPrintFormat.Table:
+                case InfoPrintFormat.Table:
                     HandleVodTable(videoInfo, chapters, playlistString);
                     break;
-                case StreamInfoPrintFormat.M3U8:
+                case InfoPrintFormat.M3U8:
                     HandleVodM3U8(playlistString);
                     break;
-                case StreamInfoPrintFormat.Json:
+                case InfoPrintFormat.Json:
                     HandleVodJson();
                     break;
                 default:
@@ -206,22 +206,22 @@ namespace TwitchDownloaderCLI.Modes
             throw new NotImplementedException("JSON format is not yet supported");
         }
 
-        private static void HandleClip(StreamInfoArgs inputOptions, ITaskProgress progress)
+        private static void HandleClip(InfoArgs inputOptions, ITaskProgress progress)
         {
-            var (clipInfo, clipQualities) = GetClipInfo(inputOptions.Id, inputOptions.Format != StreamInfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
+            var (clipInfo, clipQualities) = GetClipInfo(inputOptions.Id, inputOptions.Format != InfoPrintFormat.Raw, progress).GetAwaiter().GetResult();
 
             switch (inputOptions.Format)
             {
-                case StreamInfoPrintFormat.Raw:
+                case InfoPrintFormat.Raw:
                     HandleClipRaw(clipInfo, clipQualities);
                     break;
-                case StreamInfoPrintFormat.Table:
+                case InfoPrintFormat.Table:
                     HandleClipTable(clipInfo, clipQualities);
                     break;
-                case StreamInfoPrintFormat.M3U8:
+                case InfoPrintFormat.M3U8:
                     HandleClipM3U8(clipQualities, clipInfo);
                     break;
-                case StreamInfoPrintFormat.Json:
+                case InfoPrintFormat.Json:
                     HandleClipJson();
                     break;
                 default:
