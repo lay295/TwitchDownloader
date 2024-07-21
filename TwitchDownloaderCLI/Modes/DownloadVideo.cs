@@ -43,12 +43,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (!Path.HasExtension(inputOptions.OutputFile) && inputOptions.Quality is { Length: > 0 })
             {
-                if (inputOptions.Quality.Contains("audio", StringComparison.OrdinalIgnoreCase))
-                    inputOptions.OutputFile += ".m4a";
-                else if (char.IsDigit(inputOptions.Quality[0])
-                         || inputOptions.Quality.Contains("source", StringComparison.OrdinalIgnoreCase)
-                         || inputOptions.Quality.Contains("chunked", StringComparison.OrdinalIgnoreCase))
-                    inputOptions.OutputFile += ".mp4";
+                inputOptions.OutputFile += FilenameService.GuessVodFileExtension(inputOptions.Quality);
             }
 
             VideoDownloadOptions downloadOptions = new()

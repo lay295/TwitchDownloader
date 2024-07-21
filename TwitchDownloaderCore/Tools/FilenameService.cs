@@ -124,6 +124,29 @@ namespace TwitchDownloaderCore.Tools
             return newName.ReplaceAny(FilenameInvalidChars, '_');
         }
 
+        [return: MaybeNull]
+        public static string GuessVodFileExtension([AllowNull] string qualityString)
+        {
+            if (string.IsNullOrWhiteSpace(qualityString))
+            {
+                return ".mp4";
+            }
+
+            if (qualityString.Contains("audio", StringComparison.OrdinalIgnoreCase))
+            {
+                return ".m4a";
+            }
+
+            if (char.IsDigit(qualityString[0])
+                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase)
+                || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
+            {
+                return ".mp4";
+            }
+
+            return null;
+        }
+
         public static FileInfo GetNonCollidingName(FileInfo fileInfo)
         {
             fileInfo.Refresh();
