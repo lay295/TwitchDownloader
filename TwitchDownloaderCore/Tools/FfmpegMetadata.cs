@@ -87,6 +87,7 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
+        // https://trac.ffmpeg.org/ticket/11096 The Ffmpeg documentation is outdated and =;# do not need to be escaped.
         private static string SanitizeKeyValue(string str)
         {
             if (string.IsNullOrWhiteSpace(str))
