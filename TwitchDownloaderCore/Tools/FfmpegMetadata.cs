@@ -87,6 +87,7 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
+        // https://trac.ffmpeg.org/ticket/11096 The Ffmpeg documentation is outdated and =;# do not need to be escaped.
         private static string SanitizeKeyValue(string str)
         {
             if (string.IsNullOrWhiteSpace(str))
@@ -94,16 +95,14 @@ namespace TwitchDownloaderCore.Tools
                 return str;
             }
 
-            if (str.AsSpan().IndexOfAny(@$"=;#\{LINE_FEED}") == -1)
+            if (str.AsSpan().IndexOfAny(@$"\'{LINE_FEED}") == -1)
             {
                 return str;
             }
 
             return new StringBuilder(str)
-                .Replace("=", @"\=")
-                .Replace(";", @"\;")
-                .Replace("#", @"\#")
                 .Replace(@"\", @"\\")
+                .Replace("'", @"\'")
                 .Replace(LINE_FEED, $@"\{LINE_FEED}")
                 .ToString();
         }
