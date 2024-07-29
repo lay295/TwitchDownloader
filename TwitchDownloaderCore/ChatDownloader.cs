@@ -370,16 +370,12 @@ namespace TwitchDownloaderCore
                 }
 
                 videoId = clipInfoResponse.data.clip.video.id;
-                downloadOptions.TrimBeginning = true;
-                downloadOptions.TrimBeginningTime = (int)clipInfoResponse.data.clip.videoOffsetSeconds;
-                downloadOptions.TrimEnding = true;
-                downloadOptions.TrimEndingTime = downloadOptions.TrimBeginningTime + clipInfoResponse.data.clip.durationSeconds;
                 chatRoot.streamer.name = clipInfoResponse.data.clip.broadcaster.displayName;
                 chatRoot.streamer.id = int.Parse(clipInfoResponse.data.clip.broadcaster.id);
                 chatRoot.video.title = clipInfoResponse.data.clip.title;
                 chatRoot.video.created_at = clipInfoResponse.data.clip.createdAt;
-                chatRoot.video.start = (int)clipInfoResponse.data.clip.videoOffsetSeconds;
-                chatRoot.video.end = (int)clipInfoResponse.data.clip.videoOffsetSeconds + clipInfoResponse.data.clip.durationSeconds;
+                chatRoot.video.start = (double)clipInfoResponse.data.clip.videoOffsetSeconds + (downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : 0);
+                chatRoot.video.end = (double)clipInfoResponse.data.clip.videoOffsetSeconds + (downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : clipInfoResponse.data.clip.durationSeconds);
                 chatRoot.video.length = clipInfoResponse.data.clip.durationSeconds;
                 chatRoot.video.viewCount = clipInfoResponse.data.clip.viewCount;
                 chatRoot.video.game = clipInfoResponse.data.clip.game?.displayName ?? "Unknown";
