@@ -43,7 +43,7 @@ namespace TwitchDownloaderWPF
 
         private void Page_Initialized(object sender, EventArgs e)
         {
-            SetEnabled(false, false);
+            SetEnabled(false);
             SetEnabledTrimStart(false);
             SetEnabledTrimEnd(false);
             checkEmbed.IsChecked = Settings.Default.ChatEmbedEmotes;
@@ -73,10 +73,10 @@ namespace TwitchDownloaderWPF
             };
         }
 
-        private void SetEnabled(bool isEnabled, bool isClip)
+        private void SetEnabled(bool isEnabled)
         {
-            CheckTrimStart.IsEnabled = isEnabled & !isClip;
-            CheckTrimEnd.IsEnabled = isEnabled & !isClip;
+            CheckTrimStart.IsEnabled = isEnabled;
+            CheckTrimEnd.IsEnabled = isEnabled;
             radioTimestampRelative.IsEnabled = isEnabled;
             radioTimestampUTC.IsEnabled = isEnabled;
             radioTimestampNone.IsEnabled = isEnabled;
@@ -147,6 +147,9 @@ namespace TwitchDownloaderWPF
                     streamerId = int.Parse(videoInfo.data.video.owner.id);
                     viewCount = videoInfo.data.video.viewCount;
                     game = videoInfo.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
+
+                    numStartHour.Maximum = (int)vodLength.TotalHours;
+                    numStartMinute.Maximum = 60;
                     var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
                     if (urlTimeCodeMatch.Success)
                     {
@@ -162,14 +165,14 @@ namespace TwitchDownloaderWPF
                         numStartMinute.Value = 0;
                         numStartSecond.Value = 0;
                     }
-                    numStartHour.Maximum = (int)vodLength.TotalHours;
 
-                    numEndHour.Value = (int)vodLength.TotalHours;
                     numEndHour.Maximum = (int)vodLength.TotalHours;
+                    numEndHour.Value = (int)vodLength.TotalHours;
+                    numEndMinute.Maximum = 60;
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
                     labelLength.Text = vodLength.ToString("c");
-                    SetEnabled(true, false);
+                    SetEnabled(true);
                 }
                 else if (downloadType == DownloadType.Clip)
                 {
@@ -184,17 +187,27 @@ namespace TwitchDownloaderWPF
                     }
                     imgThumbnail.Source = image;
 
-                    TimeSpan clipLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
+                    vodLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
                     textStreamer.Text = clipInfo.data.clip.broadcaster?.displayName ?? Translations.Strings.UnknownUser;
                     var clipCreatedAt = clipInfo.data.clip.createdAt;
                     textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                     currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                     textTitle.Text = clipInfo.data.clip.title;
                     streamerId = int.Parse(clipInfo.data.clip.broadcaster?.id ?? "-1");
-                    labelLength.Text = clipLength.ToString("c");
-                    SetEnabled(true, true);
-                    SetEnabledTrimStart(false);
-                    SetEnabledTrimEnd(false);
+                    labelLength.Text = vodLength.ToString("c");
+                    SetEnabled(true);
+
+                    numStartHour.Maximum = 0;
+                    numStartHour.Value = 0;
+                    numStartMinute.Maximum = vodLength.Minutes;
+                    numStartMinute.Value = 0;
+                    numStartSecond.Value = 0;
+
+                    numEndHour.Maximum = 0;
+                    numEndHour.Value = 0;
+                    numEndMinute.Maximum = vodLength.Minutes;
+                    numEndMinute.Value = vodLength.Minutes;
+                    numEndSecond.Value = vodLength.Seconds;
                 }
 
                 btnGetInfo.IsEnabled = true;
@@ -268,22 +281,18 @@ namespace TwitchDownloaderWPF
             else if (radioCompressionGzip.IsChecked == true)
                 options.Compression = ChatCompression.Gzip;
 
-            // TODO: Enable trimming clip chats
-            if (downloadType is DownloadType.Video)
+            if (CheckTrimStart.IsChecked == true)
             {
-                if (CheckTrimStart.IsChecked == true)
-                {
-                    options.TrimBeginning = true;
-                    TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                    options.TrimBeginningTime = (int)start.TotalSeconds;
-                }
+                options.TrimBeginning = true;
+                TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
+                options.TrimBeginningTime = (int)start.TotalSeconds;
+            }
 
-                if (CheckTrimEnd.IsChecked == true)
-                {
-                    options.TrimEnding = true;
-                    TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                    options.TrimEndingTime = (int)end.TotalSeconds;
-                }
+            if (CheckTrimEnd.IsChecked == true)
+            {
+                options.TrimEnding = true;
+                TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
+                options.TrimEndingTime = (int)end.TotalSeconds;
             }
 
             if (radioTimestampUTC.IsChecked == true)
@@ -532,7 +541,7 @@ namespace TwitchDownloaderWPF
                 var currentDownload = new ChatDownloader(downloadOptions, downloadProgress);
 
                 btnGetInfo.IsEnabled = false;
-                SetEnabled(false, false);
+                SetEnabled(false);
 
                 SetImage("Images/ppOverheat.gif", true);
                 statusMessage.Text = Translations.Strings.StatusDownloading;
