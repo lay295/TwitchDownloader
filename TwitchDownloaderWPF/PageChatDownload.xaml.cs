@@ -268,6 +268,32 @@ namespace TwitchDownloaderWPF
             else if (radioCompressionGzip.IsChecked == true)
                 options.Compression = ChatCompression.Gzip;
 
+            // TODO: Enable trimming clip chats
+            if (downloadType is DownloadType.Video)
+            {
+                if (CheckTrimStart.IsChecked == true)
+                {
+                    options.TrimBeginning = true;
+                    TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
+                    options.TrimBeginningTime = (int)start.TotalSeconds;
+                }
+
+                if (CheckTrimEnd.IsChecked == true)
+                {
+                    options.TrimEnding = true;
+                    TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
+                    options.TrimEndingTime = (int)end.TotalSeconds;
+                }
+            }
+
+            if (radioTimestampUTC.IsChecked == true)
+                options.TimeFormat = TimestampFormat.Utc;
+            else if (radioTimestampRelative.IsChecked == true)
+                options.TimeFormat = TimestampFormat.Relative;
+            else if (radioTimestampNone.IsChecked == true)
+                options.TimeFormat = TimestampFormat.None;
+
+            options.Id = downloadId;
             options.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
             options.BttvEmotes = checkBttvEmbed.IsChecked.GetValueOrDefault();
             options.FfzEmotes = checkFfzEmbed.IsChecked.GetValueOrDefault();
@@ -501,35 +527,6 @@ namespace TwitchDownloaderWPF
             try
             {
                 ChatDownloadOptions downloadOptions = GetOptions(saveFileDialog.FileName);
-                if (downloadType == DownloadType.Video)
-                {
-                    if (CheckTrimStart.IsChecked == true)
-                    {
-                        downloadOptions.TrimBeginning = true;
-                        TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                        downloadOptions.TrimBeginningTime = (int)start.TotalSeconds;
-                    }
-
-                    if (CheckTrimEnd.IsChecked == true)
-                    {
-                        downloadOptions.TrimEnding = true;
-                        TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                        downloadOptions.TrimEndingTime = (int)end.TotalSeconds;
-                    }
-
-                    downloadOptions.Id = downloadId;
-                }
-                else
-                {
-                    downloadOptions.Id = downloadId;
-                }
-
-                if (radioTimestampUTC.IsChecked == true)
-                    downloadOptions.TimeFormat = TimestampFormat.Utc;
-                else if (radioTimestampRelative.IsChecked == true)
-                    downloadOptions.TimeFormat = TimestampFormat.Relative;
-                else if (radioTimestampNone.IsChecked == true)
-                    downloadOptions.TimeFormat = TimestampFormat.None;
 
                 var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
                 var currentDownload = new ChatDownloader(downloadOptions, downloadProgress);

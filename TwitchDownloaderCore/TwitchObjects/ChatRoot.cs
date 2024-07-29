@@ -242,8 +242,6 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public string name { get; set; }
         public Dictionary<string, byte[]> versions { get; set; }
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Dictionary<string, string> urls { get; set; }
     }
 
     [DebuggerDisplay("{prefix}")]
