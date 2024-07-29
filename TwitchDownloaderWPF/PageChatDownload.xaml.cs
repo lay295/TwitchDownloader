@@ -268,18 +268,22 @@ namespace TwitchDownloaderWPF
             else if (radioCompressionGzip.IsChecked == true)
                 options.Compression = ChatCompression.Gzip;
 
-            if (CheckTrimStart.IsChecked == true)
+            // TODO: Enable trimming clip chats
+            if (downloadType is DownloadType.Video)
             {
-                options.TrimBeginning = true;
-                TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                options.TrimBeginningTime = (int)start.TotalSeconds;
-            }
+                if (CheckTrimStart.IsChecked == true)
+                {
+                    options.TrimBeginning = true;
+                    TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
+                    options.TrimBeginningTime = (int)start.TotalSeconds;
+                }
 
-            if (CheckTrimEnd.IsChecked == true)
-            {
-                options.TrimEnding = true;
-                TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
-                options.TrimEndingTime = (int)end.TotalSeconds;
+                if (CheckTrimEnd.IsChecked == true)
+                {
+                    options.TrimEnding = true;
+                    TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
+                    options.TrimEndingTime = (int)end.TotalSeconds;
+                }
             }
 
             if (radioTimestampUTC.IsChecked == true)
