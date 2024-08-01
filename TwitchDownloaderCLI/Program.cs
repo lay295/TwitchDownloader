@@ -37,7 +37,7 @@ namespace TwitchDownloaderCLI
                 .WithParsed<ChatDownloadArgs>(DownloadChat.Download)
                 .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
                 .WithParsed<ChatRenderArgs>(RenderChat.Render)
-                .WithParsed<InfoArgs>(Info.PrintInfo)
+                .WithParsed<InfoArgs>(InfoHandler.PrintInfo)
                 .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
                 .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
                 .WithParsed<TsMergeArgs>(MergeTs.Merge);

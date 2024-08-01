@@ -18,7 +18,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCLI.Modes
 {
-    internal static class Info
+    internal static class InfoHandler
     {
         public static void PrintInfo(InfoArgs inputOptions)
         {
