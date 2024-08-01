@@ -57,7 +57,7 @@ namespace TwitchDownloaderCore
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                GqlCommentResponse[] commentResponse;
+                GqlCommentResponse commentResponse;
                 try
                 {
                     var request = new HttpRequestMessage()
@@ -68,20 +68,20 @@ namespace TwitchDownloaderCore
                     if (isFirst)
                     {
                         request.Content = new StringContent(
-                            "[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"contentOffsetSeconds\":" + videoStart + "},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]",
+                            "{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"contentOffsetSeconds\":" + videoStart + "},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}",
                             Encoding.UTF8, "application/json");
                     }
                     else
                     {
                         request.Content = new StringContent(
-                            "[{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"cursor\":\"" + cursor + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}]",
+                            "{\"operationName\":\"VideoCommentsByOffsetOrCursor\",\"variables\":{\"videoID\":\"" + videoId + "\",\"cursor\":\"" + cursor + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a\"}}}",
                             Encoding.UTF8, "application/json");
                     }
 
                     using (var httpResponse = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
                     {
                         httpResponse.EnsureSuccessStatusCode();
-                        commentResponse = await httpResponse.Content.ReadFromJsonAsync<GqlCommentResponse[]>(options: null, cancellationToken);
+                        commentResponse = await httpResponse.Content.ReadFromJsonAsync<GqlCommentResponse>(options: null, cancellationToken);
                     }
 
                     errorCount = 0;
@@ -97,13 +97,13 @@ namespace TwitchDownloaderCore
                     continue;
                 }
 
-                if (commentResponse[0].data.video.comments?.edges is null)
+                if (commentResponse.data.video.comments?.edges is null)
                 {
                     // video.comments can be null for some dumb reason, skip
                     continue;
                 }
 
-                var convertedComments = ConvertComments(commentResponse[0].data.video, format);
+                var convertedComments = ConvertComments(commentResponse.data.video, format);
                 foreach (var comment in convertedComments)
                 {
                     if (comment.content_offset_seconds >= videoStart && comment.content_offset_seconds < videoEnd)
@@ -117,10 +117,10 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                if (!commentResponse[0].data.video.comments.pageInfo.hasNextPage)
+                if (!commentResponse.data.video.comments.pageInfo.hasNextPage)
                     break;
 
-                cursor = commentResponse[0].data.video.comments.edges.Last().cursor;
+                cursor = commentResponse.data.video.comments.edges.Last().cursor;
 
                 var percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
                 progress.Report(percent);
