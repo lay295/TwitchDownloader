@@ -13,9 +13,16 @@ namespace TwitchDownloaderCore.Tools
             return sizeInBytes switch
             {
                 < 1 => "",
+
                 < ONE_KIBIBYTE => $"{sizeInBytes}B",
+
+                < 100 * ONE_KIBIBYTE => $"{(float)sizeInBytes / ONE_KIBIBYTE:F2}KiB",
                 < ONE_MEBIBYTE => $"{(float)sizeInBytes / ONE_KIBIBYTE:F1}KiB",
+
+                < 100 * ONE_MEBIBYTE => $"{(float)sizeInBytes / ONE_MEBIBYTE:F2}MiB",
                 < ONE_GIBIBYTE => $"{(float)sizeInBytes / ONE_MEBIBYTE:F1}MiB",
+
+                < 100 * ONE_GIBIBYTE => $"{(float)sizeInBytes / ONE_GIBIBYTE:F2}GiB",
                 _ => $"{(float)sizeInBytes / ONE_GIBIBYTE:F1}GiB",
             };
         }

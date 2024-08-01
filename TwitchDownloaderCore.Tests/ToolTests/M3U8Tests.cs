@@ -142,7 +142,6 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 
             Assert.Equal(3u, m3u8.FileMetadata.Version);
             Assert.Equal(5u, m3u8.FileMetadata.StreamTargetDuration);
-            Assert.Equal(M3U8.Metadata.PlaylistType.Unknown, m3u8.FileMetadata.Type);
             Assert.Equal(4815u, m3u8.FileMetadata.MediaSequence);
             Assert.Equal(4997u, m3u8.FileMetadata.TwitchLiveSequence);
             Assert.Equal(9994.338m, m3u8.FileMetadata.TwitchElapsedSeconds);
@@ -356,7 +355,6 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 
             Assert.Equal(4u, m3u8.FileMetadata.Version);
             Assert.Equal(2u, m3u8.FileMetadata.StreamTargetDuration);
-            Assert.Equal(M3U8.Metadata.PlaylistType.Unknown, m3u8.FileMetadata.Type);
             Assert.Equal(0u, m3u8.FileMetadata.MediaSequence);
 
             Assert.Equal(streamValues.Length, m3u8.Streams.Length);

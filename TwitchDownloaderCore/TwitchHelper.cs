@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{video(id:\\\"" + videoId + "\\\"){title,thumbnailURLs(height:180,width:320),createdAt,lengthSeconds,owner{id,displayName},viewCount,game{id,displayName,boxArtURL},description}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{video(id:\\\"" + videoId + "\\\"){title,thumbnailURLs(height:180,width:320),createdAt,lengthSeconds,owner{id,displayName,login},viewCount,game{id,displayName,boxArtURL},description}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -124,7 +124,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{clip(slug:\\\"" + clipId + "\\\"){title,thumbnailURL,createdAt,durationSeconds,broadcaster{id,displayName},videoOffsetSeconds,video{id},viewCount,game{id,displayName,boxArtURL}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{clip(slug:\\\"" + clipId + "\\\"){title,thumbnailURL,createdAt,curator{id,displayName,login},durationSeconds,broadcaster{id,displayName,login},videoOffsetSeconds,video{id},viewCount,game{id,displayName,boxArtURL}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);

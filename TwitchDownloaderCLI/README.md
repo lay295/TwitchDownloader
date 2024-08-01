@@ -9,6 +9,7 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
   - [Arguments for mode chatdownload](#arguments-for-mode-chatdownload)
   - [Arguments for mode chatupdate](#arguments-for-mode-chatupdate)
   - [Arguments for mode chatrender](#arguments-for-mode-chatrender)
+  - [Arguments for mode info](#arguments-for-mode-info)
   - [Arguments for mode ffmpeg](#arguments-for-mode-ffmpeg)
   - [Arguments for mode cache](#arguments-for-mode-cache)
   - [Arguments for mode tsmerge](#arguments-for-mode-tsmerge)
@@ -338,6 +339,22 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--collision**
 (Default: `Prompt`) Sets the handling of output file name collisions. Valid values are: `Overwrite`, `Exit`, `Rename`, `Prompt`.
 
+## Arguments for mode info
+#### Prints information about a VOD, highlight, or clip
+
+**-u / --id (REQUIRED)** The ID or URL of the VOD or clip to print the stream info about.
+
+**-f / --format**
+(Default: `Table`) The format in which the information should be printed. Valid values are: `Raw`, `Table`, and `M3U` / `M3U8`.
+
+When using table format, use a terminal that supports ANSI escape sequences for best results.
+
+**--use-utf8**
+(Default: `true`) Ensures UTF-8 encoding is used when writing results to standard output.
+
+**--oauth**
+OAuth access token to access subscriber only VODs. <ins>**DO NOT SHARE YOUR OAUTH TOKEN WITH ANYONE.**</ins>
+
 ## Arguments for mode ffmpeg
 #### Manage standalone FFmpeg
 
@@ -407,6 +424,14 @@ Render a chat with defaults
 Render a chat with custom video settings and message outlines
 
     ./TwitchDownloaderCLI chatrender -i chat.json -h 1440 -w 720 --framerate 60 --outline -o chat.mp4
+
+Display the info about a VOD in table format
+
+    ./TwitchDownloaderCLI info --id 612942303 --format table
+
+Display the info about a clip in raw format
+
+    ./TwitchDownloaderCLI info --id NurturingCalmHamburgerVoHiYo --format raw
 
 Render a chat with custom FFmpeg arguments
 

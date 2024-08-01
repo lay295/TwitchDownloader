@@ -6,6 +6,14 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
     {
         public string id { get; set; }
         public string displayName { get; set; }
+        public string login { get; set; }
+    }
+
+    public class ClipCurator
+    {
+        public string id { get; set; }
+        public string displayName { get; set; }
+        public string login { get; set; }
     }
 
     public class ClipVideo
@@ -18,6 +26,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string title { get; set; }
         public string thumbnailURL { get; set; }
         public DateTime createdAt { get; set; }
+        public ClipCurator curator { get; set; }
         public int durationSeconds { get; set; }
         public ClipBroadcaster broadcaster { get; set; }
         public int? videoOffsetSeconds { get; set; }
