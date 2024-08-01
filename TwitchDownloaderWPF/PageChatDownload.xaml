@@ -137,7 +137,7 @@
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
-            <TextBlock Text="{lex:Loc Logheader}" Foreground="{DynamicResource AppText}" />
+            <TextBlock Text="{lex:Loc LogHeader}" Foreground="{DynamicResource AppText}" />
             <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
