@@ -680,13 +680,11 @@ namespace TwitchDownloaderCore
                 return returnCache;
 
             var emojiFolder = Path.Combine(cacheFolder, "emojis", emojiVendor.EmojiFolder());
-            var emojiExtensions = new Regex(@"\.(?:png|PNG)$", RegexOptions.RightToLeft); // Extensions are case sensitive on Linux and Mac
-
             if (!Directory.Exists(emojiFolder))
                 CreateDirectory(emojiFolder);
 
-            var emojiFiles = Directory.GetFiles(emojiFolder)
-                .Where(i => emojiExtensions.IsMatch(i)).ToArray();
+            var enumerationOptions = new EnumerationOptions { MatchType = MatchType.Simple, MatchCasing = MatchCasing.CaseInsensitive };
+            var emojiFiles = Directory.GetFiles(emojiFolder, "*.png", enumerationOptions);
 
             if (emojiFiles.Length < emojiVendor.EmojiCount())
             {
@@ -719,8 +717,7 @@ namespace TwitchDownloaderCore
                         }
                     }
 
-                    emojiFiles = Directory.GetFiles(emojiFolder)
-                        .Where(i => emojiExtensions.IsMatch(i)).ToArray();
+                    emojiFiles = Directory.GetFiles(emojiFolder, "*.png", enumerationOptions);
                 }
                 finally
                 {
