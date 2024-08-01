@@ -321,7 +321,7 @@ namespace TwitchDownloaderCLI.Modes
                 StreamTargetDuration = (uint)clipInfo.data.clip.durationSeconds,
                 TwitchElapsedSeconds = 0,
                 TwitchLiveSequence = default,
-                TwitchTotalSeconds = (uint)clipInfo.data.clip.durationSeconds,
+                TwitchTotalSeconds = clipInfo.data.clip.durationSeconds,
                 Type = M3U8.Metadata.PlaylistType.Event,
             };
 
