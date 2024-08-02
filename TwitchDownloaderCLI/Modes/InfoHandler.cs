@@ -141,8 +141,8 @@ namespace TwitchDownloaderCLI.Modes
             if (hasBitrate)
             {
                 streamTable
-                    .AddColumn(new TableColumn("File size").RightAligned())
-                    .AddColumn(new TableColumn("Bitrate").RightAligned());
+                    .AddColumn(new TableColumn("Bitrate").RightAligned())
+                    .AddColumn(new TableColumn("File size").RightAligned());
             }
 
             foreach (var stream in m3u8.Streams)
@@ -155,9 +155,9 @@ namespace TwitchDownloaderCLI.Modes
                 if (hasBitrate)
                 {
                     var videoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
-                    var fileSize = stream.StreamInfo.Bandwidth.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
                     var bitrate = stream.StreamInfo.Bandwidth.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
-                    streamTable.AddRow(name, resolution, fps, codecs, fileSize, bitrate);
+                    var fileSize = stream.StreamInfo.Bandwidth.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
+                    streamTable.AddRow(name, resolution, fps, codecs, bitrate, fileSize);
                 }
                 else
                 {
