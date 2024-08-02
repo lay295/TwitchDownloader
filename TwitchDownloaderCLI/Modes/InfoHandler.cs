@@ -149,7 +149,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 var name = stream.GetResolutionFramerateString();
                 var resolution = stream.StreamInfo.Resolution.StringifyOrDefault(x => x.ToString(), DEFAULT_STRING);
-                var fps = stream.StreamInfo.Framerate.StringifyOrDefault(x => x.ToString(CultureInfo.CurrentCulture), DEFAULT_STRING);
+                var fps = stream.StreamInfo.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
                 var codecs = stream.StreamInfo.Codecs.StringifyOrDefault(x => x, DEFAULT_STRING);
 
                 if (hasBitrate)
@@ -303,7 +303,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 var name = string.Create(CultureInfo.CurrentCulture, $"{quality.quality}p{quality.frameRate:F0}");
                 var height = quality.quality;
-                var fps = quality.frameRate.StringifyOrDefault(x => string.Create(CultureInfo.CurrentCulture, $"{x:F2}"), DEFAULT_STRING);
+                var fps = quality.frameRate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
                 qualityTable.AddRow(name, height, fps);
             }
 
