@@ -17,8 +17,8 @@ namespace TwitchDownloaderWPF
     public partial class PageQueue : Page
     {
         public static readonly object taskLock = new object();
-        public static ObservableCollection<ITwitchTask> taskList { get; set; } = new ObservableCollection<ITwitchTask>();
-        BackgroundWorker taskManager = new BackgroundWorker();
+        public static ObservableCollection<ITwitchTask> taskList { get; } = new ObservableCollection<ITwitchTask>();
+        private static readonly BackgroundWorker taskManager = new BackgroundWorker();
 
         public PageQueue()
         {
@@ -34,7 +34,7 @@ namespace TwitchDownloaderWPF
             taskManager.RunWorkerAsync();
         }
 
-        private void TaskManager_DoWork(object sender, DoWorkEventArgs e)
+        private static void TaskManager_DoWork(object sender, DoWorkEventArgs e)
         {
             while (true)
             {
@@ -47,10 +47,13 @@ namespace TwitchDownloaderWPF
                 int currentChat = 0;
                 int currentRender = 0;
 
-                foreach (var task in taskList)
+                lock (taskLock)
                 {
-                    if (task.Status == TwitchTaskStatus.Running)
+                    foreach (var task in taskList)
                     {
+                        if (task.Status is not TwitchTaskStatus.Running)
+                            continue;
+
                         switch (task)
                         {
                             case VodDownloadTask:
@@ -70,12 +73,12 @@ namespace TwitchDownloaderWPF
                                 break;
                         }
                     }
-                }
 
-                foreach (var task in taskList)
-                {
-                    if (task.CanRun())
+                    foreach (var task in taskList)
                     {
+                        if (!task.CanRun())
+                            continue;
+
                         switch (task)
                         {
                             case VodDownloadTask when currentVod < maxVod:
@@ -99,7 +102,6 @@ namespace TwitchDownloaderWPF
                                 task.RunAsync();
                                 break;
                         }
-                        continue;
                     }
                 }
 
