@@ -10,7 +10,7 @@ using TwitchDownloaderWPF.Utils;
 
 namespace TwitchDownloaderWPF.TwitchTasks
 {
-    class ChatUpdateTask : ITwitchTask
+    internal class ChatUpdateTask : ITwitchTask
     {
         public TaskData Info { get; set; } = new TaskData();
 
@@ -26,6 +26,13 @@ namespace TwitchDownloaderWPF.TwitchTasks
         {
             get => _status;
             private set => SetField(ref _status, value);
+        }
+
+        private string _displayStatus;
+        public string DisplayStatus
+        {
+            get => _displayStatus;
+            private set => SetField(ref _displayStatus, value);
         }
 
         public ChatUpdateOptions UpdateOptions { get; init; }
@@ -77,6 +84,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public void ChangeStatus(TwitchTaskStatus newStatus)
         {
             Status = newStatus;
+            DisplayStatus = newStatus.ToString();
 
             if (CanCancel && newStatus is TwitchTaskStatus.Canceled or TwitchTaskStatus.Failed or TwitchTaskStatus.Finished or TwitchTaskStatus.Stopping)
             {
@@ -93,7 +101,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            var progress = new WpfTaskProgress(i => Progress = i);
+            var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
             ChatUpdater updater = new ChatUpdater(UpdateOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try

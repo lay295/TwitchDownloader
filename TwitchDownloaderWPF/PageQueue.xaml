@@ -71,7 +71,7 @@
                                     <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" >
                                         <emoji:TextBlock Text="{Binding Info.Title, StringFormat=Title: {0}}" TextWrapping="Wrap" Foreground="{DynamicResource AppText}"></emoji:TextBlock>
                                         <TextBlock Text="{Binding TaskType, StringFormat=Task Type: {0}}" Foreground="{DynamicResource AppText}"></TextBlock>
-                                        <TextBlock Text="{Binding Status, StringFormat=Status: {0}, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Foreground="{DynamicResource AppText}"></TextBlock>
+                                        <TextBlock Text="{Binding DisplayStatus, StringFormat=Status: {0}, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Foreground="{DynamicResource AppText}"></TextBlock>
                                         <StackPanel Orientation="Horizontal" Margin="1,1,0,1">
                                             <Button Content="{lex:Loc TaskCancel}" Margin="0,0,4,0" MinWidth="60" Height="28" FontSize="12" Click="BtnCancelTask_Click" IsEnabled="{Binding CanCancel}" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />
                                             <Button Visibility="{Binding Exception.Visibility}" Content="{lex:Loc TaskErrorButton}" Margin="0,0,4,0" MinWidth="60" Height="28" FontSize="12" Click="BtnTaskError_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" />

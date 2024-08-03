@@ -21,10 +21,10 @@ namespace TwitchDownloaderWPF.Utils
         private readonly Action<string> _handleLog;
         private readonly Action<string> _handleFfmpegLog;
 
-        public WpfTaskProgress(Action<int> handlePercent)
+        public WpfTaskProgress(Action<int> handlePercent, Action<string> handleStatus)
         {
             _handlePercent = handlePercent;
-            _handleStatus = null;
+            _handleStatus = handleStatus;
             _handleLog = null;
             _handleFfmpegLog = null;
 
