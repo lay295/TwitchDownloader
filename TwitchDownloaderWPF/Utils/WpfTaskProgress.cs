@@ -145,14 +145,14 @@ namespace TwitchDownloaderWPF.Utils
         {
             if ((_logLevel & LogLevel.Info) == 0) return;
 
-            _handleLog.Invoke(logMessage);
+            _handleLog?.Invoke(logMessage);
         }
 
         public void LogInfo(DefaultInterpolatedStringHandler logMessage)
         {
             if ((_logLevel & LogLevel.Info) == 0) return;
 
-            _handleLog.Invoke(logMessage.ToStringAndClear());
+            _handleLog?.Invoke(logMessage.ToStringAndClear());
         }
 
         public void LogWarning(string logMessage)
