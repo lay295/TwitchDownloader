@@ -145,7 +145,6 @@ namespace TwitchDownloaderWPF
                             Thumbnail = vodDownloadPage.imgThumbnail.Source
                         }
                     };
-                    downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                     lock (PageQueue.taskLock)
                     {
@@ -187,7 +186,6 @@ namespace TwitchDownloaderWPF
                                 Thumbnail = vodDownloadPage.imgThumbnail.Source
                             }
                         };
-                        chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -261,7 +259,6 @@ namespace TwitchDownloaderWPF
                             Thumbnail = clipDownloadPage.imgThumbnail.Source
                         }
                     };
-                    downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                     lock (PageQueue.taskLock)
                     {
@@ -294,7 +291,6 @@ namespace TwitchDownloaderWPF
                                 Thumbnail = clipDownloadPage.imgThumbnail.Source
                             }
                         };
-                        chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -359,7 +355,6 @@ namespace TwitchDownloaderWPF
                             Thumbnail = chatDownloadPage.imgThumbnail.Source
                         }
                     };
-                    chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                     lock (PageQueue.taskLock)
                     {
@@ -419,7 +414,6 @@ namespace TwitchDownloaderWPF
                             Thumbnail = chatUpdatePage.imgThumbnail.Source
                         }
                     };
-                    chatTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                     lock (PageQueue.taskLock)
                     {
@@ -459,7 +453,6 @@ namespace TwitchDownloaderWPF
                         {
                             renderTask.Info.Thumbnail = image;
                         }
-                        renderTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -520,7 +513,6 @@ namespace TwitchDownloaderWPF
                                 Thumbnail = taskData.Thumbnail
                             }
                         };
-                        downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -553,7 +545,6 @@ namespace TwitchDownloaderWPF
                                 Thumbnail = taskData.Thumbnail
                             }
                         };
-                        downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                         lock (PageQueue.taskLock)
                         {
@@ -594,7 +585,6 @@ namespace TwitchDownloaderWPF
                             Thumbnail = taskData.Thumbnail
                         }
                     };
-                    downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
                     lock (PageQueue.taskLock)
                     {
