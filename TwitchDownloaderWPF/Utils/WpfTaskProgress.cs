@@ -21,10 +21,10 @@ namespace TwitchDownloaderWPF.Utils
         private readonly Action<string> _handleLog;
         private readonly Action<string> _handleFfmpegLog;
 
-        public WpfTaskProgress(Action<int> handlePercent)
+        public WpfTaskProgress(Action<int> handlePercent, Action<string> handleStatus)
         {
             _handlePercent = handlePercent;
-            _handleStatus = null;
+            _handleStatus = handleStatus;
             _handleLog = null;
             _handleFfmpegLog = null;
 
@@ -145,14 +145,14 @@ namespace TwitchDownloaderWPF.Utils
         {
             if ((_logLevel & LogLevel.Info) == 0) return;
 
-            _handleLog.Invoke(logMessage);
+            _handleLog?.Invoke(logMessage);
         }
 
         public void LogInfo(DefaultInterpolatedStringHandler logMessage)
         {
             if ((_logLevel & LogLevel.Info) == 0) return;
 
-            _handleLog.Invoke(logMessage.ToStringAndClear());
+            _handleLog?.Invoke(logMessage.ToStringAndClear());
         }
 
         public void LogWarning(string logMessage)
