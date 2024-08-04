@@ -867,69 +867,69 @@
     <value>ユーザー名の読みやすさを向上する:</value>
   </data>
   <data name="BadgeMaskBroadcaster" xml:space="preserve">
-    <value>Broadcaster</value>
+    <value>配信者</value>
   </data>
   <data name="BadgeMaskModerator" xml:space="preserve">
-    <value>Mods</value>
+    <value>モデレーター</value>
   </data>
   <data name="BadgeMaskVIP" xml:space="preserve">
-    <value>VIPs</value>
+    <value>VIP</value>
   </data>
   <data name="BadgeMaskSubscriber" xml:space="preserve">
-    <value>Subs</value>
+    <value>サブスクライバー</value>
   </data>
   <data name="BadgeMaskPredictions" xml:space="preserve">
-    <value>Predictions</value>
+    <value>予想</value>
   </data>
   <data name="BadgeMaskNoAudioNoVideo" xml:space="preserve">
-    <value>No Audio/No Video</value>
+    <value>音声なし/音声のみ</value>
   </data>
   <data name="BadgeMaskTwitchPrime" xml:space="preserve">
-    <value>Prime</value>
+    <value>プライム</value>
   </data>
   <data name="BadgeMaskOthers" xml:space="preserve">
-    <value>Others</value>
+    <value>その他</value>
   </data>
   <data name="TitleFileAlreadyExists" xml:space="preserve">
-    <value>File already exists</value>
+    <value>ファイルが既に存在しています。</value>
   </data>
   <data name="FileAlreadyExistsHeader" xml:space="preserve">
-    <value>{0} already exists.</value>
+    <value>{0} は既に存在しています。</value>
   </data>
   <data name="FileAlreadyExistsBody" xml:space="preserve">
-    <value>The file {0} already exists. Do you want to overwrite it?</value>
+    <value>{0} このファイルは既に存在しています。上書きしますか？</value>
   </data>
   <data name="FileAlreadyExistsOverwrite" xml:space="preserve">
-    <value>Overwrite</value>
+    <value>上書き</value>
   </data>
   <data name="FileAlreadyExistsOverwriteDescription" xml:space="preserve">
-    <value>The existing file will be overwritten.</value>
+    <value>存在しているファイルは置き換えられます。</value>
   </data>
   <data name="FileAlreadyExistsRename" xml:space="preserve">
-    <value>Rename</value>
+    <value>名前を変更</value>
   </data>
   <data name="FileAlreadyExistsRenameDescription" xml:space="preserve">
-    <value>The new file will be renamed.</value>
+    <value>新しいファイルは名前を変更されます。</value>
   </data>
   <data name="FileAlreadyExistsCancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>キャンセル</value>
   </data>
   <data name="FileAlreadyExistsCancelDescription" xml:space="preserve">
-    <value>The task will be canceled.</value>
+    <value>タスクはキャンセルされます。</value>
   </data>
   <data name="FileAlreadyExistsRememberMyChoice" xml:space="preserve">
-    <value>Remember my choice for this session</value>
+    <value>このセッションで選択したものを記憶する。</value>
   </data>
   <data name="VideoTrimMode" xml:space="preserve">
-    <value>Trim Mode </value><comment>Leave a trailing space</comment>
+    <value>トリミングモード </value><comment>Leave a trailing space</comment>
   </data>
   <data name="VideoTrimModeSafe" xml:space="preserve">
-    <value>Safe</value>
+    <value>セーフ</value>
   </data>
   <data name="VideoTrimModeExact" xml:space="preserve">
-    <value>Exact</value>
+    <value>正確</value>
   </data>
   <data name="VideoTrimModeTooltip" xml:space="preserve">
-    <value>Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video.</value>
+    <value>正確なトリミングでトリミングされた動画は、まれに最初と最後の数秒間映像や音声が途切れることがあります。セーフなトリミングでは、映像や音声が途切れることはありませんが映像が若干長くなる可能性があります。</value>
   </data>
 </root>
