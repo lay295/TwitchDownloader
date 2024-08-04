@@ -35,6 +35,13 @@ namespace TwitchDownloaderWPF.TwitchTasks
             private set => SetField(ref _displayStatus, value);
         }
 
+        private string _statusImage;
+        public string StatusImage
+        {
+            get => _statusImage;
+            private set => SetField(ref _statusImage, value);
+        }
+
         public ChatDownloadOptions DownloadOptions { get; init; }
         public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
         public ITwitchTask DependantTask { get; set; }
@@ -90,6 +97,14 @@ namespace TwitchDownloaderWPF.TwitchTasks
             {
                 CanCancel = false;
             }
+
+            StatusImage = newStatus switch
+            {
+                TwitchTaskStatus.Running => "Images/ppOverheat.gif",
+                TwitchTaskStatus.Ready or TwitchTaskStatus.Waiting => "Images/ppHop.gif",
+                TwitchTaskStatus.Stopping => "Images/ppStretch.gif",
+                _ => null
+            };
         }
 
         public async Task RunAsync()

@@ -25,6 +25,7 @@
   <ItemGroup>
     <Resource Include="Images\ppOverheat.gif" />
     <Resource Include="Images\ppHop.gif" />
+    <Resource Include="Images\ppStretch.gif" />
     <Resource Include="Images\peepoSad.png" />
   </ItemGroup>
   <ItemGroup>

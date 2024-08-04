@@ -586,6 +586,7 @@ namespace TwitchDownloaderWPF
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             statusMessage.Text = Translations.Strings.StatusCanceling;
+            SetImage("Images/ppStretch.gif", true);
             try
             {
                 _cancellationTokenSource.Cancel();
