@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderWPF.Properties;
@@ -28,9 +29,7 @@ namespace TwitchDownloaderWPF
             _parentPage = page;
             InitializeComponent();
 
-            string queueFolder = Settings.Default.QueueFolder;
-            if (Directory.Exists(queueFolder))
-                textFolder.Text = queueFolder;
+            textFolder.Text = Settings.Default.QueueFolder;
 
             TextPreferredQuality.Visibility = Visibility.Collapsed;
             ComboPreferredQuality.Visibility = Visibility.Collapsed;
@@ -95,9 +94,7 @@ namespace TwitchDownloaderWPF
             _dataList = dataList;
             InitializeComponent();
 
-            string queueFolder = Settings.Default.QueueFolder;
-            if (Directory.Exists(queueFolder))
-                textFolder.Text = queueFolder;
+            textFolder.Text = Settings.Default.QueueFolder;
 
             if (_dataList.Any(x => x.Id.All(char.IsDigit)))
             {
@@ -129,8 +126,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show(this, Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
+                        TwitchHelper.CreateDirectory(folderPath);
                     }
 
                     VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text);
@@ -230,8 +226,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show(this, Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
+                        TwitchHelper.CreateDirectory(folderPath);
                     }
 
                     ClipDownloadOptions downloadOptions = new ClipDownloadOptions
@@ -335,8 +330,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show(this, Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
+                        TwitchHelper.CreateDirectory(folderPath);
                     }
 
                     ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
@@ -393,8 +387,7 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        MessageBox.Show(this, Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
+                        TwitchHelper.CreateDirectory(folderPath);
                     }
 
                     ChatUpdateOptions chatOptions = MainWindow.pageChatUpdate.GetOptions(null);
@@ -430,8 +423,7 @@ namespace TwitchDownloaderWPF
                     {
                         if (!Directory.Exists(folderPath))
                         {
-                            MessageBox.Show(this, Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
+                            TwitchHelper.CreateDirectory(folderPath);
                         }
 
                         string fileFormat = chatRenderPage.comboFormat.SelectedItem.ToString()!;
@@ -474,8 +466,7 @@ namespace TwitchDownloaderWPF
             string folderPath = textFolder.Text;
             if (!Directory.Exists(folderPath))
             {
-                MessageBox.Show(this, Translations.Strings.InvaliFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                TwitchHelper.CreateDirectory(folderPath);
             }
 
             foreach (var taskData in _dataList)
@@ -630,8 +621,6 @@ namespace TwitchDownloaderWPF
         private void btnFolder_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
-            if (Directory.Exists(textFolder.Text))
-                dialog.RootFolder = dialog.RootFolder;
             if (dialog.ShowDialog(this).GetValueOrDefault())
             {
                 textFolder.Text = dialog.SelectedPath;

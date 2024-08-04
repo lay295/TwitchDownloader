@@ -681,12 +681,6 @@
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
     <value>TwitchDownloaderWPF ana dilinizde mevcut değil mi?  Çeviriye nasıl yardım edeceğinizi öğrenmek için tıklayın!</value>
   </data>
-  <data name="InvalidFolderPath" xml:space="preserve">
-    <value>Geçersiz Klasör Yolu</value>
-  </data>
-  <data name="InvaliFolderPathMessage" xml:space="preserve">
-    <value>Klasör mevcut değil</value>
-  </data>
   <data name="StatusCanceled" xml:space="preserve">
     <value>İptal edildi</value>
   </data>

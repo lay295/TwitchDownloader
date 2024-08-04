@@ -1122,15 +1122,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid Folder Path.
-        /// </summary>
-        public static string InvalidFolderPath {
-            get {
-                return ResourceManager.GetString("InvalidFolderPath", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid start or end time.
         /// </summary>
         public static string InvalidStartEndTime {
@@ -1163,15 +1154,6 @@ namespace TwitchDownloaderWPF.Translations {
         public static string InvalidVideoLinkIdMessage {
             get {
                 return ResourceManager.GetString("InvalidVideoLinkIdMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The folder does not exist.
-        /// </summary>
-        public static string InvaliFolderPathMessage {
-            get {
-                return ResourceManager.GetString("InvaliFolderPathMessage", resourceCulture);
             }
         }
         
