@@ -621,8 +621,6 @@ namespace TwitchDownloaderWPF
         private void btnFolder_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
-            if (Directory.Exists(textFolder.Text))
-                dialog.RootFolder = dialog.RootFolder;
             if (dialog.ShowDialog(this).GetValueOrDefault())
             {
                 textFolder.Text = dialog.SelectedPath;
