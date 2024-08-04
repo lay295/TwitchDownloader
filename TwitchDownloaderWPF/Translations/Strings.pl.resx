@@ -680,12 +680,6 @@
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
     <value>TwitchDownloaderWPF nie jest dostępny w twoim natywnym języku? Kliknij, aby dowiedzieć się jak nas wspomóc!</value>
   </data>
-  <data name="InvalidFolderPath" xml:space="preserve">
-    <value>Nieprawidłowa Ścieżka Folderu</value>
-  </data>
-  <data name="InvaliFolderPathMessage" xml:space="preserve">
-    <value>Folder nie istnieje</value>
-  </data>
   <data name="StatusCanceled" xml:space="preserve">
     <value>Anulowano</value>
   </data>

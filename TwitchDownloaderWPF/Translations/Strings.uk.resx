@@ -680,12 +680,6 @@
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
     <value>TwitchDownloaderWPF недоступно на вашій мові? Натисніть тут, щоб дізнатися, як допомогти з перекладом!</value>
   </data>
-  <data name="InvalidFolderPath" xml:space="preserve">
-    <value>Неправильний шлях до папки</value>
-  </data>
-  <data name="InvaliFolderPathMessage" xml:space="preserve">
-    <value>Папка не існує</value>
-  </data>
   <data name="StatusCanceled" xml:space="preserve">
     <value>Скасовано</value>
   </data>

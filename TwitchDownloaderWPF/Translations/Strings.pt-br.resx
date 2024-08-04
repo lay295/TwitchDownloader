@@ -680,12 +680,6 @@
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
     <value>O TwitchDownloaderWPF não está disponível em sua languagem nativa? Clique para aprender como ajudar a traduzir!</value>
   </data>
-  <data name="InvalidFolderPath" xml:space="preserve">
-    <value>Diretório da Pasta Inválido</value>
-  </data>
-  <data name="InvaliFolderPathMessage" xml:space="preserve">
-    <value>A pasta não existe</value>
-  </data>
   <data name="StatusCanceled" xml:space="preserve">
     <value>Cancelado</value>
   </data>

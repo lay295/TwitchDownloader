@@ -680,12 +680,6 @@
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
     <value>あなたの母国語でTwitchDownloaderWPFが利用できませんか？クリックで翻訳を手伝う方法を学ぶ！</value>
   </data>
-  <data name="InvalidFolderPath" xml:space="preserve">
-    <value>不正なフォルダパス</value>
-  </data>
-  <data name="InvaliFolderPathMessage" xml:space="preserve">
-    <value>フォルダが存在しません</value>
-  </data>
   <data name="StatusCanceled" xml:space="preserve">
     <value>キャンセルされた</value>
   </data>
