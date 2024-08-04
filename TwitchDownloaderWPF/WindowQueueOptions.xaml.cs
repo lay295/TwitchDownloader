@@ -29,9 +29,7 @@ namespace TwitchDownloaderWPF
             _parentPage = page;
             InitializeComponent();
 
-            string queueFolder = Settings.Default.QueueFolder;
-            if (Directory.Exists(queueFolder))
-                textFolder.Text = queueFolder;
+            textFolder.Text = Settings.Default.QueueFolder;
 
             TextPreferredQuality.Visibility = Visibility.Collapsed;
             ComboPreferredQuality.Visibility = Visibility.Collapsed;
@@ -96,9 +94,7 @@ namespace TwitchDownloaderWPF
             _dataList = dataList;
             InitializeComponent();
 
-            string queueFolder = Settings.Default.QueueFolder;
-            if (Directory.Exists(queueFolder))
-                textFolder.Text = queueFolder;
+            textFolder.Text = Settings.Default.QueueFolder;
 
             if (_dataList.Any(x => x.Id.All(char.IsDigit)))
             {
