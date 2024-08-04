@@ -1,5 +1,5 @@
 > [!WARNING]
-> 日本語版の TwitchDownloaderWPF README に翻訳が追い付いていない場合があります。  
+> 英語版の TwitchDownloaderWPF README に日本語版の翻訳が追い付いていない場合があります。  
 > 最新の Twitch DownloaderWPF README を確認したい場合は、[英語版](README.md)を確認してください。
 
 # TwitchDownloaderWPF
