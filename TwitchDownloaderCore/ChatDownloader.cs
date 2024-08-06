@@ -565,12 +565,12 @@ namespace TwitchDownloaderCore
                         userInfo[user.id] = user;
                     }
 
-                    var percent = (i + BATCH_SIZE) * 100f / userIds.Length;
+                    var percent = Math.Min(i + BATCH_SIZE, userIds.Length) * 100f / userIds.Length;
                     _progress.ReportProgress((int)percent);
                 }
                 catch (Exception e)
                 {
-                    _progress.LogVerbose($"An error occurred while backfilling commenters {i}-{i + BATCH_SIZE}: {e.Message}");
+                    _progress.LogVerbose($"An error occurred while backfilling commenters {i}-{Math.Min(i + BATCH_SIZE, userIds.Length - 1)}: {e.Message}");
                     failedInfo = true;
                 }
             }
