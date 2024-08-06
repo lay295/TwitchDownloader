@@ -3,11 +3,13 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using TwitchDownloaderWPF.Extensions;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using Xabe.FFmpeg;
@@ -88,7 +90,7 @@ namespace TwitchDownloaderWPF
             // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
             FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
 
-            var currentVersion = Version.Parse("1.55.0");
+            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version!;
 #if DEBUG
             Title = $"Twitch Downloader v{currentVersion} - DEBUG";
 #else
