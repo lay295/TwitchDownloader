@@ -90,7 +90,8 @@ namespace TwitchDownloaderWPF
             // it will sometimes start behind other windows, usually (but not always) due to the user's actions.
             FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
 
-            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version!;
+            // Despite not specifying a revision in the AssemblyVersion, the compiler still adds one. We don't want that.
+            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version!.StripRevisionIfDefault();
 #if DEBUG
             Title = $"Twitch Downloader v{currentVersion} - DEBUG";
 #else
