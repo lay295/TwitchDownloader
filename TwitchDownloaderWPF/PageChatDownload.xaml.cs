@@ -149,7 +149,7 @@ namespace TwitchDownloaderWPF
                     game = videoInfo.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
 
                     numStartHour.Maximum = (int)vodLength.TotalHours;
-                    numStartMinute.Maximum = 60;
+                    numStartMinute.Maximum = 59;
                     var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
                     if (urlTimeCodeMatch.Success)
                     {
@@ -168,7 +168,7 @@ namespace TwitchDownloaderWPF
 
                     numEndHour.Maximum = (int)vodLength.TotalHours;
                     numEndHour.Value = (int)vodLength.TotalHours;
-                    numEndMinute.Maximum = 60;
+                    numEndMinute.Maximum = 59;
                     numEndMinute.Value = vodLength.Minutes;
                     numEndSecond.Value = vodLength.Seconds;
                     labelLength.Text = vodLength.ToString("c");
