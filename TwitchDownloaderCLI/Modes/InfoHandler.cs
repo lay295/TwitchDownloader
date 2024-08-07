@@ -117,7 +117,6 @@ namespace TwitchDownloaderCLI.Modes
             var infoTableTitle = new TableTitle("Video Info");
             var infoTable = new Table()
                 .Title(infoTableTitle)
-                .RoundedBorder()
                 .AddColumn(new TableColumn("Key"))
                 .AddColumn(new TableColumn("Value"))
                 .AddRow(new Markup("Streamer"), GetUserNameMarkup(infoVideo.owner.displayName, infoVideo.owner.login, DEFAULT_STRING))

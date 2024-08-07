@@ -41,23 +41,23 @@ namespace TwitchDownloaderCLI.Tools
                 switch (processedArgs[i])
                 {
                     case "--embed-emotes":
-                        Console.WriteLine("[INFO] The program has switched from --embed-emotes to -E / --embed-images, consider using those instead. Run \'{0} help\' for more information.", processFileName);
+                        Console.WriteLine("[WARNING] --embed-emotes has been deprecated in favor of -E / --embed-images and may be removed. Run '{0} help' for more information.", processFileName);
                         ConvertEmbedEmoteSyntax(processedArgs, i);
                         break;
                     case "-m" or "--mode":
-                        Console.WriteLine("[INFO] The program has switched from --mode <mode> to verbs (like \'git <verb>\'), consider using verbs instead. Run \'{0} help\' for more information.", processFileName);
+                        Console.WriteLine("[WARNING] --mode <mode> has been deprecated in favor of verbs (like 'git <verb>') and may be removed. Run '{0} help' for more information.", processFileName);
                         ConvertModeSyntax(processedArgs, i);
                         break;
                     case "--silent":
-                        Console.WriteLine("[INFO] The program has switched from --silent to log levels, consider using log levels instead. '--log-level None' will be applied to the current session. Run \'{0} help\' for more information.", processFileName);
+                        Console.WriteLine("[WARNING] --silent has been deprecated in favor of log levels. '--log-level None' will be applied to the current session and may be removed. Run '{0} help' for more information.", processFileName);
                         ConvertSilentSyntax(processedArgs, i);
                         break;
                     case "--verbose-ffmpeg":
-                        Console.WriteLine("[INFO] The program has switched from --verbose-ffmpeg to log levels, consider using log levels instead. '--log-level Status,Info,Warning,Error,Ffmpeg' will be applied to the current session. Run \'{0} help\' for more information.", processFileName);
+                        Console.WriteLine("[WARNING] --verbose-ffmpeg has been deprecated in favor of log levels and may be removed. '--log-level Status,Info,Warning,Error,Ffmpeg' will be applied to the current session. Run '{0} help' for more information.", processFileName);
                         ConvertVerboseFfmpegSyntax(processedArgs, i);
                         break;
                     case "--chat-connections":
-                        Console.WriteLine("[INFO] The program has switched from --chat-connections to -t / --threads, consider using those instead. Run \'{0} help\' for more information.", processFileName);
+                        Console.WriteLine("[WARNING] --chat-connections has been deprecated in favor of -t / --threads and may be removed. Run '{0} help' for more information.", processFileName);
                         ConvertChatConnectionsSyntax(processedArgs, i);
                         break;
                 }
