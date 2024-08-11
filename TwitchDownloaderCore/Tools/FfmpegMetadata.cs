@@ -43,9 +43,9 @@ namespace TwitchDownloaderCore.Tools
         {
             // ReSharper disable once StringLiteralTypo
             await sw.WriteLineAsync(";FFMETADATA1");
-            await sw.WriteLineAsync($"title={SanitizeKeyValue(title)} ({SanitizeKeyValue(id)})");
+            await sw.WriteLineAsync($"title={EscapeMetadataValue(title)} ({EscapeMetadataValue(id)})");
             if (!string.IsNullOrWhiteSpace(streamer))
-                await sw.WriteLineAsync($"artist={SanitizeKeyValue(streamer)}");
+                await sw.WriteLineAsync($"artist={EscapeMetadataValue(streamer)}");
             await sw.WriteLineAsync($"date={createdAt:yyyy}"); // The 'date' key becomes 'year' in most formats
             if (!string.IsNullOrWhiteSpace(game))
                 await sw.WriteLineAsync($"genre={game}");
@@ -53,13 +53,13 @@ namespace TwitchDownloaderCore.Tools
             if (!string.IsNullOrWhiteSpace(description))
             {
                 // We could use the 'description' key, but so few media players support mp4 descriptions that users would probably think it was missing
-                await sw.WriteLineAsync(@$"{SanitizeKeyValue(description.TrimEnd())}\");
+                await sw.WriteLineAsync(@$"{EscapeMetadataValue(description.TrimEnd())}\");
                 await sw.WriteLineAsync(@"------------------------\");
             }
             if (!string.IsNullOrWhiteSpace(clipper))
-                await sw.WriteLineAsync($@"Clipped by: {SanitizeKeyValue(clipper)}\");
-            await sw.WriteLineAsync(@$"Created at: {SanitizeKeyValue(createdAt.ToString("u"))}\");
-            await sw.WriteLineAsync(@$"Video id: {SanitizeKeyValue(id)}\");
+                await sw.WriteLineAsync($@"Clipped by: {EscapeMetadataValue(clipper)}\");
+            await sw.WriteLineAsync(@$"Created at: {EscapeMetadataValue(createdAt.ToString("u"))}\");
+            await sw.WriteLineAsync(@$"Video id: {EscapeMetadataValue(id)}\");
             await sw.WriteLineAsync(@$"Views: {viewCount}");
         }
 
@@ -102,7 +102,7 @@ namespace TwitchDownloaderCore.Tools
                 await sw.WriteLineAsync("TIMEBASE=1/1000");
                 await sw.WriteLineAsync($"START={startMillis}");
                 await sw.WriteLineAsync($"END={startMillis + lengthMillis}");
-                await sw.WriteLineAsync($"title={SanitizeKeyValue(gameName)}");
+                await sw.WriteLineAsync($"title={EscapeMetadataValue(gameName)}");
             }
         }
 
@@ -128,7 +128,9 @@ namespace TwitchDownloaderCore.Tools
         }
 
         // https://trac.ffmpeg.org/ticket/11096 The Ffmpeg documentation is outdated and =;# do not need to be escaped.
-        private static string SanitizeKeyValue(string str)
+        // TODO: Use nameof(filename) when C# 11+
+        [return: NotNullIfNotNull("str")]
+        private static string EscapeMetadataValue([AllowNull] string str)
         {
             if (string.IsNullOrWhiteSpace(str))
             {
