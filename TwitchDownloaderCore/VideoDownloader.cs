@@ -105,8 +105,8 @@ namespace TwitchDownloaderCore
                 _progress.SetTemplateStatus("Finalizing Video {0}% [4/4]", 0);
 
                 string metadataPath = Path.Combine(downloadFolder, "metadata.txt");
-                await FfmpegMetadata.SerializeAsync(metadataPath, downloadOptions.Id.ToString(), videoInfo, downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
-                    videoLength, videoChapterResponse.data.video.moments.edges, cancellationToken);
+                await FfmpegMetadata.SerializeAsync(metadataPath, downloadOptions.Id.ToString(), videoInfo, downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero, videoLength,
+                    videoChapterResponse.data.video.moments.edges);
 
                 var concatListPath = Path.Combine(downloadFolder, "concat.txt");
                 await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, cancellationToken);

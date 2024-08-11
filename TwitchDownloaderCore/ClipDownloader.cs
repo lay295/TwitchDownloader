@@ -224,7 +224,7 @@ namespace TwitchDownloaderCore
             Process process = null;
             try
             {
-                await FfmpegMetadata.SerializeAsync(metadataFile, downloadOptions.Id, clipMetadata, new[] { clipChapter }, cancellationToken);
+                await FfmpegMetadata.SerializeAsync(metadataFile, downloadOptions.Id, clipMetadata, new[] { clipChapter });
 
                 process = new Process
                 {

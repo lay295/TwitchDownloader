@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
@@ -15,7 +14,7 @@ namespace TwitchDownloaderCore.Tools
     {
         private const string LINE_FEED = "\u000A";
 
-        public static async Task SerializeAsync(string filePath, string videoId, VideoInfo videoInfo, TimeSpan startOffset, TimeSpan videoLength, IEnumerable<VideoMomentEdge> videoMomentEdges, CancellationToken cancellationToken = default)
+        public static async Task SerializeAsync(string filePath, string videoId, VideoInfo videoInfo, TimeSpan startOffset, TimeSpan videoLength, IEnumerable<VideoMomentEdge> videoMomentEdges)
         {
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
@@ -23,13 +22,11 @@ namespace TwitchDownloaderCore.Tools
             var streamer = GetUserName(videoInfo.owner.displayName, videoInfo.owner.login);
             var description = videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
             await SerializeGlobalMetadata(sw, streamer, videoId, videoInfo.title, videoInfo.createdAt, videoInfo.viewCount, description, videoInfo.game?.displayName);
-            await fs.FlushAsync(cancellationToken);
 
             await SerializeChapters(sw, videoMomentEdges, startOffset, videoLength);
-            await fs.FlushAsync(cancellationToken);
         }
 
-        public static async Task SerializeAsync(string filePath, string videoId, Clip clip, IEnumerable<VideoMomentEdge> videoMomentEdges, CancellationToken cancellationToken = default)
+        public static async Task SerializeAsync(string filePath, string videoId, Clip clip, IEnumerable<VideoMomentEdge> videoMomentEdges)
         {
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
@@ -37,10 +34,8 @@ namespace TwitchDownloaderCore.Tools
             var streamer = GetUserName(clip.broadcaster.displayName, clip.broadcaster.login);
             var clipper = GetUserName(clip.curator.displayName, clip.curator.login);
             await SerializeGlobalMetadata(sw, streamer, videoId, clip.title, clip.createdAt, clip.viewCount, game: clip.game?.displayName, clipper: clipper);
-            await fs.FlushAsync(cancellationToken);
 
             await SerializeChapters(sw, videoMomentEdges);
-            await fs.FlushAsync(cancellationToken);
         }
 
         private static async Task SerializeGlobalMetadata(StreamWriter sw, [AllowNull] string streamer, string id, string title, DateTime createdAt, int viewCount, [AllowNull] string description = null, [AllowNull] string game = null,
