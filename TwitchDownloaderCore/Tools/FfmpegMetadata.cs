@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,8 +20,9 @@ namespace TwitchDownloaderCore.Tools
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
+            var streamer = GetUserName(videoInfo.owner.displayName, videoInfo.owner.login);
             var description = videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
-            await SerializeGlobalMetadata(sw, videoInfo.owner.displayName, videoId, videoInfo.title, videoInfo.createdAt, videoInfo.viewCount, description);
+            await SerializeGlobalMetadata(sw, streamer, videoId, videoInfo.title, videoInfo.createdAt, videoInfo.viewCount, description, videoInfo.game?.displayName);
             await fs.FlushAsync(cancellationToken);
 
             await SerializeChapters(sw, videoMomentEdges, startOffset, videoLength);
@@ -31,28 +34,37 @@ namespace TwitchDownloaderCore.Tools
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
-            await SerializeGlobalMetadata(sw, clip.broadcaster.displayName, videoId, clip.title, clip.createdAt, clip.viewCount, null);
+            var streamer = GetUserName(clip.broadcaster.displayName, clip.broadcaster.login);
+            var clipper = GetUserName(clip.curator.displayName, clip.curator.login);
+            await SerializeGlobalMetadata(sw, streamer, videoId, clip.title, clip.createdAt, clip.viewCount, game: clip.game?.displayName, clipper: clipper);
             await fs.FlushAsync(cancellationToken);
 
             await SerializeChapters(sw, videoMomentEdges);
             await fs.FlushAsync(cancellationToken);
         }
 
-        private static async Task SerializeGlobalMetadata(StreamWriter sw, string streamerName, string videoId, string videoTitle, DateTime videoCreation, int viewCount, string videoDescription)
+        private static async Task SerializeGlobalMetadata(StreamWriter sw, [AllowNull] string streamer, string id, string title, DateTime createdAt, int viewCount, [AllowNull] string description = null, [AllowNull] string game = null,
+            [AllowNull] string clipper = null)
         {
+            // ReSharper disable once StringLiteralTypo
             await sw.WriteLineAsync(";FFMETADATA1");
-            await sw.WriteLineAsync($"title={SanitizeKeyValue(videoTitle)} ({SanitizeKeyValue(videoId)})");
-            if (!string.IsNullOrWhiteSpace(streamerName))
-                await sw.WriteLineAsync($"artist={SanitizeKeyValue(streamerName)}");
-            await sw.WriteLineAsync($"date={videoCreation:yyyy}"); // The 'date' key becomes 'year' in most formats
+            await sw.WriteLineAsync($"title={SanitizeKeyValue(title)} ({SanitizeKeyValue(id)})");
+            if (!string.IsNullOrWhiteSpace(streamer))
+                await sw.WriteLineAsync($"artist={SanitizeKeyValue(streamer)}");
+            await sw.WriteLineAsync($"date={createdAt:yyyy}"); // The 'date' key becomes 'year' in most formats
+            if (!string.IsNullOrWhiteSpace(game))
+                await sw.WriteLineAsync($"genre={game}");
             await sw.WriteAsync(@"comment=");
-            if (!string.IsNullOrWhiteSpace(videoDescription))
+            if (!string.IsNullOrWhiteSpace(description))
             {
-                await sw.WriteLineAsync(@$"{SanitizeKeyValue(videoDescription.TrimEnd())}\");
+                // We could use the 'description' key, but so few media players support mp4 descriptions that users would probably think it was missing
+                await sw.WriteLineAsync(@$"{SanitizeKeyValue(description.TrimEnd())}\");
                 await sw.WriteLineAsync(@"------------------------\");
             }
-            await sw.WriteLineAsync(@$"Originally aired: {SanitizeKeyValue(videoCreation.ToString("u"))}\");
-            await sw.WriteLineAsync(@$"Video id: {SanitizeKeyValue(videoId)}\");
+            if (!string.IsNullOrWhiteSpace(clipper))
+                await sw.WriteLineAsync($@"Clipped by: {SanitizeKeyValue(clipper)}\");
+            await sw.WriteLineAsync(@$"Created at: {SanitizeKeyValue(createdAt.ToString("u"))}\");
+            await sw.WriteLineAsync(@$"Video id: {SanitizeKeyValue(id)}\");
             await sw.WriteLineAsync(@$"Views: {viewCount}");
         }
 
@@ -97,6 +109,27 @@ namespace TwitchDownloaderCore.Tools
                 await sw.WriteLineAsync($"END={startMillis + lengthMillis}");
                 await sw.WriteLineAsync($"title={SanitizeKeyValue(gameName)}");
             }
+        }
+
+        [return: MaybeNull]
+        private static string GetUserName([AllowNull] string displayName, [AllowNull] string login)
+        {
+            if (string.IsNullOrWhiteSpace(displayName))
+            {
+                return string.IsNullOrWhiteSpace(login) ? null : login;
+            }
+
+            if (string.IsNullOrWhiteSpace(login))
+            {
+                return displayName;
+            }
+
+            if (displayName.All(char.IsAscii))
+            {
+                return displayName;
+            }
+
+            return $"{displayName} ({login})";
         }
 
         // https://trac.ffmpeg.org/ticket/11096 The Ffmpeg documentation is outdated and =;# do not need to be escaped.
