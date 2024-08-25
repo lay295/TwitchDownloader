@@ -83,7 +83,22 @@ namespace TwitchDownloaderWPF
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlVideoSearchResponse res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, videoCount);
+
+                GqlVideoSearchResponse res;
+                try
+                {
+                    res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, videoCount);
+                }
+                catch (Exception ex)
+                {
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                    return;
+                }
+
                 videoList.Clear();
                 if (res.data.user != null)
                 {
@@ -125,7 +140,22 @@ namespace TwitchDownloaderWPF
                 {
                     currentCursor = cursorList[cursorIndex];
                 }
-                GqlClipSearchResponse res = await TwitchHelper.GetGqlClips(currentChannel, period, currentCursor, videoCount);
+
+                GqlClipSearchResponse res;
+                try
+                {
+                    res = await TwitchHelper.GetGqlClips(currentChannel, period, currentCursor, videoCount);
+                }
+                catch (Exception ex)
+                {
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                    return;
+                }
+
                 videoList.Clear();
                 if (res.data.user != null)
                 {
