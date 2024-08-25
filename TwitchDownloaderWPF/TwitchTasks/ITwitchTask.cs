@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,7 +26,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         CancellationTokenSource TokenSource { get; set; }
         ITwitchTask DependantTask { get; set; }
         string TaskType { get; }
-        TwitchTaskException Exception { get; }
+        Exception Exception { get; }
         string OutputFile { get; }
         bool CanCancel { get; }
 

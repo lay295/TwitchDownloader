@@ -248,15 +248,15 @@ namespace TwitchDownloaderWPF
         {
             var taskException = task.Exception;
 
-            if (taskException?.Exception == null)
+            if (taskException is null)
             {
                 return;
             }
 
-            var errorMessage = taskException.Exception.Message;
+            var errorMessage = taskException.Message;
             if (Settings.Default.VerboseErrors)
             {
-                errorMessage = taskException.Exception.ToString();
+                errorMessage = taskException.ToString();
             }
 
             MessageBox.Show(Application.Current.MainWindow!, errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);

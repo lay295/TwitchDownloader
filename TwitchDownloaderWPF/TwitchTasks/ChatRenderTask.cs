@@ -47,8 +47,8 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public ITwitchTask DependantTask { get; set; }
         public string TaskType { get; } = Translations.Strings.ChatRender;
 
-        private TwitchTaskException _exception = new();
-        public TwitchTaskException Exception
+        private Exception _exception;
+        public Exception Exception
         {
             get => _exception;
             private set => SetField(ref _exception, value);
@@ -159,7 +159,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             catch (Exception ex)
             {
                 ChangeStatus(TwitchTaskStatus.Failed);
-                Exception = new TwitchTaskException(ex);
+                Exception = ex;
             }
             renderer.Dispose();
             TokenSource.Dispose();
