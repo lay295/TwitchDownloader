@@ -91,6 +91,8 @@ namespace TwitchDownloaderWPF
                 }
                 catch (Exception ex)
                 {
+                    MessageBox.Show(this, ex.Message, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+
                     if (Settings.Default.VerboseErrors)
                     {
                         MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -148,6 +150,8 @@ namespace TwitchDownloaderWPF
                 }
                 catch (Exception ex)
                 {
+                    MessageBox.Show(this, ex.Message, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+
                     if (Settings.Default.VerboseErrors)
                     {
                         MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
