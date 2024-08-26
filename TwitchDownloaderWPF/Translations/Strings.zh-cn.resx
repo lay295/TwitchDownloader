@@ -935,4 +935,7 @@
   <data name="VideoTrimModeTooltip" xml:space="preserve">
     <value>使用精确模式修剪的视频在前几秒或最后几秒可能会出现视频 / 音频卡顿。安全模式保证不会出现卡顿，但可能会导致视频稍长。</value>
   </data>
+  <data name="TaskRetry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
 </root>

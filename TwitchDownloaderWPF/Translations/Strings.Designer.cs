@@ -1834,6 +1834,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Retry.
+        /// </summary>
+        public static string TaskRetry {
+            get {
+                return ResourceManager.GetString("TaskRetry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Chats:.
         /// </summary>
         public static string TemplateChats {

@@ -932,4 +932,7 @@
   <data name="VideoTrimModeTooltip" xml:space="preserve">
     <value>正確なトリミングでトリミングされた動画は、まれに最初と最後の数秒間映像や音声が途切れることがあります。セーフなトリミングでは、映像や音声が途切れることはありませんが映像が若干長くなる可能性があります。</value>
   </data>
+  <data name="TaskRetry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
 </root>
