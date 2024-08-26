@@ -305,5 +305,33 @@ namespace TwitchDownloaderWPF
 
             FileService.OpenExplorerForFile(new FileInfo(task.OutputFile));
         }
+
+        private void BtnRetryTask_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button { DataContext: ITwitchTask task })
+            {
+                return;
+            }
+
+            RetryTask(task);
+        }
+
+        private void MenuItemTaskRetry_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            {
+                return;
+            }
+
+            RetryTask(task);
+        }
+
+        private static void RetryTask(ITwitchTask task)
+        {
+            if (task.CanReinitialize)
+            {
+                task.Reinitialize();
+            }
+        }
     }
 }

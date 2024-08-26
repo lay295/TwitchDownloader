@@ -29,9 +29,11 @@ namespace TwitchDownloaderWPF.TwitchTasks
         Exception Exception { get; }
         string OutputFile { get; }
         bool CanCancel { get; }
+        bool CanReinitialize { get; }
 
         Task RunAsync();
         void Cancel();
         bool CanRun();
+        void Reinitialize();
     }
 }

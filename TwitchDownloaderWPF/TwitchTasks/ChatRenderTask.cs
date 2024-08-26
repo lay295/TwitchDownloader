@@ -63,6 +63,13 @@ namespace TwitchDownloaderWPF.TwitchTasks
             private set => SetField(ref _canCancel, value);
         }
 
+        private bool _canReinitialize;
+        public bool CanReinitialize
+        {
+            get => _canReinitialize;
+            private set => SetField(ref _canReinitialize, value);
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Cancel()
@@ -83,6 +90,15 @@ namespace TwitchDownloaderWPF.TwitchTasks
             ChangeStatus(TwitchTaskStatus.Canceled);
         }
 
+        public void Reinitialize()
+        {
+            Progress = 0;
+            TokenSource = new CancellationTokenSource();
+            Exception = null;
+            CanReinitialize = false;
+            ChangeStatus(DependantTask is null || DependantTask.Status is TwitchTaskStatus.Finished ? TwitchTaskStatus.Ready : TwitchTaskStatus.Waiting);
+        }
+
         public bool CanRun()
         {
             if (DependantTask == null)
@@ -101,6 +117,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 if (DependantTask.Status is TwitchTaskStatus.Failed or TwitchTaskStatus.Canceled)
                 {
                     ChangeStatus(TwitchTaskStatus.Canceled);
+                    CanReinitialize = true;
                     return false;
                 }
             }
@@ -129,6 +146,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             {
                 TokenSource.Dispose();
                 ChangeStatus(TwitchTaskStatus.Canceled);
+                CanReinitialize = true;
                 return;
             }
 
@@ -142,6 +160,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 if (TokenSource.IsCancellationRequested)
                 {
                     ChangeStatus(TwitchTaskStatus.Canceled);
+                    CanReinitialize = true;
                 }
                 else
                 {
@@ -152,6 +171,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && TokenSource.IsCancellationRequested)
             {
                 ChangeStatus(TwitchTaskStatus.Canceled);
+                CanReinitialize = true;
             }
             catch (Exception ex)
             {
