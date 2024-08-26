@@ -96,7 +96,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             TokenSource = new CancellationTokenSource();
             Exception = null;
             CanReinitialize = false;
-            ChangeStatus(DependantTask is null || DependantTask.Status is TwitchTaskStatus.Finished ? TwitchTaskStatus.Ready : TwitchTaskStatus.Waiting);
+            ChangeStatus(DependantTask is null ? TwitchTaskStatus.Ready : TwitchTaskStatus.Waiting);
         }
 
         public bool CanRun()
