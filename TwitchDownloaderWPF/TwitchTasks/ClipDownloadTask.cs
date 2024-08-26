@@ -56,7 +56,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public string OutputFile => DownloadOptions.Filename;
 
-        private bool _canCancel = true;
+        private bool _canCancel;
         public bool CanCancel
         {
             get => _canCancel;
@@ -93,10 +93,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             Status = newStatus;
             DisplayStatus = newStatus.ToString();
 
-            if (CanCancel && newStatus is TwitchTaskStatus.Canceled or TwitchTaskStatus.Failed or TwitchTaskStatus.Finished or TwitchTaskStatus.Stopping)
-            {
-                CanCancel = false;
-            }
+            CanCancel = newStatus is not TwitchTaskStatus.Canceled and not TwitchTaskStatus.Failed and not TwitchTaskStatus.Finished and not TwitchTaskStatus.Stopping;
 
             StatusImage = newStatus switch
             {
@@ -140,6 +137,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             {
                 ChangeStatus(TwitchTaskStatus.Failed);
                 Exception = ex;
+                CanReinitialize = true;
             }
             downloader = null;
             TokenSource.Dispose();
