@@ -12,7 +12,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 {
     internal class ClipDownloadTask : ITwitchTask
     {
-        public TaskData Info { get; set; } = new TaskData();
+        public TaskData Info { get; } = new();
 
         private int _progress;
         public int Progress
@@ -43,7 +43,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         }
 
         public ClipDownloadOptions DownloadOptions { get; init; }
-        public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
+        public CancellationTokenSource TokenSource { get; private set; } = new();
         public ITwitchTask DependantTask { get; set; }
         public string TaskType { get; } = Translations.Strings.ClipDownload;
 
