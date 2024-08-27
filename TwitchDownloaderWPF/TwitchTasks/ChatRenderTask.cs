@@ -44,7 +44,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public ChatRenderOptions DownloadOptions { get; init; }
         public CancellationTokenSource TokenSource { get; private set; } = new();
-        public ITwitchTask DependantTask { get; set; }
+        public ITwitchTask DependantTask { get; init; }
         public string TaskType { get; } = Translations.Strings.ChatRender;
 
         private Exception _exception;

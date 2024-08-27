@@ -206,10 +206,10 @@ namespace TwitchDownloaderWPF
                                 {
                                     Title = vodDownloadPage.textTitle.Text,
                                     Thumbnail = vodDownloadPage.imgThumbnail.Source
-                                }
+                                },
+                                DependantTask = chatTask,
                             };
                             renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
-                            renderTask.DependantTask = chatTask;
 
                             lock (PageQueue.taskLock)
                             {

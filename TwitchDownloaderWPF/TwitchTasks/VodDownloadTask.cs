@@ -44,7 +44,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public VideoDownloadOptions DownloadOptions { get; init; }
         public CancellationTokenSource TokenSource { get; private set; } = new();
-        public ITwitchTask DependantTask { get; set; }
+        public ITwitchTask DependantTask { get; init; }
         public string TaskType { get; } = Translations.Strings.VodDownload;
 
         private Exception _exception;
