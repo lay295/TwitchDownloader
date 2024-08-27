@@ -938,4 +938,16 @@
   <data name="TaskRetry" xml:space="preserve">
     <value>Retry</value>
   </data>
+  <data name="UnableToGetChannelVideos" xml:space="preserve">
+    <value>Unable to Get Videos</value>
+  </data>
+  <data name="UnableToGetChannelVideosMessage" xml:space="preserve">
+    <value>Unable to get channel videos: {0}</value>
+  </data>
+  <data name="UnableToGetChannelClips" xml:space="preserve">
+    <value>Unable to Get Clips</value>
+  </data>
+  <data name="UnableToGetChannelClipsMessage" xml:space="preserve">
+    <value>Unable to get channel clips: {0}</value>
+  </data>
 </root>
