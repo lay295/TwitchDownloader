@@ -181,7 +181,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             }
             renderer.Dispose();
             TokenSource.Dispose();
-            GC.Collect(2, GCCollectionMode.Default, false);
+            GC.Collect(-1, GCCollectionMode.Default, false);
         }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)

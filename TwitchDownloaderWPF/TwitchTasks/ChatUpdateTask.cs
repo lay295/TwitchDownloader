@@ -160,8 +160,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 CanReinitialize = true;
             }
             TokenSource.Dispose();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            GC.Collect(-1, GCCollectionMode.Default, false);
         }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
