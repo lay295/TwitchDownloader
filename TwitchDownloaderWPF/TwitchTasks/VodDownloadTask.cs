@@ -12,7 +12,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 {
     internal class VodDownloadTask : ITwitchTask
     {
-        public TaskData Info { get; set; } = new TaskData();
+        public TaskData Info { get; } = new();
 
         private int _progress;
         public int Progress
@@ -43,12 +43,12 @@ namespace TwitchDownloaderWPF.TwitchTasks
         }
 
         public VideoDownloadOptions DownloadOptions { get; init; }
-        public CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
+        public CancellationTokenSource TokenSource { get; private set; } = new();
         public ITwitchTask DependantTask { get; set; }
         public string TaskType { get; } = Translations.Strings.VodDownload;
 
-        private TwitchTaskException _exception = new();
-        public TwitchTaskException Exception
+        private Exception _exception;
+        public Exception Exception
         {
             get => _exception;
             private set => SetField(ref _exception, value);
@@ -56,11 +56,18 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public string OutputFile => DownloadOptions.Filename;
 
-        private bool _canCancel = true;
+        private bool _canCancel;
         public bool CanCancel
         {
             get => _canCancel;
             private set => SetField(ref _canCancel, value);
+        }
+
+        private bool _canReinitialize;
+        public bool CanReinitialize
+        {
+            get => _canReinitialize;
+            private set => SetField(ref _canReinitialize, value);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -83,6 +90,15 @@ namespace TwitchDownloaderWPF.TwitchTasks
             ChangeStatus(TwitchTaskStatus.Canceled);
         }
 
+        public void Reinitialize()
+        {
+            Progress = 0;
+            TokenSource = new CancellationTokenSource();
+            Exception = null;
+            CanReinitialize = false;
+            ChangeStatus(TwitchTaskStatus.Ready);
+        }
+
         public bool CanRun()
         {
             return Status == TwitchTaskStatus.Ready;
@@ -93,10 +109,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             Status = newStatus;
             DisplayStatus = newStatus.ToString();
 
-            if (CanCancel && newStatus is TwitchTaskStatus.Canceled or TwitchTaskStatus.Failed or TwitchTaskStatus.Finished or TwitchTaskStatus.Stopping)
-            {
-                CanCancel = false;
-            }
+            CanCancel = newStatus is not TwitchTaskStatus.Canceled and not TwitchTaskStatus.Failed and not TwitchTaskStatus.Finished and not TwitchTaskStatus.Stopping;
 
             StatusImage = newStatus switch
             {
@@ -113,6 +126,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             {
                 TokenSource.Dispose();
                 ChangeStatus(TwitchTaskStatus.Canceled);
+                CanReinitialize = true;
                 return;
             }
 
@@ -125,6 +139,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 if (TokenSource.IsCancellationRequested)
                 {
                     ChangeStatus(TwitchTaskStatus.Canceled);
+                    CanReinitialize = true;
                 }
                 else
                 {
@@ -135,11 +150,13 @@ namespace TwitchDownloaderWPF.TwitchTasks
             catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && TokenSource.IsCancellationRequested)
             {
                 ChangeStatus(TwitchTaskStatus.Canceled);
+                CanReinitialize = true;
             }
             catch (Exception ex)
             {
                 ChangeStatus(TwitchTaskStatus.Failed);
-                Exception = new TwitchTaskException(ex);
+                Exception = ex;
+                CanReinitialize = true;
             }
             downloader = null;
             TokenSource.Dispose();

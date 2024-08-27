@@ -932,4 +932,7 @@
   <data name="VideoTrimModeTooltip" xml:space="preserve">
     <value>Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video.</value>
   </data>
+  <data name="TaskRetry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
 </root>

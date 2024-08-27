@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,20 +18,22 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
     public interface ITwitchTask : INotifyPropertyChanged
     {
-        TaskData Info { get; set; }
+        TaskData Info { get; }
         int Progress { get; }
         TwitchTaskStatus Status { get; }
         string DisplayStatus { get; }
         string StatusImage { get; }
-        CancellationTokenSource TokenSource { get; set; }
+        CancellationTokenSource TokenSource { get; }
         ITwitchTask DependantTask { get; set; }
         string TaskType { get; }
-        TwitchTaskException Exception { get; }
+        Exception Exception { get; }
         string OutputFile { get; }
         bool CanCancel { get; }
+        bool CanReinitialize { get; }
 
         Task RunAsync();
         void Cancel();
         bool CanRun();
+        void Reinitialize();
     }
 }

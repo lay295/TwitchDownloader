@@ -933,4 +933,7 @@
   <data name="VideoTrimModeTooltip" xml:space="preserve">
     <value>Иногда обрезанное видео может испытывать проблемы с заиканьем в первых/последних нескольких секунд. Безопасная обрезка гарантирует отсутствие заикания, но может немного удлинить видео.</value>
   </data>
+  <data name="TaskRetry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
 </root>

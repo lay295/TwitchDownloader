@@ -248,15 +248,15 @@ namespace TwitchDownloaderWPF
         {
             var taskException = task.Exception;
 
-            if (taskException?.Exception == null)
+            if (taskException is null)
             {
                 return;
             }
 
-            var errorMessage = taskException.Exception.Message;
+            var errorMessage = taskException.Message;
             if (Settings.Default.VerboseErrors)
             {
-                errorMessage = taskException.Exception.ToString();
+                errorMessage = taskException.ToString();
             }
 
             MessageBox.Show(Application.Current.MainWindow!, errorMessage, Translations.Strings.MessageBoxTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -304,6 +304,34 @@ namespace TwitchDownloaderWPF
             }
 
             FileService.OpenExplorerForFile(new FileInfo(task.OutputFile));
+        }
+
+        private void BtnRetryTask_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button { DataContext: ITwitchTask task })
+            {
+                return;
+            }
+
+            RetryTask(task);
+        }
+
+        private void MenuItemTaskRetry_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            {
+                return;
+            }
+
+            RetryTask(task);
+        }
+
+        private static void RetryTask(ITwitchTask task)
+        {
+            if (task.CanReinitialize)
+            {
+                task.Reinitialize();
+            }
         }
     }
 }
