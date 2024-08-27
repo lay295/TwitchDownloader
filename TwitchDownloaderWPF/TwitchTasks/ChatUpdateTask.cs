@@ -44,7 +44,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public ChatUpdateOptions UpdateOptions { get; init; }
         public CancellationTokenSource TokenSource { get; private set; } = new();
-        public ITwitchTask DependantTask { get; set; }
+        public ITwitchTask DependantTask { get; init; }
         public string TaskType { get; } = Translations.Strings.ChatUpdate;
 
         private Exception _exception;
@@ -159,10 +159,8 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 Exception = ex;
                 CanReinitialize = true;
             }
-            updater = null;
             TokenSource.Dispose();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            GC.Collect(-1, GCCollectionMode.Default, false);
         }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)

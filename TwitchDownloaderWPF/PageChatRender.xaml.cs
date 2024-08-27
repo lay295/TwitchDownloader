@@ -684,7 +684,7 @@ namespace TwitchDownloaderWPF
                 UpdateActionButtons(false);
 
                 currentRender.Dispose();
-                GC.Collect(2, GCCollectionMode.Default, false);
+                GC.Collect();
             }
         }
 

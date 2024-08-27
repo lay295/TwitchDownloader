@@ -44,7 +44,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public VideoDownloadOptions DownloadOptions { get; init; }
         public CancellationTokenSource TokenSource { get; private set; } = new();
-        public ITwitchTask DependantTask { get; set; }
+        public ITwitchTask DependantTask { get; init; }
         public string TaskType { get; } = Translations.Strings.VodDownload;
 
         private Exception _exception;
@@ -158,10 +158,8 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 Exception = ex;
                 CanReinitialize = true;
             }
-            downloader = null;
             TokenSource.Dispose();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            GC.Collect(-1, GCCollectionMode.Default, false);
         }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)

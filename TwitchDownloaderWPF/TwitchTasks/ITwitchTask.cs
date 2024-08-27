@@ -24,7 +24,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         string DisplayStatus { get; }
         string StatusImage { get; }
         CancellationTokenSource TokenSource { get; }
-        ITwitchTask DependantTask { get; set; }
+        ITwitchTask DependantTask { get; init; }
         string TaskType { get; }
         Exception Exception { get; }
         string OutputFile { get; }
