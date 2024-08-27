@@ -158,7 +158,6 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 Exception = ex;
                 CanReinitialize = true;
             }
-            downloader = null;
             TokenSource.Dispose();
             GC.Collect();
             GC.WaitForPendingFinalizers();

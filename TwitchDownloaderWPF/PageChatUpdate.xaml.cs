@@ -587,7 +587,6 @@ namespace TwitchDownloaderWPF
                 _cancellationTokenSource.Dispose();
                 UpdateActionButtons(false);
 
-                currentUpdate = null;
                 GC.Collect();
             }
             catch (Exception ex)
