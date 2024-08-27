@@ -51,8 +51,7 @@ namespace TwitchDownloaderCore.Tools
 
         private void Execute()
         {
-            using var cts = new CancellationTokenSource();
-            _cancellationToken.Register(PropagateCancel, cts);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken);
 
             while (!_videoPartsQueue.IsEmpty)
             {
@@ -79,15 +78,6 @@ namespace TwitchDownloaderCore.Tools
 
                 Thread.Sleep(Random.Shared.Next(50, 150));
             }
-        }
-
-        private static void PropagateCancel(object tokenSourceToCancel)
-        {
-            try
-            {
-                (tokenSourceToCancel as CancellationTokenSource)?.Cancel();
-            }
-            catch (ObjectDisposedException) { }
         }
 
         /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
