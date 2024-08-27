@@ -17,7 +17,7 @@ namespace TwitchDownloaderWPF
     public partial class PageQueue : Page
     {
         public static readonly object taskLock = new object();
-        public static ObservableCollection<ITwitchTask> taskList { get; } = new ObservableCollection<ITwitchTask>();
+        public static ObservableCollection<TwitchTask> taskList { get; } = new();
         private static readonly BackgroundWorker taskManager = new BackgroundWorker();
 
         public PageQueue()
@@ -198,7 +198,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnCancelTask_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button { DataContext: ITwitchTask task })
+            if (sender is not Button { DataContext: TwitchTask task })
             {
                 return;
             }
@@ -208,7 +208,7 @@ namespace TwitchDownloaderWPF
 
         private void MenuItemCancelTask_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            if (sender is not MenuItem { DataContext: TwitchTask task })
             {
                 return;
             }
@@ -216,7 +216,7 @@ namespace TwitchDownloaderWPF
             CancelTask(task);
         }
 
-        private static void CancelTask(ITwitchTask task)
+        private static void CancelTask(TwitchTask task)
         {
             if (task.CanCancel)
             {
@@ -226,7 +226,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnTaskError_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button { DataContext: ITwitchTask task })
+            if (sender is not Button { DataContext: TwitchTask task })
             {
                 return;
             }
@@ -236,7 +236,7 @@ namespace TwitchDownloaderWPF
 
         private void MenuItemTaskError_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            if (sender is not MenuItem { DataContext: TwitchTask task })
             {
                 return;
             }
@@ -244,7 +244,7 @@ namespace TwitchDownloaderWPF
             ShowTaskException(task);
         }
 
-        private static void ShowTaskException(ITwitchTask task)
+        private static void ShowTaskException(TwitchTask task)
         {
             var taskException = task.Exception;
 
@@ -264,7 +264,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnRemoveTask_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button { DataContext: ITwitchTask task })
+            if (sender is not Button { DataContext: TwitchTask task })
             {
                 return;
             }
@@ -274,7 +274,7 @@ namespace TwitchDownloaderWPF
 
         private void MenuItemRemoveTask_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            if (sender is not MenuItem { DataContext: TwitchTask task })
             {
                 return;
             }
@@ -282,7 +282,7 @@ namespace TwitchDownloaderWPF
             RemoveTask(task);
         }
 
-        private static void RemoveTask(ITwitchTask task)
+        private static void RemoveTask(TwitchTask task)
         {
             if (task.CanRun() || task.Status is TwitchTaskStatus.Running or TwitchTaskStatus.Waiting)
             {
@@ -298,7 +298,7 @@ namespace TwitchDownloaderWPF
 
         private void MenuItemOpenTaskFolder_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            if (sender is not MenuItem { DataContext: TwitchTask task })
             {
                 return;
             }
@@ -308,7 +308,7 @@ namespace TwitchDownloaderWPF
 
         private void BtnRetryTask_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button { DataContext: ITwitchTask task })
+            if (sender is not Button { DataContext: TwitchTask task })
             {
                 return;
             }
@@ -318,7 +318,7 @@ namespace TwitchDownloaderWPF
 
         private void MenuItemTaskRetry_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not MenuItem { DataContext: ITwitchTask task })
+            if (sender is not MenuItem { DataContext: TwitchTask task })
             {
                 return;
             }
@@ -326,7 +326,7 @@ namespace TwitchDownloaderWPF
             RetryTask(task);
         }
 
-        private static void RetryTask(ITwitchTask task)
+        private static void RetryTask(TwitchTask task)
         {
             if (task.CanReinitialize)
             {
