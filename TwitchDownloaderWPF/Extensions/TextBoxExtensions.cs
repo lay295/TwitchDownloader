@@ -18,6 +18,11 @@ namespace TwitchDownloaderWPF.Extensions
                 return false;
             }
 
+            if (textBox.IsSelectionActive)
+            {
+                textBox.Text = textBox.Text.Remove(caretPos, textBox.SelectionLength);
+            }
+
             textBox.Text = textBox.Text.Insert(caretPos, textToInsert);
             textBox.CaretIndex = caretPos + textToInsert.Length;
             return true;
