@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
 using HandyControl.Data;
+using TwitchDownloaderWPF.Extensions;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -321,6 +325,34 @@ namespace TwitchDownloaderWPF
                 .Cast<CheckComboBoxItem>()
                 .Sum(item => (int)item.Tag);
             Settings.Default.LogLevels = newLogLevel;
+        }
+
+        private void FileNameParameter_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!IsInitialized || sender is not Run { Text: var parameter })
+                return;
+
+            var focusedElement = Keyboard.FocusedElement;
+            var textBox = GetTemplateTextBox(focusedElement);
+            if (textBox.TryInsertAtCaret(parameter))
+            {
+                e.Handled = true;
+            }
+        }
+
+        [return: MaybeNull]
+        private TextBox GetTemplateTextBox(IInputElement inputElement)
+        {
+            if (ReferenceEquals(inputElement, TextVodTemplate))
+                return TextVodTemplate;
+
+            if (ReferenceEquals(inputElement, TextClipTemplate))
+                return TextClipTemplate;
+
+            if (ReferenceEquals(inputElement, TextChatTemplate))
+                return TextChatTemplate;
+
+            return null;
         }
     }
 }
