@@ -1014,7 +1014,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The default handling for file collisions in the task queue. If a choice has already been remembered for the session, an application restart will be required to override it..
+        ///   Looks up a localized string similar to The default handling for file collisions in the task queue. If a choice has already been remembered for the current session, an application restart will be required to override it..
         /// </summary>
         public static string FileCollisionBehaviorTooltip {
             get {

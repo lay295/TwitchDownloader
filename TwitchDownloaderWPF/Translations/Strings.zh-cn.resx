@@ -988,7 +988,7 @@
     <value>File Collision Behavior</value>
   </data>
   <data name="FileCollisionBehaviorTooltip" xml:space="preserve">
-    <value>The default handling for file collisions in the task queue. If a choice has already been remembered for the session, an application restart will be required to override it.</value>
+    <value>The default handling for file collisions in the task queue. If a choice has already been remembered for the current session, an application restart will be required to override it.</value>
   </data>
   <data name="FileCollisionBehaviorAsk" xml:space="preserve">
     <value>Ask</value>
