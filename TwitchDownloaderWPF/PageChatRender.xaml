@@ -193,8 +193,23 @@
                     <TextBlock Text="{lex:Loc FfmpegOutputArguments}" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"></TextBlock>
                     <TextBox x:Name="textFfmpegOutput" LostFocus="textFfmpegOutput_LostFocus" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"></TextBox>
                     <Button HorizontalAlignment="Left" Content="{lex:Loc FfmpegReset}" Margin="0,6,0,0" Click="btnResetFfmpeg_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"></Button>
-                    <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppText}">
-                        <Run Text="{lex:Loc AvailableParameters}" /> <Run Text="{lex:Loc FfmpegParameters}" FontWeight="Bold" />
+                    <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppText}" TextWrapping="Wrap">
+                        <Run Text="{lex:Loc AvailableParameters}" />
+                        <Run MouseDown="FfmpegParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
+                            {fps}
+                        </Run>
+                        <Run MouseDown="FfmpegParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
+                            {height}
+                        </Run>
+                        <Run MouseDown="FfmpegParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
+                            {width}
+                        </Run>
+                        <Run MouseDown="FfmpegParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
+                            {max_int}
+                        </Run>
+                        <Run MouseDown="FfmpegParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
+                            {save_path}
+                        </Run>
                     </TextBlock>
                     <TextBlock>
                 <Hyperlink NavigateUri="https://ffmpeg.org/ffmpeg.html" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}">
