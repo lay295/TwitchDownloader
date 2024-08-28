@@ -969,6 +969,60 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Collision Behavior.
+        /// </summary>
+        public static string FileCollisionBehavior {
+            get {
+                return ResourceManager.GetString("FileCollisionBehavior", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ask.
+        /// </summary>
+        public static string FileCollisionBehaviorAsk {
+            get {
+                return ResourceManager.GetString("FileCollisionBehaviorAsk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string FileCollisionBehaviorCancel {
+            get {
+                return ResourceManager.GetString("FileCollisionBehaviorCancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overwrite.
+        /// </summary>
+        public static string FileCollisionBehaviorOverwrite {
+            get {
+                return ResourceManager.GetString("FileCollisionBehaviorOverwrite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rename.
+        /// </summary>
+        public static string FileCollisionBehaviorRename {
+            get {
+                return ResourceManager.GetString("FileCollisionBehaviorRename", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The default handling for file collisions in the task queue. If a choice has already been remembered for the current session, an application restart will be required to override it..
+        /// </summary>
+        public static string FileCollisionBehaviorTooltip {
+            get {
+                return ResourceManager.GetString("FileCollisionBehaviorTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The display name of the channel which owns the video/clip/chat..
         /// </summary>
         public static string FilenameParameterChannelTooltip {

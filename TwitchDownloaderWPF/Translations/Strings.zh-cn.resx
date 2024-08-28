@@ -984,4 +984,22 @@
   <data name="FilenameParameterGameTooltip" xml:space="preserve">
     <value>The display name of the primary game/category in the video/clip/chat.</value>
   </data>
+  <data name="FileCollisionBehavior" xml:space="preserve">
+    <value>File Collision Behavior</value>
+  </data>
+  <data name="FileCollisionBehaviorTooltip" xml:space="preserve">
+    <value>The default handling for file collisions in the task queue. If a choice has already been remembered for the current session, an application restart will be required to override it.</value>
+  </data>
+  <data name="FileCollisionBehaviorAsk" xml:space="preserve">
+    <value>Ask</value>
+  </data>
+  <data name="FileCollisionBehaviorOverwrite" xml:space="preserve">
+    <value>Overwrite</value>
+  </data>
+  <data name="FileCollisionBehaviorRename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="FileCollisionBehaviorCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
 </root>

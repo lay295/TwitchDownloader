@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchDownloaderWPF"
+        xmlns:model="clr-namespace:TwitchDownloaderWPF.Models"
         xmlns:behave="clr-namespace:TwitchDownloaderWPF.Behaviors"
         xmlns:lex="http://wpflocalizeextension.codeplex.com"
         lex:LocalizeDictionary.DesignCulture=""
@@ -12,7 +13,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleGlobalSettings}" MinWidth="400" MinHeight="500" Width="500" Height="592" SizeToContent="Height" Initialized="Window_Initialized" Closing="Window_Closing" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
+        Title="{lex:Loc TitleGlobalSettings}" MinWidth="450" MinHeight="600" Width="500" Height="600" SizeToContent="Height" Initialized="Window_Initialized" Closing="Window_Closing" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
@@ -60,6 +61,40 @@
                 <fa:SvgAwesome Margin="3,0,1,-2" Icon="Solid_Language" Width="32" Height="26" Foreground="{DynamicResource AppText}" />
                 <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc ApplicationLanguage}"/><Hyperlink ToolTipService.ShowDuration="30000" NavigateUri="https://github.com/lay295/TwitchDownloader/blob/master/TwitchDownloaderWPF/README.md#localization" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc ApplicationLanguageTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 <ComboBox x:Name="ComboLocale" MinWidth="100" MaxWidth="330" HorizontalAlignment="Left" SelectionChanged="ComboLocale_OnSelectionChanged" Margin="3,0,3,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}">
+                    <Run Text="{lex:Loc FileCollisionBehavior}" />
+                    <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}">
+                        <Hyperlink.ToolTip>
+                            <Run Text="{lex:Loc FileCollisionBehaviorTooltip}" />
+                        </Hyperlink.ToolTip>
+                        <Run Text="(?)" />
+                    </Hyperlink>
+                    :
+                </TextBlock>
+                <ComboBox x:Name="ComboFileCollisionBehavior" SelectedIndex="0" MinWidth="100" HorizontalAlignment="Left" Margin="3,0,3,0" SelectionChanged="ComboFileCollisionBehavior_OnSelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                    <ComboBoxItem Content="{lex:Loc FileCollisionBehaviorAsk}">
+                        <ComboBoxItem.Tag>
+                            <model:CollisionBehavior>Prompt</model:CollisionBehavior>
+                        </ComboBoxItem.Tag>
+                    </ComboBoxItem>
+                    <ComboBoxItem Content="{lex:Loc FileCollisionBehaviorOverwrite}">
+                        <ComboBoxItem.Tag>
+                            <model:CollisionBehavior>Overwrite</model:CollisionBehavior>
+                        </ComboBoxItem.Tag>
+                    </ComboBoxItem>
+                    <ComboBoxItem Content="{lex:Loc FileCollisionBehaviorRename}">
+                        <ComboBoxItem.Tag>
+                            <model:CollisionBehavior>Rename</model:CollisionBehavior>
+                        </ComboBoxItem.Tag>
+                    </ComboBoxItem>
+                    <ComboBoxItem Content="{lex:Loc FileCollisionBehaviorCancel}">
+                        <ComboBoxItem.Tag>
+                            <model:CollisionBehavior>Cancel</model:CollisionBehavior>
+                        </ComboBoxItem.Tag>
+                    </ComboBoxItem>
+                </ComboBox>
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc MaximumThreadBandwidth}" /><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc MaximumThreadBandwidthTooltip}" /></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
