@@ -341,10 +341,21 @@ namespace TwitchDownloaderWPF
             if (textBox is null)
                 return;
 
-            if (textBox.TryInsertAtCaret(parameter))
+            var oldCaretPos = textBox.CaretIndex;
+            if (!textBox.TryInsertAtCaret(parameter))
+                return;
+
+            if (e.ChangedButton is MouseButton.Middle && oldCaretPos != -1)
             {
-                e.Handled = true;
+                // If we inserted a *_custom template, we can focus inside the quotation marks
+                var quoteIndex = parameter.LastIndexOf('"');
+                if (quoteIndex != -1)
+                {
+                    textBox.CaretIndex = oldCaretPos + quoteIndex;
+                }
             }
+
+            e.Handled = true;
         }
 
         [return: MaybeNull]
