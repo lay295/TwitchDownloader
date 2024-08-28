@@ -852,15 +852,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {fps} {height} {width} {max_int} {save_path}.
-        /// </summary>
-        public static string FfmpegParameters {
-            get {
-                return ResourceManager.GetString("FfmpegParameters", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Reset To Defaults.
         /// </summary>
         public static string FfmpegReset {

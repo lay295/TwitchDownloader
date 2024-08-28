@@ -287,10 +287,6 @@
   <data name="FfmpegOutputArguments" xml:space="preserve">
     <value>Argomenti di uscita:</value>
   </data>
-  <data name="FfmpegParameters" xml:space="preserve">
-    <value>{fps} {height} {width} {max_int} {save_path}</value>
-    <comment>Non tradurre</comment>
-  </data>
   <data name="FfmpegReset" xml:space="preserve">
     <value>Ripristina i valori di default</value>
   </data>
