@@ -87,7 +87,15 @@
                                             <Image MaxHeight="20" Margin="5,0" gif:ImageBehavior.AnimatedSource="{Binding StatusImage, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
                                         </StackPanel>
                                     </StackPanel>
-                                    <Button Grid.Column="2" Padding="7, 0" VerticalAlignment="Top" Height="24" FontSize="12" Content="X" Click="BtnRemoveTask_Click" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppTextDisabled}" BorderBrush="{DynamicResource AppElementBorder}" />
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                        <Button Padding="0" VerticalAlignment="Top" Width="22" Height="22" Margin="0, 0, 2, 0" Click="BtnMoveTaskUp_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+                                            <fa:SvgAwesome Icon="Solid_CaretUp" Foreground="{DynamicResource AppTextDisabled}" />
+                                        </Button>
+                                        <Button Padding="0" VerticalAlignment="Top" Width="22" Height="22" Margin="0, 0, 2, 0" Click="BtnMoveTaskDown_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+                                            <fa:SvgAwesome Icon="Solid_CaretDown" Foreground="{DynamicResource AppTextDisabled}" />
+                                        </Button>
+                                        <Button Padding="7, 0" VerticalAlignment="Top" Width="22" Height="22" FontSize="12" Content="X" Click="BtnRemoveTask_Click" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppTextDisabled}" BorderBrush="{DynamicResource AppElementBorder}" />
+                                    </StackPanel>
                                 </Grid>
                             </Border>
                         </DataTemplate>

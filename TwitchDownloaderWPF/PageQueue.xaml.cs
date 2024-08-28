@@ -333,5 +333,39 @@ namespace TwitchDownloaderWPF
                 task.Reinitialize();
             }
         }
+
+        private void BtnMoveTaskUp_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button { DataContext: TwitchTask task })
+            {
+                return;
+            }
+
+            lock (taskLock)
+            {
+                var index = taskList.IndexOf(task);
+                if (index < 1)
+                    return;
+
+                taskList.Move(index, index - 1);
+            }
+        }
+
+        private void BtnMoveTaskDown_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button { DataContext: TwitchTask task })
+            {
+                return;
+            }
+
+            lock (taskLock)
+            {
+                var index = taskList.IndexOf(task);
+                if (index == -1 || index == taskList.Count - 1)
+                    return;
+
+                taskList.Move(index, index + 1);
+            }
+        }
     }
 }
