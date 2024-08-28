@@ -743,6 +743,9 @@ namespace TwitchDownloaderWPF
 
         private void TextJson_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (!IsInitialized)
+                return;
+
             FileNames = textJson.Text.Split("&&", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             UpdateActionButtons(false);
         }
