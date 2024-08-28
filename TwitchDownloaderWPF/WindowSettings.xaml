@@ -108,10 +108,10 @@
                     {trim_start}
                 </Run>
                 <Run MouseDown="FileNameParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
-                    {trim_end}
+                    {trim_start_custom=""}
                 </Run>
                 <Run MouseDown="FileNameParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
-                    {trim_start_custom=""}
+                    {trim_end}
                 </Run>
                 <Run MouseDown="FileNameParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
                     {trim_end_custom=""}
