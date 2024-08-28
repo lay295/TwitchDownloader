@@ -969,6 +969,132 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The display name of the channel which owns the video/clip/chat..
+        /// </summary>
+        public static string FileNameParameterChannelTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterChannelTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The date that the video/clip was created in a customizable format..
+        /// </summary>
+        public static string FileNameParameterDateCustomTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterDateCustomTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The date that the video/clip was created in the format M-d-yy..
+        /// </summary>
+        public static string FileNameParameterDateTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterDateTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The display name of the primary game/category in the video/clip/chat..
+        /// </summary>
+        public static string FileNameParameterGameTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterGameTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The ID of the video/clip..
+        /// </summary>
+        public static string FileNameParameterIdTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterIdTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The length (including trim) of the video/clip/chat in a customizable format..
+        /// </summary>
+        public static string FileNameParameterLengthCustomTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterLengthCustomTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The length (including trim) of the video/clip/chat in the format hh-mm-ss..
+        /// </summary>
+        public static string FileNameParameterLengthTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterLengthTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A string of 11 random characters..
+        /// </summary>
+        public static string FileNameParameterRandomStringTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterRandomStringTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The title of the video/clip..
+        /// </summary>
+        public static string FileNameParameterTitleTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterTitleTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The end trim of the video/chat in a customizable format..
+        /// </summary>
+        public static string FileNameParameterTrimEndCustomTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterTrimEndCustomTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The end trim of the video/chat in the format hh-mm-ss..
+        /// </summary>
+        public static string FileNameParameterTrimEndTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterTrimEndTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The start trim of the video/chat in a customizable format..
+        /// </summary>
+        public static string FileNameParameterTrimStartCustomTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterTrimStartCustomTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The start trim of the video/chat in the format hh-mm-ss..
+        /// </summary>
+        public static string FileNameParameterTrimStartTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterTrimStartTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The amount of views the video/clip has..
+        /// </summary>
+        public static string FileNameParameterViewsTooltip {
+            get {
+                return ResourceManager.GetString("FileNameParameterViewsTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Not Found: .
         /// </summary>
         public static string FileNotFound {
