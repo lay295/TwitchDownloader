@@ -978,15 +978,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {title} {id} {date} {channel} {date_custom=&quot;&quot;} {random_string} {trim_start} {trim_end} {trim_start_custom=&quot;&quot;} {trim_end_custom=&quot;&quot;} {length} {length_custom=&quot;&quot;} {views} {game}.
-        /// </summary>
-        public static string FilenameTemplateParameters {
-            get {
-                return ResourceManager.GetString("FilenameTemplateParameters", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to File Not Found: .
         /// </summary>
         public static string FileNotFound {

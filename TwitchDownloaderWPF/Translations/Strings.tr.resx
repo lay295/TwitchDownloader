@@ -298,10 +298,6 @@
   <data name="FfzEmotes" xml:space="preserve">
     <value>FFZ Emojileri:</value>
   </data>
-  <data name="FilenameTemplateParameters" xml:space="preserve">
-    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
-    <comment>Do not translate</comment>
-  </data>
   <data name="FontColor" xml:space="preserve">
     <value>Font Rengi:</value>
   </data>
