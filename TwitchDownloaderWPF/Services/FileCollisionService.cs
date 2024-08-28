@@ -4,40 +4,36 @@ using System.IO;
 using System.Windows;
 using Ookii.Dialogs.Wpf;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderWPF.Models;
+using TwitchDownloaderWPF.Properties;
 
 namespace TwitchDownloaderWPF.Services
 {
     public static class FileCollisionService
     {
-        private enum CollisionCommand
-        {
-            Prompt,
-            Overwrite,
-            Rename,
-            Cancel
-        }
-
-        private static CollisionCommand _collisionCommand = CollisionCommand.Prompt;
+        private static CollisionBehavior? _sessionCollisionBehavior;
 
         [return: MaybeNull]
         public static FileInfo HandleCollisionCallback(FileInfo fileInfo, Window owner)
         {
-            if (_collisionCommand is not CollisionCommand.Prompt)
+            var collisionBehavior = _sessionCollisionBehavior ?? (CollisionBehavior)Settings.Default.FileCollisionBehavior;
+
+            if (collisionBehavior is not CollisionBehavior.Prompt)
             {
-                return GetResult(fileInfo, _collisionCommand);
+                return GetResult(fileInfo, collisionBehavior);
             }
 
             var result = ShowDialog(fileInfo, owner, out var rememberChoice);
 
             if (rememberChoice)
             {
-                _collisionCommand = result;
+                _sessionCollisionBehavior = result;
             }
 
             return GetResult(fileInfo, result);
         }
 
-        private static CollisionCommand ShowDialog(FileInfo fileInfo, Window owner, out bool rememberChoice)
+        private static CollisionBehavior ShowDialog(FileInfo fileInfo, Window owner, out bool rememberChoice)
         {
             using var dialog = new TaskDialog();
             dialog.WindowTitle = Translations.Strings.TitleFileAlreadyExists;
@@ -70,26 +66,26 @@ namespace TwitchDownloaderWPF.Services
             rememberChoice = dialog.IsVerificationChecked;
 
             if (buttonResult == overwriteButton)
-                return CollisionCommand.Overwrite;
+                return CollisionBehavior.Overwrite;
 
             if (buttonResult == renameButton)
-                return CollisionCommand.Rename;
+                return CollisionBehavior.Rename;
 
             if (buttonResult == cancelButton)
-                return CollisionCommand.Cancel;
+                return CollisionBehavior.Cancel;
 
             // This should never happen
             throw new ArgumentOutOfRangeException();
         }
 
         [return: MaybeNull]
-        private static FileInfo GetResult(FileInfo fileInfo, CollisionCommand command)
+        private static FileInfo GetResult(FileInfo fileInfo, CollisionBehavior command)
         {
             return command switch
             {
-                CollisionCommand.Overwrite => fileInfo,
-                CollisionCommand.Rename => FilenameService.GetNonCollidingName(fileInfo),
-                CollisionCommand.Cancel => null,
+                CollisionBehavior.Overwrite => fileInfo,
+                CollisionBehavior.Rename => FilenameService.GetNonCollidingName(fileInfo),
+                CollisionBehavior.Cancel => null,
                 _ => throw new ArgumentOutOfRangeException(nameof(command), command, null)
             };
         }
