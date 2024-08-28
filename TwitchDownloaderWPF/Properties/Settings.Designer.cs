@@ -969,5 +969,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["PreferredQuality"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int FileCollisionBehavior {
+            get {
+                return ((int)(this["FileCollisionBehavior"]));
+            }
+            set {
+                this["FileCollisionBehavior"] = value;
+            }
+        }
     }
 }

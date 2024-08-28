@@ -93,6 +93,17 @@ namespace TwitchDownloaderWPF
                     ComboLogLevels.SelectedItems.Add(item);
                 }
             }
+
+            var currentCollisionBehavior = (CollisionBehavior)Settings.Default.FileCollisionBehavior;
+            for (var i = 0; i < ComboFileCollisionBehavior.Items.Count; i++)
+            {
+                var current = (ComboBoxItem)ComboFileCollisionBehavior.Items[i]!;
+                if (currentCollisionBehavior == (CollisionBehavior)current.Tag)
+                {
+                    ComboFileCollisionBehavior.SelectedIndex = i;
+                    break;
+                }
+            }
         }
 
         private void BtnClearCache_Click(object sender, RoutedEventArgs e)
@@ -325,6 +336,15 @@ namespace TwitchDownloaderWPF
                 .Cast<CheckComboBoxItem>()
                 .Sum(item => (int)item.Tag);
             Settings.Default.LogLevels = newLogLevel;
+        }
+
+        private void ComboFileCollisionBehavior_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            var behavior = (ComboBoxItem)ComboFileCollisionBehavior.SelectedItem;
+            Settings.Default.FileCollisionBehavior = (int)behavior.Tag;
         }
 
         private void FilenameParameter_MouseDown(object sender, MouseButtonEventArgs e)
