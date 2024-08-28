@@ -755,6 +755,9 @@ namespace TwitchDownloaderWPF
             if (!IsInitialized || sender is not Run { Text: var parameter })
                 return;
 
+            if (e.ChangedButton is not MouseButton.Left and not MouseButton.Middle)
+                return;
+
             var focusedElement = Keyboard.FocusedElement;
             var textBox = GetFfmpegTemplateTextBox(focusedElement);
 
