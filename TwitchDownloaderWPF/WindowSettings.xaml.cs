@@ -334,6 +334,10 @@ namespace TwitchDownloaderWPF
 
             var focusedElement = Keyboard.FocusedElement;
             var textBox = GetTemplateTextBox(focusedElement);
+
+            if (textBox is null)
+                return;
+
             if (textBox.TryInsertAtCaret(parameter))
             {
                 e.Handled = true;
