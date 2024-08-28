@@ -327,7 +327,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.LogLevels = newLogLevel;
         }
 
-        private void FileNameParameter_MouseDown(object sender, MouseButtonEventArgs e)
+        private void FilenameParameter_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (!IsInitialized || sender is not Run { Text: var parameter })
                 return;
@@ -336,7 +336,7 @@ namespace TwitchDownloaderWPF
                 return;
 
             var focusedElement = Keyboard.FocusedElement;
-            var textBox = GetTemplateTextBox(focusedElement);
+            var textBox = GetFilenameTemplateTextBox(focusedElement);
 
             if (textBox is null)
                 return;
@@ -359,7 +359,7 @@ namespace TwitchDownloaderWPF
         }
 
         [return: MaybeNull]
-        private TextBox GetTemplateTextBox(IInputElement inputElement)
+        private TextBox GetFilenameTemplateTextBox(IInputElement inputElement)
         {
             if (ReferenceEquals(inputElement, TextVodTemplate))
                 return TextVodTemplate;

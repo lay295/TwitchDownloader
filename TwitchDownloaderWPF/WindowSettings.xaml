@@ -86,46 +86,46 @@
             </StackPanel>
             <TextBlock Margin="3,5,3,3" Foreground="{DynamicResource AppText}" TextWrapping="Wrap">
                 <Run Text="{lex:Loc AvailableParameters}" />
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterTitleTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterTitleTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {title}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterIdTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterIdTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {id}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterDateTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterDateTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {date}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterDateCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterDateCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {date_custom=""}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterChannelTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterChannelTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {channel}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterRandomStringTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterRandomStringTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {random_string}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterTrimStartTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterTrimStartTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {trim_start}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterTrimStartCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterTrimStartCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {trim_start_custom=""}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterTrimEndTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterTrimEndTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {trim_end}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterTrimEndCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterTrimEndCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {trim_end_custom=""}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterLengthTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterLengthTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {length}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterLengthCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterLengthCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {length_custom=""}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterViewsTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterViewsTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {views}
                 </Run>
-                <Run MouseDown="FileNameParameter_MouseDown" ToolTip="{lex:Loc FileNameParameterGameTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterGameTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {game}
                 </Run>
                 <LineBreak/>
