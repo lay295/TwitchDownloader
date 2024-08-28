@@ -96,10 +96,10 @@
                     {date}
                 </Run>
                 <Run MouseDown="FileNameParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
-                    {channel}
+                    {date_custom=""}
                 </Run>
                 <Run MouseDown="FileNameParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
-                    {date_custom=""}
+                    {channel}
                 </Run>
                 <Run MouseDown="FileNameParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
                     {random_string}
