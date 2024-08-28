@@ -13,7 +13,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleGlobalSettings}" MinWidth="400" MinHeight="500" Width="500" Height="592" SizeToContent="Height" Initialized="Window_Initialized" Closing="Window_Closing" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
+        Title="{lex:Loc TitleGlobalSettings}" MinWidth="450" MinHeight="600" Width="500" Height="600" SizeToContent="Height" Initialized="Window_Initialized" Closing="Window_Closing" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
@@ -64,32 +64,32 @@
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}">
-                    <Run Text="File Collision Behavior:" />
+                    <Run Text="{lex:Loc FileCollisionBehavior}" />
                     <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}">
                         <Hyperlink.ToolTip>
-                            <Run Text="The default handling for file collisions in the task queue. If a choice has already been remembered for the session, an application restart will be required to override it." />
+                            <Run Text="{lex:Loc FileCollisionBehaviorTooltip}" />
                         </Hyperlink.ToolTip>
                         <Run Text="(?)" />
                     </Hyperlink>
-                    <Run Text=":" />
+                    :
                 </TextBlock>
                 <ComboBox x:Name="ComboFileCollisionBehavior" SelectedIndex="0" MinWidth="100" HorizontalAlignment="Left" Margin="3,0,3,0" SelectionChanged="ComboFileCollisionBehavior_OnSelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
-                    <ComboBoxItem Content="Ask">
+                    <ComboBoxItem Content="{lex:Loc FileCollisionBehaviorAsk}">
                         <ComboBoxItem.Tag>
                             <model:CollisionBehavior>Prompt</model:CollisionBehavior>
                         </ComboBoxItem.Tag>
                     </ComboBoxItem>
-                    <ComboBoxItem Content="Overwrite">
+                    <ComboBoxItem Content="{lex:Loc FileCollisionBehaviorOverwrite}">
                         <ComboBoxItem.Tag>
                             <model:CollisionBehavior>Overwrite</model:CollisionBehavior>
                         </ComboBoxItem.Tag>
                     </ComboBoxItem>
-                    <ComboBoxItem Content="Rename">
+                    <ComboBoxItem Content="{lex:Loc FileCollisionBehaviorRename}">
                         <ComboBoxItem.Tag>
                             <model:CollisionBehavior>Rename</model:CollisionBehavior>
                         </ComboBoxItem.Tag>
                     </ComboBoxItem>
-                    <ComboBoxItem Content="Cancel">
+                    <ComboBoxItem Content="{lex:Loc FileCollisionBehaviorCancel}">
                         <ComboBoxItem.Tag>
                             <model:CollisionBehavior>Cancel</model:CollisionBehavior>
                         </ComboBoxItem.Tag>
