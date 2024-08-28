@@ -290,9 +290,12 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            if (!taskList.Remove(task))
+            lock (taskLock)
             {
-                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+                if (!taskList.Remove(task))
+                {
+                    MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
