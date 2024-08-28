@@ -297,10 +297,6 @@
   <data name="FfzEmotes" xml:space="preserve">
     <value>Emotes do FFZ:</value>
   </data>
-  <data name="FilenameTemplateParameters" xml:space="preserve">
-    <value>{title} {id} {date} {channel} {date_custom=""} {random_string} {trim_start} {trim_end} {trim_start_custom=""} {trim_end_custom=""} {length} {length_custom=""} {views} {game}</value>
-    <comment>Não traduza</comment>
-  </data>
   <data name="FontColor" xml:space="preserve">
     <value>Cor da Fonte:</value>
   </data>
@@ -946,5 +942,47 @@
   </data>
   <data name="UnableToGetChannelClipsMessage" xml:space="preserve">
     <value>Unable to get channel clips: {0}</value>
+  </data>
+  <data name="FilenameParameterTitleTooltip" xml:space="preserve">
+    <value>The title of the video/clip.</value>
+  </data>
+  <data name="FilenameParameterIdTooltip" xml:space="preserve">
+    <value>The ID of the video/clip.</value>
+  </data>
+  <data name="FilenameParameterDateTooltip" xml:space="preserve">
+    <value>The date that the video/clip was created in the format M-d-yy.</value>
+  </data>
+  <data name="FilenameParameterDateCustomTooltip" xml:space="preserve">
+    <value>The date that the video/clip was created in a customizable format.</value>
+  </data>
+  <data name="FilenameParameterChannelTooltip" xml:space="preserve">
+    <value>The display name of the channel which owns the video/clip/chat.</value>
+  </data>
+  <data name="FilenameParameterRandomStringTooltip" xml:space="preserve">
+    <value>A string of 11 random characters.</value>
+  </data>
+  <data name="FilenameParameterTrimStartTooltip" xml:space="preserve">
+    <value>The start trim of the video/chat in the format hh-mm-ss.</value>
+  </data>
+  <data name="FilenameParameterTrimStartCustomTooltip" xml:space="preserve">
+    <value>The start trim of the video/chat in a customizable format.</value>
+  </data>
+  <data name="FilenameParameterTrimEndTooltip" xml:space="preserve">
+    <value>The end trim of the video/chat in the format hh-mm-ss.</value>
+  </data>
+  <data name="FilenameParameterTrimEndCustomTooltip" xml:space="preserve">
+    <value>The end trim of the video/chat in a customizable format.</value>
+  </data>
+  <data name="FilenameParameterLengthTooltip" xml:space="preserve">
+    <value>The length (including trim) of the video/clip/chat in the format hh-mm-ss.</value>
+  </data>
+  <data name="FilenameParameterLengthCustomTooltip" xml:space="preserve">
+    <value>The length (including trim) of the video/clip/chat in a customizable format.</value>
+  </data>
+  <data name="FilenameParameterViewsTooltip" xml:space="preserve">
+    <value>The amount of views the video/clip has.</value>
+  </data>
+  <data name="FilenameParameterGameTooltip" xml:space="preserve">
+    <value>The display name of the primary game/category in the video/clip/chat.</value>
   </data>
 </root>

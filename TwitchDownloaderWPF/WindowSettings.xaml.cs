@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
 using HandyControl.Data;
+using TwitchDownloaderWPF.Extensions;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -321,6 +325,52 @@ namespace TwitchDownloaderWPF
                 .Cast<CheckComboBoxItem>()
                 .Sum(item => (int)item.Tag);
             Settings.Default.LogLevels = newLogLevel;
+        }
+
+        private void FilenameParameter_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!IsInitialized || sender is not Run { Text: var parameter })
+                return;
+
+            if (e.ChangedButton is not MouseButton.Left and not MouseButton.Middle)
+                return;
+
+            var focusedElement = Keyboard.FocusedElement;
+            var textBox = GetFilenameTemplateTextBox(focusedElement);
+
+            if (textBox is null)
+                return;
+
+            var oldCaretPos = textBox.CaretIndex;
+            if (!textBox.TryInsertAtCaret(parameter))
+                return;
+
+            if (e.ChangedButton is MouseButton.Middle && oldCaretPos != -1)
+            {
+                // If we inserted a *_custom template, we can focus inside the quotation marks
+                var quoteIndex = parameter.LastIndexOf('"');
+                if (quoteIndex != -1)
+                {
+                    textBox.CaretIndex = oldCaretPos + quoteIndex;
+                }
+            }
+
+            e.Handled = true;
+        }
+
+        [return: MaybeNull]
+        private TextBox GetFilenameTemplateTextBox(IInputElement inputElement)
+        {
+            if (ReferenceEquals(inputElement, TextVodTemplate))
+                return TextVodTemplate;
+
+            if (ReferenceEquals(inputElement, TextClipTemplate))
+                return TextClipTemplate;
+
+            if (ReferenceEquals(inputElement, TextChatTemplate))
+                return TextChatTemplate;
+
+            return null;
         }
     }
 }
