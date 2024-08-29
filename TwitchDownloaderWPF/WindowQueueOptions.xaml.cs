@@ -708,9 +708,16 @@ namespace TwitchDownloaderWPF
             if (dialog.ShowDialog(this).GetValueOrDefault())
             {
                 textFolder.Text = dialog.SelectedPath;
-                Settings.Default.QueueFolder = textFolder.Text;
-                Settings.Default.Save();
             }
+        }
+
+        private void TextFolder_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.QueueFolder = textFolder.Text;
+            Settings.Default.Save();
         }
 
         private void checkChat_Checked(object sender, RoutedEventArgs e)
