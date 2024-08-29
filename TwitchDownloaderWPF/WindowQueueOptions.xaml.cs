@@ -126,7 +126,21 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        TwitchHelper.CreateDirectory(folderPath);
+                        try
+                        {
+                            TwitchHelper.CreateDirectory(folderPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(this, Translations.Strings.InvalidFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+
+                            if (Settings.Default.VerboseErrors)
+                            {
+                                MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+
+                            return;
+                        }
                     }
 
                     VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text);
@@ -226,7 +240,21 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        TwitchHelper.CreateDirectory(folderPath);
+                        try
+                        {
+                            TwitchHelper.CreateDirectory(folderPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(this, Translations.Strings.InvalidFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+
+                            if (Settings.Default.VerboseErrors)
+                            {
+                                MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+
+                            return;
+                        }
                     }
 
                     ClipDownloadOptions downloadOptions = new ClipDownloadOptions
@@ -330,7 +358,21 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        TwitchHelper.CreateDirectory(folderPath);
+                        try
+                        {
+                            TwitchHelper.CreateDirectory(folderPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(this, Translations.Strings.InvalidFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+
+                            if (Settings.Default.VerboseErrors)
+                            {
+                                MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+
+                            return;
+                        }
                     }
 
                     ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
@@ -387,7 +429,21 @@ namespace TwitchDownloaderWPF
                     string folderPath = textFolder.Text;
                     if (!Directory.Exists(folderPath))
                     {
-                        TwitchHelper.CreateDirectory(folderPath);
+                        try
+                        {
+                            TwitchHelper.CreateDirectory(folderPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(this, Translations.Strings.InvalidFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+
+                            if (Settings.Default.VerboseErrors)
+                            {
+                                MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+
+                            return;
+                        }
                     }
 
                     ChatUpdateOptions chatOptions = MainWindow.pageChatUpdate.GetOptions(null);
@@ -423,7 +479,21 @@ namespace TwitchDownloaderWPF
                     {
                         if (!Directory.Exists(folderPath))
                         {
-                            TwitchHelper.CreateDirectory(folderPath);
+                            try
+                            {
+                                TwitchHelper.CreateDirectory(folderPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(this, Translations.Strings.InvalidFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+
+                                if (Settings.Default.VerboseErrors)
+                                {
+                                    MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                                }
+
+                                return;
+                            }
                         }
 
                         string fileFormat = chatRenderPage.comboFormat.SelectedItem.ToString()!;
@@ -466,7 +536,21 @@ namespace TwitchDownloaderWPF
             string folderPath = textFolder.Text;
             if (!Directory.Exists(folderPath))
             {
-                TwitchHelper.CreateDirectory(folderPath);
+                try
+                {
+                    TwitchHelper.CreateDirectory(folderPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, Translations.Strings.InvalidFolderPathMessage, Translations.Strings.InvalidFolderPath, MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                    return;
+                }
             }
 
             foreach (var taskData in _dataList)
@@ -624,9 +708,16 @@ namespace TwitchDownloaderWPF
             if (dialog.ShowDialog(this).GetValueOrDefault())
             {
                 textFolder.Text = dialog.SelectedPath;
-                Settings.Default.QueueFolder = textFolder.Text;
-                Settings.Default.Save();
             }
+        }
+
+        private void TextFolder_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.QueueFolder = textFolder.Text;
+            Settings.Default.Save();
         }
 
         private void checkChat_Checked(object sender, RoutedEventArgs e)
