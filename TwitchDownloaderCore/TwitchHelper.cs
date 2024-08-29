@@ -927,6 +927,7 @@ namespace TwitchDownloaderCore
             }
         }
 
+        /// <inheritdoc cref="Directory.CreateDirectory"/>
         public static DirectoryInfo CreateDirectory(string path)
         {
             DirectoryInfo directoryInfo = Directory.CreateDirectory(path);
