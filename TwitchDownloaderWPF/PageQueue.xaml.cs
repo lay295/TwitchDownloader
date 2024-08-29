@@ -290,9 +290,12 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            if (!taskList.Remove(task))
+            lock (taskLock)
             {
-                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+                if (!taskList.Remove(task))
+                {
+                    MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.TaskCouldNotBeRemoved, Translations.Strings.UnknownErrorOccurred, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -331,6 +334,40 @@ namespace TwitchDownloaderWPF
             if (task.CanReinitialize)
             {
                 task.Reinitialize();
+            }
+        }
+
+        private void BtnMoveTaskUp_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button { DataContext: TwitchTask task })
+            {
+                return;
+            }
+
+            lock (taskLock)
+            {
+                var index = taskList.IndexOf(task);
+                if (index < 1)
+                    return;
+
+                taskList.Move(index, index - 1);
+            }
+        }
+
+        private void BtnMoveTaskDown_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button { DataContext: TwitchTask task })
+            {
+                return;
+            }
+
+            lock (taskLock)
+            {
+                var index = taskList.IndexOf(task);
+                if (index == -1 || index == taskList.Count - 1)
+                    return;
+
+                taskList.Move(index, index + 1);
             }
         }
     }
