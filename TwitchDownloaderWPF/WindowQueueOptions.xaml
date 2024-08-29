@@ -30,7 +30,7 @@
         <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1">
             <WrapPanel Orientation="Horizontal">
                 <TextBlock Text="{lex:Loc DownloadFolder}" HorizontalAlignment="Left" Margin="0,6,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}"/>
-                <TextBox x:Name="textFolder" HorizontalAlignment="Left" Height="23" Margin="3,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" MinWidth="300" TextChanged="ring preferredQuality })" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <TextBox x:Name="textFolder" HorizontalAlignment="Left" Height="23" Margin="3,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" MinWidth="300" TextChanged="TextFolder_OnTextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 <Button x:Name="btnFolder" Content="{lex:Loc Browse}" HorizontalAlignment="Left" Margin="3,0,0,0" VerticalAlignment="Top" MinWidth="60" Click="btnFolder_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
             </WrapPanel>
             <CheckBox x:Name="checkVideo" Content="{lex:Loc DownloadVideo}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Checked="CheckVideo_OnChecked" Unchecked="CheckVideo_OnChecked" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}"/>
