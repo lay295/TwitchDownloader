@@ -99,7 +99,7 @@ namespace TwitchDownloaderWPF
 #endif
 
             // TODO: extract FFmpeg handling to a dedicated service
-            if (!File.Exists("ffmpeg.exe"))
+            if (!File.Exists("ffmpeg.exe") || File.GetLastWriteTime("ffmpeg.exe") < DateTime.Now - TimeSpan.FromDays(365))
             {
                 var oldTitle = Title;
                 try
