@@ -99,12 +99,12 @@ namespace TwitchDownloaderWPF
 #endif
 
             // TODO: extract FFmpeg handling to a dedicated service
-            if (!File.Exists("ffmpeg.exe"))
+            if (!File.Exists("ffmpeg.exe") || File.GetLastWriteTime("ffmpeg.exe") < DateTime.Now - TimeSpan.FromDays(365))
             {
                 var oldTitle = Title;
                 try
                 {
-                    await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full, new FfmpegDownloadProgress());
+                    await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, new FfmpegDownloadProgress());
 
                     // Flash the window to signify that FFmpeg has been downloaded
                     FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));

@@ -37,15 +37,14 @@ namespace TwitchDownloaderCLI.Modes
 
             using var progressHandler = new XabeProgressHandler(progress);
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full, progressHandler).GetAwaiter().GetResult();
-                return;
-            }
-
             FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, progressHandler).GetAwaiter().GetResult();
 
             Console.WriteLine();
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
 
             try
             {
