@@ -334,7 +334,7 @@
     <value>JSON 文件：</value>
   </data>
   <data name="Length" xml:space="preserve">
-    <value>长度：</value>
+    <value>时长：</value>
   </data>
   <data name="ListOfVodsClips" xml:space="preserve">
     <value>点播 / 剪辑列表（每行一个）</value>
@@ -934,78 +934,78 @@
     <value>使用精确模式修剪的视频在前几秒或最后几秒可能会出现视频 / 音频卡顿。安全模式保证不会出现卡顿，但可能会导致视频稍长。</value>
   </data>
   <data name="TaskRetry" xml:space="preserve">
-    <value>Retry</value>
+    <value>重试</value>
   </data>
   <data name="UnableToGetChannelVideos" xml:space="preserve">
-    <value>Unable to Get Videos</value>
+    <value>无法获取视频</value>
   </data>
   <data name="UnableToGetChannelVideosMessage" xml:space="preserve">
-    <value>Unable to get channel videos: {0}</value>
+    <value>无法获取频道视频：{0}</value>
   </data>
   <data name="UnableToGetChannelClips" xml:space="preserve">
-    <value>Unable to Get Clips</value>
+    <value>无法获取剪辑</value>
   </data>
   <data name="UnableToGetChannelClipsMessage" xml:space="preserve">
-    <value>Unable to get channel clips: {0}</value>
+    <value>无法获取频道剪辑：{0}</value>
   </data>
   <data name="FilenameParameterTitleTooltip" xml:space="preserve">
-    <value>The title of the video/clip.</value>
+    <value>视频 / 剪辑的标题。</value>
   </data>
   <data name="FilenameParameterIdTooltip" xml:space="preserve">
-    <value>The ID of the video/clip.</value>
+    <value>视频 / 剪辑的 ID。</value>
   </data>
   <data name="FilenameParameterDateTooltip" xml:space="preserve">
-    <value>The date that the video/clip was created in the format M-d-yy.</value>
+    <value>视频 / 剪辑的创建日期，格式为 M-d-yy。</value>
   </data>
   <data name="FilenameParameterDateCustomTooltip" xml:space="preserve">
-    <value>The date that the video/clip was created in a customizable format.</value>
+    <value>视频 / 剪辑的创建日期，格式为自定义格式。</value>
   </data>
   <data name="FilenameParameterChannelTooltip" xml:space="preserve">
-    <value>The display name of the channel which owns the video/clip/chat.</value>
+    <value>拥有此视频 / 剪辑 / 聊天的频道的显示名称。</value>
   </data>
   <data name="FilenameParameterRandomStringTooltip" xml:space="preserve">
-    <value>A string of 11 random characters.</value>
+    <value>由 11 个随机字符组成的字符串。</value>
   </data>
   <data name="FilenameParameterTrimStartTooltip" xml:space="preserve">
-    <value>The start trim of the video/chat in the format hh-mm-ss.</value>
+    <value>视频 / 聊天的修剪开始时间，格式为 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterTrimStartCustomTooltip" xml:space="preserve">
-    <value>The start trim of the video/chat in a customizable format.</value>
+    <value>视频 / 聊天的修剪开始时间，格式为自定义格式。</value>
   </data>
   <data name="FilenameParameterTrimEndTooltip" xml:space="preserve">
-    <value>The end trim of the video/chat in the format hh-mm-ss.</value>
+    <value>视频 / 聊天的修剪结束时间，格式为 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterTrimEndCustomTooltip" xml:space="preserve">
-    <value>The end trim of the video/chat in a customizable format.</value>
+    <value>视频 / 聊天的修剪结束时间，格式为自定义格式。</value>
   </data>
   <data name="FilenameParameterLengthTooltip" xml:space="preserve">
-    <value>The length (including trim) of the video/clip/chat in the format hh-mm-ss.</value>
+    <value>视频 / 剪辑 / 聊天的时长（包括修剪），格式为 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterLengthCustomTooltip" xml:space="preserve">
-    <value>The length (including trim) of the video/clip/chat in a customizable format.</value>
+    <value>视频 / 剪辑 / 聊天的时长（包括修剪），格式为自定义格式。</value>
   </data>
   <data name="FilenameParameterViewsTooltip" xml:space="preserve">
-    <value>The amount of views the video/clip has.</value>
+    <value>视频 / 剪辑的观看次数。</value>
   </data>
   <data name="FilenameParameterGameTooltip" xml:space="preserve">
-    <value>The display name of the primary game/category in the video/clip/chat.</value>
+    <value>视频 / 剪辑 / 聊天中主要游戏 / 分类的显示名称。</value>
   </data>
   <data name="FileCollisionBehavior" xml:space="preserve">
-    <value>File Collision Behavior</value>
+    <value>文件冲突行为</value>
   </data>
   <data name="FileCollisionBehaviorTooltip" xml:space="preserve">
-    <value>The default handling for file collisions in the task queue. If a choice has already been remembered for the current session, an application restart will be required to override it.</value>
+    <value>任务队列中文件冲突的默认处理方式。如果当前会话中已经记住了选择，则需要重新启动应用程序才能覆盖它。</value>
   </data>
   <data name="FileCollisionBehaviorAsk" xml:space="preserve">
-    <value>Ask</value>
+    <value>询问</value>
   </data>
   <data name="FileCollisionBehaviorOverwrite" xml:space="preserve">
-    <value>Overwrite</value>
+    <value>覆盖</value>
   </data>
   <data name="FileCollisionBehaviorRename" xml:space="preserve">
-    <value>Rename</value>
+    <value>重新命名</value>
   </data>
   <data name="FileCollisionBehaviorCancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>取消</value>
   </data>
 </root>
