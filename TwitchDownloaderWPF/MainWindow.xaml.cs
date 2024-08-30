@@ -104,7 +104,7 @@ namespace TwitchDownloaderWPF
                 var oldTitle = Title;
                 try
                 {
-                    await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Full, new FfmpegDownloadProgress());
+                    await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, new FfmpegDownloadProgress());
 
                     // Flash the window to signify that FFmpeg has been downloaded
                     FlashTaskbarIconIfNotForeground(TimeSpan.FromSeconds(3));
