@@ -967,19 +967,19 @@
     <value>由 11 个随机字符组成的字符串。</value>
   </data>
   <data name="FilenameParameterTrimStartTooltip" xml:space="preserve">
-    <value>视频 / 聊天的修剪开始时间，格式为 HH-mm-ss。</value>
+    <value>视频 / 聊天的修剪开始时间，格式为 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterTrimStartCustomTooltip" xml:space="preserve">
     <value>视频 / 聊天的修剪开始时间，格式为自定义格式。</value>
   </data>
   <data name="FilenameParameterTrimEndTooltip" xml:space="preserve">
-    <value>视频 / 聊天的修剪结束时间，格式为 HH-mm-ss。</value>
+    <value>视频 / 聊天的修剪结束时间，格式为 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterTrimEndCustomTooltip" xml:space="preserve">
     <value>视频 / 聊天的修剪结束时间，格式为自定义格式。</value>
   </data>
   <data name="FilenameParameterLengthTooltip" xml:space="preserve">
-    <value>视频 / 剪辑 / 聊天的时长（包括修剪），格式为 HH-mm-ss.</value>
+    <value>视频 / 剪辑 / 聊天的时长（包括修剪），格式为 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterLengthCustomTooltip" xml:space="preserve">
     <value>视频 / 剪辑 / 聊天的时长（包括修剪），格式为自定义格式。</value>
