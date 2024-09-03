@@ -17,6 +17,7 @@ namespace TwitchDownloaderCore.Tools
         GiftedMany,
         GiftedSingle,
         ContinuingGift,
+        ContinuingAnonymousGift,
         GiftedAnonymous,
         PayingForward,
         ChannelPointHighlight,
@@ -104,8 +105,13 @@ namespace TwitchDownloaderCore.Tools
                 if (bodyWithoutName.StartsWith(" gifted a Tier"))
                     return HighlightType.GiftedSingle;
 
-                if (bodyWithoutName.StartsWith(" is continuing the Gift Sub"))
+                if (bodyWithoutName.StartsWith(" is continuing the Gift Sub they got from"))
+                {
+                    if (bodyWithoutName.EndsWith("from an anonymous user! "))
+                        return HighlightType.ContinuingAnonymousGift;
+
                     return HighlightType.ContinuingGift;
+                }
 
                 if (bodyWithoutName.StartsWith(" is paying forward the Gift they got from"))
                     return HighlightType.PayingForward;
@@ -162,7 +168,7 @@ namespace TwitchDownloaderCore.Tools
                 HighlightType.SubscribedPrime => _subscribedPrimeIcon ??= GenerateSvgIcon(SUBSCRIBED_PRIME_ICON_SVG, _purple),
                 HighlightType.GiftedSingle => _giftSingleIcon ??= GenerateSvgIcon(GIFTED_SINGLE_ICON_SVG, textColor),
                 HighlightType.GiftedMany => _giftManyIcon ??= GenerateGiftedManyIcon(),
-                HighlightType.GiftedAnonymous => _giftAnonymousIcon ??= GenerateSvgIcon(GIFTED_ANONYMOUS_ICON_SVG, textColor),
+                HighlightType.GiftedAnonymous or HighlightType.ContinuingAnonymousGift => _giftAnonymousIcon ??= GenerateSvgIcon(GIFTED_ANONYMOUS_ICON_SVG, textColor),
                 HighlightType.BitBadgeTierNotification => _bitBadgeTierNotificationIcon ??= GenerateSvgIcon(BIT_BADGE_TIER_NOTIFICATION_ICON_SVG, textColor),
                 HighlightType.WatchStreak => _watchStreakIcon ??= GenerateSvgIcon(WATCH_STREAK_ICON_SVG, textColor),
                 HighlightType.CharityDonation => _charityDonationIcon ??= GenerateSvgIcon(CHARITY_DONATION_ICON_SVG, textColor),
