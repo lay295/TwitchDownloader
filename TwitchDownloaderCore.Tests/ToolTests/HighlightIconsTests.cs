@@ -98,8 +98,12 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         // Special case, in separate method.
         // ContinuingGift
         [InlineData(
-            "{\"body\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"}],\"user_color\":\"#8A2BE2\",\"emoticons\":[]}",
+            "{\"body\":\"viewer8 is continuing the Gift Sub they got from viewer9! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is continuing the Gift Sub they got from viewer9! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"}],\"user_color\":\"#8A2BE2\",\"emoticons\":[]}",
             HighlightType.ContinuingGift)]
+        // ContinuingGift
+        [InlineData(
+            "{\"body\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"}],\"user_color\":\"#8A2BE2\",\"emoticons\":[]}",
+            HighlightType.ContinuingAnonymousGift)]
         // PayingForward
         [InlineData(
             "{\"body\":\"viewer8 is paying forward the Gift they got from an anonymous gifter to the community! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is paying forward the Gift they got from an anonymous gifter to the community! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"},{\"_id\":\"bits\",\"version\":\"100\"}],\"user_color\":null,\"emoticons\":[]}",
