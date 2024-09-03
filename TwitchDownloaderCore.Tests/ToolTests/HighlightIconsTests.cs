@@ -100,7 +100,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData(
             "{\"body\":\"viewer8 is continuing the Gift Sub they got from viewer9! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is continuing the Gift Sub they got from viewer9! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"}],\"user_color\":\"#8A2BE2\",\"emoticons\":[]}",
             HighlightType.ContinuingGift)]
-        // ContinuingGift
+        // ContinuingAnonymousGift
         [InlineData(
             "{\"body\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 is continuing the Gift Sub they got from an anonymous user! \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"0\"}],\"user_color\":\"#8A2BE2\",\"emoticons\":[]}",
             HighlightType.ContinuingAnonymousGift)]
