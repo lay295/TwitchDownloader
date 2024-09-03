@@ -709,6 +709,7 @@ namespace TwitchDownloaderCore
                 case HighlightType.GiftedMany:
                 case HighlightType.GiftedSingle:
                 case HighlightType.GiftedAnonymous:
+                case HighlightType.ContinuingAnonymousGift:
                     DrawGiftMessage(comment, sectionImages, emotePositionList, ref drawPos, defaultPos, highlightIcon, iconPoint);
                     break;
                 case HighlightType.ChannelPointHighlight:
