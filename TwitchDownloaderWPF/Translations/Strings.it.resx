@@ -628,8 +628,7 @@
     <value>Tema non trovato</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>{theme} non è stato trovato. Ripristina tema a Sistema</value>
-    <comment>Non tradurre {theme}</comment>
+    <value>{0} non è stato trovato. Ripristina tema a Sistema</value>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Dispersione </value>

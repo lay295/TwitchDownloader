@@ -629,8 +629,7 @@
     <value>Tema bulunamadı</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>{theme} bulunamadı. Sistem temasına geri döndürülüyor</value>
-    <comment>Do not translate {theme}</comment>
+    <value>{0} bulunamadı. Sistem temasına geri döndürülüyor</value>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Dağıtma </value>

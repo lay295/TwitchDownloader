@@ -628,8 +628,7 @@
     <value>Тема не найденна</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>{theme} не найденна. Откат на системную</value>
-    <comment>Do not translate {theme}</comment>
+    <value>{0} не найденна. Откат на системную</value>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Разбиение </value>

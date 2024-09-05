@@ -628,8 +628,7 @@
     <value>未找到主题</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>未找到 {theme}。将主题还原为系统。</value>
-    <comment>Do not translate {theme}</comment>
+    <value>未找到 {0}。将主题还原为系统。</value>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>散布 </value>

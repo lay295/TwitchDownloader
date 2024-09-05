@@ -628,8 +628,7 @@
     <value>Motyw nie znaleziony</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>{theme} nie został znaleziony. Przywracanie Systemowego motywu</value>
-    <comment>Do not translate {theme}</comment>
+    <value>{0} nie został znaleziony. Przywracanie Systemowego motywu</value>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Rozproszenie </value>
