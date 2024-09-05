@@ -49,7 +49,7 @@ namespace TwitchDownloaderWPF.Services
             if (!Settings.Default.GuiTheme.Equals("System", StringComparison.OrdinalIgnoreCase) && !File.Exists(Path.Combine("Themes", $"{Settings.Default.GuiTheme}.xaml")))
             {
                 MessageBox.Show(
-                    Translations.Strings.ThemeNotFoundMessage.Replace("{theme}", $"{Settings.Default.GuiTheme}.xaml"),
+                    string.Format(Translations.Strings.ThemeNotFoundMessage, $"{Settings.Default.GuiTheme}.xaml"),
                     Translations.Strings.ThemeNotFound,
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);

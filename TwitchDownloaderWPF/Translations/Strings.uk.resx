@@ -628,8 +628,7 @@
     <value>Тему не знайдено</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>{theme} не знайдено. Повертаємо тему до системної</value>
-    <comment>Do not translate {theme}</comment>
+    <value>{0} не знайдено. Повертаємо тему до системної</value>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Розсіювання </value>

@@ -2067,7 +2067,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {theme} was not found. Reverting theme to System.
+        ///   Looks up a localized string similar to {0} was not found. Reverting theme to System.
         /// </summary>
         public static string ThemeNotFoundMessage {
             get {

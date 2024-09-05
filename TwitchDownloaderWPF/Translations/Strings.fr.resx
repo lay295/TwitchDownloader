@@ -628,8 +628,7 @@
     <value>Le thème n'a pas été trouvé</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>{theme} n'a pas été trouvé. Passage au thème système</value>
-    <comment>Do not translate {theme}</comment>
+    <value>{0} n'a pas été trouvé. Passage au thème système</value>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Dispersion </value>
