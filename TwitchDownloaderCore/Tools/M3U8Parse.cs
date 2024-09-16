@@ -400,7 +400,8 @@ namespace TwitchDownloaderCore.Tools
                         }
                         else if (text.StartsWith(KEY_CODECS))
                         {
-                            streamInfo.Codecs = ParsingHelpers.ParseStringValue(text, KEY_CODECS);
+                            var codecsString = ParsingHelpers.ParseStringValue(text, KEY_CODECS);
+                            streamInfo.Codecs = codecsString.Split(',');
                         }
                         else if (text.StartsWith(KEY_RESOLUTION))
                         {

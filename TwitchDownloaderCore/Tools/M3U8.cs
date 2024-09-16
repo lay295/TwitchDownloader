@@ -224,7 +224,7 @@ namespace TwitchDownloaderCore.Tools
 
                 private ExtStreamInfo() { }
 
-                public ExtStreamInfo(int programId, int bandwidth, string codecs, StreamResolution resolution, string video, decimal framerate)
+                public ExtStreamInfo(int programId, int bandwidth, string[] codecs, StreamResolution resolution, string video, decimal framerate)
                 {
                     ProgramId = programId;
                     Bandwidth = bandwidth;
@@ -236,7 +236,7 @@ namespace TwitchDownloaderCore.Tools
 
                 public int ProgramId { get; internal set; }
                 public int Bandwidth { get; internal set; }
-                public string Codecs { get; internal set; }
+                public IReadOnlyList<string> Codecs { get; internal set; }
                 public StreamResolution Resolution { get; internal set; }
                 public string Video { get; internal set; }
                 public decimal Framerate { get; internal set; }
@@ -252,8 +252,8 @@ namespace TwitchDownloaderCore.Tools
                     if (Bandwidth != default)
                         sb.AppendKeyValue("BANDWIDTH=", Bandwidth, keyValueSeparator);
 
-                    if (!string.IsNullOrWhiteSpace(Codecs))
-                        sb.AppendKeyQuoteValue("CODECS=", Codecs, keyValueSeparator);
+                    if (Codecs is { Count: > 0 })
+                        sb.AppendKeyQuoteValue("CODECS=", string.Join(',', Codecs), keyValueSeparator);
 
                     if (Resolution != default)
                         sb.AppendKeyValue("RESOLUTION=", Resolution, keyValueSeparator);

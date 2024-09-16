@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -149,7 +150,7 @@ namespace TwitchDownloaderCLI.Modes
                 var name = stream.GetResolutionFramerateString();
                 var resolution = stream.StreamInfo.Resolution.StringifyOrDefault(x => x.ToString(), DEFAULT_STRING);
                 var fps = stream.StreamInfo.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
-                var codecs = stream.StreamInfo.Codecs.StringifyOrDefault(x => x, DEFAULT_STRING);
+                var codecs = stream.StreamInfo.Codecs.StringifyOrDefault(x => string.Join(", ", x), DEFAULT_STRING);
 
                 if (hasBitrate)
                 {
@@ -359,6 +360,16 @@ namespace TwitchDownloaderCLI.Modes
             if (value.HasValue)
             {
                 return stringify(value.Value);
+            }
+
+            return defaultString;
+        }
+
+        private static string StringifyOrDefault<T>(this IEnumerable<T> values, Func<IEnumerable<T>, string> stringify, string defaultString)
+        {
+            if (values.Any())
+            {
+                return stringify(values);
             }
 
             return defaultString;
