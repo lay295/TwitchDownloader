@@ -191,22 +191,22 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             var streams = new M3U8.Stream[]
             {
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "1080p60", false, false),
-                    new M3U8.Stream.ExtStreamInfo(0, 5898203, "avc1.64002A,mp4a.40.2", (1920, 1080), "chunked", 59.995m),
+                    new M3U8.Stream.ExtStreamInfo(0, 5898203, new[] { "avc1.64002A", "mp4a.40.2" }, (1920, 1080), "chunked", 59.995m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/chunked/index-dvr.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 3443956, "avc1.4D0020,mp4a.40.2", (1280, 720), "720p60", 59.995m),
+                    new M3U8.Stream.ExtStreamInfo(0, 3443956, new[] { "avc1.4D0020", "mp4a.40.2" }, (1280, 720), "720p60", 59.995m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/720p60/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtMediaInfo (M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true),
-                    new M3U8.Stream.ExtStreamInfo (0, 1454397, "avc1.4D001F,mp4a.40.2", (852, 480), "480p30", 29.998m),
+                new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true),
+                    new M3U8.Stream.ExtStreamInfo(0, 1454397, new[] { "avc1.4D001F", "mp4a.40.2" }, (852, 480), "480p30", 29.998m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/480p30/index-dvr.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "audio_only", "Audio Only", false, false),
-                    new M3U8.Stream.ExtStreamInfo(0, 220328, "mp4a.40.2", (0, 0), "audio_only", 0m),
+                    new M3U8.Stream.ExtStreamInfo(0, 220328, new[] { "mp4a.40.2" }, (0, 0), "audio_only", 0m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/audio_only/index-dvr.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 708016, "avc1.4D001E,mp4a.40.2", (640, 360), "360p30", 29.998m),
+                    new M3U8.Stream.ExtStreamInfo(0, 708016, new[] { "avc1.4D001E", "mp4a.40.2" }, (640, 360), "360p30", 29.998m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/360p30/index-dvr.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "160p30", "160p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 288409, "avc1.4D000C,mp4a.40.2", (284, 160), "160p30", 29.998m),
+                    new M3U8.Stream.ExtStreamInfo(0, 288409, new[] { "avc1.4D000C", "mp4a.40.2" }, (284, 160), "160p30", 29.998m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/160p30/index-dvr.m3u8")
             };
 
@@ -255,13 +255,13 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         }
 
         [Theory]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"chunked\",FRAME-RATE=59.995", 5898203, "avc1.64002A,mp4a.40.2", 1920, 1080, "chunked", 59.995)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\",FRAME-RATE=59.995", 3443956, "avc1.4D0020,mp4a.40.2", 1280, 720, "720p60", 59.995)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=1454397,CODECS=\"avc1.4D001F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\",FRAME-RATE=29.998", 1454397, "avc1.4D001F,mp4a.40.2", 852, 480, "480p30", 29.998)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",VIDEO=\"audio_only\"", 220328, "mp4a.40.2", 0, 0, "audio_only", 0)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\",FRAME-RATE=29.998", 708016, "avc1.4D001E,mp4a.40.2", 640, 360, "360p30", 29.998)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\",FRAME-RATE=29.998", 288409, "avc1.4D000C,mp4a.40.2", 284, 160, "160p30", 29.998)]
-        public void CorrectlyParsesTwitchM3U8StreamInfo(string streamInfoString, int bandwidth, string codecs, uint videoWidth, uint videoHeight, string video, decimal framerate)
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"chunked\",FRAME-RATE=59.995", 5898203, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080, "chunked", 59.995)]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\",FRAME-RATE=59.995", 3443956, new[] { "avc1.4D0020", "mp4a.40.2" }, 1280, 720, "720p60", 59.995)]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=1454397,CODECS=\"avc1.4D001F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\",FRAME-RATE=29.998", 1454397, new[] { "avc1.4D001F", "mp4a.40.2" }, 852, 480, "480p30", 29.998)]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",VIDEO=\"audio_only\"", 220328, new[] { "mp4a.40.2" }, 0, 0, "audio_only", 0)]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\",FRAME-RATE=29.998", 708016, new[] { "avc1.4D001E", "mp4a.40.2" }, 640, 360, "360p30", 29.998)]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\",FRAME-RATE=29.998", 288409, new[] { "avc1.4D000C", "mp4a.40.2" }, 284, 160, "160p30", 29.998)]
+        public void CorrectlyParsesTwitchM3U8StreamInfo(string streamInfoString, int bandwidth, string[] codecs, uint videoWidth, uint videoHeight, string video, decimal framerate)
         {
             var streamInfo = M3U8.Stream.ExtStreamInfo.Parse(streamInfoString);
 
@@ -399,19 +399,19 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             var streams = new M3U8.Stream[]
             {
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "1080p60", "1080p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 9878400, "avc1.64002A,mp4a.40.2", (1920, 1080), "1080p60", 60m),
+                    new M3U8.Stream.ExtStreamInfo(1, 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, (1920, 1080), "1080p60", 60m),
                     "1080p60/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 3330599, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p60", 60m),
+                    new M3U8.Stream.ExtStreamInfo(1, 3330599, new[] { "avc1.4D401F", "mp4a.40.2" }, (1280, 720), "720p60", 60m),
                     "720p60/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 1335600, "avc1.4D401F,mp4a.40.2", (852, 480), "480p30", 30m),
+                    new M3U8.Stream.ExtStreamInfo(1, 1335600, new[] { "avc1.4D401F", "mp4a.40.2" }, (852, 480), "480p30", 30m),
                     "480p30/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 630000, "avc1.4D401F,mp4a.40.2", (640, 360), "360p30", 30m),
+                    new M3U8.Stream.ExtStreamInfo(1, 630000, new[] { "avc1.4D401F", "mp4a.40.2" }, (640, 360), "360p30", 30m),
                     "360p30/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "160p30", "160p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 230000, "avc1.4D401F,mp4a.40.2", (284, 160), "160p30", 30m),
+                    new M3U8.Stream.ExtStreamInfo(1, 230000, new[] { "avc1.4D401F", "mp4a.40.2" }, (284, 160), "160p30", 30m),
                     "160p30/playlist.m3u8")
             };
 
@@ -458,12 +458,12 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         }
 
         [Theory]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, "avc1.64002A,mp4a.40.2", 1920, 1080, "1080p60")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=3330599,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\"", 3330599, "avc1.4D401F,mp4a.40.2", 1280, 720, "720p60")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1335600,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\"", 1335600, "avc1.4D401F,mp4a.40.2", 852, 480, "480p30")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=630000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\"", 630000, "avc1.4D401F,mp4a.40.2", 640, 360, "360p30")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=230000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\"", 230000, "avc1.4D401F,mp4a.40.2", 284, 160, "160p30")]
-        public void CorrectlyParsesKickM3U8StreamInfo(string streamInfoString, int bandwidth, string codecs, uint videoWidth, uint videoHeight, string video)
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080, "1080p60")]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=3330599,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\"", 3330599, new[] { "avc1.4D401F", "mp4a.40.2" }, 1280, 720, "720p60")]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1335600,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\"", 1335600, new[] { "avc1.4D401F", "mp4a.40.2" }, 852, 480, "480p30")]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=630000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\"", 630000, new[] { "avc1.4D401F", "mp4a.40.2" }, 640, 360, "360p30")]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=230000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\"", 230000, new[] { "avc1.4D401F", "mp4a.40.2" }, 284, 160, "160p30")]
+        public void CorrectlyParsesKickM3U8StreamInfo(string streamInfoString, int bandwidth, string[] codecs, uint videoWidth, uint videoHeight, string video)
         {
             var streamInfo = M3U8.Stream.ExtStreamInfo.Parse(streamInfoString);
 

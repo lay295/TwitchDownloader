@@ -30,15 +30,15 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             {
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "1080p60 (source)", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1920, 1080), "chunked", 60),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1920, 1080), "chunked", 60),
                     "1080p60"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p60", 60),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1280, 720), "720p60", 60),
                     "720p60"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p30", "720p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p30", 30),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1280, 720), "720p30", 30),
                     "720p30")
             });
 
@@ -74,31 +74,31 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             {
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "Source", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1920, 1080), "chunked", 58.644M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1920, 1080), "chunked", 58.644M),
                     "1080p60"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p60", 58.644M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1280, 720), "720p60", 58.644M),
                     "720p60"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p30", "720p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p30", 28.814M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1280, 720), "720p30", 28.814M),
                     "720p30"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.42C01E,mp4a.40.2", (852, 480), "480p30", 30.159M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.42C01E", "mp4a.40.2" }, (852, 480), "480p30", 30.159M),
                     "480p30"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.42C01E,mp4a.40.2", (640, 360), "360p30", 30.159M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.42C01E", "mp4a.40.2" }, (640, 360), "360p30", 30.159M),
                     "360p30"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "144p30", "144p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.42C00C,mp4a.40.2", (256, 144), "144p30", 30.159M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.42C00C", "mp4a.40.2" }, (256, 144), "144p30", 30.159M),
                     "144p30"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "audio_only", "Audio Only", false, false),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "mp4a.40.2", (256, 144), "audio_only", 0),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "mp4a.40.2" }, (256, 144), "audio_only", 0),
                     "audio_only")
             });
 
@@ -122,11 +122,11 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             {
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "Source", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1920, 1080), "chunked", 0),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1920, 1080), "chunked", 0),
                     "1080p60"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p60", 58.644M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1280, 720), "720p60", 58.644M),
                     "720p60"),
             });
 
@@ -146,31 +146,31 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             {
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "Source", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1920, 1080), "chunked", 58.644M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1920, 1080), "chunked", 58.644M),
                     "1080p60"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p60", 58.644M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1280, 720), "720p60", 58.644M),
                     "720p60"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p30", "720p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.4D401F,mp4a.40.2", (1280, 720), "720p30", 28.814M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.4D401F", "mp4a.40.2" }, (1280, 720), "720p30", 28.814M),
                     "720p30"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.42C01E,mp4a.40.2", (852, 480), "480p30", 30.159M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.42C01E", "mp4a.40.2" }, (852, 480), "480p30", 30.159M),
                     "480p30"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.42C01E,mp4a.40.2", (640, 360), "360p30", 30.159M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.42C01E", "mp4a.40.2" }, (640, 360), "360p30", 30.159M),
                     "360p30"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "144p30", "144p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "avc1.42C00C,mp4a.40.2", (256, 144), "144p30", 30.159M),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "avc1.42C00C", "mp4a.40.2" }, (256, 144), "144p30", 30.159M),
                     "144p30"),
                 new M3U8.Stream(
                     new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "audio_only", "Audio Only", false, false),
-                    new M3U8.Stream.ExtStreamInfo(0, 1, "mp4a.40.2", (256, 144), "audio_only", 0),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, new[] { "mp4a.40.2" }, (256, 144), "audio_only", 0),
                     "audio_only")
             });
 
