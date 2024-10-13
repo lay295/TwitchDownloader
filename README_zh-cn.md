@@ -21,7 +21,7 @@
 
 - 下载 Twitch 点播
 - 下载 Twitch 剪辑
-- 以[包含所有原始信息的 JSON](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json)、浏览器 HTML 文件或[纯文本文件](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)的形式下载点播和剪辑的聊天内容
+- 以 [包含所有原始信息的 JSON](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json)、浏览器 HTML 文件或 [纯文本文件](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt) 的形式下载点播和剪辑的聊天内容
 - 更新之前生成的 JSON 聊天文件的内容，并提供另一种格式的保存选项
 - 使用之前生成的 JSON 聊天文件，用 Twitter Twemoji 或 Google Noto Color 表情符号以及 BTTV、FFZ、7TV 静态和动画表情来呈现聊天内容
 
@@ -43,11 +43,11 @@ Windows WPF GUI 实现了程序的所有主要功能以及一些额外的提升�
 
 ### 多语言支持
 
-通过社区翻译，Windows WPF GUI 有多种语言版本。请参阅 [WPF 自述文件（英语）](TwitchDownloaderWPF/README.md)的[本地化部分](TwitchDownloaderWPF/README.md#localization)。
+通过社区翻译，Windows WPF GUI 有多种语言版本。请参阅 [WPF 自述文件（英语）](TwitchDownloaderWPF/README.md)的 [本地化部分](TwitchDownloaderWPF/README.md#localization)。
 
 ### 主题
 
-Windows WPF GUI 内置了浅色和深色主题，以及根据当前 Windows 主题进行实时更新的选项。它还支持用户创建主题！更多详情，请参阅 [WPF 自述文件（英语）](TwitchDownloaderWPF/README.md)的[主题部分](TwitchDownloaderWPF/README.md#theming)。
+Windows WPF GUI 内置了浅色和深色主题，以及根据当前 Windows 主题进行实时更新的选项。它还支持用户创建主题！更多详情，请参阅 [WPF 自述文件（英语）](TwitchDownloaderWPF/README.md)的 [主题部分](TwitchDownloaderWPF/README.md#theming)。
 
 ### 视频演示
 
@@ -82,7 +82,7 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 
 ## Windows - 开始
 
-1. 前往[发行版页面](https://github.com/lay295/TwitchDownloader/releases/)并下载最新的 Windows 版本或[从源代码构建](#building-from-source)。
+1. 前往 [发行版页面](https://github.com/lay295/TwitchDownloader/releases/) 并下载最新的 Windows 版本或 [从源代码构建](#building-from-source)。
 2. 提取 `TwitchDownloaderCLI.exe`。
 3. 打开可执行文件放置的位置：
 
@@ -90,7 +90,7 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 cd C:\folder\containing\TwitchDownloaderCLI
 ```
 
-4. 如果没有 FFmpeg，可以通过 [Chocolatey 软件包管理器](https://community.chocolatey.org/)安装，也可以从 [ffmpeg.org](https://ffmpeg.org/download.html) 或使用 TwitchDownloaderCLI 以独立文件的形式获取：
+4. 如果没有 FFmpeg，可以通过 [Chocolatey 程序包管理器](https://community.chocolatey.org/)安装，也可以从 [ffmpeg.org](https://ffmpeg.org/download.html) 或使用 TwitchDownloaderCLI 以独立文件的形式获取：
 
 ```命令
 TwitchDownloaderCLI.exe ffmpeg --download
@@ -108,7 +108,7 @@ TwitchDownloaderCLI.exe videodownload --id <点播 ID> -o out.mp4
 
 1. 有些发行版，如 Linux Alpine，缺少某些语言（阿拉伯语、波斯语、泰语等）的字体。如果是这种情况，请安装额外的字体系列，如 [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans)，或者查看发行版的字体 Wiki 页面，因为它可能有针对这种特定情况的安装命令，如 [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) 字体页面。
 2. 确保 `fontconfig` 和 `libfontconfig1` 都已安装。在 Ubuntu 上运行 `apt-get install fontconfig libfontconfig1`。
-3. 前往[发行版页面](https://github.com/lay295/TwitchDownloader/releases/)并下载最新的 Linux 版本抓取适用于 Arch Linux 的 [AUR 软件包](https://aur.archlinux.org/packages/twitch-downloader-bin/)，或[从源代码构建](#building-from-source)。
+3. 前往 [发行版页面](https://github.com/lay295/TwitchDownloader/releases/) 并下载最新的 Linux 版本抓取适用于 Arch Linux 的 [AUR 软件包](https://aur.archlinux.org/packages/twitch-downloader-bin/)，或 [从源代码构建](#building-from-source)。
 4. 提取 `TwitchDownloaderCLI`。
 5. 打开二进制可执行文件放置的目录：
 
@@ -122,7 +122,7 @@ cd directory/containing/TwitchDownloaderCLI
 sudo chmod +x TwitchDownloaderCLI
 ```
 
-7. a) 如果没有 FFmpeg，可以通过 [Chocolatey 软件包管理器](https://community.chocolatey.org/)安装，也可以从 [ffmpeg.org](https://ffmpeg.org/download.html) 或使用 TwitchDownloaderCLI 以独立文件的形式获取：
+7. a) 如果没有 FFmpeg，可以通过 [Chocolatey 程序包管理器](https://community.chocolatey.org/) 安装，也可以从 [ffmpeg.org](https://ffmpeg.org/download.html) 或使用 TwitchDownloaderCLI 以独立文件的形式获取：
 
 ```命令
 ./TwitchDownloaderCLI ffmpeg --download
@@ -150,7 +150,7 @@ sudo chmod +x ffmpeg
 arch -x86_64 zsh
 ```
 
-2. 前往[发行版页面](https://github.com/lay295/TwitchDownloader/releases/)并下载最新的 MacOS 版本或[从源代码构建](#building-from-source)。
+2. 前往 [发行版页面](https://github.com/lay295/TwitchDownloader/releases/) 并下载最新的 MacOS 版本或 [从源代码构建](#building-from-source)。
 3. 提取 `TwitchDownloaderCLI`。
 4. 打开二进制可执行文件放置的目录：
 
@@ -164,7 +164,7 @@ cd directory/containing/TwitchDownloaderCLI
 chmod +x TwitchDownloaderCLI
 ```
 
-6. a) 如果没有 FFmpeg，可以通过 [Homebrew 软件包管理器](https://brew.sh/)在整个系统中安装，也可以从 [ffmpeg.org](https://ffmpeg.org/download.html) 或使用 TwitchDownloaderCLI 以独立文件的形式获取：
+6. a) 如果没有 FFmpeg，可以通过 [Homebrew 程序包管理器](https://brew.sh/) 在整个系统中安装，也可以从 [ffmpeg.org](https://ffmpeg.org/download.html) 或使用 TwitchDownloaderCLI 以独立文件的形式获取：
 
 ```命令
 ./TwitchDownloaderCLI ffmpeg --download
