@@ -90,7 +90,7 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 cd C:\folder\containing\TwitchDownloaderCLI
 ```
 
-4. 如果没有 FFmpeg，可以通过 [Chocolatey 程序包管理器](https://community.chocolatey.org/)安装，也可以从 [ffmpeg.org](https://ffmpeg.org/download.html) 或使用 TwitchDownloaderCLI 以独立文件的形式获取：
+4. 如果没有 FFmpeg，可以通过 [Chocolatey 程序包管理器](https://community.chocolatey.org/) 安装，也可以从 [ffmpeg.org](https://ffmpeg.org/download.html) 或使用 TwitchDownloaderCLI 以独立文件的形式获取：
 
 ```命令
 TwitchDownloaderCLI.exe ffmpeg --download
