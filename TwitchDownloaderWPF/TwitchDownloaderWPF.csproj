@@ -85,7 +85,13 @@
     <EmbeddedResource Update="Translations\Strings.it.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Translations\Strings.ja.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Translations\Strings.pl.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Translations\Strings.ru.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Translations\Strings.tr.resx">
@@ -94,13 +100,10 @@
         <EmbeddedResource Update="Translations\Strings.uk.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Translations\Strings.ru.resx">
-      <DependentUpon>Strings.resx</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Update="Translations\Strings.zh-cn.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Translations\Strings.ja.resx">
+    <EmbeddedResource Update="Translations\Strings.zh-tw.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

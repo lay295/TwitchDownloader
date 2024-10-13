@@ -19,15 +19,16 @@ namespace TwitchDownloaderWPF.Services
         // ISO 3166-1 alpha-2: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
 
         public static readonly Culture English;
-        public static readonly Culture Spanish;
         public static readonly Culture French;
         public static readonly Culture Italian;
         public static readonly Culture Japanese;
         public static readonly Culture Polish;
         public static readonly Culture Russian;
+        public static readonly Culture Spanish;
         public static readonly Culture Turkish;
         public static readonly Culture Ukrainian;
         public static readonly Culture SimplifiedChinese;
+        public static readonly Culture TraditionalChinese;
 
         public static readonly Culture[] All;
 
@@ -37,16 +38,17 @@ namespace TwitchDownloaderWPF.Services
             All = new[]
             {
                 English = new Culture("en-US", "English"),
-                Spanish = new Culture("es-ES", "Español"),
                 French = new Culture("fr-FR", "Français"),
-                Italian = new Culture("it-it", "Italiano"),
+                Italian = new Culture("it-IT", "Italiano"),
                 Japanese = new Culture("ja-JP", "日本語"),
                 Polish = new Culture("pl-PL", "Polski"),
                 Polish = new Culture("pt-BR", "Português (Brasil)"),
                 Russian = new Culture("ru-RU", "Русский"),
+                Spanish = new Culture("es-ES", "Español"),
                 Turkish = new Culture("tr-TR", "Türkçe"),
-                Ukrainian = new Culture("uk-ua", "Українська"),
-                SimplifiedChinese = new Culture("zh-CN", "简体中文"),
+                Ukrainian = new Culture("uk-UA", "Українська"),
+                SimplifiedChinese = new Culture("zh-CN", "简体中文（中国大陆）"),
+                TraditionalChinese = new Culture("zh-TW", "繁體中文（台灣）"),
             };
         }
         // ReSharper restore StringLiteralTypo
