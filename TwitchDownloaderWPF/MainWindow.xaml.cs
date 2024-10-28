@@ -153,7 +153,7 @@ namespace TwitchDownloaderWPF
                 FlashCount = uint.MaxValue,
                 Timeout = 0
             };
-            _ = NativeFunctions.FlashWindowEx(flashWInfo);
+            _ = NativeFunctions.FlashWindowEx(ref flashWInfo);
 
             await Task.Delay(flashDuration);
 
@@ -165,7 +165,7 @@ namespace TwitchDownloaderWPF
                 FlashCount = 0,
                 Timeout = 0
             };
-            _ = NativeFunctions.FlashWindowEx(stopFlashWInfo);
+            _ = NativeFunctions.FlashWindowEx(ref stopFlashWInfo);
         }
 
         private class FfmpegDownloadProgress : IProgress<ProgressInfo>
