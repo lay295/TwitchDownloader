@@ -688,7 +688,7 @@ namespace TwitchDownloaderCore
             Point iconPoint = new()
             {
                 X = drawPos.X,
-                Y = (int)((renderOptions.SectionHeight - highlightIcon?.Height) / 2.0 ?? 0)
+                Y = (int)((renderOptions.SectionHeight - highlightIcon.Height) / 2.0)
             };
 
             switch (highlightType)
