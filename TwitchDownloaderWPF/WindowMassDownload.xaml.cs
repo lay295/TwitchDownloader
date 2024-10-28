@@ -25,7 +25,7 @@ namespace TwitchDownloaderWPF
         public ObservableCollection<TaskData> videoList { get; set; } = new ObservableCollection<TaskData>();
         public readonly List<TaskData> selectedItems = new List<TaskData>();
         public readonly List<string> cursorList = new List<string>();
-        public int cursorIndex = -1;
+        public int cursorIndex = 0;
         public string currentChannel = "";
         public string period = "";
         public int videoCount = 50;
@@ -49,12 +49,18 @@ namespace TwitchDownloaderWPF
             await ChangeCurrentChannel();
         }
 
+        private void ResetLists()
+        {
+            videoList.Clear();
+            cursorList.Clear();
+            cursorList.Add("");
+            cursorIndex = 0;
+        }
+
         private Task ChangeCurrentChannel()
         {
             currentChannel = textChannel.Text;
-            videoList.Clear();
-            cursorList.Clear();
-            cursorIndex = -1;
+            ResetLists();
             return UpdateList();
         }
 
@@ -69,9 +75,7 @@ namespace TwitchDownloaderWPF
             {
                 // Pretend we are doing something so the status icon has time to show
                 await Task.Delay(50);
-                videoList.Clear();
-                cursorList.Clear();
-                cursorIndex = -1;
+                ResetLists();
                 StatusImage.Visibility = Visibility.Hidden;
                 return;
             }
@@ -125,7 +129,7 @@ namespace TwitchDownloaderWPF
                         });
                     }
 
-                    btnPrev.IsEnabled = res.data.user.videos.pageInfo.hasPreviousPage;
+                    btnPrev.IsEnabled = cursorIndex > 0;
                     if (res.data.user.videos.pageInfo.hasNextPage)
                     {
                         string newCursor = res.data.user.videos.edges.FirstOrDefault()?.cursor;
@@ -189,7 +193,7 @@ namespace TwitchDownloaderWPF
                         });
                     }
 
-                    btnPrev.IsEnabled = cursorIndex >= 0;
+                    btnPrev.IsEnabled = cursorIndex > 0;
                     if (res.data.user.clips.pageInfo.hasNextPage)
                     {
                         string newCursor = res.data.user.clips.edges.FirstOrDefault(x => x.cursor != null)?.cursor;
@@ -278,9 +282,7 @@ namespace TwitchDownloaderWPF
         private async void ComboSortByDate_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             period = ((ComboBoxItem)ComboSortByDate.SelectedItem).Tag.ToString();
-            videoList.Clear();
-            cursorList.Clear();
-            cursorIndex = -1;
+            ResetLists();
             await UpdateList();
         }
 
@@ -330,9 +332,7 @@ namespace TwitchDownloaderWPF
         private async void ComboVideoCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             videoCount = int.Parse((string)((ComboBoxItem)ComboVideoCount.SelectedValue).Content);
-            videoList.Clear();
-            cursorList.Clear();
-            cursorIndex = -1;
+            ResetLists();
             await UpdateList();
         }
 
