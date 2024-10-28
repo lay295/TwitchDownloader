@@ -125,13 +125,18 @@ namespace TwitchDownloaderWPF
                         });
                     }
 
-                    btnNext.IsEnabled = res.data.user.videos.pageInfo.hasNextPage;
                     btnPrev.IsEnabled = res.data.user.videos.pageInfo.hasPreviousPage;
                     if (res.data.user.videos.pageInfo.hasNextPage)
                     {
-                        string newCursor = res.data.user.videos.edges[0].cursor;
-                        if (!cursorList.Contains(newCursor))
-                            cursorList.Add(newCursor);
+                        string newCursor = res.data.user.videos.edges.FirstOrDefault()?.cursor;
+                        if (newCursor is not null)
+                        {
+                            btnNext.IsEnabled = true;
+                            if (!cursorList.Contains(newCursor))
+                            {
+                                cursorList.Add(newCursor);
+                            }
+                        }
                     }
                 }
             }
@@ -184,13 +189,18 @@ namespace TwitchDownloaderWPF
                         });
                     }
 
-                    btnNext.IsEnabled = res.data.user.clips.pageInfo.hasNextPage;
                     btnPrev.IsEnabled = cursorIndex >= 0;
                     if (res.data.user.clips.pageInfo.hasNextPage)
                     {
-                        string newCursor = res.data.user.clips.edges.First(x => x.cursor != null).cursor;
-                        if (!cursorList.Contains(newCursor))
-                            cursorList.Add(newCursor);
+                        string newCursor = res.data.user.clips.edges.FirstOrDefault(x => x.cursor != null)?.cursor;
+                        if (newCursor is not null)
+                        {
+                            btnNext.IsEnabled = true;
+                            if (!cursorList.Contains(newCursor))
+                            {
+                                cursorList.Add(newCursor);
+                            }
+                        }
                     }
                 }
             }
