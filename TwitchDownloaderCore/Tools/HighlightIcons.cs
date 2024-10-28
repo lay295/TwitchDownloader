@@ -160,6 +160,13 @@ namespace TwitchDownloaderCore.Tools
             if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID or TWITCH_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
                 return HighlightType.GiftedAnonymous;
 
+            if (comment.commenter._id is TWITCH_ACCOUNT_ID && comment.message.body.EndsWith("'s gift! ") &&
+                Regex.IsMatch(comment.message.body, @"^We added \d+ Gift Subs (?:AND \d+ Bonus Gift Subs )?to "))
+            {
+                // TODO: Make a dedicated enum value for Subtember?
+                return HighlightType.GiftedMany;
+            }
+
             return HighlightType.None;
         }
 
