@@ -155,8 +155,9 @@ namespace TwitchDownloaderCore.Tools
                     return HighlightType.Raid;
             }
 
+            const string TWITCH_ACCOUNT_ID = "12826";
             const string ANONYMOUS_GIFT_ACCOUNT_ID = "274598607"; // Display name is 'AnAnonymousGifter'
-            if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
+            if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID or TWITCH_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
                 return HighlightType.GiftedAnonymous;
 
             return HighlightType.None;
