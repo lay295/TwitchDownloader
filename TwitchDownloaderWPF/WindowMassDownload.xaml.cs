@@ -220,7 +220,11 @@ namespace TwitchDownloaderWPF
         {
             btnNext.IsEnabled = false;
             btnPrev.IsEnabled = false;
-            cursorIndex++;
+            if (cursorIndex < cursorList.Count - 1)
+            {
+                cursorIndex++;
+            }
+
             await UpdateList();
         }
 
@@ -228,7 +232,11 @@ namespace TwitchDownloaderWPF
         {
             btnNext.IsEnabled = false;
             btnPrev.IsEnabled = false;
-            cursorIndex--;
+            if (cursorIndex > 0)
+            {
+                cursorIndex--;
+            }
+
             await UpdateList();
         }
 
