@@ -404,7 +404,15 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e)
                 {
-                    logger.LogError($"BetterTTV returned HTTP {e.StatusCode}. BTTV emotes may not be present for this session.");
+                    var message = e.StatusCode != null
+                        ? $"BetterTTV returned HTTP {e.StatusCode}."
+                        : e.Message;
+
+                    logger.LogError($"{message} Some BTTV emotes may not be present for this session.");
+                }
+                catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
+                {
+                    logger.LogError("BetterTTV timed out. Some BTTV emotes may not be present for this session.");
                 }
             }
 
@@ -416,7 +424,15 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e)
                 {
-                    logger.LogError($"FFZ returned HTTP {e.StatusCode}. FFZ emotes may not be present for this session.");
+                    var message = e.StatusCode != null
+                        ? $"FFZ returned HTTP {e.StatusCode}."
+                        : e.Message;
+
+                    logger.LogError($"{message} Some FFZ emotes may not be present for this session.");
+                }
+                catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
+                {
+                    logger.LogError("FFZ timed out. Some FFZ emotes may not be present for this session.");
                 }
             }
 
@@ -428,7 +444,15 @@ namespace TwitchDownloaderCore
                 }
                 catch (HttpRequestException e)
                 {
-                    logger.LogError($"7TV returned HTTP {e.StatusCode}. 7TV emotes may not be present for this session.");
+                    var message = e.StatusCode != null
+                        ? $"7TV returned HTTP {e.StatusCode}."
+                        : e.Message;
+
+                    logger.LogError($"{message} Some 7TV emotes may not be present for this session.");
+                }
+                catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
+                {
+                    logger.LogError("7TV timed out. Some 7TV emotes may not be present for this session.");
                 }
             }
 
