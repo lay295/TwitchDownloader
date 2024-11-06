@@ -28,7 +28,7 @@ namespace TwitchDownloaderCore.Tests
         [InlineData("https://www.twitch.tv/videos/982306410", "982306410", VideoPlatform.Twitch)] // Old VODs - 9
         [InlineData("https://www.twitch.tv/videos/6834869128", "6834869128", VideoPlatform.Twitch)] // Current VODs - 10
         [InlineData("https://www.twitch.tv/videos/11987163407", "11987163407", VideoPlatform.Twitch)] // Future VODs - 11
-        [InlineData("https://www.twitch.tv/kitboga/streamer8/videos/2865132173", "2865132173", VideoPlatform.Twitch)] // Alternate highlight URL
+        [InlineData("https://www.twitch.tv/kitboga/video/2865132173", "2865132173", VideoPlatform.Twitch)] // Alternate highlight URL
         [InlineData("https://www.twitch.tv/kitboga/v/2865132173", "2865132173", VideoPlatform.Twitch)] // Alternate highlight URL
         public void CorrectlyParsesVodLink(string link, string expectedId, VideoPlatform expectedPlatform)
         {
