@@ -12,8 +12,9 @@ namespace TwitchDownloaderCore.Tools
         private static readonly Regex TwitchClipId = new(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\w+\/clip\/)?)[\w-]{9,}(?=$|\?|\s)", RegexOptions.Compiled);
 
         // Kick clip IDs (excluding clip_) are currently, and seem to always have been, 26 digits long
-        private static readonly Regex KickVideoId = new(@"(?<=^|kick\.com\/video\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=$|\?|\s)", RegexOptions.Compiled);
-        private static readonly Regex KickClipId = new(@"(?<=^|kick\.com\/\w+\?clip=)clip_[0-9A-Z]{26}(?=$|\?|\s)", RegexOptions.Compiled);
+        // Kick now includes the username and media type in the URL of videos and clips but ID formats have remained the same - e.g. kick.com/user1/videos/aa11aa1a-a11a-1a1a-a11a-1a1a1a1a1a
+        private static readonly Regex KickVideoId = new(@"(?<=^|kick\.com\/[a-zA-Z0-9_]{1,25}\/videos\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=$|\?|\s)", RegexOptions.Compiled);
+        private static readonly Regex KickClipId = new(@"(?<=^|kick\.com\/[a-zA-Z0-9_]{1,25}\/clips\/)clip_[0-9A-Z]{26}(?=$|\?|\s)", RegexOptions.Compiled);
 
         public static bool TryParseClip(string url, out VideoPlatform videoPlatform, out string videoId)
         {

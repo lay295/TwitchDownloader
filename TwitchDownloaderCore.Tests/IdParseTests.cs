@@ -22,8 +22,8 @@ namespace TwitchDownloaderCore.Tests
         }
 
         [Theory]
-        [InlineData("https://kick.com/video/9d02cf06-52e8-4023-abd5-16b21d143867", "9d02cf06-52e8-4023-abd5-16b21d143867", VideoPlatform.Kick)]
-        [InlineData("https://kick.com/video/79200ecf-c46d-4d74-b3ad-d06a7e0e5d8d", "79200ecf-c46d-4d74-b3ad-d06a7e0e5d8d", VideoPlatform.Kick)]
+        [InlineData("https://kick.com/streamer8/videos/9d02cf06-52e8-4023-abd5-16b21d143867", "9d02cf06-52e8-4023-abd5-16b21d143867", VideoPlatform.Kick)]
+        [InlineData("https://kick.com/streamer8/videos/79200ecf-c46d-4d74-b3ad-d06a7e0e5d8d", "79200ecf-c46d-4d74-b3ad-d06a7e0e5d8d", VideoPlatform.Kick)]
         [InlineData("https://www.twitch.tv/videos/41546181", "41546181", VideoPlatform.Twitch)] // Oldest VODs - 8
         [InlineData("https://www.twitch.tv/videos/982306410", "982306410", VideoPlatform.Twitch)] // Old VODs - 9
         [InlineData("https://www.twitch.tv/videos/6834869128", "6834869128", VideoPlatform.Twitch)] // Current VODs - 10
@@ -53,7 +53,7 @@ namespace TwitchDownloaderCore.Tests
         }
 
         [Theory]
-        [InlineData("https://kick.com/streamer8?clip=clip_F786F81SF785610534215S23D0", "clip_F786F81SF785610534215S23D0", VideoPlatform.Kick)]
+        [InlineData("https://kick.com/streamer8/clips/clip_F786F81SF785610534215S23D0", "clip_F786F81SF785610534215S23D0", VideoPlatform.Kick)]
         [InlineData("https://www.twitch.tv/streamer8/clip/SpineyPieTwitchRPGNurturing", "SpineyPieTwitchRPGNurturing", VideoPlatform.Twitch)]
         [InlineData("https://www.twitch.tv/streamer8/clip/FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf", "FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf", VideoPlatform.Twitch)]
         [InlineData("https://www.twitch.tv/streamer8/clip/SpineyPieTwitchRPGNurturing?featured=false&filter=clips&range=all&sort=time", "SpineyPieTwitchRPGNurturing", VideoPlatform.Twitch)]
@@ -90,15 +90,15 @@ namespace TwitchDownloaderCore.Tests
         }
 
         [Theory]
-        [InlineData("https://kick.com/video/9d02cf06-52e8-4023-abd5-16b21d143867", "9d02cf06-52e8-4023-abd5-16b21d143867", VideoType.Video, VideoPlatform.Kick)]
-        [InlineData("https://kick.com/video/79200ecf-c46d-4d74-b3ad-d06a7e0e5d8d", "79200ecf-c46d-4d74-b3ad-d06a7e0e5d8d", VideoType.Video, VideoPlatform.Kick)]
+        [InlineData("https://kick.com/streamer8/videos/9d02cf06-52e8-4023-abd5-16b21d143867", "9d02cf06-52e8-4023-abd5-16b21d143867", VideoType.Video, VideoPlatform.Kick)]
+        [InlineData("https://kick.com/streamer8/videos/79200ecf-c46d-4d74-b3ad-d06a7e0e5d8d", "79200ecf-c46d-4d74-b3ad-d06a7e0e5d8d", VideoType.Video, VideoPlatform.Kick)]
         [InlineData("https://www.twitch.tv/videos/41546181", "41546181", VideoType.Video, VideoPlatform.Twitch)] // Oldest VODs - 8
         [InlineData("https://www.twitch.tv/videos/982306410", "982306410", VideoType.Video, VideoPlatform.Twitch)] // Old VODs - 9
         [InlineData("https://www.twitch.tv/videos/6834869128", "6834869128", VideoType.Video, VideoPlatform.Twitch)] // Current VODs - 10
         [InlineData("https://www.twitch.tv/videos/11987163407", "11987163407", VideoType.Video, VideoPlatform.Twitch)] // Future VODs - 11
         [InlineData("https://www.twitch.tv/kitboga/video/2865132173", "2865132173", VideoType.Video, VideoPlatform.Twitch)] // Alternate highlight URL
         [InlineData("https://www.twitch.tv/kitboga/v/2865132173", "2865132173", VideoType.Video, VideoPlatform.Twitch)] // Alternate VOD URL
-        [InlineData("https://kick.com/streamer8?clip=clip_F786F81SF785610534215S23D0", "clip_F786F81SF785610534215S23D0", VideoType.Clip, VideoPlatform.Kick)]
+        [InlineData("https://kick.com/streamer8/clips/clip_F786F81SF785610534215S23D0", "clip_F786F81SF785610534215S23D0", VideoType.Clip, VideoPlatform.Kick)]
         [InlineData("https://www.twitch.tv/streamer8/clip/SpineyPieTwitchRPGNurturing", "SpineyPieTwitchRPGNurturing", VideoType.Clip, VideoPlatform.Twitch)]
         [InlineData("https://www.twitch.tv/streamer8/clip/FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf", "FuriousFlaccidTireArgieB8-NHbTiYQlzwHVvv_Vf", VideoType.Clip, VideoPlatform.Twitch)]
         [InlineData("https://www.twitch.tv/streamer8/clip/SpineyPieTwitchRPGNurturing?featured=false&filter=clips&range=all&sort=time", "SpineyPieTwitchRPGNurturing", VideoType.Clip, VideoPlatform.Twitch)]
