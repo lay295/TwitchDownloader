@@ -7,6 +7,9 @@ namespace TwitchDownloaderWPF.TwitchTasks
     {
         public string Id { get; set; }
         public string Streamer { get; set; }
+        public string StreamerId { get; set; }
+        public string Clipper { get; set; }
+        public string ClipperId { get; set; }
         public string Title { get; set; }
         public ImageSource Thumbnail { get; set; }
         public DateTime Time { get; set; }
