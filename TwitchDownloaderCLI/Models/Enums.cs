@@ -5,6 +5,7 @@ namespace TwitchDownloaderCLI.Models
     [Flags]
     internal enum LogLevel
     {
+        All = Status | Verbose | Info | Warning | Error | Ffmpeg,
         None = 1 << 0,
         Status = 1 << 1,
         Verbose = 1 << 2,
