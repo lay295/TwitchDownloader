@@ -174,6 +174,12 @@ namespace TwitchDownloaderCore
                     return;
                 }
 
+                chatRoot.clipper ??= new Clipper
+                {
+                    name = clipInfo.curator.displayName,
+                    id = int.Parse(clipInfo.curator.id),
+                };
+
                 chatRoot.video.title = clipInfo.title;
                 chatRoot.video.created_at = clipInfo.createdAt;
                 chatRoot.video.length = clipInfo.durationSeconds;

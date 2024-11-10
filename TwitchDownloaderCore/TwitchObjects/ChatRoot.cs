@@ -11,6 +11,12 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int id { get; set; }
     }
 
+    public class Clipper
+    {
+        public string name { get; set; }
+        public int id { get; set; }
+    }
+
     [DebuggerDisplay("{display_name}")]
     public class Commenter
     {
@@ -271,6 +277,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public ChatRootInfo FileInfo { get; set; } = new();
         public Streamer streamer { get; set; }
+        public Clipper clipper { get; set; }
         public Video video { get; set; }
         public List<Comment> comments { get; set; }
         public EmbeddedData embeddedData { get; set; }

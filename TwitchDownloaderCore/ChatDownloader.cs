@@ -372,6 +372,11 @@ namespace TwitchDownloaderCore
                 videoId = clipInfoResponse.data.clip.video.id;
                 chatRoot.streamer.name = clipInfoResponse.data.clip.broadcaster.displayName;
                 chatRoot.streamer.id = int.Parse(clipInfoResponse.data.clip.broadcaster.id);
+                chatRoot.clipper = new Clipper
+                {
+                    name = clipInfoResponse.data.clip.curator.displayName,
+                    id = int.Parse(clipInfoResponse.data.clip.curator.id),
+                };
                 chatRoot.video.title = clipInfoResponse.data.clip.title;
                 chatRoot.video.created_at = clipInfoResponse.data.clip.createdAt;
                 chatRoot.video.start = (double)clipInfoResponse.data.clip.videoOffsetSeconds + (downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : 0);
