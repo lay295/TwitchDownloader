@@ -32,6 +32,8 @@ namespace TwitchDownloaderWPF
         public ChatRoot ChatJsonInfo;
         public string VideoId;
         public string StreamerId;
+        public string ClipperName;
+        public string ClipperId;
         public DateTime VideoCreatedAt;
         public TimeSpan VideoLength;
         public int ViewCount;
@@ -111,6 +113,8 @@ namespace TwitchDownloaderWPF
 
             VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1";
             StreamerId = ChatJsonInfo.streamer.id.ToString(CultureInfo.InvariantCulture);
+            ClipperName = ChatJsonInfo.clipper?.name;
+            ClipperId = ChatJsonInfo.clipper?.id.ToString(CultureInfo.InvariantCulture);
             ViewCount = ChatJsonInfo.video.viewCount;
             Game = ChatJsonInfo.video.game ?? ChatJsonInfo.video.chapters.FirstOrDefault()?.gameDisplayName ?? Translations.Strings.UnknownGame;
 
@@ -502,7 +506,7 @@ namespace TwitchDownloaderWPF
                     ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text, StreamerId,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.start) ? 0.0 : ChatJsonInfo.video.start),
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : VideoLength,
-                    ViewCount, Game)
+                    ViewCount, Game, ClipperName, ClipperId)
             };
 
             if (radioJson.IsChecked == true)

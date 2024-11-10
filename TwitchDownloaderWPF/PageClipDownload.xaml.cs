@@ -27,7 +27,7 @@ namespace TwitchDownloaderWPF
     {
         public string clipId = "";
         public string streamerId;
-        public string clipper;
+        public string clipperName;
         public string clipperId;
         public DateTime currentVideoTime;
         public TimeSpan clipLength;
@@ -75,7 +75,7 @@ namespace TwitchDownloaderWPF
                 clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                 textStreamer.Text = clipData.data.clip.broadcaster?.displayName ?? Translations.Strings.UnknownUser;
                 streamerId = clipData.data.clip.broadcaster?.id;
-                clipper = clipData.data.clip.curator.displayName;
+                clipperName = clipData.data.clip.curator.displayName;
                 clipperId = clipData.data.clip.curator.id;
                 var clipCreatedAt = clipData.data.clip.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
@@ -207,7 +207,7 @@ namespace TwitchDownloaderWPF
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "MP4 Files | *.mp4",
-                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, streamerId, TimeSpan.Zero, clipLength, viewCount, game, clipper,
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, streamerId, TimeSpan.Zero, clipLength, viewCount, game, clipperName,
                     clipperId) + ".mp4"
             };
             if (saveFileDialog.ShowDialog() != true)

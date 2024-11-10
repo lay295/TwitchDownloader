@@ -139,7 +139,7 @@ namespace TwitchDownloaderWPF
                         Title = clipInfo.title,
                         Streamer = clipInfo.broadcaster?.displayName ?? Translations.Strings.UnknownUser,
                         StreamerId = clipInfo.broadcaster?.id,
-                        Clipper = clipInfo.curator.displayName,
+                        ClipperName = clipInfo.curator.displayName,
                         ClipperId = clipInfo.curator.id,
                         Time = Settings.Default.UTCVideoTime ? clipInfo.createdAt : clipInfo.createdAt.ToLocalTime(),
                         Views = clipInfo.viewCount,
