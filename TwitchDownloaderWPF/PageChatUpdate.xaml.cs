@@ -159,8 +159,8 @@ namespace TwitchDownloaderWPF
                         numEndHour.Maximum = 0;
                     }
 
-                    GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
-                    if (videoInfo.data.clip.video == null)
+                    GqlClipResponse clipInfo = await TwitchHelper.GetClipInfo(VideoId);
+                    if (clipInfo.data.clip.video == null)
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
                         _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out var image);
@@ -168,12 +168,14 @@ namespace TwitchDownloaderWPF
                     }
                     else
                     {
-                        VideoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
+                        VideoLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
                         labelLength.Text = VideoLength.ToString("c");
-                        ViewCount = videoInfo.data.clip.viewCount;
-                        Game = videoInfo.data.clip.game?.displayName;
+                        ViewCount = clipInfo.data.clip.viewCount;
+                        Game = clipInfo.data.clip.game?.displayName;
+                        ClipperName ??= clipInfo.data.clip.curator.displayName;
+                        ClipperId ??= clipInfo.data.clip.curator.id;
 
-                        var thumbUrl = videoInfo.data.clip.thumbnailURL;
+                        var thumbUrl = clipInfo.data.clip.thumbnailURL;
                         if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
