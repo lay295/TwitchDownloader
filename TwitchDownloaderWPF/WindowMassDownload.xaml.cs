@@ -26,7 +26,7 @@ namespace TwitchDownloaderWPF
         public readonly List<TaskData> selectedItems = new List<TaskData>();
         public readonly List<string> cursorList = new List<string>();
         public int cursorIndex = 0;
-        public string currentChannel = "";
+        public User currentChannel;
         public string period = "";
         public int videoCount = 50;
 
@@ -57,11 +57,32 @@ namespace TwitchDownloaderWPF
             cursorIndex = 0;
         }
 
-        private Task ChangeCurrentChannel()
+        private async Task ChangeCurrentChannel()
         {
-            currentChannel = textChannel.Text;
+            var textTrimmed = textChannel.Text.Trim();
+            if (currentChannel?.login != textTrimmed)
+            {
+                currentChannel = null;
+                if (!string.IsNullOrEmpty(textTrimmed))
+                {
+                    try
+                    {
+                        var idRes = await TwitchHelper.GetUserIds(new[] { textTrimmed });
+                        var infoRes = await TwitchHelper.GetUserInfo(idRes.data.users.Select(x => x.id));
+                        currentChannel = infoRes.data.users[0];
+                    }
+                    catch (Exception ex)
+                    {
+                        if (Settings.Default.VerboseErrors)
+                        {
+                            MessageBox.Show(this, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                }
+            }
+
             ResetLists();
-            return UpdateList();
+            await UpdateList();
         }
 
         private async Task UpdateList()
@@ -71,7 +92,7 @@ namespace TwitchDownloaderWPF
 
             StatusImage.Visibility = Visibility.Visible;
 
-            if (string.IsNullOrWhiteSpace(currentChannel))
+            if (string.IsNullOrWhiteSpace(currentChannel?.login))
             {
                 // Pretend we are doing something so the status icon has time to show
                 await Task.Delay(50);
@@ -91,7 +112,7 @@ namespace TwitchDownloaderWPF
                 GqlVideoSearchResponse res;
                 try
                 {
-                    res = await TwitchHelper.GetGqlVideos(currentChannel, currentCursor, videoCount);
+                    res = await TwitchHelper.GetGqlVideos(currentChannel.login, currentCursor, videoCount);
                 }
                 catch (Exception ex)
                 {
@@ -123,7 +144,8 @@ namespace TwitchDownloaderWPF
                             Id = video.node.id,
                             Time = Settings.Default.UTCVideoTime ? video.node.createdAt : video.node.createdAt.ToLocalTime(),
                             Views = video.node.viewCount,
-                            Streamer = currentChannel,
+                            Streamer = currentChannel.displayName,
+                            StreamerId = currentChannel.id,
                             Game = video.node.game?.displayName ?? Translations.Strings.UnknownGame,
                             Thumbnail = thumbnail
                         });
@@ -155,7 +177,7 @@ namespace TwitchDownloaderWPF
                 GqlClipSearchResponse res;
                 try
                 {
-                    res = await TwitchHelper.GetGqlClips(currentChannel, period, currentCursor, videoCount);
+                    res = await TwitchHelper.GetGqlClips(currentChannel.login, period, currentCursor, videoCount);
                 }
                 catch (Exception ex)
                 {
@@ -187,7 +209,10 @@ namespace TwitchDownloaderWPF
                             Id = clip.node.slug,
                             Time = Settings.Default.UTCVideoTime ? clip.node.createdAt : clip.node.createdAt.ToLocalTime(),
                             Views = clip.node.viewCount,
-                            Streamer = currentChannel,
+                            Streamer = currentChannel.displayName,
+                            StreamerId = currentChannel.id,
+                            ClipperName = clip.node.curator.displayName,
+                            ClipperId = clip.node.curator.id,
                             Game = clip.node.game?.displayName ?? Translations.Strings.UnknownGame,
                             Thumbnail = thumbnail
                         });
