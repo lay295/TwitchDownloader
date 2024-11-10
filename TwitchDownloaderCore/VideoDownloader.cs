@@ -386,6 +386,8 @@ namespace TwitchDownloaderCore
                 HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength);
             };
 
+            _progress.LogVerbose($"Running \"{downloadOptions.FfmpegPath}\" in \"{process.StartInfo.WorkingDirectory}\" with args: {CombineArguments(process.StartInfo.ArgumentList)}");
+
             process.Start();
             process.BeginErrorReadLine();
 
@@ -401,6 +403,17 @@ namespace TwitchDownloaderCore
             } while (!process.HasExited || !logQueue.IsEmpty);
 
             return process.ExitCode;
+
+            static string CombineArguments(IEnumerable<string> args)
+            {
+                return string.Join(' ', args.Select(x =>
+                {
+                    if (!x.StartsWith('"') && !x.StartsWith('\'') && x.Contains(' '))
+                        return $"\"{x}\"";
+
+                    return x;
+                }));
+            }
         }
 
         private void HandleFfmpegOutput(string output, Regex encodingTimeRegex, TimeSpan videoLength)

@@ -390,6 +390,8 @@ namespace TwitchDownloaderCore
                 }
             };
 
+            _progress.LogVerbose($"Running \"{renderOptions.FfmpegPath}\" in \"{process.StartInfo.WorkingDirectory}\" with args: {process.StartInfo.Arguments}");
+
             process.Start();
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
