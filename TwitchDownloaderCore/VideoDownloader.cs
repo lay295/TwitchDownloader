@@ -90,6 +90,8 @@ namespace TwitchDownloaderCore
 
                 CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
 
+                var streamIds = GetStreamIds(playlist);
+
                 if (Directory.Exists(downloadFolder))
                     Directory.Delete(downloadFolder, true);
                 TwitchHelper.CreateDirectory(downloadFolder);
@@ -109,7 +111,7 @@ namespace TwitchDownloaderCore
                     videoChapterResponse.data.video.moments.edges);
 
                 var concatListPath = Path.Combine(downloadFolder, "concat.txt");
-                await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, cancellationToken);
+                await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, streamIds, cancellationToken);
 
                 outputFs.Close();
 
@@ -143,6 +145,20 @@ namespace TwitchDownloaderCore
                     Cleanup(downloadFolder);
                 }
             }
+        }
+
+        private FfmpegConcatList.StreamIds GetStreamIds(M3U8 playlist)
+        {
+            var path = DownloadTools.RemoveQueryString(playlist.Streams.FirstOrDefault()?.Path ?? "");
+            var extension = Path.GetExtension(path);
+            if (extension is ".mp4")
+                return FfmpegConcatList.StreamIds.Mp4;
+
+            if (extension is ".ts")
+                return FfmpegConcatList.StreamIds.TransportStream;
+
+            _progress.LogWarning("No file extension was found! Assuming TS.");
+            return FfmpegConcatList.StreamIds.TransportStream;
         }
 
         private void CheckAvailableStorageSpace(int bandwidth, TimeSpan videoLength)
@@ -318,7 +334,8 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<int> RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endDuration, TimeSpan videoLength, bool disableAudioCopy, CancellationToken cancellationToken)
+        private async Task<int> RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endDuration, TimeSpan videoLength, bool disableAudioCopy,
+            CancellationToken cancellationToken)
         {
             using var process = new Process
             {
@@ -386,7 +403,7 @@ namespace TwitchDownloaderCore
                 HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength);
             };
 
-            _progress.LogVerbose($"Running FFmpeg in \"{process.StartInfo.WorkingDirectory}\" with args: {CombineArguments(process.StartInfo.ArgumentList)}");
+            _progress.LogVerbose($"Running \"{downloadOptions.FfmpegPath}\" in \"{process.StartInfo.WorkingDirectory}\" with args: {CombineArguments(process.StartInfo.ArgumentList)}");
 
             process.Start();
             process.BeginErrorReadLine();
