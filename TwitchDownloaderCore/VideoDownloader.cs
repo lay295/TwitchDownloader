@@ -109,7 +109,8 @@ namespace TwitchDownloaderCore
                     videoChapterResponse.data.video.moments.edges);
 
                 var concatListPath = Path.Combine(downloadFolder, "concat.txt");
-                await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, cancellationToken);
+                var streamIds = GetStreamIds(playlist);
+                await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, streamIds, cancellationToken);
 
                 outputFs.Close();
 
@@ -316,6 +317,20 @@ namespace TwitchDownloaderCore
                 _progress.LogInfo($"The following parts will be redownloaded: {string.Join(", ", failedParts)}");
                 await DownloadVideoPartsAsync(failedParts, Range.All, baseUrl, downloadFolder, vodAirDate, cancellationToken);
             }
+        }
+
+        private FfmpegConcatList.StreamIds GetStreamIds(M3U8 playlist)
+        {
+            var path = DownloadTools.RemoveQueryString(playlist.Streams.FirstOrDefault()?.Path ?? "");
+            var extension = Path.GetExtension(path);
+            if (extension is ".mp4")
+                return FfmpegConcatList.StreamIds.Mp4;
+
+            if (extension is ".ts")
+                return FfmpegConcatList.StreamIds.TransportStream;
+
+            _progress.LogWarning("No file extension was found! Assuming TS.");
+            return FfmpegConcatList.StreamIds.TransportStream;
         }
 
         private async Task<int> RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endDuration, TimeSpan videoLength, bool disableAudioCopy, CancellationToken cancellationToken)
