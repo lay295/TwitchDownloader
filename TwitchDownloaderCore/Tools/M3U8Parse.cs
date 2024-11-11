@@ -285,10 +285,10 @@ namespace TwitchDownloaderCore.Tools
                     var separatorIndex = text.IndexOf('@');
                     if (separatorIndex != -1
                         && separatorIndex != text.Length
-                        && uint.TryParse(text[..separatorIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var start)
-                        && uint.TryParse(text[(separatorIndex + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var end))
+                        && uint.TryParse(text[..separatorIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var length)
+                        && uint.TryParse(text[(separatorIndex + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var start))
                     {
-                        return new ExtByteRange(start, end);
+                        return new ExtByteRange(length, start);
                     }
 
                     throw new FormatException($"Unable to parse ByteRange from {text}.");

@@ -476,9 +476,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [Theory]
         [InlineData(100, 200, "100@200")]
         [InlineData(100, 200, "#EXT-X-BYTERANGE:100@200")]
-        public void CorrectlyParsesByteRange(uint start, uint length, string byteRangeString)
+        public void CorrectlyParsesByteRange(uint length, uint start, string byteRangeString)
         {
-            var expected = new M3U8.Stream.ExtByteRange(start, length);
+            var expected = new M3U8.Stream.ExtByteRange(length, start);
 
             var actual = M3U8.Stream.ExtByteRange.Parse(byteRangeString);
 

@@ -144,13 +144,13 @@ namespace TwitchDownloaderCore.Tools
                 return sb.ToString();
             }
 
-            public readonly partial record struct ExtByteRange(uint Start, uint Length)
+            public readonly partial record struct ExtByteRange(uint Length, uint Start)
             {
                 internal const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
 
-                public override string ToString() => $"{BYTE_RANGE_KEY}{Start}@{Length}";
+                public override string ToString() => $"{BYTE_RANGE_KEY}{Length}@{Start}";
 
-                public static implicit operator ExtByteRange((uint start, uint length) tuple) => new(tuple.start, tuple.length);
+                public static implicit operator ExtByteRange((uint length, uint start) tuple) => new(tuple.length, tuple.start);
             }
 
             public partial record ExtMediaInfo
