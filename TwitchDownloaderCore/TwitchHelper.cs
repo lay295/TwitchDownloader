@@ -539,7 +539,7 @@ namespace TwitchDownloaderCore
 
                 foreach (var id in comment.message.fragments
                              .Select(f => f.emoticon?.emoticon_id)
-                             .Where(id => !alreadyAdded.Contains(id) && !failedEmotes.Contains(id)))
+                             .Where(id => id != null && !alreadyAdded.Contains(id) && !failedEmotes.Contains(id)))
                 {
                     try
                     {
