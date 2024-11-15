@@ -144,7 +144,7 @@ namespace TwitchDownloaderWPF
                             Id = video.node.id,
                             Time = Settings.Default.UTCVideoTime ? video.node.createdAt : video.node.createdAt.ToLocalTime(),
                             Views = video.node.viewCount,
-                            Streamer = currentChannel.displayName,
+                            StreamerName = currentChannel.displayName,
                             StreamerId = currentChannel.id,
                             Game = video.node.game?.displayName ?? Translations.Strings.UnknownGame,
                             Thumbnail = thumbnail
@@ -209,7 +209,7 @@ namespace TwitchDownloaderWPF
                             Id = clip.node.slug,
                             Time = Settings.Default.UTCVideoTime ? clip.node.createdAt : clip.node.createdAt.ToLocalTime(),
                             Views = clip.node.viewCount,
-                            Streamer = currentChannel.displayName,
+                            StreamerName = currentChannel.displayName,
                             StreamerId = currentChannel.id,
                             ClipperName = clip.node.curator.displayName,
                             ClipperId = clip.node.curator.id,

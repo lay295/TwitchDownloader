@@ -576,7 +576,7 @@ namespace TwitchDownloaderWPF
                                 : -1,
                             FileCollisionCallback = HandleFileCollisionCallback,
                         };
-                        downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer, taskData.StreamerId,
+                        downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.StreamerName, taskData.StreamerId,
                             downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
                             downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : TimeSpan.FromSeconds(taskData.Length),
                             taskData.Views, taskData.Game) + FilenameService.GuessVodFileExtension(downloadOptions.Quality));
@@ -602,7 +602,7 @@ namespace TwitchDownloaderWPF
                         {
                             Id = taskData.Id,
                             Quality = (ComboPreferredQuality.SelectedItem as ComboBoxItem)?.Content as string,
-                            Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer, taskData.StreamerId,
+                            Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, taskData.Title, taskData.Id, taskData.Time, taskData.StreamerName, taskData.StreamerId,
                                 TimeSpan.Zero, TimeSpan.FromSeconds(taskData.Length), taskData.Views, taskData.Game, taskData.ClipperName, taskData.ClipperId) + ".mp4"),
                             ThrottleKib = Settings.Default.DownloadThrottleEnabled
                                 ? Settings.Default.MaximumBandwidthKib
@@ -648,7 +648,7 @@ namespace TwitchDownloaderWPF
                         downloadOptions.DownloadFormat = ChatFormat.Html;
                     else
                         downloadOptions.DownloadFormat = ChatFormat.Text;
-                    downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, taskData.Title, taskData.Id, taskData.Time, taskData.Streamer, taskData.StreamerId,
+                    downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, taskData.Title, taskData.Id, taskData.Time, taskData.StreamerName, taskData.StreamerId,
                         downloadOptions.TrimBeginning ? TimeSpan.FromSeconds(downloadOptions.TrimBeginningTime) : TimeSpan.Zero,
                         downloadOptions.TrimEnding ? TimeSpan.FromSeconds(downloadOptions.TrimEndingTime) : TimeSpan.FromSeconds(taskData.Length),
                         taskData.Views, taskData.Game, taskData.ClipperName, taskData.ClipperId) + "." + downloadOptions.FileExtension);
