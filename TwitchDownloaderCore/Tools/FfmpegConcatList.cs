@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace TwitchDownloaderCore.Tools
     {
         private const string LINE_FEED = "\u000A";
 
-        public static async Task SerializeAsync(string filePath, M3U8 playlist, Range videoListCrop, CancellationToken cancellationToken = default)
+        public static async Task SerializeAsync(string filePath, M3U8 playlist, Range videoListCrop, StreamIds streamIds, CancellationToken cancellationToken = default)
         {
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
@@ -27,16 +28,29 @@ namespace TwitchDownloaderCore.Tools
                 await sw.WriteAsync(DownloadTools.RemoveQueryString(stream.Path));
                 await sw.WriteLineAsync('\'');
 
-                await sw.WriteLineAsync("stream");
-                await sw.WriteLineAsync("exact_stream_id 0x100"); // Audio
-                await sw.WriteLineAsync("stream");
-                await sw.WriteLineAsync("exact_stream_id 0x101"); // Video
-                await sw.WriteLineAsync("stream");
-                await sw.WriteLineAsync("exact_stream_id 0x102"); // Subtitle
+                foreach (var id in streamIds.Ids)
+                {
+                    await sw.WriteLineAsync("stream");
+                    await sw.WriteLineAsync($"exact_stream_id {id}");
+                }
 
                 await sw.WriteAsync("duration ");
                 await sw.WriteLineAsync(stream.PartInfo.Duration.ToString(CultureInfo.InvariantCulture));
             }
+        }
+
+        public record StreamIds
+        {
+            public static readonly StreamIds TransportStream = new("0x100", "0x101", "0x102");
+            public static readonly StreamIds Mp4 = new("0x1", "0x2");
+            public static readonly StreamIds None = new();
+
+            private StreamIds(params string[] ids)
+            {
+                Ids = ids;
+            }
+
+            public IEnumerable<string> Ids { get; }
         }
     }
 }
