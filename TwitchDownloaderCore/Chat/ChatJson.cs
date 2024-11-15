@@ -208,7 +208,7 @@ namespace TwitchDownloaderCore.Chat
                     }
                 }
 
-                var assumedName = chatRoot.video.user_name ?? broadcaster.Value?.commenter.display_name ?? await TwitchHelper.GetStreamerName(assumedId);
+                var assumedName = chatRoot.video.user_name ?? broadcaster.Value?.commenter.display_name ?? await TwitchHelper.GetStreamerDisplayName(assumedId);
 
                 chatRoot.streamer = new Streamer { id = assumedId, name = assumedName };
             }
