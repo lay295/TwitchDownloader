@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
     public class UserId
@@ -9,7 +7,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
 
     public class UserIdData
     {
-        public List<UserId> users { get; set; }
+        public UserId[] users { get; set; }
     }
 
     public class GqlUserIdResponse
