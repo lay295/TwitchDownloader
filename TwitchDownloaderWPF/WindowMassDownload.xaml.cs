@@ -60,7 +60,7 @@ namespace TwitchDownloaderWPF
         private async Task ChangeCurrentChannel()
         {
             var textTrimmed = textChannel.Text.Trim();
-            if (currentChannel?.login != textTrimmed)
+            if (!textTrimmed.Equals(currentChannel?.login, StringComparison.InvariantCultureIgnoreCase))
             {
                 currentChannel = null;
                 if (!string.IsNullOrEmpty(textTrimmed))
