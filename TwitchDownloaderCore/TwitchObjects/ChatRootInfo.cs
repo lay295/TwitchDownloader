@@ -15,7 +15,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public uint Minor { get; init; }
         public uint Patch { get; init; }
 
-        public static ChatRootVersion CurrentVersion { get; } = new(1, 3, 1);
+        public static ChatRootVersion CurrentVersion { get; } = new(1, 4, 0);
 
         /// <summary>
         /// Initializes a new <see cref="ChatRootVersion"/> object with the default version of 1.0.0

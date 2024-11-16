@@ -8,6 +8,14 @@ namespace TwitchDownloaderCore.TwitchObjects
     public class Streamer
     {
         public string name { get; set; }
+        public string login { get; set; }
+        public int id { get; set; }
+    }
+
+    public class Clipper
+    {
+        public string name { get; set; }
+        public string login { get; set; }
         public int id { get; set; }
     }
 
@@ -271,6 +279,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public ChatRootInfo FileInfo { get; set; } = new();
         public Streamer streamer { get; set; }
+        public Clipper clipper { get; set; }
         public Video video { get; set; }
         public List<Comment> comments { get; set; }
         public EmbeddedData embeddedData { get; set; }

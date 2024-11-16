@@ -192,25 +192,51 @@ namespace TwitchDownloaderCore.Chat
 
             if (chatRoot.streamer is null)
             {
-                var broadcaster = new Lazy<Comment>(() =>
-                    chatRoot.comments
-                        .Where(x => x.message.user_badges != null)
-                        .FirstOrDefault(x => x.message.user_badges.Any(b => b._id.Equals("broadcaster"))));
+                var broadcasterComment = chatRoot.comments
+                    .Where(x => x.message.user_badges != null)
+                    .FirstOrDefault(x => x.message.user_badges.Any(b => b._id.Equals("broadcaster")));
 
                 if (!int.TryParse(chatRoot.video.user_id, out var assumedId))
                 {
                     if (chatRoot.comments.FirstOrDefault(x => int.TryParse(x.channel_id, out assumedId)) is null)
                     {
-                        if (!int.TryParse(broadcaster.Value?.commenter._id, out assumedId))
+                        if (!int.TryParse(broadcasterComment?.commenter._id, out assumedId))
                         {
                             assumedId = 0;
                         }
                     }
                 }
 
-                var assumedName = chatRoot.video.user_name ?? broadcaster.Value?.commenter.display_name ?? await TwitchHelper.GetStreamerName(assumedId);
+                var assumedName = chatRoot.video.user_name ?? broadcasterComment?.commenter.display_name;
+                var assumedLogin = broadcasterComment?.commenter.name;
 
-                chatRoot.streamer = new Streamer { id = assumedId, name = assumedName };
+                if ((assumedName is null || assumedLogin is null) && assumedId != 0)
+                {
+                    try
+                    {
+                        var userInfo = await TwitchHelper.GetUserInfo(new[] { assumedId.ToString() });
+                        assumedName ??= userInfo.data.users.FirstOrDefault()?.displayName;
+                        assumedLogin ??= userInfo.data.users.FirstOrDefault()?.login;
+                    }
+                    catch { /* ignored */ }
+                }
+
+                chatRoot.streamer = new Streamer
+                {
+                    name = assumedName,
+                    login = assumedLogin,
+                    id = assumedId
+                };
+            }
+
+            if (chatRoot.streamer.login is null && chatRoot.streamer.id != 0)
+            {
+                try
+                {
+                    var userInfo = await TwitchHelper.GetUserInfo(new[] { chatRoot.streamer.id.ToString() });
+                    chatRoot.streamer.login = userInfo.data.users.FirstOrDefault()?.login;
+                }
+                catch { /* ignored */ }
             }
 
             if (chatRoot.video.user_name is not null)

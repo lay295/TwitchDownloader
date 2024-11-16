@@ -136,6 +136,15 @@
                 <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterChannelTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {channel}
                 </Run>
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterChannelIdTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                    {channel_id}
+                </Run>
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterClipperTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                    {clipper}
+                </Run>
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterClipperIdTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                    {clipper_id}
+                </Run>
                 <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterRandomStringTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {random_string}
                 </Run>

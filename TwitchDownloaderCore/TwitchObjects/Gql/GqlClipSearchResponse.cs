@@ -9,12 +9,19 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string displayName { get; set; }
     }
 
+    public class ClipNodeCurator
+    {
+        public string id { get; set; }
+        public string displayName { get; set; }
+    }
+
     public class ClipNode
     {
         public string id { get; set; }
         public string slug { get; set; }
         public string title { get; set; }
         public DateTime createdAt { get; set; }
+        public ClipNodeCurator curator { get; set; }
         public int durationSeconds { get; set; }
         public string thumbnailURL { get; set; }
         public int viewCount { get; set; }

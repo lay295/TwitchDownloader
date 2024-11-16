@@ -29,7 +29,9 @@ namespace TwitchDownloaderWPF
     {
         public DownloadType downloadType;
         public string downloadId;
-        public int streamerId;
+        public string streamerId;
+        public string clipper;
+        public string clipperId;
         public DateTime currentVideoTime;
         public TimeSpan vodLength;
         public int viewCount;
@@ -144,7 +146,9 @@ namespace TwitchDownloaderWPF
                     var videoTime = videoInfo.data.video.createdAt;
                     textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoTime.ToString(CultureInfo.CurrentCulture) : videoTime.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                     currentVideoTime = Settings.Default.UTCVideoTime ? videoTime : videoTime.ToLocalTime();
-                    streamerId = int.Parse(videoInfo.data.video.owner.id);
+                    streamerId = videoInfo.data.video.owner.id;
+                    clipper = null;
+                    clipperId = null;
                     viewCount = videoInfo.data.video.viewCount;
                     game = videoInfo.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
 
@@ -193,7 +197,9 @@ namespace TwitchDownloaderWPF
                     textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                     currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                     textTitle.Text = clipInfo.data.clip.title;
-                    streamerId = int.Parse(clipInfo.data.clip.broadcaster?.id ?? "-1");
+                    streamerId = clipInfo.data.clip.broadcaster?.id;
+                    clipper = clipInfo.data.clip.curator.displayName;
+                    clipperId = clipInfo.data.clip.curator.id;
                     labelLength.Text = vodLength.ToString("c");
                     SetEnabled(true);
 
@@ -498,10 +504,10 @@ namespace TwitchDownloaderWPF
 
             var saveFileDialog = new SaveFileDialog
             {
-                FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text,
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text, streamerId,
                     CheckTrimStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     CheckTrimEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    viewCount, game)
+                    viewCount, game, clipper, clipperId)
             };
 
             if (radioJson.IsChecked == true)

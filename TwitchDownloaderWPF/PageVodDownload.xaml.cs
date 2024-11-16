@@ -37,6 +37,7 @@ namespace TwitchDownloaderWPF
         public TimeSpan vodLength;
         public int viewCount;
         public string game;
+        public string streamerId;
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageVodDownload()
@@ -138,6 +139,7 @@ namespace TwitchDownloaderWPF
 
                 vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                 textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
+                streamerId = taskVideoInfo.Result.data.video.owner.id;
                 textTitle.Text = taskVideoInfo.Result.data.video.title;
                 var videoCreatedAt = taskVideoInfo.Result.data.video.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
@@ -203,7 +205,7 @@ namespace TwitchDownloaderWPF
                 ThrottleKib = Settings.Default.DownloadThrottleEnabled
                     ? Settings.Default.MaximumBandwidthKib
                     : -1,
-                Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
+                Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text, streamerId,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
                     viewCount, game) + FilenameService.GuessVodFileExtension(comboQuality.Text)),
@@ -422,7 +424,7 @@ namespace TwitchDownloaderWPF
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? "M4A Files | *.m4a" : "MP4 Files | *.mp4",
-                FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text, streamerId,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
                     viewCount, game) + FilenameService.GuessVodFileExtension(comboQuality.Text)

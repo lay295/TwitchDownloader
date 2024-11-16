@@ -1023,11 +1023,38 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The ID of the channel which owns the video/clip/chat..
+        /// </summary>
+        public static string FilenameParameterChannelIdTooltip {
+            get {
+                return ResourceManager.GetString("FilenameParameterChannelIdTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The display name of the channel which owns the video/clip/chat..
         /// </summary>
         public static string FilenameParameterChannelTooltip {
             get {
                 return ResourceManager.GetString("FilenameParameterChannelTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The ID of the channel which created the clip, or empty for videos..
+        /// </summary>
+        public static string FilenameParameterClipperIdTooltip {
+            get {
+                return ResourceManager.GetString("FilenameParameterClipperIdTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The display name of the channel which created the clip, or empty for videos..
+        /// </summary>
+        public static string FilenameParameterClipperTooltip {
+            get {
+                return ResourceManager.GetString("FilenameParameterClipperTooltip", resourceCulture);
             }
         }
         

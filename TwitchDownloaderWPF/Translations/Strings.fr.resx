@@ -1005,4 +1005,13 @@
   <data name="FileCollisionBehaviorCancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="FilenameParameterChannelIdTooltip" xml:space="preserve">
+    <value>The ID of the channel which owns the video/clip/chat.</value>
+  </data>
+  <data name="FilenameParameterClipperTooltip" xml:space="preserve">
+    <value>The display name of the channel which created the clip, or empty for videos.</value>
+  </data>
+  <data name="FilenameParameterClipperIdTooltip" xml:space="preserve">
+    <value>The ID of the channel which created the clip, or empty for videos.</value>
+  </data>
 </root>
