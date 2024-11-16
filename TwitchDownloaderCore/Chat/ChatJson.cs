@@ -192,7 +192,7 @@ namespace TwitchDownloaderCore.Chat
 
             if (chatRoot.streamer is null)
             {
-                var broadcaster = chatRoot.comments
+                var broadcasterComment = chatRoot.comments
                     .Where(x => x.message.user_badges != null)
                     .FirstOrDefault(x => x.message.user_badges.Any(b => b._id.Equals("broadcaster")));
 
@@ -200,15 +200,15 @@ namespace TwitchDownloaderCore.Chat
                 {
                     if (chatRoot.comments.FirstOrDefault(x => int.TryParse(x.channel_id, out assumedId)) is null)
                     {
-                        if (!int.TryParse(broadcaster?.commenter._id, out assumedId))
+                        if (!int.TryParse(broadcasterComment?.commenter._id, out assumedId))
                         {
                             assumedId = 0;
                         }
                     }
                 }
 
-                var assumedName = chatRoot.video.user_name ?? broadcaster?.commenter.display_name;
-                var assumedLogin = broadcaster?.commenter.name;
+                var assumedName = chatRoot.video.user_name ?? broadcasterComment?.commenter.display_name;
+                var assumedLogin = broadcasterComment?.commenter.name;
 
                 if ((assumedName is null || assumedLogin is null) && assumedId != 0)
                 {
