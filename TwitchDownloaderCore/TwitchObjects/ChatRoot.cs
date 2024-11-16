@@ -8,12 +8,14 @@ namespace TwitchDownloaderCore.TwitchObjects
     public class Streamer
     {
         public string name { get; set; }
+        public string login { get; set; }
         public int id { get; set; }
     }
 
     public class Clipper
     {
         public string name { get; set; }
+        public string login { get; set; }
         public int id { get; set; }
     }
 

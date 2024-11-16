@@ -1047,19 +1047,6 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlUserIdResponse>();
         }
 
-        public static async Task<string> GetStreamerDisplayName(int id)
-        {
-            try
-            {
-                GqlUserInfoResponse info = await GetUserInfo(new[] { id.ToString() });
-                return info.data.users[0].displayName;
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
         public static async Task<GqlUserInfoResponse> GetUserInfo(IEnumerable<string> idList)
         {
             var request = new HttpRequestMessage()

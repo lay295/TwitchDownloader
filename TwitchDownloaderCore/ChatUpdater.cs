@@ -177,6 +177,7 @@ namespace TwitchDownloaderCore
                 chatRoot.clipper ??= new Clipper
                 {
                     name = clipInfo.curator.displayName,
+                    login = clipInfo.curator.login,
                     id = int.Parse(clipInfo.curator.id),
                 };
 

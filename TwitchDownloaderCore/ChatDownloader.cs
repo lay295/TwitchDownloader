@@ -331,6 +331,7 @@ namespace TwitchDownloaderCore
                 }
 
                 chatRoot.streamer.name = videoInfoResponse.data.video.owner.displayName;
+                chatRoot.streamer.login = videoInfoResponse.data.video.owner.login;
                 chatRoot.streamer.id = int.Parse(videoInfoResponse.data.video.owner.id);
                 chatRoot.video.description = videoInfoResponse.data.video.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
                 chatRoot.video.title = videoInfoResponse.data.video.title;
@@ -371,10 +372,12 @@ namespace TwitchDownloaderCore
 
                 videoId = clipInfoResponse.data.clip.video.id;
                 chatRoot.streamer.name = clipInfoResponse.data.clip.broadcaster.displayName;
+                chatRoot.streamer.login = clipInfoResponse.data.clip.broadcaster.login;
                 chatRoot.streamer.id = int.Parse(clipInfoResponse.data.clip.broadcaster.id);
                 chatRoot.clipper = new Clipper
                 {
                     name = clipInfoResponse.data.clip.curator.displayName,
+                    login = clipInfoResponse.data.clip.curator.login,
                     id = int.Parse(clipInfoResponse.data.clip.curator.id),
                 };
                 chatRoot.video.title = clipInfoResponse.data.clip.title;
