@@ -31,6 +31,9 @@ namespace TwitchDownloaderWPF
         public string InputFile;
         public ChatRoot ChatJsonInfo;
         public string VideoId;
+        public string StreamerId;
+        public string ClipperName;
+        public string ClipperId;
         public DateTime VideoCreatedAt;
         public TimeSpan VideoLength;
         public int ViewCount;
@@ -109,6 +112,9 @@ namespace TwitchDownloaderWPF
                 : Translations.Strings.UnknownVideoLength;
 
             VideoId = ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1";
+            StreamerId = ChatJsonInfo.streamer.id.ToString(CultureInfo.InvariantCulture);
+            ClipperName = ChatJsonInfo.clipper?.name;
+            ClipperId = ChatJsonInfo.clipper?.id.ToString(CultureInfo.InvariantCulture);
             ViewCount = ChatJsonInfo.video.viewCount;
             Game = ChatJsonInfo.video.game ?? ChatJsonInfo.video.chapters.FirstOrDefault()?.gameDisplayName ?? Translations.Strings.UnknownGame;
 
@@ -153,8 +159,8 @@ namespace TwitchDownloaderWPF
                         numEndHour.Maximum = 0;
                     }
 
-                    GqlClipResponse videoInfo = await TwitchHelper.GetClipInfo(VideoId);
-                    if (videoInfo.data.clip.video == null)
+                    GqlClipResponse clipInfo = await TwitchHelper.GetClipInfo(VideoId);
+                    if (clipInfo.data.clip.video == null)
                     {
                         AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail + ": " + Translations.Strings.VodExpiredOrIdCorrupt);
                         _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out var image);
@@ -162,12 +168,14 @@ namespace TwitchDownloaderWPF
                     }
                     else
                     {
-                        VideoLength = TimeSpan.FromSeconds(videoInfo.data.clip.durationSeconds);
+                        VideoLength = TimeSpan.FromSeconds(clipInfo.data.clip.durationSeconds);
                         labelLength.Text = VideoLength.ToString("c");
-                        ViewCount = videoInfo.data.clip.viewCount;
-                        Game = videoInfo.data.clip.game?.displayName;
+                        ViewCount = clipInfo.data.clip.viewCount;
+                        Game = clipInfo.data.clip.game?.displayName;
+                        ClipperName ??= clipInfo.data.clip.curator.displayName;
+                        ClipperId ??= clipInfo.data.clip.curator.id;
 
-                        var thumbUrl = videoInfo.data.clip.thumbnailURL;
+                        var thumbUrl = clipInfo.data.clip.thumbnailURL;
                         if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                         {
                             AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
@@ -497,10 +505,10 @@ namespace TwitchDownloaderWPF
             var saveFileDialog = new SaveFileDialog
             {
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text,
-                    ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text,
+                    ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text, StreamerId,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.start) ? 0.0 : ChatJsonInfo.video.start),
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : VideoLength,
-                    ViewCount, Game)
+                    ViewCount, Game, ClipperName, ClipperId)
             };
 
             if (radioJson.IsChecked == true)

@@ -10,7 +10,8 @@ namespace TwitchDownloaderCore.Tools
 {
     public static class FilenameService
     {
-        public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date, [AllowNull] string channel, TimeSpan trimStart, TimeSpan trimEnd, long viewCount, [AllowNull] string game)
+        public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date, [AllowNull] string channel, [AllowNull] string channelId, TimeSpan trimStart, TimeSpan trimEnd, long viewCount,
+            [AllowNull] string game, [AllowNull] string clipper = null, [AllowNull] string clipperId = null)
         {
             var videoLength = trimEnd - trimStart;
 
@@ -18,6 +19,9 @@ namespace TwitchDownloaderCore.Tools
                 .Replace("{title}", ReplaceInvalidFilenameChars(title))
                 .Replace("{id}", ReplaceInvalidFilenameChars(id))
                 .Replace("{channel}", ReplaceInvalidFilenameChars(channel))
+                .Replace("{channel_id}", ReplaceInvalidFilenameChars(channelId))
+                .Replace("{clipper}", ReplaceInvalidFilenameChars(clipper))
+                .Replace("{clipper_id}", ReplaceInvalidFilenameChars(clipperId))
                 .Replace("{date}", date.ToString("M-d-yy"))
                 .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
                 .Replace("{trim_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
