@@ -165,6 +165,8 @@ namespace TwitchDownloaderCore
             var destinationFile = Path.Combine(downloadFolder, map.Uri);
 
             var uri = new Uri(baseUrl, map.Uri);
+            _progress.LogVerbose($"Downloading header file from '{uri}' to '{destinationFile}'");
+
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
             using var response = await _httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
