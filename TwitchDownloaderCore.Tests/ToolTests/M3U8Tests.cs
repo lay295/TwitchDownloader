@@ -572,9 +572,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [Theory]
         [InlineData(100, 200, "100x200")]
         [InlineData(100, 200, "RESOLUTION=100x200")]
-        public void CorrectlyParsesResolution(uint start, uint length, string byteRangeString)
+        public void CorrectlyParsesResolution(uint width, uint height, string byteRangeString)
         {
-            var expected = new M3U8.Stream.ExtStreamInfo.StreamResolution(start, length);
+            var expected = new M3U8.Stream.ExtStreamInfo.StreamResolution(width, height);
 
             var actual = M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(byteRangeString);
 
@@ -585,9 +585,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("429496729500x1")]
         [InlineData("1x429496729500")]
         [InlineData("42949672950000")]
-        public void ThrowsFormatExceptionForBadResolutionString(string byteRangeString)
+        public void ThrowsFormatExceptionForBadResolutionString(string resolutionString)
         {
-            Assert.Throws<FormatException>(() => M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(byteRangeString));
+            Assert.Throws<FormatException>(() => M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(resolutionString));
         }
 
         [Theory]
