@@ -120,7 +120,7 @@ namespace TwitchDownloaderCore.Tools
                             continue;
                         }
 
-                        VerifyTsLength(partFile, actualLength);
+                        CheckTsLength(partFile, actualLength);
                     }
 
                     return;
@@ -177,7 +177,7 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        private void VerifyTsLength(string partFile, long length)
+        private void CheckTsLength(string partFile, long length)
         {
             if (partFile.EndsWith(".ts"))
             {
