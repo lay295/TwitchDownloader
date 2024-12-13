@@ -48,6 +48,7 @@ namespace TwitchDownloaderCore.Tools
             private const string TARGET_DURATION_KEY = "#EXT-X-TARGETDURATION:";
             private const string PLAYLIST_TYPE_KEY = "#EXT-X-PLAYLIST-TYPE:";
             private const string MEDIA_SEQUENCE_KEY = "#EXT-X-MEDIA-SEQUENCE:";
+            private const string MAP_KEY = "#EXT-X-MAP:";
             private const string TWITCH_LIVE_SEQUENCE_KEY = "#EXT-X-TWITCH-LIVE-SEQUENCE:";
             private const string TWITCH_ELAPSED_SECS_KEY = "#EXT-X-TWITCH-ELAPSED-SECS:";
             private const string TWITCH_TOTAL_SECS_KEY = "#EXT-X-TWITCH-TOTAL-SECS:";
@@ -58,6 +59,7 @@ namespace TwitchDownloaderCore.Tools
             public uint? StreamTargetDuration { get; init; }
             public PlaylistType? Type { get; init; }
             public uint? MediaSequence { get; init; }
+            public ExtMap Map { get; init; }
 
             // Twitch specific
             public uint? TwitchLiveSequence { get; init; }
@@ -94,6 +96,9 @@ namespace TwitchDownloaderCore.Tools
                 if (TwitchTotalSeconds.HasValue)
                     sb.AppendKeyValue(TWITCH_TOTAL_SECS_KEY, TwitchTotalSeconds.Value, itemSeparator);
 
+                if (Map is not null)
+                    sb.AppendKeyValue(MAP_KEY, Map.ToString(), itemSeparator);
+
                 foreach (var (key, value) in _unparsedValues)
                 {
                     sb.AppendKeyValue(key, value, itemSeparator);
@@ -105,6 +110,42 @@ namespace TwitchDownloaderCore.Tools
                 }
 
                 return sb.TrimEnd(itemSeparator).ToString();
+            }
+
+            // TODO: Merge with other ByteRange struct
+            public readonly partial record struct ByteRange(uint Length, uint Start)
+            {
+                public override string ToString()
+                {
+                    if (this == default)
+                        return "";
+
+                    return $"{Length}@{Start}";
+                }
+
+                public static implicit operator ByteRange((uint length, uint start) tuple) => new(tuple.length, tuple.start);
+            }
+
+            public partial record ExtMap(string Uri, ByteRange ByteRange)
+            {
+                private const string URI_KEY = "URI=\"";
+
+                public override string ToString()
+                {
+                    var sb = new StringBuilder();
+                    ReadOnlySpan<char> itemSeparator = stackalloc char[] { ',' };
+
+                    if (!string.IsNullOrWhiteSpace(Uri))
+                        sb.AppendKeyQuoteValue(URI_KEY, Uri, itemSeparator);
+
+                    if (ByteRange != default)
+                        sb.AppendKeyQuoteValue(ByteRange.BYTE_RANGE_KEY, ByteRange.ToString(), itemSeparator);
+
+                    if (sb.Length == 0)
+                        return "";
+
+                    return sb.TrimEnd(itemSeparator).ToString();
+                }
             }
         }
 

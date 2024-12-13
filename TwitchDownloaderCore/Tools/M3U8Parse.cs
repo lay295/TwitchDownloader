@@ -179,6 +179,7 @@ namespace TwitchDownloaderCore.Tools
                 private uint? _streamTargetDuration;
                 private PlaylistType? _type;
                 private uint? _mediaSequence;
+                private ExtMap _map;
 
                 // Twitch specific
                 private uint? _twitchLiveSequence;
@@ -224,6 +225,10 @@ namespace TwitchDownloaderCore.Tools
                     {
                         _mediaSequence = ParsingHelpers.ParseUIntValue(text, MEDIA_SEQUENCE_KEY);
                     }
+                    else if (text.StartsWith(MAP_KEY))
+                    {
+                        _map = ExtMap.Parse(text);
+                    }
                     else if (text.StartsWith(TWITCH_LIVE_SEQUENCE_KEY))
                     {
                         _twitchLiveSequence = ParsingHelpers.ParseUIntValue(text, TWITCH_LIVE_SEQUENCE_KEY);
@@ -264,11 +269,68 @@ namespace TwitchDownloaderCore.Tools
                         StreamTargetDuration = _streamTargetDuration,
                         Type = _type,
                         MediaSequence = _mediaSequence,
+                        Map = _map,
                         TwitchLiveSequence = _twitchLiveSequence,
                         TwitchElapsedSeconds = _twitchElapsedSeconds,
                         TwitchTotalSeconds = _twitchTotalSeconds,
                         _unparsedValues = _unparsedValues
                     };
+                }
+            }
+
+            public partial record struct ByteRange
+            {
+                internal const string BYTE_RANGE_KEY = "BYTERANGE=";
+
+                public static ByteRange Parse(ReadOnlySpan<char> text)
+                {
+                    if (text.StartsWith(BYTE_RANGE_KEY))
+                        text = text[BYTE_RANGE_KEY.Length..];
+
+                    var separatorIndex = text.IndexOf('@');
+                    if (separatorIndex != -1
+                        && separatorIndex != text.Length
+                        && uint.TryParse(text[..separatorIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var start)
+                        && uint.TryParse(text[(separatorIndex + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var end))
+                    {
+                        return new ByteRange(start, end);
+                    }
+
+                    throw new FormatException($"Unable to parse ByteRange from {text}.");
+                }
+            }
+
+            public partial record ExtMap
+            {
+                public static ExtMap Parse(ReadOnlySpan<char> text)
+                {
+                    if (text.StartsWith(MAP_KEY))
+                        text = text[MAP_KEY.Length..];
+
+                    ByteRange byteRange = default;
+                    var uri = "";
+
+                    do
+                    {
+                        text = text.TrimStart();
+
+                        if (text.StartsWith(ByteRange.BYTE_RANGE_KEY))
+                        {
+                            byteRange = ByteRange.Parse(text);
+                        }
+                        else if (text.StartsWith(URI_KEY))
+                        {
+                            uri = ParsingHelpers.ParseStringValue(text, URI_KEY);
+                        }
+
+                        var nextIndex = text.UnEscapedIndexOf(',');
+                        if (nextIndex == -1)
+                            break;
+
+                        text = text[(nextIndex + 1)..];
+                    } while (true);
+
+                    return new ExtMap(uri, byteRange);
                 }
             }
         }
