@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -94,13 +95,15 @@ namespace TwitchDownloaderCore
                     Directory.Delete(downloadFolder, true);
                 TwitchHelper.CreateDirectory(downloadFolder);
 
+                var headerFile = await GetHeaderFile(playlist, baseUrl, downloadFolder, cancellationToken);
+
                 _progress.SetTemplateStatus("Downloading {0}% [2/4]", 0);
 
-                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
+                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, downloadFolder, headerFile, airDate, cancellationToken);
 
                 _progress.SetTemplateStatus("Verifying Parts {0}% [3/4]", 0);
 
-                await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, airDate, cancellationToken);
+                await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, downloadFolder, headerFile, airDate, cancellationToken);
 
                 _progress.SetTemplateStatus("Finalizing Video {0}% [4/4]", 0);
 
@@ -146,6 +149,32 @@ namespace TwitchDownloaderCore
             }
         }
 
+        private async Task<string> GetHeaderFile(M3U8 playlist, Uri baseUrl, string downloadFolder, CancellationToken cancellationToken)
+        {
+            var map = playlist.FileMetadata.Map;
+            if (string.IsNullOrWhiteSpace(map?.Uri))
+            {
+                return null;
+            }
+
+            if (map.ByteRange != default)
+            {
+                _progress.LogWarning($"Byte range was {map.ByteRange}, but is not yet implemented!");
+            }
+
+            var destinationFile = Path.Combine(downloadFolder, map.Uri);
+
+            var uri = new Uri(baseUrl, map.Uri);
+            using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+            await response.Content.CopyToAsync(fs, cancellationToken);
+
+            return destinationFile;
+        }
+
         private void CheckAvailableStorageSpace(int bandwidth, TimeSpan videoLength)
         {
             var videoSizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth,
@@ -176,7 +205,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartsAsync(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
             var videoPartsQueue = new ConcurrentQueue<string>(playlist.Take(videoListCrop).Select(x => x.Path));
@@ -184,7 +213,7 @@ namespace TwitchDownloaderCore
             var downloadThreads = new VideoDownloadThread[downloadOptions.DownloadThreads];
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
             {
-                downloadThreads[i] = new VideoDownloadThread(videoPartsQueue, _httpClient, baseUrl, downloadFolder, vodAirDate, downloadOptions.ThrottleKib, _progress, cancellationToken);
+                downloadThreads[i] = new VideoDownloadThread(videoPartsQueue, _httpClient, baseUrl, downloadFolder, headerFile, vodAirDate, downloadOptions.ThrottleKib, _progress, cancellationToken);
             }
 
             var downloadExceptions = await WaitForDownloadThreads(downloadThreads, videoPartsQueue, partCount, cancellationToken);
@@ -283,7 +312,7 @@ namespace TwitchDownloaderCore
             _progress.LogInfo(sb.ToString());
         }
 
-        private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
+        private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
             var failedParts = new List<M3U8.Stream>();
             var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
@@ -315,7 +344,7 @@ namespace TwitchDownloaderCore
                 }
 
                 _progress.LogInfo($"The following parts will be redownloaded: {string.Join(", ", failedParts)}");
-                await DownloadVideoPartsAsync(failedParts, Range.All, baseUrl, downloadFolder, vodAirDate, cancellationToken);
+                await DownloadVideoPartsAsync(failedParts, Range.All, baseUrl, downloadFolder, headerFile, vodAirDate, cancellationToken);
             }
         }
 
