@@ -205,9 +205,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(IEnumerable<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartsAsync(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
-            var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
+            var partCount = videoListCrop.GetOffsetAndLength(playlist.Count).Length;
             var videoPartsQueue = new ConcurrentQueue<string>(playlist.Take(videoListCrop).Select(x => x.Path));
 
             var downloadThreads = new VideoDownloadThread[downloadOptions.DownloadThreads];
@@ -315,7 +315,7 @@ namespace TwitchDownloaderCore
         private async Task VerifyDownloadedParts(ICollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, string downloadFolder, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
             var failedParts = new List<M3U8.Stream>();
-            var partCount = videoListCrop.End.Value - videoListCrop.Start.Value;
+            var partCount = videoListCrop.GetOffsetAndLength(playlist.Count).Length;
             var doneCount = 0;
 
             foreach (var part in playlist.Take(videoListCrop))
