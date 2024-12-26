@@ -48,6 +48,7 @@ namespace TwitchDownloaderCore.Tools
             private const string TARGET_DURATION_KEY = "#EXT-X-TARGETDURATION:";
             private const string PLAYLIST_TYPE_KEY = "#EXT-X-PLAYLIST-TYPE:";
             private const string MEDIA_SEQUENCE_KEY = "#EXT-X-MEDIA-SEQUENCE:";
+            private const string MAP_KEY = "#EXT-X-MAP:";
             private const string TWITCH_LIVE_SEQUENCE_KEY = "#EXT-X-TWITCH-LIVE-SEQUENCE:";
             private const string TWITCH_ELAPSED_SECS_KEY = "#EXT-X-TWITCH-ELAPSED-SECS:";
             private const string TWITCH_TOTAL_SECS_KEY = "#EXT-X-TWITCH-TOTAL-SECS:";
@@ -58,6 +59,7 @@ namespace TwitchDownloaderCore.Tools
             public uint? StreamTargetDuration { get; init; }
             public PlaylistType? Type { get; init; }
             public uint? MediaSequence { get; init; }
+            public ExtMap Map { get; init; }
 
             // Twitch specific
             public uint? TwitchLiveSequence { get; init; }
@@ -94,6 +96,9 @@ namespace TwitchDownloaderCore.Tools
                 if (TwitchTotalSeconds.HasValue)
                     sb.AppendKeyValue(TWITCH_TOTAL_SECS_KEY, TwitchTotalSeconds.Value, itemSeparator);
 
+                if (Map is not null)
+                    sb.AppendKeyValue(MAP_KEY, Map.ToString(), itemSeparator);
+
                 foreach (var (key, value) in _unparsedValues)
                 {
                     sb.AppendKeyValue(key, value, itemSeparator);
@@ -106,15 +111,41 @@ namespace TwitchDownloaderCore.Tools
 
                 return sb.TrimEnd(itemSeparator).ToString();
             }
+
+            public partial record ExtMap(string Uri, ByteRange ByteRange)
+            {
+                private const string URI_KEY = "URI=\"";
+                private const string BYTE_RANGE_KEY = "BYTERANGE=";
+
+                public override string ToString()
+                {
+                    var sb = new StringBuilder();
+                    ReadOnlySpan<char> itemSeparator = stackalloc char[] { ',' };
+
+                    if (!string.IsNullOrWhiteSpace(Uri))
+                        sb.AppendKeyQuoteValue(URI_KEY, Uri, itemSeparator);
+
+                    if (ByteRange != default)
+                        sb.AppendKeyQuoteValue(BYTE_RANGE_KEY, ByteRange.ToString(), itemSeparator);
+
+                    if (sb.Length == 0)
+                        return "";
+
+                    return sb.TrimEnd(itemSeparator).ToString();
+                }
+            }
         }
 
-        public partial record Stream(Stream.ExtMediaInfo MediaInfo, Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, Stream.ExtByteRange ByteRange, string Path)
+        public partial record Stream(Stream.ExtMediaInfo MediaInfo, Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
         {
             public Stream(ExtMediaInfo mediaInfo, ExtStreamInfo streamInfo, string path) : this(mediaInfo, streamInfo, null, default, default, path) { }
 
-            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ExtByteRange byteRange, string path) : this(null, null, partInfo, programDateTime, byteRange, path) { }
+            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, null, partInfo, programDateTime, byteRange, path) { }
 
             public bool IsPlaylist { get; } = Path.AsSpan().EndsWith(".m3u8") || Path.AsSpan().EndsWith(".m3u");
+
+            internal const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
+            internal const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
 
             public override string ToString()
             {
@@ -130,10 +161,10 @@ namespace TwitchDownloaderCore.Tools
                     sb.AppendLine(PartInfo.ToString());
 
                 if (ProgramDateTime != default)
-                    sb.AppendKeyValue("#EXT-X-PROGRAM-DATE-TIME:", ProgramDateTime.ToString("O"), default);
+                    sb.AppendKeyValue(PROGRAM_DATE_TIME_KEY, ProgramDateTime.ToString("O"), Environment.NewLine);
 
                 if (ByteRange != default)
-                    sb.AppendLine(ByteRange.ToString());
+                    sb.AppendKeyValue(BYTE_RANGE_KEY, ByteRange.ToString(), Environment.NewLine);
 
                 if (!string.IsNullOrEmpty(Path))
                     sb.Append(Path);
@@ -142,15 +173,6 @@ namespace TwitchDownloaderCore.Tools
                     return "";
 
                 return sb.ToString();
-            }
-
-            public readonly partial record struct ExtByteRange(uint Start, uint Length)
-            {
-                internal const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
-
-                public override string ToString() => $"{BYTE_RANGE_KEY}{Start}@{Length}";
-
-                public static implicit operator ExtByteRange((uint start, uint length) tuple) => new(tuple.start, tuple.length);
             }
 
             public partial record ExtMediaInfo
@@ -264,7 +286,7 @@ namespace TwitchDownloaderCore.Tools
                     if (Framerate != default)
                         sb.AppendKeyValue("FRAME-RATE=", Framerate, default);
 
-                    return sb.ToString();
+                    return sb.TrimEnd(keyValueSeparator).ToString();
                 }
             }
 
@@ -298,6 +320,19 @@ namespace TwitchDownloaderCore.Tools
                     return sb.ToString();
                 }
             }
+        }
+
+        public readonly partial record struct ByteRange(uint Length, uint Start)
+        {
+            public override string ToString()
+            {
+                if (this == default)
+                    return "";
+
+                return $"{Length}@{Start}";
+            }
+
+            public static implicit operator ByteRange((uint length, uint start) tuple) => new(tuple.length, tuple.start);
         }
     }
 

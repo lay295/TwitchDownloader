@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -15,19 +16,29 @@ namespace TwitchDownloaderCore.Tools
         /// <param name="httpClient">The <see cref="HttpClient"/> to perform the download operation.</param>
         /// <param name="url">The url of the file to download.</param>
         /// <param name="destinationFile">The path to the file where download will be saved.</param>
+        /// <param name="headerFile">Path to a file whose contents will be written to the start of the destination file.</param>
         /// <param name="throttleKib">The maximum download speed in kibibytes per second, or -1 for no maximum.</param>
         /// <param name="logger">Logger.</param>
         /// <param name="cancellationTokenSource">A <see cref="CancellationTokenSource"/> containing a <see cref="CancellationToken"/> to cancel the operation.</param>
         /// <returns>The expected length of the downloaded file, or -1 if the content length header is not present.</returns>
         /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
-        public static async Task<long> DownloadFileAsync(HttpClient httpClient, Uri url, string destinationFile, int throttleKib, ITaskLogger logger, CancellationTokenSource cancellationTokenSource = null)
+        public static async Task<long> DownloadFileAsync(HttpClient httpClient, Uri url, string destinationFile, [AllowNull] string headerFile, int throttleKib, ITaskLogger logger, CancellationTokenSource cancellationTokenSource = null)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
             var cancellationToken = cancellationTokenSource?.Token ?? CancellationToken.None;
 
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
+
+            var fileMode = FileMode.Create;
+            if (!string.IsNullOrWhiteSpace(headerFile))
+            {
+                await using var headerFs = new FileStream(headerFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                await using var destinationFs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                await headerFs.CopyToAsync(destinationFs, cancellationToken);
+                fileMode = FileMode.Append;
+            }
 
             // Why are we setting a CTS CancelAfter timer? See lay295#265
             const int SIXTY_SECONDS = 60;
@@ -48,7 +59,7 @@ namespace TwitchDownloaderCore.Tools
             {
                 case -1:
                 {
-                    await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    await using var fs = new FileStream(destinationFile, fileMode, FileAccess.Write, FileShare.Read);
                     await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
                     break;
                 }
@@ -58,7 +69,7 @@ namespace TwitchDownloaderCore.Tools
                     {
                         await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
                         await using var throttledStream = new ThrottledStream(contentStream, throttleKib);
-                        await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                        await using var fs = new FileStream(destinationFile, fileMode, FileAccess.Write, FileShare.Read);
                         await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
                     }
                     catch (IOException ex) when (ex.Message.Contains("EOF"))

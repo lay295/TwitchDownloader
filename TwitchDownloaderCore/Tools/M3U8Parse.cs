@@ -25,7 +25,7 @@ namespace TwitchDownloaderCore.Tools
 
             Metadata.Builder metadataBuilder = new();
             DateTimeOffset currentExtProgramDateTime = default;
-            Stream.ExtByteRange currentByteRange = default;
+            ByteRange currentByteRange = default;
             Stream.ExtPartInfo currentExtPartInfo = null;
 
             while (sr.ReadLine() is { } line)
@@ -68,7 +68,7 @@ namespace TwitchDownloaderCore.Tools
 
             Metadata.Builder metadataBuilder = new();
             DateTimeOffset currentExtProgramDateTime = default;
-            Stream.ExtByteRange currentByteRange = default;
+            ByteRange currentByteRange = default;
             Stream.ExtPartInfo currentExtPartInfo = null;
 
             var textStart = -1;
@@ -124,7 +124,7 @@ namespace TwitchDownloaderCore.Tools
         }
 
         private static void ClearStreamMetadata(out Stream.ExtMediaInfo currentExtMediaInfo, out Stream.ExtStreamInfo currentExtStreamInfo, out DateTimeOffset currentExtProgramDateTime,
-            out Stream.ExtByteRange currentByteRange, out Stream.ExtPartInfo currentExtPartInfo)
+            out ByteRange currentByteRange, out Stream.ExtPartInfo currentExtPartInfo)
         {
             currentExtMediaInfo = null;
             currentExtStreamInfo = null;
@@ -134,9 +134,8 @@ namespace TwitchDownloaderCore.Tools
         }
 
         private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtMediaInfo extMediaInfo, ref Stream.ExtStreamInfo extStreamInfo,
-            ref DateTimeOffset extProgramDateTime, ref Stream.ExtByteRange byteRange, ref Stream.ExtPartInfo extPartInfo)
+            ref DateTimeOffset extProgramDateTime, ref ByteRange byteRange, ref Stream.ExtPartInfo extPartInfo)
         {
-            const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
             const string END_LIST_KEY = "#EXT-X-ENDLIST";
             if (text.StartsWith(Stream.ExtMediaInfo.MEDIA_INFO_KEY))
             {
@@ -146,13 +145,13 @@ namespace TwitchDownloaderCore.Tools
             {
                 extStreamInfo = Stream.ExtStreamInfo.Parse(text);
             }
-            else if (text.StartsWith(PROGRAM_DATE_TIME_KEY))
+            else if (text.StartsWith(Stream.PROGRAM_DATE_TIME_KEY))
             {
-                extProgramDateTime = ParsingHelpers.ParseDateTimeOffset(text, PROGRAM_DATE_TIME_KEY, false);
+                extProgramDateTime = ParsingHelpers.ParseDateTimeOffset(text, Stream.PROGRAM_DATE_TIME_KEY, false);
             }
-            else if (text.StartsWith(Stream.ExtByteRange.BYTE_RANGE_KEY))
+            else if (text.StartsWith(Stream.BYTE_RANGE_KEY))
             {
-                byteRange = Stream.ExtByteRange.Parse(text);
+                byteRange = ByteRange.Parse(text, Stream.BYTE_RANGE_KEY);
             }
             else if (text.StartsWith(Stream.ExtPartInfo.PART_INFO_KEY))
             {
@@ -179,6 +178,7 @@ namespace TwitchDownloaderCore.Tools
                 private uint? _streamTargetDuration;
                 private PlaylistType? _type;
                 private uint? _mediaSequence;
+                private ExtMap _map;
 
                 // Twitch specific
                 private uint? _twitchLiveSequence;
@@ -224,6 +224,10 @@ namespace TwitchDownloaderCore.Tools
                     {
                         _mediaSequence = ParsingHelpers.ParseUIntValue(text, MEDIA_SEQUENCE_KEY);
                     }
+                    else if (text.StartsWith(MAP_KEY))
+                    {
+                        _map = ExtMap.Parse(text);
+                    }
                     else if (text.StartsWith(TWITCH_LIVE_SEQUENCE_KEY))
                     {
                         _twitchLiveSequence = ParsingHelpers.ParseUIntValue(text, TWITCH_LIVE_SEQUENCE_KEY);
@@ -264,6 +268,7 @@ namespace TwitchDownloaderCore.Tools
                         StreamTargetDuration = _streamTargetDuration,
                         Type = _type,
                         MediaSequence = _mediaSequence,
+                        Map = _map,
                         TwitchLiveSequence = _twitchLiveSequence,
                         TwitchElapsedSeconds = _twitchElapsedSeconds,
                         TwitchTotalSeconds = _twitchTotalSeconds,
@@ -271,30 +276,44 @@ namespace TwitchDownloaderCore.Tools
                     };
                 }
             }
+
+            public partial record ExtMap
+            {
+                public static ExtMap Parse(ReadOnlySpan<char> text)
+                {
+                    if (text.StartsWith(MAP_KEY))
+                        text = text[MAP_KEY.Length..];
+
+                    ByteRange byteRange = default;
+                    var uri = "";
+
+                    do
+                    {
+                        text = text.TrimStart();
+
+                        if (text.StartsWith(BYTE_RANGE_KEY))
+                        {
+                            byteRange = ByteRange.Parse(text, BYTE_RANGE_KEY);
+                        }
+                        else if (text.StartsWith(URI_KEY))
+                        {
+                            uri = ParsingHelpers.ParseStringValue(text, URI_KEY);
+                        }
+
+                        var nextIndex = text.UnEscapedIndexOf(',');
+                        if (nextIndex == -1)
+                            break;
+
+                        text = text[(nextIndex + 1)..];
+                    } while (true);
+
+                    return new ExtMap(uri, byteRange);
+                }
+            }
         }
 
         public partial record Stream
         {
-            public partial record struct ExtByteRange
-            {
-                public static ExtByteRange Parse(ReadOnlySpan<char> text)
-                {
-                    if (text.StartsWith(BYTE_RANGE_KEY))
-                        text = text[17..];
-
-                    var separatorIndex = text.IndexOf('@');
-                    if (separatorIndex != -1
-                        && separatorIndex != text.Length
-                        && uint.TryParse(text[..separatorIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var start)
-                        && uint.TryParse(text[(separatorIndex + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var end))
-                    {
-                        return new ExtByteRange(start, end);
-                    }
-
-                    throw new FormatException($"Unable to parse ByteRange from {text}.");
-                }
-            }
-
             public partial record ExtMediaInfo
             {
                 public static ExtMediaInfo Parse(ReadOnlySpan<char> text)
@@ -465,6 +484,26 @@ namespace TwitchDownloaderCore.Tools
 
                     return partInfo;
                 }
+            }
+        }
+
+        public partial record struct ByteRange
+        {
+            public static ByteRange Parse(ReadOnlySpan<char> text, ReadOnlySpan<char> keyName)
+            {
+                if (text.StartsWith(keyName))
+                    text = text[keyName.Length..];
+
+                var separatorIndex = text.IndexOf('@');
+                if (separatorIndex != -1
+                    && separatorIndex != text.Length
+                    && uint.TryParse(text[..separatorIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var start)
+                    && uint.TryParse(text[(separatorIndex + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var end))
+                {
+                    return new ByteRange(start, end);
+                }
+
+                throw new FormatException($"Unable to parse ByteRange from {text}.");
             }
         }
 
