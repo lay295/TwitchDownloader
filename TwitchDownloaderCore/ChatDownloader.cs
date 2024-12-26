@@ -387,9 +387,9 @@ namespace TwitchDownloaderCore
                 chatRoot.streamer.id = int.Parse(clipInfoResponse.data.clip.broadcaster.id);
                 chatRoot.clipper = new Clipper
                 {
-                    name = clipInfoResponse.data.clip.curator.displayName,
-                    login = clipInfoResponse.data.clip.curator.login,
-                    id = int.Parse(clipInfoResponse.data.clip.curator.id),
+                    name = clipInfoResponse.data.clip.curator?.displayName,
+                    login = clipInfoResponse.data.clip.curator?.login,
+                    id = int.Parse(clipInfoResponse.data.clip.curator?.id ?? "0"),
                 };
                 chatRoot.video.title = clipInfoResponse.data.clip.title;
                 chatRoot.video.created_at = clipInfoResponse.data.clip.createdAt;

@@ -172,8 +172,8 @@ namespace TwitchDownloaderWPF
                         labelLength.Text = VideoLength.ToString("c");
                         ViewCount = clipInfo.data.clip.viewCount;
                         Game = clipInfo.data.clip.game?.displayName;
-                        ClipperName ??= clipInfo.data.clip.curator.displayName;
-                        ClipperId ??= clipInfo.data.clip.curator.id;
+                        ClipperName ??= clipInfo.data.clip.curator?.displayName ?? Translations.Strings.UnknownUser;
+                        ClipperId ??= clipInfo.data.clip.curator?.id;
 
                         var thumbUrl = clipInfo.data.clip.thumbnailURL;
                         if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))

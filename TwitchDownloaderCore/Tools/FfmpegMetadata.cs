@@ -32,7 +32,7 @@ namespace TwitchDownloaderCore.Tools
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
             var streamer = GetUserName(clip.broadcaster.displayName, clip.broadcaster.login);
-            var clipper = GetUserName(clip.curator.displayName, clip.curator.login);
+            var clipper = GetUserName(clip.curator?.displayName, clip.curator?.login);
             await SerializeGlobalMetadata(sw, streamer, videoId, clip.title, clip.createdAt, clip.viewCount, game: clip.game?.displayName, clipper: clipper);
 
             await SerializeChapters(sw, videoMomentEdges);

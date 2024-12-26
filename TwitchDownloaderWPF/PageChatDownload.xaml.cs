@@ -198,8 +198,8 @@ namespace TwitchDownloaderWPF
                     currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
                     textTitle.Text = clipInfo.data.clip.title;
                     streamerId = clipInfo.data.clip.broadcaster?.id;
-                    clipper = clipInfo.data.clip.curator.displayName;
-                    clipperId = clipInfo.data.clip.curator.id;
+                    clipper = clipInfo.data.clip.curator?.displayName ?? Translations.Strings.UnknownUser;
+                    clipperId = clipInfo.data.clip.curator?.id;
                     labelLength.Text = vodLength.ToString("c");
                     SetEnabled(true);
 

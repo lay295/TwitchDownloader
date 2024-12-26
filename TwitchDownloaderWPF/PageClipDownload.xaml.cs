@@ -75,8 +75,8 @@ namespace TwitchDownloaderWPF
                 clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
                 textStreamer.Text = clipData.data.clip.broadcaster?.displayName ?? Translations.Strings.UnknownUser;
                 streamerId = clipData.data.clip.broadcaster?.id;
-                clipperName = clipData.data.clip.curator.displayName;
-                clipperId = clipData.data.clip.curator.id;
+                clipperName = clipData.data.clip.curator?.displayName ?? Translations.Strings.UnknownUser;
+                clipperId = clipData.data.clip.curator?.id;
                 var clipCreatedAt = clipData.data.clip.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
