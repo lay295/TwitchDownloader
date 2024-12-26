@@ -360,14 +360,16 @@ namespace TwitchDownloaderCore
         {
             var path = DownloadTools.RemoveQueryString(playlist.Streams.FirstOrDefault()?.Path ?? "");
             var extension = Path.GetExtension(path);
-            if (extension is ".mp4")
-                return FfmpegConcatList.StreamIds.Mp4;
-
-            if (extension is ".ts")
-                return FfmpegConcatList.StreamIds.TransportStream;
-
-            _progress.LogWarning("No file extension was found! Assuming TS.");
-            return FfmpegConcatList.StreamIds.TransportStream;
+            switch (extension)
+            {
+                case ".mp4":
+                    return FfmpegConcatList.StreamIds.Mp4;
+                case ".ts":
+                    return FfmpegConcatList.StreamIds.TransportStream;
+                default:
+                    _progress.LogWarning("No file extension was found! Assuming TS.");
+                    return FfmpegConcatList.StreamIds.TransportStream;
+            }
         }
 
         private async Task<int> RunFfmpegVideoCopy(string tempFolder, FileInfo outputFile, string concatListPath, string metadataPath, decimal startOffset, decimal endDuration, TimeSpan videoLength, bool disableAudioCopy, CancellationToken cancellationToken)
