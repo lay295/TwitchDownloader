@@ -95,6 +95,12 @@ namespace TwitchDownloaderCore
                     Directory.Delete(downloadFolder, true);
                 TwitchHelper.CreateDirectory(downloadFolder);
 
+                if (qualityPlaylist.StreamInfo.Codecs.Any(x => x.StartsWith("av01")))
+                {
+                    _progress.LogWarning("AV1 VOD support is still experimental. " +
+                                         "If you encounter playback issues, try using an FFmpeg-based application like MPV, Kdenlive, or Blender, or re-encode the video file as H.264/AVC or H.265/HEVC with FFmpeg or Handbrake.");
+                }
+
                 var headerFile = await GetHeaderFile(playlist, baseUrl, downloadFolder, cancellationToken);
 
                 _progress.SetTemplateStatus("Downloading {0}% [2/4]", 0);
