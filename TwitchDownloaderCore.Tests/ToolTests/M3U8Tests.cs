@@ -376,7 +376,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
                 "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:03.97Z\n#EXT-X-BYTERANGE:1768140@3175696\n#EXTINF:2.000,\n506.ts\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:05.97Z\n#EXT-X-BYTERANGE:1519040@4943836\n#EXTINF:2.000,\n506.ts" +
                 "\n#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:35:07.97Z\n#EXT-X-BYTERANGE:1506068@6462876\n#EXTINF:2.000,\n506.ts\n#EXT-X-ENDLIST";
 
-            var streamValues = new (DateTimeOffset programDateTime, M3U8.Stream.ExtByteRange byteRange, string path)[]
+            var streamValues = new (DateTimeOffset programDateTime, M3U8.ByteRange byteRange, string path)[]
             {
                 (DateTimeOffset.Parse("2023-11-16T05:34:07.97Z"), (1601196, 6470396), "500.ts"),
                 (DateTimeOffset.Parse("2023-11-16T05:34:09.97Z"), (1588224, 0), "501.ts"),
@@ -549,13 +549,14 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         }
 
         [Theory]
-        [InlineData(100, 200, "100@200")]
-        [InlineData(100, 200, "#EXT-X-BYTERANGE:100@200")]
-        public void CorrectlyParsesByteRange(uint length, uint start, string byteRangeString)
+        [InlineData(100, 200, "100@200", "")]
+        [InlineData(100, 200, "#EXT-X-BYTERANGE:100@200", "#EXT-X-BYTERANGE:")]
+        [InlineData(100, 200, "BYTERANGE=100@200", "BYTERANGE=")]
+        public void CorrectlyParsesByteRange(uint length, uint start, string byteRangeString, string key)
         {
-            var expected = new M3U8.Stream.ExtByteRange(length, start);
+            var expected = new M3U8.ByteRange(length, start);
 
-            var actual = M3U8.Stream.ExtByteRange.Parse(byteRangeString);
+            var actual = M3U8.ByteRange.Parse(byteRangeString, key);
 
             Assert.Equal(expected, actual);
         }
@@ -566,7 +567,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("42949672950000")]
         public void ThrowsFormatExceptionForBadByteRangeString(string byteRangeString)
         {
-            Assert.Throws<FormatException>(() => M3U8.Stream.ExtByteRange.Parse(byteRangeString));
+            Assert.Throws<FormatException>(() => M3U8.ByteRange.Parse(byteRangeString, default));
         }
 
         [Theory]
