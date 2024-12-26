@@ -42,7 +42,7 @@ namespace TwitchDownloaderCore
                 "TwitchDownloader");
         }
 
-        private static async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, IProgress<int> progress, ChatFormat format, CancellationToken cancellationToken)
+        private static async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, IProgress<int> progress, ITaskLogger logger, ChatFormat format, CancellationToken cancellationToken)
         {
             var comments = new List<Comment>();
             int videoStart = downloadRange.Start.Value;
@@ -51,7 +51,8 @@ namespace TwitchDownloaderCore
             double latestMessage = videoStart - 1;
             bool isFirst = true;
             string cursor = "";
-            int errorCount = 0;
+            double errorCount = 0;
+            double nullCount = 0;
 
             while (latestMessage < videoEnd)
             {
@@ -83,25 +84,35 @@ namespace TwitchDownloaderCore
                         httpResponse.EnsureSuccessStatusCode();
                         commentResponse = await httpResponse.Content.ReadFromJsonAsync<GqlCommentResponse>(options: null, cancellationToken);
                     }
-
-                    errorCount = 0;
                 }
-                catch (HttpRequestException)
+                catch (HttpRequestException ex)
                 {
                     if (++errorCount > 10)
                     {
                         throw;
                     }
 
-                    await Task.Delay(1_000 * errorCount, cancellationToken);
+                    logger.LogVerbose($"Exception '{ex.Message}' thrown at {latestMessage}s ({cursor}) in range {downloadRange}. Current error factor: {errorCount}.");
+                    await Task.Delay((int)(1_000 * errorCount), cancellationToken);
                     continue;
                 }
 
+                // video.comments can be null for some dumb reason
                 if (commentResponse.data.video.comments?.edges is null)
                 {
-                    // video.comments can be null for some dumb reason, skip
+                    if (++nullCount > 10)
+                    {
+                        throw new Exception("Received too many null comment lists. Try reducing your download threads.");
+                    }
+
+                    logger.LogVerbose($"Received null comment list at {latestMessage}s ({cursor}) in range {downloadRange}. Current null factor: {nullCount}.");
+                    await Task.Delay((int)(100 * nullCount), cancellationToken);
                     continue;
                 }
+
+                const double BACK_OFF_FACTOR = 0.1;
+                nullCount = Math.Max(0, nullCount - BACK_OFF_FACTOR);
+                errorCount = Math.Max(0, errorCount - BACK_OFF_FACTOR);
 
                 var convertedComments = ConvertComments(commentResponse.data.video, format);
                 foreach (var comment in convertedComments)
@@ -437,7 +448,7 @@ namespace TwitchDownloaderCore
                 var start = videoStart + chunkSize * i;
                 var end = Math.Min(videoEnd, start + chunkSize);
                 var downloadRange = new Range(start, end);
-                downloadTasks.Add(DownloadSection(downloadRange, video.id, taskProgress, downloadOptions.DownloadFormat, cancellationToken));
+                downloadTasks.Add(DownloadSection(downloadRange, video.id, taskProgress, _progress, downloadOptions.DownloadFormat, cancellationToken));
             }
 
             await Task.WhenAll(downloadTasks);
