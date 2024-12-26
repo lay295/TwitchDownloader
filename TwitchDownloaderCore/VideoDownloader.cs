@@ -174,7 +174,7 @@ namespace TwitchDownloaderCore
             _progress.LogVerbose($"Downloading header file from '{uri}' to '{destinationFile}'");
 
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             await using var fs = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.Read);
