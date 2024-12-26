@@ -336,8 +336,8 @@ namespace TwitchDownloaderCore
                 chatRoot.video.description = videoInfoResponse.data.video.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
                 chatRoot.video.title = videoInfoResponse.data.video.title;
                 chatRoot.video.created_at = videoInfoResponse.data.video.createdAt;
-                chatRoot.video.start = downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : 0.0;
-                chatRoot.video.end = downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : videoInfoResponse.data.video.lengthSeconds;
+                chatRoot.video.start = downloadOptions.TrimBeginning ? Math.Max(0, downloadOptions.TrimBeginningTime) : 0.0;
+                chatRoot.video.end = downloadOptions.TrimEnding ? Math.Min(downloadOptions.TrimEndingTime, videoInfoResponse.data.video.lengthSeconds) : videoInfoResponse.data.video.lengthSeconds;
                 chatRoot.video.length = videoInfoResponse.data.video.lengthSeconds;
                 chatRoot.video.viewCount = videoInfoResponse.data.video.viewCount;
                 chatRoot.video.game = videoInfoResponse.data.video.game?.displayName ?? "Unknown";
