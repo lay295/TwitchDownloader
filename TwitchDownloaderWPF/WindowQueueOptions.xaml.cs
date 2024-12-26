@@ -171,8 +171,10 @@ namespace TwitchDownloaderWPF
                             chatOptions.DownloadFormat = ChatFormat.Html;
                         else
                             chatOptions.DownloadFormat = ChatFormat.Text;
+                        if (RadioCompressionGzip.IsChecked.GetValueOrDefault())
+                            chatOptions.Compression = ChatCompression.Gzip;
                         chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
-                        chatOptions.Filename = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(downloadOptions.Filename) + "." + chatOptions.DownloadFormat);
+                        chatOptions.Filename = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(downloadOptions.Filename) + "." + chatOptions.DownloadFormat + (chatOptions is { DownloadFormat: ChatFormat.Json, Compression: ChatCompression.Gzip } ? ".gz" : ""));
                         chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
                         if (downloadOptions.TrimBeginning)
@@ -298,11 +300,13 @@ namespace TwitchDownloaderWPF
                             chatOptions.DownloadFormat = ChatFormat.Html;
                         else
                             chatOptions.DownloadFormat = ChatFormat.Text;
+                        if (RadioCompressionGzip.IsChecked.GetValueOrDefault())
+                            chatOptions.Compression = ChatCompression.Gzip;
                         chatOptions.TimeFormat = TimestampFormat.Relative;
                         chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
                         chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id,
                             clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, clipDownloadPage.streamerId, TimeSpan.Zero, clipDownloadPage.clipLength,
-                            clipDownloadPage.viewCount, clipDownloadPage.game, clipDownloadPage.clipperName, clipDownloadPage.clipId) + "." + chatOptions.FileExtension);
+                            clipDownloadPage.viewCount, clipDownloadPage.game, clipDownloadPage.clipperName, clipDownloadPage.clipId) + "." + chatOptions.FileExtension + (chatOptions is { DownloadFormat: ChatFormat.Json, Compression: ChatCompression.Gzip } ? ".gz" : ""));
                         chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
                         ChatDownloadTask chatTask = new ChatDownloadTask
@@ -380,7 +384,7 @@ namespace TwitchDownloaderWPF
                         chatDownloadPage.streamerId,
                         chatOptions.TrimBeginning ? TimeSpan.FromSeconds(chatOptions.TrimBeginningTime) : TimeSpan.Zero,
                         chatOptions.TrimEnding ? TimeSpan.FromSeconds(chatOptions.TrimEndingTime) : chatDownloadPage.vodLength,
-                        chatDownloadPage.viewCount, chatDownloadPage.game) + "." + chatOptions.FileExtension);
+                        chatDownloadPage.viewCount, chatDownloadPage.game) + "." + chatOptions.FileExtension + (chatOptions is { DownloadFormat: ChatFormat.Json, Compression: ChatCompression.Gzip } ? ".gz" : ""));
                     chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
                     ChatDownloadTask chatTask = new ChatDownloadTask
