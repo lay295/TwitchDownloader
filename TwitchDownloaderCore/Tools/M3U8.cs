@@ -112,23 +112,10 @@ namespace TwitchDownloaderCore.Tools
                 return sb.TrimEnd(itemSeparator).ToString();
             }
 
-            // TODO: Merge with other ByteRange struct
-            public readonly partial record struct ByteRange(uint Length, uint Start)
-            {
-                public override string ToString()
-                {
-                    if (this == default)
-                        return "";
-
-                    return $"{Length}@{Start}";
-                }
-
-                public static implicit operator ByteRange((uint length, uint start) tuple) => new(tuple.length, tuple.start);
-            }
-
             public partial record ExtMap(string Uri, ByteRange ByteRange)
             {
                 private const string URI_KEY = "URI=\"";
+                private const string BYTE_RANGE_KEY = "BYTERANGE=";
 
                 public override string ToString()
                 {
@@ -139,7 +126,7 @@ namespace TwitchDownloaderCore.Tools
                         sb.AppendKeyQuoteValue(URI_KEY, Uri, itemSeparator);
 
                     if (ByteRange != default)
-                        sb.AppendKeyQuoteValue(ByteRange.BYTE_RANGE_KEY, ByteRange.ToString(), itemSeparator);
+                        sb.AppendKeyQuoteValue(BYTE_RANGE_KEY, ByteRange.ToString(), itemSeparator);
 
                     if (sb.Length == 0)
                         return "";
@@ -149,13 +136,16 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        public partial record Stream(Stream.ExtMediaInfo MediaInfo, Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, Stream.ExtByteRange ByteRange, string Path)
+        public partial record Stream(Stream.ExtMediaInfo MediaInfo, Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
         {
             public Stream(ExtMediaInfo mediaInfo, ExtStreamInfo streamInfo, string path) : this(mediaInfo, streamInfo, null, default, default, path) { }
 
-            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ExtByteRange byteRange, string path) : this(null, null, partInfo, programDateTime, byteRange, path) { }
+            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, null, partInfo, programDateTime, byteRange, path) { }
 
             public bool IsPlaylist { get; } = Path.AsSpan().EndsWith(".m3u8") || Path.AsSpan().EndsWith(".m3u");
+
+            internal const string PROGRAM_DATE_TIME_KEY = "#EXT-X-PROGRAM-DATE-TIME:";
+            internal const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
 
             public override string ToString()
             {
@@ -171,10 +161,10 @@ namespace TwitchDownloaderCore.Tools
                     sb.AppendLine(PartInfo.ToString());
 
                 if (ProgramDateTime != default)
-                    sb.AppendKeyValue("#EXT-X-PROGRAM-DATE-TIME:", ProgramDateTime.ToString("O"), default);
+                    sb.AppendKeyValue(PROGRAM_DATE_TIME_KEY, ProgramDateTime.ToString("O"), default);
 
                 if (ByteRange != default)
-                    sb.AppendLine(ByteRange.ToString());
+                    sb.AppendKeyValue(BYTE_RANGE_KEY, ByteRange.ToString(), default);
 
                 if (!string.IsNullOrEmpty(Path))
                     sb.Append(Path);
@@ -183,15 +173,6 @@ namespace TwitchDownloaderCore.Tools
                     return "";
 
                 return sb.ToString();
-            }
-
-            public readonly partial record struct ExtByteRange(uint Length, uint Start)
-            {
-                internal const string BYTE_RANGE_KEY = "#EXT-X-BYTERANGE:";
-
-                public override string ToString() => $"{BYTE_RANGE_KEY}{Length}@{Start}";
-
-                public static implicit operator ExtByteRange((uint length, uint start) tuple) => new(tuple.length, tuple.start);
             }
 
             public partial record ExtMediaInfo
@@ -339,6 +320,19 @@ namespace TwitchDownloaderCore.Tools
                     return sb.ToString();
                 }
             }
+        }
+
+        public readonly partial record struct ByteRange(uint Length, uint Start)
+        {
+            public override string ToString()
+            {
+                if (this == default)
+                    return "";
+
+                return $"{Length}@{Start}";
+            }
+
+            public static implicit operator ByteRange((uint length, uint start) tuple) => new(tuple.length, tuple.start);
         }
     }
 
