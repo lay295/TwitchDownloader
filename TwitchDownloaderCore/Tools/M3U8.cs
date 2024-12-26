@@ -161,10 +161,10 @@ namespace TwitchDownloaderCore.Tools
                     sb.AppendLine(PartInfo.ToString());
 
                 if (ProgramDateTime != default)
-                    sb.AppendKeyValue(PROGRAM_DATE_TIME_KEY, ProgramDateTime.ToString("O"), default);
+                    sb.AppendKeyValue(PROGRAM_DATE_TIME_KEY, ProgramDateTime.ToString("O"), Environment.NewLine);
 
                 if (ByteRange != default)
-                    sb.AppendKeyValue(BYTE_RANGE_KEY, ByteRange.ToString(), default);
+                    sb.AppendKeyValue(BYTE_RANGE_KEY, ByteRange.ToString(), Environment.NewLine);
 
                 if (!string.IsNullOrEmpty(Path))
                     sb.Append(Path);
@@ -286,7 +286,7 @@ namespace TwitchDownloaderCore.Tools
                     if (Framerate != default)
                         sb.AppendKeyValue("FRAME-RATE=", Framerate, default);
 
-                    return sb.ToString();
+                    return sb.TrimEnd(keyValueSeparator).ToString();
                 }
             }
 
