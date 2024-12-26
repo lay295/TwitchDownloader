@@ -211,8 +211,8 @@ namespace TwitchDownloaderWPF
                             Views = clip.node.viewCount,
                             StreamerName = currentChannel.displayName,
                             StreamerId = currentChannel.id,
-                            ClipperName = clip.node.curator.displayName,
-                            ClipperId = clip.node.curator.id,
+                            ClipperName = clip.node.curator?.displayName ?? Translations.Strings.UnknownUser,
+                            ClipperId = clip.node.curator?.id,
                             Game = clip.node.game?.displayName ?? Translations.Strings.UnknownGame,
                             Thumbnail = thumbnail
                         });
