@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using HandyControl.Data;
+using TwitchDownloaderCore.Services;
 using TwitchDownloaderWPF.Extensions;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
@@ -112,24 +113,8 @@ namespace TwitchDownloaderWPF
             if (messageBoxResult == MessageBoxResult.Yes)
             {
                 //Let's clear the user selected temp folder and the default one
-                string defaultDir = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
-                string tempDir = Path.Combine(Settings.Default.TempPath, "TwitchDownloader");
-                if (Directory.Exists(defaultDir))
-                {
-                    try
-                    {
-                        Directory.Delete(defaultDir, true);
-                    }
-                    catch { }
-                }
-                if (Directory.Exists(tempDir))
-                {
-                    try
-                    {
-                        Directory.Delete(tempDir, true);
-                    }
-                    catch { }
-                }
+                CacheDirectoryService.ClearCacheDirectory(Settings.Default.TempPath, out _);
+                CacheDirectoryService.ClearCacheDirectory(Path.GetTempPath(), out _);
             }
         }
 
