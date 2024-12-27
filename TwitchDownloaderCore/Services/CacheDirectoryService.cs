@@ -13,6 +13,8 @@ namespace TwitchDownloaderCore.Services
             if (string.IsNullOrWhiteSpace(baseDirectory))
                 baseDirectory = Path.GetTempPath();
 
+            baseDirectory = Path.GetFullPath(baseDirectory);
+
             if (new DirectoryInfo(baseDirectory).Name == CACHE_DIRECTORY_SUFFIX)
             {
                 return baseDirectory;
