@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using TwitchDownloaderCLI.Modes.Arguments;
+using TwitchDownloaderCore.Services;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -42,19 +43,17 @@ namespace TwitchDownloaderCLI.Modes
 
         private static void ClearTempCache()
         {
-            var defaultCacheDirectory = Path.Combine(Path.GetTempPath(), "TwitchDownloader");
+            var defaultCacheDirectory = CacheDirectoryService.GetCacheDirectory(Path.GetTempPath());
             if (Directory.Exists(defaultCacheDirectory))
             {
                 Console.WriteLine("Clearing cache...");
-                try
+                if (CacheDirectoryService.ClearCacheDirectory(Path.GetTempPath(), out var exception))
                 {
-                    Directory.Delete(defaultCacheDirectory, true);
                     Console.WriteLine("Cache cleared successfully.");
+                    return;
                 }
-                catch (UnauthorizedAccessException)
-                {
-                    Console.WriteLine("Insufficient access to clear cache folder.");
-                }
+
+                Console.WriteLine($"Failed to clear cache: {exception.Message}");
                 return;
             }
 
