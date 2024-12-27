@@ -9,6 +9,7 @@ using System.Web;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
@@ -19,14 +20,13 @@ namespace TwitchDownloaderCore
         private readonly ClipDownloadOptions downloadOptions;
         private readonly ITaskProgress _progress;
         private static readonly HttpClient HttpClient = new();
+        private readonly string _cacheDir;
 
         public ClipDownloader(ClipDownloadOptions clipDownloadOptions, ITaskProgress progress)
         {
             downloadOptions = clipDownloadOptions;
             _progress = progress;
-            downloadOptions.TempFolder = Path.Combine(
-                string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : Path.GetFullPath(downloadOptions.TempFolder),
-                "TwitchDownloader");
+            _cacheDir = CacheDirectoryService.GetCacheDirectory(downloadOptions.TempFolder);
         }
 
         public async Task DownloadAsync(CancellationToken cancellationToken)
@@ -68,12 +68,12 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            if (!Directory.Exists(downloadOptions.TempFolder))
+            if (!Directory.Exists(_cacheDir))
             {
-                TwitchHelper.CreateDirectory(downloadOptions.TempFolder);
+                TwitchHelper.CreateDirectory(_cacheDir);
             }
 
-            var tempFile = Path.Combine(downloadOptions.TempFolder, $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}.mp4");
+            var tempFile = Path.Combine(_cacheDir, $"{downloadOptions.Id}_{DateTimeOffset.UtcNow.Ticks}.mp4");
             try
             {
                 await using (var tempFileStream = File.Open(tempFile, FileMode.Create, FileAccess.Write, FileShare.Read))
