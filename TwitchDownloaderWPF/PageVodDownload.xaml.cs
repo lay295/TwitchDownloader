@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Models;
