@@ -5,8 +5,9 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Tools;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Services
 {
     public static class FilenameService
     {

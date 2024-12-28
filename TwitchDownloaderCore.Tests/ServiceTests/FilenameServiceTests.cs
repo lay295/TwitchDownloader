@@ -1,6 +1,6 @@
-﻿using TwitchDownloaderCore.Tools;
+﻿using TwitchDownloaderCore.Services;
 
-namespace TwitchDownloaderCore.Tests.ToolTests
+namespace TwitchDownloaderCore.Tests.ServiceTests
 {
     public class FilenameServiceTests
     {

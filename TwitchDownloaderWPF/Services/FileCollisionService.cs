@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using Ookii.Dialogs.Wpf;
-using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.Services;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 

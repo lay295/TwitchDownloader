@@ -3,7 +3,7 @@ using System.IO;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCore.Interfaces;
-using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.Services;
 
 namespace TwitchDownloaderCLI.Tools
 {
