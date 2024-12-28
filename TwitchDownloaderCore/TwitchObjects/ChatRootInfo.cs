@@ -41,7 +41,7 @@ namespace TwitchDownloaderCore.TwitchObjects
             => $"{Major}.{Minor}.{Patch}";
 
         public override int GetHashCode()
-            => ToString().GetHashCode();
+            => HashCode.Combine(Major, Minor, Patch);
 
         public static bool operator >(ChatRootVersion left, ChatRootVersion right)
         {
