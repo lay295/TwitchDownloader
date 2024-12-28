@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Gql;
@@ -20,6 +21,7 @@ namespace TwitchDownloaderCore
     {
         private readonly ChatDownloadOptions downloadOptions;
         private readonly ITaskProgress _progress;
+        private readonly string _cacheDir;
 
         private static readonly HttpClient HttpClient = new()
         {
@@ -37,9 +39,7 @@ namespace TwitchDownloaderCore
         {
             downloadOptions = chatDownloadOptions;
             _progress = progress;
-            downloadOptions.TempFolder = Path.Combine(
-                string.IsNullOrWhiteSpace(downloadOptions.TempFolder) ? Path.GetTempPath() : Path.GetFullPath(downloadOptions.TempFolder),
-                "TwitchDownloader");
+            _cacheDir = CacheDirectoryService.GetCacheDirectory(downloadOptions.TempFolder);
         }
 
         private static async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, IProgress<int> progress, ITaskLogger logger, ChatFormat format, CancellationToken cancellationToken)
@@ -471,13 +471,13 @@ namespace TwitchDownloaderCore
 
             // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
             // TODO: Combine this with ChatUpdater in a different file
-            List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, _progress, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
+            List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, _cacheDir, _progress, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
             _progress.ReportProgress(25);
-            List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(chatRoot.comments, downloadOptions.TempFolder, _progress, cancellationToken: cancellationToken);
+            List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(chatRoot.comments, _cacheDir, _progress, cancellationToken: cancellationToken);
             _progress.ReportProgress(50);
-            List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, downloadOptions.TempFolder, _progress, cancellationToken: cancellationToken);
+            List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, _cacheDir, _progress, cancellationToken: cancellationToken);
             _progress.ReportProgress(75);
-            List<CheerEmote> twitchBits = await TwitchHelper.GetBits(chatRoot.comments, downloadOptions.TempFolder, chatRoot.streamer.id.ToString(), _progress, cancellationToken: cancellationToken);
+            List<CheerEmote> twitchBits = await TwitchHelper.GetBits(chatRoot.comments, _cacheDir, chatRoot.streamer.id.ToString(), _progress, cancellationToken: cancellationToken);
             _progress.ReportProgress(100);
 
             _progress.SetTemplateStatus("Embedding Images {0}%", 0);
