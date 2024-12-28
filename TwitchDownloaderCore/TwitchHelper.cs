@@ -355,7 +355,7 @@ namespace TwitchDownloaderCore
         public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
-            List<string> alreadyAdded = new List<string>();
+            HashSet<string> alreadyAdded = new HashSet<string>();
 
             // No 3rd party emotes are wanted
             if (!bttv && !ffz && !stv)
@@ -459,7 +459,7 @@ namespace TwitchDownloaderCore
             return returnList;
 
             static async Task FetchEmoteImages(IReadOnlyCollection<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, ICollection<TwitchEmote> returnList,
-                ICollection<string> alreadyAdded, DirectoryInfo cacheFolder, ITaskLogger logger, CancellationToken cancellationToken)
+                ISet<string> alreadyAdded, DirectoryInfo cacheFolder, ITaskLogger logger, CancellationToken cancellationToken)
             {
                 if (!cacheFolder.Exists)
                     cacheFolder = CreateDirectory(cacheFolder.FullName);
@@ -500,8 +500,8 @@ namespace TwitchDownloaderCore
         public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<TwitchEmote> returnList = new List<TwitchEmote>();
-            List<string> alreadyAdded = new List<string>();
-            List<string> failedEmotes = new List<string>();
+            HashSet<string> alreadyAdded = new HashSet<string>();
+            HashSet<string> failedEmotes = new HashSet<string>();
 
             DirectoryInfo emoteFolder = new DirectoryInfo(Path.Combine(cacheFolder, "emotes"));
             if (!emoteFolder.Exists)
@@ -633,7 +633,7 @@ namespace TwitchDownloaderCore
         public static async Task<List<ChatBadge>> GetChatBadges(List<Comment> comments, int streamerId, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<ChatBadge> returnList = new List<ChatBadge>();
-            List<string> alreadyAdded = new List<string>();
+            HashSet<string> alreadyAdded = new HashSet<string>();
 
             // Load our embedded data from file
             if (embeddedData?.twitchBadges != null)
@@ -781,7 +781,7 @@ namespace TwitchDownloaderCore
         public static async Task<List<CheerEmote>> GetBits(List<Comment> comments, string cacheFolder, string channelId, ITaskLogger logger, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             List<CheerEmote> returnList = new List<CheerEmote>();
-            List<string> alreadyAdded = new List<string>();
+            HashSet<string> alreadyAdded = new HashSet<string>();
 
             // Load our embedded data from file
             if (embeddedData?.twitchBits != null)
