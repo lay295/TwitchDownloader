@@ -309,6 +309,16 @@ namespace TwitchDownloaderWPF
             FileService.OpenExplorerForFile(new FileInfo(task.OutputFile));
         }
 
+        private void MenuItemCopyTaskPath_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { DataContext: TwitchTask task })
+            {
+                return;
+            }
+
+            Clipboard.SetText(task.OutputFile);
+        }
+
         private void BtnRetryTask_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button { DataContext: TwitchTask task })
