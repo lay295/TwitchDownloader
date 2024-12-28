@@ -66,6 +66,11 @@
                                                 <fa:SvgAwesome Icon="Solid_FolderOpen" Foreground="{DynamicResource AppText}" />
                                             </MenuItem.Icon>
                                         </MenuItem>
+                                        <MenuItem Header="{lex:Loc CopyFolderPathToClipboard}" Click="MenuItemCopyTaskPath_Click" Foreground="{DynamicResource AppText}">
+                                            <MenuItem.Icon>
+                                                <fa:SvgAwesome Icon="Solid_Copy" Foreground="{DynamicResource AppText}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
                                     </ContextMenu>
                                 </Border.ContextMenu>
                                 <Grid Margin="1,1">
