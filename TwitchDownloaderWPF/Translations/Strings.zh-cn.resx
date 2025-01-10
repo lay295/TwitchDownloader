@@ -1008,12 +1008,12 @@
     <value>取消</value>
   </data>
   <data name="FilenameParameterChannelIdTooltip" xml:space="preserve">
-    <value>The ID of the channel which owns the video/clip/chat.</value>
+    <value>拥有此视频 / 剪辑 / 聊天的频道的 ID。</value>
   </data>
   <data name="FilenameParameterClipperTooltip" xml:space="preserve">
-    <value>The display name of the channel which created the clip, or empty for videos.</value>
+    <value>创建此剪辑的频道的显示名称，如果是视频则为空。</value>
   </data>
   <data name="FilenameParameterClipperIdTooltip" xml:space="preserve">
-    <value>The ID of the channel which created the clip, or empty for videos.</value>
+    <value>创建此剪辑的频道的 ID，如果是视频则为空。</value>
   </data>
 </root>
