@@ -168,7 +168,7 @@
     <value>Coupe Chat:</value>
   </data>
   <data name="ChatDownload" xml:space="preserve">
-    <value>Télécharger du Chat</value>
+    <value>Télécharger un chat</value>
   </data>
   <data name="ChatDownloads" xml:space="preserve">
     <value>Téléchargements de Chats</value>
@@ -204,7 +204,7 @@
     <value>Vous êtes sûr de vouloir vider le cache ?\nYou should only really do this if the program isn't working correctly</value>
   </data>
   <data name="ClipDownload" xml:space="preserve">
-    <value>Télécharger du Clip</value>
+    <value>Télécharger un clip</value>
   </data>
   <data name="ClipDownloads" xml:space="preserve">
     <value>Téléchargements de clips</value>
@@ -466,7 +466,7 @@
     <value>Erreur</value>
   </data>
   <data name="TaskQueue" xml:space="preserve">
-    <value>Queue de travaux</value>
+    <value>File d'attente</value>
   </data>
   <data name="ThirdPartyEmotes" xml:space="preserve">
     <value>Emoticônes de tiers </value>
@@ -557,7 +557,7 @@
     <value>Lien Vidéo/Clip:</value>
   </data>
   <data name="VodDownload" xml:space="preserve">
-    <value>Télécharger du vidéos</value>
+    <value>Télécharger une vidéo</value>
   </data>
   <data name="VodDownloads" xml:space="preserve">
     <value>Téléchargements de vidéos</value>
