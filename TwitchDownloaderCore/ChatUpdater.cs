@@ -176,9 +176,9 @@ namespace TwitchDownloaderCore
 
                 chatRoot.clipper ??= new Clipper
                 {
-                    name = clipInfo.curator.displayName,
-                    login = clipInfo.curator.login,
-                    id = int.Parse(clipInfo.curator.id),
+                    name = clipInfo.curator?.displayName,
+                    login = clipInfo.curator?.login,
+                    id = int.Parse(clipInfo.curator?.id ?? "0"),
                 };
 
                 chatRoot.video.title = clipInfo.title;
