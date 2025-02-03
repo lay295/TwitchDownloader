@@ -69,9 +69,9 @@ namespace TwitchDownloaderCore.Tools
         private readonly SKPaint _outlinePaint;
         private readonly Dictionary<SKColor, SKPaint> _iconPaints = new();
 
-        public HighlightIcons(ChatRenderOptions renderOptions, SKColor iconPurple, SKPaint outlinePaint)
+        public HighlightIcons(ChatRenderOptions renderOptions, string cacheDir, SKColor iconPurple, SKPaint outlinePaint)
         {
-            _cacheDir = new DirectoryInfo(Path.Combine(renderOptions.TempFolder, "icons"));
+            _cacheDir = new DirectoryInfo(Path.Combine(cacheDir, "icons"));
             _purple = iconPurple;
             _offline = renderOptions.Offline;
             _fontSize = renderOptions.FontSize;
