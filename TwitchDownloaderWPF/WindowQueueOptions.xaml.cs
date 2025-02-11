@@ -264,7 +264,7 @@ namespace TwitchDownloaderWPF
                     {
                         Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, clipDownloadPage.textTitle.Text, clipDownloadPage.clipId,
                             clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, clipDownloadPage.streamerId, TimeSpan.Zero, clipDownloadPage.clipLength,
-                            clipDownloadPage.viewCount, clipDownloadPage.game, clipDownloadPage.clipperName, clipDownloadPage.clipperId) + ".mp4"),
+                            clipDownloadPage.clipLength, clipDownloadPage.viewCount, clipDownloadPage.game, clipDownloadPage.clipperName, clipDownloadPage.clipperId) + ".mp4"),
                         Id = clipDownloadPage.clipId,
                         Quality = clipDownloadPage.comboQuality.Text,
                         ThrottleKib = Settings.Default.DownloadThrottleEnabled
@@ -306,7 +306,7 @@ namespace TwitchDownloaderWPF
                         chatOptions.TimeFormat = TimestampFormat.Relative;
                         chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
                         chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id,
-                            clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, clipDownloadPage.streamerId, TimeSpan.Zero, clipDownloadPage.clipLength,
+                            clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, clipDownloadPage.streamerId, TimeSpan.Zero, clipDownloadPage.clipLength, clipDownloadPage.clipLength,
                             clipDownloadPage.viewCount, clipDownloadPage.game, clipDownloadPage.clipperName, clipDownloadPage.clipId) + "." + chatOptions.FileExtension + (chatOptions is { DownloadFormat: ChatFormat.Json, Compression: ChatCompression.Gzip } ? ".gz" : ""));
                         chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
@@ -385,7 +385,7 @@ namespace TwitchDownloaderWPF
                         chatDownloadPage.streamerId,
                         chatOptions.TrimBeginning ? TimeSpan.FromSeconds(chatOptions.TrimBeginningTime) : TimeSpan.Zero,
                         chatOptions.TrimEnding ? TimeSpan.FromSeconds(chatOptions.TrimEndingTime) : chatDownloadPage.vodLength,
-                        chatDownloadPage.viewCount, chatDownloadPage.game) + "." + chatOptions.FileExtension + (chatOptions is { DownloadFormat: ChatFormat.Json, Compression: ChatCompression.Gzip } ? ".gz" : ""));
+                        chatDownloadPage.vodLength, chatDownloadPage.viewCount, chatDownloadPage.game) + "." + chatOptions.FileExtension + (chatOptions is { DownloadFormat: ChatFormat.Json, Compression: ChatCompression.Gzip } ? ".gz" : ""));
                     chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
                     ChatDownloadTask chatTask = new ChatDownloadTask
@@ -458,7 +458,7 @@ namespace TwitchDownloaderWPF
                         chatUpdatePage.StreamerId,
                         chatOptions.TrimBeginning ? TimeSpan.FromSeconds(chatOptions.TrimBeginningTime) : TimeSpan.Zero,
                         chatOptions.TrimEnding ? TimeSpan.FromSeconds(chatOptions.TrimEndingTime) : chatUpdatePage.VideoLength,
-                        chatUpdatePage.ViewCount, chatUpdatePage.Game, chatUpdatePage.ClipperName, chatUpdatePage.ClipperId) + "." + chatOptions.FileExtension);
+                        chatUpdatePage.VideoLength, chatUpdatePage.ViewCount, chatUpdatePage.Game, chatUpdatePage.ClipperName, chatUpdatePage.ClipperId) + "." + chatOptions.FileExtension);
                     chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
                     ChatUpdateTask chatTask = new ChatUpdateTask
@@ -584,7 +584,7 @@ namespace TwitchDownloaderWPF
                         downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.StreamerName, taskData.StreamerId,
                             downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
                             downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : TimeSpan.FromSeconds(taskData.Length),
-                            taskData.Views, taskData.Game) + FilenameService.GuessVodFileExtension(downloadOptions.Quality));
+                            TimeSpan.FromSeconds(taskData.Length), taskData.Views, taskData.Game) + FilenameService.GuessVodFileExtension(downloadOptions.Quality));
 
                         VodDownloadTask downloadTask = new VodDownloadTask
                         {
@@ -608,7 +608,7 @@ namespace TwitchDownloaderWPF
                             Id = taskData.Id,
                             Quality = (ComboPreferredQuality.SelectedItem as ComboBoxItem)?.Content as string,
                             Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, taskData.Title, taskData.Id, taskData.Time, taskData.StreamerName, taskData.StreamerId,
-                                TimeSpan.Zero, TimeSpan.FromSeconds(taskData.Length), taskData.Views, taskData.Game, taskData.ClipperName, taskData.ClipperId) + ".mp4"),
+                                TimeSpan.Zero, TimeSpan.FromSeconds(taskData.Length), TimeSpan.FromSeconds(taskData.Length), taskData.Views, taskData.Game, taskData.ClipperName, taskData.ClipperId) + ".mp4"),
                             ThrottleKib = Settings.Default.DownloadThrottleEnabled
                                 ? Settings.Default.MaximumBandwidthKib
                                 : -1,
@@ -656,7 +656,7 @@ namespace TwitchDownloaderWPF
                     downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, taskData.Title, taskData.Id, taskData.Time, taskData.StreamerName, taskData.StreamerId,
                         downloadOptions.TrimBeginning ? TimeSpan.FromSeconds(downloadOptions.TrimBeginningTime) : TimeSpan.Zero,
                         downloadOptions.TrimEnding ? TimeSpan.FromSeconds(downloadOptions.TrimEndingTime) : TimeSpan.FromSeconds(taskData.Length),
-                        taskData.Views, taskData.Game, taskData.ClipperName, taskData.ClipperId) + "." + downloadOptions.FileExtension);
+                        TimeSpan.FromSeconds(taskData.Length), taskData.Views, taskData.Game, taskData.ClipperName, taskData.ClipperId) + "." + downloadOptions.FileExtension);
 
                     ChatDownloadTask downloadTask = new ChatDownloadTask
                     {

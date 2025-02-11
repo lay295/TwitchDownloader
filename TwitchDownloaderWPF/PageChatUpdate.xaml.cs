@@ -509,7 +509,7 @@ namespace TwitchDownloaderWPF
                     ChatJsonInfo.video.id ?? ChatJsonInfo.comments.FirstOrDefault()?.content_id ?? "-1", VideoCreatedAt, textStreamer.Text, StreamerId,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.FromSeconds(double.IsNegative(ChatJsonInfo.video.start) ? 0.0 : ChatJsonInfo.video.start),
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : VideoLength,
-                    ViewCount, Game, ClipperName, ClipperId)
+                    VideoLength, ViewCount, Game, ClipperName, ClipperId)
             };
 
             if (radioJson.IsChecked == true)
