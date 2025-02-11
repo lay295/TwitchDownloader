@@ -12,6 +12,8 @@ namespace TwitchDownloaderWPF.Services
         {
             try
             {
+                // Clipboard.SetText will throw ExternalException if it cannot set the clipboard text or does not
+                // receive a confirmation from COM. This is only documented on Clipboard.SetDataObject.
                 Clipboard.SetText(text);
             }
             catch (Exception e)
