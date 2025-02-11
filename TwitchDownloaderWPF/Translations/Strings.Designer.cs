@@ -1104,7 +1104,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The length (including trim) of the video/clip/chat in a customizable format..
+        ///   Looks up a localized string similar to The length (excluding trim) of the video/clip/chat in a customizable format..
         /// </summary>
         public static string FilenameParameterLengthCustomTooltip {
             get {
@@ -1113,7 +1113,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The length (including trim) of the video/clip/chat in the format hh-mm-ss..
+        ///   Looks up a localized string similar to The length (excluding trim) of the video/clip/chat in the format hh-mm-ss..
         /// </summary>
         public static string FilenameParameterLengthTooltip {
             get {
@@ -1154,6 +1154,24 @@ namespace TwitchDownloaderWPF.Translations {
         public static string FilenameParameterTrimEndTooltip {
             get {
                 return ResourceManager.GetString("FilenameParameterTrimEndTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The length (including trim) of the video/clip/chat in a customizable format..
+        /// </summary>
+        public static string FilenameParameterTrimLengthCustomTooltip {
+            get {
+                return ResourceManager.GetString("FilenameParameterTrimLengthCustomTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The length (including trim) of the video/clip/chat in the format hh-mm-ss..
+        /// </summary>
+        public static string FilenameParameterTrimLengthTooltip {
+            get {
+                return ResourceManager.GetString("FilenameParameterTrimLengthTooltip", resourceCulture);
             }
         }
         

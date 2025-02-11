@@ -1019,4 +1019,10 @@
   <data name="FailedToCopyToClipboard" xml:space="preserve">
     <value>Failed to Copy to Clipboard</value>
   </data>
+  <data name="FilenameParameterTrimLengthTooltip" xml:space="preserve">
+    <value>The length (including trim) of the video/clip/chat in the format hh-mm-ss.</value>
+  </data>
+  <data name="FilenameParameterTrimLengthCustomTooltip" xml:space="preserve">
+    <value>The length (including trim) of the video/clip/chat in a customizable format.</value>
+  </data>
 </root>
