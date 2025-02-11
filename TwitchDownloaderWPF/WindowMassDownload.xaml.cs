@@ -366,7 +366,10 @@ namespace TwitchDownloaderWPF
             if (sender is not MenuItem { DataContext: TaskData taskData }) return;
 
             var id = taskData.Id;
-            Clipboard.SetText(id);
+            if (!ClipboardService.TrySetText(id, out var exception))
+            {
+                MessageBox.Show(this, exception.ToString(), Translations.Strings.FailedToCopyToClipboard, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
             e.Handled = true;
         }
@@ -380,7 +383,10 @@ namespace TwitchDownloaderWPF
                 ? $"https://twitch.tv/videos/{id}"
                 : $"https://clips.twitch.tv/{id}";
 
-            Clipboard.SetText(url);
+            if (!ClipboardService.TrySetText(url, out var exception))
+            {
+                MessageBox.Show(this, exception.ToString(), Translations.Strings.FailedToCopyToClipboard, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
             e.Handled = true;
         }

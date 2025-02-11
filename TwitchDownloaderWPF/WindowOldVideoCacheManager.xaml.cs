@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderWPF.Services;
 
 namespace TwitchDownloaderWPF
 {
@@ -98,7 +99,10 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            Clipboard.SetText(gridItem.Path);
+            if (!ClipboardService.TrySetText(gridItem.Path, out var exception))
+            {
+                MessageBox.Show(this, exception.ToString(), Translations.Strings.FailedToCopyToClipboard, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public DirectoryInfo[] GetItemsToDelete() => GridItems
