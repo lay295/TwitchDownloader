@@ -160,6 +160,12 @@
                 <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterTrimEndCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {trim_end_custom=""}
                 </Run>
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterTrimLengthTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                    {trim_length}
+                </Run>
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterTrimLengthCustomTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                    {trim_length_custom=""}
+                </Run>
                 <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterLengthTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {length}
                 </Run>
