@@ -816,6 +816,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to Copy to Clipboard.
+        /// </summary>
+        public static string FailedToCopyToClipboard {
+            get {
+                return ResourceManager.GetString("FailedToCopyToClipboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Fatal Error.
         /// </summary>
         public static string FatalError {

@@ -1013,4 +1013,7 @@
   <data name="FilenameParameterClipperIdTooltip" xml:space="preserve">
     <value>The ID of the channel which created the clip, or empty for videos.</value>
   </data>
+  <data name="FailedToCopyToClipboard" xml:space="preserve">
+    <value>Failed to Copy to Clipboard</value>
+  </data>
 </root>
