@@ -1016,4 +1016,7 @@
   <data name="FilenameParameterClipperIdTooltip" xml:space="preserve">
     <value>创建此剪辑的频道的 ID，如果是视频则为空。</value>
   </data>
+  <data name="FailedToCopyToClipboard" xml:space="preserve">
+    <value>Failed to Copy to Clipboard</value>
+  </data>
 </root>

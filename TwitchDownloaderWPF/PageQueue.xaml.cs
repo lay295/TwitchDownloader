@@ -316,7 +316,10 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            Clipboard.SetText(task.OutputFile);
+            if (!ClipboardService.TrySetText(task.OutputFile, out var exception))
+            {
+                MessageBox.Show(Application.Current.MainWindow!, exception.ToString(), Translations.Strings.FailedToCopyToClipboard, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void BtnRetryTask_Click(object sender, RoutedEventArgs e)
