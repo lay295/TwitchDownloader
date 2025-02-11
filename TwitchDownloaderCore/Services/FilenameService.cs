@@ -11,10 +11,10 @@ namespace TwitchDownloaderCore.Services
 {
     public static class FilenameService
     {
-        public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date, [AllowNull] string channel, [AllowNull] string channelId, TimeSpan trimStart, TimeSpan trimEnd, long viewCount,
+        public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date, [AllowNull] string channel, [AllowNull] string channelId, TimeSpan trimStart, TimeSpan trimEnd, TimeSpan videoLength, long viewCount,
             [AllowNull] string game, [AllowNull] string clipper = null, [AllowNull] string clipperId = null)
         {
-            var videoLength = trimEnd - trimStart;
+            var trimLength = trimEnd - trimStart;
 
             var stringBuilder = new StringBuilder(template)
                 .Replace("{title}", ReplaceInvalidFilenameChars(title))
@@ -27,6 +27,7 @@ namespace TwitchDownloaderCore.Services
                 .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
                 .Replace("{trim_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
                 .Replace("{trim_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimEnd))
+                .Replace("{trim_length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimLength))
                 .Replace("{length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", videoLength))
                 .Replace("{views}", viewCount.ToString(CultureInfo.CurrentCulture))
                 .Replace("{game}", ReplaceInvalidFilenameChars(game));
@@ -47,6 +48,12 @@ namespace TwitchDownloaderCore.Services
             {
                 var trimEndRegex = new Regex("{trim_end_custom=\"(.*?)\"}");
                 ReplaceCustomWithFormattable(stringBuilder, trimEndRegex, trimEnd, TimeSpanHFormat.ReusableInstance);
+            }
+
+            if (template.Contains("{trim_length_custom="))
+            {
+                var lengthRegex = new Regex("{trim_length_custom=\"(.*?)\"}");
+                ReplaceCustomWithFormattable(stringBuilder, lengthRegex, trimLength, TimeSpanHFormat.ReusableInstance);
             }
 
             if (template.Contains("{length_custom="))
