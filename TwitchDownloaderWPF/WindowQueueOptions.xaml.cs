@@ -172,6 +172,7 @@ namespace TwitchDownloaderWPF
                             chatOptions.DownloadFormat = ChatFormat.Html;
                         else
                             chatOptions.DownloadFormat = ChatFormat.Text;
+                        // TODO: Support non-json chat compression
                         if (RadioCompressionGzip.IsChecked.GetValueOrDefault() && chatOptions.DownloadFormat == ChatFormat.Json)
                             chatOptions.Compression = ChatCompression.Gzip;
                         chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
@@ -301,6 +302,7 @@ namespace TwitchDownloaderWPF
                             chatOptions.DownloadFormat = ChatFormat.Html;
                         else
                             chatOptions.DownloadFormat = ChatFormat.Text;
+                        // TODO: Support non-json chat compression
                         if (RadioCompressionGzip.IsChecked.GetValueOrDefault() && chatOptions.DownloadFormat == ChatFormat.Json)
                             chatOptions.Compression = ChatCompression.Gzip;
                         chatOptions.TimeFormat = TimestampFormat.Relative;
@@ -652,6 +654,7 @@ namespace TwitchDownloaderWPF
                         downloadOptions.DownloadFormat = ChatFormat.Html;
                     else
                         downloadOptions.DownloadFormat = ChatFormat.Text;
+                    // TODO: Support non-json chat compression
                     if (RadioCompressionGzip.IsChecked.GetValueOrDefault() && downloadOptions.DownloadFormat == ChatFormat.Json)
                         downloadOptions.Compression = ChatCompression.Gzip;
                     downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, taskData.Title, taskData.Id, taskData.Time, taskData.StreamerName, taskData.StreamerId,
