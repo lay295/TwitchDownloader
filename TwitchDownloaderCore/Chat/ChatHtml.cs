@@ -33,7 +33,7 @@ namespace TwitchDownloaderCore.Chat
             using var templateStream = new MemoryStream(Properties.Resources.chat_template);
             using var templateReader = new StreamReader(templateStream);
 
-            await using var sw = new StreamWriter(outputStream);
+            await using var sw = new StreamWriter(outputStream, leaveOpen: true);
 
             while (!templateReader.EndOfStream)
             {

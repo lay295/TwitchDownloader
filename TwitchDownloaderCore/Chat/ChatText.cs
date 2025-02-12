@@ -13,7 +13,7 @@ namespace TwitchDownloaderCore.Chat
         /// </summary>
         public static async Task SerializeAsync(Stream outputStream, ChatRoot chatRoot, TimestampFormat timeFormat)
         {
-            await using var sw = new StreamWriter(outputStream);
+            await using var sw = new StreamWriter(outputStream, leaveOpen: true);
             foreach (var comment in chatRoot.comments)
             {
                 var username = comment.commenter.display_name;
