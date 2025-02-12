@@ -283,7 +283,8 @@ namespace TwitchDownloaderWPF
             else if (radioText.IsChecked == true)
                 options.DownloadFormat = ChatFormat.Text;
 
-            if (radioCompressionNone.IsChecked == true)
+            // TODO: Support non-json chat compression
+            if (radioCompressionNone.IsChecked == true || options.DownloadFormat != ChatFormat.Json)
                 options.Compression = ChatCompression.None;
             else if (radioCompressionGzip.IsChecked == true)
                 options.Compression = ChatCompression.Gzip;
