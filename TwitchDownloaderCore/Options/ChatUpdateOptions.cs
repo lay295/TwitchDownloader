@@ -27,9 +27,9 @@ namespace TwitchDownloaderCore.Options
                 return string.Concat(
                     OutputFormat switch
                     {
-                        ChatFormat.Json => "json",
-                        ChatFormat.Html => "html",
-                        ChatFormat.Text => "txt",
+                        ChatFormat.Json => ".json",
+                        ChatFormat.Html => ".html",
+                        ChatFormat.Text => ".txt",
                         _ => ""
                     },
                     Compression switch
