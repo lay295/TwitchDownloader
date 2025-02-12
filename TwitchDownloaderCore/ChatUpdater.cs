@@ -116,7 +116,11 @@ namespace TwitchDownloaderCore
             }
             finally
             {
-                await outputStream.FlushAsync(cancellationToken);
+                if (outputStream is GZipStream gzipStream)
+                {
+                    // GZipStream finishes writing on disposal, not flush.
+                    await gzipStream.DisposeAsync();
+                }
             }
         }
 
