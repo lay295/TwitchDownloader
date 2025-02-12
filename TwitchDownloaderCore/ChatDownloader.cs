@@ -304,27 +304,35 @@ namespace TwitchDownloaderCore
                 await BackfillUserInfo(chatRoot);
             }
 
-            await using Stream outputStream = downloadOptions.Compression switch
+            _progress.SetStatus("Writing Output File");
+
+            Stream outputStream = downloadOptions.Compression switch
             {
                 ChatCompression.None => outputFs,
                 ChatCompression.Gzip => new GZipStream(outputFs, CompressionLevel.SmallestSize),
-                _ => throw new ArgumentOutOfRangeException(nameof(downloadOptions.Compression), $"{downloadOptions.Compression} is not a supported chat compression.")
+                _ => throw new NotSupportedException($"{downloadOptions.Compression} is not a supported chat compression.")
             };
 
-            _progress.SetStatus("Writing Output File");
-            switch (downloadOptions.DownloadFormat)
+            try
             {
-                case ChatFormat.Json:
-                    await ChatJson.SerializeAsync(outputFs, chatRoot, cancellationToken);
-                    break;
-                case ChatFormat.Html:
-                    await ChatHtml.SerializeAsync(outputStream, outputFileInfo.FullName, chatRoot, _progress, downloadOptions.EmbedData, cancellationToken);
-                    break;
-                case ChatFormat.Text:
-                    await ChatText.SerializeAsync(outputStream, chatRoot, downloadOptions.TimeFormat);
-                    break;
-                default:
-                    throw new NotSupportedException($"{downloadOptions.DownloadFormat} is not a supported output format.");
+                switch (downloadOptions.DownloadFormat)
+                {
+                    case ChatFormat.Json:
+                        await ChatJson.SerializeAsync(outputFs, chatRoot, cancellationToken);
+                        break;
+                    case ChatFormat.Html:
+                        await ChatHtml.SerializeAsync(outputStream, outputFileInfo.FullName, chatRoot, _progress, downloadOptions.EmbedData, cancellationToken);
+                        break;
+                    case ChatFormat.Text:
+                        await ChatText.SerializeAsync(outputStream, chatRoot, downloadOptions.TimeFormat);
+                        break;
+                    default:
+                        throw new NotSupportedException($"{downloadOptions.DownloadFormat} is not a supported output format.");
+                }
+            }
+            finally
+            {
+                await outputStream.FlushAsync(cancellationToken);
             }
         }
 
