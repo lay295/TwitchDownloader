@@ -11,9 +11,9 @@ namespace TwitchDownloaderCore.Chat
         /// <summary>
         /// Serializes a chat plain text file.
         /// </summary>
-        public static async Task SerializeAsync(FileStream fileStream, ChatRoot chatRoot, TimestampFormat timeFormat)
+        public static async Task SerializeAsync(Stream outputStream, ChatRoot chatRoot, TimestampFormat timeFormat)
         {
-            await using var sw = new StreamWriter(fileStream);
+            await using var sw = new StreamWriter(outputStream);
             foreach (var comment in chatRoot.comments)
             {
                 var username = comment.commenter.display_name;

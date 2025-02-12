@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,16 +90,23 @@ namespace TwitchDownloaderCore
             _progress.SetStatus($"Writing Output File [{++currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
+            await using Stream outputStream = _updateOptions.Compression switch
+            {
+                ChatCompression.None => outputFs,
+                ChatCompression.Gzip => new GZipStream(outputFs, CompressionLevel.SmallestSize),
+                _ => throw new ArgumentOutOfRangeException(nameof(_updateOptions.Compression), $"{_updateOptions.Compression} is not a supported chat compression.")
+            };
+
             switch (_updateOptions.OutputFormat)
             {
                 case ChatFormat.Json:
-                    await ChatJson.SerializeAsync(outputFs, chatRoot, _updateOptions.Compression, cancellationToken);
+                    await ChatJson.SerializeAsync(outputStream, chatRoot, cancellationToken);
                     break;
                 case ChatFormat.Html:
-                    await ChatHtml.SerializeAsync(outputFs, outputFileInfo.FullName, chatRoot, _progress, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
+                    await ChatHtml.SerializeAsync(outputStream, outputFileInfo.FullName, chatRoot, _progress, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
                     break; // If there is embedded data, it's almost guaranteed to be first party emotes or badges.
                 case ChatFormat.Text:
-                    await ChatText.SerializeAsync(outputFs, chatRoot, _updateOptions.TextTimestampFormat);
+                    await ChatText.SerializeAsync(outputStream, chatRoot, _updateOptions.TextTimestampFormat);
                     break;
                 default:
                     throw new NotSupportedException($"{_updateOptions.OutputFormat} is not a supported output format.");
