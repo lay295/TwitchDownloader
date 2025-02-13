@@ -1,6 +1,5 @@
 ﻿using HandyControl.Controls;
 using Microsoft.Win32;
-using Newtonsoft.Json;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -9,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -527,7 +527,7 @@ namespace TwitchDownloaderWPF
 
         private void SaveArguments()
         {
-            List<CustomFfmpegArgs> args = JsonConvert.DeserializeObject<List<CustomFfmpegArgs>>(Settings.Default.FfmpegArguments);
+            List<CustomFfmpegArgs> args = JsonSerializer.Deserialize<List<CustomFfmpegArgs>>(Settings.Default.FfmpegArguments);
 
             bool foundArg = false;
             foreach (CustomFfmpegArgs arg in args)
@@ -548,13 +548,13 @@ namespace TwitchDownloaderWPF
                 args.Add(newArgs);
             }
 
-            Settings.Default.FfmpegArguments = JsonConvert.SerializeObject(args);
+            Settings.Default.FfmpegArguments = JsonSerializer.Serialize(args);
             Settings.Default.Save();
         }
 
         private void LoadFfmpegArgs()
         {
-            List<CustomFfmpegArgs> args = JsonConvert.DeserializeObject<List<CustomFfmpegArgs>>(Settings.Default.FfmpegArguments);
+            List<CustomFfmpegArgs> args = JsonSerializer.Deserialize<List<CustomFfmpegArgs>>(Settings.Default.FfmpegArguments);
 
             bool foundArg = false;
             foreach (CustomFfmpegArgs arg in args)
