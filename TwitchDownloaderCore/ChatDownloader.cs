@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -304,19 +305,38 @@ namespace TwitchDownloaderCore
             }
 
             _progress.SetStatus("Writing Output File");
-            switch (downloadOptions.DownloadFormat)
+
+            Stream outputStream = downloadOptions.Compression switch
             {
-                case ChatFormat.Json:
-                    await ChatJson.SerializeAsync(outputFs, chatRoot, downloadOptions.Compression, cancellationToken);
-                    break;
-                case ChatFormat.Html:
-                    await ChatHtml.SerializeAsync(outputFs, outputFileInfo.FullName, chatRoot, _progress, downloadOptions.EmbedData, cancellationToken);
-                    break;
-                case ChatFormat.Text:
-                    await ChatText.SerializeAsync(outputFs, chatRoot, downloadOptions.TimeFormat);
-                    break;
-                default:
-                    throw new NotSupportedException($"{downloadOptions.DownloadFormat} is not a supported output format.");
+                ChatCompression.None => outputFs,
+                ChatCompression.Gzip => new GZipStream(outputFs, CompressionLevel.SmallestSize),
+                _ => throw new NotSupportedException($"{downloadOptions.Compression} is not a supported chat compression.")
+            };
+
+            try
+            {
+                switch (downloadOptions.DownloadFormat)
+                {
+                    case ChatFormat.Json:
+                        await ChatJson.SerializeAsync(outputStream, chatRoot, cancellationToken);
+                        break;
+                    case ChatFormat.Html:
+                        await ChatHtml.SerializeAsync(outputStream, outputFileInfo.FullName, chatRoot, _progress, downloadOptions.EmbedData, cancellationToken);
+                        break;
+                    case ChatFormat.Text:
+                        await ChatText.SerializeAsync(outputStream, chatRoot, downloadOptions.TimeFormat);
+                        break;
+                    default:
+                        throw new NotSupportedException($"{downloadOptions.DownloadFormat} is not a supported output format.");
+                }
+            }
+            finally
+            {
+                if (outputStream is GZipStream gzipStream)
+                {
+                    // GZipStream finishes writing on disposal, not flush.
+                    await gzipStream.DisposeAsync();
+                }
             }
         }
 

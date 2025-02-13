@@ -24,14 +24,21 @@ namespace TwitchDownloaderCore.Options
         {
             get
             {
-                return OutputFormat switch
-                {
-                    ChatFormat.Json when Compression is ChatCompression.None => "json",
-                    ChatFormat.Json when Compression is ChatCompression.Gzip => "json.gz",
-                    ChatFormat.Html => "html",
-                    ChatFormat.Text => "txt",
-                    _ => ""
-                };
+                return string.Concat(
+                    OutputFormat switch
+                    {
+                        ChatFormat.Json => ".json",
+                        ChatFormat.Html => ".html",
+                        ChatFormat.Text => ".txt",
+                        _ => ""
+                    },
+                    Compression switch
+                    {
+                        ChatCompression.None => "",
+                        ChatCompression.Gzip => ".gz",
+                        _ => ""
+                    }
+                );
             }
         }
         public string TempFolder { get; set; }
