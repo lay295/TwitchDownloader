@@ -219,6 +219,12 @@ dotnet restore
 dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
 
+4. b) Construa o CLI:
+
+```
+dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
+```
+
 - Perfis Aplicáveis: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
 
 5. a) Navegue para a pasta do GUI:
