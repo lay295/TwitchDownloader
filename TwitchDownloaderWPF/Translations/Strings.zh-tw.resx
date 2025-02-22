@@ -978,10 +978,10 @@
     <value>影片 / 聊天的修剪結束時間，格式為自訂格式。</value>
   </data>
   <data name="FilenameParameterLengthTooltip" xml:space="preserve">
-    <value>影片 / 剪輯 / 聊天的時長（包括修剪），格式為 hh-mm-ss。</value>
+    <value>影片 / 剪輯 / 聊天的時長（不包括修剪），格式為 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterLengthCustomTooltip" xml:space="preserve">
-    <value>影片 / 剪輯 / 聊天的時長（包括修剪），格式為自訂格式。</value>
+    <value>影片 / 剪輯 / 聊天的時長（不包括修剪），格式為自訂格式。</value>
   </data>
   <data name="FilenameParameterViewsTooltip" xml:space="preserve">
     <value>影片 / 剪輯的觀看次數。</value>
@@ -1017,12 +1017,12 @@
     <value>建立此剪輯的頻道的 ID，如果是影片則為空。</value>
   </data>
   <data name="FailedToCopyToClipboard" xml:space="preserve">
-    <value>Failed to Copy to Clipboard</value>
+    <value>未能複製至剪貼簿</value>
   </data>
   <data name="FilenameParameterTrimLengthTooltip" xml:space="preserve">
-    <value>The length (including trim) of the video/clip/chat in the format hh-mm-ss.</value>
+    <value>影片 / 剪輯 / 聊天的時長（包括修剪），格式為 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterTrimLengthCustomTooltip" xml:space="preserve">
-    <value>The length (including trim) of the video/clip/chat in a customizable format.</value>
+    <value>影片 / 剪輯 / 聊天的時長（包括修剪），格式為自訂格式。</value>
   </data>
 </root>
