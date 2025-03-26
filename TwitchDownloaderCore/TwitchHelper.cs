@@ -458,7 +458,7 @@ namespace TwitchDownloaderCore
 
             return returnList;
 
-            static async Task FetchEmoteImages(IReadOnlyCollection<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, ICollection<TwitchEmote> returnList,
+            static async Task FetchEmoteImages([AllowNull] IEnumerable<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, ICollection<TwitchEmote> returnList,
                 ISet<string> alreadyAdded, DirectoryInfo cacheFolder, ITaskLogger logger, CancellationToken cancellationToken)
             {
                 if (!cacheFolder.Exists)
@@ -473,8 +473,8 @@ namespace TwitchDownloaderCore
                 {
                     emoteResponseQuery = from emote in emoteResponse
                         where !alreadyAdded.Contains(emote.Code)
-                        let pattern = $@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)"
-                        where comments.Any(comment => Regex.IsMatch(comment.message.body, pattern))
+                        let regex = new Regex($@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)")
+                        where comments.Any(comment => regex.IsMatch(comment.message.body))
                         select emote;
                 }
 
@@ -854,10 +854,10 @@ namespace TwitchDownloaderCore
 
                     var cheerNodesQuery = from node in cheerGroup.nodes
                         where !alreadyAdded.Contains(node.prefix)
-                        let pattern = $@"(?<=^|\s){Regex.Escape(node.prefix)}(?=[1-9])"
+                        let regex = new Regex($@"(?<=^|\s){Regex.Escape(node.prefix)}(?=[1-9])")
                         where comments
                             .Where(comment => comment.message.bits_spent > 0)
-                            .Any(comment => Regex.IsMatch(comment.message.body, pattern))
+                            .Any(comment => regex.IsMatch(comment.message.body))
                         select node;
 
                     foreach (CheerNode node in cheerNodesQuery)
