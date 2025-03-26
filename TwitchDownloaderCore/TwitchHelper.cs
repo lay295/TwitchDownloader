@@ -465,7 +465,7 @@ namespace TwitchDownloaderCore
                     cacheFolder = CreateDirectory(cacheFolder.FullName);
 
                 IEnumerable<EmoteResponseItem> emoteResponseQuery;
-                if (comments.Count == 0)
+                if (comments is null)
                 {
                     emoteResponseQuery = emoteResponse;
                 }
