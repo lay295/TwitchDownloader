@@ -67,7 +67,8 @@ namespace TwitchDownloaderCore.Extensions
             return filteredStreams.Length switch
             {
                 1 => filteredStreams[0],
-                2 when !desiredFramerate.Success => filteredStreams.First(x => Math.Abs(x.StreamInfo.Framerate - 30) <= 2),
+                2 when filteredStreams[0].StreamInfo.Framerate != 0 && filteredStreams[0].StreamInfo.Framerate == filteredStreams[1].StreamInfo.Framerate => filteredStreams.MaxBy(x => x.StreamInfo.Bandwidth),
+                2 when !desiredFramerate.Success => filteredStreams.FirstOrDefault(x => Math.Abs(x.StreamInfo.Framerate - 30) <= 2, filteredStreams.Last()),
                 _ => m3u8.BestQualityStream()
             };
         }
