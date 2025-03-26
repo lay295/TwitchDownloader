@@ -324,7 +324,7 @@ namespace TwitchDownloaderCore
 
         private async Task VerifyDownloadedParts(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
-            var failedParts = new List<M3U8.Stream>();
+            var missingParts = new List<M3U8.Stream>();
             var partCount = videoListCrop.GetOffsetAndLength(playlist.Count).Length;
             var doneCount = 0;
 
@@ -334,7 +334,7 @@ namespace TwitchDownloaderCore
                 var fi = new FileInfo(filePath);
                 if (!fi.Exists || fi.Length == 0)
                 {
-                    failedParts.Add(part);
+                    missingParts.Add(part);
                 }
 
                 doneCount++;
@@ -344,17 +344,17 @@ namespace TwitchDownloaderCore
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            if (failedParts.Count != 0)
+            if (missingParts.Count != 0)
             {
-                if (partCount > 20 && failedParts.Count >= partCount * 0.95)
+                if (partCount > 20 && missingParts.Count >= partCount * 0.95)
                 {
                     // 19/20 parts are missing or empty, something went horribly wrong.
                     // TODO: Somehow let the user bypass this. Maybe with callbacks?
-                    throw new Exception($"Too many parts are missing ({failedParts.Count}/{partCount}), aborting.");
+                    throw new Exception($"Too many parts are missing or empty ({missingParts.Count}/{partCount}), aborting.");
                 }
 
-                _progress.LogInfo($"The following parts will be redownloaded: {string.Join(", ", failedParts)}");
-                await DownloadVideoPartsAsync(failedParts, Range.All, baseUrl, headerFile, vodAirDate, cancellationToken);
+                _progress.LogInfo($"The following parts were missing or empty and will be redownloaded: {string.Join(", ", missingParts.Select(x => x.Path))}");
+                await DownloadVideoPartsAsync(missingParts, Range.All, baseUrl, headerFile, vodAirDate, cancellationToken);
             }
         }
 
