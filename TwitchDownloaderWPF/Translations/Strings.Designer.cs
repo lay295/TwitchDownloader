@@ -2679,6 +2679,42 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All Videos.
+        /// </summary>
+        public static string VideoTypeAllVideos {
+            get {
+                return ResourceManager.GetString("VideoTypeAllVideos", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highlights.
+        /// </summary>
+        public static string VideoTypeHighlights {
+            get {
+                return ResourceManager.GetString("VideoTypeHighlights", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Broadcasts.
+        /// </summary>
+        public static string VideoTypePastBroadcasts {
+            get {
+                return ResourceManager.GetString("VideoTypePastBroadcasts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploads.
+        /// </summary>
+        public static string VideoTypeUploads {
+            get {
+                return ResourceManager.GetString("VideoTypeUploads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to VOD/Clip Link:.
         /// </summary>
         public static string VodClipLink {

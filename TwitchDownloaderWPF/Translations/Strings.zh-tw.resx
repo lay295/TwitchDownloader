@@ -1025,4 +1025,16 @@
   <data name="FilenameParameterTrimLengthCustomTooltip" xml:space="preserve">
     <value>影片 / 剪輯 / 聊天的時長（包括修剪），格式為自訂格式。</value>
   </data>
+  <data name="VideoTypeAllVideos" xml:space="preserve">
+    <value>All Videos</value>
+  </data>
+  <data name="VideoTypePastBroadcasts" xml:space="preserve">
+    <value>Broadcasts</value>
+  </data>
+  <data name="VideoTypeHighlights" xml:space="preserve">
+    <value>Highlights</value>
+  </data>
+  <data name="VideoTypeUploads" xml:space="preserve">
+    <value>Uploads</value>
+  </data>
 </root>
