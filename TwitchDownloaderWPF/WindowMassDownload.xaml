@@ -29,11 +29,11 @@
                 <ComboBoxItem Content="{lex:Loc TopThirtyDays}" Tag="LAST_MONTH"/>
                 <ComboBoxItem Content="{lex:Loc TopAllTime}" Tag="ALL_TIME"/>
             </ComboBox>
-            <ComboBox SelectedIndex="0" x:Name="ComboSortByVideoType" Margin="5,6,0,0" MinWidth="100" SelectionChanged="ComboSortByVideoType_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
-                <ComboBoxItem Content="All Videos" Tag=""/>
-                <ComboBoxItem Content="Broadcasts" Tag="ARCHIVE"/>
-                <ComboBoxItem Content="Highlights" Tag="HIGHLIGHT"/>
-                <ComboBoxItem Content="Uploads" Tag="PREMIERE_UPLOAD"/>
+            <ComboBox SelectedIndex="0" x:Name="ComboSortByVideoType" Margin="5,6,0,0" MinWidth="120" SelectionChanged="ComboSortByVideoType_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                <ComboBoxItem Content="{lex:Loc VideoTypeAllVideos}" Tag=""/>
+                <ComboBoxItem Content="{lex:Loc VideoTypePastBroadcasts}" Tag="ARCHIVE"/>
+                <ComboBoxItem Content="{lex:Loc VideoTypeHighlights}" Tag="HIGHLIGHT"/>
+                <ComboBoxItem Content="{lex:Loc VideoTypeUploads}" Tag="PREMIERE_UPLOAD"/>
             </ComboBox>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
