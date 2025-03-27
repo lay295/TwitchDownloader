@@ -4,6 +4,7 @@ A Windows WPF desktop application that implements the core functionality wrapped
 This document is also available in:
 
 - [**Japanese / 日本語**](README_ja.md)
+- [**Portuguese (Brazil) / Português (Brasil)**](README_pt-br.md)
 
 ## Table of Contents
 - [TwitchDownloaderWPF](#twitchdownloaderwpf)
