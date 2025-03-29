@@ -467,6 +467,10 @@ namespace TwitchDownloaderCore
 
                 var start = videoStart + chunkSize * i;
                 var end = Math.Min(videoEnd, start + chunkSize);
+
+                if (!downloadOptions.TrimEnding && i == connectionCount - 1)
+                    end = int.MaxValue;
+
                 var downloadRange = new Range(start, end);
                 downloadTasks.Add(DownloadSection(downloadRange, video.id, taskProgress, _progress, downloadOptions.DownloadFormat, cancellationToken));
             }
