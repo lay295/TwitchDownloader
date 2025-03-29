@@ -292,6 +292,10 @@ namespace TwitchDownloaderCore
 
             chatRoot.comments = await DownloadComments(cancellationToken, chatRoot.video, connectionCount);
 
+            var lastComment = chatRoot.comments.LastOrDefault();
+            if (lastComment != null && lastComment.content_offset_seconds > chatRoot.video.end)
+                chatRoot.video.end = lastComment.content_offset_seconds;
+
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
                 await EmbedImages(chatRoot, cancellationToken);
