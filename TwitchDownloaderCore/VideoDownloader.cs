@@ -218,7 +218,11 @@ namespace TwitchDownloaderCore
         private async Task DownloadVideoPartsAsync(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.GetOffsetAndLength(playlist.Count).Length;
-            var videoPartsQueue = new ConcurrentQueue<string>(playlist.Take(videoListCrop).Select(x => x.Path));
+            var orderedParts = playlist
+                .Take(videoListCrop)
+                .Select(x => x.Path)
+                .OrderBy(x => !x.Contains("-muted")); // Prioritize downloading muted segments
+            var videoPartsQueue = new ConcurrentQueue<string>(orderedParts);
 
             var downloadThreads = new VideoDownloadThread[downloadOptions.DownloadThreads];
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
