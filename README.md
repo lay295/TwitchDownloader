@@ -19,8 +19,8 @@ This document is also available in:
 - [**Russian / Русский**](README_ru.md)
 - [**Spanish / Español**](README_es.md)
 - [**Turkish / Türkçe**](README_tr.md)
-- [**Simplified Chinese / 简体中文（中国大陆）**](README_zh-cn.md)
-- [**Traditonal Chinese / 繁體中文（台灣）**](README_zh-tw.md)
+- [**Simplified Chinese (Chinese Mainland) / 简体中文（中国大陆）**](README_zh-cn.md)
+- [**Traditonal Chinese (Taiwan) / 繁體中文（台灣）**](README_zh-tw.md)
 
 ## Chat Render Example
 
