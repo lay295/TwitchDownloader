@@ -70,7 +70,7 @@ CLI 是跨平臺的，可以實現程式的主要功能。它可在 Windows、Li
 
 <sup>*僅對 Intel Mac 進行了測試</sup>
 
-透過 CLI，可以使用外部指令碼自動處理影片。例如，你可以在 Windows 上將以下程式碼複製貼到 `.bat` 檔案中，下載點播及其聊天內容，然後繪製聊天內容，所有這些都只需一次輸入。
+透過 CLI，可以使用外部指令碼自動處理影片。例如，你可以在 Windows 上將以下程式碼複製貼上到 `.bat` 檔案中，下載點播及其聊天內容，然後繪製聊天內容，所有這些都只需一次輸入。
 
 ```bat
 @echo off
@@ -108,7 +108,7 @@ TwitchDownloaderCLI.exe videodownload --id <點播 ID> -o out.mp4
 
 1. 有些發行版，如 Linux Alpine，缺少某些語言（阿拉伯語、波斯語、泰語等）的字型。如果是這種情況，請安裝額外的字體系列，如 [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans)，或者檢視發行版的字型 Wiki 頁面，因為它可能有針對這種特定情況的安裝指令，如 [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) 字型頁面。
 2. 確保 `fontconfig` 和 `libfontconfig1` 都已安裝。在 Ubuntu 上執行 `apt-get install fontconfig libfontconfig1`。
-3. 前往 [發行版頁面](https://github.com/lay295/TwitchDownloader/releases/) 並下載最新的 Linux 版本抓取適用於 Arch Linux 的 [AUR 套裝軟體](https://aur.archlinux.org/packages/twitch-downloader-bin/)，或 [從原始碼構建](#building-from-source)。
+3. 前往 [發行版頁面](https://github.com/lay295/TwitchDownloader/releases/) 並下載最新的 Linux 版本抓取適用於 Arch Linux 的 [AUR 軟體包](https://aur.archlinux.org/packages/twitch-downloader-bin/)，或 [從原始碼構建](#building-from-source)。
 4. 提取 `TwitchDownloaderCLI`。
 5. 開啟二進位制可執行檔案放置的目錄：
 
@@ -144,7 +144,7 @@ sudo chmod +x ffmpeg
 
 ## MacOS – 開始
 
-1. 如果你的裝置使用的是 Apple Silicon M 系列處理器，請確保下載了 arm64 二進位制檔案，但如果你想在 Apple Silicon 上使用 x64 二進位制檔案，則必須在 Rosetta 2 下透過終端工作階段執行：
+1. 如果你的裝置使用的是 Apple Silicon M 系列處理器，請確保下載了 arm64 二進位制檔案，但如果你想在 Apple Silicon 上使用 x64 二進位制檔案，則必須在 Rosetta 2 下透過終端會話執行：
 
 ```指令
 arch -x86_64 zsh

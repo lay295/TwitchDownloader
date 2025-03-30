@@ -703,7 +703,7 @@
     <value>未選擇 JSON 檔案</value>
   </data>
   <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
-    <value>訪問許可權不足。可能需要 OAuth。</value>
+    <value>訪問權限不足。可能需要 OAuth。</value>
   </data>
   <data name="EmojiVendor" xml:space="preserve">
     <value>表情符號（Emoji）提供者：</value>
@@ -761,7 +761,7 @@
     <value>錯誤</value>
   </data>
   <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
-    <value>無法啟動 Windows 應用程式主題監視器。已停用即時 Windows 主題同步。錯誤程式碼：{0}</value>
+    <value>無法啟動 Windows 應用程式主題監視器。已停用即時 Windows 主題同步。錯誤代碼：{0}</value>
   </data>
   <data name="LabelVideosPerPage" xml:space="preserve">
     <value>每頁影片數：</value>
