@@ -496,7 +496,22 @@ namespace TwitchDownloaderCore
 
         private async Task<(M3U8 playlist, DateTimeOffset airDate)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
-            var playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
+            string playlistString;
+            try
+            {
+                playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
+            {
+                // Hacky workaround for old highlights that were muted
+                var newUrl = Regex.Replace(playlistUrl, @"-muted-\w+(?=\.m3u8$)", "");
+                if (playlistUrl == newUrl)
+                    throw;
+
+                _progress.LogError($"Received {(int)ex.StatusCode}: {ex.StatusCode} when fetching playlist. Attempting workaround...");
+                playlistString = await _httpClient.GetStringAsync(newUrl, cancellationToken);
+            }
+
             var playlist = M3U8.Parse(playlistString);
 
             var airDate = DateTimeOffset.UtcNow.AddHours(-25);
