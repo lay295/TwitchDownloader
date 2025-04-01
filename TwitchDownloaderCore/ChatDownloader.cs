@@ -43,7 +43,7 @@ namespace TwitchDownloaderCore
             _cacheDir = CacheDirectoryService.GetCacheDirectory(downloadOptions.TempFolder);
         }
 
-        private static async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, IProgress<int> progress, ITaskLogger logger, ChatFormat format, CancellationToken cancellationToken)
+        private static async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, DateTime videoCreatedAt, IProgress<int> progress, ITaskLogger logger, ChatFormat format, CancellationToken cancellationToken)
         {
             var comments = new List<Comment>();
             int videoStart = downloadRange.Start.Value;
@@ -115,7 +115,7 @@ namespace TwitchDownloaderCore
                 nullCount = Math.Max(0, nullCount - BACK_OFF_FACTOR);
                 errorCount = Math.Max(0, errorCount - BACK_OFF_FACTOR);
 
-                var convertedComments = ConvertComments(commentResponse.data.video, format);
+                var convertedComments = ConvertComments(commentResponse.data.video, videoCreatedAt, format);
                 foreach (var comment in convertedComments)
                 {
                     if (comment.content_offset_seconds >= videoStart && comment.content_offset_seconds < videoEnd)
@@ -146,7 +146,7 @@ namespace TwitchDownloaderCore
             return comments;
         }
 
-        private static List<Comment> ConvertComments(CommentVideo video, ChatFormat format)
+        private static List<Comment> ConvertComments(CommentVideo video, DateTime videoCreatedAt, ChatFormat format)
         {
             List<Comment> returnList = new List<Comment>(video.comments.edges.Count);
 
@@ -157,10 +157,16 @@ namespace TwitchDownloaderCore
                     continue;
 
                 var oldComment = comment.node;
+
+                // As of April 2025, Twitch returns comment.createdAt as local time but uses UTC formatting in the request
+                var newCreatedAt = oldComment.createdAt - videoCreatedAt < TimeSpan.FromMinutes(-5) // Sometimes Twitch takes a few minutes to register the creation of a video
+                    ? DateTime.SpecifyKind(oldComment.createdAt, DateTimeKind.Local).ToUniversalTime()
+                    : oldComment.createdAt;
+
                 var newComment = new Comment
                 {
                     _id = oldComment.id,
-                    created_at = oldComment.createdAt,
+                    created_at = newCreatedAt,
                     channel_id = video.creator?.id ?? "", // Deliberate empty string for ChatJson.UpgradeChatJson
                     content_type = "video",
                     content_id = video.id,
@@ -468,7 +474,7 @@ namespace TwitchDownloaderCore
                 var start = videoStart + chunkSize * i;
                 var end = Math.Min(videoEnd, start + chunkSize);
                 var downloadRange = new Range(start, end);
-                downloadTasks.Add(DownloadSection(downloadRange, video.id, taskProgress, _progress, downloadOptions.DownloadFormat, cancellationToken));
+                downloadTasks.Add(DownloadSection(downloadRange, video.id, video.created_at, taskProgress, _progress, downloadOptions.DownloadFormat, cancellationToken));
             }
 
             await Task.WhenAll(downloadTasks);
