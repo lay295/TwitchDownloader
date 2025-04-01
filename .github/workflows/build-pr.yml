@@ -60,7 +60,7 @@ jobs:
         path: TwitchDownloaderGUI-Windows-x64.zip
 
   build-cli:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: [build-gui]
     steps:
     - uses: actions/checkout@v4.1.7
