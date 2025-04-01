@@ -43,7 +43,7 @@ namespace TwitchDownloaderCore
             _cacheDir = CacheDirectoryService.GetCacheDirectory(downloadOptions.TempFolder);
         }
 
-        private async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, IProgress<int> downloadProgress, CancellationToken cancellationToken)
+        private async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, bool runToEnd, IProgress<int> downloadProgress, CancellationToken cancellationToken)
         {
             var comments = new List<Comment>();
             int videoStart = downloadRange.Start.Value;
@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore
             double errorCount = 0;
             double nullCount = 0;
 
-            while (latestMessage < videoEnd)
+            while (runToEnd || latestMessage < videoEnd)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -471,12 +471,11 @@ namespace TwitchDownloaderCore
 
                 var start = videoStart + chunkSize * i;
                 var end = Math.Min(videoEnd, start + chunkSize);
-
-                if (!downloadOptions.TrimEnding && i == connectionCount - 1)
-                    end = int.MaxValue;
-
                 var downloadRange = new Range(start, end);
-                downloadTasks.Add(DownloadSection(downloadRange, video.id, taskProgress, cancellationToken));
+
+                var runToEnd = !downloadOptions.TrimEnding && i == connectionCount - 1;
+
+                downloadTasks.Add(DownloadSection(downloadRange, video.id, runToEnd, taskProgress, cancellationToken));
             }
 
             await Task.WhenAll(downloadTasks);
