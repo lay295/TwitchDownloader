@@ -189,24 +189,63 @@ namespace TwitchDownloaderCore
 
             if (getBttv)
             {
-                emoteResponse.BTTV = await GetBttvEmotesMetadata(streamerId, cancellationToken);
+                try
+                {
+                    emoteResponse.BTTV = await GetBttvEmotesMetadata(streamerId, cancellationToken);
+                }
+                catch (HttpRequestException ex)
+                {
+                    LogProviderException(ex, "BetterTTV", logger);
+                }
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (getFfz)
             {
-                emoteResponse.FFZ = await GetFfzEmotesMetadata(streamerId, cancellationToken);
+                try
+                {
+                    emoteResponse.FFZ = await GetFfzEmotesMetadata(streamerId, cancellationToken);
+                }
+                catch (HttpRequestException ex)
+                {
+                    LogProviderException(ex, "FFZ", logger);
+                }
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (getStv)
             {
-                emoteResponse.STV = await GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, logger, cancellationToken);
+                try
+                {
+                    emoteResponse.STV = await GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, logger, cancellationToken);
+                }
+                catch (HttpRequestException ex)
+                {
+                    LogProviderException(ex, "7TV", logger);
+                }
             }
 
             return emoteResponse;
+
+            static void LogProviderException(HttpRequestException ex, string providerName, ITaskLogger logger)
+            {
+                string message;
+                if (ex.Message.Contains("HttpClient.Timeout"))
+                {
+                    message = $"{providerName} timed out.";
+                }
+                else
+                {
+                    message = ex.StatusCode.HasValue
+                        ? $"{providerName} returned {(int)ex.StatusCode}: {ex.StatusCode}."
+                        : ex.Message;
+                }
+
+                // Message ends with a '.'
+                logger.LogError($"{message} {providerName} emotes may not be present for this session.");
+            }
         }
 
         private static async Task<List<EmoteResponseItem>> GetBttvEmotesMetadata(int streamerId, CancellationToken cancellationToken)
