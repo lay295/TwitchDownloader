@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Interfaces;
@@ -25,6 +26,11 @@ namespace TwitchDownloaderCore.Tools
         public static async Task<long> DownloadFileAsync(HttpClient httpClient, Uri url, string destinationFile, [AllowNull] string headerFile, int throttleKib, ITaskLogger logger, CancellationTokenSource cancellationTokenSource = null)
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            // For some reason tryUnmute fails when we don't explicitly define Accept-Encoding
+            request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
+            request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("br"));
 
             var cancellationToken = cancellationTokenSource?.Token ?? CancellationToken.None;
 

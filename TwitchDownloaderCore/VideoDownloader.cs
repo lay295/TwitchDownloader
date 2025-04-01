@@ -218,7 +218,11 @@ namespace TwitchDownloaderCore
         private async Task DownloadVideoPartsAsync(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.GetOffsetAndLength(playlist.Count).Length;
-            var videoPartsQueue = new ConcurrentQueue<string>(playlist.Take(videoListCrop).Select(x => x.Path));
+            var orderedParts = playlist
+                .Take(videoListCrop)
+                .Select(x => x.Path)
+                .OrderBy(x => !x.Contains("-muted")); // Prioritize downloading muted segments
+            var videoPartsQueue = new ConcurrentQueue<string>(orderedParts);
 
             var downloadThreads = new VideoDownloadThread[downloadOptions.DownloadThreads];
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
@@ -492,7 +496,22 @@ namespace TwitchDownloaderCore
 
         private async Task<(M3U8 playlist, DateTimeOffset airDate)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
-            var playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
+            string playlistString;
+            try
+            {
+                playlistString = await _httpClient.GetStringAsync(playlistUrl, cancellationToken);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
+            {
+                // Hacky workaround for old highlights that were muted
+                var newUrl = Regex.Replace(playlistUrl, @"-muted-\w+(?=\.m3u8$)", "");
+                if (playlistUrl == newUrl)
+                    throw;
+
+                _progress.LogError($"Received {(int)ex.StatusCode}: {ex.StatusCode} when fetching playlist. Attempting workaround...");
+                playlistString = await _httpClient.GetStringAsync(newUrl, cancellationToken);
+            }
+
             var playlist = M3U8.Parse(playlistString);
 
             var airDate = DateTimeOffset.UtcNow.AddHours(-25);
