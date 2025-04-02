@@ -8,6 +8,8 @@ using System.Xml;
 using System.Linq;
 using System.IO.Compression;
 using TwitchDownloaderCLI.Modes.Arguments;
+using System.Reflection;
+using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -17,7 +19,9 @@ namespace TwitchDownloaderCLI.Modes
 
         public static void ParseArgs(UpdateArgs args)
         {
-#if !DEBUG
+#if DEBUG
+            Console.WriteLine("Auto-update is not supported for debug builds");
+#else
             CheckForUpdate(args.ForceUpdate).GetAwaiter().GetResult();
 #endif
         }
@@ -25,18 +29,7 @@ namespace TwitchDownloaderCLI.Modes
         private static async Task CheckForUpdate(bool forceUpdate)
         {
             // Get the old version
-            string headerString = HeadingInfo.Default.ToString();
-            Regex versionPattern = new Regex(@"([0-9]+\.[0-9]+\.[0-9]+)");
-            Match m = versionPattern.Match(headerString);
-            string oldVersionString = m.Success ? m.Groups[1].Value : string.Empty;
-
-            if (oldVersionString == string.Empty)
-            {
-                Console.Error.WriteLine("Internal error: could not parse old version string!");
-                return;
-            }
-
-            Version oldVersion = new Version(oldVersionString);
+            Version oldVersion = Assembly.GetExecutingAssembly().GetName().Version!.StripRevisionIfDefault();
 
             // Get the new version
             var updateInfoUrl = @"https://downloader-update.twitcharchives.workers.dev/";
@@ -55,78 +48,92 @@ namespace TwitchDownloaderCLI.Modes
 
             Version newVersion = new Version(newVersionString);
 
-            if (newVersion.CompareTo(oldVersion) > 0)
-            {
-                Console.WriteLine($"A new version of TwitchDownloader CLI is available ({newVersionString})!");
-
-                // We want the download for the CLI version, not the GUI version
-                string oldUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url").InnerText;
-                string newUrl = Regex.Replace(oldUrl, "GUI", "CLI");
-
-                if (forceUpdate)
-                {
-                    await AutoUpdate(newUrl);
-                }
-                else
-                {
-                    Console.WriteLine("Would you like to auto-update? (y/n):");
-                    var input = Console.ReadLine();
-
-                    if (input == "y")
-                    {
-                        await AutoUpdate(newUrl);
-                    }
-                }
-            }
-            else if (newVersion.CompareTo(oldVersion) == 0)
+            if (newVersion <= oldVersion)
             {
                 Console.WriteLine("You have the latest version of TwitchDownloader CLI!");
+                return;
+            }
+
+            Console.WriteLine($"A new version of TwitchDownloader CLI is available ({newVersionString})!");
+
+            // We want the download for the CLI version, not the GUI version
+            string oldUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url").InnerText;
+            string newUrl = Regex.Replace(oldUrl, "GUI", "CLI");
+
+            if (forceUpdate)
+            {
+                await AutoUpdate(newUrl);
+            }
+            else
+            {
+                Console.WriteLine("Would you like to auto-update?");
+
+                while (true)
+                {
+                    Console.WriteLine("[Y] Yes / [N] No: ");
+                    var userInput = Console.ReadLine()!.Trim().ToLower();
+
+                    switch (userInput)
+                    {
+                        case "y" or "yes":
+                            await AutoUpdate(newUrl);
+                            return;
+                        case "n" or "no":
+                            return;
+                    }
+                }
             }
         }
 
         private static async Task AutoUpdate(string url)
         {
+            var currentExePath = Environment.ProcessPath;
+            var oldExePath = currentExePath + ".bak";
+            var updateDir = Path.GetDirectoryName(currentExePath);
+            var archivePath = Path.Combine(updateDir, url.Split("/").Last());
+
+            if (string.IsNullOrEmpty(currentExePath))
+            {
+                Console.Error.WriteLine("Internal error: Current executable path is null or empty!");
+            }
+
+            if (string.IsNullOrEmpty(updateDir))
+            {
+                Console.Error.WriteLine("Internal error: Update directory is null or empty!");
+            }
+
             Console.WriteLine("Downloading update archive...");
             Stream s = await _client.GetStreamAsync(url);
-            var archiveName = url.Split("/").Last();
 
             // Create downloaded archive file from stream data
-            using (var fs = new FileStream(archiveName, FileMode.OpenOrCreate))
+            using (var fs = new FileStream(archivePath, FileMode.OpenOrCreate))
             {
                 s.CopyTo(fs);
             }
 
-            var exeName = Path.GetFileName(Environment.ProcessPath);
-            var oldExe = exeName + ".bak";
-
-            if (string.IsNullOrEmpty(exeName))
-            {
-                Console.Error.WriteLine("Internal error: Executable name is null!");
-            }
-
             // Check for a previous update
-            if (File.Exists(oldExe))
+            if (File.Exists(oldExePath))
             {
-                File.Delete(oldExe);
+                File.Delete(oldExePath);
             }
 
             // Rename current exe
-            File.Move(exeName, oldExe);
+            File.Move(currentExePath, oldExePath);
 
-            if (File.Exists("COPYRIGHT.txt"))
+            if (File.Exists(Path.Combine(updateDir, "COPYRIGHT.txt")))
             {
-                File.Delete("COPYRIGHT.txt");
+                File.Delete(Path.Combine(updateDir, "COPYRIGHT.txt"));
             }
 
-            if (File.Exists("THIRD-PARTY-LICENSES.txt"))
+            if (File.Exists(Path.Combine(updateDir, "THIRD-PARTY-LICENSES.txt")))
             {
-                File.Delete("THIRD-PARTY-LICENSES.txt");
+                File.Delete(Path.Combine(updateDir, "THIRD-PARTY-LICENSES.txt"));
             }
 
-            ZipFile.ExtractToDirectory(archiveName, ".");
+            ZipFile.ExtractToDirectory(archivePath, updateDir);
 
             // Clean up downloaded archive
-            File.Delete(archiveName);
+            File.Delete(archivePath);
 
             Console.WriteLine("TwitchDownloader CLI has been updated!");
         }
