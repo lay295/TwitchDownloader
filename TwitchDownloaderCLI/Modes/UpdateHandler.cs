@@ -10,6 +10,7 @@ using System.IO.Compression;
 using TwitchDownloaderCLI.Modes.Arguments;
 using System.Reflection;
 using TwitchDownloaderCore.Extensions;
+using System.Runtime.InteropServices;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -56,9 +57,22 @@ namespace TwitchDownloaderCLI.Modes
 
             Console.WriteLine($"A new version of TwitchDownloader CLI is available ({newVersionString})!");
 
-            // We want the download for the CLI version, not the GUI version
-            string oldUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url").InnerText;
-            string newUrl = Regex.Replace(oldUrl, "GUI", "CLI");
+            string origUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url").InnerText;
+            string urlBase = new Regex(@"(.*)\/").Match(origUrl).Groups[1].Value;
+
+            string origPackageName = origUrl.Split("/").Last();
+            string packageNameBase = new Regex(@"(.*)-(?:.*)-(?:.*)").Match(origPackageName).Groups[1].Value;
+
+            // Construct the appropriate package name
+            string packageName = ConstructPackageName(Regex.Replace(packageNameBase, "GUI", "CLI"));
+
+            if (packageName == string.Empty)
+            {
+                Console.Error.WriteLine("Error: Current OS and architecture not supported for auto-update");
+                return;
+            }
+
+            string newUrl = urlBase + "/" + packageName;
 
             if (forceUpdate)
             {
@@ -83,6 +97,45 @@ namespace TwitchDownloaderCLI.Modes
                     }
                 }
             }
+        }
+
+        private static string ConstructPackageName(string packageNameBase)
+        {
+            var arch = RuntimeInformation.OSArchitecture;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return packageNameBase + "-Windows-x64.zip";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                switch(arch)
+                {
+                    case Architecture.X64:
+                        return packageNameBase + "-MacOS-x64.zip";
+                    case Architecture.Arm64:
+                        return packageNameBase + "-MacOSArm64.zip";
+                    default:
+                        return string.Empty;
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                switch(arch)
+                {
+                    case Architecture.X64:
+                        return packageNameBase + "-Linux-x64.zip";
+                    case Architecture.Arm:
+                        return packageNameBase + "-LinuxArm.zip";
+                    case Architecture.Arm64:
+                        return packageNameBase + "-LinuxArm64.zip";
+                    default:
+                        return string.Empty;
+                }
+            }
+
+            return string.Empty;
+
         }
 
         private static async Task AutoUpdate(string url)
