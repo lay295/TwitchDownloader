@@ -6,8 +6,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
     [Verb("update", HelpText = "Manages updating the CLI")]
     internal sealed class UpdateArgs : ITwitchDownloaderArgs
     {
-        [Option('c', "check", Default = true, Required = false, HelpText = "Checks whether a new version of the CLI is available")]
-        public bool CheckForUpdate { get; set; }
+        [Option('f', "force", Default = false, Required = false, HelpText = "Skips the yes/no prompt for updating")]
+        public bool ForceUpdate { get; set; }
 
         // Interface args
         public bool? ShowBanner { get; set; }

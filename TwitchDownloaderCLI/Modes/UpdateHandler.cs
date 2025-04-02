@@ -17,15 +17,12 @@ namespace TwitchDownloaderCLI.Modes
 
         public static void ParseArgs(UpdateArgs args)
         {
-            if (args.CheckForUpdate)
-            {
 #if !DEBUG
-                CheckForUpdate().GetAwaiter().GetResult();
+            CheckForUpdate(args.ForceUpdate).GetAwaiter().GetResult();
 #endif
-            }
         }
 
-        private static async Task CheckForUpdate()
+        private static async Task CheckForUpdate(bool forceUpdate)
         {
             // Get the old version
             string headerString = HeadingInfo.Default.ToString();
@@ -61,16 +58,24 @@ namespace TwitchDownloaderCLI.Modes
             if (newVersion.CompareTo(oldVersion) > 0)
             {
                 Console.WriteLine($"A new version of TwitchDownloader CLI is available ({newVersionString})!");
-                Console.WriteLine("Would you like to auto-update? (y/n):");
-                var input = Console.ReadLine();
 
-                if (input == "y")
+                // We want the download for the CLI version, not the GUI version
+                string oldUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url").InnerText;
+                string newUrl = Regex.Replace(oldUrl, "GUI", "CLI");
+
+                if (forceUpdate)
                 {
-                    // We want the download for the CLI version, not the GUI version
-                    string oldUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url").InnerText;
-                    string newUrl = Regex.Replace(oldUrl, "GUI", "CLI");
-                    
                     await AutoUpdate(newUrl);
+                }
+                else
+                {
+                    Console.WriteLine("Would you like to auto-update? (y/n):");
+                    var input = Console.ReadLine();
+
+                    if (input == "y")
+                    {
+                        await AutoUpdate(newUrl);
+                    }
                 }
             }
             else if (newVersion.CompareTo(oldVersion) == 0)
