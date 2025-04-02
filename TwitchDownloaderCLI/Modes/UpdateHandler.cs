@@ -120,6 +120,9 @@ namespace TwitchDownloaderCLI.Modes
 
             ZipFile.ExtractToDirectory(archiveName, ".");
 
+            // Clean up downloaded archive
+            File.Delete(archiveName);
+
             Console.WriteLine("TwitchDownloader CLI has been updated!");
         }
     }
