@@ -109,29 +109,31 @@ namespace TwitchDownloaderCLI.Modes
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                switch(arch)
+                return arch switch
                 {
-                    case Architecture.X64:
-                        return packageNameBase + "-MacOS-x64.zip";
-                    case Architecture.Arm64:
-                        return packageNameBase + "-MacOSArm64.zip";
-                    default:
-                        return string.Empty;
-                }
+                    Architecture.X64 => packageNameBase + "-MacOS-x64.zip",
+                    Architecture.Arm64 => packageNameBase + "-MacOSArm64.zip",
+                    _ => string.Empty
+                };
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                switch(arch)
+                // TODO: Change to 'linux-musl-x64' when .NET 8+
+                if (RuntimeInformation.RuntimeIdentifier == "linux.kernel.version-musl-x64" ||
+                    RuntimeInformation.RuntimeIdentifier == "linux-musl.kernel.version-x64")
                 {
-                    case Architecture.X64:
-                        return packageNameBase + "-Linux-x64.zip";
-                    case Architecture.Arm:
-                        return packageNameBase + "-LinuxArm.zip";
-                    case Architecture.Arm64:
-                        return packageNameBase + "-LinuxArm64.zip";
-                    default:
-                        return string.Empty;
-                }
+                    return packageNameBase + "-LinuxAlpine-x64.zip";
+                } 
+                else
+                {
+                    return arch switch
+                    {
+                        Architecture.X64 => packageNameBase + "-Linux-x64.zip",
+                        Architecture.Arm => packageNameBase + "-LinuxArm.zip",
+                        Architecture.Arm64 => packageNameBase + "-LinuxArm64.zip",
+                        _ => string.Empty
+                    };
+                }    
             }
 
             return string.Empty;
