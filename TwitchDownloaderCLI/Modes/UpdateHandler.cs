@@ -60,11 +60,8 @@ namespace TwitchDownloaderCLI.Modes
             string origUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url-cli").InnerText;
             string urlBase = new Regex(@"(.*)\/").Match(origUrl).Groups[1].Value;
 
-            string origPackageName = origUrl.Split("/").Last();
-            string packageNameBase = new Regex(@"(.*)-\{0\}").Match(origPackageName).Groups[1].Value;
-
             // Construct the appropriate package name
-            string packageName = ConstructPackageName(packageNameBase);
+            string packageName = ConstructPackageName(origUrl.Split("/").Last());
 
             if (packageName == string.Empty)
             {
@@ -98,20 +95,21 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static string ConstructPackageName(string packageNameBase)
+        private static string ConstructPackageName(string origPackageName)
         {
             var arch = RuntimeInformation.OSArchitecture;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return packageNameBase + "-Windows-x64.zip";
+                return string.Format(origPackageName, "Windows-x64");
+                
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 return arch switch
                 {
-                    Architecture.X64 => packageNameBase + "-MacOS-x64.zip",
-                    Architecture.Arm64 => packageNameBase + "-MacOSArm64.zip",
+                    Architecture.X64 => string.Format(origPackageName, "MacOS-x64"),
+                    Architecture.Arm64 => string.Format(origPackageName, "MacOSArm64"),
                     _ => string.Empty
                 };
             }
@@ -120,15 +118,15 @@ namespace TwitchDownloaderCLI.Modes
                 // TODO: Change to 'linux-musl-x64' when .NET 8+
                 if (RuntimeInformation.RuntimeIdentifier.Contains("musl"))
                 {
-                    return packageNameBase + "-LinuxAlpine-x64.zip";
+                    return string.Format(origPackageName, "LinuxAlpine-x64");
                 } 
                 else
                 {
                     return arch switch
                     {
-                        Architecture.X64 => packageNameBase + "-Linux-x64.zip",
-                        Architecture.Arm => packageNameBase + "-LinuxArm.zip",
-                        Architecture.Arm64 => packageNameBase + "-LinuxArm64.zip",
+                        Architecture.X64 => string.Format(origPackageName, "Linux-x64"),
+                        Architecture.Arm => string.Format(origPackageName, "LinuxArm"),
+                        Architecture.Arm64 => string.Format(origPackageName, "LinuxArm64"),
                         _ => string.Empty
                     };
                 }    
