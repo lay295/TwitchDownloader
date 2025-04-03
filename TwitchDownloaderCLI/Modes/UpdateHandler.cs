@@ -119,8 +119,7 @@ namespace TwitchDownloaderCLI.Modes
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 // TODO: Change to 'linux-musl-x64' when .NET 8+
-                if (RuntimeInformation.RuntimeIdentifier == "linux.kernel.version-musl-x64" ||
-                    RuntimeInformation.RuntimeIdentifier == "linux-musl.kernel.version-x64")
+                if (RuntimeInformation.RuntimeIdentifier.Contains("musl"))
                 {
                     return packageNameBase + "-LinuxAlpine-x64.zip";
                 } 
