@@ -68,8 +68,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (packageName == string.Empty)
             {
-                Console.Error.WriteLine("Error: Current OS and architecture not supported for auto-update");
-                return;
+                throw new PlatformNotSupportedException("Current OS and architecture not supported for auto-update");
             }
 
             string newUrl = urlBase + "/" + packageName;
