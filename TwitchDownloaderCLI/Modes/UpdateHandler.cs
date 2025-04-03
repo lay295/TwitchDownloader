@@ -57,14 +57,14 @@ namespace TwitchDownloaderCLI.Modes
 
             Console.WriteLine($"A new version of TwitchDownloader CLI is available ({newVersionString})!");
 
-            string origUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url").InnerText;
+            string origUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url-cli").InnerText;
             string urlBase = new Regex(@"(.*)\/").Match(origUrl).Groups[1].Value;
 
             string origPackageName = origUrl.Split("/").Last();
-            string packageNameBase = new Regex(@"(.*)-(?:.*)-(?:.*)").Match(origPackageName).Groups[1].Value;
+            string packageNameBase = new Regex(@"(.*)-\{0\}").Match(origPackageName).Groups[1].Value;
 
             // Construct the appropriate package name
-            string packageName = ConstructPackageName(Regex.Replace(packageNameBase, "GUI", "CLI"));
+            string packageName = ConstructPackageName(packageNameBase);
 
             if (packageName == string.Empty)
             {
