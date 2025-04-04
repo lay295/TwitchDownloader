@@ -10,7 +10,7 @@ on:
 
 jobs:
   create-release:
-   runs-on: ubuntu-20.04
+   runs-on: ubuntu-24.04
    
    steps:
     - name: Create a Release
@@ -89,7 +89,7 @@ jobs:
         asset_content_type: application/zip
 
   build-cli:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: [create-release, build-gui]
     steps:
     - uses: actions/checkout@v4.1.7
