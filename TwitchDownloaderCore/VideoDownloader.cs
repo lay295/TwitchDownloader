@@ -107,7 +107,7 @@ namespace TwitchDownloaderCore
 
                 _progress.SetTemplateStatus("Downloading {0}% [2/4]", 0);
 
-                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, headerFile, airDate, cancellationToken);
+                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, headerFile, airDate, true, cancellationToken);
 
                 _progress.SetTemplateStatus("Verifying Parts {0}% [3/4]", 0);
 
@@ -121,7 +121,24 @@ namespace TwitchDownloaderCore
 
                 var concatListPath = Path.Combine(_vodCacheDir, "concat.txt");
                 var streamIds = GetStreamIds(playlist);
-                await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, streamIds, cancellationToken);
+
+                var validParts = playlist.Streams
+                    .Take(videoListCrop)
+                    .Where(x => File.Exists(Path.Combine(_vodCacheDir, DownloadTools.RemoveQueryString(x.Path))))
+                    .ToArray();
+
+                // This should never occur unless stub emission fails
+                if (validParts.Length < videoListCrop.GetOffsetAndLength(playlist.Streams.Length).Length)
+                {
+                    // This is probably super inefficient, but it's a very cold path anyway
+                    var missingParts = playlist.Streams
+                        .Take(videoListCrop)
+                        .Where(x => !validParts.Contains(x));
+
+                    _progress.LogWarning($"The following parts could not be downloaded and will be missing from the finalized video: {string.Join(", ", missingParts)}");
+                }
+
+                await FfmpegConcatList.SerializeAsync(concatListPath, validParts, streamIds, cancellationToken);
 
                 outputFs.Close();
 
@@ -215,7 +232,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartsAsync(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, [AllowNull] string headerFile, DateTimeOffset vodAirDate, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.GetOffsetAndLength(playlist.Count).Length;
             var orderedParts = playlist
@@ -230,17 +247,17 @@ namespace TwitchDownloaderCore
                 downloadThreads[i] = new VideoDownloadThread(videoPartsQueue, _httpClient, baseUrl, _vodCacheDir, headerFile, vodAirDate, downloadOptions.ThrottleKib, _progress, cancellationToken);
             }
 
-            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, videoPartsQueue, partCount, cancellationToken);
+            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, videoPartsQueue, partCount, limitThreadRestarts, cancellationToken);
 
             LogDownloadThreadExceptions(downloadExceptions);
         }
 
-        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, ConcurrentQueue<string> videoPartsQueue, int partCount, CancellationToken cancellationToken)
+        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, ConcurrentQueue<string> videoPartsQueue, int partCount, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
             var previousDoneCount = 0;
             var restartedThreads = 0;
-            var maxRestartedThreads = (int)Math.Max(downloadOptions.DownloadThreads * 1.5, 10);
+            var maxRestartedThreads = limitThreadRestarts ? (int)Math.Ceiling(partCount * 0.95) : int.MaxValue;
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
@@ -278,7 +295,7 @@ namespace TwitchDownloaderCore
 
             _progress.ReportProgress(100);
 
-            if (restartedThreads == maxRestartedThreads)
+            if (restartedThreads >= maxRestartedThreads)
             {
                 throw new AggregateException("The download thread restart limit was reached.", downloadExceptions.Values);
             }
@@ -358,7 +375,63 @@ namespace TwitchDownloaderCore
                 }
 
                 _progress.LogInfo($"The following parts were missing or empty and will be redownloaded: {string.Join(", ", missingParts.Select(x => x.Path))}");
-                await DownloadVideoPartsAsync(missingParts, Range.All, baseUrl, headerFile, vodAirDate, cancellationToken);
+                await DownloadVideoPartsAsync(missingParts, Range.All, baseUrl, headerFile, vodAirDate, false, cancellationToken);
+            }
+
+            await EmitPartStubs(playlist, videoListCrop, headerFile, cancellationToken);
+        }
+        
+        private async Task EmitPartStubs(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, string headerFile, CancellationToken cancellationToken)
+        {
+            byte[] transportStreamStub =
+            {
+                0x47, 0x40, 0x00, 0x1A, 0x00, 0x00, 0xB0, 0x0D, 0x00, 0x01, 0xC1, 0x00, 0x00, 0x00, 0x01, 0xF0, 0x00, 0x2A, 0xB1, 0x04, 0xB2, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0x47, 0x41, 0x00, 0x30, 0x72, 0x40, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x01, 0xC0, 0x00, 0x3F, 0x84, 0x80, 0x05, 0x21, 0x06, 0xC3, 0xCF, 0x45, 0xFF, 0xF1, 0x4C, 0x40, 0x01, 0x7F, 0xFC, 0x00, 0xD0, 0x00, 0x07,
+                0xFF, 0xF1, 0x4C, 0x40, 0x01, 0x7F, 0xFC, 0x00, 0xD0, 0x00, 0x07, 0xFF, 0xF1, 0x4C, 0x40, 0x01, 0x7F, 0xFC, 0x00, 0xD0, 0x00, 0x07, 0xFF, 0xF1, 0x4C, 0x40, 0x01, 0x7F, 0xFC, 0x00, 0xD0, 0x00, 0x07, 0xFF, 0xF1, 0x4C,
+                0x40, 0x01, 0x7F, 0xFC, 0x00, 0xD0, 0x00, 0x07
+            };
+
+            // Emit stubs for missing parts
+            foreach (var part in playlist.Take(videoListCrop))
+            {
+                var partName = DownloadTools.RemoveQueryString(part.Path);
+                var path = Path.Combine(_vodCacheDir, partName);
+
+                if (File.Exists(path) && new FileInfo(path).Length > 0)
+                    continue;
+
+                await using var headerFs = !string.IsNullOrWhiteSpace(headerFile)
+                    ? File.OpenRead(headerFile)
+                    : null;
+
+                try
+                {
+                    await using var fs = File.Create(path);
+
+                    if (headerFs is null)
+                    {
+                        // TS stream
+                        await fs.WriteAsync(transportStreamStub, cancellationToken);
+                    }
+                    else
+                    {
+                        // AV1 stream
+                        await headerFs.CopyToAsync(fs, cancellationToken);
+                        headerFs.Seek(0, SeekOrigin.Begin);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _progress.LogVerbose($"Failed to write stub for part {partName}: {ex.Message}");
+                }
             }
         }
 

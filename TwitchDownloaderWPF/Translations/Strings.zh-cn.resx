@@ -1027,16 +1027,16 @@
     <value>视频 / 剪辑 / 聊天的长度（包括修剪），格式为自定义格式。</value>
   </data>
   <data name="VideoTypeAllVideos" xml:space="preserve">
-    <value>All Videos</value>
+    <value>所有视频</value>
   </data>
   <data name="VideoTypePastBroadcasts" xml:space="preserve">
-    <value>Broadcasts</value>
+    <value>直播</value>
   </data>
   <data name="VideoTypeHighlights" xml:space="preserve">
-    <value>Highlights</value>
+    <value>精选内容</value>
   </data>
   <data name="VideoTypeUploads" xml:space="preserve">
-    <value>Uploads</value>
+    <value>上传视频</value>
   </data>
   <data name="DeferDownload" xml:space="preserve">
     <value>Defer Download Until Broadcast Finished</value>
