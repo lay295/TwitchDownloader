@@ -21,5 +21,6 @@ namespace TwitchDownloaderCore.Options
         public Func<DirectoryInfo[], DirectoryInfo[]> CacheCleanerCallback { get; set; }
         public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
         public VideoTrimMode TrimMode { get; set; }
+        public bool DeferDownload { get; set; }
     }
 }

@@ -48,6 +48,7 @@
                     <ComboBoxItem Content="Worst" />
                 </ComboBox>
             </StackPanel>
+            <CheckBox x:Name="checkDefer" Content="{lex:Loc DeferDownload}" HorizontalAlignment="Left" Margin="25,0,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             <CheckBox x:Name="checkChat" Content="{lex:Loc DownloadChat}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Checked="checkChat_Checked" Unchecked="checkChat_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             <StackPanel Margin="20,0,0,0">
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">

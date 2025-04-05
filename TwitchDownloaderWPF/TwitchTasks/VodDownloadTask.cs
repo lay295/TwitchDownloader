@@ -38,6 +38,20 @@ namespace TwitchDownloaderWPF.TwitchTasks
             }
 
             var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
+
+            if (DownloadOptions.DeferDownload)
+            {
+                ChangeStatus(TwitchTaskStatus.Waiting);
+
+                var videoResponse = await TwitchHelper.GetVideoInfo(DownloadOptions.Id);
+
+                while (videoResponse.data.video.status == "RECORDING")
+                {
+                    Thread.Sleep(30000);
+                    videoResponse = await TwitchHelper.GetVideoInfo(DownloadOptions.Id);
+                }
+            }
+            
             VideoDownloader downloader = new VideoDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try

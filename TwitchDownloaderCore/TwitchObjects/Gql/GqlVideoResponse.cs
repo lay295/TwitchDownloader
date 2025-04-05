@@ -24,6 +24,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         /// This can be filtered out with: <code>description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd()</code>
         /// </remarks>
         public string description { get; set; }
+        public string status { get; set; }
     }
 
     public class VideoData
