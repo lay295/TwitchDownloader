@@ -408,7 +408,7 @@ namespace TwitchDownloaderCore
                 if (File.Exists(path) && new FileInfo(path).Length > 0)
                     continue;
 
-                await using var headerFs = headerFile is not null
+                await using var headerFs = !string.IsNullOrWhiteSpace(headerFile)
                     ? File.OpenRead(headerFile)
                     : null;
 
