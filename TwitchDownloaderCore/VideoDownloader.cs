@@ -107,7 +107,7 @@ namespace TwitchDownloaderCore
 
                 _progress.SetTemplateStatus("Downloading {0}% [2/4]", 0);
 
-                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, headerFile, airDate, cancellationToken);
+                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, headerFile, airDate, true, cancellationToken);
 
                 _progress.SetTemplateStatus("Verifying Parts {0}% [3/4]", 0);
 
@@ -215,7 +215,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartsAsync(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, [AllowNull] string headerFile, DateTimeOffset vodAirDate, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var partCount = videoListCrop.GetOffsetAndLength(playlist.Count).Length;
             var orderedParts = playlist
@@ -230,17 +230,17 @@ namespace TwitchDownloaderCore
                 downloadThreads[i] = new VideoDownloadThread(videoPartsQueue, _httpClient, baseUrl, _vodCacheDir, headerFile, vodAirDate, downloadOptions.ThrottleKib, _progress, cancellationToken);
             }
 
-            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, videoPartsQueue, partCount, cancellationToken);
+            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, videoPartsQueue, partCount, limitThreadRestarts, cancellationToken);
 
             LogDownloadThreadExceptions(downloadExceptions);
         }
 
-        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, ConcurrentQueue<string> videoPartsQueue, int partCount, CancellationToken cancellationToken)
+        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, ConcurrentQueue<string> videoPartsQueue, int partCount, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
             var previousDoneCount = 0;
             var restartedThreads = 0;
-            var maxRestartedThreads = (int)Math.Ceiling(partCount * 0.95);
+            var maxRestartedThreads = limitThreadRestarts ? (int)Math.Ceiling(partCount * 0.95) : int.MaxValue;
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
@@ -358,7 +358,7 @@ namespace TwitchDownloaderCore
                 }
 
                 _progress.LogInfo($"The following parts were missing or empty and will be redownloaded: {string.Join(", ", missingParts.Select(x => x.Path))}");
-                await DownloadVideoPartsAsync(missingParts, Range.All, baseUrl, headerFile, vodAirDate, cancellationToken);
+                await DownloadVideoPartsAsync(missingParts, Range.All, baseUrl, headerFile, vodAirDate, false, cancellationToken);
             }
         }
 
