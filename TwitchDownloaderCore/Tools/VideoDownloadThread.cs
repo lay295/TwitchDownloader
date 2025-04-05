@@ -61,23 +61,9 @@ namespace TwitchDownloaderCore.Tools
             {
                 _cancellationToken.ThrowIfCancellationRequested();
 
-                string videoPart = null;
-                try
+                if (_videoPartsQueue.TryDequeue(out var videoPart))
                 {
-                    if (_videoPartsQueue.TryDequeue(out videoPart))
-                    {
-                        DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
-                    }
-                }
-                catch
-                {
-                    if (videoPart != null && !_cancellationToken.IsCancellationRequested)
-                    {
-                        // Requeue the video part now instead of deferring to the verifier since we already know it's bad
-                        _videoPartsQueue.Enqueue(videoPart);
-                    }
-
-                    throw;
+                    DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
                 }
 
                 Thread.Sleep(Random.Shared.Next(50, 150));
@@ -127,31 +113,35 @@ namespace TwitchDownloaderCore.Tools
                 }
                 catch (HttpRequestException ex) when (tryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
                 {
-                    _logger.LogVerbose($"Received HTTP {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
+                    _logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
                     tryUnmute = false;
 
                     await Delay(100, cancellationTokenSource.Token);
                 }
                 catch (HttpRequestException ex)
                 {
-                    const int MAX_RETRIES = 10;
+                    const int MAX_ERROR_COUNT = 3;
+                    errorCount++;
 
-                    _logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} for {videoPartName}. {MAX_RETRIES - (errorCount + 1)} retries left.");
-                    if (++errorCount > MAX_RETRIES)
+                    _logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} for {videoPartName}. {MAX_ERROR_COUNT - errorCount} retries left.");
+
+                    if (errorCount >= MAX_ERROR_COUNT)
                     {
-                        throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_RETRIES} retries");
+                        throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_ERROR_COUNT} retries");
                     }
 
                     await Delay(1_000 * errorCount, cancellationTokenSource.Token);
                 }
                 catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
                 {
-                    const int MAX_RETRIES = 3;
+                    const int MAX_TIMEOUT_COUNT = 2;
+                    timeoutCount++;
 
-                    _logger.LogVerbose($"{videoPartName} timed out. {MAX_RETRIES - (timeoutCount + 1)} retries left.");
-                    if (++timeoutCount > MAX_RETRIES)
+                    _logger.LogVerbose($"{videoPartName} timed out. {MAX_TIMEOUT_COUNT - timeoutCount} retries left.");
+
+                    if (timeoutCount >= MAX_TIMEOUT_COUNT)
                     {
-                        throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_RETRIES} times");
+                        throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_TIMEOUT_COUNT} times");
                     }
 
                     await Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
