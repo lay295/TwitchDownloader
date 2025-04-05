@@ -61,23 +61,9 @@ namespace TwitchDownloaderCore.Tools
             {
                 _cancellationToken.ThrowIfCancellationRequested();
 
-                string videoPart = null;
-                try
+                if (_videoPartsQueue.TryDequeue(out var videoPart))
                 {
-                    if (_videoPartsQueue.TryDequeue(out videoPart))
-                    {
-                        DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
-                    }
-                }
-                catch
-                {
-                    if (videoPart != null && !_cancellationToken.IsCancellationRequested)
-                    {
-                        // Requeue the video part now instead of deferring to the verifier since we already know it's bad
-                        _videoPartsQueue.Enqueue(videoPart);
-                    }
-
-                    throw;
+                    DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
                 }
 
                 Thread.Sleep(Random.Shared.Next(50, 150));
