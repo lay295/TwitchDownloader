@@ -510,7 +510,8 @@ namespace TwitchDownloaderCore
             );
 
             // If comments are within a few seconds, they're probably roughly in sync with the video
-            if (estimatedOffset.TotalSeconds < 5)
+            // If comments are out by more than a day, something probably went wrong in the calculation (video.created_at is local but comment.created_at is UTC?)
+            if (estimatedOffset.TotalSeconds < 5 || estimatedOffset.TotalDays > 1)
             {
                 return;
             }
