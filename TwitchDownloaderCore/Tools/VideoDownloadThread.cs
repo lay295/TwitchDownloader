@@ -134,7 +134,7 @@ namespace TwitchDownloaderCore.Tools
                 }
                 catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
                 {
-                    const int MAX_TIMEOUT_COUNT = 3;
+                    const int MAX_TIMEOUT_COUNT = 2;
                     timeoutCount++;
 
                     _logger.LogVerbose($"{videoPartName} timed out. {MAX_TIMEOUT_COUNT - timeoutCount} retries left.");
