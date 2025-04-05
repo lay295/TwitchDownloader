@@ -43,7 +43,7 @@ namespace TwitchDownloaderWPF
             else if (page is PageChatDownload chatPage)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
-                checkDefer.Visibility = Visibility.Collapsed;
+                checkDelay.Visibility = Visibility.Collapsed;
                 checkChat.IsChecked = true;
                 checkChat.IsEnabled = false;
                 TextDownloadFormat.Visibility = Visibility.Collapsed;
@@ -63,7 +63,7 @@ namespace TwitchDownloaderWPF
             else if (page is PageChatUpdate)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
-                checkDefer.Visibility = Visibility.Collapsed;
+                checkDelay.Visibility = Visibility.Collapsed;
                 checkChat.Visibility = Visibility.Collapsed;
                 TextDownloadFormat.Visibility = Visibility.Collapsed;
                 radioJson.Visibility = Visibility.Collapsed;
@@ -78,7 +78,7 @@ namespace TwitchDownloaderWPF
             else if (page is PageChatRender)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
-                checkDefer.Visibility = Visibility.Collapsed;
+                checkDelay.Visibility = Visibility.Collapsed;
                 checkChat.Visibility = Visibility.Collapsed;
                 TextDownloadFormat.Visibility = Visibility.Collapsed;
                 radioJson.Visibility = Visibility.Collapsed;
@@ -147,7 +147,7 @@ namespace TwitchDownloaderWPF
                         }
                     }
 
-                    VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text, checkDefer.IsChecked.GetValueOrDefault());
+                    VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text, checkDelay.IsChecked.GetValueOrDefault());
                     downloadOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
                     VodDownloadTask downloadTask = new VodDownloadTask

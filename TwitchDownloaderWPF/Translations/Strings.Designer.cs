@@ -592,11 +592,11 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Defer Download Until Broadcast Finished.
+        ///   Looks up a localized string similar to Delay Download Until Broadcast Finished.
         /// </summary>
-        public static string DeferDownload {
+        public static string DelayDownload {
             get {
-                return ResourceManager.GetString("DeferDownload", resourceCulture);
+                return ResourceManager.GetString("DelayDownload", resourceCulture);
             }
         }
         

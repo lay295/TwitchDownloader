@@ -39,7 +39,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
             var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
 
-            if (DownloadOptions.DeferDownload)
+            if (DownloadOptions.DelayDownload)
             {
                 ChangeStatus(TwitchTaskStatus.Waiting);
 

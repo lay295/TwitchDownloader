@@ -1038,7 +1038,7 @@
   <data name="VideoTypeUploads" xml:space="preserve">
     <value>Uploads</value>
   </data>
-  <data name="DeferDownload" xml:space="preserve">
-    <value>Defer Download Until Broadcast Finished</value>
+  <data name="DelayDownload" xml:space="preserve">
+    <value>Delay Download Until Broadcast Finished</value>
   </data>
 </root>
