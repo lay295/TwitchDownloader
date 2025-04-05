@@ -240,7 +240,7 @@ namespace TwitchDownloaderCore
             var allThreadsExited = false;
             var previousDoneCount = 0;
             var restartedThreads = 0;
-            var maxRestartedThreads = (int)Math.Max(downloadOptions.DownloadThreads * 1.5, 10);
+            var maxRestartedThreads = (int)Math.Ceiling(partCount * 0.95);
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
@@ -278,7 +278,7 @@ namespace TwitchDownloaderCore
 
             _progress.ReportProgress(100);
 
-            if (restartedThreads == maxRestartedThreads)
+            if (restartedThreads >= maxRestartedThreads)
             {
                 throw new AggregateException("The download thread restart limit was reached.", downloadExceptions.Values);
             }
