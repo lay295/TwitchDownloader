@@ -137,7 +137,7 @@ namespace TwitchDownloaderCore.Tools
                     const int MAX_TIMEOUT_COUNT = 3;
                     timeoutCount++;
 
-                    _logger.LogVerbose($"{videoPartName} timed out. {MAX_TIMEOUT_COUNT - (timeoutCount + 1)} retries left.");
+                    _logger.LogVerbose($"{videoPartName} timed out. {MAX_TIMEOUT_COUNT - timeoutCount} retries left.");
 
                     if (timeoutCount >= MAX_TIMEOUT_COUNT)
                     {
