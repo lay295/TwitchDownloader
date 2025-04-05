@@ -127,7 +127,7 @@ namespace TwitchDownloaderCore.Tools
                 }
                 catch (HttpRequestException ex) when (tryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
                 {
-                    _logger.LogVerbose($"Received HTTP {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
+                    _logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
                     tryUnmute = false;
 
                     await Delay(100, cancellationTokenSource.Token);
