@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,14 +12,14 @@ namespace TwitchDownloaderCore.Tools
     {
         private const string LINE_FEED = "\u000A";
 
-        public static async Task SerializeAsync(string filePath, M3U8 playlist, Range videoListCrop, StreamIds streamIds, CancellationToken cancellationToken = default)
+        public static async Task SerializeAsync(string filePath, IEnumerable<M3U8.Stream> playlist, StreamIds streamIds, CancellationToken cancellationToken = default)
         {
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
             await sw.WriteLineAsync("ffconcat version 1.0");
 
-            foreach (var stream in playlist.Streams.Take(videoListCrop))
+            foreach (var stream in playlist)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 

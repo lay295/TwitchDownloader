@@ -47,8 +47,8 @@ namespace TwitchDownloaderWPF.Services
                 Russian = new Culture("ru-RU", "Русский"),
                 Turkish = new Culture("tr-TR", "Türkçe"),
                 Ukrainian = new Culture("uk-ua", "Українська"),
-                SimplifiedChinese = new Culture("zh-CN", "简体中文（中国大陆）"),
-                TraditionalChinese = new Culture("zh-TW", "繁體中文（台灣）"),
+                SimplifiedChinese = new Culture("zh-CN", "简体中文"),
+                TraditionalChinese = new Culture("zh-TW", "繁體中文"),
             };
         }
         // ReSharper restore StringLiteralTypo

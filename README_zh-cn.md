@@ -27,7 +27,7 @@
 
 # GUI
 
-## Windows 呈现基础 (WPF)
+## Windows 呈现基础（WPF）
 
 ![WindowsWPF](https://i.imgur.com/bLegxGX.gif)
 
@@ -193,7 +193,7 @@ chmod +x ffmpeg
 
 ## 构建说明
 
-1. 克隆此仓库：
+1. 克隆本仓库：
 
 ```命令
 git clone https://github.com/lay295/TwitchDownloader.git
@@ -255,7 +255,7 @@ FFmpeg 二进制文件和运行时的下载使用 [Xabe.FFmpeg.Downloader](https
 
 聊天 Html 导出使用的 _Inter_ 字体由 [Google Fonts API](https://fonts.google.com/) 托管 © Google。
 
-有关使用的外部库的完整列表，请参阅 [THIRD-PARTY-LICENSES.txt（英文）](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt)。
+有关使用的外部库的完整列表，请参阅 [THIRD-PARTY-LICENSES.txt（英语）](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt)。
 
 # 开源许可协议
 
