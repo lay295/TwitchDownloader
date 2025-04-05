@@ -121,7 +121,24 @@ namespace TwitchDownloaderCore
 
                 var concatListPath = Path.Combine(_vodCacheDir, "concat.txt");
                 var streamIds = GetStreamIds(playlist);
-                await FfmpegConcatList.SerializeAsync(concatListPath, playlist, videoListCrop, streamIds, cancellationToken);
+
+                var validParts = playlist.Streams
+                    .Take(videoListCrop)
+                    .Where(x => File.Exists(Path.Combine(_vodCacheDir, DownloadTools.RemoveQueryString(x.Path))))
+                    .ToArray();
+
+                // This should never occur unless stub emission fails
+                if (validParts.Length < videoListCrop.GetOffsetAndLength(playlist.Streams.Length).Length)
+                {
+                    // This is probably super inefficient, but it's a very cold path anyway
+                    var missingParts = playlist.Streams
+                        .Take(videoListCrop)
+                        .Where(x => !validParts.Contains(x));
+
+                    _progress.LogWarning($"The following parts could not be downloaded and will be missing from the finalized video: {string.Join(", ", missingParts)}");
+                }
+
+                await FfmpegConcatList.SerializeAsync(concatListPath, validParts, streamIds, cancellationToken);
 
                 outputFs.Close();
 
