@@ -1,6 +1,6 @@
 using System;
 
-namespace TwitchDownloaderWPF.Extensions
+namespace TwitchDownloaderCore.Extensions
 {
     public static class VersionExtensions
     {
