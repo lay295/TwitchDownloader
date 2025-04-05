@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -489,8 +490,38 @@ namespace TwitchDownloaderCore
                 .ToHashSet(new CommentIdEqualityComparer())
                 .ToList();
 
+            AdjustCommentOffsets(video, commentList);
+
             commentList.Sort(new CommentOffsetComparer());
             return commentList;
+        }
+
+        // Some old VODs have comments offset by up to an hour. Try to fix them based on the creation times
+        private void AdjustCommentOffsets(Video video, List<Comment> commentList)
+        {
+            if (commentList.Count == 0)
+            {
+                return;
+            }
+
+            var estimatedOffset = TimeSpan.FromSeconds(commentList[0].content_offset_seconds) - (commentList[0].created_at - video.created_at);
+            estimatedOffset = TimeSpan.FromTicks(
+                (long)Math.Min(estimatedOffset.Ticks, commentList[0].content_offset_seconds * TimeSpan.TicksPerSecond)
+            );
+
+            // If comments are within a few seconds, they're probably roughly in sync with the video
+            if (estimatedOffset.TotalSeconds < 5)
+            {
+                return;
+            }
+
+            _progress.LogInfo($"Video comments are offset by ~{estimatedOffset.TotalSeconds:F0} seconds. Adjusting offsets...");
+
+            var commentSpan = CollectionsMarshal.AsSpan(commentList);
+            foreach (var comment in commentSpan)
+            {
+                comment.content_offset_seconds -= estimatedOffset.TotalSeconds;
+            }
         }
 
         private async Task EmbedImages(ChatRoot chatRoot, CancellationToken cancellationToken)
