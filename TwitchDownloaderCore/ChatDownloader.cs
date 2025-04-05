@@ -43,7 +43,7 @@ namespace TwitchDownloaderCore
             _cacheDir = CacheDirectoryService.GetCacheDirectory(downloadOptions.TempFolder);
         }
 
-        private static async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, DateTime videoCreatedAt, IProgress<int> progress, ITaskLogger logger, ChatFormat format, CancellationToken cancellationToken)
+        private async Task<List<Comment>> DownloadSection(Range downloadRange, string videoId, DateTime videoCreatedAt, bool runToEnd, IProgress<int> downloadProgress, CancellationToken cancellationToken)
         {
             var comments = new List<Comment>();
             int videoStart = downloadRange.Start.Value;
@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore
             double errorCount = 0;
             double nullCount = 0;
 
-            while (latestMessage < videoEnd)
+            while (runToEnd || latestMessage < videoEnd)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -93,7 +93,7 @@ namespace TwitchDownloaderCore
                         throw;
                     }
 
-                    logger.LogVerbose($"Exception '{ex.Message}' thrown at {latestMessage}s ({cursor}) in range {downloadRange}. Current error factor: {errorCount}.");
+                    _progress.LogVerbose($"Exception '{ex.Message}' thrown at {latestMessage}s ({cursor}) in range {downloadRange}. Current error factor: {errorCount}.");
                     await Task.Delay((int)(1_000 * errorCount), cancellationToken);
                     continue;
                 }
@@ -106,7 +106,7 @@ namespace TwitchDownloaderCore
                         throw new Exception("Received too many null comment lists. Try reducing your download threads.");
                     }
 
-                    logger.LogVerbose($"Received null comment list at {latestMessage}s ({cursor}) in range {downloadRange}. Current null factor: {nullCount}.");
+                    _progress.LogVerbose($"Received null comment list at {latestMessage}s ({cursor}) in range {downloadRange}. Current null factor: {nullCount}.");
                     await Task.Delay((int)(100 * nullCount), cancellationToken);
                     continue;
                 }
@@ -115,7 +115,7 @@ namespace TwitchDownloaderCore
                 nullCount = Math.Max(0, nullCount - BACK_OFF_FACTOR);
                 errorCount = Math.Max(0, errorCount - BACK_OFF_FACTOR);
 
-                var convertedComments = ConvertComments(commentResponse.data.video, videoCreatedAt, format);
+                var convertedComments = ConvertComments(commentResponse.data.video, videoCreatedAt);
                 foreach (var comment in convertedComments)
                 {
                     if (comment.content_offset_seconds >= videoStart && comment.content_offset_seconds < videoEnd)
@@ -135,7 +135,7 @@ namespace TwitchDownloaderCore
                 cursor = commentResponse.data.video.comments.edges.Last().cursor;
 
                 var percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
-                progress.Report(percent);
+                downloadProgress.Report(percent);
 
                 if (isFirst)
                 {
@@ -146,7 +146,7 @@ namespace TwitchDownloaderCore
             return comments;
         }
 
-        private static List<Comment> ConvertComments(CommentVideo video, DateTime videoCreatedAt, ChatFormat format)
+        private List<Comment> ConvertComments(CommentVideo video, DateTime videoCreatedAt)
         {
             List<Comment> returnList = new List<Comment>(video.comments.edges.Count);
 
@@ -182,7 +182,7 @@ namespace TwitchDownloaderCore
 
                 const int AVERAGE_WORD_LENGTH = 5; // The average english word is ~4.7 chars. Round up to partially account for spaces
                 var bodyStringBuilder = new StringBuilder(oldComment.message.fragments.Count * AVERAGE_WORD_LENGTH);
-                if (format == ChatFormat.Text)
+                if (downloadOptions.DownloadFormat == ChatFormat.Text)
                 {
                     // Optimize allocations for writing text chats
                     foreach (var fragment in oldComment.message.fragments)
@@ -474,7 +474,10 @@ namespace TwitchDownloaderCore
                 var start = videoStart + chunkSize * i;
                 var end = Math.Min(videoEnd, start + chunkSize);
                 var downloadRange = new Range(start, end);
-                downloadTasks.Add(DownloadSection(downloadRange, video.id, video.created_at, taskProgress, _progress, downloadOptions.DownloadFormat, cancellationToken));
+
+                var runToEnd = !downloadOptions.TrimEnding && i == connectionCount - 1;
+
+                downloadTasks.Add(DownloadSection(downloadRange, video.id, video.created_at, runToEnd, taskProgress, cancellationToken));
             }
 
             await Task.WhenAll(downloadTasks);
