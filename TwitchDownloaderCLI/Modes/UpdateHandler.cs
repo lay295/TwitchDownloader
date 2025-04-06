@@ -11,41 +11,45 @@ using TwitchDownloaderCLI.Modes.Arguments;
 using System.Reflection;
 using TwitchDownloaderCore.Extensions;
 using System.Runtime.InteropServices;
+using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCLI.Tools;
+using Spectre.Console;
+using System.Diagnostics;
 
 namespace TwitchDownloaderCLI.Modes
 {
     internal static class UpdateHandler
     {
-        private static HttpClient _client = new();
+        private static readonly HttpClient _client = new();
 
         public static void ParseArgs(UpdateArgs args)
         {
 #if DEBUG
             Console.WriteLine("Auto-update is not supported for debug builds");
 #else
-            CheckForUpdate(args.ForceUpdate).GetAwaiter().GetResult();
+            var progress = new CliTaskProgress(args.LogLevel);
+            CheckForUpdate(args.ForceUpdate, progress).GetAwaiter().GetResult();
 #endif
         }
 
-        private static async Task CheckForUpdate(bool forceUpdate)
+        private static async Task CheckForUpdate(bool forceUpdate, CliTaskProgress progress)
         {
             // Get the old version
             Version oldVersion = Assembly.GetExecutingAssembly().GetName().Version!.StripRevisionIfDefault();
 
             // Get the new version
             var updateInfoUrl = @"https://downloader-update.twitcharchives.workers.dev/";
-            using HttpResponseMessage response = await _client.GetAsync(updateInfoUrl);
-            string xmlString = await response.Content.ReadAsStringAsync();
+            var xmlString = await _client.GetStringAsync(updateInfoUrl);
 
             if (string.IsNullOrEmpty(xmlString))
             {
-                Console.Error.WriteLine("Internal error: could not parse remote update info XML!");
+                progress.LogError("Internal error: could not parse remote update info XML!");
             }
 
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xmlString);
 
-            string newVersionString = xmlDoc.DocumentElement.SelectSingleNode("/item/version").InnerText;
+            string newVersionString = xmlDoc.DocumentElement!.SelectSingleNode("/item/version").InnerText;
 
             Version newVersion = new Version(newVersionString);
 
@@ -72,7 +76,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (forceUpdate)
             {
-                await AutoUpdate(newUrl);
+                await AutoUpdate(newUrl, progress);
             }
             else
             {
@@ -86,7 +90,7 @@ namespace TwitchDownloaderCLI.Modes
                     switch (userInput)
                     {
                         case "y" or "yes":
-                            await AutoUpdate(newUrl);
+                            await AutoUpdate(newUrl, progress);
                             return;
                         case "n" or "no":
                             return;
@@ -133,33 +137,37 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             return string.Empty;
-
         }
 
-        private static async Task AutoUpdate(string url)
+        private static async Task AutoUpdate(string url, CliTaskProgress progress)
         {
             var currentExePath = Environment.ProcessPath;
             var oldExePath = currentExePath + ".bak";
-            var updateDir = Path.GetDirectoryName(currentExePath);
+            var updateDir = Path.GetDirectoryName(currentExePath)!;
             var archivePath = Path.Combine(updateDir, url.Split("/").Last());
 
             if (string.IsNullOrEmpty(currentExePath))
             {
-                Console.Error.WriteLine("Internal error: Current executable path is null or empty!");
+                progress.LogError("Internal error: Current executable path is null or empty!");
             }
 
             if (string.IsNullOrEmpty(updateDir))
             {
-                Console.Error.WriteLine("Internal error: Update directory is null or empty!");
+                progress.LogError("Internal error: Update directory is null or empty!");
             }
 
             Console.WriteLine("Downloading update archive...");
-            Stream s = await _client.GetStreamAsync(url);
+
+            using var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
+
+            var archiveLength = response.Content.Headers.ContentLength;
 
             // Create downloaded archive file from stream data
-            using (var fs = new FileStream(archivePath, FileMode.OpenOrCreate))
+            await using (var fs = new FileStream(archivePath, FileMode.OpenOrCreate))
             {
-                s.CopyTo(fs);
+                await contentStream.ProgressCopyToAsync(fs, archiveLength, new Progress<StreamCopyProgress>(DownloadProgressHandler)).ConfigureAwait(false);
             }
 
             // Check for a previous update
@@ -169,24 +177,25 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             // Rename current exe
-            File.Move(currentExePath, oldExePath);
+            File.Move(currentExePath!, oldExePath);
 
-            if (File.Exists(Path.Combine(updateDir, "COPYRIGHT.txt")))
+            await using (var archiveFs = File.Open(archivePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                File.Delete(Path.Combine(updateDir, "COPYRIGHT.txt"));
+                using var archive = new ZipArchive(archiveFs, ZipArchiveMode.Read);
+                foreach (var entry in archive.Entries)
+                {
+                    entry.ExtractToFile(Path.Combine(updateDir, entry.FullName), true);
+                }
             }
-
-            if (File.Exists(Path.Combine(updateDir, "THIRD-PARTY-LICENSES.txt")))
-            {
-                File.Delete(Path.Combine(updateDir, "THIRD-PARTY-LICENSES.txt"));
-            }
-
-            ZipFile.ExtractToDirectory(archivePath, updateDir);
-
-            // Clean up downloaded archive
-            File.Delete(archivePath);
 
             Console.WriteLine("TwitchDownloader CLI has been updated!");
+
+            void DownloadProgressHandler(StreamCopyProgress streamProgress)
+            {
+                var percent = (int)(streamProgress.BytesCopied / (double)streamProgress.SourceLength * 100);
+                progress.ReportProgress(percent);
+            }
         }
+
     }
 }
