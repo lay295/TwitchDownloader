@@ -44,6 +44,7 @@ namespace TwitchDownloaderCLI.Modes
             if (string.IsNullOrEmpty(xmlString))
             {
                 progress.LogError("Could not parse remote update info XML!");
+                return;
             }
 
             XmlDocument xmlDoc = new XmlDocument();
@@ -149,14 +150,16 @@ namespace TwitchDownloaderCLI.Modes
             if (string.IsNullOrEmpty(currentExePath))
             {
                 progress.LogError("Current executable path is null or empty!");
+                return;
             }
 
             if (string.IsNullOrEmpty(updateDir))
             {
                 progress.LogError("Update directory is null or empty!");
+                return;
             }
 
-            progress.LogInfo("Downloading update archive...");
+            progress.SetTemplateStatus("Downloading Update {0}%", 0);
 
             using var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
@@ -187,6 +190,9 @@ namespace TwitchDownloaderCLI.Modes
                     entry.ExtractToFile(Path.Combine(updateDir, entry.FullName), true);
                 }
             }
+
+            // Clean up downloaded archive
+            File.Delete(archivePath);
 
             progress.LogInfo("TwitchDownloader CLI has been updated!");
 
