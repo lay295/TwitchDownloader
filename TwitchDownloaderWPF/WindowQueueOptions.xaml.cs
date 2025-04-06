@@ -157,7 +157,8 @@ namespace TwitchDownloaderWPF
                         {
                             Title = vodDownloadPage.textTitle.Text,
                             Thumbnail = vodDownloadPage.imgThumbnail.Source
-                        }
+                        },
+                        VideoMonitor = new Utils.LiveVideoMonitor(downloadOptions.Id)
                     };
 
                     lock (PageQueue.taskLock)

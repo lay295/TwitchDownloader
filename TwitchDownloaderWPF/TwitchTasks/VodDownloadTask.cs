@@ -12,6 +12,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public VideoDownloadOptions DownloadOptions { get; init; }
         public override string TaskType { get; } = Translations.Strings.VodDownload;
         public override string OutputFile => DownloadOptions.Filename;
+        public LiveVideoMonitor VideoMonitor { get; init; }
 
         public override void Reinitialize()
         {
@@ -42,16 +43,14 @@ namespace TwitchDownloaderWPF.TwitchTasks
             if (DownloadOptions.DelayDownload)
             {
                 ChangeStatus(TwitchTaskStatus.Waiting);
-
-                var videoResponse = await TwitchHelper.GetVideoInfo(DownloadOptions.Id);
-
-                while (videoResponse.data.video.status == "RECORDING")
+                
+                while (VideoMonitor.IsVideoRecording())
                 {
-                    Thread.Sleep(30000);
-                    videoResponse = await TwitchHelper.GetVideoInfo(DownloadOptions.Id);
+                    var waitTime = Random.Shared.Next(8, 14);
+                    await Task.Delay(TimeSpan.FromSeconds(waitTime));
                 }
             }
-            
+
             VideoDownloader downloader = new VideoDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
