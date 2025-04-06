@@ -182,12 +182,22 @@ namespace TwitchDownloaderCLI.Modes
             // Rename current exe
             File.Move(currentExePath!, oldExePath);
 
+            progress.SetTemplateStatus("Extracting Files {0}%", 0);
+
             await using (var archiveFs = File.Open(archivePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 using var archive = new ZipArchive(archiveFs, ZipArchiveMode.Read);
+
+                var entryCount = archive.Entries.Count;
+                var extracted = 0;
+
                 foreach (var entry in archive.Entries)
                 {
                     entry.ExtractToFile(Path.Combine(updateDir, entry.FullName), true);
+                    extracted++;
+
+                    var percent = (int)(extracted / (double)entryCount * 100);
+                    progress.ReportProgress(percent);
                 }
             }
 
