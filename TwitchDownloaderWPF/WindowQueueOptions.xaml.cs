@@ -817,6 +817,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 ComboPreferredQuality.IsEnabled = checkVideo.IsChecked.GetValueOrDefault();
+                checkDelay.IsEnabled = checkVideo.IsChecked.GetValueOrDefault();
                 try
                 {
                     var newBrush = (Brush)Application.Current.Resources[checkVideo.IsChecked.GetValueOrDefault() ? "AppText" : "AppTextDisabled"];
