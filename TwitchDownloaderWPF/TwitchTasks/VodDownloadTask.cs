@@ -12,7 +12,6 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public VideoDownloadOptions DownloadOptions { get; init; }
         public override string TaskType { get; } = Translations.Strings.VodDownload;
         public override string OutputFile => DownloadOptions.Filename;
-        public LiveVideoMonitor VideoMonitor { get; init; }
 
         public override void Reinitialize()
         {
@@ -30,6 +29,19 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public override async Task RunAsync()
         {
+            if (DownloadOptions.DelayDownload)
+            {
+                ChangeStatus(TwitchTaskStatus.Waiting);
+
+                var videoMonitor = new LiveVideoMonitor(DownloadOptions.Id);
+
+                while (await videoMonitor.IsVideoRecording())
+                {
+                    var waitTime = Random.Shared.Next(8, 14);
+                    await Task.Delay(TimeSpan.FromSeconds(waitTime));
+                }
+            }
+
             if (TokenSource.IsCancellationRequested)
             {
                 TokenSource.Dispose();
@@ -39,20 +51,9 @@ namespace TwitchDownloaderWPF.TwitchTasks
             }
 
             var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
-
-            if (DownloadOptions.DelayDownload)
-            {
-                ChangeStatus(TwitchTaskStatus.Waiting);
-                
-                while (VideoMonitor.IsVideoRecording())
-                {
-                    var waitTime = Random.Shared.Next(8, 14);
-                    await Task.Delay(TimeSpan.FromSeconds(waitTime));
-                }
-            }
-
             VideoDownloader downloader = new VideoDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
+
             try
             {
                 await downloader.DownloadAsync(TokenSource.Token);

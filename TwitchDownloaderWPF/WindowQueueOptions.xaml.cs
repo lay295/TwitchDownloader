@@ -147,7 +147,8 @@ namespace TwitchDownloaderWPF
                         }
                     }
 
-                    VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text, checkDelay.IsChecked.GetValueOrDefault());
+                    VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text);
+                    downloadOptions.DelayDownload = checkDelay.IsChecked.GetValueOrDefault();
                     downloadOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
                     VodDownloadTask downloadTask = new VodDownloadTask
@@ -157,8 +158,7 @@ namespace TwitchDownloaderWPF
                         {
                             Title = vodDownloadPage.textTitle.Text,
                             Thumbnail = vodDownloadPage.imgThumbnail.Source
-                        },
-                        VideoMonitor = new Utils.LiveVideoMonitor(downloadOptions.Id)
+                        }
                     };
 
                     lock (PageQueue.taskLock)

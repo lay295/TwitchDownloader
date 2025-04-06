@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using TwitchDownloaderCore;
 
 namespace TwitchDownloaderWPF.Utils
@@ -9,7 +10,7 @@ namespace TwitchDownloaderWPF.Utils
         private bool _lastCheck;
         private const int SECONDS_LOWER_BOUND = 30;
         private const int SECONDS_UPPER_BOUND = 34;
-        private Random _random = new Random();
+        private Random _random = Random.Shared;
         private long _videoId;
 
         public LiveVideoMonitor(long videoId) 
@@ -21,11 +22,11 @@ namespace TwitchDownloaderWPF.Utils
         {
             return _random.NextDouble() * (SECONDS_UPPER_BOUND - SECONDS_LOWER_BOUND) + SECONDS_LOWER_BOUND;
         }
-        public bool IsVideoRecording()
+        public async Task<bool> IsVideoRecording()
         {
             if (DateTimeOffset.UtcNow > _nextTimeToCheck)
             {
-                var videoResponse = TwitchHelper.GetVideoInfo(_videoId).Result;
+                var videoResponse = await TwitchHelper.GetVideoInfo(_videoId);
                 _lastCheck = videoResponse.data.video.status == "RECORDING";
                 _nextTimeToCheck = DateTimeOffset.UtcNow.AddSeconds(generateNextRandomInterval());
             }

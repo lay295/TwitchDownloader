@@ -198,7 +198,7 @@ namespace TwitchDownloaderWPF
             BtnCancel.Visibility = Visibility.Collapsed;
         }
 
-        public VideoDownloadOptions GetOptions(string filename, string folder, bool delayDownload = false)
+        public VideoDownloadOptions GetOptions(string filename, string folder)
         {
             VideoDownloadOptions options = new VideoDownloadOptions
             {
@@ -218,8 +218,7 @@ namespace TwitchDownloaderWPF
                 TrimEnding = checkEnd.IsChecked.GetValueOrDefault(),
                 TrimEndingTime = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value),
                 FfmpegPath = "ffmpeg",
-                TempFolder = Settings.Default.TempPath,
-                DelayDownload = delayDownload
+                TempFolder = Settings.Default.TempPath
             };
 
             if (RadioTrimSafe.IsChecked == true)
