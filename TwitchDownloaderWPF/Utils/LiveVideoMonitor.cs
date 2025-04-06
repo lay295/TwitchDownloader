@@ -10,8 +10,7 @@ namespace TwitchDownloaderWPF.Utils
         private bool _lastCheck;
         private const int SECONDS_LOWER_BOUND = 30;
         private const int SECONDS_UPPER_BOUND = 34;
-        private Random _random = Random.Shared;
-        private long _videoId;
+        private readonly long _videoId;
 
         public LiveVideoMonitor(long videoId) 
         {
@@ -20,7 +19,7 @@ namespace TwitchDownloaderWPF.Utils
 
         private double generateNextRandomInterval()
         {
-            return _random.NextDouble() * (SECONDS_UPPER_BOUND - SECONDS_LOWER_BOUND) + SECONDS_LOWER_BOUND;
+            return Random.Shared.NextDouble() * (SECONDS_UPPER_BOUND - SECONDS_LOWER_BOUND) + SECONDS_LOWER_BOUND;
         }
         public async Task<bool> IsVideoRecording()
         {
