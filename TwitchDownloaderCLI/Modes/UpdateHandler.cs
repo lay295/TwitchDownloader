@@ -24,10 +24,10 @@ namespace TwitchDownloaderCLI.Modes
 
         public static void ParseArgs(UpdateArgs args)
         {
-#if DEBUG
-            Console.WriteLine("Auto-update is not supported for debug builds");
-#else
             var progress = new CliTaskProgress(args.LogLevel);
+#if DEBUG
+            progress.LogInfo("Auto-update is not supported for debug builds");
+#else
             CheckForUpdate(args.ForceUpdate, progress).GetAwaiter().GetResult();
 #endif
         }
@@ -43,7 +43,7 @@ namespace TwitchDownloaderCLI.Modes
 
             if (string.IsNullOrEmpty(xmlString))
             {
-                progress.LogError("Internal error: could not parse remote update info XML!");
+                progress.LogError("Could not parse remote update info XML!");
             }
 
             XmlDocument xmlDoc = new XmlDocument();
@@ -55,11 +55,11 @@ namespace TwitchDownloaderCLI.Modes
 
             if (newVersion <= oldVersion)
             {
-                Console.WriteLine("You have the latest version of TwitchDownloader CLI!");
+                progress.LogInfo("You have the latest version of TwitchDownloader CLI!");
                 return;
             }
 
-            Console.WriteLine($"A new version of TwitchDownloader CLI is available ({newVersionString})!");
+            progress.LogInfo($"A new version of TwitchDownloader CLI is available ({newVersionString})!");
 
             string origUrl = xmlDoc.DocumentElement.SelectSingleNode("/item/url-cli").InnerText;
             string urlBase = new Regex(@"(.*)\/").Match(origUrl).Groups[1].Value;
@@ -148,15 +148,15 @@ namespace TwitchDownloaderCLI.Modes
 
             if (string.IsNullOrEmpty(currentExePath))
             {
-                progress.LogError("Internal error: Current executable path is null or empty!");
+                progress.LogError("Current executable path is null or empty!");
             }
 
             if (string.IsNullOrEmpty(updateDir))
             {
-                progress.LogError("Internal error: Update directory is null or empty!");
+                progress.LogError("Update directory is null or empty!");
             }
 
-            Console.WriteLine("Downloading update archive...");
+            progress.LogInfo("Downloading update archive...");
 
             using var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
@@ -188,7 +188,7 @@ namespace TwitchDownloaderCLI.Modes
                 }
             }
 
-            Console.WriteLine("TwitchDownloader CLI has been updated!");
+            progress.LogInfo("TwitchDownloader CLI has been updated!");
 
             void DownloadProgressHandler(StreamCopyProgress streamProgress)
             {
