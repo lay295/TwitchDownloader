@@ -104,6 +104,10 @@ namespace TwitchDownloaderWPF
             {
                 ComboPreferredQuality.Items.Add(new ComboBoxItem { Content = "Audio Only" });
             }
+            else
+            {
+                checkDelay.Visibility = Visibility.Collapsed;
+            }
 
             var preferredQuality = Settings.Default.PreferredQuality;
             for (var i = 0; i < ComboPreferredQuality.Items.Count; i++)
@@ -586,6 +590,7 @@ namespace TwitchDownloaderWPF
                                 ? Settings.Default.MaximumBandwidthKib
                                 : -1,
                             FileCollisionCallback = HandleFileCollisionCallback,
+                            DelayDownload = checkDelay.IsChecked.GetValueOrDefault()
                         };
                         downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.StreamerName, taskData.StreamerId,
                             downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
