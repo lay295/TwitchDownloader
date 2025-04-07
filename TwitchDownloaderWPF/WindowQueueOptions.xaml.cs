@@ -43,6 +43,7 @@ namespace TwitchDownloaderWPF
             else if (page is PageChatDownload chatPage)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
+                checkDelay.Visibility = Visibility.Collapsed;
                 checkChat.IsChecked = true;
                 checkChat.IsEnabled = false;
                 TextDownloadFormat.Visibility = Visibility.Collapsed;
@@ -62,6 +63,7 @@ namespace TwitchDownloaderWPF
             else if (page is PageChatUpdate)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
+                checkDelay.Visibility = Visibility.Collapsed;
                 checkChat.Visibility = Visibility.Collapsed;
                 TextDownloadFormat.Visibility = Visibility.Collapsed;
                 radioJson.Visibility = Visibility.Collapsed;
@@ -76,6 +78,7 @@ namespace TwitchDownloaderWPF
             else if (page is PageChatRender)
             {
                 checkVideo.Visibility = Visibility.Collapsed;
+                checkDelay.Visibility = Visibility.Collapsed;
                 checkChat.Visibility = Visibility.Collapsed;
                 TextDownloadFormat.Visibility = Visibility.Collapsed;
                 radioJson.Visibility = Visibility.Collapsed;
@@ -100,6 +103,10 @@ namespace TwitchDownloaderWPF
             if (_dataList.Any(x => x.Id.All(char.IsDigit)))
             {
                 ComboPreferredQuality.Items.Add(new ComboBoxItem { Content = "Audio Only" });
+            }
+            else
+            {
+                checkDelay.Visibility = Visibility.Collapsed;
             }
 
             var preferredQuality = Settings.Default.PreferredQuality;
@@ -145,6 +152,7 @@ namespace TwitchDownloaderWPF
                     }
 
                     VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text);
+                    downloadOptions.DelayDownload = checkDelay.IsChecked.GetValueOrDefault();
                     downloadOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
                     VodDownloadTask downloadTask = new VodDownloadTask
@@ -582,6 +590,7 @@ namespace TwitchDownloaderWPF
                                 ? Settings.Default.MaximumBandwidthKib
                                 : -1,
                             FileCollisionCallback = HandleFileCollisionCallback,
+                            DelayDownload = checkDelay.IsChecked.GetValueOrDefault()
                         };
                         downloadOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateVod, taskData.Title, taskData.Id, taskData.Time, taskData.StreamerName, taskData.StreamerId,
                             downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero,
@@ -808,6 +817,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 ComboPreferredQuality.IsEnabled = checkVideo.IsChecked.GetValueOrDefault();
+                checkDelay.IsEnabled = checkVideo.IsChecked.GetValueOrDefault();
                 try
                 {
                     var newBrush = (Brush)Application.Current.Resources[checkVideo.IsChecked.GetValueOrDefault() ? "AppText" : "AppTextDisabled"];

@@ -1037,4 +1037,7 @@
   <data name="VideoTypeUploads" xml:space="preserve">
     <value>上傳</value>
   </data>
+  <data name="DelayDownload" xml:space="preserve">
+    <value>Delay Download Until Broadcast Finished</value>
+  </data>
 </root>
