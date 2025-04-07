@@ -3,10 +3,10 @@ using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
-    [Verb("update", HelpText = "Manages updating the CLI")]
+    [Verb("update", HelpText = "Manage updating the CLI")]
     internal sealed class UpdateArgs : ITwitchDownloaderArgs
     {
-        [Option('f', "force", Default = false, Required = false, HelpText = "Skips the yes/no prompt for updating")]
+        [Option('f', "force", Default = false, Required = false, HelpText = "Bypasses the confirmation prompt")]
         public bool ForceUpdate { get; set; }
 
         // Interface args
