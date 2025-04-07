@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
-using TwitchDownloaderWPF.Extensions;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using Xabe.FFmpeg;
