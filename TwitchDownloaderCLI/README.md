@@ -12,6 +12,7 @@ Also can concatenate/combine/merge Transport Stream files, either those parts do
   - [Arguments for mode info](#arguments-for-mode-info)
   - [Arguments for mode ffmpeg](#arguments-for-mode-ffmpeg)
   - [Arguments for mode cache](#arguments-for-mode-cache)
+  - [Arguments for mode update](#arguments-for-mode-update)
   - [Arguments for mode tsmerge](#arguments-for-mode-tsmerge)
   - [Example Commands](#example-commands)
   - [Additional Notes](#additional-notes)
@@ -370,6 +371,12 @@ OAuth access token to access subscriber only VODs. <ins>**DO NOT SHARE YOUR OAUT
 **--force-clear**
 (Default: `false`) Clears the default cache folder, bypassing the confirmation prompt.
 
+## Arguments for mode update
+#### Updates TwitchDownloaderCLI
+
+**-f / --force**
+(Default: `false`) Bypasses the confirmation prompt.
+
 ## Arguments for mode tsmerge
 #### Concatenates multiple .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) files into a single file
 
@@ -444,6 +451,10 @@ Download a portable FFmpeg binary for your system
 Clear the default TwitchDownloader cache folder
 
     ./TwitchDownloaderCLI cache --clear
+
+Check for newer versions of TwitchDownloaderCLI and immediately download it if it exists
+
+    ./TwitchDownloaderCLI update --force
 
 Concatenate several ts files into a single output file
 
