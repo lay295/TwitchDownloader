@@ -60,7 +60,7 @@ namespace TwitchDownloaderWPF
             NumMaximumBandwidth.IsEnabled = Settings.Default.DownloadThrottleEnabled;
             CheckThrottleEnabled.IsChecked = Settings.Default.DownloadThrottleEnabled;
             RadioTimeFormatUtc.IsChecked = Settings.Default.UTCVideoTime;
-            CheckStatus.IsChecked = Settings.Default.HideStatusAnimations;
+            CheckReduceMotion.IsChecked = Settings.Default.ReduceMotion;
 
             if (Directory.Exists("Themes"))
             {
@@ -379,12 +379,12 @@ namespace TwitchDownloaderWPF
             return null;
         }
 
-        private void CheckStatus_OnCheckedChanged(object sender, RoutedEventArgs e)
+        private void CheckReduceMotion_OnCheckedChanged(object sender, RoutedEventArgs e)
         {
             if (!IsInitialized)
                 return;
 
-            Settings.Default.HideStatusAnimations = CheckStatus.IsChecked.GetValueOrDefault();
+            Settings.Default.ReduceMotion = CheckReduceMotion.IsChecked.GetValueOrDefault();
         }
     }
 }

@@ -985,12 +985,12 @@ namespace TwitchDownloaderWPF.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool HideStatusAnimations {
+        public bool ReduceMotion {
             get {
-                return ((bool)(this["HideStatusAnimations"]));
+                return ((bool)(this["ReduceMotion"]));
             }
             set {
-                this["HideStatusAnimations"] = value;
+                this["ReduceMotion"] = value;
             }
         }
     }

@@ -44,8 +44,8 @@
                 <CheckBox x:Name="CheckDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckDonation_OnCheckedChanged" Unchecked="CheckDonation_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                <TextBlock Margin="3,4,3,3" Text="{lex:Loc HideStatusAnimations}" Foreground="{DynamicResource AppText}" />
-                <CheckBox x:Name="CheckStatus" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckStatus_OnCheckedChanged" Unchecked="CheckStatus_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
+                <TextBlock Margin="3,4,3,3" Text="{lex:Loc ReduceMotion}" Foreground="{DynamicResource AppText}" />
+                <CheckBox x:Name="CheckReduceMotion" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckReduceMotion_OnCheckedChanged" Unchecked="CheckReduceMotion_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,3,3,4" Text="{lex:Loc SettingsTimeFormat}" Foreground="{DynamicResource AppText}" />

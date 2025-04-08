@@ -91,7 +91,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
             CanCancel = newStatus is not TwitchTaskStatus.Canceled and not TwitchTaskStatus.Failed and not TwitchTaskStatus.Finished and not TwitchTaskStatus.Stopping;
 
-            if (Settings.Default.HideStatusAnimations)
+            if (Settings.Default.ReduceMotion)
             {
                 StatusImage = null;
             }
