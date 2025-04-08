@@ -137,8 +137,17 @@ namespace TwitchDownloaderWPF
                     {
                         VideoLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                         labelLength.Text = VideoLength.ToString("c");
-                        numStartHour.Maximum = (int)VideoLength.TotalHours;
-                        numEndHour.Maximum = (int)VideoLength.TotalHours;
+                        if (VideoLength > TimeSpan.Zero)
+                        {
+                            numStartHour.Maximum = (int)VideoLength.TotalHours;
+                            numEndHour.Maximum = (int)VideoLength.TotalHours;
+                        }
+                        else
+                        {
+                            numStartHour.Maximum = 48;
+                            numEndHour.Maximum = 48;
+                        }
+
                         ViewCount = videoInfo.data.video.viewCount;
                         Game = videoInfo.data.video.game?.displayName;
 
