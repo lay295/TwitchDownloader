@@ -1039,4 +1039,7 @@
   <data name="DelayDownload" xml:space="preserve">
     <value>Delay Download Until Broadcast Finished</value>
   </data>
+  <data name="ReduceMotion" xml:space="preserve">
+    <value>Reduce Motion:</value>
+  </data>
 </root>

@@ -1272,8 +1272,8 @@ namespace TwitchDownloaderWPF.Translations {
             get {
                 return ResourceManager.GetString("HideDonationButton", resourceCulture);
             }
-        }
-        
+        }        
+       
         /// <summary>
         ///   Looks up a localized string similar to Highlight Indent Scale:.
         /// </summary>
@@ -1667,6 +1667,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string Quality {
             get {
                 return ResourceManager.GetString("Quality", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reduce Motion:.
+        /// </summary>
+        public static string ReduceMotion {
+            get {
+                return ResourceManager.GetString("ReduceMotion", resourceCulture);
             }
         }
         
