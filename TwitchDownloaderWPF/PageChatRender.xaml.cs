@@ -510,11 +510,13 @@ namespace TwitchDownloaderWPF
             };
             settings.ShowDialog();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+            statusImage.Visibility = Settings.Default.HideStatusAnimations ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
+            statusImage.Visibility = Settings.Default.HideStatusAnimations ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void btnResetFfmpeg_Click(object sender, RoutedEventArgs e)

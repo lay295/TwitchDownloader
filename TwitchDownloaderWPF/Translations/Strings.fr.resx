@@ -1038,4 +1038,7 @@
   <data name="DelayDownload" xml:space="preserve">
     <value>Delay Download Until Broadcast Finished</value>
   </data>
+  <data name="HideStatusAnimations" xml:space="preserve">
+    <value>Hide Status Animations:</value>
+  </data>
 </root>

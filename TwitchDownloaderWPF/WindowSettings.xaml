@@ -13,7 +13,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:fa="http://schemas.fontawesome.com/icons/"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleGlobalSettings}" MinWidth="450" MinHeight="600" Width="500" Height="600" SizeToContent="Height" Initialized="Window_Initialized" Closing="Window_Closing" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
+        Title="{lex:Loc TitleGlobalSettings}" MinWidth="450" MinHeight="675" Width="500" Height="675" SizeToContent="Height" Initialized="Window_Initialized" Closing="Window_Closing" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
@@ -42,6 +42,10 @@
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,4,3,3" Text="{lex:Loc HideDonationButton}" Foreground="{DynamicResource AppText}" />
                 <CheckBox x:Name="CheckDonation" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckDonation_OnCheckedChanged" Unchecked="CheckDonation_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                <TextBlock Margin="3,4,3,3" Text="{lex:Loc HideStatusAnimations}" Foreground="{DynamicResource AppText}" />
+                <CheckBox x:Name="CheckStatus" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckStatus_OnCheckedChanged" Unchecked="CheckStatus_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,3,3,4" Text="{lex:Loc SettingsTimeFormat}" Foreground="{DynamicResource AppText}" />

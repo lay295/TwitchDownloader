@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderWPF.Properties;
 
 namespace TwitchDownloaderWPF.TwitchTasks
 {
@@ -90,13 +91,20 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
             CanCancel = newStatus is not TwitchTaskStatus.Canceled and not TwitchTaskStatus.Failed and not TwitchTaskStatus.Finished and not TwitchTaskStatus.Stopping;
 
-            StatusImage = newStatus switch
+            if (Settings.Default.HideStatusAnimations)
             {
-                TwitchTaskStatus.Running => "Images/ppOverheat.gif",
-                TwitchTaskStatus.Ready or TwitchTaskStatus.Waiting => "Images/ppHop.gif",
-                TwitchTaskStatus.Stopping => "Images/ppStretch.gif",
-                _ => null
-            };
+                StatusImage = null;
+            }
+            else
+            {
+                StatusImage = newStatus switch
+                {
+                    TwitchTaskStatus.Running => "Images/ppOverheat.gif",
+                    TwitchTaskStatus.Ready or TwitchTaskStatus.Waiting => "Images/ppHop.gif",
+                    TwitchTaskStatus.Stopping => "Images/ppStretch.gif",
+                    _ => null
+                };
+            }
         }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)

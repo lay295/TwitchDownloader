@@ -981,5 +981,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FileCollisionBehavior"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HideStatusAnimations {
+            get {
+                return ((bool)(this["HideStatusAnimations"]));
+            }
+            set {
+                this["HideStatusAnimations"] = value;
+            }
+        }
     }
 }

@@ -94,7 +94,10 @@ namespace TwitchDownloaderWPF
             if (!IsInitialized)
                 return;
 
-            StatusImage.Visibility = Visibility.Visible;
+            if (!Settings.Default.HideStatusAnimations)
+            {
+                StatusImage.Visibility = Visibility.Visible;
+            }
 
             if (string.IsNullOrWhiteSpace(currentChannel?.login))
             {

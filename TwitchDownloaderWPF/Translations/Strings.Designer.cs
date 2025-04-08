@@ -1275,6 +1275,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hide Status Animations:.
+        /// </summary>
+        public static string HideStatusAnimations {
+            get {
+                return ResourceManager.GetString("HideStatusAnimations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Highlight Indent Scale:.
         /// </summary>
         public static string HighlightIndentScale {
