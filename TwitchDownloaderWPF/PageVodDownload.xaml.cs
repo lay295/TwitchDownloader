@@ -311,7 +311,7 @@ namespace TwitchDownloaderWPF
             if (checkStart.IsChecked.GetValueOrDefault())
             {
                 var beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
-                if (beginTime.TotalSeconds >= vodLength.TotalSeconds)
+                if (vodLength > TimeSpan.Zero && beginTime.TotalSeconds >= vodLength.TotalSeconds)
                 {
                     return false;
                 }
