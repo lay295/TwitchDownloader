@@ -101,7 +101,7 @@ namespace TwitchDownloaderCore.Tools
                 await sw.WriteLineAsync("[CHAPTER]");
                 await sw.WriteLineAsync("TIMEBASE=1/1000");
                 await sw.WriteLineAsync($"START={startMillis}");
-                await sw.WriteLineAsync($"END={startMillis + Math.Max(lengthMillis, 0)}");
+                await sw.WriteLineAsync($"END={startMillis + lengthMillis}");
                 await sw.WriteLineAsync($"title={EscapeMetadataValue(gameName)}");
             }
         }
