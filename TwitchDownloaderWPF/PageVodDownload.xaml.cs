@@ -308,6 +308,11 @@ namespace TwitchDownloaderWPF
 
         public bool ValidateInputs()
         {
+            if (vodLength <= TimeSpan.Zero)
+            {
+                return true;
+            }
+
             if (checkStart.IsChecked.GetValueOrDefault())
             {
                 var beginTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
