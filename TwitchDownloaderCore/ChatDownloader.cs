@@ -119,7 +119,7 @@ namespace TwitchDownloaderCore
                 var convertedComments = ConvertComments(commentResponse.data.video, videoCreatedAt);
                 foreach (var comment in convertedComments)
                 {
-                    if (comment.content_offset_seconds >= videoStart && comment.content_offset_seconds < videoEnd)
+                    if (comment.content_offset_seconds >= videoStart && (runToEnd || comment.content_offset_seconds < videoEnd))
                     {
                         comments.Add(comment);
                     }
@@ -136,6 +136,9 @@ namespace TwitchDownloaderCore
                 cursor = commentResponse.data.video.comments.edges.Last().cursor;
 
                 var percent = (int)Math.Floor((latestMessage - videoStart) / videoDuration * 100);
+                if (runToEnd)
+                    percent = Math.Min(percent, 99);
+
                 downloadProgress.Report(percent);
 
                 if (isFirst)
@@ -389,7 +392,10 @@ namespace TwitchDownloaderCore
                 chatRoot.video.length = videoInfoResponse.data.video.lengthSeconds;
                 chatRoot.video.viewCount = videoInfoResponse.data.video.viewCount;
                 chatRoot.video.game = videoInfoResponse.data.video.game?.displayName ?? "Unknown";
-                connectionCount = downloadOptions.DownloadThreads;
+                var downloadLength = chatRoot.video.end - chatRoot.video.start;
+                connectionCount = downloadLength / downloadOptions.DownloadThreads < 1
+                    ? Math.Max((int)downloadLength, 1)
+                    : downloadOptions.DownloadThreads;
 
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(long.Parse(videoId), videoInfoResponse.data.video);
                 chatRoot.video.chapters.EnsureCapacity(videoChapterResponse.data.video.moments.edges.Count);
