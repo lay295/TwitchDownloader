@@ -119,7 +119,7 @@ namespace TwitchDownloaderCore
                 var convertedComments = ConvertComments(commentResponse.data.video, videoCreatedAt);
                 foreach (var comment in convertedComments)
                 {
-                    if (comment.content_offset_seconds >= videoStart && comment.content_offset_seconds < videoEnd)
+                    if (comment.content_offset_seconds >= videoStart && (runToEnd || comment.content_offset_seconds < videoEnd))
                     {
                         comments.Add(comment);
                     }
