@@ -1173,6 +1173,15 @@ namespace TwitchDownloaderCore
             var chapterResponse = await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
             chapterResponse.data.video.moments ??= new VideoMomentConnection { edges = new List<VideoMomentEdge>() };
 
+            // For some reason durations can be negative sometimes
+            foreach (var edge in chapterResponse.data.video.moments.edges)
+            {
+                if (edge.node.durationMilliseconds < 0)
+                {
+                    edge.node.durationMilliseconds = 0;
+                }
+            }
+
             // When downloading VODs of currently-airing streams, the last chapter lacks a duration
             if (chapterResponse.data.video.moments.edges.LastOrDefault() is { } lastEdge && lastEdge.node.durationMilliseconds is 0)
             {

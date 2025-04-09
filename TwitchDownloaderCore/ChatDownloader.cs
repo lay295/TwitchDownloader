@@ -299,6 +299,16 @@ namespace TwitchDownloaderCore
 
             chatRoot.comments = await DownloadComments(cancellationToken, chatRoot.video, connectionCount);
 
+            // Sometimes the API returns a video length of 0. Assume the last comment is when the video ends
+            if (chatRoot.video.length <= 0 && chatRoot.comments.LastOrDefault() is { } lastComment)
+            {
+                chatRoot.video.length = lastComment.content_offset_seconds;
+                if (chatRoot.video.end <= 0)
+                {
+                    chatRoot.video.end = lastComment.content_offset_seconds;
+                }
+            }
+
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
                 await EmbedImages(chatRoot, cancellationToken);
