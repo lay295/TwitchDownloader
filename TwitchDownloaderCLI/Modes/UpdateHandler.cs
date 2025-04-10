@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
+using Mono.Unix;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore.Extensions;
@@ -177,6 +178,14 @@ namespace TwitchDownloaderCLI.Modes
                 File.Delete(oldExePath);
             }
 
+            // Get old unix file permissions
+            var isUnx = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+            var previousPermissions = FileAccessPermissions.DefaultPermissions;
+            if (isUnx)
+            {
+                 previousPermissions = new UnixFileInfo(currentExePath).FileAccessPermissions;
+            }
+
             // Rename current exe
             File.Move(currentExePath!, oldExePath);
 
@@ -203,6 +212,25 @@ namespace TwitchDownloaderCLI.Modes
 
             // Clean up downloaded archive
             File.Delete(archivePath);
+
+            // Apply previous file permissions
+            if (isUnx)
+            {
+                try
+                {
+                    var ufi = new UnixFileInfo(currentExePath)
+                    {
+                        FileAccessPermissions = previousPermissions
+                    };
+                    ufi.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    var processFilename = Path.GetFileName(currentExePath);
+                    var chmodCommand = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "chmod +x" : "sudo chmod +x";
+                    progress.LogError($"Unable to restore previous file permissions: {ex.Message} Please run '{chmodCommand} {processFilename}' to allow {processFilename} to be executed.");
+                }
+            }
 
             void DownloadProgressHandler(StreamCopyProgress streamProgress)
             {
