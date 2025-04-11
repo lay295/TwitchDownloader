@@ -143,11 +143,11 @@ namespace TwitchDownloaderWPF
 
                     vodLength = TimeSpan.FromSeconds(videoInfo.data.video.lengthSeconds);
                     textTitle.Text = videoInfo.data.video.title;
-                    textStreamer.Text = videoInfo.data.video.owner.displayName;
+                    textStreamer.Text = videoInfo.data.video.owner?.displayName ?? Translations.Strings.UnknownUser;
                     var videoTime = videoInfo.data.video.createdAt;
                     textCreatedAt.Text = Settings.Default.UTCVideoTime ? videoTime.ToString(CultureInfo.CurrentCulture) : videoTime.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                     currentVideoTime = Settings.Default.UTCVideoTime ? videoTime : videoTime.ToLocalTime();
-                    streamerId = videoInfo.data.video.owner.id;
+                    streamerId = videoInfo.data.video.owner?.id;
                     clipper = null;
                     clipperId = null;
                     viewCount = videoInfo.data.video.viewCount;
