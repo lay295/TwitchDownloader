@@ -119,7 +119,7 @@ namespace TwitchDownloaderCLI.Modes
                 .Title(infoTableTitle)
                 .AddColumn(new TableColumn("Key"))
                 .AddColumn(new TableColumn("Value"))
-                .AddRow(new Markup("Streamer"), GetUserNameMarkup(infoVideo.owner.displayName, infoVideo.owner.login, DEFAULT_STRING))
+                .AddRow(new Markup("Streamer"), GetUserNameMarkup(infoVideo.owner?.displayName, infoVideo.owner?.login, DEFAULT_STRING))
                 .AddRow(new Markup("Title"), new Paragraph(infoVideo.title))
                 .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoVideo.lengthSeconds)))
                 .AddRow("Category", infoVideo.game?.displayName ?? DEFAULT_STRING)

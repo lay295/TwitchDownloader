@@ -19,7 +19,7 @@ namespace TwitchDownloaderCore.Tools
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
-            var streamer = GetUserName(videoInfo.owner.displayName, videoInfo.owner.login);
+            var streamer = GetUserName(videoInfo.owner?.displayName, videoInfo.owner?.login);
             var description = videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
             await SerializeGlobalMetadata(sw, streamer, videoId, videoInfo.title, videoInfo.createdAt, videoInfo.viewCount, description, videoInfo.game?.displayName);
 
@@ -31,7 +31,7 @@ namespace TwitchDownloaderCore.Tools
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
-            var streamer = GetUserName(clip.broadcaster.displayName, clip.broadcaster.login);
+            var streamer = GetUserName(clip.broadcaster?.displayName, clip.broadcaster?.login);
             var clipper = GetUserName(clip.curator?.displayName, clip.curator?.login);
             await SerializeGlobalMetadata(sw, streamer, videoId, clip.title, clip.createdAt, clip.viewCount, game: clip.game?.displayName, clipper: clipper);
 
