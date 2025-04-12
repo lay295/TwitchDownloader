@@ -38,6 +38,9 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
             <Image x:Name="StatusImage" gif:ImageBehavior.AnimatedSource="Images/ppOverheat.gif" MaxWidth="50" Margin="0, 6, 6, 0" Visibility="Hidden" />
+            <ComboBox x:Name="ComboFavorites" SelectedIndex="0" Margin="5,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" SelectionChanged="ComboFavorites_SelectionChanged">
+                <ComboBoxItem Content="{lex:Loc Favorites}"/>
+            </ComboBox>
             <TextBox x:Name="textChannel" Height="23" Text="" MinWidth="194" MaxWidth="300" Margin="0,6,0,0" KeyDown="TextChannel_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             <Button x:Name="btnChannel" Content="{lex:Loc SetChannel}" Margin="3,6,0,0" MinWidth="84" Height="30" Click="btnChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>

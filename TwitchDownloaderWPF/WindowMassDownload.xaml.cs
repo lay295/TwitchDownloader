@@ -74,6 +74,7 @@ namespace TwitchDownloaderWPF
                         var idRes = await TwitchHelper.GetUserIds(new[] { textTrimmed });
                         var infoRes = await TwitchHelper.GetUserInfo(idRes.data.users.Select(x => x.id));
                         currentChannel = infoRes.data.users[0];
+                        ComboFavorites.Items.Add(new ComboBoxItem() { Content = currentChannel.displayName });
                     }
                     catch (Exception ex)
                     {
@@ -417,6 +418,18 @@ namespace TwitchDownloaderWPF
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
 
             e.Handled = true;
+        }
+
+        private void ComboFavorites_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(!IsInitialized)
+                return;
+
+            if (ComboFavorites.SelectedIndex != 0)
+            {
+                textChannel.Text = (string)((ComboBoxItem)ComboFavorites.SelectedValue).Content;
+            }
+            ComboFavorites.SelectedIndex = 0;
         }
     }
 }

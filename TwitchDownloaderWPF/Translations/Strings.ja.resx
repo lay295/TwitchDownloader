@@ -1040,4 +1040,7 @@
   <data name="ReduceMotion" xml:space="preserve">
     <value>Reduce Motion:</value>
   </data>
+  <data name="Favorites" xml:space="preserve">
+    <value>Favorites</value>
+  </data>
 </root>
