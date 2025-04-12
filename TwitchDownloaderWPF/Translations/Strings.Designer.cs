@@ -843,15 +843,6 @@ namespace TwitchDownloaderWPF.Translations {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Favorites.
-        /// </summary>
-        public static string Favorites {
-            get {
-                return ResourceManager.GetString("Favorites", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Input Arguments:.
         /// </summary>
         public static string FfmpegInputArguments {
@@ -1676,6 +1667,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string Quality {
             get {
                 return ResourceManager.GetString("Quality", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Recent Channels.
+        /// </summary>
+        public static string RecentChannels {
+            get {
+                return ResourceManager.GetString("RecentChannels", resourceCulture);
             }
         }
 
