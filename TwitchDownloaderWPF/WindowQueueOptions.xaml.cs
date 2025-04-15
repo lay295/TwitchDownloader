@@ -35,10 +35,17 @@ namespace TwitchDownloaderWPF
             TextPreferredQuality.Visibility = Visibility.Collapsed;
             ComboPreferredQuality.Visibility = Visibility.Collapsed;
 
-            if (page is PageVodDownload or PageClipDownload)
+            if (page is PageVodDownload)
             {
                 checkVideo.IsChecked = true;
                 checkVideo.IsEnabled = false;
+            }
+            else if (page is PageClipDownload)
+            {
+                checkVideo.IsChecked = true;
+                checkVideo.IsEnabled = false;
+                checkDelay.Visibility = Visibility.Collapsed;
+                checkDelayChat.Visibility = Visibility.Collapsed;
             }
             else if (page is PageChatDownload chatPage)
             {
