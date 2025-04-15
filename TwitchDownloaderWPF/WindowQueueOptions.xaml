@@ -10,7 +10,7 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleEnqueueOptions}" MinHeight="292" Height="292" MinWidth="500" Width="500" SizeToContent="WidthAndHeight" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
+        Title="{lex:Loc TitleEnqueueOptions}" MinHeight="300" Height="300" MinWidth="500" Width="500" SizeToContent="WidthAndHeight" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
@@ -63,9 +63,10 @@
                     <RadioButton x:Name="RadioCompressionGzip" IsEnabled="False" Content="{lex:Loc ChatCompressionGzip}" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 </StackPanel>
                 <CheckBox x:Name="checkEmbed" IsEnabled="False" Content="{lex:Loc EmbedImages}" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}"/>
+                <CheckBox x:Name="checkDelayChat" Content="{lex:Loc DelayDownloadChat}" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" IsEnabled="False" />
             </StackPanel>
             <CheckBox x:Name="checkRender" IsEnabled="False" Content="{lex:Loc RenderChat}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-            <Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Left" Margin="182,-18,0,0" VerticalAlignment="Top" MinWidth="105" Height="45" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="btnQueue" Content="{lex:Loc AddToQueue}" HorizontalAlignment="Left" Margin="182,-10,0,0" VerticalAlignment="Top" MinWidth="105" Height="45" Click="btnQueue_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
     </Grid>
 </Window>

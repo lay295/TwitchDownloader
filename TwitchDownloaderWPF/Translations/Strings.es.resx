@@ -1042,4 +1042,7 @@
   <data name="ReduceMotion" xml:space="preserve">
     <value>Reduce Motion:</value>
   </data>
+  <data name="DelayDownloadChat" xml:space="preserve">
+    <value>Delay Download Until Broadcast Finished (Only For Videos)</value>
+  </data>
 </root>
