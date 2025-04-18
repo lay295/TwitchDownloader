@@ -42,8 +42,8 @@ namespace TwitchDownloaderWPF.Utils
                     const int MAX_ERRORS = 10;
                     _consecutiveErrors++;
 
-                    _logger?.LogVerbose($"Error while getting monitor info for {_videoId}: {ex.Message} {MAX_ERRORS - _consecutiveErrors} reties remain.");
-                    if (_consecutiveErrors > MAX_ERRORS)
+                    _logger?.LogVerbose($"Error while getting monitor info for {_videoId}: {ex.Message} {MAX_ERRORS - _consecutiveErrors} retries left.");
+                    if (_consecutiveErrors >= MAX_ERRORS)
                     {
                         _logger?.LogError($"Error while getting monitor info for {_videoId}: {ex.Message} Assuming video is not live.");
                         return false;
