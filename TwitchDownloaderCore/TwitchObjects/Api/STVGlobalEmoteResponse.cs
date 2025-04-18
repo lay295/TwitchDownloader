@@ -22,7 +22,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
         //These flags, not currently respected
         //https://github.com/SevenTV/Common/blob/4139fcc3eb8d79003573b26b552ef112ec85b8df/structures/v3/type.emoteset.go#L66-L72
         public int flags { get; set; }
-        public object timestamp { get; set; }
+        public ulong timestamp { get; set; }
         public string actor_id { get; set; }
         public STVData data { get; set; }
         public string origin_id { get; set; }
@@ -45,7 +45,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
         public List<STVFile> files { get; set; }
     }
 
-    public class Origin
+    public class StvOrigin
     {
         public string id { get; set; }
         public int weight { get; set; }
@@ -59,7 +59,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
         public string display_name { get; set; }
         public string avatar_url { get; set; }
         public STVStyle style { get; set; }
-        public List<string> roles { get; set; }
+        public List<string> role_ids { get; set; }
     }
 
     public class STVGlobalEmoteResponse
@@ -72,12 +72,14 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
         public List<STVEmote> emotes { get; set; }
         public int emote_count { get; set; }
         public int capacity { get; set; }
-        public List<Origin> origins { get; set; }
+        public List<StvOrigin> origins { get; set; }
         public STVOwner owner { get; set; }
     }
 
     public class STVStyle
     {
         public int? color { get; set; }
+        public string paint_id { get; set; }
+        public string badge_id { get; set; }
     }
 }
