@@ -409,8 +409,7 @@ namespace TwitchDownloaderCore
 
                     try
                     {
-                        TwitchEmote newEmote = new TwitchEmote(emoteData.data, EmoteProvider.ThirdParty, emoteData.imageScale, emoteData.id, emoteData.name);
-                        newEmote.IsZeroWidth = emoteData.isZeroWidth;
+                        var newEmote = new TwitchEmote(emoteData.data, EmoteProvider.ThirdParty, emoteData.imageScale, emoteData.id, emoteData.name, emoteData.isZeroWidth.GetValueOrDefault());
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emoteData.name);
                     }
@@ -498,8 +497,7 @@ namespace TwitchDownloaderCore
                     try
                     {
                         var imageData = await GetImage(cacheFolder, emoteUrl, emote.Id, 2, emote.ImageType, logger, cancellationToken);
-                        var newEmote = new TwitchEmote(imageData, EmoteProvider.ThirdParty, 2, emote.Id, emote.Code);
-                        newEmote.IsZeroWidth = emote.IsZeroWidth;
+                        var newEmote = new TwitchEmote(imageData, EmoteProvider.ThirdParty, 2, emote.Id, emote.Code, emote.IsZeroWidth);
 
                         returnList.Add(newEmote);
                         alreadyAdded.Add(emote.Code);
