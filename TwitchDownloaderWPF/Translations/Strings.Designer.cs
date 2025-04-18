@@ -598,15 +598,6 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("DelayDownload", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Delay Download Until Broadcast Finished (Only For Videos).
-        /// </summary>
-        public static string DelayDownloadChat {
-            get {
-                return ResourceManager.GetString("DelayDownloadChat", resourceCulture);
-            }
-        }
         
         /// <summary>
         ///   Looks up a localized string similar to Delete.
