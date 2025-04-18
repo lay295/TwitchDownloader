@@ -235,7 +235,8 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string url { get; set; }
         public int width { get; set; }
         public int height { get; set; }
-        public bool isZeroWidth { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? isZeroWidth { get; set; }
     }
 
     [DebuggerDisplay("{name}")]
