@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
@@ -31,11 +30,13 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public override async Task RunAsync()
         {
+            var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
+
             if (DownloadOptions.DelayDownload && long.TryParse(DownloadOptions.Id, out var videoId))
             {
                 ChangeStatus(TwitchTaskStatus.Waiting);
 
-                var videoMonitor = new LiveVideoMonitor(videoId);
+                var videoMonitor = new LiveVideoMonitor(videoId, progress);
                 while (await videoMonitor.IsVideoRecording())
                 {
                     var waitTime = Random.Shared.NextDouble(8, 14);
@@ -51,7 +52,6 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
             ChatDownloader downloader = new ChatDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
