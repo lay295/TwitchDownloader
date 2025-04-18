@@ -184,10 +184,10 @@
                 </Run>
                 <LineBreak/>
                 <Run Text="{lex:Loc DateCustomFormatting}" />
-                <Hyperlink NavigateUri="https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc DateCustomFormattingHyperlink}" /></Hyperlink>
+                <Hyperlink NavigateUri="https://learn.microsoft.com/dotnet/standard/base-types/custom-date-and-time-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc DateCustomFormattingHyperlink}" /></Hyperlink>
                 <LineBreak/>
                 <Run Text="{lex:Loc TimeSpanCustomFormatting}" />
-                <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-timespan-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc TimeSpanCustomFormattingHyperlink}" /></Hyperlink>
+                <Hyperlink NavigateUri="https://learn.microsoft.com/dotnet/standard/base-types/custom-timespan-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc TimeSpanCustomFormattingHyperlink}" /></Hyperlink>
             </TextBlock>
         </StackPanel>
         <Grid Grid.Row="2" Grid.Column="1" VerticalAlignment="Bottom" MinHeight="30">
