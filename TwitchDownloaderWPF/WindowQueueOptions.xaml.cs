@@ -66,6 +66,10 @@ namespace TwitchDownloaderWPF
                     checkRender.IsChecked = false;
                     checkRender.IsEnabled = false;
                 }
+                if (chatPage.downloadType == DownloadType.Clip)
+                {
+                    checkDelayChat.Visibility = Visibility.Collapsed;
+                }
             }
             else if (page is PageChatUpdate)
             {
