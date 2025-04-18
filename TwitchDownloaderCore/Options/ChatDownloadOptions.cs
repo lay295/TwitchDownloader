@@ -43,5 +43,6 @@ namespace TwitchDownloaderCore.Options
         }
         public string TempFolder { get; set; }
         public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
+        public bool DelayDownload { get; set; }
     }
 }
