@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderWPF.Utils
 {
@@ -9,11 +10,14 @@ namespace TwitchDownloaderWPF.Utils
     {
         private DateTimeOffset _nextTimeToCheck;
         private bool _lastCheck;
+        private int _consecutiveErrors;
         private readonly long _videoId;
+        private readonly ITaskLogger _logger;
 
-        public LiveVideoMonitor(long videoId) 
+        public LiveVideoMonitor(long videoId, ITaskLogger logger = null)
         {
             _videoId = videoId;
+            _logger = logger;
         }
 
         private static double GenerateNextRandomInterval()
@@ -27,8 +31,25 @@ namespace TwitchDownloaderWPF.Utils
         {
             if (DateTimeOffset.UtcNow > _nextTimeToCheck)
             {
-                var videoResponse = await TwitchHelper.GetVideoInfo(_videoId);
-                _lastCheck = videoResponse.data.video.status == "RECORDING";
+                try
+                {
+                    var videoResponse = await TwitchHelper.GetVideoInfo(_videoId);
+                    _lastCheck = videoResponse.data.video.status == "RECORDING";
+                    _consecutiveErrors = 0;
+                }
+                catch (Exception ex)
+                {
+                    const int MAX_ERRORS = 10;
+                    _consecutiveErrors++;
+
+                    _logger?.LogVerbose($"Error while getting monitor info for {_videoId}: {ex.Message} {MAX_ERRORS - _consecutiveErrors} reties remain.");
+                    if (_consecutiveErrors > MAX_ERRORS)
+                    {
+                        _logger?.LogError($"Error while getting monitor info for {_videoId}: {ex.Message} Assuming video is not live.");
+                        return false;
+                    }
+                }
+
                 _nextTimeToCheck = DateTimeOffset.UtcNow.AddSeconds(GenerateNextRandomInterval());
             }
 
