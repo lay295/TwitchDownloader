@@ -25,7 +25,11 @@ namespace TwitchDownloaderCore
 {
     public static class TwitchHelper
     {
-        private static readonly HttpClient httpClient = new HttpClient();
+        private static readonly HttpClient httpClient = new()
+        {
+            Timeout = TimeSpan.FromSeconds(20)
+        };
+
         private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
 
         public static async Task<GqlVideoResponse> GetVideoInfo(long videoId)
@@ -193,7 +197,7 @@ namespace TwitchDownloaderCore
                 {
                     emoteResponse.BTTV = await GetBttvEmotesMetadata(streamerId, cancellationToken);
                 }
-                catch (HttpRequestException ex)
+                catch (Exception ex)
                 {
                     LogProviderException(ex, "BetterTTV", logger);
                 }
@@ -207,7 +211,7 @@ namespace TwitchDownloaderCore
                 {
                     emoteResponse.FFZ = await GetFfzEmotesMetadata(streamerId, cancellationToken);
                 }
-                catch (HttpRequestException ex)
+                catch (Exception ex)
                 {
                     LogProviderException(ex, "FFZ", logger);
                 }
@@ -221,7 +225,7 @@ namespace TwitchDownloaderCore
                 {
                     emoteResponse.STV = await GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, logger, cancellationToken);
                 }
-                catch (HttpRequestException ex)
+                catch (Exception ex)
                 {
                     LogProviderException(ex, "7TV", logger);
                 }
@@ -229,21 +233,15 @@ namespace TwitchDownloaderCore
 
             return emoteResponse;
 
-            static void LogProviderException(HttpRequestException ex, string providerName, ITaskLogger logger)
+            static void LogProviderException(Exception ex, string providerName, ITaskLogger logger)
             {
-                string message;
-                if (ex.Message.Contains("HttpClient.Timeout"))
+                var message = ex switch
                 {
-                    message = $"{providerName} timed out.";
-                }
-                else
-                {
-                    message = ex.StatusCode.HasValue
-                        ? $"{providerName} returned {(int)ex.StatusCode}: {ex.StatusCode}."
-                        : ex.Message;
-                }
+                    HttpRequestException { StatusCode: not null } hre => $"{providerName} returned {(int)hre.StatusCode}: {hre.StatusCode}.",
+                    TaskCanceledException when ex.Message.Contains("HttpClient.Timeout") => $"{providerName} timed out.",
+                    _ => ex.Message
+                };
 
-                // Message ends with a '.'
                 logger.LogError($"{message} {providerName} emotes may not be present for this session.");
             }
         }
