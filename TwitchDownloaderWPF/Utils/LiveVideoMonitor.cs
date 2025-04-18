@@ -39,7 +39,7 @@ namespace TwitchDownloaderWPF.Utils
                 }
                 catch (Exception ex)
                 {
-                    const int MAX_ERRORS = 10;
+                    const int MAX_ERRORS = 6;
                     _consecutiveErrors++;
 
                     _logger?.LogVerbose($"Error while getting monitor info for {_videoId}: {ex.Message} {MAX_ERRORS - _consecutiveErrors} retries left.");
