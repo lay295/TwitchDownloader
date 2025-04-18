@@ -31,20 +31,15 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public override async Task RunAsync()
         {
-            if (DownloadOptions.DelayDownload)
+            if (DownloadOptions.DelayDownload && long.TryParse(DownloadOptions.Id, out var videoId))
             {
-                DownloadType downloadType = DownloadOptions.Id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
+                ChangeStatus(TwitchTaskStatus.Waiting);
 
-                if (downloadType == DownloadType.Video)
+                var videoMonitor = new LiveVideoMonitor(videoId);
+                while (await videoMonitor.IsVideoRecording())
                 {
-                    ChangeStatus(TwitchTaskStatus.Waiting);
-
-                    var videoMonitor = new LiveVideoMonitor((long)Convert.ToDouble(DownloadOptions.Id));
-                    while (await videoMonitor.IsVideoRecording())
-                    {
-                        var waitTime = Random.Shared.NextDouble(8, 14);
-                        await Task.Delay(TimeSpan.FromSeconds(waitTime));
-                    }
+                    var waitTime = Random.Shared.NextDouble(8, 14);
+                    await Task.Delay(TimeSpan.FromSeconds(waitTime));
                 }
             }
 
