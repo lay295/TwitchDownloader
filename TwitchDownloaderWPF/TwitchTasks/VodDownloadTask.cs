@@ -30,11 +30,13 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public override async Task RunAsync()
         {
+            var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
+
             if (DownloadOptions.DelayDownload)
             {
                 ChangeStatus(TwitchTaskStatus.Waiting);
 
-                var videoMonitor = new LiveVideoMonitor(DownloadOptions.Id);
+                var videoMonitor = new LiveVideoMonitor(DownloadOptions.Id, progress);
                 while (await videoMonitor.IsVideoRecording())
                 {
                     var waitTime = Random.Shared.NextDouble(8, 14);
@@ -50,7 +52,6 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
             VideoDownloader downloader = new VideoDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
 
