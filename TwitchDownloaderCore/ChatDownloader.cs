@@ -589,7 +589,6 @@ namespace TwitchDownloaderCore
                     data = emote.ImageData,
                     width = emote.Width / emote.ImageScale,
                     height = emote.Height / emote.ImageScale,
-                    isZeroWidth = emote.IsZeroWidth
                 };
 
                 chatRoot.embeddedData.firstParty.Add(newEmote);
