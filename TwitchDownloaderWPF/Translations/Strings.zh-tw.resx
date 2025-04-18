@@ -1038,9 +1038,9 @@
     <value>上傳</value>
   </data>
   <data name="DelayDownload" xml:space="preserve">
-    <value>Delay Download Until Broadcast Finished</value>
+    <value>下載推遲至直播結束：</value>
   </data>
   <data name="ReduceMotion" xml:space="preserve">
-    <value>Reduce Motion:</value>
+    <value>減少動畫效果：</value>
   </data>
 </root>

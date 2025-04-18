@@ -1038,9 +1038,9 @@
     <value>上传视频</value>
   </data>
   <data name="DelayDownload" xml:space="preserve">
-    <value>Delay Download Until Broadcast Finished</value>
+    <value>下载推迟至直播结束：</value>
   </data>
   <data name="ReduceMotion" xml:space="preserve">
-    <value>Reduce Motion:</value>
+    <value>减少动画效果：</value>
   </data>
 </root>
