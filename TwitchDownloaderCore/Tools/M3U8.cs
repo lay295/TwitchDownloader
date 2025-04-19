@@ -250,7 +250,7 @@ namespace TwitchDownloaderCore.Tools
                 {
                     ProgramId = programId;
                     Bandwidth = bandwidth;
-                    Codecs = codecs;
+                    Codecs = codecs ?? Array.Empty<string>();
                     Resolution = resolution;
                     Video = video;
                     Framerate = framerate;
@@ -258,7 +258,7 @@ namespace TwitchDownloaderCore.Tools
 
                 public int ProgramId { get; internal set; }
                 public int Bandwidth { get; internal set; }
-                public IReadOnlyList<string> Codecs { get; internal set; }
+                public IReadOnlyList<string> Codecs { get; internal set; } = Array.Empty<string>();
                 public StreamResolution Resolution { get; internal set; }
                 public string Video { get; internal set; }
                 public decimal Framerate { get; internal set; }
