@@ -841,7 +841,7 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("FatalError", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Input Arguments:.
         /// </summary>
@@ -1667,6 +1667,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string Quality {
             get {
                 return ResourceManager.GetString("Quality", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Recent Channels.
+        /// </summary>
+        public static string RecentChannels {
+            get {
+                return ResourceManager.GetString("RecentChannels", resourceCulture);
             }
         }
 

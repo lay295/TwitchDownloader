@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,6 +47,15 @@ namespace TwitchDownloaderWPF
             }
             btnNext.IsEnabled = false;
             btnPrev.IsEnabled = false;
+
+            if (Settings.Default.RecentChannels != null)
+            {
+                foreach (var recentChannel in Settings.Default.RecentChannels)
+                {
+                    ComboRecentChannels.Items.Add(new ComboBoxItem() { Content = recentChannel });
+                }
+            }
+
         }
 
         private async void btnChannel_Click(object sender, RoutedEventArgs e)
@@ -74,6 +84,7 @@ namespace TwitchDownloaderWPF
                         var idRes = await TwitchHelper.GetUserIds(new[] { textTrimmed });
                         var infoRes = await TwitchHelper.GetUserInfo(idRes.data.users.Select(x => x.id));
                         currentChannel = infoRes.data.users[0];
+                        UpdateRecentChannels();
                     }
                     catch (Exception ex)
                     {
@@ -417,6 +428,49 @@ namespace TwitchDownloaderWPF
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
 
             e.Handled = true;
+        }
+
+        private void ComboRecentChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(!IsInitialized)
+                return;
+
+            if (ComboRecentChannels.SelectedValue != null && ComboRecentChannels.SelectedIndex != 0)
+            {
+                textChannel.Text = (string)((ComboBoxItem)ComboRecentChannels.SelectedValue).Content;
+            }
+            ComboRecentChannels.SelectedIndex = 0;
+        }
+
+        private void UpdateRecentChannels()
+        {
+            if (Settings.Default.RecentChannels == null)
+            {
+                Settings.Default.RecentChannels = new StringCollection();
+            }
+
+            if (!Settings.Default.RecentChannels.Contains(currentChannel.displayName))
+            {
+                if (Settings.Default.RecentChannels.Count == 10)
+                {
+                    Settings.Default.RecentChannels.RemoveAt(0);
+                    Settings.Default.RecentChannels.Add(currentChannel.displayName);
+
+                    ComboRecentChannels.Items.Clear();
+                    ComboRecentChannels.Items.Add(new ComboBoxItem() { Content = Translations.Strings.RecentChannels });
+                    foreach (var recentChannel in Settings.Default.RecentChannels)
+                    {
+                        ComboRecentChannels.Items.Add(new ComboBoxItem() { Content = recentChannel });
+                    }
+                }
+                else
+                {
+                    Settings.Default.RecentChannels.Add(currentChannel.displayName);
+                    ComboRecentChannels.Items.Add(new ComboBoxItem() { Content = currentChannel.displayName });
+                }
+
+                Settings.Default.Save();
+            }
         }
     }
 }
