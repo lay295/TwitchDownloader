@@ -365,9 +365,9 @@ namespace TwitchDownloaderCLI.Modes
             return defaultString;
         }
 
-        private static string StringifyOrDefault<T>(this IEnumerable<T> values, Func<IEnumerable<T>, string> stringify, string defaultString)
+        private static string StringifyOrDefault<T>([AllowNull] this IEnumerable<T> values, Func<IEnumerable<T>, string> stringify, string defaultString)
         {
-            if (values.Any())
+            if (values is not null && values.Any())
             {
                 return stringify(values);
             }
