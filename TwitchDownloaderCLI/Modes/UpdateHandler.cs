@@ -179,9 +179,8 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             // Get old unix file permissions
-            var isUnx = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-            var previousPermissions = FileAccessPermissions.DefaultPermissions;
-            if (isUnx)
+            FileAccessPermissions? previousPermissions = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 try
                 {
@@ -221,13 +220,13 @@ namespace TwitchDownloaderCLI.Modes
             File.Delete(archivePath);
 
             // Apply previous file permissions
-            if (isUnx)
+            if (previousPermissions.HasValue)
             {
                 try
                 {
                     var ufi = new UnixFileInfo(currentExePath)
                     {
-                        FileAccessPermissions = previousPermissions
+                        FileAccessPermissions = previousPermissions.Value
                     };
                     ufi.Refresh();
                 }

@@ -9,11 +9,13 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Mono.Unix;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
@@ -993,10 +995,14 @@ namespace TwitchDownloaderCore
             return directoryInfo;
         }
 
-        public static void SetDirectoryPermissions(string path)
+        [SupportedOSPlatform("linux")]
+        [SupportedOSPlatform("osx")]
+        private static void SetDirectoryPermissions(string path)
         {
-            var folderInfo = new Mono.Unix.UnixFileInfo(path);
-            folderInfo.FileAccessPermissions = Mono.Unix.FileAccessPermissions.AllPermissions;
+            var folderInfo = new UnixFileInfo(path);
+            folderInfo.FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute |
+                                               FileAccessPermissions.GroupRead | FileAccessPermissions.GroupWrite |
+                                               FileAccessPermissions.OtherRead | FileAccessPermissions.OtherWrite;
             folderInfo.Refresh();
         }
 
