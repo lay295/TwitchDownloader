@@ -91,8 +91,7 @@ namespace TwitchDownloaderCore
 
                 if (Directory.Exists(_vodCacheDir))
                 {
-                    _progress.LogVerbose("Download cache already exists! Attempting to delete...");
-                    Directory.Delete(_vodCacheDir, true);
+                    _progress.LogWarning("Download cache already exists!");
                 }
 
                 TwitchHelper.CreateDirectory(_vodCacheDir);
@@ -380,7 +379,7 @@ namespace TwitchDownloaderCore
 
             await EmitPartStubs(playlist, videoListCrop, headerFile, cancellationToken);
         }
-        
+
         private async Task EmitPartStubs(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, string headerFile, CancellationToken cancellationToken)
         {
             byte[] transportStreamStub =

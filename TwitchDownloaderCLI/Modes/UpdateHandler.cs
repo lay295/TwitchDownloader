@@ -183,7 +183,14 @@ namespace TwitchDownloaderCLI.Modes
             var previousPermissions = FileAccessPermissions.DefaultPermissions;
             if (isUnx)
             {
-                 previousPermissions = new UnixFileInfo(currentExePath).FileAccessPermissions;
+                try
+                {
+                    previousPermissions = new UnixFileInfo(currentExePath).FileAccessPermissions;
+                }
+                catch (Exception ex)
+                {
+                    progress.LogError($"Failed to get current file permissions for {Path.GetFileName(currentExePath)}: {ex.Message}");
+                }
             }
 
             // Rename current exe
