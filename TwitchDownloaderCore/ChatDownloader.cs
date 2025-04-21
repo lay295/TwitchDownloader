@@ -300,7 +300,7 @@ namespace TwitchDownloaderCore
 
             var (chatRoot, connectionCount) = await InitChatRoot(downloadType);
 
-            chatRoot.comments = await DownloadComments(cancellationToken, chatRoot.video, connectionCount);
+            chatRoot.comments = await DownloadComments(downloadType, chatRoot.video, connectionCount, cancellationToken);
 
             // Sometimes the API returns a video length of 0. Assume the last comment is when the video ends
             if (chatRoot.video.length <= 0 && chatRoot.comments.LastOrDefault() is { } lastComment)
@@ -464,7 +464,7 @@ namespace TwitchDownloaderCore
             return (chatRoot, connectionCount);
         }
 
-        private async Task<List<Comment>> DownloadComments(CancellationToken cancellationToken, Video video, int connectionCount)
+        private async Task<List<Comment>> DownloadComments(DownloadType downloadType, Video video, int connectionCount, CancellationToken cancellationToken)
         {
             _progress.SetTemplateStatus("Downloading {0}%", 0);
 
@@ -492,7 +492,7 @@ namespace TwitchDownloaderCore
                 var end = Math.Min(videoEnd, start + chunkSize);
                 var downloadRange = new Range(start, end);
 
-                var runToEnd = !downloadOptions.TrimEnding && i == connectionCount - 1;
+                var runToEnd = downloadType is DownloadType.Video && !downloadOptions.TrimEnding && i == connectionCount - 1;
 
                 downloadTasks.Add(DownloadSection(downloadRange, video.id, video.created_at, runToEnd, taskProgress, cancellationToken));
             }
