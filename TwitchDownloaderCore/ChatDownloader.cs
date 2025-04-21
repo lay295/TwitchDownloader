@@ -506,7 +506,10 @@ namespace TwitchDownloaderCore
                 .ToHashSet(new CommentIdEqualityComparer())
                 .ToList();
 
-            AdjustCommentOffsets(video, commentList);
+            if (downloadType is DownloadType.Video)
+            {
+                AdjustCommentOffsets(video, commentList);
+            }
 
             commentList.Sort(new CommentOffsetComparer());
             return commentList;
