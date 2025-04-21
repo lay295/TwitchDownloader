@@ -50,8 +50,7 @@ namespace TwitchDownloaderCLI.Modes
             {
                 var ffmpegFileInfo = new UnixFileInfo("ffmpeg")
                 {
-                    FileAccessPermissions = FileAccessPermissions.UserRead | FileAccessPermissions.UserWrite | FileAccessPermissions.GroupRead | FileAccessPermissions.OtherRead |
-                                            FileAccessPermissions.UserExecute | FileAccessPermissions.GroupExecute | FileAccessPermissions.OtherExecute
+                    FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute | FileAccessPermissions.GroupReadWriteExecute | FileAccessPermissions.OtherReadWriteExecute,
                 };
                 ffmpegFileInfo.Refresh();
             }
