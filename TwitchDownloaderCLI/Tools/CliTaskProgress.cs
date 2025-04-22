@@ -263,7 +263,11 @@ namespace TwitchDownloaderCLI.Tools
 
         public void Dispose()
         {
-            CheckLastWriteHadNewLine();
+            lock (this)
+            {
+                CheckLastWriteHadNewLine();
+            }
+
             GC.SuppressFinalize(this);
         }
 
