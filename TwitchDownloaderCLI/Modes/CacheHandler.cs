@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using TwitchDownloaderCLI.Modes.Arguments;
+using TwitchDownloaderCLI.Tools;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Services;
 
 namespace TwitchDownloaderCLI.Modes
@@ -9,13 +11,15 @@ namespace TwitchDownloaderCLI.Modes
     {
         public static void ParseArgs(CacheArgs args)
         {
+            using var progress = new CliTaskProgress(args.LogLevel);
+
             if (args.ForceClearCache)
             {
-                ClearTempCache();
+                ClearTempCache(progress);
             }
             else if (args.ClearCache)
             {
-                PromptClearCache();
+                PromptClearCache(progress);
             }
 
             // TODO: Add option to print out cache information (i.e. individual sub-directory size, maybe in table form?)
@@ -23,7 +27,7 @@ namespace TwitchDownloaderCLI.Modes
             // TODO: Allow the user to specify a cache folder so it can be managed with the aforementioned tools
         }
 
-        private static void PromptClearCache()
+        private static void PromptClearCache(ITaskProgress progress)
         {
             Console.WriteLine("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly.");
             while (true)
@@ -33,7 +37,7 @@ namespace TwitchDownloaderCLI.Modes
                 switch (userInput)
                 {
                     case "y" or "yes":
-                        ClearTempCache();
+                        ClearTempCache(progress);
                         return;
                     case "n" or "no":
                         return;
@@ -41,23 +45,26 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static void ClearTempCache()
+        private static void ClearTempCache(ITaskProgress progress)
         {
-            var defaultCacheDirectory = CacheDirectoryService.GetCacheDirectory(Path.GetTempPath());
-            if (Directory.Exists(defaultCacheDirectory))
-            {
-                Console.WriteLine("Clearing cache...");
-                if (CacheDirectoryService.ClearCacheDirectory(Path.GetTempPath(), out var exception))
-                {
-                    Console.WriteLine("Cache cleared successfully.");
-                    return;
-                }
+            var baseDirectory = Path.GetTempPath();
+            var defaultCacheDirectory = CacheDirectoryService.GetCacheDirectory(baseDirectory);
 
-                Console.WriteLine($"Failed to clear cache: {exception.Message}");
+            if (!Directory.Exists(defaultCacheDirectory))
+            {
+                progress.LogInfo("No cache to clear.");
                 return;
             }
 
-            Console.WriteLine("No cache to clear.");
+            progress.LogInfo("Clearing cache...");
+
+            if (!CacheDirectoryService.ClearCacheDirectory(baseDirectory, out var exception))
+            {
+                progress.LogError($"Failed to clear cache: {exception.Message}");
+                return;
+            }
+
+            progress.LogInfo("Cache cleared successfully.");
         }
     }
 }
