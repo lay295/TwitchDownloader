@@ -23,7 +23,7 @@ namespace TwitchDownloaderCLI.Modes
 
         public static void ParseArgs(UpdateArgs args)
         {
-            var progress = new CliTaskProgress(args.LogLevel);
+            using var progress = new CliTaskProgress(args.LogLevel);
 #if DEBUG
             progress.LogInfo("Self-update is not supported for debug builds");
 #else

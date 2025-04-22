@@ -5,7 +5,7 @@ using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderCLI.Tools
 {
-    internal class CliTaskProgress : ITaskProgress
+    internal class CliTaskProgress : ITaskProgress, IDisposable
     {
         private const string STATUS_PREAMBLE = "[STATUS] - ";
         private const string VERBOSE_LOG_PREAMBLE = "[VERBOSE] - ";
@@ -251,7 +251,7 @@ namespace TwitchDownloaderCLI.Tools
             _lastWriteHadNewLine = true;
         }
 
-        ~CliTaskProgress()
+        private void CheckLastWriteHadNewLine()
         {
             if (!_lastWriteHadNewLine)
             {
@@ -259,6 +259,17 @@ namespace TwitchDownloaderCLI.Tools
                 Console.WriteLine();
                 _lastWriteHadNewLine = true;
             }
+        }
+
+        public void Dispose()
+        {
+            CheckLastWriteHadNewLine();
+            GC.SuppressFinalize(this);
+        }
+
+        ~CliTaskProgress()
+        {
+            CheckLastWriteHadNewLine();
         }
     }
 }

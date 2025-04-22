@@ -19,7 +19,7 @@ namespace TwitchDownloaderCLI.Modes
 
         public static void ParseArgs(FfmpegArgs args)
         {
-            var progress = new CliTaskProgress(args.LogLevel);
+            using var progress = new CliTaskProgress(args.LogLevel);
 
             if (args.DownloadFfmpeg)
             {
@@ -38,8 +38,6 @@ namespace TwitchDownloaderCLI.Modes
             using var progressHandler = new XabeProgressHandler(progress);
 
             FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, progressHandler).GetAwaiter().GetResult();
-
-            Console.WriteLine();
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

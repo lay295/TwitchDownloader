@@ -23,7 +23,7 @@ namespace TwitchDownloaderCLI.Modes
     {
         public static void PrintInfo(InfoArgs inputOptions)
         {
-            var progress = new CliTaskProgress(inputOptions.LogLevel);
+            using var progress = new CliTaskProgress(inputOptions.LogLevel);
             SetUtf8Encoding(inputOptions.UseUtf8.GetValueOrDefault(), progress);
 
             var vodClipIdMatch = IdParse.MatchVideoOrClipId(inputOptions.Id);

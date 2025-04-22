@@ -14,7 +14,7 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Update(ChatUpdateArgs inputOptions)
         {
-            var progress = new CliTaskProgress(inputOptions.LogLevel);
+            using var progress = new CliTaskProgress(inputOptions.LogLevel);
 
             var collisionHandler = new FileCollisionHandler(inputOptions, progress);
             var updateOptions = GetUpdateOptions(inputOptions, collisionHandler, progress);
