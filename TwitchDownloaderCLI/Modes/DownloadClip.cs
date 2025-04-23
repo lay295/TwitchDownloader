@@ -14,7 +14,7 @@ namespace TwitchDownloaderCLI.Modes
     {
         internal static void Download(ClipDownloadArgs inputOptions)
         {
-            var progress = new CliTaskProgress(inputOptions.LogLevel);
+            using var progress = new CliTaskProgress(inputOptions.LogLevel);
 
             if (inputOptions.EncodeMetadata == true)
             {
