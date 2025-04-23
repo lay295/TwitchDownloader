@@ -72,7 +72,7 @@ namespace TwitchDownloaderCLI.Modes
             var newUrl = $"{urlBase}/{packageName}";
             if (args.ForceUpdate)
             {
-                await AutoUpdate(newUrl, progress);
+                await AutoUpdate(newUrl, newVersion, progress);
             }
             else
             {
@@ -86,15 +86,13 @@ namespace TwitchDownloaderCLI.Modes
                     switch (userInput)
                     {
                         case "y" or "yes":
-                            await AutoUpdate(newUrl, progress);
+                            await AutoUpdate(newUrl, newVersion, progress);
                             return;
                         case "n" or "no":
                             return;
                     }
                 }
             }
-
-            progress.LogInfo($"TwitchDownloaderCLI has been updated to v{newVersion}!");
         }
 
         [return: MaybeNull]
@@ -137,7 +135,7 @@ namespace TwitchDownloaderCLI.Modes
             return null;
         }
 
-        private static async Task AutoUpdate(string url, ITaskProgress progress)
+        private static async Task AutoUpdate(string url, Version newVersion, ITaskProgress progress)
         {
             var currentExePath = Environment.ProcessPath;
             var oldExePath = currentExePath + ".bak";
@@ -237,6 +235,8 @@ namespace TwitchDownloaderCLI.Modes
                     progress.LogError($"Unable to restore previous file permissions: {ex.Message} Please run '{chmodCommand} {processFilename}' to allow {processFilename} to be executed.");
                 }
             }
+
+            progress.LogInfo($"{nameof(TwitchDownloaderCLI)} has been updated to v{newVersion}!");
 
             void DownloadProgressHandler(StreamCopyProgress streamProgress)
             {
