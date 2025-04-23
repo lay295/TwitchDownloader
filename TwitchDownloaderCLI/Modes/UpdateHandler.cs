@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using Mono.Unix;
+using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore.Extensions;
@@ -52,11 +53,11 @@ namespace TwitchDownloaderCLI.Modes
 
             if (newVersion <= oldVersion)
             {
-                progress.LogInfo("You have the latest version of TwitchDownloaderCLI");
+                progress.LogInfo($"You have the latest version of {nameof(TwitchDownloaderCLI)}");
                 return;
             }
 
-            progress.LogInfo($"A new version of TwitchDownloaderCLI is available (v{newVersionString})!");
+            progress.LogInfo($"{nameof(TwitchDownloaderCLI)} v{newVersion} is available!");
 
             var origUrl = xmlDoc.DocumentElement!.SelectSingleNode("/item/url-cli")!.InnerText;
             var urlBase = Regex.Match(origUrl, @"(.*)\/").Groups[1].Value;
@@ -70,31 +71,18 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             var newUrl = $"{urlBase}/{packageName}";
+
             if (args.ForceUpdate)
             {
-                await AutoUpdate(newUrl, progress);
+                await AutoUpdate(newUrl, newVersion, progress);
+                return;
             }
-            else
+
+            var promptResult = UserPrompt.ShowYesNo("Would you like to update?");
+            if (promptResult is UserPromptResult.Yes)
             {
-                Console.WriteLine("Would you like to update?");
-
-                while (true)
-                {
-                    Console.WriteLine("[Y] Yes / [N] No: ");
-                    var userInput = Console.ReadLine()!.Trim().ToLower();
-
-                    switch (userInput)
-                    {
-                        case "y" or "yes":
-                            await AutoUpdate(newUrl, progress);
-                            return;
-                        case "n" or "no":
-                            return;
-                    }
-                }
+                await AutoUpdate(newUrl, newVersion, progress);
             }
-
-            progress.LogInfo($"TwitchDownloaderCLI has been updated to v{newVersion}!");
         }
 
         [return: MaybeNull]
@@ -137,7 +125,7 @@ namespace TwitchDownloaderCLI.Modes
             return null;
         }
 
-        private static async Task AutoUpdate(string url, ITaskProgress progress)
+        private static async Task AutoUpdate(string url, Version newVersion, ITaskProgress progress)
         {
             var currentExePath = Environment.ProcessPath;
             var oldExePath = currentExePath + ".bak";
@@ -237,6 +225,8 @@ namespace TwitchDownloaderCLI.Modes
                     progress.LogError($"Unable to restore previous file permissions: {ex.Message} Please run '{chmodCommand} {processFilename}' to allow {processFilename} to be executed.");
                 }
             }
+
+            progress.LogInfo($"{nameof(TwitchDownloaderCLI)} has been updated to v{newVersion}!");
 
             void DownloadProgressHandler(StreamCopyProgress streamProgress)
             {
