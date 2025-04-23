@@ -31,4 +31,11 @@ namespace TwitchDownloaderCLI.Models
         M3U = M3U8,
         Json
     }
+
+    public enum UserPromptResult
+    {
+        Yes,
+        No,
+        Cancel,
+    }
 }

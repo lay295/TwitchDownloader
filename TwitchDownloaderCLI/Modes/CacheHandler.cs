@@ -1,5 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
+using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore.Interfaces;
@@ -29,19 +29,10 @@ namespace TwitchDownloaderCLI.Modes
 
         private static void PromptClearCache(ITaskProgress progress)
         {
-            Console.WriteLine("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly.");
-            while (true)
+            var promptResult = UserPrompt.ShowYesNo("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly.");
+            if (promptResult is UserPromptResult.Yes)
             {
-                Console.Write("[Y] Yes / [N] No: ");
-                var userInput = Console.ReadLine()!.Trim().ToLower();
-                switch (userInput)
-                {
-                    case "y" or "yes":
-                        ClearTempCache(progress);
-                        return;
-                    case "n" or "no":
-                        return;
-                }
+                ClearTempCache(progress);
             }
         }
 
