@@ -372,10 +372,13 @@ OAuth access token to access subscriber only VODs. <ins>**DO NOT SHARE YOUR OAUT
 (Default: `false`) Clears the default cache folder, bypassing the confirmation prompt.
 
 ## Arguments for mode update
-#### Updates TwitchDownloaderCLI
+#### Manages updating TwitchDownloaderCLI
 
 **-f / --force**
 (Default: `false`) Bypasses the confirmation prompt.
+
+**-k / --keep-update**
+(Default: `false`) Retain the downloaded update zip file instead of deleting it after the update is finished.
 
 ## Arguments for mode tsmerge
 #### Concatenates multiple .ts/.tsv/.tsa/.m2t/.m2ts (MPEG Transport Stream) files into a single file
