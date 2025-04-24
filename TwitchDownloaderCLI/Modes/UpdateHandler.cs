@@ -91,7 +91,11 @@ namespace TwitchDownloaderCLI.Modes
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return string.Format(origPackageName, "Windows-x64");
+                return arch switch
+                {
+                    Architecture.X64 => string.Format(origPackageName, "Windows-x64"),
+                    _ => null
+                };
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -106,10 +110,13 @@ namespace TwitchDownloaderCLI.Modes
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                // TODO: Change to 'linux-musl-x64' when .NET 8+
                 if (RuntimeInformation.RuntimeIdentifier.Contains("musl"))
                 {
-                    return string.Format(origPackageName, "LinuxAlpine-x64");
+                    return arch switch
+                    {
+                        Architecture.X64 => string.Format(origPackageName, "LinuxAlpine-x64"),
+                        _ => null
+                    };
                 }
 
                 return arch switch
