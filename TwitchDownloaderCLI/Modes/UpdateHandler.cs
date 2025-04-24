@@ -38,7 +38,7 @@ namespace TwitchDownloaderCLI.Modes
             var oldVersion = Assembly.GetExecutingAssembly().GetName().Version!.StripRevisionIfDefault();
 
             // Get the new version
-            var xmlString = await HttpClient.GetStringAsync("https://downloader-update.twitcharchives.workers.dev/");
+            var xmlString = await HttpClient.GetStringAsync("https://downloader-update.twitcharchives.workers.dev/").ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(xmlString))
             {
                 progress.LogError("Could not parse remote update info XML");
@@ -66,10 +66,12 @@ namespace TwitchDownloaderCLI.Modes
             var packageName = ConstructPackageName(origUrl.Split('/').Last());
             if (string.IsNullOrWhiteSpace(packageName))
             {
-                throw new PlatformNotSupportedException("Self-update is not supported for the current OS/architecture");
+                progress.LogVerbose($"Could not construct package name for arch: {RuntimeInformation.OSArchitecture}, RID: {RuntimeInformation.RuntimeIdentifier}");
+                throw new PlatformNotSupportedException("Self-update is not supported for the current OS/architecture.");
             }
 
             var newUrl = $"{urlBase}/{packageName}";
+            progress.LogVerbose($"Constructed download URL: {newUrl}");
 
             if (args.ForceUpdate)
             {
