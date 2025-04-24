@@ -74,14 +74,14 @@ namespace TwitchDownloaderCLI.Modes
 
             if (args.ForceUpdate)
             {
-                await AutoUpdate(newUrl, newVersion, progress);
+                await AutoUpdate(newUrl, args.KeepArchive, newVersion, progress);
                 return;
             }
 
             var promptResult = UserPrompt.ShowYesNo("Would you like to update?");
             if (promptResult is UserPromptResult.Yes)
             {
-                await AutoUpdate(newUrl, newVersion, progress);
+                await AutoUpdate(newUrl, args.KeepArchive, newVersion, progress);
             }
         }
 
@@ -125,7 +125,7 @@ namespace TwitchDownloaderCLI.Modes
             return null;
         }
 
-        private static async Task AutoUpdate(string url, Version newVersion, ITaskProgress progress)
+        private static async Task AutoUpdate(string url, bool keepArchive, Version newVersion, ITaskProgress progress)
         {
             var currentExePath = Environment.ProcessPath;
             var oldExePath = currentExePath + ".bak";
@@ -204,8 +204,10 @@ namespace TwitchDownloaderCLI.Modes
 
             progress.ReportProgress(100);
 
-            // Clean up downloaded archive
-            File.Delete(archivePath);
+            if (!keepArchive)
+            {
+                File.Delete(archivePath);
+            }
 
             // Apply previous file permissions
             if (previousPermissions.HasValue)
