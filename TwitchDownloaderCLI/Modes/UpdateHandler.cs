@@ -64,7 +64,6 @@ namespace TwitchDownloaderCLI.Modes
 
             // Construct the appropriate package name
             var packageName = ConstructPackageName(origUrl.Split('/').Last());
-
             if (string.IsNullOrWhiteSpace(packageName))
             {
                 throw new PlatformNotSupportedException("Self-update is not supported for the current OS/architecture");
@@ -74,14 +73,14 @@ namespace TwitchDownloaderCLI.Modes
 
             if (args.ForceUpdate)
             {
-                await AutoUpdate(newUrl, args.KeepArchive, newVersion, progress);
+                await AutoUpdate(newUrl, args.KeepArchive, newVersion, progress).ConfigureAwait(false);
                 return;
             }
 
             var promptResult = UserPrompt.ShowYesNo("Would you like to update?");
             if (promptResult is UserPromptResult.Yes)
             {
-                await AutoUpdate(newUrl, args.KeepArchive, newVersion, progress);
+                await AutoUpdate(newUrl, args.KeepArchive, newVersion, progress).ConfigureAwait(false);
             }
         }
 
@@ -128,28 +127,44 @@ namespace TwitchDownloaderCLI.Modes
         private static async Task AutoUpdate(string url, bool keepArchive, Version newVersion, ITaskProgress progress)
         {
             var currentExePath = Environment.ProcessPath;
-            var oldExePath = currentExePath + ".bak";
-            var updateDir = Path.GetDirectoryName(currentExePath)!;
-            var archivePath = Path.Combine(updateDir, url.Split('/').Last());
-
-            if (string.IsNullOrEmpty(currentExePath))
+            if (string.IsNullOrWhiteSpace(currentExePath))
             {
-                progress.LogError("Current executable path is null or empty!");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(updateDir))
-            {
-                progress.LogError("Update directory is null or empty!");
+                progress.LogError("Cannot update: process path was null or empty! (Was the executable moved or deleted?)");
                 return;
             }
 
             progress.SetTemplateStatus("Downloading Update {0}%", 0);
 
-            using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            var updateDir = Path.GetDirectoryName(currentExePath)!;
+            var archivePath = Path.Combine(updateDir, url.Split('/').Last());
+            await DownloadUpdateArchive(url, progress, archivePath).ConfigureAwait(false);
+
+            // Get old unix file permissions
+            var previousPermissions = GetUnixFilePermissions(progress, currentExePath);
+
+            // Create backup
+            BackupCurrentExecutable(currentExePath, progress);
+
+            progress.SetTemplateStatus("Extracting Files {0}%", 0);
+
+            await ExtractZipFiles(progress, archivePath, updateDir).ConfigureAwait(false);
+
+            if (!keepArchive)
+            {
+                File.Delete(archivePath);
+            }
+
+            ApplyUnixFilePermissions(progress, currentExePath, previousPermissions);
+
+            progress.LogInfo($"{nameof(TwitchDownloaderCLI)} has been updated to v{newVersion}!");
+        }
+
+        private static async Task DownloadUpdateArchive(string url, ITaskProgress progress, string archivePath)
+        {
+            using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            await using var contentStream = await response.Content.ReadAsStreamAsync();
+            await using var contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             var archiveLength = response.Content.Headers.ContentLength;
 
             // Create downloaded archive file from stream data
@@ -160,19 +175,20 @@ namespace TwitchDownloaderCLI.Modes
 
             progress.ReportProgress(100);
 
-            // Check for a previous update
-            if (File.Exists(oldExePath))
+            void DownloadProgressHandler(StreamCopyProgress streamProgress)
             {
-                File.Delete(oldExePath);
+                var percent = (int)(streamProgress.BytesCopied / (double)streamProgress.SourceLength * 100);
+                progress.ReportProgress(percent);
             }
+        }
 
-            // Get old unix file permissions
-            FileAccessPermissions? previousPermissions = null;
+        private static FileAccessPermissions? GetUnixFilePermissions(ITaskProgress progress, string currentExePath)
+        {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 try
                 {
-                    previousPermissions = new UnixFileInfo(currentExePath).FileAccessPermissions;
+                    return new UnixFileInfo(currentExePath).FileAccessPermissions;
                 }
                 catch (Exception ex)
                 {
@@ -180,11 +196,31 @@ namespace TwitchDownloaderCLI.Modes
                 }
             }
 
-            // Rename current exe
-            File.Move(currentExePath!, oldExePath);
+            return null;
+        }
 
-            progress.SetTemplateStatus("Extracting Files {0}%", 0);
+        private static void BackupCurrentExecutable(string currentExePath, ITaskProgress progress)
+        {
+            try
+            {
+                var backupPath = currentExePath + ".bak";
+                if (File.Exists(backupPath))
+                {
+                    File.Delete(backupPath);
+                }
 
+                File.Move(currentExePath, backupPath);
+
+                progress.LogVerbose($"Successfully created backup of current version at {backupPath}");
+            }
+            catch (Exception ex)
+            {
+                progress.LogWarning($"Failed to create backup: {ex.Message}");
+            }
+        }
+
+        private static async Task ExtractZipFiles(ITaskProgress progress, string archivePath, string destinationDir)
+        {
             await using (var archiveFs = File.Open(archivePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 using var archive = new ZipArchive(archiveFs, ZipArchiveMode.Read);
@@ -194,7 +230,7 @@ namespace TwitchDownloaderCLI.Modes
 
                 foreach (var entry in archive.Entries)
                 {
-                    entry.ExtractToFile(Path.Combine(updateDir, entry.FullName), true);
+                    entry.ExtractToFile(Path.Combine(destinationDir, entry.FullName), true);
                     extracted++;
 
                     var percent = (int)(extracted / (double)entryCount * 100);
@@ -203,37 +239,28 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             progress.ReportProgress(100);
+        }
 
-            if (!keepArchive)
+        private static void ApplyUnixFilePermissions(ITaskProgress progress, string currentExePath, FileAccessPermissions? previousPermissions)
+        {
+            if (!previousPermissions.HasValue)
             {
-                File.Delete(archivePath);
+                return;
             }
 
-            // Apply previous file permissions
-            if (previousPermissions.HasValue)
+            try
             {
-                try
+                var ufi = new UnixFileInfo(currentExePath)
                 {
-                    var ufi = new UnixFileInfo(currentExePath)
-                    {
-                        FileAccessPermissions = previousPermissions.Value
-                    };
-                    ufi.Refresh();
-                }
-                catch (Exception ex)
-                {
-                    var processFilename = Path.GetFileName(currentExePath);
-                    var chmodCommand = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "chmod +x" : "sudo chmod +x";
-                    progress.LogError($"Unable to restore previous file permissions: {ex.Message} Please run '{chmodCommand} {processFilename}' to allow {processFilename} to be executed.");
-                }
+                    FileAccessPermissions = previousPermissions.Value
+                };
+                ufi.Refresh();
             }
-
-            progress.LogInfo($"{nameof(TwitchDownloaderCLI)} has been updated to v{newVersion}!");
-
-            void DownloadProgressHandler(StreamCopyProgress streamProgress)
+            catch (Exception ex)
             {
-                var percent = (int)(streamProgress.BytesCopied / (double)streamProgress.SourceLength * 100);
-                progress.ReportProgress(percent);
+                var processFilename = Path.GetFileName(currentExePath);
+                var chmodCommand = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "chmod +x" : "sudo chmod +x";
+                progress.LogError($"Unable to restore previous file permissions: {ex.Message} Please run '{chmodCommand} {processFilename}' to allow {processFilename} to be executed.");
             }
         }
     }
