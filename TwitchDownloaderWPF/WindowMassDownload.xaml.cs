@@ -457,11 +457,11 @@ namespace TwitchDownloaderWPF
                 // Move the most current channel to the top of the list
                 recentChannels.Remove(currentChannel.login);
                 recentChannels.Insert(0, currentChannel.login);
+            }
 
-                while (recentChannels.Count > 15)
-                {
-                    recentChannels.RemoveAt(recentChannels.Count - 1);
-                }
+            while (recentChannels.Count > 15)
+            {
+                recentChannels.RemoveAt(recentChannels.Count - 1);
             }
 
             ComboChannel.Items.Clear();
