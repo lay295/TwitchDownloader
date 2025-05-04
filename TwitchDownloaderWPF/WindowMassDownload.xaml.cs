@@ -22,6 +22,8 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class WindowMassDownload : Window
     {
+        private readonly string _clearChannelsConstant = Guid.NewGuid().ToString();
+
         public DownloadType downloaderType { get; set; }
         public ObservableCollection<TaskData> videoList { get; set; } = new ObservableCollection<TaskData>();
         public readonly List<TaskData> selectedItems = new List<TaskData>();
@@ -48,14 +50,8 @@ namespace TwitchDownloaderWPF
             btnNext.IsEnabled = false;
             btnPrev.IsEnabled = false;
 
-            if (Settings.Default.RecentChannels != null)
-            {
-                foreach (var recentChannel in Settings.Default.RecentChannels)
-                {
-                    ComboRecentChannels.Items.Add(new ComboBoxItem() { Content = recentChannel });
-                }
-            }
-
+            UpdateRecentChannels();
+            ComboChannel.Text = "";
         }
 
         private async void btnChannel_Click(object sender, RoutedEventArgs e)
@@ -73,7 +69,10 @@ namespace TwitchDownloaderWPF
 
         private async Task ChangeCurrentChannel()
         {
-            var textTrimmed = textChannel.Text.Trim();
+            if (!IsInitialized)
+                return;
+
+            var textTrimmed = ComboChannel.Text.Trim();
             if (!textTrimmed.Equals(currentChannel?.login, StringComparison.InvariantCultureIgnoreCase))
             {
                 currentChannel = null;
@@ -370,7 +369,7 @@ namespace TwitchDownloaderWPF
                 : Translations.Strings.TitleClipMassDownloader;
         }
 
-        private async void TextChannel_OnKeyDown(object sender, KeyEventArgs e)
+        private async void ComboChannel_OnKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -430,47 +429,56 @@ namespace TwitchDownloaderWPF
             e.Handled = true;
         }
 
-        private void ComboRecentChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ComboChannel_OnDropDownClosed(object sender, EventArgs e)
         {
-            if(!IsInitialized)
+            if (!IsInitialized || ComboChannel.SelectedItem is not ComboBoxItem comboBoxItem)
                 return;
 
-            if (ComboRecentChannels.SelectedValue != null && ComboRecentChannels.SelectedIndex != 0)
+            if (string.Equals(comboBoxItem.Content as string, currentChannel?.login, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            if (comboBoxItem.Tag as string == _clearChannelsConstant)
             {
-                textChannel.Text = (string)((ComboBoxItem)ComboRecentChannels.SelectedValue).Content;
+                Settings.Default.RecentChannels.Clear();
+                currentChannel = null;
+                UpdateRecentChannels();
             }
-            ComboRecentChannels.SelectedIndex = 0;
+
+            await ChangeCurrentChannel();
         }
 
         private void UpdateRecentChannels()
         {
-            if (Settings.Default.RecentChannels == null)
+            var recentChannels = Settings.Default.RecentChannels ?? new StringCollection();
+
+            if (!string.IsNullOrWhiteSpace(currentChannel?.login))
             {
-                Settings.Default.RecentChannels = new StringCollection();
+                // Move the most current channel to the top of the list
+                recentChannels.Remove(currentChannel.login);
+                recentChannels.Insert(0, currentChannel.login);
+
+                while (recentChannels.Count > 15)
+                {
+                    recentChannels.RemoveAt(recentChannels.Count - 1);
+                }
             }
 
-            if (!Settings.Default.RecentChannels.Contains(currentChannel.displayName))
+            ComboChannel.Items.Clear();
+            foreach (var channel in recentChannels)
             {
-                if (Settings.Default.RecentChannels.Count == 10)
-                {
-                    Settings.Default.RecentChannels.RemoveAt(0);
-                    Settings.Default.RecentChannels.Add(currentChannel.displayName);
-
-                    ComboRecentChannels.Items.Clear();
-                    ComboRecentChannels.Items.Add(new ComboBoxItem() { Content = Translations.Strings.RecentChannels });
-                    foreach (var recentChannel in Settings.Default.RecentChannels)
-                    {
-                        ComboRecentChannels.Items.Add(new ComboBoxItem() { Content = recentChannel });
-                    }
-                }
-                else
-                {
-                    Settings.Default.RecentChannels.Add(currentChannel.displayName);
-                    ComboRecentChannels.Items.Add(new ComboBoxItem() { Content = currentChannel.displayName });
-                }
-
-                Settings.Default.Save();
+                ComboChannel.Items.Add(new ComboBoxItem { Content = channel });
             }
+
+            // Select the most recent channel, if there is one
+            if (recentChannels.Count > 0)
+            {
+                ComboChannel.SelectedIndex = 0;
+            }
+
+            ComboChannel.Items.Add(new ComboBoxItem { Content = "Clear Recent Channels", Tag = _clearChannelsConstant });
+
+            Settings.Default.RecentChannels = recentChannels;
+            Settings.Default.Save();
         }
     }
 }
