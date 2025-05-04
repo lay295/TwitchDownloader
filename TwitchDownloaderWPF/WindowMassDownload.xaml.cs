@@ -476,7 +476,7 @@ namespace TwitchDownloaderWPF
                 ComboChannel.SelectedIndex = 0;
             }
 
-            ComboChannel.Items.Add(new ComboBoxItem { Content = "Clear Recent Channels", Tag = _clearChannelsConstant });
+            ComboChannel.Items.Add(new ComboBoxItem { Content = Translations.Strings.ClearRecentChannels, Tag = _clearChannelsConstant });
 
             Settings.Default.RecentChannels = recentChannels;
             Settings.Default.Save();
