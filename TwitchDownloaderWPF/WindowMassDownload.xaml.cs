@@ -83,7 +83,6 @@ namespace TwitchDownloaderWPF
                         var idRes = await TwitchHelper.GetUserIds(new[] { textTrimmed });
                         var infoRes = await TwitchHelper.GetUserInfo(idRes.data.users.Select(x => x.id));
                         currentChannel = infoRes.data.users[0];
-                        UpdateRecentChannels();
                     }
                     catch (Exception ex)
                     {
@@ -143,6 +142,7 @@ namespace TwitchDownloaderWPF
                     return;
                 }
 
+                UpdateRecentChannels();
                 videoList.Clear();
                 if (res.data.user != null)
                 {
@@ -208,6 +208,7 @@ namespace TwitchDownloaderWPF
                     return;
                 }
 
+                UpdateRecentChannels();
                 videoList.Clear();
                 if (res.data.user != null)
                 {
