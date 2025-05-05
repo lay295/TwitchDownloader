@@ -454,7 +454,7 @@ namespace TwitchDownloaderWPF
 
             if (!string.IsNullOrWhiteSpace(currentChannel?.login))
             {
-                // Move the most current channel to the top of the list
+                // Move the current channel to the top of the list
                 recentChannels.Remove(currentChannel.login);
                 recentChannels.Insert(0, currentChannel.login);
             }
