@@ -63,7 +63,23 @@ namespace TwitchDownloaderCore.Tools
 
                 if (_videoPartsQueue.TryDequeue(out var videoPart))
                 {
-                    DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
+                    try
+                    {
+                        DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            // HACK: Delete the file so the verifier notices the missing part
+                            // TODO: Replace with a video part table
+                            File.Delete(DownloadTools.RemoveQueryString(videoPart));
+                        }
+                        catch { }
+
+                        _logger.LogVerbose($"Error while downloading {videoPart}: {ex.Message}");
+                        throw;
+                    }
                 }
 
                 Thread.Sleep(Random.Shared.Next(50, 150));
