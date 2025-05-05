@@ -1043,4 +1043,7 @@
   <data name="ReduceMotion" xml:space="preserve">
     <value>減少動畫效果：</value>
   </data>
+  <data name="ClearRecentChannels" xml:space="preserve">
+    <value>Clear Recent Channels</value>
+  </data>
 </root>

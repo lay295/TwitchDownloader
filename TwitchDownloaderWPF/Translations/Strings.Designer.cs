@@ -492,6 +492,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Clear Recent Channels.
+        /// </summary>
+        public static string ClearRecentChannels {
+            get {
+                return ResourceManager.GetString("ClearRecentChannels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Clip Download.
         /// </summary>
         public static string ClipDownload {
@@ -1272,8 +1281,8 @@ namespace TwitchDownloaderWPF.Translations {
             get {
                 return ResourceManager.GetString("HideDonationButton", resourceCulture);
             }
-        }        
-       
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Highlight Indent Scale:.
         /// </summary>
@@ -1669,7 +1678,7 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("Quality", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Reduce Motion:.
         /// </summary>

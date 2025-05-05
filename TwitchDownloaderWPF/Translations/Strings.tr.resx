@@ -1042,4 +1042,7 @@
   <data name="ReduceMotion" xml:space="preserve">
     <value>Reduce Motion:</value>
   </data>
+  <data name="ClearRecentChannels" xml:space="preserve">
+    <value>Clear Recent Channels</value>
+  </data>
 </root>

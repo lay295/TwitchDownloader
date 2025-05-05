@@ -993,5 +993,16 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ReduceMotion"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection RecentChannels {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["RecentChannels"]));
+            }
+            set {
+                this["RecentChannels"] = value;
+            }
+        }
     }
 }
