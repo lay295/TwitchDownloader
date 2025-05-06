@@ -14,6 +14,7 @@ using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
@@ -110,6 +111,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             var m3u8 = M3U8.Parse(playlistString);
             m3u8.SortStreamsByQuality();
+            var qualities = VideoQualities.FromM3U8(m3u8);
 
             const string DEFAULT_STRING = "-";
             var infoVideo = videoInfo.data.video;
@@ -137,7 +139,7 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("FPS").RightAligned())
                 .AddColumn(new TableColumn("Codecs").RightAligned());
 
-            var hasBitrate = m3u8.Streams.Any(x => x.StreamInfo.Bandwidth != default);
+            var hasBitrate = qualities.Any(x => x.Item.StreamInfo.Bandwidth != 0);
             if (hasBitrate)
             {
                 streamTable
@@ -145,18 +147,20 @@ namespace TwitchDownloaderCLI.Modes
                     .AddColumn(new TableColumn("File size").RightAligned());
             }
 
-            foreach (var stream in m3u8.Streams)
+            foreach (var quality in qualities)
             {
-                var name = stream.GetResolutionFramerateString();
-                var resolution = stream.StreamInfo.Resolution.StringifyOrDefault(x => x.ToString(), DEFAULT_STRING);
-                var fps = stream.StreamInfo.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
-                var codecs = stream.StreamInfo.Codecs.StringifyOrDefault(x => string.Join(", ", x), DEFAULT_STRING);
+                var streamInfo = quality.Item.StreamInfo;
+
+                var name = quality.Name;
+                var resolution = streamInfo.Resolution.StringifyOrDefault(x => x.ToString(), DEFAULT_STRING);
+                var fps = streamInfo.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
+                var codecs = streamInfo.Codecs.StringifyOrDefault(x => string.Join(", ", x), DEFAULT_STRING);
 
                 if (hasBitrate)
                 {
                     var videoLength = TimeSpan.FromSeconds(infoVideo.lengthSeconds);
-                    var bitrate = stream.StreamInfo.Bandwidth.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
-                    var fileSize = stream.StreamInfo.Bandwidth.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
+                    var bitrate = streamInfo.Bandwidth.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
+                    var fileSize = streamInfo.Bandwidth.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
                     streamTable.AddRow(name, resolution, fps, codecs, bitrate, fileSize);
                 }
                 else
