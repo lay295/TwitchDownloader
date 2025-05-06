@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -15,6 +14,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Models;
+using TwitchDownloaderCore.Models.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
@@ -32,7 +33,6 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageVodDownload : Page
     {
-        public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = new();
         public long currentVideoId;
         public DateTime currentVideoTime;
         public TimeSpan vodLength;
@@ -114,7 +114,6 @@ namespace TwitchDownloaderWPF
                 imgThumbnail.Source = image;
 
                 comboQuality.Items.Clear();
-                videoQualities.Clear();
 
                 var playlistString = await TwitchHelper.GetVideoPlaylist(videoId, taskAccessToken.Result.data.videoPlaybackAccessToken.value, taskAccessToken.Result.data.videoPlaybackAccessToken.signature);
                 if (playlistString.Contains("vod_manifest_restricted") || playlistString.Contains("unauthorized_entitlements"))
@@ -124,16 +123,13 @@ namespace TwitchDownloaderWPF
 
                 var videoPlaylist = M3U8.Parse(playlistString);
                 videoPlaylist.SortStreamsByQuality();
+                var qualities = VideoQualities.FromM3U8(videoPlaylist);
 
                 //Add video qualities to combo quality
-                foreach (var stream in videoPlaylist.Streams)
+                foreach (var quality in qualities)
                 {
-                    var userFriendlyName = stream.GetResolutionFramerateString();
-                    if (!videoQualities.ContainsKey(userFriendlyName))
-                    {
-                        videoQualities.Add(userFriendlyName, (stream.Path, stream.StreamInfo.Bandwidth));
-                        comboQuality.Items.Add(userFriendlyName);
-                    }
+                    var item = new ComboBoxItem { Content = quality.Name, Tag = quality };
+                    comboQuality.Items.Add(item);
                 }
 
                 comboQuality.SelectedIndex = 0;
@@ -218,9 +214,9 @@ namespace TwitchDownloaderWPF
                 Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text, streamerId,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    vodLength, viewCount, game) + FilenameService.GuessVodFileExtension(comboQuality.Text)),
+                    vodLength, viewCount, game) + FilenameService.GuessVodFileExtension(((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString())),
                 Oauth = TextOauth.Text,
-                Quality = GetQualityWithoutSize(comboQuality.Text),
+                Quality = ((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString(),
                 Id = currentVideoId,
                 TrimBeginning = checkStart.IsChecked.GetValueOrDefault(),
                 TrimBeginningTime = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value),
@@ -249,33 +245,24 @@ namespace TwitchDownloaderWPF
                 ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value)
                 : vodLength;
 
-            for (var i = 0; i < comboQuality.Items.Count; i++)
+            foreach (var item in comboQuality.Items.Cast<ComboBoxItem>())
             {
-                var qualityWithSize = (string)comboQuality.Items[i];
-                var quality = GetQualityWithoutSize(qualityWithSize);
-                var bandwidth = videoQualities[quality].bandwidth;
+                var quality = (IVideoQuality<M3U8.Stream>)item.Tag;
+                var bandwidth = quality.Item.StreamInfo.Bandwidth;
 
                 var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth, trimStart, trimEnd);
                 if (sizeInBytes == 0)
                 {
-                    comboQuality.Items[i] = quality;
+                    item.Content = quality.Name;
                 }
                 else
                 {
                     var newVideoSize = VideoSizeEstimator.StringifyByteCount(sizeInBytes);
-                    comboQuality.Items[i] = $"{quality} - {newVideoSize}";
+                    item.Content = $"{quality.Name} - {newVideoSize}";
                 }
             }
 
             comboQuality.SelectedIndex = selectedIndex;
-        }
-
-        private static string GetQualityWithoutSize(string qualityWithSize)
-        {
-            var qualityIndex = qualityWithSize.LastIndexOf(" - ", StringComparison.Ordinal);
-            return qualityIndex == -1
-                ? qualityWithSize
-                : qualityWithSize[..qualityIndex];
         }
 
         public void SetImage(string imageUri, bool isGif)
