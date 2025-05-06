@@ -4,7 +4,7 @@
     {
         public string id { get; set; }
         public PlaybackAccessToken playbackAccessToken { get; set; }
-        public VideoQuality[] videoQualities { get; set; }
+        public ClipVideoQuality[] videoQualities { get; set; }
     }
 
     public class ClipTokenData
@@ -24,7 +24,7 @@
         public Extensions extensions { get; set; }
     }
 
-    public class VideoQuality
+    public class ClipVideoQuality
     {
         public decimal frameRate { get; set; }
         public string quality { get; set; }
