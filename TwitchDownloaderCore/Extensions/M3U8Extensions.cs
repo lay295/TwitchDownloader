@@ -38,12 +38,14 @@ namespace TwitchDownloaderCore.Extensions
             var streamInfo = stream.StreamInfo;
             if (Regex.IsMatch(streamInfo.Video, RESOLUTION_FRAMERATE_PATTERN))
             {
-                return streamInfo.Video;
+                var hyphenIndex = streamInfo.Video.IndexOf('-');
+                return hyphenIndex > 0 ? streamInfo.Video[..hyphenIndex] : streamInfo.Video;
             }
 
             if (Regex.IsMatch(mediaInfo.GroupId, RESOLUTION_FRAMERATE_PATTERN))
             {
-                return mediaInfo.GroupId;
+                var hyphenIndex = mediaInfo.GroupId.IndexOf('-');
+                return hyphenIndex > 0 ? mediaInfo.GroupId[..hyphenIndex] : mediaInfo.GroupId;
             }
 
             if (streamInfo.Resolution == default)
