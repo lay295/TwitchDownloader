@@ -10,12 +10,15 @@ namespace TwitchDownloaderCore.Models
 
         public string Name { get; }
 
+        public Resolution Resolution { get; }
+
         public bool IsSource { get; }
 
         internal M3U8VideoQuality(M3U8.Stream item, string name)
         {
             Item = item;
             Name = name;
+            Resolution = item.StreamInfo.Resolution;
             IsSource = item.IsSource();
         }
     }

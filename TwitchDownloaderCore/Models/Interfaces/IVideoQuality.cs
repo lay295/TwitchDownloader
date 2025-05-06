@@ -6,6 +6,8 @@ namespace TwitchDownloaderCore.Models.Interfaces
 
         public string Name { get; }
 
+        public Resolution Resolution { get; }
+
         public bool IsSource { get; }
 
         public string ToString() => Name;

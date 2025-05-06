@@ -9,6 +9,8 @@ namespace TwitchDownloaderCore.Models
 
         public string Name { get; }
 
+        public Resolution Resolution { get; }
+
         public bool IsSource { get; }
 
         public ClipVideoQuality(ClipQuality item, string name, bool isSource)
@@ -16,6 +18,11 @@ namespace TwitchDownloaderCore.Models
             Item = item;
             Name = name;
             IsSource = isSource;
+
+            if (uint.TryParse(item.quality, out var frameHeight))
+            {
+                Resolution = new Resolution(frameHeight);
+            }
         }
     }
 }
