@@ -25,7 +25,7 @@ namespace TwitchDownloaderCore.Extensions
         /// A <see cref="string"/> representing the <paramref name="stream"/>'s <see cref="M3U8.Stream.ExtStreamInfo.Resolution"/>
         /// and <see cref="M3U8.Stream.ExtStreamInfo.Framerate"/> in the format of "{resolution}p{framerate}" or <see langword="null"/>
         /// </returns>
-        public static string GetResolutionFramerateString(this M3U8.Stream stream)
+        public static string GetResolutionFramerateString(this M3U8.Stream stream, bool appendSource = true)
         {
             const string RESOLUTION_FRAMERATE_PATTERN = /*lang=regex*/@"\d{3,4}p\d{2,3}";
 
@@ -57,9 +57,9 @@ namespace TwitchDownloaderCore.Extensions
 
             var frameHeight = streamInfo.Resolution.Height;
 
-            if (streamInfo.Framerate == default)
+            if (streamInfo.Framerate == 0)
             {
-                return stream.IsSource()
+                return appendSource && stream.IsSource()
                     ? $"{frameHeight}p (Source)"
                     : $"{frameHeight}p";
             }
@@ -67,7 +67,7 @@ namespace TwitchDownloaderCore.Extensions
             // Some M3U8 responses have framerate values up to 2fps more/less than the typical framerate.
             var frameRate = (uint)(Math.Round(streamInfo.Framerate / 10) * 10);
 
-            return stream.IsSource()
+            return appendSource && stream.IsSource()
                 ? $"{frameHeight}p{frameRate} (Source)"
                 : $"{frameHeight}p{frameRate}";
         }
