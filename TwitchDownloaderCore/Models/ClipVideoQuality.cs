@@ -3,7 +3,7 @@ using ClipQuality = TwitchDownloaderCore.TwitchObjects.Gql.ShareClipRenderStatus
 
 namespace TwitchDownloaderCore.Models
 {
-    public class ClipVideoQuality : IVideoQuality<ClipQuality>
+    public sealed record ClipVideoQuality : IVideoQuality<ClipQuality>
     {
         public ClipQuality Item { get; }
 
@@ -23,5 +23,7 @@ namespace TwitchDownloaderCore.Models
             Framerate = item.frameRate;
             IsSource = isSource;
         }
+
+        public override string ToString() => Name;
     }
 }

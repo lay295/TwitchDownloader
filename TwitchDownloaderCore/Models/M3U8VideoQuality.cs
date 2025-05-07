@@ -4,7 +4,7 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Models
 {
-    public class M3U8VideoQuality : IVideoQuality<M3U8.Stream>
+    public sealed record M3U8VideoQuality : IVideoQuality<M3U8.Stream>
     {
         public M3U8.Stream Item { get; }
 
@@ -24,5 +24,7 @@ namespace TwitchDownloaderCore.Models
             Framerate = item.StreamInfo.Framerate;
             IsSource = item.IsSource();
         }
+
+        public override string ToString() => Name;
     }
 }

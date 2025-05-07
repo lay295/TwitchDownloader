@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
@@ -83,11 +83,10 @@ namespace TwitchDownloaderWPF
                 viewCount = clip.viewCount;
                 game = clip.game?.displayName ?? Translations.Strings.UnknownGame;
 
-                // Only support landscape clips for now
-                var clipAssets = clip.assets.FirstOrDefault(x => x.aspectRatio > 1) ?? clip.assets.First();
-                foreach (var quality in clipAssets.videoQualities)
+                var clipQualities = VideoQualities.FromClip(clip);
+                foreach (var quality in clipQualities.Qualities)
                 {
-                    comboQuality.Items.Add(new TwitchClip(quality.quality, Math.Round(quality.frameRate).ToString("F0"), quality.sourceURL));
+                    comboQuality.Items.Add(quality);
                 }
 
                 comboQuality.SelectedIndex = 0;
@@ -309,26 +308,5 @@ namespace TwitchDownloaderWPF
                 Settings.Default.Save();
             }
         }
-    }
-}
-
-public class TwitchClip
-{
-    public string quality { get; set; }
-    public string framerate { get; set; }
-    public string url { get; set; }
-
-    public TwitchClip(string Quality, string Framerate, string Url)
-    {
-        quality = Quality;
-        framerate = Framerate;
-        url = Url;
-    }
-
-    override
-        public string ToString()
-    {
-        //Only show framerate if it's not 30fps
-        return $"{quality}p{(framerate == "30" ? "" : framerate)}";
     }
 }
