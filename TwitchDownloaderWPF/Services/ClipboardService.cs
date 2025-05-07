@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Windows;
 
@@ -8,7 +7,7 @@ namespace TwitchDownloaderWPF.Services
     public static class ClipboardService
     {
         [SupportedOSPlatform("windows")]
-        public static bool TrySetText(string text, [MaybeNullWhen(false)] out Exception exception)
+        public static bool TrySetText(string text, out Exception exception)
         {
             try
             {
@@ -19,7 +18,9 @@ namespace TwitchDownloaderWPF.Services
             catch (Exception e)
             {
                 exception = e;
-                return false;
+                // Clipboard.SetText seems to throw despite succeeding more often than it fails. Blindly return true for now.
+                return true;
+                // return false;
             }
 
             exception = null;
