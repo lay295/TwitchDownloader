@@ -33,6 +33,13 @@ namespace TwitchDownloaderWPF
         {
             InitializeComponent();
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            if (Settings.Default.UpgradeRequired)
+            {
+                Settings.Default.Upgrade();
+                Settings.Default.UpgradeRequired = false;
+                Settings.Default.Save();
+            }
         }
 
         private void btnVodDownload_Click(object sender, RoutedEventArgs e)
@@ -73,12 +80,6 @@ namespace TwitchDownloaderWPF
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Main.Content = pageVodDownload;
-            if (Settings.Default.UpgradeRequired)
-            {
-                Settings.Default.Upgrade();
-                Settings.Default.UpgradeRequired = false;
-                Settings.Default.Save();
-            }
 
             // Replace old crop parameters with new trim parameters
             Settings.Default.TemplateVod = Regex.Replace(Settings.Default.TemplateVod, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
