@@ -83,21 +83,35 @@ namespace TwitchDownloaderCore.Models
             return new M3U8VideoQualities(qualities);
         }
 
-        public static IVideoQualities<ClipQuality> FromClip(ShareClipRenderStatusAssets clip)
+        public static IVideoQualities<ClipQuality> FromClip(ShareClipRenderStatusClip clip)
         {
-            if (clip.videoQualities is { Length: > 0 })
+            const string PORTRAIT_SUFFIX = "Portrait";
+
+            var landscapeAssets = clip.assets.FirstOrDefault(x => x.aspectRatio > 1) ?? clip.assets.FirstOrDefault();
+            var sourceQuality = landscapeAssets?.videoQualities.FirstOrDefault();
+
+            var qualityCount = clip.assets.Sum(x => x.videoQualities.Length);
+            var qualities = new List<IVideoQuality<ClipQuality>>(qualityCount);
+            foreach (var asset in clip.assets)
             {
-                Array.Sort(clip.videoQualities, new ClipAssetQualityComparer());
+                var aspectRatio = asset.aspectRatio;
+
+                var assetQualities = BuildQualityList(
+                    asset.videoQualities,
+                    quality => aspectRatio <= 1 ? $"{quality.quality}p{quality.frameRate:F0}-{PORTRAIT_SUFFIX}" : $"{quality.quality}p{quality.frameRate:F0}",
+                    (quality, name) => new ClipVideoQuality(quality, name, ReferenceEquals(quality, sourceQuality))
+                );
+
+                qualities.AddRange(assetQualities);
             }
 
-            var source = clip.videoQualities.FirstOrDefault();
-            var qualities = BuildQualityList(
-                clip.videoQualities,
-                quality => quality.quality,
-                (quality, name) => new ClipVideoQuality(quality, name, ReferenceEquals(quality, source))
-            );
+            var sortedQualities = qualities
+                .OrderByDescending(x => x.Name.Contains(PORTRAIT_SUFFIX))
+                .ThenBy(x => x.Resolution)
+                .ThenBy(x => x.Name)
+                .ToArray();
 
-            return new ClipVideoQualities(qualities);
+            return new ClipVideoQualities(sortedQualities);
         }
 
         private static List<IVideoQuality<T>> BuildQualityList<T>(IReadOnlyList<T> source, Func<T, string> getQualityName, Func<T, string, IVideoQuality<T>> constructQuality)

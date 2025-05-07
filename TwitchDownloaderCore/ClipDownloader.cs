@@ -134,10 +134,7 @@ namespace TwitchDownloaderCore
 
         private static string GetDownloadUrlForQuality(ShareClipRenderStatusClip clip, string qualityString)
         {
-            // Only support landscape clips for now
-            var clipAssets = clip.assets.FirstOrDefault(x => x.aspectRatio > 1) ?? clip.assets.First();
-
-            var qualities = VideoQualities.FromClip(clipAssets);
+            var qualities = VideoQualities.FromClip(clip);
             var userQuality = qualities.GetQuality(qualityString) ?? qualities.BestQuality();
 
             return userQuality?.Item.sourceURL ?? throw new NullReferenceException($"Unknown Quality: {qualityString}");
