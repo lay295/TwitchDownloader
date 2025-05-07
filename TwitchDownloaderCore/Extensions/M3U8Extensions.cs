@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Extensions

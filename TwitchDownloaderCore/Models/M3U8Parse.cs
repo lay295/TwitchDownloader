@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Models
 {
     public partial record M3U8
     {

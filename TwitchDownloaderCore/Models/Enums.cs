@@ -1,4 +1,4 @@
-﻿namespace TwitchDownloaderCore.Tools
+﻿namespace TwitchDownloaderCore.Models
 {
     // TODO: Add Bzip2 and possibly 7Zip support
     public enum ChatCompression

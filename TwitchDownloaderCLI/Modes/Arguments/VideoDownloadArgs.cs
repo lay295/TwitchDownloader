@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 using TwitchDownloaderCLI.Models;
-using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCLI.Modes.Arguments
 {
