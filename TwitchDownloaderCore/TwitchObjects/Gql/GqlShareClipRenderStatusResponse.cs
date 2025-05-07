@@ -73,7 +73,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public ShareClipRenderStatusFollowers followers { get; set; }
         public ShareClipRenderStatusStream stream { get; set; }
         public ShareClipRenderStatusLastBroadcast lastBroadcast { get; set; }
-        // public object self { get; set; }
+        public object self { get; set; }
     }
 
     public class ShareClipRenderStatusBroadcast
