@@ -190,7 +190,7 @@ namespace TwitchDownloaderCore.Models
                 if (aspectRatio > 0)
                 {
                     var width = (uint)Math.Round(height * aspectRatio);
-                    return new Resolution(height, width);
+                    return new Resolution(width, height);
                 }
 
                 return new Resolution(height);
