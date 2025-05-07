@@ -145,14 +145,14 @@ namespace TwitchDownloaderCore.Models
                 {
                     if (asset.videoQualities is { Length: > 0 })
                     {
-                        Array.Sort(asset.videoQualities, new ClipAssetQualityComparer());
+                        Array.Sort(asset.videoQualities, new ClipVideoQualityComparer());
                     }
                 }
             }
 
             // Find source quality
-            var landscapeAssets = clip.assets.FirstOrDefault(x => x.aspectRatio > 1) ?? clip.assets.FirstOrDefault();
-            var sourceQuality = landscapeAssets?.videoQualities.FirstOrDefault();
+            var landscapeAssets = clip.assets.FirstOrDefault(IsLandscape) ?? clip.assets.FirstOrDefault();
+            var sourceQuality = landscapeAssets?.videoQualities.MaxBy(x => uint.TryParse(x.quality, out var frameHeight) ? frameHeight : 0);
 
             // Build quality list
             var qualityCount = clip.assets.Sum(x => x.videoQualities.Length);
@@ -160,7 +160,7 @@ namespace TwitchDownloaderCore.Models
             foreach (var asset in clip.assets)
             {
                 var aspectRatio = asset.aspectRatio;
-                var isPortrait = asset.portraitMetadata is not null || asset.type == "RECOMPOSED" || aspectRatio is < 1 and not 0;
+                var isPortrait = IsPortrait(asset);
 
                 var assetQualities = BuildQualityList(
                     asset.videoQualities,
@@ -180,6 +180,16 @@ namespace TwitchDownloaderCore.Models
                 .ToArray();
 
             return new ClipVideoQualities(sortedQualities);
+
+            static bool IsLandscape(ShareClipRenderStatusAssets asset)
+            {
+                return asset.type == "SOURCE" || asset.portraitMetadata is null || asset.aspectRatio > 1;
+            }
+
+            static bool IsPortrait(ShareClipRenderStatusAssets asset)
+            {
+                return asset.type == "RECOMPOSED" || asset.portraitMetadata is not null || asset.aspectRatio is < 1 and not 0;
+            }
 
             static Resolution BuildClipResolution(ClipQuality clipQuality, decimal aspectRatio)
             {

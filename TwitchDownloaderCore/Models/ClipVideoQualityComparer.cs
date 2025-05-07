@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Models
 {
-    public class ClipAssetQualityComparer : IComparer<ShareClipRenderStatusVideoQuality>
+    public class ClipVideoQualityComparer : IComparer<ShareClipRenderStatusVideoQuality>
     {
         public int Compare(ShareClipRenderStatusVideoQuality x, ShareClipRenderStatusVideoQuality y)
         {

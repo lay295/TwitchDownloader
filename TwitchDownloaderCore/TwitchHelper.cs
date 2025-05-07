@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using Mono.Unix;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Api;
@@ -176,7 +177,7 @@ namespace TwitchDownloaderCore
             {
                 foreach (var asset in renderStatusResponse.data.clip.assets)
                 {
-                    Array.Sort(asset.videoQualities, new ClipAssetQualityComparer());
+                    Array.Sort(asset.videoQualities, new ClipVideoQualityComparer());
                 }
             }
 
