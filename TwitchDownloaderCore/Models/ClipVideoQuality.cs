@@ -1,5 +1,5 @@
 using TwitchDownloaderCore.Models.Interfaces;
-using ClipQuality = TwitchDownloaderCore.TwitchObjects.Gql.ClipVideoQuality;
+using ClipQuality = TwitchDownloaderCore.TwitchObjects.Gql.ShareClipRenderStatusVideoQuality;
 
 namespace TwitchDownloaderCore.Models
 {

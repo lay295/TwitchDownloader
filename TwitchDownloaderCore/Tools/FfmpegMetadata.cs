@@ -26,7 +26,7 @@ namespace TwitchDownloaderCore.Tools
             await SerializeChapters(sw, videoMomentEdges, startOffset, videoLength);
         }
 
-        public static async Task SerializeAsync(string filePath, string videoId, Clip clip, IEnumerable<VideoMomentEdge> videoMomentEdges)
+        public static async Task SerializeAsync(string filePath, string videoId, ShareClipRenderStatusClip clip, IEnumerable<VideoMomentEdge> videoMomentEdges)
         {
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };

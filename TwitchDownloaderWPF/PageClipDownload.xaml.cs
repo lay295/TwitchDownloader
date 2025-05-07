@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,7 +13,6 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
-using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -59,13 +59,10 @@ namespace TwitchDownloaderWPF
             {
                 btnGetInfo.IsEnabled = false;
                 comboQuality.Items.Clear();
-                Task<GqlClipResponse> taskClipInfo = TwitchHelper.GetClipInfo(clipId);
-                Task<GqlClipTokenResponse> taskLinks = TwitchHelper.GetClipLinks(clipId);
-                await Task.WhenAll(taskClipInfo, taskLinks);
+                var clipRenderStatus = await TwitchHelper.GetShareClipRenderStatus(clipId);
+                var clip = clipRenderStatus.data.clip;
 
-                GqlClipResponse clipData = taskClipInfo.Result;
-
-                var thumbUrl = clipData.data.clip.thumbnailURL;
+                var thumbUrl = clip.thumbnailURL;
                 if (!ThumbnailService.TryGetThumb(thumbUrl, out var image))
                 {
                     AppendLog(Translations.Strings.ErrorLog + Translations.Strings.UnableToFindThumbnail);
@@ -73,20 +70,22 @@ namespace TwitchDownloaderWPF
                 }
                 imgThumbnail.Source = image;
 
-                clipLength = TimeSpan.FromSeconds(taskClipInfo.Result.data.clip.durationSeconds);
-                textStreamer.Text = clipData.data.clip.broadcaster?.displayName ?? Translations.Strings.UnknownUser;
-                streamerId = clipData.data.clip.broadcaster?.id;
-                clipperName = clipData.data.clip.curator?.displayName ?? Translations.Strings.UnknownUser;
-                clipperId = clipData.data.clip.curator?.id;
-                var clipCreatedAt = clipData.data.clip.createdAt;
+                clipLength = TimeSpan.FromSeconds(clip.durationSeconds);
+                textStreamer.Text = clip.broadcaster?.displayName ?? Translations.Strings.UnknownUser;
+                streamerId = clip.broadcaster?.id;
+                clipperName = clip.curator?.displayName ?? Translations.Strings.UnknownUser;
+                clipperId = clip.curator?.id;
+                var clipCreatedAt = clip.createdAt;
                 textCreatedAt.Text = Settings.Default.UTCVideoTime ? clipCreatedAt.ToString(CultureInfo.CurrentCulture) : clipCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
                 currentVideoTime = Settings.Default.UTCVideoTime ? clipCreatedAt : clipCreatedAt.ToLocalTime();
-                textTitle.Text = clipData.data.clip.title;
+                textTitle.Text = clip.title;
                 labelLength.Text = clipLength.ToString("c");
-                viewCount = taskClipInfo.Result.data.clip.viewCount;
-                game = taskClipInfo.Result.data.clip.game?.displayName ?? Translations.Strings.UnknownGame;
+                viewCount = clip.viewCount;
+                game = clip.game?.displayName ?? Translations.Strings.UnknownGame;
 
-                foreach (var quality in taskLinks.Result.data.clip.videoQualities)
+                // Only support landscape clips for now
+                var clipAssets = clip.assets.FirstOrDefault(x => x.aspectRatio > 1) ?? clip.assets.First();
+                foreach (var quality in clipAssets.videoQualities)
                 {
                     comboQuality.Items.Add(new TwitchClip(quality.quality, Math.Round(quality.frameRate).ToString("F0"), quality.sourceURL));
                 }

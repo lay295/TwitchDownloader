@@ -159,6 +159,30 @@ namespace TwitchDownloaderCore
             return gqlClipTokenResponses;
         }
 
+        public static async Task<GqlShareClipRenderStatusResponse> GetShareClipRenderStatus(string clipId)
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"operationName\":\"ShareClipRenderStatus\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"f130048a462a0ac86bb54d653c968c514e9ab9ca94db52368c1179e97b0f16eb\"}}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+
+            var renderStatusResponse = await response.Content.ReadFromJsonAsync<GqlShareClipRenderStatusResponse>();
+            if (renderStatusResponse.data.clip.assets is not null)
+            {
+                foreach (var asset in renderStatusResponse.data.clip.assets)
+                {
+                    Array.Sort(asset.videoQualities, new ClipAssetQualityComparer());
+                }
+            }
+
+            return renderStatusResponse;
+        }
+
         public static async Task<GqlVideoSearchResponse> GetGqlVideos(string channelName, string cursor = "", int limit = 50, string type = "")
         {
             var request = new HttpRequestMessage()
@@ -1203,7 +1227,7 @@ namespace TwitchDownloaderCore
             return chapterResponse;
         }
 
-        public static VideoMomentEdge GenerateClipChapter(Clip clipInfo)
+        public static VideoMomentEdge GenerateClipChapter(ShareClipRenderStatusClip clipInfo)
         {
             return GenerateVideoMomentEdge(0, clipInfo.durationSeconds, clipInfo.game?.id, clipInfo.game?.displayName, clipInfo.game?.displayName, clipInfo.game?.boxArtURL);
         }

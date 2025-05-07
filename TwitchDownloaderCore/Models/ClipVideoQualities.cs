@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Models.Interfaces;
-using ClipQuality = TwitchDownloaderCore.TwitchObjects.Gql.ClipVideoQuality;
+using ClipQuality = TwitchDownloaderCore.TwitchObjects.Gql.ShareClipRenderStatusVideoQuality;
 
 namespace TwitchDownloaderCore.Models
 {

@@ -8,7 +8,7 @@ using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Models.Interfaces;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
-using ClipQuality = TwitchDownloaderCore.TwitchObjects.Gql.ClipVideoQuality;
+using ClipQuality = TwitchDownloaderCore.TwitchObjects.Gql.ShareClipRenderStatusVideoQuality;
 
 namespace TwitchDownloaderCore.Models
 {
@@ -83,11 +83,11 @@ namespace TwitchDownloaderCore.Models
             return new M3U8VideoQualities(qualities);
         }
 
-        public static IVideoQualities<ClipQuality> FromClip(ClipToken clip)
+        public static IVideoQualities<ClipQuality> FromClip(ShareClipRenderStatusAssets clip)
         {
             if (clip.videoQualities is { Length: > 0 })
             {
-                Array.Sort(clip.videoQualities, new ClipQualityComparer());
+                Array.Sort(clip.videoQualities, new ClipAssetQualityComparer());
             }
 
             var source = clip.videoQualities.FirstOrDefault();

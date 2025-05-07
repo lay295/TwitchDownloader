@@ -56,8 +56,7 @@ namespace TwitchDownloaderCore
         {
             _progress.SetStatus("Fetching Clip Info");
 
-            var downloadUrl = await GetDownloadUrl();
-            var clipInfo = await TwitchHelper.GetClipInfo(downloadOptions.Id);
+            var (clipInfo, downloadUrl) = await GetClipInfo();
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -112,31 +111,33 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<string> GetDownloadUrl()
+        private async Task<(GqlShareClipRenderStatusResponse clipInfo, string downloadUrl)> GetClipInfo()
         {
-            var listLinks = await TwitchHelper.GetClipLinks(downloadOptions.Id);
-            var clip = listLinks.data.clip;
+            var clipRenderStatus = await TwitchHelper.GetShareClipRenderStatus(downloadOptions.Id);
+            var clip = clipRenderStatus.data.clip;
 
             if (clip.playbackAccessToken is null)
             {
                 throw new NullReferenceException("Invalid Clip, deleted possibly?");
             }
 
-            if (clip.videoQualities is null || clip.videoQualities.Length == 0)
+            if (clip.assets is not { Length: > 0 } || clip.assets[0].videoQualities is not { Length: > 0 })
             {
                 throw new NullReferenceException("Clip has no video qualities, deleted possibly?");
             }
 
-            var downloadUrl = GetDownloadUrlForQuality(clip, downloadOptions.Quality);
+            var qualityUrl = GetDownloadUrlForQuality(clip, downloadOptions.Quality);
+            var downloadUrl = qualityUrl + "?sig=" + clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(clip.playbackAccessToken.value);
 
-            return downloadUrl + "?sig=" + clip.playbackAccessToken.signature + "&token=" + HttpUtility.UrlEncode(clip.playbackAccessToken.value);
+            return (clipRenderStatus, downloadUrl);
         }
 
-        private static string GetDownloadUrlForQuality(ClipToken clip, string qualityString)
+        private static string GetDownloadUrlForQuality(ShareClipRenderStatusClip clip, string qualityString)
         {
-            Debug.Assert(clip.videoQualities.OrderBy(x => x, new ClipQualityComparer()).SequenceEqual(clip.videoQualities));
+            // Only support landscape clips for now
+            var clipAssets = clip.assets.FirstOrDefault(x => x.aspectRatio > 1) ?? clip.assets.First();
 
-            var qualities = VideoQualities.FromClip(clip);
+            var qualities = VideoQualities.FromClip(clipAssets);
             var userQuality = qualities.GetQuality(qualityString) ?? qualities.BestQuality();
 
             return userQuality?.Item.sourceURL ?? throw new NullReferenceException($"Unknown Quality: {qualityString}");
@@ -163,7 +164,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task EncodeClipWithMetadata(string inputFile, string destinationFile, Clip clipMetadata, VideoMomentEdge clipChapter, CancellationToken cancellationToken)
+        private async Task EncodeClipWithMetadata(string inputFile, string destinationFile, ShareClipRenderStatusClip clipMetadata, VideoMomentEdge clipChapter, CancellationToken cancellationToken)
         {
             var metadataFile = $"{inputFile}_metadata.txt";
 
