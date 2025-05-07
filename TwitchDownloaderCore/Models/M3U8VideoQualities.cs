@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Models.Interfaces;
 using TwitchDownloaderCore.Tools;
@@ -14,9 +13,6 @@ namespace TwitchDownloaderCore.Models
         {
             Qualities = qualities;
         }
-
-        private static readonly Regex UserQualityStringRegex = new(@"(?:^|\s)(?:(?<Width>\d{3,4})x)?(?<Height>\d{3,4})p?(?<Framerate>\d{1,3})?(?:$|\s)",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public override IVideoQuality<M3U8.Stream> GetQuality(string qualityString)
         {
@@ -36,29 +32,7 @@ namespace TwitchDownloaderCore.Models
                 }
             }
 
-            var qualityStringMatch = UserQualityStringRegex.Match(qualityString);
-            if (!qualityStringMatch.Success)
-            {
-                return null;
-            }
-
-            var desiredWidth = qualityStringMatch.Groups["Width"];
-            var desiredHeight = qualityStringMatch.Groups["Height"];
-            var desiredFramerate = qualityStringMatch.Groups["Framerate"];
-
-            var filteredStreams = Qualities
-                .WhereOnlyIf(x => x.Item.StreamInfo.Resolution.Width == int.Parse(desiredWidth.ValueSpan), desiredWidth.Success)
-                .WhereOnlyIf(x => x.Item.StreamInfo.Resolution.Height == int.Parse(desiredHeight.ValueSpan), desiredHeight.Success)
-                .WhereOnlyIf(x => Math.Abs(x.Item.StreamInfo.Framerate - int.Parse(desiredFramerate.ValueSpan)) <= 2, desiredFramerate.Success)
-                .ToArray();
-
-            return filteredStreams.Length switch
-            {
-                1 => filteredStreams[0],
-                2 when filteredStreams[0].Item.StreamInfo.Framerate != 0 && filteredStreams[0].Item.StreamInfo.Framerate == filteredStreams[1].Item.StreamInfo.Framerate => filteredStreams.MaxBy(x => x.Item.StreamInfo.Bandwidth),
-                2 when !desiredFramerate.Success => filteredStreams.FirstOrDefault(x => Math.Abs(x.Item.StreamInfo.Framerate - 30) <= 2, filteredStreams.Last()),
-                _ => null
-            };
+            return null;
         }
 
         protected override bool TryGetKeywordQuality(string qualityString, out IVideoQuality<M3U8.Stream> quality)

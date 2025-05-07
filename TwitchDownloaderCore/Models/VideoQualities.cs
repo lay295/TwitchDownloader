@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Models.Interfaces;
 using TwitchDownloaderCore.Tools;
@@ -33,6 +34,11 @@ namespace TwitchDownloaderCore.Models
                 return true;
             }
 
+            if (TryGetRegexQuality(qualityString, out quality))
+            {
+                return true;
+            }
+
             quality = null;
             return false;
         }
@@ -57,6 +63,47 @@ namespace TwitchDownloaderCore.Models
             return false;
         }
 
+        private bool TryGetRegexQuality(string qualityString, out IVideoQuality<T> quality)
+        {
+            // No point trying to regex match if there's no values to compare to
+            if (Qualities.All(x => x.Resolution == default && x.Framerate == 0))
+            {
+                quality = null;
+                return false;
+            }
+
+            var qualityStringMatch = VideoQualities.UserQualityStringRegex.Match(qualityString);
+            if (!qualityStringMatch.Success)
+            {
+                quality = null;
+                return false;
+            }
+
+            var desiredWidth = qualityStringMatch.Groups["Width"];
+            var desiredHeight = qualityStringMatch.Groups["Height"];
+            var desiredFramerate = qualityStringMatch.Groups["Framerate"];
+
+            var filteredQualities = Qualities
+                .WhereOnlyIf(x => x.Resolution.Width == int.Parse(desiredWidth.ValueSpan), desiredWidth.Success)
+                .WhereOnlyIf(x => x.Resolution.Height == int.Parse(desiredHeight.ValueSpan), desiredHeight.Success)
+                .WhereOnlyIf(x => Math.Abs(x.Framerate - int.Parse(desiredFramerate.ValueSpan)) <= 2, desiredFramerate.Success)
+                .ToArray();
+
+            quality = filteredQualities.Length switch
+            {
+                // We matched
+                1 => filteredQualities[0],
+                // 2+ matches with the same framerate. Streamer is broadcasting multiple source qualities? Pick first.
+                >= 2 when filteredQualities.All(x => x.Framerate == filteredQualities[0].Framerate) => filteredQualities[0],
+                // 2+ matches with no framerate specified by the user. Pick first 30fps/last quality
+                >= 2 when !desiredFramerate.Success => filteredQualities.FirstOrDefault(x => Math.Abs(x.Framerate - 30) <= 2) ?? filteredQualities.Last(),
+                // No match
+                _ => null
+            };
+
+            return quality != null;
+        }
+
         public abstract IVideoQuality<T> GetQuality(string qualityString);
 
         public abstract IVideoQuality<T> BestQuality();
@@ -70,10 +117,14 @@ namespace TwitchDownloaderCore.Models
 
     public static class VideoQualities
     {
+        internal static readonly Regex UserQualityStringRegex = new(@"(?:^|\s)(?:(?<Width>\d{3,4})x)?(?<Height>\d{3,4})p?(?<Framerate>\d{1,3})?(?:$|\s)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         public static IVideoQualities<M3U8.Stream> FromM3U8(M3U8 m3u8)
         {
+            // Sort input
             m3u8.SortStreamsByQuality();
 
+            // Build quality list
             var qualities = BuildQualityList(
                 m3u8.Streams,
                 stream => stream.GetResolutionFramerateString(false),
@@ -87,9 +138,23 @@ namespace TwitchDownloaderCore.Models
         {
             const string PORTRAIT_SUFFIX = "Portrait";
 
+            // Sort input
+            if (clip.assets is { Length: > 0 })
+            {
+                foreach (var asset in clip.assets)
+                {
+                    if (asset.videoQualities is { Length: > 0 })
+                    {
+                        Array.Sort(asset.videoQualities, new ClipAssetQualityComparer());
+                    }
+                }
+            }
+
+            // Find source quality
             var landscapeAssets = clip.assets.FirstOrDefault(x => x.aspectRatio > 1) ?? clip.assets.FirstOrDefault();
             var sourceQuality = landscapeAssets?.videoQualities.FirstOrDefault();
 
+            // Build quality list
             var qualityCount = clip.assets.Sum(x => x.videoQualities.Length);
             var qualities = new List<IVideoQuality<ClipQuality>>(qualityCount);
             foreach (var asset in clip.assets)
@@ -105,6 +170,7 @@ namespace TwitchDownloaderCore.Models
                 qualities.AddRange(assetQualities);
             }
 
+            // Sort quality list
             var sortedQualities = qualities
                 .OrderBy(x => x.Name.Contains(PORTRAIT_SUFFIX))
                 .ThenByDescending(x => x.Resolution.Height)
