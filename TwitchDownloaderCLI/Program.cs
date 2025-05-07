@@ -28,7 +28,7 @@ namespace TwitchDownloaderCLI
             var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, InfoArgs, FfmpegArgs, CacheArgs, UpdateArgs, TsMergeArgs>(preParsedArgs);
             parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
 
-            CoreLicensor.EnsureFilesExist(AppContext.BaseDirectory);
+            CoreLicensor.EnsureFilesExist(null);
             WriteApplicationBanner((ITwitchDownloaderArgs)parserResult.Value);
 
             parserResult

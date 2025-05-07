@@ -11,7 +11,7 @@ namespace TwitchDownloaderCore.Tools
         {
             if (string.IsNullOrEmpty(baseDir))
             {
-                baseDir = AppContext.BaseDirectory;
+                baseDir = Path.GetDirectoryName(Environment.ProcessPath) ?? AppContext.BaseDirectory;
             }
 
             using (var ms = new MemoryStream(Properties.Resources.copyright))
