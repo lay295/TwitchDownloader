@@ -1227,7 +1227,7 @@ namespace TwitchDownloaderCore
             return chapterResponse;
         }
 
-        public static VideoMomentEdge GenerateClipChapter(Clip clipInfo)
+        public static VideoMomentEdge GenerateClipChapter(ShareClipRenderStatusClip clipInfo)
         {
             return GenerateVideoMomentEdge(0, clipInfo.durationSeconds, clipInfo.game?.id, clipInfo.game?.displayName, clipInfo.game?.displayName, clipInfo.game?.boxArtURL);
         }
