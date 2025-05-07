@@ -28,6 +28,16 @@ namespace TwitchDownloaderCore.Tools
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
+            // Add browser-like headers for Twitch segment requests
+            request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            request.Headers.Referrer = new Uri("https://www.twitch.tv/");
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+            request.Headers.Add("Origin", "https://www.twitch.tv");
+            request.Headers.Add("Sec-Fetch-Site", "cross-site");
+            request.Headers.Add("Sec-Fetch-Mode", "cors");
+            request.Headers.Add("Sec-Fetch-Dest", "video");
+            request.Headers.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
+
             // For some reason tryUnmute fails when we don't explicitly define Accept-Encoding
             request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
             request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
