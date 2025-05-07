@@ -106,9 +106,10 @@ namespace TwitchDownloaderCore.Models
             }
 
             var sortedQualities = qualities
-                .OrderByDescending(x => x.Name.Contains(PORTRAIT_SUFFIX))
-                .ThenBy(x => x.Resolution)
-                .ThenBy(x => x.Name)
+                .OrderBy(x => x.Name.Contains(PORTRAIT_SUFFIX))
+                .ThenByDescending(x => x.Resolution.Height)
+                .ThenByDescending(x => x.Framerate)
+                .ThenByDescending(x => x.Name)
                 .ToArray();
 
             return new ClipVideoQualities(sortedQualities);

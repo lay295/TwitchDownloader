@@ -8,6 +8,8 @@ namespace TwitchDownloaderCore.Models.Interfaces
 
         public Resolution Resolution { get; }
 
+        public decimal Framerate { get; }
+
         public bool IsSource { get; }
 
         public string ToString() => Name;

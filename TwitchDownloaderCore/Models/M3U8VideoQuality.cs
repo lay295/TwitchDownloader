@@ -12,6 +12,8 @@ namespace TwitchDownloaderCore.Models
 
         public Resolution Resolution { get; }
 
+        public decimal Framerate { get; }
+
         public bool IsSource { get; }
 
         internal M3U8VideoQuality(M3U8.Stream item, string name)
@@ -19,6 +21,7 @@ namespace TwitchDownloaderCore.Models
             Item = item;
             Name = name;
             Resolution = item.StreamInfo.Resolution;
+            Framerate = item.StreamInfo.Framerate;
             IsSource = item.IsSource();
         }
     }
