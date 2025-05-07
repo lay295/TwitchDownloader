@@ -298,27 +298,16 @@ namespace TwitchDownloaderCLI.Modes
                 .Title(qualityTableTitle)
                 .AddColumn(new TableColumn("Name"))
                 .AddColumn(new TableColumn("Resolution"))
-                .AddColumn(new TableColumn("FPS").RightAligned())
-                .AddColumn(new TableColumn("Aspect Ratio"));
+                .AddColumn(new TableColumn("FPS").RightAligned());
 
-            foreach (var asset in clipRenderStatus.data.clip.assets)
+            var clipQualities = VideoQualities.FromClip(clipRenderStatus.data.clip);
+            foreach (var quality in clipQualities.Qualities)
             {
-                var aspectRatio = asset.aspectRatio.ToString("F4");
+                var name = quality.Name;
+                var resolution = quality.Resolution.HasWidth ? quality.Resolution.ToString() : quality.Resolution.Height.ToString();
+                var fps = quality.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
 
-                foreach (var quality in asset.videoQualities)
-                {
-                    var name = string.Create(CultureInfo.CurrentCulture, $"{quality.quality}p{quality.frameRate:F0}");
-                    var resolution = $"{quality.quality}p";
-                    var fps = quality.frameRate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
-
-                    if (uint.TryParse(quality.quality, out var height))
-                    {
-                        var width = (uint)Math.Round(height * asset.aspectRatio);
-                        resolution = $"{width}x{height}";
-                    }
-
-                    qualityTable.AddRow(name, resolution, fps, aspectRatio);
-                }
+                qualityTable.AddRow(name, resolution, fps);
             }
 
             AnsiConsole.Write(qualityTable);
@@ -327,6 +316,7 @@ namespace TwitchDownloaderCLI.Modes
         private static void HandleClipM3U8(GqlShareClipRenderStatusResponse clipRenderStatus)
         {
             var clip = clipRenderStatus.data.clip;
+            var clipQualities = VideoQualities.FromClip(clip);
 
             var metadata = new M3U8.Metadata
             {
@@ -339,24 +329,14 @@ namespace TwitchDownloaderCLI.Modes
                 Type = M3U8.Metadata.PlaylistType.Event,
             };
 
-            var streams = clip.assets
-                .SelectMany(x => x.videoQualities
-                    .Select(y =>
-                    {
-                        M3U8.Stream.ExtStreamInfo.StreamResolution resolution = default;
-                        if (uint.TryParse(y.quality, out var height))
-                        {
-                            var width = (uint)Math.Round(height * x.aspectRatio);
-                            resolution = new M3U8.Stream.ExtStreamInfo.StreamResolution(width, height);
-                        }
-
-                        return new M3U8.Stream(
-                            new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, y.quality, y.quality, true, true),
-                            new M3U8.Stream.ExtStreamInfo(default, default, default, resolution, y.quality, y.frameRate),
-                            $"{y.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}"
-                        );
-                    })
-                ).ToArray();
+            var streams = clipQualities.Qualities
+                .Select(x =>
+                    new M3U8.Stream(
+                        new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, x.Item.quality, x.Name, true, true),
+                        new M3U8.Stream.ExtStreamInfo(default, default, default, x.Resolution, x.Item.quality, x.Framerate),
+                        $"{x.Item.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}"
+                    ))
+                .ToArray();
 
             var m3u8 = new M3U8(metadata, streams);
             Console.Write(m3u8.ToString());
