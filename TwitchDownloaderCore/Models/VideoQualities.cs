@@ -99,7 +99,7 @@ namespace TwitchDownloaderCore.Models
                 var assetQualities = BuildQualityList(
                     asset.videoQualities,
                     quality => aspectRatio <= 1 ? $"{quality.quality}p{quality.frameRate:F0}-{PORTRAIT_SUFFIX}" : $"{quality.quality}p{quality.frameRate:F0}",
-                    (quality, name) => new ClipVideoQuality(quality, name, ReferenceEquals(quality, sourceQuality))
+                    (quality, name) => new ClipVideoQuality(quality, name, BuildClipResolution(quality, aspectRatio), ReferenceEquals(quality, sourceQuality))
                 );
 
                 qualities.AddRange(assetQualities);
@@ -112,6 +112,22 @@ namespace TwitchDownloaderCore.Models
                 .ToArray();
 
             return new ClipVideoQualities(sortedQualities);
+
+            static Resolution BuildClipResolution(ClipQuality clipQuality, decimal aspectRatio)
+            {
+                if (!uint.TryParse(clipQuality.quality, out var height))
+                {
+                    return default;
+                }
+
+                if (aspectRatio > 0)
+                {
+                    var width = (uint)Math.Round(height * aspectRatio);
+                    return new Resolution(height, width);
+                }
+
+                return new Resolution(height);
+            }
         }
 
         private static List<IVideoQuality<T>> BuildQualityList<T>(IReadOnlyList<T> source, Func<T, string> getQualityName, Func<T, string, IVideoQuality<T>> constructQuality)

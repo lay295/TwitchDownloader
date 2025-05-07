@@ -13,10 +13,5 @@ namespace TwitchDownloaderCore.Models
         public static implicit operator Resolution((uint width, uint height) tuple) => new(tuple.width, tuple.height);
 
         public static implicit operator Resolution(M3U8.Stream.ExtStreamInfo.StreamResolution sr) => new(sr.Width, sr.Height);
-        public readonly void Deconstruct(out uint Width, out uint Height)
-        {
-            Width = this.Width;
-            Height = this.Height;
-        }
     }
 }
