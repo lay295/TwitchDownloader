@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using TwitchDownloaderCore.Interfaces;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Models
 {
     public class StubTaskProgress : ITaskProgress
     {

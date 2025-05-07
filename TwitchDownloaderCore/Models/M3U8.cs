@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text;
 using TwitchDownloaderCore.Extensions;
 
-namespace TwitchDownloaderCore.Tools
+namespace TwitchDownloaderCore.Models
 {
     // https://en.wikipedia.org/wiki/M3U
     // https://datatracker.ietf.org/doc/html/rfc8216

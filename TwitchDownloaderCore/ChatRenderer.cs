@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;

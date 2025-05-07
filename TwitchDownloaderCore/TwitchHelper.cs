@@ -18,7 +18,6 @@ using System.Threading.Tasks;
 using Mono.Unix;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
-using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Api;

@@ -1,5 +1,3 @@
-using TwitchDownloaderCore.Tools;
-
 namespace TwitchDownloaderCore.Models
 {
     public readonly record struct Resolution(uint Width, uint Height)

@@ -1,5 +1,4 @@
 using TwitchDownloaderCore.Models;
-using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Tests.ModelTests
 {

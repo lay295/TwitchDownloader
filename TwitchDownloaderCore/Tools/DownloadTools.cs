@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.Tools
 {

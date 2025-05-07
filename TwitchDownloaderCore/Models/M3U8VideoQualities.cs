@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Models.Interfaces;
-using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Models
 {
