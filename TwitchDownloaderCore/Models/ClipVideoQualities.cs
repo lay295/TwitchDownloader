@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Models.Interfaces;
 using ClipQuality = TwitchDownloaderCore.TwitchObjects.Gql.ShareClipRenderStatusVideoQuality;
 
@@ -38,12 +39,36 @@ namespace TwitchDownloaderCore.Models
 
         public override IVideoQuality<ClipQuality> BestQuality()
         {
-            return Qualities.FirstOrDefault(x => x.IsSource) ?? Qualities.FirstOrDefault();
+            if (Qualities is null)
+            {
+                return null;
+            }
+
+            var bestQuality = Qualities.FirstOrDefault(x => x.IsSource);
+
+            bestQuality ??= Qualities
+                .WhereOnlyIf(x => x.Resolution.Width > x.Resolution.Height, Qualities.All(x => x.Resolution.HasWidth))
+                .MaxBy(x => x.Resolution.Height);
+
+            bestQuality ??= Qualities.MaxBy(x => x.Resolution.Height);
+
+            return bestQuality ?? Qualities.FirstOrDefault();
         }
 
         public override IVideoQuality<ClipQuality> WorstQuality()
         {
-            return Qualities.LastOrDefault();
+            if (Qualities is null)
+            {
+                return null;
+            }
+
+            var worstQuality = Qualities
+                .WhereOnlyIf(x => x.Resolution.Width > x.Resolution.Height, Qualities.All(x => x.Resolution.HasWidth))
+                .MinBy(x => x.Resolution.Height);
+
+            worstQuality ??= Qualities.MinBy(x => x.Resolution.Height);
+
+            return worstQuality ?? Qualities.LastOrDefault();
         }
     }
 }
