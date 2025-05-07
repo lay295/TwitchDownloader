@@ -180,14 +180,12 @@ namespace TwitchDownloaderCore
             else
             {
                 var clipId = chatRoot.video.id;
-                Clip clipInfo = null;
+                ShareClipRenderStatusClip clipRenderStatus;
                 try
                 {
-                    clipInfo = (await TwitchHelper.GetClipInfo(clipId)).data.clip;
+                    clipRenderStatus = (await TwitchHelper.GetShareClipRenderStatus(clipId)).data.clip;
                 }
-                catch { /* Eat the exception */ }
-
-                if (clipInfo is null)
+                catch
                 {
                     _progress.LogInfo("Unable to fetch clip info, deleted possibly?");
                     return;
@@ -195,31 +193,34 @@ namespace TwitchDownloaderCore
 
                 chatRoot.clipper ??= new Clipper
                 {
-                    name = clipInfo.curator?.displayName,
-                    login = clipInfo.curator?.login,
-                    id = int.Parse(clipInfo.curator?.id ?? "0"),
+                    name = clipRenderStatus.curator?.displayName,
+                    login = clipRenderStatus.curator?.login,
+                    id = int.Parse(clipRenderStatus.curator?.id ?? "0"),
                 };
 
-                chatRoot.video.title = clipInfo.title;
-                chatRoot.video.created_at = clipInfo.createdAt;
-                chatRoot.video.length = clipInfo.durationSeconds;
-                chatRoot.video.viewCount = clipInfo.viewCount;
-                chatRoot.video.game = clipInfo.game.displayName;
+                chatRoot.video.title = clipRenderStatus.title;
+                chatRoot.video.created_at = clipRenderStatus.createdAt;
+                chatRoot.video.length = clipRenderStatus.durationSeconds;
+                chatRoot.video.viewCount = clipRenderStatus.viewCount;
+                chatRoot.video.game = clipRenderStatus.game.displayName;
 
-                var clipChapter = TwitchHelper.GenerateClipChapter(clipInfo);
-                chatRoot.video.chapters.Add(new VideoChapter
+                if (chatRoot.video.chapters is not { Count: > 0 })
                 {
-                    id = clipChapter.node.id,
-                    startMilliseconds = clipChapter.node.positionMilliseconds,
-                    lengthMilliseconds = clipChapter.node.durationMilliseconds,
-                    _type = clipChapter.node._type,
-                    description = clipChapter.node.description,
-                    subDescription = clipChapter.node.subDescription,
-                    thumbnailUrl = clipChapter.node.thumbnailURL,
-                    gameId = clipChapter.node.details.game?.id,
-                    gameDisplayName = clipChapter.node.details.game?.displayName,
-                    gameBoxArtUrl = clipChapter.node.details.game?.boxArtURL
-                });
+                    var clipChapter = TwitchHelper.GenerateClipChapter(clipRenderStatus);
+                    chatRoot.video.chapters.Add(new VideoChapter
+                    {
+                        id = clipChapter.node.id,
+                        startMilliseconds = clipChapter.node.positionMilliseconds,
+                        lengthMilliseconds = clipChapter.node.durationMilliseconds,
+                        _type = clipChapter.node._type,
+                        description = clipChapter.node.description,
+                        subDescription = clipChapter.node.subDescription,
+                        thumbnailUrl = clipChapter.node.thumbnailURL,
+                        gameId = clipChapter.node.details.game?.id,
+                        gameDisplayName = clipChapter.node.details.game?.displayName,
+                        gameBoxArtUrl = clipChapter.node.details.game?.boxArtURL
+                    });
+                }
             }
         }
 
