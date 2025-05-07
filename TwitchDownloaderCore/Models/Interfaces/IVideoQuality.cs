@@ -1,8 +1,8 @@
 namespace TwitchDownloaderCore.Models.Interfaces
 {
-    public interface IVideoQuality<out T>
+    public interface IVideoQuality<out TItem>
     {
-        public T Item { get; }
+        public TItem Item { get; }
 
         public string Name { get; }
 
@@ -11,6 +11,8 @@ namespace TwitchDownloaderCore.Models.Interfaces
         public decimal Framerate { get; }
 
         public bool IsSource { get; }
+
+        public string Path { get; }
 
         public string ToString() => Name;
     }
