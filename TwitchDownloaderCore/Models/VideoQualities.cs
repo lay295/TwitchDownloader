@@ -160,10 +160,11 @@ namespace TwitchDownloaderCore.Models
             foreach (var asset in clip.assets)
             {
                 var aspectRatio = asset.aspectRatio;
+                var isPortrait = asset.portraitMetadata is not null || asset.type == "RECOMPOSED" || aspectRatio is < 1 and not 0;
 
                 var assetQualities = BuildQualityList(
                     asset.videoQualities,
-                    quality => aspectRatio <= 1 ? $"{quality.quality}p{quality.frameRate:F0}-{PORTRAIT_SUFFIX}" : $"{quality.quality}p{quality.frameRate:F0}",
+                    quality => isPortrait ? $"{quality.quality}p{quality.frameRate:F0}-{PORTRAIT_SUFFIX}" : $"{quality.quality}p{quality.frameRate:F0}",
                     (quality, name) => new ClipVideoQuality(quality, name, BuildClipResolution(quality, aspectRatio), ReferenceEquals(quality, sourceQuality))
                 );
 
