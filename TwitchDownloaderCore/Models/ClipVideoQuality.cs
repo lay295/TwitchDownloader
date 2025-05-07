@@ -15,6 +15,8 @@ namespace TwitchDownloaderCore.Models
 
         public bool IsSource { get; }
 
+        public string Path { get; }
+
         public ClipVideoQuality(ClipQuality item, string name, Resolution resolution, bool isSource)
         {
             Item = item;
@@ -22,6 +24,7 @@ namespace TwitchDownloaderCore.Models
             Resolution = resolution;
             Framerate = item.frameRate;
             IsSource = isSource;
+            Path = item.sourceURL;
         }
 
         public override string ToString() => Name;
