@@ -11,8 +11,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
@@ -667,8 +667,10 @@ namespace TwitchDownloaderCore
             }
 
             var m3u8 = M3U8.Parse(playlistString);
+            var qualities = VideoQualities.FromM3U8(m3u8);
+            var userQuality = qualities.GetQuality(downloadOptions.Quality) ?? qualities.BestQuality();
 
-            return m3u8.GetStreamOfQuality(downloadOptions.Quality);
+            return userQuality?.Item ?? throw new NullReferenceException($"Unknown quality: {downloadOptions.Quality}");
         }
 
         private void Cleanup(string downloadFolder)

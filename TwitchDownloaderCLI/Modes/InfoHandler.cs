@@ -14,6 +14,7 @@ using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
@@ -110,6 +111,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             var m3u8 = M3U8.Parse(playlistString);
             m3u8.SortStreamsByQuality();
+            var qualities = VideoQualities.FromM3U8(m3u8);
 
             const string DEFAULT_STRING = "-";
             var infoVideo = videoInfo.data.video;
@@ -137,7 +139,7 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("FPS").RightAligned())
                 .AddColumn(new TableColumn("Codecs").RightAligned());
 
-            var hasBitrate = m3u8.Streams.Any(x => x.StreamInfo.Bandwidth != default);
+            var hasBitrate = qualities.Any(x => x.Item.StreamInfo.Bandwidth != 0);
             if (hasBitrate)
             {
                 streamTable
@@ -145,18 +147,20 @@ namespace TwitchDownloaderCLI.Modes
                     .AddColumn(new TableColumn("File size").RightAligned());
             }
 
-            foreach (var stream in m3u8.Streams)
+            foreach (var quality in qualities)
             {
-                var name = stream.GetResolutionFramerateString();
-                var resolution = stream.StreamInfo.Resolution.StringifyOrDefault(x => x.ToString(), DEFAULT_STRING);
-                var fps = stream.StreamInfo.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
-                var codecs = stream.StreamInfo.Codecs.StringifyOrDefault(x => string.Join(", ", x), DEFAULT_STRING);
+                var streamInfo = quality.Item.StreamInfo;
+
+                var name = quality.Name;
+                var resolution = streamInfo.Resolution.StringifyOrDefault(x => x.ToString(), DEFAULT_STRING);
+                var fps = streamInfo.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
+                var codecs = streamInfo.Codecs.StringifyOrDefault(x => string.Join(", ", x), DEFAULT_STRING);
 
                 if (hasBitrate)
                 {
                     var videoLength = TimeSpan.FromSeconds(infoVideo.lengthSeconds);
-                    var bitrate = stream.StreamInfo.Bandwidth.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
-                    var fileSize = stream.StreamInfo.Bandwidth.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
+                    var bitrate = streamInfo.Bandwidth.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
+                    var fileSize = streamInfo.Bandwidth.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
                     streamTable.AddRow(name, resolution, fps, codecs, bitrate, fileSize);
                 }
                 else
@@ -294,27 +298,16 @@ namespace TwitchDownloaderCLI.Modes
                 .Title(qualityTableTitle)
                 .AddColumn(new TableColumn("Name"))
                 .AddColumn(new TableColumn("Resolution"))
-                .AddColumn(new TableColumn("FPS").RightAligned())
-                .AddColumn(new TableColumn("Aspect Ratio"));
+                .AddColumn(new TableColumn("FPS").RightAligned());
 
-            foreach (var asset in clipRenderStatus.data.clip.assets)
+            var clipQualities = VideoQualities.FromClip(clipRenderStatus.data.clip);
+            foreach (var quality in clipQualities.Qualities)
             {
-                var aspectRatio = asset.aspectRatio.ToString("F4");
+                var name = quality.Name;
+                var resolution = quality.Resolution.HasWidth ? quality.Resolution.ToString() : quality.Resolution.Height.ToString();
+                var fps = quality.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
 
-                foreach (var quality in asset.videoQualities)
-                {
-                    var name = string.Create(CultureInfo.CurrentCulture, $"{quality.quality}p{quality.frameRate:F0}");
-                    var resolution = $"{quality.quality}p";
-                    var fps = quality.frameRate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
-
-                    if (uint.TryParse(quality.quality, out var height))
-                    {
-                        var width = (uint)Math.Round(height * asset.aspectRatio);
-                        resolution = $"{width}x{height}";
-                    }
-
-                    qualityTable.AddRow(name, resolution, fps, aspectRatio);
-                }
+                qualityTable.AddRow(name, resolution, fps);
             }
 
             AnsiConsole.Write(qualityTable);
@@ -323,6 +316,7 @@ namespace TwitchDownloaderCLI.Modes
         private static void HandleClipM3U8(GqlShareClipRenderStatusResponse clipRenderStatus)
         {
             var clip = clipRenderStatus.data.clip;
+            var clipQualities = VideoQualities.FromClip(clip);
 
             var metadata = new M3U8.Metadata
             {
@@ -335,24 +329,14 @@ namespace TwitchDownloaderCLI.Modes
                 Type = M3U8.Metadata.PlaylistType.Event,
             };
 
-            var streams = clip.assets
-                .SelectMany(x => x.videoQualities
-                    .Select(y =>
-                    {
-                        M3U8.Stream.ExtStreamInfo.StreamResolution resolution = default;
-                        if (uint.TryParse(y.quality, out var height))
-                        {
-                            var width = (uint)Math.Round(height * x.aspectRatio);
-                            resolution = new M3U8.Stream.ExtStreamInfo.StreamResolution(width, height);
-                        }
-
-                        return new M3U8.Stream(
-                            new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, y.quality, y.quality, true, true),
-                            new M3U8.Stream.ExtStreamInfo(default, default, default, resolution, y.quality, y.frameRate),
-                            $"{y.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}"
-                        );
-                    })
-                ).ToArray();
+            var streams = clipQualities.Qualities
+                .Select(x =>
+                    new M3U8.Stream(
+                        new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, x.Item.quality, x.Name, true, true),
+                        new M3U8.Stream.ExtStreamInfo(default, default, default, x.Resolution, x.Item.quality, x.Framerate),
+                        $"{x.Item.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}"
+                    ))
+                .ToArray();
 
             var m3u8 = new M3U8(metadata, streams);
             Console.Write(m3u8.ToString());

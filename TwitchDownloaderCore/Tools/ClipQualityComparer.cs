@@ -4,9 +4,9 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore.Tools
 {
-    public class ClipQualityComparer : IComparer<VideoQuality>
+    public class ClipQualityComparer : IComparer<ClipVideoQuality>
     {
-        public int Compare(VideoQuality x, VideoQuality y)
+        public int Compare(ClipVideoQuality x, ClipVideoQuality y)
         {
             if (x is null)
             {

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
@@ -133,69 +134,11 @@ namespace TwitchDownloaderCore
 
         private static string GetDownloadUrlForQuality(ShareClipRenderStatusClip clip, string qualityString)
         {
-            // Only support landscape clips for now
-            var clipAssets = clip.assets.FirstOrDefault(x => x.aspectRatio > 1) ?? clip.assets.First();
+            var qualities = VideoQualities.FromClip(clip);
+            var userQuality = qualities.GetQuality(qualityString) ?? qualities.BestQuality();
 
-            if (TryGetKeywordQuality(clipAssets, qualityString, out var downloadUrl))
-            {
-                return downloadUrl;
-            }
-
-            if (qualityString.Contains('p'))
-            {
-                foreach (var quality in clipAssets.videoQualities)
-                {
-                    var framerate = (int)Math.Round(quality.frameRate);
-                    var framerateString = qualityString.EndsWith('p') && framerate == 30
-                        ? ""
-                        : framerate.ToString("F0");
-
-                    if ($"{quality.quality}p{framerateString}" == qualityString)
-                    {
-                        return quality.sourceURL;
-                    }
-                }
-            }
-            else
-            {
-                var quality = clipAssets.videoQualities.FirstOrDefault(quality => quality.quality == qualityString);
-                if (quality is not null)
-                {
-                    return quality.sourceURL;
-                }
-            }
-
-            return BestQuality(clipAssets).sourceURL;
+            return userQuality?.Item.sourceURL ?? throw new NullReferenceException($"Unknown Quality: {qualityString}");
         }
-
-        private static bool TryGetKeywordQuality(ShareClipRenderStatusAssets clip, string qualityString, out string downloadUrl)
-        {
-            if (string.IsNullOrWhiteSpace(qualityString))
-            {
-                downloadUrl = BestQuality(clip).sourceURL;
-                return true;
-            }
-
-            if (qualityString.Contains("best", StringComparison.OrdinalIgnoreCase)
-                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase))
-            {
-                downloadUrl = BestQuality(clip).sourceURL;
-                return true;
-            }
-
-            if (qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase))
-            {
-                downloadUrl = WorstQuality(clip).sourceURL;
-                return true;
-            }
-
-            downloadUrl = null;
-            return false;
-        }
-
-        private static ShareClipRenderStatusVideoQuality BestQuality(ShareClipRenderStatusAssets clip) => clip.videoQualities.First();
-
-        private static ShareClipRenderStatusVideoQuality WorstQuality(ShareClipRenderStatusAssets clip) => clip.videoQualities.Last();
 
         private static async Task DownloadFileTaskAsync(string url, FileStream fs, int throttleKib, IProgress<StreamCopyProgress> progress, CancellationToken cancellationToken)
         {
