@@ -80,7 +80,7 @@ namespace TwitchDownloaderWPF
                 {
                     try
                     {
-                        var idRes = await TwitchHelper.GetUserIds(new[] { textTrimmed });
+                        var idRes = await TwitchHelper.GetUserIds(new[] { textTrimmed.ToLowerInvariant() });
                         var infoRes = await TwitchHelper.GetUserInfo(idRes.data.users.Select(x => x.id));
                         currentChannel = infoRes.data.users[0];
                     }
