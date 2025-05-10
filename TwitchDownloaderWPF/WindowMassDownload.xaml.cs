@@ -22,7 +22,10 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class WindowMassDownload : Window
     {
-        private readonly string _clearChannelsConstant = Guid.NewGuid().ToString();
+        private readonly ComboBoxItem _comboBoxItemClearChannels = new()
+        {
+            Content = Translations.Strings.ClearRecentChannels
+        };
 
         public DownloadType downloaderType { get; set; }
         public ObservableCollection<TaskData> videoList { get; set; } = new ObservableCollection<TaskData>();
@@ -438,7 +441,7 @@ namespace TwitchDownloaderWPF
             if (string.Equals(comboBoxItem.Content as string, currentChannel?.login, StringComparison.OrdinalIgnoreCase))
                 return;
 
-            if (comboBoxItem.Tag as string == _clearChannelsConstant)
+            if (ReferenceEquals(comboBoxItem, _comboBoxItemClearChannels))
             {
                 Settings.Default.RecentChannels.Clear();
                 currentChannel = null;
@@ -476,7 +479,7 @@ namespace TwitchDownloaderWPF
                 ComboChannel.SelectedIndex = 0;
             }
 
-            ComboChannel.Items.Add(new ComboBoxItem { Content = Translations.Strings.ClearRecentChannels, Tag = _clearChannelsConstant });
+            ComboChannel.Items.Add(_comboBoxItemClearChannels);
 
             Settings.Default.RecentChannels = recentChannels;
             Settings.Default.Save();
