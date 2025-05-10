@@ -76,7 +76,7 @@ namespace TwitchDownloaderWPF
             if (!textTrimmed.Equals(currentChannel?.login, StringComparison.InvariantCultureIgnoreCase))
             {
                 currentChannel = null;
-                if (!string.IsNullOrEmpty(textTrimmed))
+                if (!string.IsNullOrEmpty(textTrimmed) && !textTrimmed.Any(char.IsWhiteSpace))
                 {
                     try
                     {
