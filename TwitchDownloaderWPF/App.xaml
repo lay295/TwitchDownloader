@@ -28,7 +28,9 @@
             <SolidColorBrush x:Key="AppDividerText" Color="#212121" />
 
             <SolidColorBrush x:Key="BigButtonBackground" Color="#326CF3" />
+            <SolidColorBrush x:Key="BigButtonBackgroundSelected" Color="#1E66CC"/>
             <SolidColorBrush x:Key="BigButtonBorder" Color="#326CF3" />
+            <SolidColorBrush x:Key="BigButtonBorderSelected" Color="#1E66CC"/>
             <SolidColorBrush x:Key="BigButtonText" Color="#FFFFFF" />
 
             <SolidColorBrush x:Key="ActionButtonBackground" Color="#00BCD4" />

@@ -44,6 +44,6 @@
         <Button x:Name="btnQueue" Margin="4" Grid.Row="1" Grid.Column="6" MinWidth="122" Height="52" Click="btnQueue_Click" FontWeight="Bold" Padding="3,0,3,0" Background="{DynamicResource BigButtonBackground}" Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" >
             <TextBlock Text="{lex:Loc TaskQueue}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="{Binding ActualWidth, ElementName=btnQueue, Mode=OneWay}" Padding="3,0,3,0" />
         </Button>
-        <Frame Focusable="False" x:Name="Main" Grid.Column="0" Grid.ColumnSpan="8" Grid.Row="2" NavigationUIVisibility="Hidden" Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBackground}"/>
+        <Frame Focusable="False" x:Name="Main" Grid.Column="0" Grid.ColumnSpan="8" Grid.Row="2" NavigationUIVisibility="Hidden" Navigated="Main_OnNavigated" Background="{DynamicResource AppBackground}" BorderBrush="{DynamicResource AppBackground}"/>
     </Grid>
 </Window>
