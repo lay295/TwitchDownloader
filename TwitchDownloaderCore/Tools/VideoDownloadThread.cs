@@ -93,6 +93,7 @@ namespace TwitchDownloaderCore.Tools
             var errorCount = 0;
             var timeoutCount = 0;
             var lengthFailureCount = 0;
+            long expectedLength = 0;
             while (true)
             {
                 cancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -100,11 +101,48 @@ namespace TwitchDownloaderCore.Tools
                 try
                 {
                     var partFile = Path.Combine(_cacheFolder, DownloadTools.RemoveQueryString(videoPartName));
-                    long expectedLength;
                     if (tryUnmute && videoPartName.Contains("-muted"))
                     {
                         var unmutedPartName = videoPartName.Replace("-muted", "");
-                        expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, unmutedPartName), partFile, _headerFile, _throttleKib, _logger, cancellationTokenSource);
+                        try
+                        {
+                            expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, unmutedPartName), partFile, _headerFile, _throttleKib, _logger, cancellationTokenSource);
+                        }
+                        catch (HttpRequestException ex) when (ex.StatusCode is HttpStatusCode.Forbidden)
+                        {
+                            // Multi-quality fallback logic
+                            string[] qualities = { "chunked", "720p60", "480p30", "360p30", "160p30" };
+                            var baseUrlStr = _baseUrl.ToString().TrimEnd('/');
+                            var urlParts = baseUrlStr.Split('/');
+                            var currentQuality = urlParts[^1];
+                            int currentQualityIndex = Array.IndexOf(qualities, currentQuality);
+                            bool found = false;
+                            for (int i = 0; i < qualities.Length; i++)
+                            {
+                                if (i == currentQualityIndex) continue;
+                                var altBaseUrl = new Uri(_baseUrl, "../" + qualities[i] + "/");
+                                var altUrl = new Uri(altBaseUrl, unmutedPartName);
+                                try
+                                {
+                                    expectedLength = await DownloadTools.DownloadFileAsync(_client, altUrl, partFile, _headerFile, _throttleKib, _logger, cancellationTokenSource);
+                                    _logger.LogVerbose($"Unmuted segment for {videoPartName} found in quality {qualities[i]}");
+                                    found = true;
+                                    break;
+                                }
+                                catch (HttpRequestException)
+                                {
+                                    continue;
+                                }
+                                catch (Exception)
+                                {
+                                    continue;
+                                }
+                            }
+                            if (!found)
+                            {
+                                expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, videoPartName), partFile, _headerFile, _throttleKib, _logger, cancellationTokenSource);
+                            }
+                        }
                     }
                     else
                     {
