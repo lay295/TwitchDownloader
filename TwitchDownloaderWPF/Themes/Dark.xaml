@@ -24,8 +24,10 @@
     <SolidColorBrush x:Key="AppDividerText" Color="#E0E0E0"/>
 
     <!--Big buttons at the top of the window-->
-    <SolidColorBrush x:Key="BigButtonBackground" Color="#2463D8"/>
+    <SolidColorBrush x:Key="BigButtonBackground" Color="#2468D8"/>
+    <SolidColorBrush x:Key="BigButtonBackgroundSelected" Color="#3071F2"/>
     <SolidColorBrush x:Key="BigButtonBorder" Color="#1A58CC"/>
+    <SolidColorBrush x:Key="BigButtonBorderSelected" Color="#2468D8"/>
     <SolidColorBrush x:Key="BigButtonText" Color="#FFFFFF"/>
 
     <!--Basically every other button-->
