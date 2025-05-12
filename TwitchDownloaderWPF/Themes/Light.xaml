@@ -25,9 +25,7 @@
 
     <!--Big buttons at the top of the window-->
     <SolidColorBrush x:Key="BigButtonBackground" Color="#326CF3"/>
-    <SolidColorBrush x:Key="BigButtonBackgroundSelected" Color="#1E66CC"/>
     <SolidColorBrush x:Key="BigButtonBorder" Color="#326CF3"/>
-    <SolidColorBrush x:Key="BigButtonBorderSelected" Color="#1E66CC"/>
     <SolidColorBrush x:Key="BigButtonText" Color="#FFFFFF"/>
 
     <!--Basically every other button-->

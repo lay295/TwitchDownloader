@@ -8,8 +8,8 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Navigation;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderWPF.Properties;
@@ -42,8 +42,6 @@ namespace TwitchDownloaderWPF
                 Settings.Default.UpgradeRequired = false;
                 Settings.Default.Save();
             }
-
-            App.ThemeServiceSingleton.AppThemeChanged += OnAppThemeChanged;
         }
 
         private void btnVodDownload_Click(object sender, RoutedEventArgs e)
@@ -200,11 +198,6 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void OnAppThemeChanged(object sender, EventArgs args)
-        {
-            UpdateSelectedBigButton();
-        }
-
         private void Main_OnNavigated(object sender, NavigationEventArgs e)
         {
             UpdateSelectedBigButton();
@@ -212,88 +205,37 @@ namespace TwitchDownloaderWPF
 
         private void UpdateSelectedBigButton()
         {
-            var deselectedWeight = FontWeights.Medium;
-            var selectedWeight = FontWeights.ExtraBold;
-
-            Brush bigButtonBackground;
-            Brush bigButtonBackgroundSelected;
-            Brush bigButtonBorder;
-            Brush bigButtonBorderSelected;
-            try
-            {
-                bigButtonBackground = (Brush)Application.Current.Resources["BigButtonBackground"];
-                bigButtonBorder = (Brush)Application.Current.Resources["BigButtonBorder"];
-                bigButtonBackgroundSelected = (Brush)Application.Current.Resources["BigButtonBackgroundSelected"];
-                bigButtonBorderSelected = (Brush)Application.Current.Resources["BigButtonBorderSelected"];
-            }
-            catch
-            {
-                bigButtonBackground = btnVodDownload.Background;
-                bigButtonBackgroundSelected = btnVodDownload.Background;
-                bigButtonBorder = btnVodDownload.BorderBrush;
-                bigButtonBorderSelected = btnVodDownload.BorderBrush;
-            }
-
-            btnVodDownload.FontWeight = deselectedWeight;
-            btnVodDownload.Background = bigButtonBackground;
-            btnVodDownload.BorderBrush = bigButtonBorder;
-
-            btnClipDownload.FontWeight = deselectedWeight;
-            btnClipDownload.Background = bigButtonBackground;
-            btnClipDownload.BorderBrush = bigButtonBorder;
-
-            btnChatDownload.FontWeight = deselectedWeight;
-            btnChatDownload.Background = bigButtonBackground;
-            btnChatDownload.BorderBrush = bigButtonBorder;
-
-            btnChatUpdate.FontWeight = deselectedWeight;
-            btnChatUpdate.Background = bigButtonBackground;
-            btnChatUpdate.BorderBrush = bigButtonBorder;
-
-            btnChatRender.FontWeight = deselectedWeight;
-            btnChatRender.Background = bigButtonBackground;
-            btnChatRender.BorderBrush = bigButtonBorder;
-
-            btnQueue.FontWeight = deselectedWeight;
-            btnQueue.Background = bigButtonBackground;
-            btnQueue.BorderBrush = bigButtonBorder;
+            ((TextBlock)btnVodDownload.Content).TextDecorations = null;
+            ((TextBlock)btnClipDownload.Content).TextDecorations = null;
+            ((TextBlock)btnChatDownload.Content).TextDecorations = null;
+            ((TextBlock)btnChatUpdate.Content).TextDecorations = null;
+            ((TextBlock)btnChatRender.Content).TextDecorations = null;
+            ((TextBlock)btnQueue.Content).TextDecorations = null;
 
             var newPage = Main.Content;
             if (ReferenceEquals(newPage, pageVodDownload))
             {
-                btnVodDownload.FontWeight = selectedWeight;
-                btnVodDownload.Background = bigButtonBackgroundSelected;
-                btnVodDownload.BorderBrush = bigButtonBorderSelected;
+                ((TextBlock)btnVodDownload.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageClipDownload))
             {
-                btnClipDownload.FontWeight = selectedWeight;
-                btnClipDownload.Background = bigButtonBackgroundSelected;
-                btnClipDownload.BorderBrush = bigButtonBorderSelected;
+                ((TextBlock)btnClipDownload.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageChatDownload))
             {
-                btnChatDownload.FontWeight = selectedWeight;
-                btnChatDownload.Background = bigButtonBackgroundSelected;
-                btnChatDownload.BorderBrush = bigButtonBorderSelected;
+                ((TextBlock)btnChatDownload.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageChatUpdate))
             {
-                btnChatUpdate.FontWeight = selectedWeight;
-                btnChatUpdate.Background = bigButtonBackgroundSelected;
-                btnChatUpdate.BorderBrush = bigButtonBorderSelected;
+                ((TextBlock)btnChatUpdate.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageChatRender))
             {
-                btnChatRender.FontWeight = selectedWeight;
-                btnChatRender.Background = bigButtonBackgroundSelected;
-                btnChatRender.BorderBrush = bigButtonBorderSelected;
+                ((TextBlock)btnChatRender.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageQueue))
             {
-                btnQueue.FontWeight = selectedWeight;
-                btnQueue.Background = bigButtonBackgroundSelected;
-                btnQueue.BorderBrush = bigButtonBorderSelected;
+                ((TextBlock)btnQueue.Content).TextDecorations = TextDecorations.Underline;
             }
         }
     }

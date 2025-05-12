@@ -24,8 +24,6 @@ namespace TwitchDownloaderWPF.Services
         private readonly WindowsThemeService _windowsThemeService;
         private readonly App _wpfApplication;
 
-        public event EventHandler AppThemeChanged;
-
         public ThemeService(App app, WindowsThemeService windowsThemeService)
         {
             if (!Directory.Exists("Themes"))
@@ -103,8 +101,6 @@ namespace TwitchDownloaderWPF.Services
                 wnd.Show();
                 wnd.Close();
             }
-
-            OnAppThemeChanged();
         }
 
         [SupportedOSPlatform("windows")]
@@ -179,11 +175,6 @@ namespace TwitchDownloaderWPF.Services
         {
             _wpfApplication.Resources.MergedDictionaries[0].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Skin{newSkin}.xaml", UriKind.Absolute);
             _wpfApplication.Resources.MergedDictionaries[1].Source = new Uri($"pack://application:,,,/HandyControl;component/Themes/Theme.xaml", UriKind.Absolute);
-        }
-
-        protected virtual void OnAppThemeChanged()
-        {
-            AppThemeChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }
