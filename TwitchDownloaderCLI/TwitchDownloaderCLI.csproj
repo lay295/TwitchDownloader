@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>1.55.6</Version>
+    <Version>1.55.7</Version>
     <Copyright>Copyright © lay295 and contributors</Copyright>
     <Description>Download and render Twitch VODs, clips, and chats</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
