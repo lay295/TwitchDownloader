@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -77,7 +76,7 @@ namespace TwitchDownloaderCore
 
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(downloadOptions.Id, videoInfoResponse.data.video);
 
-                var qualityPlaylist = await GetQualityPlaylist();
+                var (allQualityPaths, qualityPlaylist) = await GetQualityPlaylist();
 
                 var playlistUrl = qualityPlaylist.Path;
                 var baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
@@ -106,11 +105,12 @@ namespace TwitchDownloaderCore
 
                 _progress.SetTemplateStatus("Downloading {0}% [2/4]", 0);
 
-                await DownloadVideoPartsAsync(playlist.Streams, videoListCrop, baseUrl, headerFile, airDate, true, cancellationToken);
+                var downloadState = new VideoDownloadState(allQualityPaths, playlist.Streams, videoListCrop, baseUrl, headerFile, airDate);
+                await DownloadVideoPartsAsync(downloadState, cancellationToken);
 
                 _progress.SetTemplateStatus("Verifying Parts {0}% [3/4]", 0);
 
-                await VerifyDownloadedParts(playlist.Streams, videoListCrop, baseUrl, headerFile, airDate, cancellationToken);
+                await VerifyDownloadedParts(downloadState, cancellationToken);
 
                 _progress.SetTemplateStatus("Finalizing Video {0}% [4/4]", 0);
 
@@ -231,27 +231,21 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, [AllowNull] string headerFile, DateTimeOffset vodAirDate, bool limitThreadRestarts, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartsAsync(VideoDownloadState downloadState, CancellationToken cancellationToken)
         {
-            var partCount = videoListCrop.GetOffsetAndLength(playlist.Count).Length;
-            var orderedParts = playlist
-                .Take(videoListCrop)
-                .Select(x => x.Path)
-                .OrderBy(x => !x.Contains("-muted")); // Prioritize downloading muted segments
-            var videoPartsQueue = new ConcurrentQueue<string>(orderedParts);
-
             var downloadThreads = new VideoDownloadThread[downloadOptions.DownloadThreads];
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
             {
-                downloadThreads[i] = new VideoDownloadThread(videoPartsQueue, _httpClient, baseUrl, _vodCacheDir, headerFile, vodAirDate, downloadOptions.ThrottleKib, _progress, cancellationToken);
+                downloadThreads[i] = new VideoDownloadThread(downloadState, _httpClient, _vodCacheDir, downloadOptions.ThrottleKib, _progress, cancellationToken);
             }
 
-            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, videoPartsQueue, partCount, limitThreadRestarts, cancellationToken);
+            var partCount = downloadState.PartCount;
+            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, downloadState, partCount, true, cancellationToken);
 
             LogDownloadThreadExceptions(downloadExceptions);
         }
 
-        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, ConcurrentQueue<string> videoPartsQueue, int partCount, bool limitThreadRestarts, CancellationToken cancellationToken)
+        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, int partCount, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
             var previousDoneCount = 0;
@@ -260,9 +254,9 @@ namespace TwitchDownloaderCore
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
-                if (videoPartsQueue.Count != previousDoneCount)
+                if (downloadState.PartQueue.Count != previousDoneCount)
                 {
-                    previousDoneCount = videoPartsQueue.Count;
+                    previousDoneCount = downloadState.PartQueue.Count;
                     var percent = (int)((partCount - previousDoneCount) / (double)partCount * 100);
                     _progress.ReportProgress(percent);
                 }
@@ -342,45 +336,35 @@ namespace TwitchDownloaderCore
             _progress.LogInfo(sb.ToString());
         }
 
-        private async Task VerifyDownloadedParts(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, Uri baseUrl, [AllowNull] string headerFile, DateTimeOffset vodAirDate, CancellationToken cancellationToken)
+        private async Task VerifyDownloadedParts(VideoDownloadState downloadState, CancellationToken cancellationToken)
         {
-            var missingParts = new List<M3U8.Stream>();
-            var partCount = videoListCrop.GetOffsetAndLength(playlist.Count).Length;
-            var doneCount = 0;
+            var partCount = downloadState.PartCount;
+            var invalidCount = await Task.Run(() => GetInvalidParts(downloadState), cancellationToken).ConfigureAwait(false);
 
-            foreach (var part in playlist.Take(videoListCrop))
+            if (invalidCount > 0)
             {
-                var filePath = Path.Combine(_vodCacheDir, DownloadTools.RemoveQueryString(part.Path));
-                var fi = new FileInfo(filePath);
-                if (!fi.Exists || fi.Length == 0)
+                if (partCount > 20 && invalidCount >= partCount * 0.95)
                 {
-                    missingParts.Add(part);
-                }
-
-                doneCount++;
-                var percent = (int)(doneCount / (double)partCount * 100);
-                _progress.ReportProgress(percent);
-
-                cancellationToken.ThrowIfCancellationRequested();
-            }
-
-            if (missingParts.Count != 0)
-            {
-                if (partCount > 20 && missingParts.Count >= partCount * 0.95)
-                {
-                    // 19/20 parts are missing or empty, something went horribly wrong.
+                    // 19/20 parts are invalid, something went horribly wrong.
                     // TODO: Somehow let the user bypass this. Maybe with callbacks?
-                    throw new Exception($"Too many parts are missing or empty ({missingParts.Count}/{partCount}), aborting.");
+                    throw new Exception($"Too many parts are missing or corrupt ({invalidCount}/{partCount}), aborting.");
                 }
 
-                _progress.LogInfo($"The following parts were missing or empty and will be redownloaded: {string.Join(", ", missingParts.Select(x => x.Path))}");
-                await DownloadVideoPartsAsync(missingParts, Range.All, baseUrl, headerFile, vodAirDate, false, cancellationToken);
-            }
+                _progress.LogInfo($"{invalidCount} parts were missing or corrupt and will be redownloaded.");
+                await DownloadVideoPartsAsync(downloadState, cancellationToken).ConfigureAwait(false);
 
-            await EmitPartStubs(playlist, videoListCrop, headerFile, cancellationToken);
+                try
+                {
+                    await Task.Run(() => EmitPartStubs(downloadState), cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _progress.LogError($"Failed to emit part stubs: {ex.Message}");
+                }
+            }
         }
 
-        private async Task EmitPartStubs(IReadOnlyCollection<M3U8.Stream> playlist, Range videoListCrop, string headerFile, CancellationToken cancellationToken)
+        private void EmitPartStubs(VideoDownloadState downloadState)
         {
             byte[] transportStreamStub =
             {
@@ -398,40 +382,75 @@ namespace TwitchDownloaderCore
                 0x40, 0x01, 0x7F, 0xFC, 0x00, 0xD0, 0x00, 0x07
             };
 
+            _progress.ReportProgress(0);
+            var partCount = downloadState.PartCount;
+            var doneCount = 0;
+
+            using var headerFs = !string.IsNullOrWhiteSpace(downloadState.HeaderFile)
+                ? File.OpenRead(downloadState.HeaderFile)
+                : null;
+
             // Emit stubs for missing parts
-            foreach (var part in playlist.Take(videoListCrop))
+            foreach (var part in downloadState.PartStates.Keys)
             {
-                var partName = DownloadTools.RemoveQueryString(part.Path);
+                var partName = DownloadTools.RemoveQueryString(part);
                 var path = Path.Combine(_vodCacheDir, partName);
 
-                if (File.Exists(path) && new FileInfo(path).Length > 0)
+                var fi = new FileInfo(path);
+                if (fi.Exists && fi.Length > 0)
                     continue;
-
-                await using var headerFs = !string.IsNullOrWhiteSpace(headerFile)
-                    ? File.OpenRead(headerFile)
-                    : null;
 
                 try
                 {
-                    await using var fs = File.Create(path);
+                    using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read);
 
                     if (headerFs is null)
                     {
                         // TS stream
-                        await fs.WriteAsync(transportStreamStub, cancellationToken);
+                        fs.Write(transportStreamStub);
                     }
                     else
                     {
                         // AV1 stream
-                        await headerFs.CopyToAsync(fs, cancellationToken);
                         headerFs.Seek(0, SeekOrigin.Begin);
+                        headerFs.CopyTo(fs);
                     }
                 }
                 catch (Exception ex)
                 {
                     _progress.LogVerbose($"Failed to write stub for part {partName}: {ex.Message}");
                 }
+
+                doneCount++;
+                var percent = (int)(doneCount / (double)partCount * 100);
+                _progress.ReportProgress(percent);
             }
+        }
+
+        private int GetInvalidParts(VideoDownloadState downloadState)
+        {
+            var partCount = downloadState.PartCount;
+            var doneCount = 0;
+
+            var invalidCount = 0;
+            foreach (var (partName, partState) in downloadState.PartStates)
+            {
+                var filePath = Path.Combine(_vodCacheDir, DownloadTools.RemoveQueryString(partName));
+                var fi = new FileInfo(filePath);
+
+                var expectedFileSize = partState.ExpectedFileSize + downloadState.HeaderFileSize;
+                if (!fi.Exists || fi.Length == 0 || fi.Length != expectedFileSize)
+                {
+                    downloadState.PartQueue.Enqueue(partName);
+                    invalidCount++;
+                }
+
+                doneCount++;
+                var percent = (int)(doneCount / (double)partCount * 100);
+                _progress.ReportProgress(percent);
+            }
+
+            return invalidCount;
         }
 
         private FfmpegConcatList.StreamIds GetStreamIds(M3U8 playlist)
@@ -651,7 +670,7 @@ namespace TwitchDownloaderCore
             return new Range(startIndex, endIndex);
         }
 
-        private async Task<M3U8.Stream> GetQualityPlaylist()
+        private async Task<(string[] allQualityPaths, M3U8.Stream qualityPlaylist)> GetQualityPlaylist()
         {
             GqlVideoTokenResponse accessToken = await TwitchHelper.GetVideoToken(downloadOptions.Id, downloadOptions.Oauth);
 
@@ -670,7 +689,16 @@ namespace TwitchDownloaderCore
             var qualities = VideoQualities.FromM3U8(m3u8);
             var userQuality = qualities.GetQuality(downloadOptions.Quality) ?? qualities.BestQuality();
 
-            return userQuality?.Item ?? throw new NullReferenceException($"Unknown quality: {downloadOptions.Quality}");
+            var allQualityPaths = qualities.Qualities
+                .Select(x =>
+                {
+                    var lastSlash = x.Path.LastIndexOf('/');
+                    var secondLastSlash = x.Path.AsSpan(0, lastSlash).LastIndexOf('/');
+                    return x.Path[(secondLastSlash + 1)..lastSlash];
+                })
+                .ToArray();
+
+            return (allQualityPaths, userQuality?.Item ?? throw new NullReferenceException($"Unknown quality: {downloadOptions.Quality}"));
         }
 
         private void Cleanup(string downloadFolder)
