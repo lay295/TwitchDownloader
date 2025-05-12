@@ -469,7 +469,7 @@
     <value>Fila de Trabalhos</value>
   </data>
   <data name="ThirdPartyEmotes" xml:space="preserve">
-    <value>Emotes de terceiros</value>
+    <value>Emotes de terceiros </value>
     <comment>Deixe um espaço no final</comment>
   </data>
   <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
@@ -542,10 +542,10 @@
     <value>Lista de URL</value>
   </data>
   <data name="VerboseErrorOutput" xml:space="preserve">
-    <value>Saída de Erros com Ladainha</value>
+    <value>Saída de Erros Detalhados</value>
   </data>
   <data name="VerboseErrors" xml:space="preserve">
-    <value>Erros com Ladainha:</value>
+    <value>Erros Detalhados:</value>
   </data>
   <data name="VideoCreatedAt" xml:space="preserve">
     <value>Criado:</value>
@@ -566,7 +566,7 @@
     <value>Vídeo está expirado ou o ID embutido está corrompido</value>
   </data>
   <data name="VodLinkId" xml:space="preserve">
-    <value>Link/ID da VOD:</value>
+    <value>Link/ID do VOD:</value>
   </data>
   <data name="TemplateVods" xml:space="preserve">
     <value>VODs:</value>
@@ -1023,24 +1023,24 @@
     <value>A duração (incluindo o corte) do vídeo/clipe/chat em um formato personalizável.</value>
   </data>
   <data name="VideoTypeAllVideos" xml:space="preserve">
-    <value>All Videos</value>
+    <value>Todos os Vídeos</value>
   </data>
   <data name="VideoTypePastBroadcasts" xml:space="preserve">
-    <value>Broadcasts</value>
+    <value>Transmissões</value>
   </data>
   <data name="VideoTypeHighlights" xml:space="preserve">
-    <value>Highlights</value>
+    <value>Destaques</value>
   </data>
   <data name="VideoTypeUploads" xml:space="preserve">
     <value>Uploads</value>
   </data>
   <data name="DelayDownload" xml:space="preserve">
-    <value>Delay Download Until Broadcast Finished</value>
+    <value>Atrase o Download até o Fim da Transmissão</value>
   </data>
   <data name="ReduceMotion" xml:space="preserve">
-    <value>Reduce Motion:</value>
+    <value>Reduzir Movimento:</value>
   </data>
   <data name="ClearRecentChannels" xml:space="preserve">
-    <value>Clear Recent Channels</value>
+    <value>Limpar Canais Recentes</value>
   </data>
 </root>
