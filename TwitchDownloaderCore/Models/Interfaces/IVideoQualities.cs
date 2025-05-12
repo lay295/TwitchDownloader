@@ -8,7 +8,7 @@ namespace TwitchDownloaderCore.Models.Interfaces
         public IReadOnlyList<IVideoQuality<T>> Qualities { get; }
 
         [return: MaybeNull]
-        public IVideoQuality<T> GetQuality(string qualityString);
+        public IVideoQuality<T> GetQuality([AllowNull] string qualityString);
 
         [return: MaybeNull]
         public IVideoQuality<T> BestQuality();

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -17,7 +18,7 @@ namespace TwitchDownloaderCore.Models
     {
         public IReadOnlyList<IVideoQuality<T>> Qualities { get; protected init; }
 
-        protected bool TryGetQuality(string qualityString, out IVideoQuality<T> quality)
+        protected bool TryGetQuality([NotNullWhen(false)] string qualityString, out IVideoQuality<T> quality)
         {
             var qualitySpan = qualityString.AsSpan().Trim();
             foreach (var videoQuality in Qualities)

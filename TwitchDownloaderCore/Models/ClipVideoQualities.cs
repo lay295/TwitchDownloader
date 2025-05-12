@@ -24,7 +24,7 @@ namespace TwitchDownloaderCore.Models
             foreach (var quality in Qualities)
             {
                 var framerate = (int)Math.Round(quality.Framerate);
-                var framerateString = qualityString.EndsWith('p') && framerate == 30
+                var framerateString = qualityString!.EndsWith('p') && framerate == 30
                     ? ""
                     : framerate.ToString("F0");
 

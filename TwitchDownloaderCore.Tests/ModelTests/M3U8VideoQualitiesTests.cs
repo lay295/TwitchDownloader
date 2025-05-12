@@ -25,7 +25,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         [InlineData("chunked", "1080p60")]
         [InlineData("Best", "1080p60")]
         [InlineData("Worst", "720p30")]
-        public static void FindsQuality_FromLiveM3U8(string qualityString, string expectedPath)
+        public static void FindsQuality_FromLiveM3U8(string? qualityString, string expectedPath)
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), new[]
             {
@@ -73,7 +73,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         [InlineData("chunked", "1080p60")]
         [InlineData("Best", "1080p60")]
         [InlineData("Worst", "144p30")]
-        public static void FindsQuality_FromOldM3U8(string qualityString, string expectedPath)
+        public static void FindsQuality_FromOldM3U8(string? qualityString, string expectedPath)
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), new[]
             {
@@ -124,7 +124,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         [InlineData("chunked", "1080p60")]
         [InlineData("Best", "1080p60")]
         [InlineData("Worst", "720p60")]
-        public static void FindsQuality_FromM3U8WithoutFramerate(string qualityString, string expectedPath)
+        public static void FindsQuality_FromM3U8WithoutFramerate(string? qualityString, string? expectedPath)
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), new[]
             {
