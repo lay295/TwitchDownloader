@@ -8,7 +8,9 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Navigation;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -193,6 +195,47 @@ namespace TwitchDownloaderWPF
                         string.Format(Translations.Strings.StatusDownloaderFFmpeg, percent.ToString())
                     );
                 }
+            }
+        }
+
+        private void Main_OnNavigated(object sender, NavigationEventArgs e)
+        {
+            UpdateSelectedBigButton();
+        }
+
+        private void UpdateSelectedBigButton()
+        {
+            ((TextBlock)btnVodDownload.Content).TextDecorations = null;
+            ((TextBlock)btnClipDownload.Content).TextDecorations = null;
+            ((TextBlock)btnChatDownload.Content).TextDecorations = null;
+            ((TextBlock)btnChatUpdate.Content).TextDecorations = null;
+            ((TextBlock)btnChatRender.Content).TextDecorations = null;
+            ((TextBlock)btnQueue.Content).TextDecorations = null;
+
+            var newPage = Main.Content;
+            if (ReferenceEquals(newPage, pageVodDownload))
+            {
+                ((TextBlock)btnVodDownload.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageClipDownload))
+            {
+                ((TextBlock)btnClipDownload.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageChatDownload))
+            {
+                ((TextBlock)btnChatDownload.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageChatUpdate))
+            {
+                ((TextBlock)btnChatUpdate.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageChatRender))
+            {
+                ((TextBlock)btnChatRender.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageQueue))
+            {
+                ((TextBlock)btnQueue.Content).TextDecorations = TextDecorations.Underline;
             }
         }
     }
