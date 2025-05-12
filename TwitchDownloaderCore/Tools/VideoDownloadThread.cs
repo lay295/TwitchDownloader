@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -12,27 +10,20 @@ namespace TwitchDownloaderCore.Tools
 {
     internal sealed record VideoDownloadThread
     {
-        private readonly ConcurrentQueue<string> _videoPartsQueue;
+        private readonly VideoDownloadState _downloadState;
         private readonly HttpClient _client;
-        private readonly Uri _baseUrl;
         private readonly string _cacheFolder;
-        private readonly string _headerFile;
-        private readonly DateTimeOffset _vodAirDate;
-        private TimeSpan VodAge => DateTimeOffset.UtcNow - _vodAirDate;
         private readonly int _throttleKib;
         private readonly ITaskLogger _logger;
         private readonly CancellationToken _cancellationToken;
         public Task ThreadTask { get; private set; }
 
-        public VideoDownloadThread(ConcurrentQueue<string> videoPartsQueue, HttpClient httpClient, Uri baseUrl, string cacheFolder, [AllowNull] string headerFile, DateTimeOffset vodAirDate, int throttleKib, ITaskLogger logger,
+        public VideoDownloadThread(VideoDownloadState downloadState, HttpClient httpClient, string cacheFolder, int throttleKib, ITaskLogger logger,
             CancellationToken cancellationToken)
         {
-            _headerFile = headerFile;
-            _videoPartsQueue = videoPartsQueue;
+            _downloadState = downloadState;
             _client = httpClient;
-            _baseUrl = baseUrl;
             _cacheFolder = cacheFolder;
-            _vodAirDate = vodAirDate;
             _throttleKib = throttleKib;
             _logger = logger;
             _cancellationToken = cancellationToken;
@@ -57,148 +48,125 @@ namespace TwitchDownloaderCore.Tools
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken);
 
-            while (!_videoPartsQueue.IsEmpty)
+            while (!_downloadState.PartQueue.IsEmpty)
             {
                 _cancellationToken.ThrowIfCancellationRequested();
 
-                if (_videoPartsQueue.TryDequeue(out var videoPart))
+                if (_downloadState.PartQueue.TryDequeue(out var videoPart))
                 {
                     try
                     {
-                        DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
+                        var result = DownloadVideoPartAsync(videoPart, cts).GetAwaiter().GetResult();
+                        if (!result)
+                        {
+                            Thread.Sleep(Random.Shared.Next(100, 1_000));
+                            _downloadState.PartQueue.Enqueue(videoPart);
+                        }
                     }
                     catch (Exception ex)
                     {
-                        try
-                        {
-                            // HACK: Delete the file so the verifier notices the missing part
-                            // TODO: Replace with a video part table
-                            File.Delete(DownloadTools.RemoveQueryString(videoPart));
-                        }
-                        catch { }
-
                         _logger.LogVerbose($"Error while downloading {videoPart}: {ex.Message}");
                         throw;
                     }
                 }
 
-                Thread.Sleep(Random.Shared.Next(50, 150));
+                Thread.Sleep(Random.Shared.Next(25, 100));
             }
         }
 
         /// <remarks>The <paramref name="cancellationTokenSource"/> may be canceled by this method.</remarks>
-        private async Task DownloadVideoPartAsync(string videoPartName, CancellationTokenSource cancellationTokenSource)
+        private async Task<bool> DownloadVideoPartAsync(string videoPartName, CancellationTokenSource cancellationTokenSource)
         {
-            var tryUnmute = VodAge < TimeSpan.FromHours(24);
-            var errorCount = 0;
-            var timeoutCount = 0;
-            var lengthFailureCount = 0;
-            while (true)
+            var partState = _downloadState.PartStates[videoPartName];
+
+            try
             {
-                cancellationTokenSource.Token.ThrowIfCancellationRequested();
-
-                try
+                // Check download attempts
+                const int MAX_DOWNLOAD_ATTEMPTS = 8;
+                if (partState.DownloadAttempts++ > MAX_DOWNLOAD_ATTEMPTS)
                 {
-                    var partFile = Path.Combine(_cacheFolder, DownloadTools.RemoveQueryString(videoPartName));
-                    long expectedLength;
-                    if (tryUnmute && videoPartName.Contains("-muted"))
-                    {
-                        var unmutedPartName = videoPartName.Replace("-muted", "");
-                        expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, unmutedPartName), partFile, _headerFile, _throttleKib, _logger, cancellationTokenSource);
-                    }
-                    else
-                    {
-                        expectedLength = await DownloadTools.DownloadFileAsync(_client, new Uri(_baseUrl, videoPartName), partFile, _headerFile, _throttleKib, _logger, cancellationTokenSource);
-                    }
-
-                    // TODO: Support checking file length with header file
-                    if (string.IsNullOrWhiteSpace(_headerFile) && expectedLength > 0)
-                    {
-                        // I would love to compare hashes here but unfortunately Twitch doesn't give us a ContentMD5 header
-                        var actualLength = new FileInfo(partFile).Length;
-                        if (!VerifyFileLength(expectedLength, actualLength, partFile, ref lengthFailureCount))
-                        {
-                            await Delay(1_000, cancellationTokenSource.Token);
-                            continue;
-                        }
-
-                        CheckTsLength(partFile, actualLength);
-                    }
-
-                    return;
+                    throw new Exception($"{videoPartName} failed to download after {MAX_DOWNLOAD_ATTEMPTS} attempts.");
                 }
-                catch (HttpRequestException ex) when (tryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
-                {
-                    _logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(tryUnmute)}.");
-                    tryUnmute = false;
 
-                    await Delay(100, cancellationTokenSource.Token);
+                // Download file
+                var partFile = Path.Combine(_cacheFolder, DownloadTools.RemoveQueryString(videoPartName));
+                if (partState.TryUnmute && videoPartName.Contains("-muted"))
+                {
+                    var unmutedPartName = videoPartName.Replace("-muted", "");
+                    partState.ExpectedFileSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, unmutedPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
                 }
-                catch (HttpRequestException ex)
+                else
                 {
-                    const int MAX_ERROR_COUNT = 3;
-                    errorCount++;
+                    partState.ExpectedFileSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, videoPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
+                }
 
-                    _logger.LogVerbose($"Received {(int)(ex.StatusCode ?? 0)}: {ex.StatusCode} for {videoPartName}. {MAX_ERROR_COUNT - errorCount} retries left.");
+                // Check file size
+                if (partState.ExpectedFileSize > 0 && (!string.IsNullOrWhiteSpace(_downloadState.HeaderFile) || _downloadState.HeaderFileSize > 0))
+                {
+                    var fi = new FileInfo(partFile);
+                    var expectedFileSize = partState.ExpectedFileSize + _downloadState.HeaderFileSize;
 
-                    if (errorCount >= MAX_ERROR_COUNT)
+                    // I would love to compare hashes here, but unfortunately Twitch doesn't give us a ContentMD5 header
+                    if (fi.Length != expectedFileSize)
                     {
-                        throw new HttpRequestException($"Video part {videoPartName} failed after {MAX_ERROR_COUNT} retries");
+                        _logger.LogVerbose($"{partFile} failed to verify: expected {expectedFileSize:N0}B, got {fi.Length:N0}B.");
+
+                        await Delay(50, cancellationTokenSource.Token);
+                        return false;
                     }
 
-                    await Delay(1_000 * errorCount, cancellationTokenSource.Token);
-                }
-                catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
-                {
-                    const int MAX_TIMEOUT_COUNT = 2;
-                    timeoutCount++;
-
-                    _logger.LogVerbose($"{videoPartName} timed out. {MAX_TIMEOUT_COUNT - timeoutCount} retries left.");
-
-                    if (timeoutCount >= MAX_TIMEOUT_COUNT)
-                    {
-                        throw new HttpRequestException($"Video part {videoPartName} timed out {MAX_TIMEOUT_COUNT} times");
-                    }
-
-                    await Delay(5_000 * timeoutCount, cancellationTokenSource.Token);
+                    CheckTsLength(partFile, fi.Length);
                 }
             }
-
-            bool VerifyFileLength(long expectedLength, long actualLength, string partFile, ref int failureCount)
+            catch (HttpRequestException ex) when (partState.TryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
             {
-                if (actualLength != expectedLength)
-                {
-                    const int MAX_RETRIES = 1;
+                // TODO: Try to unmute part with other available qualities
 
-                    _logger.LogVerbose($"{partFile} failed to verify: expected {expectedLength:N0}B, got {actualLength:N0}B.");
-                    if (++failureCount > MAX_RETRIES)
-                    {
-                        throw new Exception($"Failed to download {partFile}: expected {expectedLength:N0}B, got {actualLength:N0}B");
-                    }
+                _logger.LogVerbose($"Received {(int)ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(partState.TryUnmute)}.");
 
-                    return false;
-                }
+                partState.TryUnmute = false;
 
-                return true;
+                await Delay(50, cancellationTokenSource.Token);
+                return false;
             }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogVerbose(ex.StatusCode.HasValue
+                    ? $"Received {(int)ex.StatusCode}: {ex.StatusCode} for {videoPartName}."
+                    : $"{videoPartName}: {ex.Message}");
+
+                await Delay(1_000, cancellationTokenSource.Token);
+                return false;
+            }
+            catch (TaskCanceledException ex) when (ex.Message.Contains("HttpClient.Timeout"))
+            {
+                _logger.LogVerbose($"{videoPartName} timed out.");
+
+                await Delay(5_000, cancellationTokenSource.Token);
+                return false;
+            }
+
+            return true;
         }
 
         private void CheckTsLength(string partFile, long length)
         {
-            if (partFile.EndsWith(".ts"))
+            if (!partFile.EndsWith(".ts"))
             {
-                const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
-                if (length % TS_PACKET_LENGTH != 0)
-                {
-                    _logger.LogVerbose($"{partFile} contains malformed packets and may cause encoding issues.");
-                }
+                return;
+            }
+
+            const int TS_PACKET_LENGTH = 188; // MPEG TS packets are made of a header and a body: [ 4B ][   184B   ] - https://tsduck.io/download/docs/mpegts-introduction.pdf
+            if (length % TS_PACKET_LENGTH != 0)
+            {
+                _logger.LogWarning($"{Path.GetFileName(partFile)} contains malformed packets and may cause encoding issues.");
             }
         }
 
         private static Task Delay(int millis, CancellationToken cancellationToken)
         {
             var jitteredMillis = millis + Random.Shared.Next(-200, 200);
-            return Task.Delay(Math.Max(millis / 2, jitteredMillis), cancellationToken);
+            return Task.Delay(Math.Clamp(jitteredMillis, millis / 2, millis * 2), cancellationToken);
         }
     }
 }
