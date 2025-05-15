@@ -95,9 +95,9 @@ namespace TwitchDownloaderCore.Tools
             {
                 // Check download attempts
                 const int MAX_DOWNLOAD_ATTEMPTS = 5;
-                if (partState.DownloadAttempts++ > MAX_DOWNLOAD_ATTEMPTS)
+                if (partState.DownloadAttempts++ >= MAX_DOWNLOAD_ATTEMPTS)
                 {
-                    throw new Exception($"{videoPartName} failed to download after {MAX_DOWNLOAD_ATTEMPTS} attempts.");
+                    throw new Exception($"{videoPartName} failed to download after {partState.DownloadAttempts - 1} attempts.");
                 }
 
                 // Download file
