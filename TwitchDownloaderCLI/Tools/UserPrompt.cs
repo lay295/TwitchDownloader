@@ -1,31 +1,46 @@
 using System;
 using TwitchDownloaderCLI.Models;
+using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderCLI.Tools
 {
     public static class UserPrompt
     {
-        public static UserPromptResult ShowYesNo(string message)
+        public static UserPromptResult ShowYesNo(string message, ITaskLogger logger = null)
         {
             Console.WriteLine(message);
 
             while (true)
             {
                 Console.Write("[Y] Yes / [N] No: ");
-                var userInput = Console.ReadLine().AsSpan().Trim();
 
-                if (userInput.Equals("y", StringComparison.OrdinalIgnoreCase) ||
-                    userInput.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                var userInput = Console.ReadLine();
+                if (userInput is null)
                 {
-                    return UserPromptResult.Yes;
+                    Console.WriteLine();
+                    LogError("Could not read user input.", logger);
+                    return UserPromptResult.Unknown;
                 }
 
-                if (userInput.Equals("n", StringComparison.OrdinalIgnoreCase) ||
-                    userInput.Equals("no", StringComparison.OrdinalIgnoreCase))
+                switch (userInput.Trim().ToLower())
                 {
-                    return UserPromptResult.No;
+                    case "y" or "yes":
+                        return UserPromptResult.Yes;
+                    case "n" or "no":
+                        return UserPromptResult.No;
                 }
             }
+        }
+
+        private static void LogError(string message, ITaskLogger logger = null)
+        {
+            if (logger is null)
+            {
+                Console.WriteLine($"[ERROR] - {message}");
+                return;
+            }
+
+            logger.LogError(message);
         }
     }
 }

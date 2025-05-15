@@ -79,7 +79,7 @@ namespace TwitchDownloaderCLI.Modes
                 return;
             }
 
-            var promptResult = UserPrompt.ShowYesNo("Would you like to update?");
+            var promptResult = UserPrompt.ShowYesNo("Would you like to update?", progress);
             if (promptResult is UserPromptResult.Yes)
             {
                 await AutoUpdate(newUrl, args.KeepArchive, newVersion, progress).ConfigureAwait(false);

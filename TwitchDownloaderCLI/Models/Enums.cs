@@ -34,6 +34,7 @@ namespace TwitchDownloaderCLI.Models
 
     public enum UserPromptResult
     {
+        Unknown,
         Yes,
         No,
         Cancel,
