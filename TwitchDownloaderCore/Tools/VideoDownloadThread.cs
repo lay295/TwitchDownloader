@@ -112,6 +112,14 @@ namespace TwitchDownloaderCore.Tools
                     downloadSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, videoPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
                 }
 
+                if (downloadSize == 0)
+                {
+                    _logger.LogWarning($"Got file size of 0B for {videoPartName}.");
+
+                    await Delay(1_000, cancellationTokenSource.Token);
+                    return false;
+                }
+
                 if (downloadSize > 0)
                 {
                     // We don't have reports of this happening, but it's better to be safe than sorry
@@ -127,22 +135,19 @@ namespace TwitchDownloaderCore.Tools
                 }
 
                 // Check file size
-                if (partState.ExpectedFileSize > 0)
+                partFi.Refresh();
+                var expectedFileSize = partState.ExpectedFileSize + _downloadState.HeaderFileSize;
+
+                // I would love to compare hashes here, but unfortunately Twitch doesn't give us a ContentMD5 header
+                if (partFi.Length != expectedFileSize)
                 {
-                    partFi.Refresh();
-                    var expectedFileSize = partState.ExpectedFileSize + _downloadState.HeaderFileSize;
+                    _logger.LogVerbose($"{partFile} failed to verify: expected {expectedFileSize:N0}B, got {partFi.Length:N0}B.");
 
-                    // I would love to compare hashes here, but unfortunately Twitch doesn't give us a ContentMD5 header
-                    if (partFi.Length != expectedFileSize)
-                    {
-                        _logger.LogVerbose($"{partFile} failed to verify: expected {expectedFileSize:N0}B, got {partFi.Length:N0}B.");
-
-                        await Delay(50, cancellationTokenSource.Token);
-                        return false;
-                    }
-
-                    CheckTsLength(partFile, partFi.Length);
+                    await Delay(50, cancellationTokenSource.Token);
+                    return false;
                 }
+
+                CheckTsLength(partFile, partFi.Length);
             }
             catch (HttpRequestException ex) when (partState.TryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
             {
