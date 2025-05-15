@@ -66,6 +66,7 @@ namespace TwitchDownloaderCore.Tools
                     }
                     catch (Exception ex)
                     {
+                        // Deliberately do not re-enqueue the part on exceptions
                         _logger.LogVerbose($"Error while downloading {videoPart}: {ex.Message}");
                         throw;
                     }
