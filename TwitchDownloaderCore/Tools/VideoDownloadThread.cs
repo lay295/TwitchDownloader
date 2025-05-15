@@ -116,7 +116,7 @@ namespace TwitchDownloaderCore.Tools
                 }
 
                 // Check file size
-                if (partState.ExpectedFileSize > 0 && (!string.IsNullOrWhiteSpace(_downloadState.HeaderFile) || _downloadState.HeaderFileSize > 0))
+                if (partState.ExpectedFileSize > 0)
                 {
                     var fi = new FileInfo(partFile);
                     var expectedFileSize = partState.ExpectedFileSize + _downloadState.HeaderFileSize;
