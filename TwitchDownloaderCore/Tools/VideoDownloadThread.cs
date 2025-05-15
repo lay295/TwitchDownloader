@@ -89,15 +89,30 @@ namespace TwitchDownloaderCore.Tools
                 }
 
                 // Download file
+                long downloadSize;
                 var partFile = Path.Combine(_cacheFolder, DownloadTools.RemoveQueryString(videoPartName));
                 if (partState.TryUnmute && videoPartName.Contains("-muted"))
                 {
                     var unmutedPartName = videoPartName.Replace("-muted", "");
-                    partState.ExpectedFileSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, unmutedPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
+                    downloadSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, unmutedPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
                 }
                 else
                 {
-                    partState.ExpectedFileSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, videoPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
+                    downloadSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, videoPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
+                }
+
+                if (downloadSize > 0)
+                {
+                    // We don't have reports of this happening, but it's better to be safe than sorry
+                    if (partState.ExpectedFileSize > 0 && partState.ExpectedFileSize != downloadSize)
+                    {
+                        var previousDownloadSize = downloadSize;
+                        downloadSize = Math.Max(partState.ExpectedFileSize, downloadSize);
+
+                        _logger.LogWarning($"Got two different file sizes for {videoPartName}: {partState.ExpectedFileSize:N0}B and {previousDownloadSize:N0}B! Using {downloadSize:N0}B.");
+                    }
+
+                    partState.ExpectedFileSize = downloadSize;
                 }
 
                 // Check file size
