@@ -15,11 +15,17 @@ namespace TwitchDownloaderCore.Tools
             public byte DownloadAttempts;
             public bool TryUnmute;
             /// <summary>
-            /// The name of the part to fetch the audio from. Null if not applicable.
+            /// The state of the part to fetch the audio from. Null if not applicable.
             ///
             /// Not yet implemented.
             /// </summary>
-            public string UnmutedPartName;
+            public UnmutedPartState UnmutedPart;
+        }
+
+        public class UnmutedPartState
+        {
+            public long ExpectedFileSize;
+            public string FileName;
         }
 
         public IReadOnlyList<string> AllQualities { get; }
