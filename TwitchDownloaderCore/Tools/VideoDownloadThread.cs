@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -82,7 +83,7 @@ namespace TwitchDownloaderCore.Tools
             try
             {
                 // Check download attempts
-                const int MAX_DOWNLOAD_ATTEMPTS = 8;
+                const int MAX_DOWNLOAD_ATTEMPTS = 5;
                 if (partState.DownloadAttempts++ > MAX_DOWNLOAD_ATTEMPTS)
                 {
                     throw new Exception($"{videoPartName} failed to download after {MAX_DOWNLOAD_ATTEMPTS} attempts.");
@@ -140,6 +141,10 @@ namespace TwitchDownloaderCore.Tools
                 _logger.LogVerbose($"Received {(int)ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(partState.TryUnmute)}.");
 
                 partState.TryUnmute = false;
+
+                // Do not count trying to unmute as a download attempt
+                Debug.Assert(partState.DownloadAttempts > 0);
+                partState.DownloadAttempts--;
 
                 await Delay(50, cancellationTokenSource.Token);
                 return false;
