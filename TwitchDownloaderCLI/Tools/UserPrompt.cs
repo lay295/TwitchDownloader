@@ -1,11 +1,12 @@
 using System;
 using TwitchDownloaderCLI.Models;
+using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderCLI.Tools
 {
     public static class UserPrompt
     {
-        public static UserPromptResult ShowYesNo(string message)
+        public static UserPromptResult ShowYesNo(string message, ITaskLogger logger = null)
         {
             Console.WriteLine(message);
 
@@ -17,7 +18,7 @@ namespace TwitchDownloaderCLI.Tools
                 if (userInput is null)
                 {
                     Console.WriteLine();
-                    Console.WriteLine("[ERROR] - Could not read user input.");
+                    LogError("Could not read user input.", logger);
                     return UserPromptResult.Unknown;
                 }
 
@@ -29,6 +30,17 @@ namespace TwitchDownloaderCLI.Tools
                         return UserPromptResult.No;
                 }
             }
+        }
+
+        private static void LogError(string message, ITaskLogger logger = null)
+        {
+            if (logger is null)
+            {
+                Console.WriteLine($"[ERROR] - {message}");
+                return;
+            }
+
+            logger.LogError(message);
         }
     }
 }

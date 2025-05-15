@@ -29,7 +29,7 @@ namespace TwitchDownloaderCLI.Modes
 
         private static void PromptClearCache(ITaskProgress progress)
         {
-            var promptResult = UserPrompt.ShowYesNo("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly.");
+            var promptResult = UserPrompt.ShowYesNo("Are you sure you want to clear the cache? This should really only be done if the program isn't working correctly.", progress);
             if (promptResult is UserPromptResult.Yes)
             {
                 ClearTempCache(progress);
