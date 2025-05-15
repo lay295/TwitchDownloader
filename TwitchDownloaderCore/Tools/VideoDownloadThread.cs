@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -65,6 +66,7 @@ namespace TwitchDownloaderCore.Tools
                     }
                     catch (Exception ex)
                     {
+                        // Deliberately do not re-enqueue the part on exceptions
                         _logger.LogVerbose($"Error while downloading {videoPart}: {ex.Message}");
                         throw;
                     }
@@ -78,45 +80,74 @@ namespace TwitchDownloaderCore.Tools
         private async Task<bool> DownloadVideoPartAsync(string videoPartName, CancellationTokenSource cancellationTokenSource)
         {
             var partState = _downloadState.PartStates[videoPartName];
+            var partFile = Path.Combine(_cacheFolder, DownloadTools.RemoveQueryString(videoPartName));
+            var partFi = new FileInfo(partFile);
+
+            if (partState.ExpectedFileSize > 0
+                && partFi.Exists
+                && partFi.Length == partState.ExpectedFileSize + _downloadState.HeaderFileSize)
+            {
+                _logger.LogWarning($"Tried to redownload already downloaded part: {videoPartName}.");
+                return true;
+            }
 
             try
             {
                 // Check download attempts
-                const int MAX_DOWNLOAD_ATTEMPTS = 8;
-                if (partState.DownloadAttempts++ > MAX_DOWNLOAD_ATTEMPTS)
+                const int MAX_DOWNLOAD_ATTEMPTS = 5;
+                if (partState.DownloadAttempts++ >= MAX_DOWNLOAD_ATTEMPTS)
                 {
-                    throw new Exception($"{videoPartName} failed to download after {MAX_DOWNLOAD_ATTEMPTS} attempts.");
+                    throw new Exception($"{videoPartName} failed to download after {partState.DownloadAttempts - 1} attempts.");
                 }
 
                 // Download file
-                var partFile = Path.Combine(_cacheFolder, DownloadTools.RemoveQueryString(videoPartName));
+                long downloadSize;
                 if (partState.TryUnmute && videoPartName.Contains("-muted"))
                 {
                     var unmutedPartName = videoPartName.Replace("-muted", "");
-                    partState.ExpectedFileSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, unmutedPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
+                    downloadSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, unmutedPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
                 }
                 else
                 {
-                    partState.ExpectedFileSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, videoPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
+                    downloadSize = await DownloadTools.DownloadFileAsync(_client, new Uri(_downloadState.BaseUrl, videoPartName), partFile, _downloadState.HeaderFile, _throttleKib, _logger, cancellationTokenSource);
+                }
+
+                if (downloadSize == 0)
+                {
+                    _logger.LogWarning($"Got file size of 0B for {videoPartName}.");
+
+                    await Delay(1_000, cancellationTokenSource.Token);
+                    return false;
+                }
+
+                if (downloadSize > 0)
+                {
+                    // We don't have reports of this happening, but it's better to be safe than sorry
+                    if (partState.ExpectedFileSize > 0 && partState.ExpectedFileSize != downloadSize)
+                    {
+                        var previousDownloadSize = downloadSize;
+                        downloadSize = Math.Max(partState.ExpectedFileSize, downloadSize);
+
+                        _logger.LogWarning($"Got two different file sizes for {videoPartName}: {partState.ExpectedFileSize:N0}B and {previousDownloadSize:N0}B! Using {downloadSize:N0}B.");
+                    }
+
+                    partState.ExpectedFileSize = downloadSize;
                 }
 
                 // Check file size
-                if (partState.ExpectedFileSize > 0 && (!string.IsNullOrWhiteSpace(_downloadState.HeaderFile) || _downloadState.HeaderFileSize > 0))
+                partFi.Refresh();
+                var expectedFileSize = partState.ExpectedFileSize + _downloadState.HeaderFileSize;
+
+                // I would love to compare hashes here, but unfortunately Twitch doesn't give us a ContentMD5 header
+                if (partFi.Length != expectedFileSize)
                 {
-                    var fi = new FileInfo(partFile);
-                    var expectedFileSize = partState.ExpectedFileSize + _downloadState.HeaderFileSize;
+                    _logger.LogVerbose($"{partFile} failed to verify: expected {expectedFileSize:N0}B, got {partFi.Length:N0}B.");
 
-                    // I would love to compare hashes here, but unfortunately Twitch doesn't give us a ContentMD5 header
-                    if (fi.Length != expectedFileSize)
-                    {
-                        _logger.LogVerbose($"{partFile} failed to verify: expected {expectedFileSize:N0}B, got {fi.Length:N0}B.");
-
-                        await Delay(50, cancellationTokenSource.Token);
-                        return false;
-                    }
-
-                    CheckTsLength(partFile, fi.Length);
+                    await Delay(50, cancellationTokenSource.Token);
+                    return false;
                 }
+
+                CheckTsLength(partFile, partFi.Length);
             }
             catch (HttpRequestException ex) when (partState.TryUnmute && ex.StatusCode is HttpStatusCode.Forbidden)
             {
@@ -125,6 +156,10 @@ namespace TwitchDownloaderCore.Tools
                 _logger.LogVerbose($"Received {(int)ex.StatusCode}: {ex.StatusCode} when trying to unmute {videoPartName}. Disabling {nameof(partState.TryUnmute)}.");
 
                 partState.TryUnmute = false;
+
+                // Do not count trying to unmute as a download attempt
+                Debug.Assert(partState.DownloadAttempts > 0);
+                partState.DownloadAttempts--;
 
                 await Delay(50, cancellationTokenSource.Token);
                 return false;

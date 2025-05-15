@@ -49,7 +49,7 @@ namespace TwitchDownloaderCore.Tools
 
             // Why are we setting a CTS CancelAfter timer? See lay295#265
             const int SIXTY_SECONDS = 60;
-            if (throttleKib == -1 || !response.Content.Headers.ContentLength.HasValue)
+            if (throttleKib <= 0 || !response.Content.Headers.ContentLength.HasValue)
             {
                 cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(SIXTY_SECONDS));
             }
@@ -59,18 +59,12 @@ namespace TwitchDownloaderCore.Tools
                 cancellationTokenSource?.CancelAfter(TimeSpan.FromSeconds(Math.Max(
                     SIXTY_SECONDS,
                     response.Content.Headers.ContentLength!.Value / ONE_KIBIBYTE / throttleKib * 8 // Allow up to 8x the shortest download time given the thread bandwidth
-                    )));
+                )));
             }
 
             switch (throttleKib)
             {
-                case -1:
-                {
-                    await using var fs = new FileStream(destinationFile, fileMode, FileAccess.Write, FileShare.Read);
-                    await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
-                    break;
-                }
-                default:
+                case > 0:
                 {
                     try
                     {
@@ -82,10 +76,16 @@ namespace TwitchDownloaderCore.Tools
                     catch (IOException ex) when (ex.Message.Contains("EOF"))
                     {
                         // If we get an exception for EOF, it may be related to the throttler. Try again without it.
-                        logger.LogVerbose($"Unexpected EOF, retrying without bandwidth throttle. Message: {ex.Message}.");
+                        logger.LogVerbose($"Unexpected EOF, retrying without bandwidth throttle. Message: {ex.Message}");
                         await Task.Delay(2_000, cancellationToken);
-                        goto case -1;
+                        goto default;
                     }
+                    break;
+                }
+                default:
+                {
+                    await using var fs = new FileStream(destinationFile, fileMode, FileAccess.Write, FileShare.Read);
+                    await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
                     break;
                 }
             }
