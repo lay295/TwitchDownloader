@@ -445,6 +445,7 @@ namespace TwitchDownloaderWPF
             {
                 Settings.Default.RecentChannels.Clear();
                 currentChannel = null;
+                ComboChannel.Text = "";
                 UpdateRecentChannels();
             }
 
@@ -467,17 +468,16 @@ namespace TwitchDownloaderWPF
                 recentChannels.RemoveAt(recentChannels.Count - 1);
             }
 
+            var oldText = ComboChannel.Text;
+
             ComboChannel.Items.Clear();
             foreach (var channel in recentChannels)
             {
                 ComboChannel.Items.Add(new ComboBoxItem { Content = channel });
             }
 
-            // Select the most recent channel, if there is one
-            if (recentChannels.Count > 0)
-            {
-                ComboChannel.SelectedIndex = 0;
-            }
+            // Restore the previous text
+            ComboChannel.Text = oldText;
 
             ComboChannel.Items.Add(_comboBoxItemClearChannels);
 
