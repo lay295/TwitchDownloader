@@ -37,7 +37,7 @@ namespace TwitchDownloaderCLI.Tools
             return null;
         }
 
-        private static FileInfo PromptUser(FileInfo fileInfo)
+        private FileInfo PromptUser(FileInfo fileInfo)
         {
             // Deliberate use of Console.WriteLine instead of logger. Do not change.
             Console.WriteLine($"The file '{fileInfo.FullName}' already exists.");
@@ -45,8 +45,16 @@ namespace TwitchDownloaderCLI.Tools
             while (true)
             {
                 Console.Write("[O] Overwrite / [R] Rename / [E] Exit: ");
-                var userInput = Console.ReadLine()!.Trim().ToLower();
-                switch (userInput)
+
+                var userInput = Console.ReadLine();
+                if (userInput is null)
+                {
+                    Console.WriteLine();
+                    _logger.LogError("Could not read user input.");
+                    Environment.Exit(1);
+                }
+
+                switch (userInput.Trim().ToLower())
                 {
                     case "o" or "overwrite":
                         return fileInfo;
