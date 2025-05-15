@@ -50,7 +50,7 @@ namespace TwitchDownloaderCLI.Tools
                 if (userInput is null)
                 {
                     Console.WriteLine();
-                    _logger.LogError("Could not read user input.");
+                    _logger.LogError("Could not read user input. Please specify the desired collision behavior with the CLI argument and try again.");
                     Environment.Exit(1);
                 }
 
