@@ -33,6 +33,7 @@ namespace TwitchDownloaderCore
         };
 
         private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
+        private const string SEVEN_TV_PROXY_HOST = "7tv-imageproxy.twitcharchives.workers.dev";
 
         public static async Task<GqlVideoResponse> GetVideoInfo(long videoId)
         {
@@ -398,6 +399,13 @@ namespace TwitchDownloaderCore
                     logger.LogVerbose($"{stvEmote.name} has disallowed flags, skipping. Flags: {emoteFlags}.");
                     continue;
                 }
+
+                // 7TV emotes are not available over TLS 1.2, so we need to use a proxy for now
+                emoteHost.url = Regex.Replace(
+                    emoteHost.url,
+                    @"^(//)[^/]+",
+                    m => $"{m.Groups[1].Value}{SEVEN_TV_PROXY_HOST}"
+                );
 
                 var emoteUrl = $"https:{emoteHost.url}/[scale]x.{emoteFormat}";
                 var emoteResponse = new EmoteResponseItem { Id = stvEmote.id, Code = stvEmote.name, ImageType = emoteFormat, ImageUrl = emoteUrl };
