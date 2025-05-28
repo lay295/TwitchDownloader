@@ -246,9 +246,9 @@
                 <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
+        <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="1">
             <TextBlock Text="{lex:Loc LogHeader}" Foreground="{DynamicResource AppText}"/>
-            <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+            <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" VerticalScrollBarVisibility="Auto" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
                         <Setter Property="Margin" Value="0" />
@@ -256,6 +256,7 @@
                 </RichTextBox.Resources>
             </RichTextBox>
         </StackPanel>
+        <Button x:Name="BtnClearLog" Grid.Column="4" Grid.Row="3" MinWidth="50" Content="{lex:Loc ClearLog}" Click="BtnClearLog_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         <!--STATUS BAR-->
         <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
             <StatusBarItem Padding="10,5,0,5">

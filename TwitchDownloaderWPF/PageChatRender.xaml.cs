@@ -425,6 +425,13 @@ namespace TwitchDownloaderWPF
             );
         }
 
+        private void BtnClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            textLog.Dispatcher.BeginInvoke(() =>
+                textLog.Document.Blocks.Clear()
+            );
+        }
+
         public void SetImage(string imageUri, bool isGif)
         {
             var image = new BitmapImage();
