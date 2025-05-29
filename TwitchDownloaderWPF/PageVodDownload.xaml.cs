@@ -337,6 +337,13 @@ namespace TwitchDownloaderWPF
             );
         }
 
+        private void BtnClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            textLog.Dispatcher.BeginInvoke(() =>
+                textLog.Document.Blocks.Clear()
+            );
+        }
+
         private void Page_Initialized(object sender, EventArgs e)
         {
             SetEnabled(false);

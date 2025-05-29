@@ -1046,4 +1046,7 @@
   <data name="ClearRecentChannels" xml:space="preserve">
     <value>清除最近的頻道</value>
   </data>
+  <data name="ClearLog" xml:space="preserve">
+    <value>Clear Log</value>
+  </data>
 </root>
