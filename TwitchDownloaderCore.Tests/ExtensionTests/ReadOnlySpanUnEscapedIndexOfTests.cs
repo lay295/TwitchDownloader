@@ -102,14 +102,15 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
         }
 
         [Fact]
-        public void Throws_WhenImbalancedQuoteChar()
+        public void DoesNotFind_WhenImbalancedQuotes()
         {
-            Assert.Throws<FormatException>(() =>
-            {
-                const char CHAR_TO_FIND = 'F';
-                ReadOnlySpan<char> str = "SORRY \"FOR TRAFFIC NaM";
-                str.UnEscapedIndexOf(CHAR_TO_FIND);
-            });
+            ReadOnlySpan<char> str = "SORRY \"FOR TRAFFIC NaM";
+            const char CHAR_TO_FIND = 'F';
+            const int CHAR_INDEX = -1;
+
+            var actual = str.UnEscapedIndexOf(CHAR_TO_FIND);
+
+            Assert.Equal(CHAR_INDEX, actual);
         }
     }
 }

@@ -89,7 +89,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             var success = str.TryReplaceNonEscaped(destination, 'R', 'W');
 
-            Assert.False(success);
+            Assert.True(success);
+            Assert.Equal(str, destination);
         }
 
         [Fact]
