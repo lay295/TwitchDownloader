@@ -200,6 +200,7 @@ namespace TwitchDownloaderWPF
                 RadioEmojiTwemoji.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.TwitterTwemoji;
                 RadioEmojiNone.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.None;
 
+                comboBadges.SelectedItems.Clear();
                 var badgeMask = (ChatBadgeType)Settings.Default.ChatBadgeMask;
                 foreach (CheckComboBoxItem item in comboBadges.Items)
                 {
@@ -214,6 +215,8 @@ namespace TwitchDownloaderWPF
                     if (container.Name == Settings.Default.VideoContainer)
                     {
                         comboFormat.SelectedItem = container;
+
+                        comboCodec.Items.Clear();
                         foreach (Codec codec in container.SupportedCodecs)
                         {
                             comboCodec.Items.Add(codec);
@@ -222,6 +225,7 @@ namespace TwitchDownloaderWPF
                                 comboCodec.SelectedItem = codec;
                             }
                         }
+
                         break;
                     }
                 }
