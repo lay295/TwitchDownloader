@@ -49,6 +49,7 @@ namespace TwitchDownloaderCore.Models
             private const string PLAYLIST_TYPE_KEY = "#EXT-X-PLAYLIST-TYPE:";
             private const string MEDIA_SEQUENCE_KEY = "#EXT-X-MEDIA-SEQUENCE:";
             private const string MAP_KEY = "#EXT-X-MAP:";
+            private const string SESSION_DATA_KEY = "#EXT-X-SESSION-DATA:";
             private const string TWITCH_LIVE_SEQUENCE_KEY = "#EXT-X-TWITCH-LIVE-SEQUENCE:";
             private const string TWITCH_ELAPSED_SECS_KEY = "#EXT-X-TWITCH-ELAPSED-SECS:";
             private const string TWITCH_TOTAL_SECS_KEY = "#EXT-X-TWITCH-TOTAL-SECS:";
@@ -60,6 +61,12 @@ namespace TwitchDownloaderCore.Models
             public PlaylistType? Type { get; init; }
             public uint? MediaSequence { get; init; }
             public ExtMap Map { get; init; }
+            private Dictionary<string, string> _sessionData;
+            public IReadOnlyDictionary<string, string> SessionData
+            {
+                get => _sessionData ??= new Dictionary<string, string>();
+                init => _sessionData = new Dictionary<string, string>(value);
+            }
 
             // Twitch specific
             public uint? TwitchLiveSequence { get; init; }
@@ -67,8 +74,12 @@ namespace TwitchDownloaderCore.Models
             public decimal? TwitchTotalSeconds { get; init; }
 
             // Other headers that we don't have dedicated properties for. Useful for debugging.
-            private List<KeyValuePair<string, string>> _unparsedValues = new();
-            public IReadOnlyList<KeyValuePair<string, string>> UnparsedValues => _unparsedValues;
+            private List<KeyValuePair<string, string>> _unparsedValues;
+            public IReadOnlyList<KeyValuePair<string, string>> UnparsedValues
+            {
+                get => _unparsedValues ??= new List<KeyValuePair<string, string>>();
+                init => _unparsedValues = new List<KeyValuePair<string, string>>(value);
+            }
 
             public override string ToString()
             {
@@ -98,6 +109,13 @@ namespace TwitchDownloaderCore.Models
 
                 if (Map is not null)
                     sb.AppendKeyValue(MAP_KEY, Map.ToString(), itemSeparator);
+
+                foreach (var (id, value) in _sessionData)
+                {
+                    sb.Append(SESSION_DATA_KEY);
+                    sb.AppendKeyQuoteValue("DATA-ID=\"", id, ",");
+                    sb.AppendKeyQuoteValue("VALUE=\"", value, itemSeparator);
+                }
 
                 foreach (var (key, value) in _unparsedValues)
                 {
