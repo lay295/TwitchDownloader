@@ -179,6 +179,7 @@ namespace TwitchDownloaderCore.Models
                 private PlaylistType? _type;
                 private uint? _mediaSequence;
                 private ExtMap _map;
+                private readonly Dictionary<string, string> _sessionData = new();
 
                 // Twitch specific
                 private uint? _twitchLiveSequence;
@@ -228,6 +229,39 @@ namespace TwitchDownloaderCore.Models
                     {
                         _map = ExtMap.Parse(text);
                     }
+                    else if (text.StartsWith(SESSION_DATA_KEY))
+                    {
+                        text = text[SESSION_DATA_KEY.Length..];
+
+                        string id = null;
+                        string value = null;
+                        do
+                        {
+                            text = text.TrimStart();
+
+                            const string DATA_ID_KEY = "DATA-ID=\"";
+                            const string VALUE_KEY = "VALUE=\"";
+                            if (text.StartsWith(DATA_ID_KEY))
+                            {
+                                id = ParsingHelpers.ParseStringValue(text, DATA_ID_KEY);
+                            }
+                            else if (text.StartsWith(VALUE_KEY))
+                            {
+                                value = ParsingHelpers.ParseStringValue(text, VALUE_KEY);
+                            }
+
+                            var nextIndex = text.UnEscapedIndexOf(',');
+                            if (nextIndex == -1)
+                                break;
+
+                            text = text[(nextIndex + 1)..];
+                        } while (true);
+
+                        if (id is not null)
+                        {
+                            _sessionData[id] = value;
+                        }
+                    }
                     else if (text.StartsWith(TWITCH_LIVE_SEQUENCE_KEY))
                     {
                         _twitchLiveSequence = ParsingHelpers.ParseUIntValue(text, TWITCH_LIVE_SEQUENCE_KEY);
@@ -269,6 +303,7 @@ namespace TwitchDownloaderCore.Models
                         Type = _type,
                         MediaSequence = _mediaSequence,
                         Map = _map,
+                        _sessionData = _sessionData,
                         TwitchLiveSequence = _twitchLiveSequence,
                         TwitchElapsedSeconds = _twitchElapsedSeconds,
                         TwitchTotalSeconds = _twitchTotalSeconds,
