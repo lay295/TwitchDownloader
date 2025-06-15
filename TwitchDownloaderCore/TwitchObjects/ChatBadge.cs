@@ -72,12 +72,37 @@ namespace TwitchDownloaderCore.TwitchObjects
             };
         }
 
-        public void Resize(double newScale)
+        /// <inheritdoc cref="TwitchEmote.SnapResize"/>
+        public void SnapResize(int height, int snapThreshold)
         {
             foreach (var (versionName, bitmap) in Versions)
             {
-                SKImageInfo imageInfo = new SKImageInfo((int)(bitmap.Width * newScale), (int)(bitmap.Height * newScale));
-                SKBitmap newBitmap = new SKBitmap(imageInfo);
+                var bitmapInfo = bitmap.Info;
+
+                if (snapThreshold != 0)
+                {
+                    var o = (height + snapThreshold) % bitmapInfo.Height;
+                    if (o <= snapThreshold * 2)
+                    {
+                        height += snapThreshold - o;
+                    }
+                }
+
+                var imageInfo = new SKImageInfo((int)(height / (double)bitmap.Height * bitmap.Width), height);
+                var newBitmap = new SKBitmap(imageInfo);
+                bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
+                bitmap.Dispose();
+                newBitmap.SetImmutable();
+                Versions[versionName] = newBitmap;
+            }
+        }
+
+        public void Scale(double newScale)
+        {
+            foreach (var (versionName, bitmap) in Versions)
+            {
+                var imageInfo = new SKImageInfo((int)(bitmap.Width * newScale), (int)(bitmap.Height * newScale));
+                var newBitmap = new SKBitmap(imageInfo);
                 bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
                 bitmap.Dispose();
                 newBitmap.SetImmutable();
