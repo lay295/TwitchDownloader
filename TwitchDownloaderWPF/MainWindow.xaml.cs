@@ -34,14 +34,6 @@ namespace TwitchDownloaderWPF
         public MainWindow()
         {
             InitializeComponent();
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-            if (Settings.Default.UpgradeRequired)
-            {
-                Settings.Default.Upgrade();
-                Settings.Default.UpgradeRequired = false;
-                Settings.Default.Save();
-            }
         }
 
         private void btnVodDownload_Click(object sender, RoutedEventArgs e)
