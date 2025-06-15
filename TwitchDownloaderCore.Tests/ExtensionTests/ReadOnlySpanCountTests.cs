@@ -5,10 +5,10 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
     public class ReadOnlySpanCountTests
     {
         [Fact]
-        public void ReturnsNegativeOneWhenNotPresent()
+        public void ReturnsZero_WhenNotPresent()
         {
             ReadOnlySpan<char> str = "SORRY FOR THE TRAFFIC NaM";
-            const int EXPECTED = -1;
+            const int EXPECTED = 0;
 
             var actual = str.Count('L');
 
@@ -16,10 +16,10 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
         }
 
         [Fact]
-        public void ReturnsNegativeOneForEmptyString()
+        public void ReturnsZero_ForEmptyString()
         {
             ReadOnlySpan<char> str = "";
-            const int EXPECTED = -1;
+            const int EXPECTED = 0;
 
             var actual = str.Count('L');
 

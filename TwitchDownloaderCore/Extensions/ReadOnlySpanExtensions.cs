@@ -195,7 +195,7 @@ namespace TwitchDownloaderCore.Extensions
         public static int Count(this ReadOnlySpan<char> str, char character)
         {
             if (str.IsEmpty)
-                return -1;
+                return 0;
 
             var count = 0;
             var temp = str;
@@ -207,7 +207,7 @@ namespace TwitchDownloaderCore.Extensions
                 temp = temp[(index + 1)..];
             }
 
-            return count == 0 ? -1 : count;
+            return count;
         }
     }
 }
