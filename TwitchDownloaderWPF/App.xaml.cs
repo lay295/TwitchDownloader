@@ -17,6 +17,8 @@ namespace TwitchDownloaderWPF
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            UpgradeSettings();
+
             base.OnStartup(e);
 
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
@@ -36,6 +38,16 @@ namespace TwitchDownloaderWPF
                 WindowStartupLocation = WindowStartupLocation.CenterScreen
             };
             MainWindow.Show();
+        }
+
+        private static void UpgradeSettings()
+        {
+            if (Settings.Default.UpgradeRequired)
+            {
+                Settings.Default.Upgrade();
+                Settings.Default.UpgradeRequired = false;
+                Settings.Default.Save();
+            }
         }
 
         private static void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
