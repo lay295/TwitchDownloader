@@ -122,6 +122,9 @@ namespace TwitchDownloaderCore.Models
 
         public static IVideoQualities<M3U8.Stream> FromM3U8(M3U8 m3u8)
         {
+            // Parse unavailable media if needed
+            m3u8 = m3u8.WithUnavailableMedia();
+
             // Sort input
             m3u8.SortStreamsByQuality();
 
