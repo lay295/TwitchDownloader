@@ -47,8 +47,8 @@ namespace TwitchDownloaderCore.Extensions
 
                         if (i == -1)
                         {
-                            destination.Clear();
-                            return false;
+                            // The rest of the string is escaped
+                            return true;
                         }
 
                         break;
@@ -95,7 +95,7 @@ namespace TwitchDownloaderCore.Extensions
         public static int UnEscapedIndexOf(this ReadOnlySpan<char> str, char character)
         {
             if (character is '\\' or '\'' or '\"')
-                throw new ArgumentOutOfRangeException(nameof(character), character, "Escape characters are not supported.");
+                throw new ArgumentOutOfRangeException(nameof(character), character, "Searching for escape characters is not supported.");
 
             var firstIndex = str.IndexOf(character);
             if (firstIndex == -1)
@@ -119,8 +119,12 @@ namespace TwitchDownloaderCore.Extensions
                     case '\"':
                     {
                         var closeQuoteMark = FindCloseQuoteChar(str, i, length, readChar);
+
                         if (closeQuoteMark == -1)
-                            throw new FormatException($"Unbalanced quote mark at {i}.");
+                        {
+                            // The rest of the string is escaped
+                            return -1;
+                        }
 
                         i = closeQuoteMark;
 
@@ -146,7 +150,7 @@ namespace TwitchDownloaderCore.Extensions
             const string ESCAPE_CHARS = @"\'""";
 
             if (characters.IndexOfAny(ESCAPE_CHARS) != -1)
-                throw new ArgumentOutOfRangeException(nameof(characters), characters.ToString(), "Escape characters are not supported.");
+                throw new ArgumentOutOfRangeException(nameof(characters), characters.ToString(), "Searching for escape characters is not supported.");
 
             var firstIndex = str.IndexOfAny(characters);
             if (firstIndex == -1)
@@ -170,8 +174,12 @@ namespace TwitchDownloaderCore.Extensions
                     case '\"':
                     {
                         var closeQuoteMark = FindCloseQuoteChar(str, i, length, readChar);
+
                         if (closeQuoteMark == -1)
-                            throw new FormatException($"Unbalanced quote mark at {i}.");
+                        {
+                            // The rest of the string is escaped
+                            return -1;
+                        }
 
                         i = closeQuoteMark;
 
