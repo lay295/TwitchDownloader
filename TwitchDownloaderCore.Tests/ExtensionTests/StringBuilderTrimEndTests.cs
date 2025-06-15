@@ -3,7 +3,7 @@ using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderCore.Tests.ExtensionTests
 {
-    public class StringBuilderExtensionTests
+    public class StringBuilderTrimEndTests
     {
         [Theory]
         [InlineData("Foo", "o", "F")]
