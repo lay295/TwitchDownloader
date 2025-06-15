@@ -280,6 +280,13 @@ namespace TwitchDownloaderWPF
             );
         }
 
+        private void BtnClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            textLog.Dispatcher.BeginInvoke(() =>
+                textLog.Document.Blocks.Clear()
+            );
+        }
+
         public ChatDownloadOptions GetOptions(string filename)
         {
             ChatDownloadOptions options = new ChatDownloadOptions();

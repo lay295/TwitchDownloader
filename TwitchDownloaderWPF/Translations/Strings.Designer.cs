@@ -492,6 +492,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Clear Log.
+        /// </summary>
+        public static string ClearLog {
+            get {
+                return ResourceManager.GetString("ClearLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Clear Recent Channels.
         /// </summary>
         public static string ClearRecentChannels {
