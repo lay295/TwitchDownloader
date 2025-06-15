@@ -1694,16 +1694,13 @@ namespace TwitchDownloaderCore
 
             var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
+            var newHeight = (int)Math.Round(36 * renderOptions.ReferenceScale * renderOptions.BadgeScale);
+            var snapThreshold = (int)Math.Round(1 * renderOptions.ReferenceScale);
             foreach (var badge in badgeTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // Assume badges are always 2x scale, not 1x or 4x
-                var newScale = renderOptions.ReferenceScale * renderOptions.BadgeScale;
-                if (Math.Abs(newScale - 1.0) > 0.01)
-                {
-                    badge.Resize(newScale);
-                }
+                badge.SnapResize(newHeight, snapThreshold);
             }
 
             return badgeTask;
@@ -1713,16 +1710,13 @@ namespace TwitchDownloaderCore
         {
             var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
+            var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
+            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
             foreach (var emote in emoteTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // Assume emojis are 4x scale
-                double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
-                if (Math.Abs(newScale - 1.0) > 0.01)
-                {
-                    emote.Resize(newScale);
-                }
+                emote.SnapResize(newHeight, snapThreshold);
             }
 
             return emoteTask;
@@ -1733,16 +1727,13 @@ namespace TwitchDownloaderCore
             var emoteThirdTask = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes,
                 renderOptions.StvEmotes, renderOptions.AllowUnlistedEmotes, renderOptions.Offline, cancellationToken);
 
+            var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
+            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
             foreach (var emote in emoteThirdTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // Assume emojis are 4x scale
-                double newScale = emote.ImageScale * 0.5 * renderOptions.ReferenceScale * renderOptions.EmoteScale;
-                if (Math.Abs(newScale - 1.0) > 0.01)
-                {
-                    emote.Resize(newScale);
-                }
+                emote.SnapResize(newHeight, snapThreshold);
             }
 
             return emoteThirdTask;
@@ -1752,16 +1743,13 @@ namespace TwitchDownloaderCore
         {
             var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, _cacheDir, chatRoot.streamer.id.ToString(), _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
+            var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
+            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
             foreach (var cheer in cheerTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                //Assume cheermotes are always 2x scale, not 1x or 4x
-                var newScale = renderOptions.ReferenceScale * renderOptions.EmoteScale;
-                if (Math.Abs(newScale - 1.0) > 0.01)
-                {
-                    cheer.Resize(newScale);
-                }
+                cheer.SnapResize(newHeight, snapThreshold);
             }
 
             return cheerTask;
@@ -1771,8 +1759,7 @@ namespace TwitchDownloaderCore
         {
             var emojis = await TwitchHelper.GetEmojis(_cacheDir, renderOptions.EmojiVendor, _progress, cancellationToken);
 
-            //Assume emojis are 4x (they're 72x72)
-            double emojiScale = 0.5 * renderOptions.ReferenceScale * renderOptions.EmojiScale;
+            var newHeight = (int)Math.Round(54 * renderOptions.ReferenceScale * renderOptions.EmojiScale);
 
             // We can't just enumerate the dictionary because of the version checks
             string[] emojiKeys = emojis.Keys.ToArray();
@@ -1782,7 +1769,7 @@ namespace TwitchDownloaderCore
 
                 SKBitmap bitmap = emojis[emojiKey];
                 SKImageInfo oldEmojiInfo = bitmap.Info;
-                SKImageInfo imageInfo = new SKImageInfo((int)(oldEmojiInfo.Width * emojiScale), (int)(oldEmojiInfo.Height * emojiScale));
+                SKImageInfo imageInfo = new SKImageInfo((int)(newHeight / (double)oldEmojiInfo.Height * oldEmojiInfo.Width), newHeight);
                 SKBitmap newBitmap = new SKBitmap(imageInfo);
                 bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
                 bitmap.Dispose();

@@ -25,11 +25,20 @@ namespace TwitchDownloaderCore.TwitchObjects
             return returnPair;
         }
 
-        public void Resize(double newScale)
+        /// <inheritdoc cref="TwitchEmote.SnapResize"/>
+        public void SnapResize(int newScale, int snapThreshold)
         {
-            for (int i = 0; i < tierList.Count; i++)
+            for (var i = 0; i < tierList.Count; i++)
             {
-                tierList[i].Value.Resize(newScale);
+                tierList[i].Value.SnapResize(newScale, snapThreshold);
+            }
+        }
+
+        public void Scale(double newScale)
+        {
+            for (var i = 0; i < tierList.Count; i++)
+            {
+                tierList[i].Value.Scale(newScale);
             }
         }
 
