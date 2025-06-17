@@ -1043,4 +1043,7 @@
   <data name="ClearRecentChannels" xml:space="preserve">
     <value>Limpar Canais Recentes</value>
   </data>
+  <data name="ClearLog" xml:space="preserve">
+    <value>Clear Log</value>
+  </data>
 </root>

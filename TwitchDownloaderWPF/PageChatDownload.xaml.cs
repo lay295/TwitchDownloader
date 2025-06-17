@@ -275,8 +275,17 @@ namespace TwitchDownloaderWPF
 
         private void AppendLog(string message)
         {
+            BtnClearLog.IsEnabled = true;
             textLog.Dispatcher.BeginInvoke(() =>
                 textLog.AppendText(message + Environment.NewLine)
+            );
+        }
+
+        private void BtnClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            BtnClearLog.IsEnabled = false;
+            textLog.Dispatcher.BeginInvoke(() =>
+                textLog.Document.Blocks.Clear()
             );
         }
 

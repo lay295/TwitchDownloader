@@ -248,14 +248,16 @@
         </StackPanel>
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
             <TextBlock Text="{lex:Loc LogHeader}" Foreground="{DynamicResource AppText}"/>
-            <RichTextBox Margin="0,5" IsReadOnly="True" Name="textLog" Height="230" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+            <RichTextBox Margin="0,3" IsReadOnly="True" Name="textLog" Height="230" VerticalScrollBarVisibility="Auto" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
                         <Setter Property="Margin" Value="0" />
                     </Style>
                 </RichTextBox.Resources>
             </RichTextBox>
+            <Button x:Name="BtnClearLog" MinWidth="50" IsEnabled="False" Content="{lex:Loc ClearLog}" Click="BtnClearLog_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
+
         <!--STATUS BAR-->
         <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
             <StatusBarItem Padding="10,5,0,5">
