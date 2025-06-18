@@ -264,6 +264,15 @@ namespace TwitchDownloaderCore.Chat
                     }
                 }
             }
+
+            // 300x300 avatars are overkill for chat rendering
+            foreach (var comment in chatRoot.comments)
+            {
+                if (comment.commenter.logo.Contains("300x300"))
+                {
+                    comment.commenter.logo = comment.commenter.logo.Replace("300x300", "70x70");
+                }
+            }
         }
 #pragma warning restore CS0618 // Type or member is obsolete
 
