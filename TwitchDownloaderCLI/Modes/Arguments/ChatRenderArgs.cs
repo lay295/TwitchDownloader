@@ -108,6 +108,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("readable-colors", Default = true, HelpText = "Increases the contrast of usernames against the background or outline color.")]
         public bool? AdjustUsernameVisibility { get; set; }
 
+        [Option("avatars", Default = false, HelpText = "Renders the avatars of users next to their username and badges.")]
+        public bool RenderUserAvatars { get; set; }
+
         [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, and bits from the input json.")]
         public bool Offline { get; set; }
 
@@ -131,6 +134,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("scale-emoji", Default = 1.0, HelpText = "Number to scale emoji images.")]
         public double ScaleEmoji { get; set; }
+
+        [Option("scale-avatar", Default = 1.0, HelpText = "Number to scale avatar images.")]
+        public double ScaleAvatar { get; set; }
 
         [Option("scale-vertical", Default = 1.0, HelpText = "Number to scale vertical padding.")]
         public double ScaleVertical { get; set; }

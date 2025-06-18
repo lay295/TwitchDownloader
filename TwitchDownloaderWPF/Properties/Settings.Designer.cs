@@ -1004,5 +1004,29 @@ namespace TwitchDownloaderWPF.Properties {
                 this["RecentChannels"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RenderUserAvatars {
+            get {
+                return ((bool)(this["RenderUserAvatars"]));
+            }
+            set {
+                this["RenderUserAvatars"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double AvatarScale {
+            get {
+                return ((double)(this["AvatarScale"]));
+            }
+            set {
+                this["AvatarScale"] = value;
+            }
+        }
     }
 }

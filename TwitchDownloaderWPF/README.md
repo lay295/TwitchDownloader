@@ -195,6 +195,8 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Offline**: Render without making a single network request; use only information and images embedded inside the chat JSON.
 
+**User Avatars**: Enables user avatars in the render.
+
 **Chat Badge Filter**: Do not render the specified badges. For example in Figure 5.2, the *No Audio* or *No Video* badges will never be rendered.
 
 **Ignore Users List**: A comma-separated, case-insensitive list of users to be removed from the render. For example, in Figure 5.2 Streamlabs, StreamElements, and Nightbot will be removed from the render.
@@ -210,6 +212,8 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 **Badge Scale**: The scale of badges.
 
 **Emoji Scale**: The scale of emojis.
+
+**Avatar Scale**: The scale of avatars.
 
 **Outline Scale**: The thickness of render outlines.
 
@@ -259,7 +263,7 @@ If render speeds feel like they are too slow, try any of the following:
 | Reduce render height     | Increase update rate          | Disable sub messages                      |
 | Reduce framerate         | Switch to system emojis       | Disable outlines                          |
 | Disable generate mask    |                               | Disable alternating backgrounds           |
-| Disable image sharpening |                               |                                           |
+| Disable image sharpening |                               | Disable User Avatars                      |
 | Change codec to H.264    |                               |                                           |
 
 ### Task Queue

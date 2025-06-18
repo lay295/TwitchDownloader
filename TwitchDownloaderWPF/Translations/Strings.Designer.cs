@@ -159,6 +159,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Avatar Scale:.
+        /// </summary>
+        public static string AvatarScale {
+            get {
+                return ResourceManager.GetString("AvatarScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Background Color:.
         /// </summary>
         public static string BackgroundColor {
@@ -1811,6 +1820,15 @@ namespace TwitchDownloaderWPF.Translations {
         public static string RenderTabScaling {
             get {
                 return ResourceManager.GetString("RenderTabScaling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Avatars:.
+        /// </summary>
+        public static string RenderUserAvatars {
+            get {
+                return ResourceManager.GetString("RenderUserAvatars", resourceCulture);
             }
         }
         

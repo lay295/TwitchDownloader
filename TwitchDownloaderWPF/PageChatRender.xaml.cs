@@ -116,6 +116,7 @@ namespace TwitchDownloaderWPF
                 EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture),
                 BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture),
                 EmojiScale = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture),
+                AvatarScale = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture),
                 SidePaddingScale = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture),
                 SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture),
                 WordSpacingScale = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture),
@@ -139,6 +140,7 @@ namespace TwitchDownloaderWPF
                 SubMessages = checkSub.IsChecked.GetValueOrDefault(),
                 ChatBadges = checkBadge.IsChecked.GetValueOrDefault(),
                 Offline = checkOffline.IsChecked.GetValueOrDefault(),
+                RenderUserAvatars = checkRenderAvatars.IsChecked.GetValueOrDefault(),
                 AllowUnlistedEmotes = true,
                 DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault(),
                 AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault(),
@@ -182,6 +184,7 @@ namespace TwitchDownloaderWPF
                 textEmoteScale.Text = Settings.Default.EmoteScale.ToString("0.0#");
                 textEmojiScale.Text = Settings.Default.EmojiScale.ToString("0.0#");
                 textBadgeScale.Text = Settings.Default.BadgeScale.ToString("0.0#");
+                textAvatarScale.Text = Settings.Default.AvatarScale.ToString("0.0#");
                 textVerticalScale.Text = Settings.Default.VerticalSpacingScale.ToString("0.0#");
                 textSidePaddingScale.Text = Settings.Default.LeftSpacingScale.ToString("0.0#");
                 textSectionHeightScale.Text = Settings.Default.SectionHeightScale.ToString("0.0#");
@@ -193,6 +196,7 @@ namespace TwitchDownloaderWPF
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
+                checkRenderAvatars.IsChecked = Settings.Default.RenderUserAvatars;
                 checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
                 checkAlternateMessageBackgrounds.IsChecked = Settings.Default.AlternateMessageBackgrounds;
                 checkAdjustUsernameVisibility.IsChecked = Settings.Default.AdjustUsernameVisibility;
@@ -292,6 +296,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.SubMessages = checkSub.IsChecked.GetValueOrDefault();
             Settings.Default.ChatBadges = checkBadge.IsChecked.GetValueOrDefault();
             Settings.Default.Offline = checkOffline.IsChecked.GetValueOrDefault();
+            Settings.Default.RenderUserAvatars = checkRenderAvatars.IsChecked.GetValueOrDefault();
             Settings.Default.DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault();
             Settings.Default.AlternateMessageBackgrounds = checkAlternateMessageBackgrounds.IsChecked.GetValueOrDefault();
             Settings.Default.AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault();
@@ -330,6 +335,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.EmojiScale = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.AvatarScale = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.LeftSpacingScale = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
@@ -368,6 +374,7 @@ namespace TwitchDownloaderWPF
                 _ = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);

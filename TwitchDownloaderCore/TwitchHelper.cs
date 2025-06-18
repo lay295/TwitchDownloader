@@ -944,6 +944,60 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
+        public static async Task<Dictionary<string, SKBitmap>> GetAvatars(List<Comment> comments, string[] defaultAvatars, string cacheFolder, ITaskLogger logger, bool offline = false, CancellationToken cancellationToken = default)
+        {
+            // TODO: Support offline avatar fetching
+            if (offline)
+            {
+                return new Dictionary<string, SKBitmap>();
+            }
+
+            var urls = new HashSet<string>(defaultAvatars ?? Array.Empty<string>());
+            foreach (var comment in comments)
+            {
+                var logo = comment.commenter.logo;
+                if (string.IsNullOrWhiteSpace(logo))
+                    continue;
+
+                urls.Add(logo);
+            }
+
+            var avatarFolder = new DirectoryInfo(Path.Combine(cacheFolder, "avatars"));
+            if (!avatarFolder.Exists)
+                avatarFolder = CreateDirectory(avatarFolder.FullName);
+
+            var avatars = new Dictionary<string, SKBitmap>();
+            foreach (var url in urls)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var avatarId = Path.GetFileNameWithoutExtension(url);
+
+                byte[] bytes;
+                try
+                {
+                    bytes = await GetImage(avatarFolder, url, avatarId, 2, "jpg",  logger, cancellationToken);
+                }
+                catch (HttpRequestException e)
+                {
+                    logger.LogVerbose($"Error while fetching {url}: {e.Message}");
+                    continue;
+                }
+
+                using var ms = new MemoryStream(bytes);
+                var bitmap = SKBitmap.Decode(ms);
+                if (bitmap is null)
+                {
+                    logger.LogWarning($"Skia was unable to decode {avatarId}.");
+                    continue;
+                }
+
+                avatars.Add(url, bitmap);
+            }
+
+            return avatars;
+        }
+
         public static FileInfo ClaimFile(string path, Func<FileInfo, FileInfo> fileAlreadyExistsCallback, ITaskLogger logger)
         {
             var fullPath = Path.GetFullPath(path);
@@ -1116,7 +1170,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{users(ids:[" + string.Join(",", idList.Select(x => "\\\"" + x + "\\\"").ToArray()) + "]){id,displayName,login,createdAt,updatedAt,description,profileImageURL(width:300)}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{users(ids:[" + string.Join(",", idList.Select(x => "\\\"" + x + "\\\"").ToArray()) + "]){id,displayName,login,createdAt,updatedAt,description,profileImageURL(width:70)}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);

@@ -292,6 +292,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--readable-colors**
 (Default: `true`) Increases the contrast of usernames against the background or outline color.
 
+**--avatars**
+(Default: `false`) Renders the avatars of users next to their username and badges
+
 **--offline**
 (Default: `false`) Render completely offline using only embedded emotes, badges, and bits from the input json.
 
@@ -315,6 +318,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 
 **--scale-emoji**
 (Default: `1.0`) Number to scale emoji images.
+
+**--scale-avatar**
+(Default: `1.0`) Number to scale avatar images.
 
 **--scale-vertical**
 (Default: `1.0`) Number to scale vertical padding.
