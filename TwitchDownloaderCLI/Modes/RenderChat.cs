@@ -72,6 +72,7 @@ namespace TwitchDownloaderCLI.Modes
                 TempFolder = inputOptions.TempFolder,
                 SubMessages = (bool)inputOptions.SubMessages!,
                 ChatBadges = (bool)inputOptions.ChatBadges!,
+                RenderUserAvatars = inputOptions.RenderUserAvatars,
                 Timestamp = inputOptions.Timestamp,
                 Offline = inputOptions.Offline,
                 EmojiVendor = inputOptions.EmojiVendor.ToLower() switch
@@ -85,6 +86,7 @@ namespace TwitchDownloaderCLI.Modes
                 EmoteScale = inputOptions.ScaleEmote,
                 BadgeScale = inputOptions.ScaleBadge,
                 EmojiScale = inputOptions.ScaleEmoji,
+                AvatarScale = inputOptions.ScaleAvatar,
                 VerticalSpacingScale = inputOptions.ScaleVertical,
                 SidePaddingScale = inputOptions.ScaleLeft,
                 SectionHeightScale = inputOptions.ScaleSectionHeight,
