@@ -11,10 +11,6 @@
   </div>
 </div>
 
-## Chat Oynatma Örneği
-
-<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
-
 ## Neler Yapabilir?
 
 - Twitch VOD'larını İndir
@@ -22,6 +18,10 @@
 - VOD'lar ve Klipler için sohbeti, ya [tüm orijinal bilgileri içeren bir JSON olarak](https://pastebin.com/raw/YDgRe6X4), bir tarayıcı HTML dosyası olarak ya da [düz metin dosyası olarak](https://pastebin.com/raw/016azeQX) indirin.
 - Daha önce oluşturulmuş bir JSON sohbet dosyasının içeriğini güncelleyin ve başka bir biçimde kaydetme seçeneğiyle kaydedin.
 - Daha önce oluşturulmuş bir JSON sohbet dosyasını kullanarak sohbeti Twitter Twemoji veya Google Noto Color emojileri ve BTTV, FFZ, 7TV statik ve animasyonlu emojilerle oynatmak için kullanın.
+
+### Chat Oynatma Örneği
+
+<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
 
 # GUI
 

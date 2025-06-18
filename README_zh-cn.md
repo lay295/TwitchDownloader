@@ -13,10 +13,6 @@
     </div>
 </div>
 
-## 聊天渲染示例
-
-<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
-
 ## 它能做什么？
 
 - 下载 Twitch 点播
@@ -24,6 +20,10 @@
 - 以 [包含所有原始信息的 JSON](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json)、浏览器 HTML 文件或 [纯文本文件](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt) 的形式下载点播和剪辑的聊天内容
 - 更新之前生成的 JSON 聊天文件的内容，并提供另一种格式的保存选项
 - 使用之前生成的 JSON 聊天文件，用 Twitter Twemoji 或 Google Noto Color 表情符号以及 BTTV、FFZ、7TV 静态和动画表情来呈现聊天内容
+
+### 聊天渲染示例
+
+<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
 
 # GUI
 

@@ -22,17 +22,17 @@ This document is also available in:
 - [**Simplified Chinese / 简体中文**](README_zh-cn.md)
 - [**Traditonal Chinese / 繁體中文**](README_zh-tw.md)
 
-## Chat Render Example
-
-<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
-
-## What can it do?
+## What Can It Do?
 
 - Download Twitch VODs
 - Download Twitch Clips
 - Download chat for VODs and Clips, in either a [JSON with all the original information](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json), a browser HTML file, or a [plain text file](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)
 - Update the contents of a previously generated JSON chat file with an option to save as another format
 - Use a previously generated JSON chat file to render the chat with Twitter Twemoji or Google Noto Color emojis and BTTV, FFZ, 7TV static and animated emotes
+
+### Chat Render Example
+
+<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
 
 # GUI
 

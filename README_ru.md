@@ -11,10 +11,6 @@
   </div>
 </div>
 
-## Пример рендера чата
-
-<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
-
 ## Что эта программа может делать?
 
 - Скачивать Twitch VODs (записи)
@@ -22,6 +18,10 @@
 - Скачивать чат для VODs и клипов, в [JSON со всей оригинальной информацией](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json), a также в браузерный HTML файл, или [обычный txt файл](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)
 - Обновить содержание сгенерированного JSON чат файла с опцией сохранить в другом формате
 - Использовать сгенерированный JSON чат файл для рендера чата с смайликами Twitter Twemoji или Google Noto Color Emojis и BTTV, FFZ, 7TV статичныими и анимированными смайликами
+
+### Пример рендера чата
+
+<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
 
 # Интерфейс
 

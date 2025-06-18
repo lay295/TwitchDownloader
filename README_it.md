@@ -13,10 +13,6 @@
 
 Questo archivio Readme potrebbe non essere aggiornato, considera la visioone del [**Readme in Inglese**](README.md)
 
-## Esempio di rendering della Chat
-
-<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
-
 ## Cosa può fare?
 
 - Scaricare i VODs di Twitch
@@ -24,6 +20,10 @@ Questo archivio Readme potrebbe non essere aggiornato, considera la visioone del
 - Scaricare la chat per i VOD e le clip, sia in un formato [JSON with all the original information](https://github.com/lay295/TwitchDownloader/files/13495494/ExampleMoonMoonJsonFile.json), un file HTML, o un [file di testo](https://github.com/lay295/TwitchDownloader/files/13495523/ExampleMoonMoonTextFile.txt)
 - Aggiornare il contenuto di un file di chat JSON generato in precedenza con un'opzione di salvataggio in un altro formato.
 - Utilizzare un file di chat JSON generato in precedenza per renderizzare la chat con le emoji di Twitter Twemoji o Google Noto Color e le emotes statiche e animate di BTTV, FFZ, 7TV.
+
+### Esempio di rendering della Chat
+
+<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
 
 # GUI
 

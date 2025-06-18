@@ -13,10 +13,6 @@
 
 **Este archivo Readme podría no estar actualizado, considere revisar el Readme en [**ingles**](README.md)**
 
-## Ejemplo de Renderizado de Chat
-
-<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
-
 ## ¿Qué puede hacer?
 
 - Descargar VODs de Twitch
@@ -24,6 +20,10 @@
 - Descargar el chat de VODs y Clips, ya sea en un archivo JSON con toda la información original, en un archivo HTML del navegador o en un archivo de texto sin formato
 - Actualizar el contenido de un archivo JSON de chat generado previamente con la opción de guardarlo en otro formato
 - Usar un archivo JSON de chat generado previamente para renderizar el chat con emojis de Twitter Twemoji o Google Noto Color, y con emotes estáticos y animados de BTTV, FFZ y 7TV
+
+### Ejemplo de Renderizado de Chat
+
+<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
 
 # Interfaz Gráfica de Usuario (GUI)
 
