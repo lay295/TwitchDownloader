@@ -1980,6 +1980,8 @@ namespace TwitchDownloaderCore
                         cheerEmote?.Dispose();
                     foreach (var (_, bitmap) in emojiCache)
                         bitmap?.Dispose();
+                    foreach (var (_, bitmap) in avatarCache)
+                        bitmap?.Dispose();
                     foreach (var (_, paint) in fallbackFontCache)
                         paint?.Dispose();
                     fontManager?.Dispose();
@@ -1993,6 +1995,7 @@ namespace TwitchDownloaderCore
                     emoteThirdList.Clear();
                     cheermotesList.Clear();
                     emojiCache.Clear();
+                    avatarCache.Clear();
                     fallbackFontCache.Clear();
 
                     // Set the root references to null to explicitly tell the garbage collector that the resources have been disposed
@@ -2002,6 +2005,7 @@ namespace TwitchDownloaderCore
                     emoteThirdList = null;
                     cheermotesList = null;
                     emojiCache = null;
+                    avatarCache = null;
                     fallbackFontCache = null;
                 }
             }
