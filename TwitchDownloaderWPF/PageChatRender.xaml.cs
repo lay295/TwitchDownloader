@@ -424,7 +424,9 @@ namespace TwitchDownloaderWPF
 
         private void AppendLog(string message)
         {
-            BtnClearLog.IsEnabled = true;
+            BtnClearLog.Dispatcher.BeginInvoke(() =>
+                BtnClearLog.IsEnabled = true
+            );
             textLog.Dispatcher.BeginInvoke(() =>
                 textLog.AppendText(message + Environment.NewLine)
             );
