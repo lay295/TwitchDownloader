@@ -99,12 +99,14 @@
                             <TextBlock Text="{lex:Loc FfzEmotes}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc StvEmotes}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc Offline}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc OfflineTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                            <TextBlock Text="{lex:Loc RenderUserAvatars}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="0,10,0,2">
                             <CheckBox x:Name="checkBTTV" HorizontalAlignment="Left" Margin="0,0,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                             <CheckBox x:Name="checkFFZ" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                             <CheckBox x:Name="checkSTV" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                             <CheckBox x:Name="checkOffline" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
+                            <CheckBox x:Name="checkRenderAvatars" HorizontalAlignment="Left" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="20,10,0,5">
                             <TextBlock Text="{lex:Loc ChatBadgeFilter}" Foreground="{DynamicResource AppText}"></TextBlock>
@@ -131,19 +133,20 @@
                             <TextBlock Text="{lex:Loc EmoteScale}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc BadgeScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc EmojiScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
+                            <TextBlock Text="{lex:Loc AvatarScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc OutlineScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc VerticalSpacingScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
-                            <TextBlock Text="{lex:Loc SectionHeightScale}" HorizontalAlignment="Right" Margin="0,14, 0,0" Foreground="{DynamicResource AppText}"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="0,10,5,5">
                             <TextBox x:Name="textEmoteScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textBadgeScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textEmojiScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                            <TextBox x:Name="textAvatarScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textOutlineScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textVerticalScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                            <TextBox x:Name="textSectionHeightScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="5,10,5,5">
+                            <TextBlock Text="{lex:Loc SectionHeightScale}" HorizontalAlignment="Right" Margin="0,14, 0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc WordSpacingScale}" HorizontalAlignment="Right" Margin="0,6,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc EmoteSpacingScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc HighlightStrokeScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
@@ -151,6 +154,7 @@
                             <TextBlock Text="{lex:Loc SidePaddingScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="0,10,5,5">
+                            <TextBox x:Name="textSectionHeightScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textWordSpaceScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textEmoteSpaceScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textAccentStrokeScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
