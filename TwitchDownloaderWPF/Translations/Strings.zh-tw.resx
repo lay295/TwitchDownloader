@@ -1049,4 +1049,10 @@
   <data name="ClearLog" xml:space="preserve">
     <value>Clear Log</value>
   </data>
+  <data name="RenderUserAvatars" xml:space="preserve">
+    <value>User Avatars:</value>
+  </data>
+  <data name="AvatarScale" xml:space="preserve">
+    <value>Avatar Scale:</value>
+  </data>
 </root>
