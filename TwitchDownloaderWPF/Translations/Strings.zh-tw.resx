@@ -150,7 +150,7 @@
     <value>瀏覽</value>
   </data>
   <data name="BttvEmotes" xml:space="preserve">
-    <value>BTTV 表情（Emote）：</value>
+    <value>BTTV 表情：</value>
   </data>
   <data name="CacheFolder" xml:space="preserve">
     <value>快取資料夾：</value>
@@ -263,16 +263,16 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedMissingTooltip" xml:space="preserve">
-    <value>嵌入遺失的表情（Emote）、徽章和 Cheermote。已嵌入的影象將保持不變。</value>
+    <value>嵌入遺失的表情、徽章和 Cheermote。已嵌入的影象將保持不變。</value>
   </data>
   <data name="EnqueueDownload" xml:space="preserve">
-    <value>預覽下載</value>
+    <value>新增至下載隊列</value>
   </data>
   <data name="EnqueueRender" xml:space="preserve">
-    <value>預覽下載</value>
+    <value>新增至繪製隊列</value>
   </data>
   <data name="EnqueueUpdate" xml:space="preserve">
-    <value>預覽更新</value>
+    <value>新增至更新隊列</value>
   </data>
   <data name="ErrorLog" xml:space="preserve">
     <value>錯誤： </value>
@@ -291,7 +291,7 @@
     <value>重設為預設值</value>
   </data>
   <data name="FfzEmotes" xml:space="preserve">
-    <value>FFZ 表情（Emote）：</value>
+    <value>FFZ 表情：</value>
   </data>
   <data name="FontColor" xml:space="preserve">
     <value>字型顏色：</value>
@@ -369,13 +369,13 @@
     <value>部分繪製</value>
   </data>
   <data name="Quality" xml:space="preserve">
-    <value>質量：</value>
+    <value>畫質：</value>
   </data>
   <data name="Render" xml:space="preserve">
     <value>繪製</value>
   </data>
   <data name="RenderFfmpegWarning" xml:space="preserve">
-    <value>僅供進階使用者使用。如果出現管道結束錯誤，這可能就是原因。</value>
+    <value>僅供進階使用者使用。若出現管道結束錯誤，原因可能出自此處。</value>
   </data>
   <data name="RenderFileFormat" xml:space="preserve">
     <value>檔案格式：</value>
@@ -393,7 +393,7 @@
     <value>FFmpeg</value>
   </data>
   <data name="RenderTabGeneral" xml:space="preserve">
-    <value>一般</value>
+    <value>常規</value>
   </data>
   <data name="RenderTabPreview" xml:space="preserve">
     <value>預覽</value>
@@ -412,7 +412,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ReplaceEmbedsTooltip" xml:space="preserve">
-    <value>取代檔案中所有嵌入的表情（Emote）、徽章和 Cheermote。所有嵌入的影象都將被覆蓋！</value>
+    <value>取代檔案中所有嵌入的表情、徽章和 Cheermote。所有嵌入的影象都將被覆蓋！</value>
   </data>
   <data name="SearchClips" xml:space="preserve">
     <value>搜尋剪輯</value>
@@ -454,7 +454,7 @@
     <value>實況主：</value>
   </data>
   <data name="StvEmotes" xml:space="preserve">
-    <value>7TV 表情（Emote）：</value>
+    <value>7TV 表情：</value>
   </data>
   <data name="SubMessages" xml:space="preserve">
     <value>訂閱資訊：</value>
@@ -469,11 +469,11 @@
     <value>任務隊列</value>
   </data>
   <data name="ThirdPartyEmotes" xml:space="preserve">
-    <value>第三方表情（Emote） </value>
+    <value>第三方表情 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
-    <value>還可將第三方表情（Emote）嵌入檔案。檔案大小會更大。</value>
+    <value>還可將第三方表情嵌入檔案。檔案大小會更大。</value>
   </data>
   <data name="TimestampFormat" xml:space="preserve">
     <value>時間戳格式：</value>
@@ -597,25 +597,25 @@
     <value>徽章比例：</value>
   </data>
   <data name="EmojiScale" xml:space="preserve">
-    <value>表情符號（Emoji）比例：</value>
+    <value>Emoji 比例：</value>
   </data>
   <data name="EmoteScale" xml:space="preserve">
-    <value>表情（Emote）比例：</value>
+    <value>表情比例：</value>
   </data>
   <data name="EmoteSpacingScale" xml:space="preserve">
-    <value>表情（Emote）間距比例：</value>
+    <value>表情間距比例：</value>
   </data>
   <data name="SidePaddingScale" xml:space="preserve">
-    <value>邊緣填充比例：</value>
+    <value>側邊距比例：</value>
   </data>
   <data name="SectionHeightScale" xml:space="preserve">
-    <value>片段高度比例：</value>
+    <value>區域高度比例：</value>
   </data>
   <data name="VerticalSpacingScale" xml:space="preserve">
-    <value>垂直間隔比例：</value>
+    <value>垂直間距比例：</value>
   </data>
   <data name="WordSpacingScale" xml:space="preserve">
-    <value>字間距比例：</value>
+    <value>詞間距比例：</value>
   </data>
   <data name="FileNotFound" xml:space="preserve">
     <value>未找到檔案： </value>
@@ -631,7 +631,7 @@
     <value>未找到 {0}。將主題還原為系統。</value>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
-    <value>散佈 </value>
+    <value>離散化 </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="MessageDispersionTooltip" xml:space="preserve">
@@ -654,7 +654,7 @@
     <value>全域設定</value>
   </data>
   <data name="TitleEnqueueOptions" xml:space="preserve">
-    <value>等待選項</value>
+    <value>隊列選項</value>
   </data>
   <data name="TitleRenderRange" xml:space="preserve">
     <value>選擇繪製速度（秒）</value>
@@ -684,11 +684,11 @@
     <value>正在取消</value>
   </data>
   <data name="MaximumThreadBandwidth" xml:space="preserve">
-    <value>執行緒最大頻寬 </value>
+    <value>最大執行緒頻寬 </value>
       <comment>Leave a trailing space</comment>
   </data>
   <data name="MaximumThreadBandwidthTooltip" xml:space="preserve">
-    <value>允許新下載執行緒使用的最大頻寬（千位元組 / 秒）。</value>
+    <value>允許新下載執行緒使用的最大頻寬（KiB/s）。</value>
   </data>
   <data name="RenderImageSharpening" xml:space="preserve">
     <value>銳化：</value>
@@ -706,7 +706,7 @@
     <value>訪問權限不足。可能需要 OAuth。</value>
   </data>
   <data name="EmojiVendor" xml:space="preserve">
-    <value>表情符號（Emoji）提供者：</value>
+    <value>Emoji 提供者：</value>
   </data>
   <data name="EmojiVendorNotoColor" xml:space="preserve">
     <value>Google</value>
@@ -721,7 +721,7 @@
     <value>你選擇了生成不透明背景的遮罩。降低背景顏色 Alpha 或停用生成遮罩。</value>
   </data>
   <data name="OutlineScale" xml:space="preserve">
-    <value>邊框比例：</value>
+    <value>描邊比例：</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
     <value>trim_start_custom、trim_end_custom 和 length_custom 格式基於</value>
@@ -807,7 +807,7 @@
     <value>開啟資料夾</value>
   </data>
   <data name="PreferredQuality" xml:space="preserve">
-    <value>首選質量：</value>
+    <value>首選畫質：</value>
   </data>
   <data name="TitleWindowOldVideoCacheManager" xml:space="preserve">
     <value>選擇要刪除的快取</value>
@@ -831,7 +831,7 @@
     <value>{0:N0} 天</value>
   </data>
   <data name="LogLevels" xml:space="preserve">
-    <value>日誌等級：</value>
+    <value>日誌級別：</value>
   </data>
   <data name="LogLevelVerbose" xml:space="preserve">
     <value>詳細</value>
@@ -921,7 +921,7 @@
     <value>記住我的選擇</value>
   </data>
   <data name="VideoTrimMode" xml:space="preserve">
-    <value>修剪模式 </value><comment>Leave a trailing space</comment>
+    <value>裁剪模式 </value><comment>Leave a trailing space</comment>
   </data>
   <data name="VideoTrimModeSafe" xml:space="preserve">
     <value>安全</value>
@@ -930,7 +930,7 @@
     <value>精確</value>
   </data>
   <data name="VideoTrimModeTooltip" xml:space="preserve">
-    <value>使用精確模式修剪的影片在前幾秒或最後幾秒可能會出現影片 / 音訊卡頓。安全模式保證不會出現卡頓，但可能會導致影片稍長。</value>
+    <value>使用精確模式裁剪的影片在前幾秒或最後幾秒可能會出現影片 / 音訊卡頓。安全模式保證不會出現卡頓，但可能會導致影片稍長。</value>
   </data>
   <data name="TaskRetry" xml:space="preserve">
     <value>重試</value>
@@ -966,22 +966,22 @@
     <value>由 11 個隨機字元組成的字串。</value>
   </data>
   <data name="FilenameParameterTrimStartTooltip" xml:space="preserve">
-    <value>影片 / 聊天的修剪開始時間，格式為 hh-mm-ss。</value>
+    <value>影片 / 聊天的裁剪開始時間，格式為 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterTrimStartCustomTooltip" xml:space="preserve">
-    <value>影片 / 聊天的修剪開始時間，格式為自訂格式。</value>
+    <value>影片 / 聊天的裁剪開始時間，格式為自訂格式。</value>
   </data>
   <data name="FilenameParameterTrimEndTooltip" xml:space="preserve">
-    <value>影片 / 聊天的修剪結束時間，格式為 hh-mm-ss。</value>
+    <value>影片 / 聊天的裁剪結束時間，格式為 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterTrimEndCustomTooltip" xml:space="preserve">
-    <value>影片 / 聊天的修剪結束時間，格式為自訂格式。</value>
+    <value>影片 / 聊天的裁剪結束時間，格式為自訂格式。</value>
   </data>
   <data name="FilenameParameterLengthTooltip" xml:space="preserve">
-    <value>影片 / 剪輯 / 聊天的長度（不包括修剪），格式為 hh-mm-ss。</value>
+    <value>影片 / 剪輯 / 聊天的長度（不包括裁剪），格式為 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterLengthCustomTooltip" xml:space="preserve">
-    <value>影片 / 剪輯 / 聊天的長度（不包括修剪），格式為自訂格式。</value>
+    <value>影片 / 剪輯 / 聊天的長度（不包括裁剪），格式為自訂格式。</value>
   </data>
   <data name="FilenameParameterViewsTooltip" xml:space="preserve">
     <value>影片 / 剪輯的觀看次數。</value>
@@ -993,7 +993,7 @@
     <value>檔案衝突行為</value>
   </data>
   <data name="FileCollisionBehaviorTooltip" xml:space="preserve">
-    <value>任務隊列中檔案衝突的預設處理方式。如果目前會話中已經記住了選擇，則需要重新啟動應用程式才能覆蓋它。</value>
+    <value>任務隊列中檔案衝突的預設處理方式。若目前會話中已經記住了選擇，則需要重新啟動應用程式才能覆蓋它。</value>
   </data>
   <data name="FileCollisionBehaviorAsk" xml:space="preserve">
     <value>詢問</value>
@@ -1011,19 +1011,19 @@
     <value>擁有此影片 / 剪輯 / 聊天的頻道的 ID。</value>
   </data>
   <data name="FilenameParameterClipperTooltip" xml:space="preserve">
-    <value>建立此剪輯的頻道的顯示名稱，如果是影片則為空。</value>
+    <value>建立此剪輯的頻道的顯示名稱，若為影片則為空。</value>
   </data>
   <data name="FilenameParameterClipperIdTooltip" xml:space="preserve">
-    <value>建立此剪輯的頻道的 ID，如果是影片則為空。</value>
+    <value>建立此剪輯的頻道的 ID，若為影片則為空。</value>
   </data>
   <data name="FailedToCopyToClipboard" xml:space="preserve">
     <value>未能複製至剪貼簿</value>
   </data>
   <data name="FilenameParameterTrimLengthTooltip" xml:space="preserve">
-    <value>影片 / 剪輯 / 聊天的長度（包括修剪），格式為 hh-mm-ss。</value>
+    <value>影片 / 剪輯 / 聊天的長度（包括裁剪），格式為 hh-mm-ss。</value>
   </data>
   <data name="FilenameParameterTrimLengthCustomTooltip" xml:space="preserve">
-    <value>影片 / 剪輯 / 聊天的長度（包括修剪），格式為自訂格式。</value>
+    <value>影片 / 剪輯 / 聊天的長度（包括裁剪），格式為自訂格式。</value>
   </data>
   <data name="VideoTypeAllVideos" xml:space="preserve">
     <value>所有影片</value>
@@ -1047,12 +1047,12 @@
     <value>清除最近的頻道</value>
   </data>
   <data name="ClearLog" xml:space="preserve">
-    <value>Clear Log</value>
+    <value>清除日誌</value>
   </data>
   <data name="RenderUserAvatars" xml:space="preserve">
-    <value>User Avatars:</value>
+    <value>使用者大頭貼：</value>
   </data>
   <data name="AvatarScale" xml:space="preserve">
-    <value>Avatar Scale:</value>
+    <value>大頭貼比例：</value>
   </data>
 </root>
