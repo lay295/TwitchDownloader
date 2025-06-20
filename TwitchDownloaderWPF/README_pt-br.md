@@ -1,13 +1,15 @@
->[!WARNING]
->A tradução em português do README de TwitchDownloaderWPF pode estar desatualizada.
->Caso deseja checar a versão mais recente, por favor, refira ao README em [Inglês](README.md).
+> [!WARNING]
+> A tradução em português do README de TwitchDownloaderWPF pode estar desatualizada.
+> Caso deseja checar a versão mais recente, por favor, refira ao README em [Inglês](README.md).
 
 # TwitchDownloaderWPF
+
 Um aplicativo desktop Windows WPF que implementa a funcionalidade principal envolvida em vários recursos de qualidade de vida.
 
 ## Sumário
+
 - [TwitchDownloaderWPF](#twitchdownloaderwpf)
-  - [Sumário](#sumario)
+  - [Sumário](#sumário)
   - [Uso](#uso)
     - [Download de VOD](#download-de-vod)
     - [Download de Clipe](#download-de-clipe)
@@ -34,6 +36,7 @@ Um aplicativo desktop Windows WPF que implementa a funcionalidade principal envo
 A maioria das páginas contém uma área de informações no lado esquerdo da janela, exibindo a thumbnail (se disponível), o streamer, a data de criação e o título do VOD/clipe. O centro da janela contém as configurações para o trabalho, e o lado direito da janela contém uma área para registrar eventos.
 
 ### Download de VOD
+
 Baixa um VOD ou highlight de uma stream da Twitch.
 
 ![Figura 1.1](Images/vodExample.png)
@@ -53,8 +56,8 @@ Para começar, insira um link ou ID válido de um VOD ou highlight. Se o VOD ou 
 
 **Download**: Inicia o trabalho de download. Se, em vez disso, você abrir o menu suspenso, pode enviá-lo para a [Fila de Tarefas](#fila-de-tarefas) com a opção Adicionar à fila. As configurações de download atuais serão usadas em ambos os cenários.
 
-
 ### Download de Clipe
+
 Baixa um clipe da Twitch.
 
 ![Figura 2.1](Images/clipExample.png)
@@ -69,6 +72,7 @@ Para começar, insira um link ou ID válido de um clipe. A partir daí, as opç�
 **Download**: Inicia o trabalho de download. Se, em vez disso, você abrir o menu suspenso, pode enviá-lo para a [Fila de Tarefas](#fila-de-tarefas) com a opção Adicionar à fila. As configurações de download atuais serão usadas em ambos os cenários.
 
 ### Download de Chat
+
 Baixa o chat de um VOD, highlight, ou clipe.
 
 ![Figura 3.1](Images/chatdownload1Example.png)
@@ -80,6 +84,7 @@ Baixa o chat de um VOD, highlight, ou clipe.
 Para começar, insira um link ou ID válido de um VOD, highlight ou clipe. A partir daí, as opções de download serão desbloqueadas, permitindo personalizar o trabalho. Se o VOD ou highlight for exclusivo para assinantes ou privado, não será possível baixar o chat. Esta é uma limitação da API da Twitch, não do TwitchDownloader.
 
 **Formato de Download**: O formato de arquivo em que o chat baixado será salvo.
+
 - `JSON` gera uma versão específica do chat, que pode ser usada para atualização e renderização.
 - `Texto` gera uma versão em texto puro do chat, ideal para ler enquanto assiste a um VOD.
 - `HTML` gera uma página local que emula a aparência do site da Twitch.
@@ -99,6 +104,7 @@ Para começar, insira um link ou ID válido de um VOD, highlight ou clipe. A par
 **Download**: Inicia o trabalho de download. Se, em vez disso, você abrir o menu suspenso, pode enviá-lo para a [Fila de Tarefas](#task-queue) com a opção *Adicionar à fila*. As configurações de download atuais serão usadas em ambos os cenários.
 
 ### Atualizador de Chat  
+
 Atualiza os emotes incorporados, badges, bits e cortes de um chat JSON baixado e/ou converte um chat JSON para outro formato.  
 
 ![Figura 4.1](Images/chatupdateExample.png)  
@@ -107,6 +113,7 @@ Atualiza os emotes incorporados, badges, bits e cortes de um chat JSON baixado e
 Para começar, clique no botão **Procurar** e selecione um chat JSON baixado anteriormente. A partir daí, as opções de atualização serão desbloqueadas, permitindo que você personalize a tarefa. Se o vídeo original do chat ainda existir, suas informações serão carregadas na seção de informações.
 
 **Formato de Download**: O formato de arquivo em que o chat baixado será salvo.
+
 - `JSON` gera uma versão específica do chat, que pode ser usada para atualização e renderização.
 - `Texto` gera uma versão em texto puro do chat, ideal para ler enquanto assiste a um VOD.
 - `HTML` gera uma página local que emula a aparência do site da Twitch.
@@ -126,6 +133,7 @@ Para começar, clique no botão **Procurar** e selecione um chat JSON baixado an
 **Atualizar**: Inicia a tarefa de atualização. Se, em vez disso, você abrir o menu suspenso, pode enviá-lo para a [Fila de Tarefas](#task-queue) com a opção *Adicionar à fila*. As configurações atuais de atualização serão usadas em ambos os cenários.  
 
 ### Renderização de Chat
+
 Renderiza um chat JSON como um vídeo.  
 
 ![Figura 5.1](Images/chatrender1Example.png)  
@@ -182,7 +190,7 @@ Para começar, clique no botão **Procurar** e selecione um chat JSON baixado an
 
 **Fundos Alternativos**: Alterna a cor de fundo de cada mensagem do chat para ajudar a diferenciá-las.  
 
-**Aumentar Visibilidade de Nome de Usuários**: Aumenta o contraste entre os nomes de usuário e o fundo, semelhante à opção _Readable Colors_ do chat da Twitch. Se os contornos estiverem ativados, esta opção aumenta o contraste do nome de usuário contra o contorno em vez do fundo.  
+**Aumentar Visibilidade de Nome de Usuários**: Aumenta o contraste entre os nomes de usuário e o fundo, semelhante à opção *Readable Colors* do chat da Twitch. Se os contornos estiverem ativados, esta opção aumenta o contraste do nome de usuário contra o contorno em vez do fundo.  
 
 **Emotes BTTV**: Habilita emotes do BTTV na renderização.  
 
@@ -198,7 +206,7 @@ Para começar, clique no botão **Procurar** e selecione um chat JSON baixado an
 
 **Lista de Palavras Banidas**: Uma lista separada por vírgulas e sem distinção entre maiúsculas e minúsculas de palavras que farão com que mensagens sejam removidas da renderização. Por exemplo, na Figura 5.2, qualquer mensagem que contenha `" pog "`, `"[pOg+"`, `"/POg9"` será removida da renderização. No entanto, qualquer mensagem contendo `" poggers "` não será removida.  
 
-**Fornecedor de Emojis**: O estilo de emojis usados na renderização. Atualmente, são suportados os _Twemoji_ do Twitter, _Noto Color_ do Google e os emojis do seu sistema (_Nenhum_).
+**Fornecedor de Emojis**: O estilo de emojis usados na renderização. Atualmente, são suportados os *Twemoji* do Twitter, *Noto Color* do Google e os emojis do seu sistema (*Nenhum*).
 
 #### <ins>Escala</ins>
 
@@ -224,7 +232,7 @@ Para começar, clique no botão **Procurar** e selecione um chat JSON baixado an
 
 **Escala da Identação do Highlight**: Define a escala do recuo de mensagens destacadas/subs.  
 
-#### <ins>Codificação</ins> 
+#### <ins>Codificação</ins>
 
 **Formato de Arquivo**: Define o formato do arquivo da renderização final.  
 
@@ -301,6 +309,7 @@ Gerencie o comportamento do aplicativo.
 <br><sup>*Figura 7.1*</sup>
 
 **Pasta de Cache**: O diretório onde os arquivos temporários são armazenados. Isso inclui downloads de VODs, emotes, badges e cheermotes.  
+
 - **Limpar**: Exclui todos os arquivos de cache relacionados ao TwitchDownloader. Não recomendado, a menos que o aplicativo não esteja funcionando corretamente.  
 - **Navegar**: Permite selecionar uma nova pasta para armazenar o cache temporário. Os arquivos existentes não serão transferidos.  
 
@@ -316,7 +325,7 @@ Gerencie o comportamento do aplicativo.
 
 - **Largura de Banda Máxima por Thread**: Define a largura de banda máxima (em KiB/s) permitida para novas threads de download.  
 
-- **Níveis de Log**: Ativa diferentes níveis de registro para facilitar a depuração. 
+- **Níveis de Log**: Ativa diferentes níveis de registro para facilitar a depuração.
 
 - **Modelos de Nome de Arquivo para Download**: Modelos usados para gerar nomes padrão para os arquivos baixados.  
 
@@ -331,6 +340,7 @@ Gerencie o comportamento do aplicativo.
 ### Problemas Sem Erros
 
 Alguns problemas podem não ser consideradas como erro. Eles devem ser reportados como um [issue no GitHub](https://github.com/lay295/TwitchDownloader/issues), juntamente com os detalhes da entrada que causou o problema. Exemplos:  
+
 - O download de um vídeo fica travado em `Downloading: 99%` por mais de 5 minutos.  
 - A renderização do chat não atualiza o status por mais de 10 segundos.  
 - Mensagens do chat ausentes na renderização.  
@@ -340,12 +350,13 @@ Alguns problemas podem não ser consideradas como erro. Eles devem ser reportado
 ### Erros Comuns
 
 Um erro pode ser considerado "comum" se ocorrer antes de iniciar um trabalho ou imediatamente após o início de um trabalho. Um erro comum geralmente exibe uma mensagem amigável, muitas vezes acompanhada de um pop-up explicando o que deu errado. Alguns exemplos de erros comuns incluem:
+
 - Impossível encontrar a miniatura**  
-   - O VOD está expirado ou está ao vivo no momento.
+  - O VOD está expirado ou está ao vivo no momento.
 - Impossível obter informações do vídeo/clipe**  
-   - O VOD/clip vinculado é inválido, foi removido, ou é privado/sub-only e nenhum OAuth válido foi fornecido.
+  - O VOD/clip vinculado é inválido, foi removido, ou é privado/sub-only e nenhum OAuth válido foi fornecido.
 - Impossível analisar entradas**  
-   - Uma ou mais entradas de renderização são inválidas, consulte o log.
+  - Uma ou mais entradas de renderização são inválidas, consulte o log.
 
 ### Erros Raros
 
@@ -354,8 +365,8 @@ Um erro raro pode ser identificado por um pop-up com o título "Erro Fatal" ou u
 - Erro ao converter valor 'XXX' para o tipo 'XXX'. Caminho 'XXX', linha #, posição #.
 - Não é possível acessar o valor filho em Newtonsoft.Json.Linq.JValue.
 - Código de status da resposta não indica sucesso: 404 (Não Encontrado).
-- O pipe foi finalizado. 
-   - Ocorreu um problema com o FFmpeg. Redefina os argumentos para os valores padrão e tente novamente. Se o problema persistir, crie um novo issue no GitHub.
+- O pipe foi finalizado.
+  - Ocorreu um problema com o FFmpeg. Redefina os argumentos para os valores padrão e tente novamente. Se o problema persistir, crie um novo issue no GitHub.
 
 Para ajudar a identificar a origem de um erro, ative os `Erros Detalhados` nas [configurações](#configurações) e faça uma captura de tela do pop-up resultante intitulado "Verbose Error Output".
 
@@ -375,7 +386,7 @@ A aplicação inclui tanto um tema claro quanto um tema escuro, com a opção de
 
 Para começar a criar seu próprio tema, basta duplicar um dos temas incluídos e abri-lo com seu editor de texto favorito.
 
-A aplicação WPF usa alguns elementos de um pacote chamado _HandyControl_, que não fornece suporte completo para personalização de temas. A maioria dos elementos do HandyControl suporta apenas a recoloração do texto e das bordas, o que significa que os fundos devem ser brancos ou escuros. Para controlar isso, defina a chave booleana `DarkHandyControl` como verdadeira ou falsa.
+A aplicação WPF usa alguns elementos de um pacote chamado *HandyControl*, que não fornece suporte completo para personalização de temas. A maioria dos elementos do HandyControl suporta apenas a recoloração do texto e das bordas, o que significa que os fundos devem ser brancos ou escuros. Para controlar isso, defina a chave booleana `DarkHandyControl` como verdadeira ou falsa.
 
 Para habilitar barras de título escuras com seu tema, defina a chave booleana `DarkTitleBar` como verdadeira.
 
