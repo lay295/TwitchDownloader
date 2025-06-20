@@ -47,17 +47,17 @@
 
 要开始操作，请输入有效点播 / 精选内容链接 / ID。若内容为私有或订阅限定，则需提供具有访问权限账户的 OAuth 令牌。解锁下载选项后即可自定义任务。
 
-**Quality（画质）**：选择下载画质并显示预估文件大小。Twitch 有时会将最高质量称为“Source”（源）而非常规分辨率格式（如图 1.1 所示的 1080p60）。
+<u>**Quality（画质）**</u>：选择下载画质并显示预估文件大小。Twitch 有时会将最高质量称为“Source”（源）而非常规分辨率格式（如图 1.1 所示的 1080p60）。
 
-**Trim Mode（裁剪模式）**：设置视频裁剪处理方式。精确裁剪可能在前后几秒出现音视频卡顿；安全裁剪可避免卡顿，但可能使视频稍长。
+<u>**Trim Mode（裁剪模式）**</u>：设置视频裁剪处理方式。精确裁剪可能在前后几秒出现音视频卡顿；安全裁剪可避免卡顿，但可能使视频稍长。
 
-**Trim（裁剪）**：以 [时] [分] [秒] 的格式设置裁剪起止时间。裁剪将减少总下载量。
+<u>**Trim（裁剪）**</u>：以 [时] [分] [秒] 的格式设置裁剪起止时间。裁剪将减少总下载量。
 
-**Download Threads（下载线程）**：启用的并行下载线程数量。
+<u>**Download Threads（下载线程）**</u>：启用的并行下载线程数量。
 
 **OAuth**：用于下载订阅限定或私有视频的授权令牌。Twitch 要求此令牌以防止未授权下载付费 / 私有内容。获取 OAuth 令牌教程：[https://youtu.be/1MBsUoFGuls](https://www.youtube.com/watch?v=1MBsUoFGuls)。<ins>**请勿向任何人分享你的 OAuth 令牌！**</ins>
 
-**Download（下载）**：开始下载任务。通过下拉菜单选择“*Enqueue（添加至队列）*”可将任务发送至[任务队列](#任务队列)。两种方式均使用当前下载设置。
+<u>**Download（下载）**</u>：开始下载任务。通过下拉菜单选择“*Enqueue（添加至队列）*”可将任务发送至[任务队列](#任务队列)。两种方式均使用当前下载设置。
 
 ### 剪辑下载
 
@@ -68,11 +68,11 @@
 
 要开始操作，请输入有效剪辑链接 / ID。解锁下载选项后即可自定义任务。
 
-**Quality（画质）**：选择剪辑下载画质。
+<u>**Quality（画质）**</u>：选择剪辑下载画质。
 
-**Encode Metadata（编码元数据）**：使用 FFmpeg 将剪辑元数据（如直播日期和剪辑 ID）编码至最终 MP4 文件。
+<u>**Encode Metadata（编码元数据）**</u>：使用 FFmpeg 将剪辑元数据（如直播日期和剪辑 ID）编码至最终 MP4 文件。
 
-**Download（下载）**：开始下载任务。通过下拉菜单选择“*Enqueue（添加至队列）*”可将任务发送至[任务队列](#任务队列)。两种方式均使用当前下载设置。
+<u>**Download（下载）**</u>：开始下载任务。通过下拉菜单选择“*Enqueue（添加至队列）*”可将任务发送至[任务队列](#任务队列)。两种方式均使用当前下载设置。
 
 ### 聊天下载
 
@@ -86,25 +86,25 @@ Downloads the chat of a VOD, highlight, or clip.
 
 要开始操作，请输入有效点播 / 精选内容 / 剪辑链接 / ID。解锁下载选项后即可自定义任务。若点播或精选内容为私有或订阅限定，则无法下载聊天。此为 Twitch API 限制，而非 TwitchDownloader。
 
-**Download Format（下载格式）**：聊天保存格式。
+<u>**Download Format（下载格式）**</u>：聊天保存格式。
 
 - `JSON`：输出富文本聊天记录，可用于更新和渲染；
 - `Text`：输出原始文本格式，适合观看视频时阅读；
 - `HTML`：输出模拟 Twitch 网页界面的本地网页。
 
-**Compression（压缩）**（仅 JSON）：使用 GZip 压缩标准减小文件体积（40-90%）。若需手动编辑聊天文件（不使用[聊天更新器](#聊天更新器)功能则不推荐启用）。
+<u>**Compression（压缩）**</u>（仅 JSON）：使用 GZip 压缩标准减小文件体积（40-90%）。若需手动编辑聊天文件（不使用[聊天更新器](#聊天更新器)功能则不推荐启用）。
 
-**Timestamp Format（时间戳格式）**（仅 Text）：文本下载中的时间戳格式。可选 `UTC`、`Relative`（视频相对时间）或 `None`（无）。
+<u>**Timestamp Format（时间戳格式）**</u>（仅 Text）：文本下载中的时间戳格式。可选 `UTC`、`Relative`（视频相对时间）或 `None`（无）。
 
-**Trim（裁剪）**：以 [时] [分] [秒] 的格式设置裁剪起止时间。裁剪将减少总下载量。
+<u>**Trim（裁剪）**</u>：以 [时] [分] [秒] 的格式设置裁剪起止时间。裁剪将减少总下载量。
 
-**Embed Images（嵌入图片）**（仅 JSON 和 HTML）：下载实况主表情和徽章并嵌入聊天文件。文件体积将显著增大。
+<u>**Embed Images（嵌入图片）**</u>（仅 JSON 和 HTML）：下载实况主表情和徽章并嵌入聊天文件。文件体积将显著增大。
 
-**3rd Party Emotes（第三方表情）**（仅 JSON 和 HTML）：同时下载指定第三方平台的表情并嵌入聊天文件。若实况主未在平台注册则自动跳过。
+<u>**3rd Party Emotes（第三方表情）**</u>（仅 JSON 和 HTML）：同时下载指定第三方平台的表情并嵌入聊天文件。若实况主未在平台注册则自动跳过。
 
-**Download Threads（下载线程）**：启用的并行下载线程数量。部分网络环境下，Twitch 服务器可能限制仅使用 1 个线程。
+<u>**Download Threads（下载线程）**</u>：启用的并行下载线程数量。部分网络环境下，Twitch 服务器可能限制仅使用 1 个线程。
 
-**Download（下载）**：开始下载任务。通过下拉菜单选择“*Enqueue（添加至队列）*”可将任务发送至[任务队列](#任务队列)。两种方式均使用当前下载设置。
+<u>**Download（下载）**</u>：开始下载任务。通过下拉菜单选择“*Enqueue（添加至队列）*”可将任务发送至[任务队列](#任务队列)。两种方式均使用当前下载设置。
 
 ### 聊天更新器
 
@@ -113,27 +113,27 @@ Downloads the chat of a VOD, highlight, or clip.
 ![图 4.1](Images/chatupdateExample.png)
 <br><sup>*图 4.1*</sup>
 
-要开始操作，请点击“**Browse（浏览）**”按钮并选择先前下载的 JSON 聊天文件。解锁下载选项后即可自定义任务。若源视频仍存在，其信息将加载至信息区域。
+要开始操作，请点击“<u>**Browse（浏览）**</u>”按钮并选择先前下载的 JSON 聊天文件。解锁下载选项后即可自定义任务。若源视频仍存在，其信息将加载至信息区域。
 
-**Download Format（下载格式）**：聊天保存格式。
+<u>**Download Format（下载格式）**</u>：聊天保存格式。
 
 - `JSON`：输出富文本聊天记录，可用于更新和渲染；
 - `Text`：输出原始文本格式，适合观看视频时阅读；
 - `HTML`：输出模拟 Twitch 网页界面的本地网页。
 
-**Compression（压缩）**（仅 JSON）：使用 GZip 压缩标准减小文件体积（40-90%）。若需手动编辑聊天文件（不使用[聊天更新器](#聊天更新器)功能则不推荐启用）。
+<u>**Compression（压缩）**</u>（仅 JSON）：使用 GZip 压缩标准减小文件体积（40-90%）。若需手动编辑聊天文件（不使用[聊天更新器](#聊天更新器)功能则不推荐启用）。
 
-**Timestamp Format（时间戳格式）**（仅 Text）：文本下载中的时间戳格式。可选 `UTC`、`Relative`（视频相对时间）或 `None`（无）。
+<u>**Timestamp Format（时间戳格式）**</u>（仅 Text）：文本下载中的时间戳格式。可选 `UTC`、`Relative`（视频相对时间）或 `None`（无）。
 
-**Trim（裁剪）**：以 [时] [分] [秒] 的格式设置裁剪起止时间。扩大范围将尝试获取原下载未包含的聊天；缩小范围不会删除聊天。
+<u>**Trim（裁剪）**</u>：以 [时] [分] [秒] 的格式设置裁剪起止时间。扩大范围将尝试获取原下载未包含的聊天；缩小范围不会删除聊天。
 
-**Embed Missing（嵌入缺失项）**（仅 JSON 和 HTML）：下载原始 JSON 未包含的表情或徽章。已有项不会被覆盖。
+<u>**Embed Missing（嵌入缺失项）**</u>（仅 JSON 和 HTML）：下载原始 JSON 未包含的表情或徽章。已有项不会被覆盖。
 
-**Replace Embeds（替换嵌入项）**（仅 JSON 和 HTML）：丢弃原始 JSON 中所有现存表情和徽章并重新下载。
+<u>**Replace Embeds（替换嵌入项）**</u>（仅 JSON 和 HTML）：丢弃原始 JSON 中所有现存表情和徽章并重新下载。
 
-**3rd Party Emotes（第三方表情）**（仅 JSON 和 HTML）：同时下载指定第三方平台表情并嵌入聊天文件。若实况主未在平台注册则自动跳过。
+<u>**3rd Party Emotes（第三方表情）**</u>（仅 JSON 和 HTML）：同时下载指定第三方平台表情并嵌入聊天文件。若实况主未在平台注册则自动跳过。
 
-**Update（更新）**：开始更新任务。通过下拉菜单选择“*Enqueue（添加至队列）*”可将任务发送至[任务队列](#任务队列)。两种方式均使用当前更新设置。
+<u>**Update（更新）**</u>：开始更新任务。通过下拉菜单选择“*Enqueue（添加至队列）*”可将任务发送至[任务队列](#任务队列)。两种方式均使用当前更新设置。
 
 ### 聊天渲染
 
@@ -157,109 +157,109 @@ Downloads the chat of a VOD, highlight, or clip.
 ![图 5.6](Images/rangeExample.png)
 <br><sup>*图 5.6*</sup>
 
-要开始操作，请点击“**Browse（浏览）**”按钮并选择先前下载的 JSON 聊天文件。随后即可通过渲染选项自定义任务。
+要开始操作，请点击“<u>**Browse（浏览）**</u>”按钮并选择先前下载的 JSON 聊天文件。随后即可通过渲染选项自定义任务。
 
 **渲染**：开始渲染任务。通过下拉菜单选择“*Enqueue（添加至队列）*”可将任务发送至[任务队列](#任务队列)；选择“*Partial Render（部分渲染）*”可渲染聊天片段（见图 5.6）。所有方式均使用当前渲染设置。
 
 #### <ins>常规</ins>
 
-**Width（宽度）**：输出视频的宽（必须为偶数）。
+<u>**Width（宽度）**</u>：输出视频的宽（必须为偶数）。
 
-**Height（高度）**：输出视频的高（必须为偶数）。
+<u>**Height（高度）**</u>：输出视频的高（必须为偶数）。
 
-**Font（字体）**：输出视频所用字体（Twitch 网站使用 *Inter*，本工具内置为 *Inter Embedded*）。
+<u>**Font（字体）**</u>：输出视频所用字体（Twitch 网站使用 *Inter*，本工具内置为 *Inter Embedded*）。
 
-**Font Size（字体大小）**：字体大小。
+<u>**Font Size（字体大小）**</u>：字体大小。
 
-**Font Color（字体颜色）**：消息字体颜色。
+<u>**Font Color（字体颜色）**</u>：消息字体颜色。
 
-**Background Color（背景颜色）**：输出视频背景颜色。
+<u>**Background Color（背景颜色）**</u>：输出视频背景颜色。
 
-**Alt Background Color（交替背景颜色）**：消息替代背景颜色（需启用“*Alternate Backgrounds〔交替背景〕*”）。
+<u>**Alt Background Color（交替背景颜色）**</u>：消息替代背景颜色（需启用“*Alternate Backgrounds〔交替背景〕*”）。
 
 #### <ins>渲染</ins>
 
-**Outline（边框）**：为用户名和消息添加细黑边。
+<u>**Outline（边框）**</u>：为用户名和消息添加细黑边。
 
-**Timestamps（时间戳）**：在消息旁显示相对于视频开始的时间。
+<u>**Timestamps（时间戳）**</u>：在消息旁显示相对于视频开始的时间。
 
-**Sub Messages（订阅消息）**：渲染订阅、续订及礼物消息。禁用后将过滤此类消息。
+<u>**Sub Messages（订阅消息）**</u>：渲染订阅、续订及礼物消息。禁用后将过滤此类消息。
 
-**Chat Badges（聊天徽章）**：在用户名旁显示徽章。
+<u>**Chat Badges（聊天徽章）**</u>：在用户名旁显示徽章。
 
-**Update Rate（更新频率）**：绘制下批评论时间间隔（秒）。值越低聊天流越易读，但略微增加渲染时间。
+<u>**Update Rate（更新频率）**</u>：绘制下批评论时间间隔（秒）。值越低聊天流越易读，但略微增加渲染时间。
 
-**Dispersion（离散化）**：2022 年 11 月 Twitch API 变更后，聊天消息仅能按整秒下载。此选项尝试使用元数据还原消息实际发送时间，可能导致评论顺序变化（需将更新频率设置为小于 1.0 以获得有效效果）。
+<u>**Dispersion（离散化）**</u>：2022 年 11 月 Twitch API 变更后，聊天消息仅能按整秒下载。此选项尝试使用元数据还原消息实际发送时间，可能导致评论顺序变化（需将更新频率设置为小于 1.0 以获得有效效果）。
 
-**Alternate Backgrounds（交替背景）**：隔行切换消息背景颜色以提高辨识度。
+<u>**Alternate Backgrounds（交替背景）**</u>：隔行切换消息背景颜色以提高辨识度。
 
-**Increase Username Visibility（增强用户名可见性）**：提高用户名与背景的对比度（类似于 Twitch 的“可读颜色”选项）。启用描边时，此选项将增强用户名与描边的对比度。
+<u>**Increase Username Visibility（增强用户名可见性）**</u>：提高用户名与背景的对比度（类似于 Twitch 的“可读颜色”选项）。启用描边时，此选项将增强用户名与描边的对比度。
 
-**BTTV Emotes（BTTV 表情）**：启用 BTTV 平台表情渲染。
+<u>**BTTV Emotes（BTTV 表情）**</u>：启用 BTTV 平台表情渲染。
 
-**FFZ Emotes（FFZ 表情）**：启用 FFZ 平台表情渲染。
+<u>**FFZ Emotes（FFZ 表情）**</u>：启用 FFZ 平台表情渲染。
 
-**7TV Emotes（7TV 表情）**：启用 7TV 平台表情渲染。
+<u>**7TV Emotes（7TV 表情）**</u>：启用 7TV 平台表情渲染。
 
-**Offline（离线）**：仅使用 JSON 中嵌入的信息和图片渲染（无网络请求）。
+<u>**Offline（离线）**</u>：仅使用 JSON 中嵌入的信息和图片渲染（无网络请求）。
 
-**User Avatars（用户头像）**：在渲染中显示用户头像。
+<u>**User Avatars（用户头像）**</u>：在渲染中显示用户头像。
 
-**Chat Badge Filter（聊天勋章过滤器）**：不渲染指定徽章（例如图 5.2 中永不渲染“*No Autio / No Video〔无音频 / 无视频〕*”徽章）。
+<u>**Chat Badge Filter（聊天勋章过滤器）**</u>：不渲染指定徽章（例如图 5.2 中永不渲染“*No Autio / No Video〔无音频 / 无视频〕*”徽章）。
 
-**Ignore Users List（屏蔽用户列表）**：逗号分隔、不区分大小写的用户列表（渲染时将移除）。例如图 5.2 将移除 Streamlabs、StreamElements 和 Nightbot。
+<u>**Ignore Users List（屏蔽用户列表）**</u>：逗号分隔、不区分大小写的用户列表（渲染时将移除）。例如图 5.2 将移除 Streamlabs、StreamElements 和 Nightbot。
 
-**Banned Words List（屏蔽词列表）**：逗号分隔、不区分大小写的禁用词列表（包含这些词的消息将被移除）。例如图 5.2 将移除包含 `" pog "`、`"[pOg+"`、`"/POg9"` 的消息，但保留包含 `" poggers "` 的消息。
+<u>**Banned Words List（屏蔽词列表）**</u>：逗号分隔、不区分大小写的禁用词列表（包含这些词的消息将被移除）。例如图 5.2 将移除包含 `" pog "`、`"[pOg+"`、`"/POg9"` 的消息，但保留包含 `" poggers "` 的消息。
 
-**Emoji Vendor（Emoji 提供者）**：渲染所用表情符号风格。支持 Twitter 的 *Twemoji*、Google 的 *Noto Color* 及系统默认表情（*None〔无〕*）。
+<u>**Emoji Vendor（Emoji 提供者）**</u>：渲染所用表情符号风格。支持 Twitter 的 *Twemoji*、Google 的 *Noto Color* 及系统默认表情（*None〔无〕*）。
 
 #### <ins>比例</ins>
 
-**Emote Scale（表情比例）**：表情缩放比例。
+<u>**Emote Scale（表情比例）**</u>：表情缩放比例。
 
-**Badge Scale（徽章比例）**：徽章缩放比例。
+<u>**Badge Scale（徽章比例）**</u>：徽章缩放比例。
 
-**Emoji Scale（Emoji 比例）**：Emoji 缩放比例。
+<u>**Emoji Scale（Emoji 比例）**</u>：Emoji 缩放比例。
 
-**Avatar Scale（头像比例）**：头像缩放比例。
+<u>**Avatar Scale（头像比例）**</u>：头像缩放比例。
 
-**Outline Scale（描边比例）**：描边粗细比例。
+<u>**Outline Scale（描边比例）**</u>：描边粗细比例。
 
-**Vertical Spacing Scale（垂直间距比例）**：消息间垂直间距比例。
+<u>**Vertical Spacing Scale（垂直间距比例）**</u>：消息间垂直间距比例。
 
-**Side Padding Scale（侧边距比例）**：水平内边距比例。
+<u>**Side Padding Scale（侧边距比例）**</u>：水平内边距比例。
 
-**Section Height Scale（区域高度比例）**：单行文本高度比例。
+<u>**Section Height Scale（区域高度比例）**</u>：单行文本高度比例。
 
-**Word Spacing Scale（词间距比例）**：词语间水平间距比例。
+<u>**Word Spacing Scale（词间距比例）**</u>：词语间水平间距比例。
 
-**Emote Spacing Scale（表情间距比例）**：表情与表情 / 词语间的间距比例。
+<u>**Emote Spacing Scale（表情间距比例）**</u>：表情与表情 / 词语间的间距比例。
 
-**Highlight Stroke Scale（高亮描边比例）**：高亮 / 订阅消息侧边栏宽度比例。
+<u>**Highlight Stroke Scale（高亮描边比例）**</u>：高亮 / 订阅消息侧边栏宽度比例。
 
-**Highlight Indent Scale（高亮缩进比例）**：高亮 / 订阅消息缩进比例。
+<u>**Highlight Indent Scale（高亮缩进比例）**</u>：高亮 / 订阅消息缩进比例。
 
 #### <ins>编码</ins>
 
-**File Format（文件格式）**：输出视频格式。
+<u>**File Format（文件格式）**</u>：输出视频格式。
 
-**Codec（编解码器）**：输出视频所用编解码器。
+<u>**Codec（编解码器）**</u>：输出视频所用编解码器。
 
-**Framerate（帧速率）**：输出视频帧速率。
+<u>**Framerate（帧速率）**</u>：输出视频帧速率。
 
-**Generate Mask（生成遮罩）**：生成包含文本和图像黑白遮罩的副文件。背景颜色 Alpha 通道必须小于 255。
+<u>**Generate Mask（生成遮罩）**</u>：生成包含文本和图像黑白遮罩的副文件。背景颜色 Alpha 通道必须小于 255。
 
-**Sharpening（锐化）**：对渲染视频应用锐化滤镜。略微增加渲染时间和文件大小（建议字体大小大于等于 24 时使用）。
+<u>**Sharpening（锐化）**</u>：对渲染视频应用锐化滤镜。略微增加渲染时间和文件大小（建议字体大小大于等于 24 时使用）。
 
 #### <ins>FFmpeg</ins>
 
 **警告：修改 FFmpeg 参数可能导致管道错误！**
 
-**Input Arguments（输入参数）**：控制 FFmpeg 渲染输入的参数。
+<u>**Input Arguments（输入参数）**</u>：控制 FFmpeg 渲染输入的参数。
 
-**Output Arguments（输出参数）**：控制 FFmpeg 编码输出的参数。
+<u>**Output Arguments（输出参数）**</u>：控制 FFmpeg 编码输出的参数。
 
-**Reset To Defaults（重置为默认值）**：重置 FFmpeg 参数至默认状态。
+<u>**Reset To Defaults（重置为默认值）**</u>：重置 FFmpeg 参数至默认状态。
 
 #### <ins>优化渲染速度</ins>
 
@@ -297,21 +297,21 @@ Downloads the chat of a VOD, highlight, or clip.
 
 任务队列页面包含 4 类限制器：
 
-**VOD Downloads（点播下载）**：同时进行的点播 / 精选内容下载任务数量。
+<u>**VOD Downloads（点播下载）**</u>：同时进行的点播 / 精选内容下载任务数量。
 
-**Clip Downloads（剪辑下载）**：同时进行的剪辑下载任务数量。
+<u>**Clip Downloads（剪辑下载）**</u>：同时进行的剪辑下载任务数量。
 
-**Chat Downloads（聊天下载）**：同时进行的聊天下载 / 更新任务数量。
+<u>**Chat Downloads（聊天下载）**</u>：同时进行的聊天下载 / 更新任务数量。
 
-**Chat Renders（聊天渲染）**：同时进行的聊天渲染任务数量。
+<u>**Chat Renders（聊天渲染）**</u>：同时进行的聊天渲染任务数量。
 
 任务队列还支持 3 种批量下载模式：
 
-**URL List（URL 列表）**：一个使用相同设置批量处理点播、精选内容、剪辑 URL 的列表（见图 6.2 和 6.5）。
+<u>**URL List（URL 列表）**</u>：一个使用相同设置批量处理点播、精选内容、剪辑 URL 的列表（见图 6.2 和 6.5）。
 
-**Search VODs（搜索点播）**：一个搜索实况主所有点播并使用相同设置批量处理的窗口（见图 6.3 和 6.5）。
+<u>**Search VODs（搜索点播）**</u>：一个搜索实况主所有点播并使用相同设置批量处理的窗口（见图 6.3 和 6.5）。
 
-**Search Clips（搜索剪辑）**：一个搜索实况主所有剪辑并使用相同设置批量处理的窗口（见图 6.3 和 6.5）。
+<u>**Search Clips（搜索剪辑）**</u>：一个搜索实况主所有剪辑并使用相同设置批量处理的窗口（见图 6.3 和 6.5）。
 
 ### 设置
 
@@ -320,32 +320,32 @@ Downloads the chat of a VOD, highlight, or clip.
 ![图 7.1](Images/settingsExample.png)
 <br><sup>*图 7.1*</sup>
 
-**Cache Folder（缓存文件夹）**：临时工作文件存储目录（含点播下载、表情、徽章等）。
+<u>**Cache Folder（缓存文件夹）**</u>：临时工作文件存储目录（含点播下载、表情、徽章等）。
 
-- **Clear（清除）**：删除所有缓存文件（仅推荐异常时使用）。
-- **Browse（浏览）**：选择新缓存目录（不迁移现有文件）。
+- <u>**Clear（清除）**</u>：删除所有缓存文件（仅推荐异常时使用）。
+- <u>**Browse（浏览）**</u>：选择新缓存目录（不迁移现有文件）。
 
-**Hide Donation Button（隐藏捐赠按钮）**：隐藏捐赠按钮。
+<u>**Hide Donation Button（隐藏捐赠按钮）**</u>：隐藏捐赠按钮。
 
-**Time Format（时间格式）**：控制界面和文件名模板中的时间显示格式。
+<u>**Time Format（时间格式）**</u>：控制界面和文件名模板中的时间显示格式。
 
-**Verbose Errors（详细错误）**：启用错误时的详细弹窗提示。
+<u>**Verbose Errors（详细错误）**</u>：启用错误时的详细弹窗提示。
 
-**Theme（主题）**：应用程序主题（详见[主题](#主题)）。
+<u>**Theme（主题）**</u>：应用程序主题（详见[主题](#主题)）。
 
-**Language（语言）**：应用程序语言。（详见[本地化](#本地化)）。
+<u>**Language（语言）**</u>：应用程序语言。（详见[本地化](#本地化)）。
 
-**Maximum Thread Bandwidth（最大线程宽带）**：单个下载线程最大带宽（单位：KiB/s）。
+<u>**Maximum Thread Bandwidth（最大线程宽带）**</u>：单个下载线程最大带宽（单位：KiB/s）。
 
-**Log Levels（日志级别）**：启用不同日志级别以便于调试。
+<u>**Log Levels（日志级别）**</u>：启用不同日志级别以便于调试。
 
-**Download Filename Templates（下载文件名模板）**：下载文件的默认命名模板。
+<u>**Download Filename Templates（下载文件名模板）**</u>：下载文件的默认命名模板。
 
-**Restore Defaults（重置为默认值）**：重置所有设置（含各页面记忆设置）。重新启动后生效。
+<u>**Restore Defaults（重置为默认值）**</u>：重置所有设置（含各页面记忆设置）。重新启动后生效。
 
-**Save（保存）**：保存当前设置并关闭窗口。
+<u>**Save（保存）**</u>：保存当前设置并关闭窗口。
 
-**Cancel（取消）**：放弃更改并关闭窗口。
+<u>**Cancel（取消）**</u>：放弃更改并关闭窗口。
 
 ## 故障排除
 
