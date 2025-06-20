@@ -957,7 +957,7 @@
     <value>视频 / 剪辑的创建日期，格式为 M-d-yy。</value>
   </data>
   <data name="FilenameParameterDateCustomTooltip" xml:space="preserve">
-    <value>视频 / 剪辑的创建日期，格式为自定义格式。</value>
+    <value>视频 / 剪辑的创建日期，自定义格式。</value>
   </data>
   <data name="FilenameParameterChannelTooltip" xml:space="preserve">
     <value>拥有此视频 / 剪辑 / 聊天的频道的显示名称。</value>
@@ -966,22 +966,22 @@
     <value>由 11 个随机字符组成的字符串。</value>
   </data>
   <data name="FilenameParameterTrimStartTooltip" xml:space="preserve">
-    <value>视频 / 聊天的裁剪开始时间，格式为 hh-mm-ss。</value>
+    <value>视频 / 聊天裁剪开始的时间，hh-mm-ss 格式。</value>
   </data>
   <data name="FilenameParameterTrimStartCustomTooltip" xml:space="preserve">
-    <value>视频 / 聊天的裁剪开始时间，格式为自定义格式。</value>
+    <value>视频 / 聊天裁剪开始的时间，自定义格式。</value>
   </data>
   <data name="FilenameParameterTrimEndTooltip" xml:space="preserve">
-    <value>视频 / 聊天的裁剪结束时间，格式为 hh-mm-ss。</value>
+    <value>视频 / 聊天裁剪结束的时间，hh-mm-ss 格式。</value>
   </data>
   <data name="FilenameParameterTrimEndCustomTooltip" xml:space="preserve">
-    <value>视频 / 聊天的裁剪结束时间，格式为自定义格式。</value>
+    <value>视频 / 聊天裁剪结束的时间，自定义格式。</value>
   </data>
   <data name="FilenameParameterLengthTooltip" xml:space="preserve">
-    <value>视频 / 剪辑 / 聊天的长度（不包括裁剪），格式为 hh-mm-ss。</value>
+    <value>视频 / 剪辑 / 聊天的长度（不包括裁剪），hh-mm-ss 格式。</value>
   </data>
   <data name="FilenameParameterLengthCustomTooltip" xml:space="preserve">
-    <value>视频 / 剪辑 / 聊天的长度（不包括裁剪），格式为自定义格式。</value>
+    <value>视频 / 剪辑 / 聊天的长度（不包括裁剪），自定义格式。</value>
   </data>
   <data name="FilenameParameterViewsTooltip" xml:space="preserve">
     <value>视频 / 剪辑的观看次数。</value>
@@ -1020,10 +1020,10 @@
     <value>未能复制至剪贴板</value>
   </data>
   <data name="FilenameParameterTrimLengthTooltip" xml:space="preserve">
-    <value>视频 / 剪辑 / 聊天的长度（包括裁剪），格式为 hh-mm-ss。</value>
+    <value>视频 / 剪辑 / 聊天的长度（包括裁剪），hh-mm-ss 格式。</value>
   </data>
   <data name="FilenameParameterTrimLengthCustomTooltip" xml:space="preserve">
-    <value>视频 / 剪辑 / 聊天的长度（包括裁剪），格式为自定义格式。</value>
+    <value>视频 / 剪辑 / 聊天的长度（包括裁剪），自定义格式。</value>
   </data>
   <data name="VideoTypeAllVideos" xml:space="preserve">
     <value>所有视频</value>
