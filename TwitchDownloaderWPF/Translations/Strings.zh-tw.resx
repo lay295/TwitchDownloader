@@ -930,7 +930,7 @@
     <value>精確</value>
   </data>
   <data name="VideoTrimModeTooltip" xml:space="preserve">
-    <value>使用精確模式裁剪的影片在前幾秒或最後幾秒可能會出現影片 / 音訊卡頓。安全模式保證不會出現卡頓，但可能會導致影片稍長。</value>
+    <value>使用精確模式裁剪的影片可能在前後幾秒出現影音卡頓。安全模式保證不會出現卡頓，但可能會導致影片稍長。</value>
   </data>
   <data name="TaskRetry" xml:space="preserve">
     <value>重試</value>
