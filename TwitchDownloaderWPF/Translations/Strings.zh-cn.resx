@@ -165,7 +165,7 @@
     <value>聊天徽章：</value>
   </data>
   <data name="TrimChat" xml:space="preserve">
-    <value>裁切：</value>
+    <value>裁剪：</value>
   </data>
   <data name="ChatDownload" xml:space="preserve">
     <value>聊天下载</value>
@@ -222,7 +222,7 @@
     <value>开始</value>
   </data>
   <data name="TrimVideo" xml:space="preserve">
-    <value>裁切：</value>
+    <value>裁剪：</value>
   </data>
   <data name="DateCustomFormatting" xml:space="preserve">
     <value>date_custom 格式基于 </value>
@@ -319,7 +319,7 @@
     <value>请输入有效的剪辑链接 / ID\n示例：\nhttps://clips.twitch.tv/ImportantPlausibleMetalOSsloth\nImportantPlausibleMetalOSsloth</value>
   </data>
   <data name="InvalidTrimInputs" xml:space="preserve">
-    <value>裁切输入无效</value>
+    <value>裁剪输入无效</value>
   </data>
   <data name="InvalidStartEndTime" xml:space="preserve">
     <value>开始或结束时间无效</value>
