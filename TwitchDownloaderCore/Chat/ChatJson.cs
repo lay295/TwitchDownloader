@@ -268,7 +268,7 @@ namespace TwitchDownloaderCore.Chat
             // 300x300 avatars are overkill for chat rendering
             foreach (var comment in chatRoot.comments)
             {
-                if (comment.commenter.logo.Contains("300x300"))
+                if (comment.commenter.logo?.Contains("300x300") ?? false)
                 {
                     comment.commenter.logo = comment.commenter.logo.Replace("300x300", "70x70");
                 }
