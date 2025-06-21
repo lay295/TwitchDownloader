@@ -265,6 +265,7 @@ namespace TwitchDownloaderCore
                 var message = ex switch
                 {
                     HttpRequestException { StatusCode: not null } hre => $"{providerName} returned {(int)hre.StatusCode}: {hre.StatusCode}.",
+                    HttpRequestException { InnerException: not null } when ex.Message.Contains("SSL") => $"{ex.Message.Remove(ex.Message.Length - 1)}: {ex.InnerException.Message}",
                     TaskCanceledException when ex.Message.Contains("HttpClient.Timeout") => $"{providerName} timed out.",
                     _ => ex.Message
                 };
@@ -548,6 +549,7 @@ namespace TwitchDownloaderCore
                 var message = ex switch
                 {
                     HttpRequestException { StatusCode: not null } hre => $"{providerName} returned {(int)hre.StatusCode}: {hre.StatusCode}.",
+                    HttpRequestException { InnerException: not null } when ex.Message.Contains("SSL") => $"{ex.Message.Remove(ex.Message.Length - 1)}: {ex.InnerException.Message}",
                     TaskCanceledException when ex.Message.Contains("HttpClient.Timeout") => $"{providerName} timed out.",
                     _ => ex.Message
                 };
