@@ -58,15 +58,15 @@ Windows WPF GUI 內建了淺色和深色主題，以及根據目前 Windows 主�
 
 請檢視 [GitHub](https://github.com/mohad12211/twitch-downloader-gui) 上的 twitch-downloader-gui 或 [AUR](https://aur.archlinux.org/packages/twitch-downloader-gui) 上的 CLI 的 Linux GUI 封裝程式。
 
-## MacOS?
+## macOS?
 
-目前還沒有適用於 MacOS 的 GUI 版本 :(
+目前還沒有適用於 macOS 的 GUI 版本 :(
 
 # CLI
 
 ### [點選此處檢視完整的 CLI 檔案（暫無繁體中文）](TwitchDownloaderCLI/README.md)
 
-CLI 是跨平臺的，可以實現程式的主要功能。它可在 Windows、Linux 和 MacOS<sup>*</sup> 上執行。
+CLI 是跨平臺的，可以實現程式的主要功能。它可在 Windows、Linux 和 macOS<sup>*</sup> 上執行。
 
 <sup>*僅對 Intel Mac 進行了測試</sup>
 
@@ -82,7 +82,7 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 
 ## Windows - 開始
 
-1. 前往[Release 頁面](https://github.com/lay295/TwitchDownloader/releases/)並下載最新的 Windows 版本或[從原始碼構建](#building-from-source)；
+1. 前往[Release 頁面](https://github.com/lay295/TwitchDownloader/releases/)並下載最新的 Windows 版本或[從原始碼構建](#從原始碼構建)；
 2. 提取 `TwitchDownloaderCLI.exe`；
 3. 開啟可執行檔案放置的位置：
 
@@ -108,7 +108,7 @@ TwitchDownloaderCLI.exe videodownload --id <點播 ID> -o out.mp4
 
 1. 有些 Release，如 Linux Alpine，缺少某些語言（阿拉伯語、波斯語、泰語等）的字型。如果是這種情況，請安裝額外的字體系列，如 [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans)；或檢視 Release 的字型 Wiki 頁面，因為它可能有針對這種特定情況的安裝指令，如 [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) 字型頁面；
 2. 確保 `fontconfig` 和 `libfontconfig1` 都已安裝。在 Ubuntu 上執行 `apt-get install fontconfig libfontconfig1`；
-3. 前往 [Release 頁面](https://github.com/lay295/TwitchDownloader/releases/)並下載最新的 Linux 版本抓取適用於 Arch Linux 的 [AUR 套裝軟體](https://aur.archlinux.org/packages/twitch-downloader-bin/)；或[從原始碼構建](#building-from-source)；
+3. 前往 [Release 頁面](https://github.com/lay295/TwitchDownloader/releases/)並下載最新的 Linux 版本抓取適用於 Arch Linux 的 [AUR 套裝軟體](https://aur.archlinux.org/packages/twitch-downloader-bin/)；或[從原始碼構建](#從原始碼構建)；
 4. 提取 `TwitchDownloaderCLI`；
 5. 開啟二進位制可執行檔案放置的目錄：
 
@@ -142,7 +142,7 @@ sudo chmod +x ffmpeg
 
 更多指令範例見 [CLI README 檔案（暫無繁體中文）](TwitchDownloaderCLI/README.md#example-commands)。
 
-## MacOS – 開始
+## macOS – 開始
 
 1. 如果你的裝置使用的是 Apple Silicon M 系列處理器，請確保下載了 ARM64 二進位制檔案；但如果你想在 Apple Silicon 上使用 x64 二進位制檔案，則必須在 Rosetta 2 下透過終端會話執行：
 
@@ -150,7 +150,7 @@ sudo chmod +x ffmpeg
 arch -x86_64 zsh
 ```
 
-2. 前往 [Release 頁面](https://github.com/lay295/TwitchDownloader/releases/)並下載最新的 MacOS 版本或[從原始碼構建](#building-from-source)；
+2. 前往 [Release 頁面](https://github.com/lay295/TwitchDownloader/releases/)並下載最新的 macOS 版本或[從原始碼構建](#從原始碼構建)；
 3. 提取 `TwitchDownloaderCLI`；
 4. 開啟二進位制可執行檔案放置的目錄：
 
@@ -225,7 +225,7 @@ dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 ```
 
-- 可接受的設定檔：`Windows`、`Linux`、`LinuxAlpine`、`LinuxArm`、`LinuxArm64`、`MacOS`、`MacOSArm64`
+- 可接受的設定檔：`Windows`、`Linux`、`LinuxAlpine`、`LinuxArm`、`LinuxArm64`、`macOS`、`macOSArm64`
 
 5. a) 定位至 GUI 構建資料夾：
 

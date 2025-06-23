@@ -58,15 +58,15 @@ Windows WPF GUI 内置了浅色和深色主题，以及根据当前 Windows 主�
 
 请查看 [GitHub](https://github.com/mohad12211/twitch-downloader-gui) 上的 twitch-downloader-gui 或 [AUR](https://aur.archlinux.org/packages/twitch-downloader-gui) 上的 CLI 的 Linux GUI 封装程序。
 
-## MacOS?
+## macOS?
 
-目前还没有适用于 MacOS 的 GUI 版本 :(
+目前还没有适用于 macOS 的 GUI 版本 :(
 
 # CLI
 
 ### [点击此处查看完整的 CLI 文档（暂无简体中文）](TwitchDownloaderCLI/README.md)
 
-CLI 是跨平台的，可以实现程序的主要功能。它可在 Windows、Linux 和 MacOS<sup>*</sup> 上运行。
+CLI 是跨平台的，可以实现程序的主要功能。它可在 Windows、Linux 和 macOS<sup>*</sup> 上运行。
 
 <sup>*仅对 Intel Mac 进行了测试</sup>
 
@@ -82,7 +82,7 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 
 ## Windows - 开始
 
-1. 前往[发行版页面](https://github.com/lay295/TwitchDownloader/releases/)并下载最新的 Windows 版本或[从源代码构建](#building-from-source)；
+1. 前往[发行版页面](https://github.com/lay295/TwitchDownloader/releases/)并下载最新的 Windows 版本或[从源代码构建](#从源代码构建)；
 2. 提取 `TwitchDownloaderCLI.exe`；
 3. 打开可执行文件放置的位置：
 
@@ -108,7 +108,7 @@ TwitchDownloaderCLI.exe videodownload --id <点播 ID> -o out.mp4
 
 1. 有些发行版，如 Linux Alpine，缺少某些语言（阿拉伯语、波斯语、泰语等）的字体。如果是这种情况，请安装额外的字体系列，如 [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans)；或查看发行版的字体 Wiki 页面，因为它可能有针对这种特定情况的安装命令，如 [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) 字体页面；
 2. 确保 `fontconfig` 和 `libfontconfig1` 都已安装。在 Ubuntu 上运行 `apt-get install fontconfig libfontconfig1`；
-3. 前往[发行版页面](https://github.com/lay295/TwitchDownloader/releases/)并下载最新的 Linux 版本抓取适用于 Arch Linux 的 [AUR 软件包](https://aur.archlinux.org/packages/twitch-downloader-bin/)；或[从源代码构建](#building-from-source)；
+3. 前往[发行版页面](https://github.com/lay295/TwitchDownloader/releases/)并下载最新的 Linux 版本抓取适用于 Arch Linux 的 [AUR 软件包](https://aur.archlinux.org/packages/twitch-downloader-bin/)；或[从源代码构建](#从源代码构建)；
 4. 提取 `TwitchDownloaderCLI`；
 5. 打开二进制可执行文件放置的目录：
 
@@ -142,7 +142,7 @@ sudo chmod +x ffmpeg
 
 更多命令示例见 [CLI 自述文件（暂无简体中文）](TwitchDownloaderCLI/README.md#example-commands)。
 
-## MacOS – 开始
+## macOS – 开始
 
 1. 如果你的设备使用的是 Apple Silicon M 系列处理器，请确保下载了 ARM64 二进制文件；但如果你想在 Apple Silicon 上使用 x64 二进制文件，则必须在 Rosetta 2 下通过终端会话运行：
 
@@ -150,7 +150,7 @@ sudo chmod +x ffmpeg
 arch -x86_64 zsh
 ```
 
-2. 前往[发行版页面](https://github.com/lay295/TwitchDownloader/releases/)并下载最新的 MacOS 版本或[从源代码构建](#building-from-source)；
+2. 前往[发行版页面](https://github.com/lay295/TwitchDownloader/releases/)并下载最新的 macOS 版本或[从源代码构建](#从源代码构建)；
 3. 提取 `TwitchDownloaderCLI`；
 4. 打开二进制可执行文件放置的目录：
 
@@ -225,7 +225,7 @@ dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 ```
 
-- 可接受的配置文件：`Windows`、`Linux`、`LinuxAlpine`、`LinuxArm`、`LinuxArm64`、`MacOS`、`MacOSArm64`
+- 可接受的配置文件：`Windows`、`Linux`、`LinuxAlpine`、`LinuxArm`、`LinuxArm64`、`macOS`、`macOSArm64`
 
 5. a) 定位至 GUI 构建文件夹：
 
