@@ -122,12 +122,12 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("Key"))
                 .AddColumn(new TableColumn("Value"))
                 .AddRow(new Markup("Streamer"), GetUserNameMarkup(infoVideo.owner?.displayName, infoVideo.owner?.login, DEFAULT_STRING))
-                .AddRow(new Markup("Title"), new Paragraph(infoVideo.title))
+                .AddRow("Title", Markup.Escape(infoVideo.title))
                 .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoVideo.lengthSeconds)))
-                .AddRow("Category", infoVideo.game?.displayName ?? DEFAULT_STRING)
+                .AddRow("Category", Markup.Escape(infoVideo.game?.displayName ?? DEFAULT_STRING))
                 .AddRow("Views", infoVideo.viewCount.ToString("N0", CultureInfo.CurrentCulture))
                 .AddRow("Created at", $"{infoVideo.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC")
-                .AddRow("Description", infoVideo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd() ?? DEFAULT_STRING);
+                .AddRow("Description", Markup.Escape(infoVideo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd() ?? DEFAULT_STRING));
 
             AnsiConsole.Write(infoTable);
 
@@ -185,7 +185,7 @@ namespace TwitchDownloaderCLI.Modes
 
             foreach (var chapter in chapters.data.video.moments.edges)
             {
-                var category = chapter.node.details.game?.displayName ?? DEFAULT_STRING;
+                var category = Markup.Escape(chapter.node.details.game?.displayName ?? DEFAULT_STRING);
                 var type = chapter.node._type;
                 var start = TimeSpan.FromMilliseconds(chapter.node.positionMilliseconds);
                 var length = TimeSpan.FromMilliseconds(chapter.node.durationMilliseconds);
@@ -276,10 +276,10 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("Key"))
                 .AddColumn(new TableColumn("Value"))
                 .AddRow(new Markup("Streamer"), GetUserNameMarkup(infoClip.broadcaster?.displayName, infoClip.broadcaster?.login, DEFAULT_STRING))
-                .AddRow(new Markup("Title"), new Paragraph(infoClip.title))
+                .AddRow("Title", Markup.Escape(infoClip.title))
                 .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoClip.durationSeconds)))
                 .AddRow(new Markup("Clipped by"), GetUserNameMarkup(infoClip.curator?.displayName, infoClip.curator?.login, DEFAULT_STRING))
-                .AddRow("Category", infoClip.game?.displayName ?? DEFAULT_STRING)
+                .AddRow("Category", Markup.Escape(infoClip.game?.displayName ?? DEFAULT_STRING))
                 .AddRow("Views", infoClip.viewCount.ToString("N0", CultureInfo.CurrentCulture))
                 .AddRow("Created at", $"{infoClip.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC");
 
