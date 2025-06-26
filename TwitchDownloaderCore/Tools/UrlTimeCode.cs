@@ -13,8 +13,9 @@ namespace TwitchDownloaderCore.Tools
         /// <returns>The <see cref="TimeSpan"/> equivalent to the time interval contained in the <paramref name="input"/> span.</returns>
         public static TimeSpan Parse(ReadOnlySpan<char> input)
         {
-            var returnTimespan = TimeSpan.Zero;
+            input = input.Trim();
 
+            var returnTimespan = TimeSpan.Zero;
             var units = new List<char>("dhms");
             while (true)
             {
