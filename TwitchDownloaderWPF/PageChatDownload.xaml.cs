@@ -159,7 +159,7 @@ namespace TwitchDownloaderWPF
                     {
                         var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
                         CheckTrimStart.IsChecked = true;
-                        numStartHour.Value = time.Hours;
+                        numStartHour.Value = (int)time.TotalHours;
                         numStartMinute.Value = time.Minutes;
                         numStartSecond.Value = time.Seconds;
                     }
