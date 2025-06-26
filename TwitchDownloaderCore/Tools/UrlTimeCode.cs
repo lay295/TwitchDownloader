@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace TwitchDownloaderCore.Tools
 {
@@ -11,39 +13,41 @@ namespace TwitchDownloaderCore.Tools
         /// <returns>The <see cref="TimeSpan"/> equivalent to the time interval contained in the <paramref name="input"/> span.</returns>
         public static TimeSpan Parse(ReadOnlySpan<char> input)
         {
-            var dayIndex = input.IndexOf('d');
-            var hourIndex = input.IndexOf('h');
-            var minuteIndex = input.IndexOf('m');
-            var secondIndex = input.IndexOf('s');
+            input = input.Trim();
+
             var returnTimespan = TimeSpan.Zero;
-
-            if (dayIndex != -1 && int.TryParse(input[..dayIndex], out var days))
+            var units = new List<char>("dhms");
+            while (true)
             {
-                returnTimespan = returnTimespan.Add(TimeSpan.FromDays(days));
+                var unitIndex = input.IndexOfAny(CollectionsMarshal.AsSpan(units));
+                if (unitIndex < 1)
+                {
+                    return input.IsEmpty
+                        ? returnTimespan // Successful parse
+                        : TimeSpan.Zero; // Invalid format
+                }
+
+                if (!uint.TryParse(input[..unitIndex], out var time))
+                {
+                    // Invalid format
+                    return TimeSpan.Zero;
+                }
+
+                var unit = input[unitIndex];
+                returnTimespan += unit switch
+                {
+                    'd' => TimeSpan.FromDays(time),
+                    'h' => TimeSpan.FromHours(time),
+                    'm' => TimeSpan.FromMinutes(time),
+                    's' => TimeSpan.FromSeconds(time),
+                    _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
+                };
+
+                // Only parse the unit once
+                units.Remove(unit);
+
+                input = input[(unitIndex + 1)..];
             }
-
-            dayIndex++;
-
-            if (hourIndex != -1 && int.TryParse(input[dayIndex..hourIndex], out var hours))
-            {
-                returnTimespan = returnTimespan.Add(TimeSpan.FromHours(hours));
-            }
-
-            hourIndex++;
-
-            if (minuteIndex != -1 && int.TryParse(input[hourIndex..minuteIndex], out var minutes))
-            {
-                returnTimespan = returnTimespan.Add(TimeSpan.FromMinutes(minutes));
-            }
-
-            minuteIndex++;
-
-            if (secondIndex != -1 && int.TryParse(input[minuteIndex..secondIndex], out var seconds))
-            {
-                returnTimespan = returnTimespan.Add(TimeSpan.FromSeconds(seconds));
-            }
-
-            return returnTimespan;
         }
     }
 }
