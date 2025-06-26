@@ -26,6 +26,7 @@ namespace TwitchDownloaderCore.Tools
         BitBadgeTierNotification,
         WatchStreak,
         CharityDonation,
+        Combo,
         Unknown
     }
 
@@ -127,6 +128,9 @@ namespace TwitchDownloaderCore.Tools
                 if (bodyWithoutName.StartsWith(": Donated ") && bodyWithoutName[10..].Contains(" to support ", StringComparison.Ordinal))
                     return HighlightType.CharityDonation;
 
+                if (bodyWithoutName.StartsWith("'s community sent") && bodyWithoutName.EndsWith("! "))
+                    return HighlightType.Combo;
+
                 if (bodyWithoutName.StartsWith(" converted from a"))
                 {
                     // TODO: use bodyWithoutName when .NET 7
@@ -145,6 +149,9 @@ namespace TwitchDownloaderCore.Tools
                     };
                 }
             }
+
+            if (bodySpan.StartsWith("Combo started! You have ") && bodySpan.EndsWith("left to join. "))
+                return HighlightType.Combo;
 
             if (bodySpan.Equals("bits badge tier notification ", StringComparison.Ordinal))
                 return HighlightType.BitBadgeTierNotification;
