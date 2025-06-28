@@ -37,6 +37,37 @@ namespace TwitchDownloaderCore.Models
             return null;
         }
 
+        protected override bool TryGetKeywordQuality(string qualityString, out IVideoQuality<ClipQuality> quality)
+        {
+            if (string.IsNullOrWhiteSpace(qualityString))
+            {
+                quality = BestQuality();
+                return true;
+            }
+
+            if (qualityString.Contains("best", StringComparison.OrdinalIgnoreCase)
+                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase))
+            {
+                quality = qualityString.Contains("portrait", StringComparison.OrdinalIgnoreCase)
+                    ? BestPortraitQuality()
+                    : BestQuality();
+
+                return true;
+            }
+
+            if (qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase))
+            {
+                quality = qualityString.Contains("portrait", StringComparison.OrdinalIgnoreCase)
+                    ? WorstPortraitQuality()
+                    : WorstQuality();
+
+                return true;
+            }
+
+            quality = null;
+            return false;
+        }
+
         public override IVideoQuality<ClipQuality> BestQuality()
         {
             if (Qualities is null)
@@ -55,6 +86,22 @@ namespace TwitchDownloaderCore.Models
             return bestQuality ?? Qualities.FirstOrDefault();
         }
 
+        private IVideoQuality<ClipQuality> BestPortraitQuality()
+        {
+            if (Qualities is null)
+            {
+                return null;
+            }
+
+            var bestQuality = Qualities
+                .WhereOnlyIf(x => x.Resolution.Width < x.Resolution.Height, Qualities.All(x => x.Resolution.HasWidth))
+                .MaxBy(x => x.Resolution.Height);
+
+            bestQuality ??= Qualities.MaxBy(x => x.Resolution.Height);
+
+            return bestQuality ?? Qualities.FirstOrDefault();
+        }
+
         public override IVideoQuality<ClipQuality> WorstQuality()
         {
             if (Qualities is null)
@@ -64,6 +111,22 @@ namespace TwitchDownloaderCore.Models
 
             var worstQuality = Qualities
                 .WhereOnlyIf(x => x.Resolution.Width > x.Resolution.Height, Qualities.All(x => x.Resolution.HasWidth))
+                .MinBy(x => x.Resolution.Height);
+
+            worstQuality ??= Qualities.MinBy(x => x.Resolution.Height);
+
+            return worstQuality ?? Qualities.LastOrDefault();
+        }
+
+        private IVideoQuality<ClipQuality> WorstPortraitQuality()
+        {
+            if (Qualities is null)
+            {
+                return null;
+            }
+
+            var worstQuality = Qualities
+                .WhereOnlyIf(x => x.Resolution.Width < x.Resolution.Height, Qualities.All(x => x.Resolution.HasWidth))
                 .MinBy(x => x.Resolution.Height);
 
             worstQuality ??= Qualities.MinBy(x => x.Resolution.Height);
