@@ -32,12 +32,12 @@ namespace TwitchDownloaderCore.Models
 
             if (TryGetKeywordQuality(qualityString, out quality))
             {
-                return true;
+                return quality != null;
             }
 
             if (TryGetRegexQuality(qualityString, out quality))
             {
-                return true;
+                return quality != null;
             }
 
             quality = null;
@@ -201,36 +201,31 @@ namespace TwitchDownloaderCore.Models
                 return new List<IVideoQuality<T>>();
             }
 
-            // Build name count dictionary
-            var counts = new Dictionary<string, int>();
+            // Check for duplicate quality names
+            var duplicates = new Dictionary<string, int>();
             foreach (var quality in source)
             {
                 var name = getQualityName(quality);
-                CollectionsMarshal.GetValueRefOrAddDefault(counts, name, out _)++;
+                ref var count = ref CollectionsMarshal.GetValueRefOrAddDefault(duplicates, name, out var exists);
+                count = exists ? 1 : 0;
             }
 
             // Build quality list
             var qualities = new List<IVideoQuality<T>>(source.Count);
-            var duplicates = new HashSet<string>();
             foreach (var quality in source)
             {
                 var name = getQualityName(quality);
-                ref var count = ref CollectionsMarshal.GetValueRefOrAddDefault(counts, name, out var exists);
+                ref var count = ref CollectionsMarshal.GetValueRefOrAddDefault(duplicates, name, out var exists);
                 Debug.Assert(exists);
 
                 // No duplicate names
-                if (count == 1)
+                if (count == 0)
                 {
                     qualities.Add(constructQuality(quality, name));
                     continue;
                 }
 
                 // 1 or more duplicate names
-                if (duplicates.Add(name))
-                {
-                    count = 1;
-                }
-
                 qualities.Add(constructQuality(quality, $"{name}-{count}"));
                 count++;
             }
