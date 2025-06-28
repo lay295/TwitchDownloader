@@ -17,7 +17,7 @@ namespace TwitchDownloaderCore.Models
 
         public string Path { get; }
 
-        public ClipVideoQuality(ClipQuality item, string name, Resolution resolution, bool isSource)
+        internal ClipVideoQuality(ClipQuality item, string name, Resolution resolution, bool isSource)
         {
             Item = item;
             Name = name;

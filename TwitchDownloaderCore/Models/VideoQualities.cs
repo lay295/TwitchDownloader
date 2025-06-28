@@ -32,37 +32,19 @@ namespace TwitchDownloaderCore.Models
 
             if (TryGetKeywordQuality(qualityString, out quality))
             {
-                return true;
+                return quality != null;
             }
 
             if (TryGetRegexQuality(qualityString, out quality))
             {
-                return true;
+                return quality != null;
             }
 
             quality = null;
             return false;
         }
 
-        protected virtual bool TryGetKeywordQuality(string qualityString, out IVideoQuality<T> quality)
-        {
-            if (string.IsNullOrWhiteSpace(qualityString)
-                || qualityString.Contains("best", StringComparison.OrdinalIgnoreCase)
-                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase))
-            {
-                quality = BestQuality();
-                return true;
-            }
-
-            if (qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase))
-            {
-                quality = WorstQuality();
-                return true;
-            }
-
-            quality = null;
-            return false;
-        }
+        protected abstract bool TryGetKeywordQuality(string qualityString, out IVideoQuality<T> quality);
 
         private bool TryGetRegexQuality(string qualityString, out IVideoQuality<T> quality)
         {
@@ -219,36 +201,31 @@ namespace TwitchDownloaderCore.Models
                 return new List<IVideoQuality<T>>();
             }
 
-            // Build name count dictionary
-            var counts = new Dictionary<string, int>();
+            // Check for duplicate quality names
+            var duplicates = new Dictionary<string, int>();
             foreach (var quality in source)
             {
                 var name = getQualityName(quality);
-                CollectionsMarshal.GetValueRefOrAddDefault(counts, name, out _)++;
+                ref var count = ref CollectionsMarshal.GetValueRefOrAddDefault(duplicates, name, out var exists);
+                count = exists ? 1 : 0;
             }
 
             // Build quality list
             var qualities = new List<IVideoQuality<T>>(source.Count);
-            var duplicates = new HashSet<string>();
             foreach (var quality in source)
             {
                 var name = getQualityName(quality);
-                ref var count = ref CollectionsMarshal.GetValueRefOrAddDefault(counts, name, out var exists);
+                ref var count = ref CollectionsMarshal.GetValueRefOrAddDefault(duplicates, name, out var exists);
                 Debug.Assert(exists);
 
                 // No duplicate names
-                if (count == 1)
+                if (count == 0)
                 {
                     qualities.Add(constructQuality(quality, name));
                     continue;
                 }
 
                 // 1 or more duplicate names
-                if (duplicates.Add(name))
-                {
-                    count = 1;
-                }
-
                 qualities.Add(constructQuality(quality, $"{name}-{count}"));
                 count++;
             }
