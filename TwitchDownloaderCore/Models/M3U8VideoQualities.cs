@@ -36,14 +36,18 @@ namespace TwitchDownloaderCore.Models
 
         protected override bool TryGetKeywordQuality(string qualityString, out IVideoQuality<M3U8.Stream> quality)
         {
-            if (base.TryGetKeywordQuality(qualityString, out quality))
+            if (string.IsNullOrWhiteSpace(qualityString)
+                || qualityString.Contains("best", StringComparison.OrdinalIgnoreCase)
+                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase)
+                || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
             {
+                quality = BestQuality();
                 return true;
             }
 
-            if (qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
+            if (qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase))
             {
-                quality = BestQuality();
+                quality = WorstQuality();
                 return true;
             }
 

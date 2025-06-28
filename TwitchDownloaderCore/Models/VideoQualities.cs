@@ -44,25 +44,7 @@ namespace TwitchDownloaderCore.Models
             return false;
         }
 
-        protected virtual bool TryGetKeywordQuality(string qualityString, out IVideoQuality<T> quality)
-        {
-            if (string.IsNullOrWhiteSpace(qualityString)
-                || qualityString.Contains("best", StringComparison.OrdinalIgnoreCase)
-                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase))
-            {
-                quality = BestQuality();
-                return true;
-            }
-
-            if (qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase))
-            {
-                quality = WorstQuality();
-                return true;
-            }
-
-            quality = null;
-            return false;
-        }
+        protected abstract bool TryGetKeywordQuality(string qualityString, out IVideoQuality<T> quality);
 
         private bool TryGetRegexQuality(string qualityString, out IVideoQuality<T> quality)
         {
