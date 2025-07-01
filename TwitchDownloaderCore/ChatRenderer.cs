@@ -635,7 +635,7 @@ namespace TwitchDownloaderCore
             var finalBitmapInfo = finalBitmap.Info;
             using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
             {
-                if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight or HighlightType.WatchStreak)
+                if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight or HighlightType.WatchStreak or HighlightType.Combo)
                 {
                     var accentColor = highlightType is HighlightType.PayingForward
                         ? new SKColor(0xFF26262C) // AARRGGBB
@@ -742,6 +742,7 @@ namespace TwitchDownloaderCore
                 case HighlightType.ContinuingGift:
                 case HighlightType.PayingForward:
                 case HighlightType.Raid:
+                case HighlightType.Combo:
                 default:
                     DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
                     break;
