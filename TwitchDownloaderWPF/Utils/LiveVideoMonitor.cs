@@ -50,7 +50,8 @@ namespace TwitchDownloaderWPF.Utils
                     }
                 }
 
-                NextTimeToCheck = DateTimeOffset.UtcNow.AddSeconds(GenerateNextRandomInterval());
+                var randomOffset = Random.Shared.NextDouble(30, 40);
+                NextTimeToCheck = DateTimeOffset.UtcNow.AddSeconds(randomOffset);
             }
         }
 
@@ -87,13 +88,6 @@ namespace TwitchDownloaderWPF.Utils
             _logger = logger;
         }
 
-        private static double GenerateNextRandomInterval()
-        {
-            const int SECONDS_LOWER_BOUND = 30;
-            const int SECONDS_UPPER_BOUND = 38;
-            return Random.Shared.NextDouble(SECONDS_LOWER_BOUND, SECONDS_UPPER_BOUND);
-        }
-
         public async Task<bool> IsVideoRecording()
         {
             var state = GetOrCreateState(_videoId);
@@ -121,13 +115,11 @@ namespace TwitchDownloaderWPF.Utils
                 // Restart cleanup timer if it is stopped
                 _cacheCleanTimer ??= new Timer(TimerCallback, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
 
-                // Got existing state
                 if (VideoStateCache.TryGetValue(videoId, out var state))
                 {
                     return state;
                 }
 
-                // Create a new state
                 var newState = new VideoState(videoId);
                 VideoStateCache.Add(newState);
                 return newState;
