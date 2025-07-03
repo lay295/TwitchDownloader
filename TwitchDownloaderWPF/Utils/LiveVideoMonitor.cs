@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
@@ -55,12 +56,7 @@ namespace TwitchDownloaderWPF.Utils
             }
         }
 
-        private class StateCache : KeyedCollection<long, VideoState>
-        {
-            protected override long GetKeyForItem(VideoState item) => item.VideoId;
-        }
-
-        private static readonly StateCache VideoStateCache = new();
+        private static readonly Dictionary<long, VideoState> VideoStateCache = new();
         private static Timer _cacheCleanTimer;
 
         private readonly long _videoId;
@@ -115,14 +111,13 @@ namespace TwitchDownloaderWPF.Utils
                 // Restart cleanup timer if it is stopped
                 _cacheCleanTimer ??= new Timer(TimerCallback, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
 
-                if (VideoStateCache.TryGetValue(videoId, out var state))
+                ref var state = ref CollectionsMarshal.GetValueRefOrAddDefault(VideoStateCache, videoId, out var exists);
+                if (!exists)
                 {
-                    return state;
+                    state = new VideoState(videoId);
                 }
 
-                var newState = new VideoState(videoId);
-                VideoStateCache.Add(newState);
-                return newState;
+                return state;
             }
         }
 
@@ -132,7 +127,7 @@ namespace TwitchDownloaderWPF.Utils
             {
                 // Remove entries that haven't been checked in a while
                 var removeThreshold = DateTimeOffset.UtcNow - TimeSpan.FromMinutes(15);
-                foreach (var videoState in VideoStateCache.ToArray())
+                foreach (var videoState in VideoStateCache.Values.ToArray())
                 {
                     if (videoState.NextTimeToCheck < removeThreshold)
                     {
