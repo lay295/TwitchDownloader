@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.Utils;
 
 namespace TwitchDownloaderWPF.TwitchTasks
@@ -122,6 +124,16 @@ namespace TwitchDownloaderWPF.TwitchTasks
                     var waitTime = Random.Shared.NextDouble(8, 14);
                     await Task.Delay(TimeSpan.FromSeconds(waitTime));
                 }
+
+                var thumbUrl = videoMonitor.LatestVideoResponse.data.video.thumbnailURLs.FirstOrDefault();
+                await MainWindow.pageQueue.Dispatcher.InvokeAsync(() =>
+                {
+                    if (ThumbnailService.TryGetThumb(thumbUrl, out var newThumb))
+                    {
+                        Info.Thumbnail = newThumb;
+                        OnPropertyChanged(nameof(Info));
+                    }
+                });
             }
             catch (Exception ex)
             {
