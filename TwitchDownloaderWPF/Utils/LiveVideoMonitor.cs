@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderWPF.Utils
 {
@@ -13,6 +14,8 @@ namespace TwitchDownloaderWPF.Utils
         private int _consecutiveErrors;
         private readonly long _videoId;
         private readonly ITaskLogger _logger;
+
+        public GqlVideoResponse LatestVideoResponse { get; private set; }
 
         public LiveVideoMonitor(long videoId, ITaskLogger logger = null)
         {
@@ -33,8 +36,8 @@ namespace TwitchDownloaderWPF.Utils
             {
                 try
                 {
-                    var videoResponse = await TwitchHelper.GetVideoInfo(_videoId);
-                    _lastCheck = videoResponse.data.video.status == "RECORDING";
+                    LatestVideoResponse = await TwitchHelper.GetVideoInfo(_videoId);
+                    _lastCheck = LatestVideoResponse.data.video.status == "RECORDING";
                     _consecutiveErrors = 0;
                 }
                 catch (Exception ex)
