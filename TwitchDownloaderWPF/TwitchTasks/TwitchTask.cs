@@ -4,7 +4,10 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Utils;
 
 namespace TwitchDownloaderWPF.TwitchTasks
 {
@@ -105,6 +108,28 @@ namespace TwitchDownloaderWPF.TwitchTasks
                     _ => null
                 };
             }
+        }
+
+        protected async Task<bool> DelayUntilVideoOffline(long videoId, ITaskLogger logger)
+        {
+            try
+            {
+                ChangeStatus(TwitchTaskStatus.Waiting);
+
+                var videoMonitor = new LiveVideoMonitor(videoId, logger);
+                while (await videoMonitor.IsVideoRecording())
+                {
+                    var waitTime = Random.Shared.NextDouble(8, 14);
+                    await Task.Delay(TimeSpan.FromSeconds(waitTime));
+                }
+            }
+            catch (Exception ex)
+            {
+                Exception = ex;
+                return false;
+            }
+
+            return true;
         }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)

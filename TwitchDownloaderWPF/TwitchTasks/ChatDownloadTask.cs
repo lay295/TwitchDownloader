@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
-using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderWPF.Utils;
 
@@ -34,13 +33,12 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
             if (DownloadOptions.DelayDownload && long.TryParse(DownloadOptions.Id, out var videoId))
             {
-                ChangeStatus(TwitchTaskStatus.Waiting);
-
-                var videoMonitor = new LiveVideoMonitor(videoId, progress);
-                while (await videoMonitor.IsVideoRecording())
+                var success = await DelayUntilVideoOffline(videoId, progress);
+                if (!success)
                 {
-                    var waitTime = Random.Shared.NextDouble(8, 14);
-                    await Task.Delay(TimeSpan.FromSeconds(waitTime));
+                    ChangeStatus(TwitchTaskStatus.Failed);
+                    CanReinitialize = true;
+                    return;
                 }
             }
 
