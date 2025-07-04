@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +10,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderWPF.Utils
 {
+    // ReSharper disable InconsistentlySynchronizedField
     internal class LiveVideoMonitor
     {
         private class VideoState
@@ -18,8 +18,9 @@ namespace TwitchDownloaderWPF.Utils
             public DateTimeOffset NextTimeToCheck { get; private set; }
             public bool LastCheck { get; private set; }
             public GqlVideoResponse LatestVideoResponse { get; private set; }
-            public long VideoId { get; }
             public SemaphoreSlim Semaphore { get; }
+            public long VideoId { get; }
+            public int RefCount { get; set; }
 
             private int _consecutiveErrors;
 
@@ -57,89 +58,55 @@ namespace TwitchDownloaderWPF.Utils
         }
 
         private static readonly Dictionary<long, VideoState> VideoStateCache = new();
-        private static Timer _cacheCleanTimer;
 
-        private readonly long _videoId;
         private readonly ITaskLogger _logger;
+        private readonly VideoState _state;
 
-        public GqlVideoResponse LatestVideoResponse
-        {
-            get
-            {
-                lock (VideoStateCache)
-                {
-                    if (VideoStateCache.TryGetValue(_videoId, out var state))
-                    {
-                        return state.LatestVideoResponse;
-                    }
-                }
-
-                return null;
-            }
-        }
+        public GqlVideoResponse LatestVideoResponse => _state.LatestVideoResponse;
 
         public LiveVideoMonitor(long videoId, ITaskLogger logger = null)
         {
-            _videoId = videoId;
             _logger = logger;
-        }
 
-        public async Task<bool> IsVideoRecording()
-        {
-            var state = GetOrCreateState(_videoId);
-
-            await state.Semaphore.WaitAsync(TimeSpan.FromSeconds(10));
-            try
-            {
-                if (DateTimeOffset.UtcNow > state.NextTimeToCheck)
-                {
-                    await state.CheckIsRecording(_logger);
-                }
-            }
-            finally
-            {
-                state.Semaphore.Release();
-            }
-
-            return state.LastCheck;
-        }
-
-        private static VideoState GetOrCreateState(long videoId)
-        {
             lock (VideoStateCache)
             {
-                // Restart cleanup timer if it is stopped
-                _cacheCleanTimer ??= new Timer(TimerCallback, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
-
                 ref var state = ref CollectionsMarshal.GetValueRefOrAddDefault(VideoStateCache, videoId, out var exists);
                 if (!exists)
                 {
                     state = new VideoState(videoId);
                 }
 
-                return state;
+                _state = state;
+                _state.RefCount++;
             }
         }
 
-        private static void TimerCallback(object state)
+        public async Task<bool> IsVideoRecording()
+        {
+            await _state.Semaphore.WaitAsync(TimeSpan.FromSeconds(10));
+            try
+            {
+                if (DateTimeOffset.UtcNow > _state.NextTimeToCheck)
+                {
+                    await _state.CheckIsRecording(_logger);
+                }
+            }
+            finally
+            {
+                _state.Semaphore.Release();
+            }
+
+            return _state.LastCheck;
+        }
+
+        ~LiveVideoMonitor()
         {
             lock (VideoStateCache)
             {
-                // Remove entries that haven't been checked in a while
-                var removeThreshold = DateTimeOffset.UtcNow - TimeSpan.FromMinutes(15);
-                foreach (var videoState in VideoStateCache.Values.ToArray())
+                _state.RefCount--;
+                if (_state.RefCount < 1)
                 {
-                    if (videoState.NextTimeToCheck < removeThreshold)
-                    {
-                        VideoStateCache.Remove(videoState.VideoId);
-                    }
-                }
-
-                // If the cache is empty, stop the timer
-                if (VideoStateCache.Count is 0)
-                {
-                    _cacheCleanTimer.Dispose();
-                    _cacheCleanTimer = null;
+                    VideoStateCache.Remove(_state.VideoId);
                 }
             }
         }
