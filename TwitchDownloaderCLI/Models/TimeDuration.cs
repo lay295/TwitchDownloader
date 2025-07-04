@@ -57,8 +57,19 @@ namespace TwitchDownloaderCLI.Models
 
         private static TimeSpan ParseTimeSpan(string str)
         {
+            // TimeSpan.Parse interprets '10:30' as 10 hours, 30 minutes when we want it to mean 10 minutes, 30 seconds
+            var match = Regex.Match(str, @"^(\d{1,}):(\d{1,2})(?:\.(\d{1,3})\d*)?$");
+            if (match.Success)
+            {
+                if (!int.TryParse(match.Groups[1].ValueSpan, out var minutes)) minutes = 0;
+                if (!int.TryParse(match.Groups[2].ValueSpan, out var seconds)) seconds = 0;
+                if (!int.TryParse(match.Groups[3].ValueSpan, out var milliseconds)) milliseconds = 0;
+
+                return new TimeSpan(0, 0, minutes, seconds, milliseconds);
+            }
+
             // TimeSpan.Parse interprets '36:01:02' as 36 days, 1 hour, and 2 minutes, so we need to manually parse it ourselves
-            var match = Regex.Match(str, @"^(?:(\d{1,})[.:])?(\d{2,}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,3})\d*)?$");
+            match = Regex.Match(str, @"^(?:(\d{1,})[.:])?(\d{2,}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,3})\d*)?$");
             if (match.Success)
             {
                 if (!int.TryParse(match.Groups[1].ValueSpan, out var days)) days = 0;
