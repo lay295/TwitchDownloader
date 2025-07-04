@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderWPF.Properties;
@@ -119,10 +120,10 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 ChangeStatus(TwitchTaskStatus.Waiting);
 
                 var videoMonitor = new LiveVideoMonitor(videoId, logger);
-                while (await videoMonitor.IsVideoRecording())
+                while (await videoMonitor.IsVideoRecording(TokenSource.Token))
                 {
                     var waitTime = Random.Shared.NextDouble(8, 14);
-                    await Task.Delay(TimeSpan.FromSeconds(waitTime));
+                    await Task.Delay(TimeSpan.FromSeconds(waitTime), TokenSource.Token);
                 }
 
                 var thumbUrl = videoMonitor.LatestVideoResponse.data.video.thumbnailURLs.FirstOrDefault();
@@ -133,7 +134,11 @@ namespace TwitchDownloaderWPF.TwitchTasks
                         Info.Thumbnail = newThumb;
                         OnPropertyChanged(nameof(Info));
                     }
-                });
+                }, DispatcherPriority.Normal, TokenSource.Token);
+            }
+            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && TokenSource.IsCancellationRequested)
+            {
+                return true;
             }
             catch (Exception ex)
             {

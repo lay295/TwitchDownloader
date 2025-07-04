@@ -81,9 +81,9 @@ namespace TwitchDownloaderWPF.Utils
             }
         }
 
-        public async Task<bool> IsVideoRecording()
+        public async Task<bool> IsVideoRecording(CancellationToken cancellationToken)
         {
-            await _state.Semaphore.WaitAsync(TimeSpan.FromSeconds(10));
+            await _state.Semaphore.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
             try
             {
                 if (DateTimeOffset.UtcNow > _state.NextTimeToCheck)
