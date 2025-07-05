@@ -1762,12 +1762,13 @@ namespace TwitchDownloaderCore
             var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
-            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var upSnapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var downSnapThreshold = (int)Math.Round(24 * renderOptions.ReferenceScale);
             foreach (var emote in emoteTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                emote.SnapResize(newHeight, snapThreshold);
+                emote.SnapResize(newHeight, upSnapThreshold, downSnapThreshold);
             }
 
             return emoteTask;
@@ -1779,12 +1780,13 @@ namespace TwitchDownloaderCore
                 renderOptions.StvEmotes, renderOptions.AllowUnlistedEmotes, renderOptions.Offline, cancellationToken);
 
             var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
-            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var upSnapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var downSnapThreshold = (int)Math.Round(24 * renderOptions.ReferenceScale);
             foreach (var emote in emoteThirdTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                emote.SnapResize(newHeight, snapThreshold);
+                emote.SnapResize(newHeight, upSnapThreshold, downSnapThreshold);
             }
 
             return emoteThirdTask;
@@ -1795,12 +1797,13 @@ namespace TwitchDownloaderCore
             var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, _cacheDir, chatRoot.streamer.id.ToString(), _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
-            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var upSnapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var downSnapThreshold = (int)Math.Round(24 * renderOptions.ReferenceScale);
             foreach (var cheer in cheerTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                cheer.SnapResize(newHeight, snapThreshold);
+                cheer.SnapResize(newHeight, upSnapThreshold, downSnapThreshold);
             }
 
             return cheerTask;
