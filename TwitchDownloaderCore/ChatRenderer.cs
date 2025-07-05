@@ -252,6 +252,12 @@ namespace TwitchDownloaderCore
 
         private SKTypeface GetInterTypeface(SKFontStyle fontStyle)
         {
+            // HACK: Normal and Bold look basically identical in Inter. Replace Bold with ExtraBold for now
+            if (fontStyle.Weight == (int)SKFontStyleWeight.Bold)
+            {
+                fontStyle = new SKFontStyle((int)SKFontStyleWeight.ExtraBold, fontStyle.Width, fontStyle.Slant);
+            }
+
             using var stream = fontStyle.Slant switch
             {
                 SKFontStyleSlant.Italic or SKFontStyleSlant.Oblique => new MemoryStream(Properties.Resources.InterVariableItalic),
