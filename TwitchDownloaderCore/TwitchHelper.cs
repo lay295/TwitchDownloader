@@ -1180,7 +1180,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlUserInfoResponse>();
         }
 
-        public static async Task<byte[]> GetImage(DirectoryInfo cacheDir, string imageUrl, string imageId, int imageScale, string imageType, ITaskLogger logger, CancellationToken cancellationToken = default)
+        public static async Task<(byte[], SKCodec)> GetImage(DirectoryInfo cacheDir, string url, string imageId, int imageScale, string imageType, bool offline, ITaskLogger logger, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -1191,8 +1191,6 @@ namespace TwitchDownloaderCore
                 cacheDir.Refresh();
             }
 
-            byte[] imageBytes;
-
             var filePath = Path.Combine(cacheDir.FullName, $"{imageId}_{imageScale}.{imageType}");
             var file = new FileInfo(filePath);
 
@@ -1200,21 +1198,19 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    await using var fs = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
-                    imageBytes = new byte[fs.Length];
-                    _ = await fs.ReadAsync(imageBytes, cancellationToken);
+                    var fileBytes = await File.ReadAllBytesAsync(file.FullName, cancellationToken).ConfigureAwait(false);
 
-                    if (imageBytes.Length > 0)
+                    if (fileBytes.Length > 0)
                     {
-                        using var ms = new MemoryStream(imageBytes);
-                        using var codec = SKCodec.Create(ms, out var result);
+                        var ms = new MemoryStream(fileBytes);
+                        var codec = SKCodec.Create(ms, out var result);
 
                         if (codec is not null)
                         {
-                            return imageBytes;
+                            return (fileBytes, codec);
                         }
 
-                        logger.LogVerbose($"Failed to decode {imageId} from cache: {result}");
+                        logger.LogVerbose($"Failed to decode {file.Name} from cache: {result}");
                     }
 
                     // Delete the corrupted image
@@ -1227,19 +1223,24 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            imageBytes = await httpClient.GetByteArrayAsync(imageUrl, cancellationToken);
+            // Return null if offline
+            if (offline)
+            {
+                return (null, null);
+            }
+
+            var imageBytes = await httpClient.GetByteArrayAsync(url, cancellationToken).ConfigureAwait(false);
 
             try
             {
-                await using var fs = file.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
-                await fs.WriteAsync(imageBytes, cancellationToken);
+                await File.WriteAllBytesAsync(file.FullName, imageBytes, cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogVerbose($"Failed to open or write to {file.Name}: {e.Message}");
+                logger.LogVerbose($"Failed to save {file.Name} to cache: {ex.Message}");
             }
 
-            return imageBytes;
+            return (imageBytes, null);
         }
 
         /// <remarks>When a given video has only 1 chapter, data.video.moments.edges will be empty.</remarks>
