@@ -102,6 +102,26 @@ namespace TwitchDownloaderCore.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] InterBoldItalic {
+            get {
+                object obj = ResourceManager.GetObject("InterBoldItalic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] InterItalic {
+            get {
+                object obj = ResourceManager.GetObject("InterItalic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] noto_emoji_2_038 {
             get {
                 object obj = ResourceManager.GetObject("noto_emoji_2_038", resourceCulture);
