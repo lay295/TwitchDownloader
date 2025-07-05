@@ -246,10 +246,10 @@ File the program will output to.
 (Default: `12`) Font size.
 
 **--message-fontstyle**
-(Default: `normal`) Font style of message. Valid values are **normal**, **bold**, and **italic**.
+(Default: `normal`) Font style of message. Valid values are **normal**, **bold**, **italic**, and **bolditalic**.
 
 **--username-fontstyle**
-(Default: `bold`) Font style of username. Valid values are **normal**, **bold**, and **italic**.
+(Default: `bold`) Font style of username. Valid values are **normal**, **bold**, **italic**, and **bolditalic**.
 
 **--timestamp**
 (Default: `false`) Enables timestamps to the left of messages, similar to VOD chat on Twitch.

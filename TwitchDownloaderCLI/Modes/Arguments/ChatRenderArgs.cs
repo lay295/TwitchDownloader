@@ -63,10 +63,10 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("font-size", Default = 12, HelpText = "Font size.")]
         public double FontSize { get; set; }
 
-        [Option("message-fontstyle", Default = "normal", HelpText = "Font style of messages. Valid values are normal, bold, and italic.")]
+        [Option("message-fontstyle", Default = "normal", HelpText = "Font style of messages. Valid values are normal, bold, italic, and bolditalic.")]
         public string MessageFontStyle { get; set; }
 
-        [Option("username-fontstyle", Default = "bold", HelpText = "Font style of usernames. Valid values are normal, bold, and italic.")]
+        [Option("username-fontstyle", Default = "bold", HelpText = "Font style of usernames. Valid values are normal, bold, italic, and bolditalic.")]
         public string UsernameFontStyle { get; set; }
 
         [Option("timestamp", Default = false, HelpText = "Enable timestamps to the left of messages, similar to VOD chat on Twitch.")]
