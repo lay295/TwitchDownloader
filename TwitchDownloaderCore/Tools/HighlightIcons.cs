@@ -200,25 +200,27 @@ namespace TwitchDownloaderCore.Tools
         private SKImage GenerateGiftedManyIcon()
         {
             //int newSize = (int)(fontSize / 0.2727); // 44*44px @ 12pt font // Doesn't work because our image sections aren't tall enough and I'm not rewriting that right now
-            var finalIconSize = (int)FinalIconSize;
+            var taskIcon = TwitchHelper.GetImage(_cacheDir, GIFTED_MANY_ICON_URL, "gift-illus", 3, "png", _offline, StubTaskProgress.Instance);
+            taskIcon.Wait();
+            var (bytes, codec) = taskIcon.Result;
 
-            if (_offline)
+            SKBitmap tempBitmap;
+            if (codec is null)
             {
-                using var offlineBitmap = new SKBitmap(finalIconSize, finalIconSize);
-                using (var offlineCanvas = new SKCanvas(offlineBitmap))
-                    offlineCanvas.Clear();
-                offlineBitmap.SetImmutable();
-                return SKImage.FromBitmap(offlineBitmap);
+                using var ms = new MemoryStream(bytes);
+                using var skCodec = SKCodec.Create(ms);
+                tempBitmap = SKBitmap.Decode(skCodec);
+            }
+            else
+            {
+                tempBitmap = SKBitmap.Decode(codec);
+                codec.Dispose();
             }
 
-            var taskIconBytes = TwitchHelper.GetImage(_cacheDir, GIFTED_MANY_ICON_URL, "gift-illus", 3, "png", StubTaskProgress.Instance);
-            taskIconBytes.Wait();
-            using var ms = new MemoryStream(taskIconBytes.Result); // Illustration is 72x72
-            using var codec = SKCodec.Create(ms);
-            using var tempBitmap = SKBitmap.Decode(codec);
-
-            var imageInfo = new SKImageInfo(finalIconSize, finalIconSize);
-            using var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            var newSize = (int)FinalIconSize;
+            var imageInfo = new SKImageInfo(newSize, newSize);
+            var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            tempBitmap.Dispose();
 
             resizedBitmap.SetImmutable();
             return SKImage.FromBitmap(resizedBitmap);
