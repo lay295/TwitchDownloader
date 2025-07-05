@@ -788,7 +788,8 @@
     <value>La aplicación debe reiniciarse para que los cambios surtan efecto.</value>
   </data>
   <data name="RestartTheApplication" xml:space="preserve">
-    <value>Por favor, reinicie {0}</value><comment>{0} es el nombre de la aplicación.</comment>
+    <value>Por favor, reinicie {0}</value>
+    <comment>{0} es el nombre de la aplicación.</comment>
   </data>
   <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
     <value>Restaurar valores predeterminados</value>
@@ -830,7 +831,7 @@
     <value>{0:N0} días</value>
   </data>
   <data name="LogLevels" xml:space="preserve">
-    <value>Log Levels:</value>
+    <value>Niveles de registro:</value>
   </data>
   <data name="LogLevelVerbose" xml:space="preserve">
     <value>Verbose</value>
@@ -839,7 +840,7 @@
     <value>Info</value>
   </data>
   <data name="LogLevelWarning" xml:space="preserve">
-    <value>Warning</value>
+    <value>Advertencia</value>
   </data>
   <data name="LogLevelError" xml:space="preserve">
     <value>Error</value>
@@ -848,22 +849,22 @@
     <value>FFmpeg</value>
   </data>
   <data name="CopyFolderPathToClipboard" xml:space="preserve">
-    <value>Copy path to clipboard</value>
+    <value>Copiar ruta al portapapeles</value>
   </data>
   <data name="ContextMenuOpenFolder" xml:space="preserve">
-    <value>Open folder</value>
+    <value>Abrir carpeta</value>
   </data>
   <data name="UnknownUser" xml:space="preserve">
-    <value>Unknown User</value>
+    <value>Usuario desconocido</value>
   </data>
   <data name="UnknownGame" xml:space="preserve">
-    <value>Unknown Game</value>
+    <value>Juego desconocido</value>
   </data>
   <data name="UnknownVideoLength" xml:space="preserve">
-    <value>Unknown</value>
+    <value>Desconocido</value>
   </data>
   <data name="IncreaseUsernameReadability" xml:space="preserve">
-    <value>Increase Username Readability:</value>
+    <value>Aumentar la legibilidad del nombre de usuario:</value>
   </data>
   <data name="BadgeMaskBroadcaster" xml:space="preserve">
     <value>Broadcaster</value>
@@ -878,180 +879,181 @@
     <value>Subs</value>
   </data>
   <data name="BadgeMaskPredictions" xml:space="preserve">
-    <value>Predictions</value>
+    <value>Predicciones</value>
   </data>
   <data name="BadgeMaskNoAudioNoVideo" xml:space="preserve">
-    <value>No Audio/No Video</value>
+    <value>Sin Audio/Sin Vídeo</value>
   </data>
   <data name="BadgeMaskTwitchPrime" xml:space="preserve">
     <value>Prime</value>
   </data>
   <data name="BadgeMaskOthers" xml:space="preserve">
-    <value>Others</value>
+    <value>Otros</value>
   </data>
   <data name="TitleFileAlreadyExists" xml:space="preserve">
-    <value>File already exists</value>
+    <value>El archivo ya existe</value>
   </data>
   <data name="FileAlreadyExistsHeader" xml:space="preserve">
-    <value>{0} already exists.</value>
+    <value>{0} ya existe.</value>
   </data>
   <data name="FileAlreadyExistsBody" xml:space="preserve">
-    <value>The file {0} already exists. Do you want to overwrite it?</value>
+    <value>El archivo {0} ya existe. ¿Quieres sobrescribirlo?</value>
   </data>
   <data name="FileAlreadyExistsOverwrite" xml:space="preserve">
-    <value>Overwrite</value>
+    <value>Sobrescribir</value>
   </data>
   <data name="FileAlreadyExistsOverwriteDescription" xml:space="preserve">
-    <value>The existing file will be overwritten.</value>
+    <value>El archivo existente se sobrescribirá.</value>
   </data>
   <data name="FileAlreadyExistsRename" xml:space="preserve">
-    <value>Rename</value>
+    <value>Renombrar</value>
   </data>
   <data name="FileAlreadyExistsRenameDescription" xml:space="preserve">
-    <value>The new file will be renamed.</value>
+    <value>Se cambiará el nombre del archivo nuevo.</value>
   </data>
   <data name="FileAlreadyExistsCancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Cancelar</value>
   </data>
   <data name="FileAlreadyExistsCancelDescription" xml:space="preserve">
-    <value>The task will be canceled.</value>
+    <value>La tarea se cancelará.</value>
   </data>
   <data name="FileAlreadyExistsRememberMyChoice" xml:space="preserve">
-    <value>Remember my choice for this session</value>
+    <value>Recordar mi elección para esta sesión</value>
   </data>
   <data name="VideoTrimMode" xml:space="preserve">
-    <value>Trim Mode </value><comment>Leave a trailing space</comment>
+    <value>Modo de recorte </value>
+    <comment>Dejar un espacio al final</comment>
   </data>
   <data name="VideoTrimModeSafe" xml:space="preserve">
-    <value>Safe</value>
+    <value>Seguro</value>
   </data>
   <data name="VideoTrimModeExact" xml:space="preserve">
-    <value>Exact</value>
+    <value>Exacto</value>
   </data>
   <data name="VideoTrimModeTooltip" xml:space="preserve">
-    <value>Videos trimmed with exact trim may rarely experience video/audio stuttering within the first/last few seconds. Safe trimming is guaranteed to not stutter but may result in a slightly longer video.</value>
+    <value>Los vídeos recortados con el modo exacto pueden, en raras ocasiones, experimentar saltos de vídeo/audio en los primeros o últimos segundos. El recorte seguro garantiza que no habrá saltos, pero puede resultar en un vídeo ligeramente más largo.</value>
   </data>
   <data name="TaskRetry" xml:space="preserve">
-    <value>Retry</value>
+    <value>Reintentar</value>
   </data>
   <data name="UnableToGetChannelVideos" xml:space="preserve">
-    <value>Unable to Get Videos</value>
+    <value>No se pueden obtener los vídeos</value>
   </data>
   <data name="UnableToGetChannelVideosMessage" xml:space="preserve">
-    <value>Unable to get channel videos: {0}</value>
+    <value>No se pueden obtener los vídeos del canal: {0}</value>
   </data>
   <data name="UnableToGetChannelClips" xml:space="preserve">
-    <value>Unable to Get Clips</value>
+    <value>No se pueden obtener los clips</value>
   </data>
   <data name="UnableToGetChannelClipsMessage" xml:space="preserve">
-    <value>Unable to get channel clips: {0}</value>
+    <value>No se pueden obtener los clips del canal: {0}</value>
   </data>
   <data name="FilenameParameterTitleTooltip" xml:space="preserve">
-    <value>The title of the video/clip.</value>
+    <value>El título del vídeo/clip.</value>
   </data>
   <data name="FilenameParameterIdTooltip" xml:space="preserve">
-    <value>The ID of the video/clip.</value>
+    <value>El ID del vídeo/clip.</value>
   </data>
   <data name="FilenameParameterDateTooltip" xml:space="preserve">
-    <value>The date that the video/clip was created in the format M-d-yy.</value>
+    <value>La fecha de creación del vídeo/clip en formato M-d-aa.</value>
   </data>
   <data name="FilenameParameterDateCustomTooltip" xml:space="preserve">
-    <value>The date that the video/clip was created in a customizable format.</value>
+    <value>La fecha de creación del vídeo/clip en un formato personalizable.</value>
   </data>
   <data name="FilenameParameterChannelTooltip" xml:space="preserve">
-    <value>The display name of the channel which owns the video/clip/chat.</value>
+    <value>El nombre de usuario del canal propietario del vídeo/clip/chat.</value>
   </data>
   <data name="FilenameParameterRandomStringTooltip" xml:space="preserve">
-    <value>A string of 11 random characters.</value>
+    <value>Una cadena de 11 caracteres aleatorios.</value>
   </data>
   <data name="FilenameParameterTrimStartTooltip" xml:space="preserve">
-    <value>The start trim of the video/chat in the format hh-mm-ss.</value>
+    <value>El inicio del recorte del vídeo/chat en formato hh-mm-ss.</value>
   </data>
   <data name="FilenameParameterTrimStartCustomTooltip" xml:space="preserve">
-    <value>The start trim of the video/chat in a customizable format.</value>
+    <value>El inicio del recorte del vídeo/chat en un formato personalizable.</value>
   </data>
   <data name="FilenameParameterTrimEndTooltip" xml:space="preserve">
-    <value>The end trim of the video/chat in the format hh-mm-ss.</value>
+    <value>El final del recorte del vídeo/chat en formato hh-mm-ss.</value>
   </data>
   <data name="FilenameParameterTrimEndCustomTooltip" xml:space="preserve">
-    <value>The end trim of the video/chat in a customizable format.</value>
+    <value>El final del recorte del vídeo/chat en un formato personalizable.</value>
   </data>
   <data name="FilenameParameterLengthTooltip" xml:space="preserve">
-    <value>The length (excluding trim) of the video/clip/chat in the format hh-mm-ss.</value>
+    <value>La duración (sin recorte) del vídeo/clip/chat en formato hh-mm-ss.</value>
   </data>
   <data name="FilenameParameterLengthCustomTooltip" xml:space="preserve">
-    <value>The length (excluding trim) of the video/clip/chat in a customizable format.</value>
+    <value>La duración (sin recorte) del vídeo/clip/chat en un formato personalizable.</value>
   </data>
   <data name="FilenameParameterViewsTooltip" xml:space="preserve">
-    <value>The amount of views the video/clip has.</value>
+    <value>El número de visualizaciones que tiene el vídeo/clip.</value>
   </data>
   <data name="FilenameParameterGameTooltip" xml:space="preserve">
-    <value>The display name of the primary game/category in the video/clip/chat.</value>
+    <value>El nombre del juego/categoría principal en el vídeo/clip/chat.</value>
   </data>
   <data name="FileCollisionBehavior" xml:space="preserve">
-    <value>File Collision Behavior</value>
+    <value>Comportamiento en colisión de archivos</value>
   </data>
   <data name="FileCollisionBehaviorTooltip" xml:space="preserve">
-    <value>The default handling for file collisions in the task queue. If a choice has already been remembered for the current session, an application restart will be required to override it.</value>
+    <value>La acción por defecto para colisiones de archivos en la cola de tareas. Si ya se ha recordado una elección para la sesión actual, será necesario reiniciar la aplicación para cambiarla.</value>
   </data>
   <data name="FileCollisionBehaviorAsk" xml:space="preserve">
-    <value>Ask</value>
+    <value>Preguntar</value>
   </data>
   <data name="FileCollisionBehaviorOverwrite" xml:space="preserve">
-    <value>Overwrite</value>
+    <value>Sobrescribir</value>
   </data>
   <data name="FileCollisionBehaviorRename" xml:space="preserve">
-    <value>Rename</value>
+    <value>Renombrar</value>
   </data>
   <data name="FileCollisionBehaviorCancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Cancelar</value>
   </data>
   <data name="FilenameParameterChannelIdTooltip" xml:space="preserve">
-    <value>The ID of the channel which owns the video/clip/chat.</value>
+    <value>El ID del canal propietario del vídeo/clip/chat.</value>
   </data>
   <data name="FilenameParameterClipperTooltip" xml:space="preserve">
-    <value>The display name of the channel which created the clip, or empty for videos.</value>
+    <value>El nombre de usuario del canal que creó el clip, o vacío para los vídeos.</value>
   </data>
   <data name="FilenameParameterClipperIdTooltip" xml:space="preserve">
-    <value>The ID of the channel which created the clip, or empty for videos.</value>
+    <value>El ID del canal que creó el clip, o vacío para los vídeos.</value>
   </data>
   <data name="FailedToCopyToClipboard" xml:space="preserve">
-    <value>Failed to Copy to Clipboard</value>
+    <value>Error al copiar al portapapeles</value>
   </data>
   <data name="FilenameParameterTrimLengthTooltip" xml:space="preserve">
-    <value>The length (including trim) of the video/clip/chat in the format hh-mm-ss.</value>
+    <value>La duración (con recorte) del vídeo/clip/chat en formato hh-mm-ss.</value>
   </data>
   <data name="FilenameParameterTrimLengthCustomTooltip" xml:space="preserve">
-    <value>The length (including trim) of the video/clip/chat in a customizable format.</value>
+    <value>La duración (con recorte) del vídeo/clip/chat en un formato personalizable.</value>
   </data>
   <data name="VideoTypeAllVideos" xml:space="preserve">
-    <value>All Videos</value>
+    <value>Todos los vídeos</value>
   </data>
   <data name="VideoTypePastBroadcasts" xml:space="preserve">
-    <value>Broadcasts</value>
+    <value>Emisiones</value>
   </data>
   <data name="VideoTypeHighlights" xml:space="preserve">
-    <value>Highlights</value>
+    <value>Destacados</value>
   </data>
   <data name="VideoTypeUploads" xml:space="preserve">
-    <value>Uploads</value>
+    <value>Vídeos subidos</value>
   </data>
   <data name="DelayDownload" xml:space="preserve">
-    <value>Delay Download Until Broadcast Finished</value>
+    <value>Retrasar la descarga hasta que finalice la emisión</value>
   </data>
   <data name="ReduceMotion" xml:space="preserve">
-    <value>Reduce Motion:</value>
+    <value>Reducir movimiento:</value>
   </data>
   <data name="ClearRecentChannels" xml:space="preserve">
-    <value>Clear Recent Channels</value>
+    <value>Limpiar canales recientes</value>
   </data>
   <data name="ClearLog" xml:space="preserve">
-    <value>Clear Log</value>
+    <value>Limpiar registro</value>
   </data>
   <data name="RenderUserAvatars" xml:space="preserve">
-    <value>User Avatars:</value>
+    <value>Avatares de usuario:</value>
   </data>
   <data name="AvatarScale" xml:space="preserve">
-    <value>Avatar Scale:</value>
+    <value>Escala de avatares:</value>
   </data>
 </root>
