@@ -252,15 +252,22 @@ namespace TwitchDownloaderCore
 
         private static SKTypeface GetInterTypeface(SKFontStyle fontStyle)
         {
-            if (fontStyle == SKFontStyle.Bold)
-            {
-                using MemoryStream stream = new MemoryStream(Properties.Resources.InterBold);
+            MemoryStream stream = null;
+            try {
+                if (fontStyle == SKFontStyle.Bold)
+                    stream = new MemoryStream(Properties.Resources.InterBold);
+                else if (fontStyle == SKFontStyle.Italic)
+                    stream = new MemoryStream(Properties.Resources.InterItalic);
+                else if (fontStyle == SKFontStyle.BoldItalic)
+                    stream = new MemoryStream(Properties.Resources.InterBoldItalic);
+                else
+                    stream = new MemoryStream(Properties.Resources.Inter);
+
                 return SKTypeface.FromStream(stream);
             }
-            else
+            finally
             {
-                using MemoryStream stream = new MemoryStream(Properties.Resources.Inter);
-                return SKTypeface.FromStream(stream);
+                stream?.Dispose();
             }
         }
 
