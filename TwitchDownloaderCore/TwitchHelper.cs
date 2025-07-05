@@ -1371,5 +1371,39 @@ namespace TwitchDownloaderCore
                 }
             };
         }
+
+        public static int SnapResizeHeight(int desiredHeight, int upSnapThreshold, int downSnapThreshold, int imageHeight)
+        {
+            if (upSnapThreshold == downSnapThreshold && upSnapThreshold != 0)
+            {
+                var o = (desiredHeight + upSnapThreshold) % imageHeight;
+                if (o <= upSnapThreshold * 2)
+                {
+                    desiredHeight += upSnapThreshold - o;
+                }
+            }
+            else
+            {
+                if (downSnapThreshold != 0)
+                {
+                    var o = desiredHeight % imageHeight;
+                    if (o <= downSnapThreshold)
+                    {
+                        desiredHeight -= o;
+                    }
+                }
+
+                if (upSnapThreshold != 0)
+                {
+                    var o = imageHeight - (desiredHeight % imageHeight);
+                    if (o <= upSnapThreshold)
+                    {
+                        desiredHeight += o;
+                    }
+                }
+            }
+
+            return desiredHeight;
+        }
     }
 }
