@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace TwitchDownloaderCore.TwitchObjects
@@ -31,12 +32,21 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int Width => EmoteFrames[0].Width;
         public SKImageInfo Info => EmoteFrames[0].Info;
 
-        public TwitchEmote(byte[] imageData, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName, bool isZeroWidth = false)
+        public TwitchEmote(byte[] imageData, [AllowNull] SKCodec codec, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName, bool isZeroWidth = false)
         {
-            using MemoryStream ms = new MemoryStream(imageData);
-            Codec = SKCodec.Create(ms, out var result);
-            if (Codec is null)
-                throw new Exception($"Skia was unable to decode {imageName} ({imageId}). Returned: {result}");
+            if (codec is null)
+            {
+                var ms = new MemoryStream(imageData);
+                Codec = SKCodec.Create(ms, out var result);
+                if (Codec is null)
+                {
+                    throw new Exception($"Skia was unable to decode {imageName} ({imageId}). Returned: {result}");
+                }
+            }
+            else
+            {
+                Codec = codec;
+            }
 
             EmoteProvider = emoteProvider;
             Id = imageId;
