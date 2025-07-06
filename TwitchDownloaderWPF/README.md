@@ -1,12 +1,16 @@
 # TwitchDownloaderWPF
+
 A Windows WPF desktop application that implements the core functionality wrapped in various quality of life features.
 
 This document is also available in:
 
 - [**Japanese / 日本語**](README_ja.md)
 - [**Portuguese (Brazil) / Português (Brasil)**](README_pt-br.md)
+- [**Simplified Chinese / 简体中文**](README_zh-cn.md)
+- [**Traditonal Chinese / 繁體中文**](README_zh-tw.md)
 
 ## Table of Contents
+
 - [TwitchDownloaderWPF](#twitchdownloaderwpf)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
@@ -37,6 +41,7 @@ This document is also available in:
 Most of the pages contain an information area on the left side of window, showing the thumbnail (if available), streamer, creation date, and title of the VOD/clip, the center of the window contains the settings for the job, and the right side of the window contains an area for logging events.
 
 ### VOD Download
+
 Downloads a stream VOD or highlight from Twitch.
 
 ![Figure 1.1](Images/vodExample.png)
@@ -57,6 +62,7 @@ To get started, input a valid link or ID to a VOD or highlight. If the VOD or hi
 **Download**: Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
 
 ### Clip Download
+
 Downloads a clip from Twitch.
 
 ![Figure 2.1](Images/clipExample.png)
@@ -71,6 +77,7 @@ To get started, input a valid link or ID to a clip. From there the download opti
 **Download**: Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
 
 ### Chat Download
+
 Downloads the chat of a VOD, highlight, or clip.
 
 ![Figure 3.1](Images/chatdownload1Example.png)
@@ -82,6 +89,7 @@ Downloads the chat of a VOD, highlight, or clip.
 To get started, input a valid link or ID to a VOD, highlight, or clip. From there the download options will unlock, allowing you to customize the job. If the VOD or highlight is sub-only or private, then it cannot have the chat downloaded. This is a limitation of the Twitch API, not TwitchDownloader.
 
 **Download Format**: The file format the downloaded chat will be saved in.
+
 - `JSON` outputs a rich version of the chat that can be used for updating and rendering.
 - `Text` outputs a raw text version of the chat ideal for simply reading while watching a VOD.
 - `HTML` outputs a local webpage that emulates the look of the Twitch website.
@@ -101,6 +109,7 @@ To get started, input a valid link or ID to a VOD, highlight, or clip. From ther
 **Download**: Starts the download job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current download settings will be used in both scenarios.
 
 ### Chat Updater
+
 Updates the embedded emotes, badges, bits, and trimming of a JSON chat download and/or converts a JSON chat to another format.
 
 ![Figure 4.1](Images/chatupdateExample.png)
@@ -109,6 +118,7 @@ Updates the embedded emotes, badges, bits, and trimming of a JSON chat download 
 To get started, click the **Browse** button and navigate to a previously downloaded JSON chat. From there the update options will unlock, allowing you to customize the job. If the source video of the chat still exists, its information will be loaded in the information section.
 
 **Download Format**: The file format the updated chat will be saved in.
+
 - `JSON` outputs a rich version of the chat that can be used for updating and rendering.
 - `Text` outputs a raw text version of the chat ideal for simply reading while watching a VOD.
 - `HTML` outputs a local webpage that emulates the look of the Twitch website.
@@ -128,6 +138,7 @@ To get started, click the **Browse** button and navigate to a previously downloa
 **Update**: Starts the update job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. The current update settings will be used in both scenarios.
 
 ### Chat Render
+
 Renders a chat JSON as a video.
 
 ![Figure 5.1](Images/chatrender1Example.png)
@@ -150,7 +161,7 @@ Renders a chat JSON as a video.
 
 To get started, click the **Browse** button and navigate to a previously downloaded JSON chat. From there you may edit the render options to customize the job.
 
-**Render**: Starts the render job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. Alternatively you can also select 
+**Render**: Starts the render job. If instead you open the dropdown, you can send it to the [Task Queue](#task-queue) with the *Enqueue* option. Alternatively you can also select
 the *Partial Render* option to render a smaller section of the chat, see Figure 5.6. The current render settings will be used in all scenarios.
 
 #### <ins>General</ins>
@@ -185,7 +196,7 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Alternate Backgrounds**: Alternates the background color of every other chat message to help tell them apart.
 
-**Increase Username Visibility**: Increases the contrast between usernames and the background, similarly to the _Readable Colors_ option in Twitch chat. If render outlines are enabled, this option will increase username contrast against the outline instead of the background.
+**Increase Username Visibility**: Increases the contrast between usernames and the background, similarly to the *Readable Colors* option in Twitch chat. If render outlines are enabled, this option will increase username contrast against the outline instead of the background.
 
 **BTTV Emotes**: Enables emotes from BTTV in the render.
 
@@ -203,7 +214,7 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Banned Words List**: A comma-separated, case-insensitive list of words that will cause messages to be removed from the render. For example, in Figure 5.2 any message that contains `" pog "`, `"[pOg+"`, `"/POg9"` will be removed from the render. Any message that contains `" poggers "` will not be removed.
 
-**Emoji Vendor**: The style of emojis used in the render. Currently Twitter's _Twemoji_, Google's _Noto Color_, and your system's (_None_) emojis are supported.
+**Emoji Vendor**: The style of emojis used in the render. Currently Twitter's *Twemoji*, Google's *Noto Color*, and your system's (*None*) emojis are supported.
 
 #### <ins>Scaling</ins>
 
@@ -241,7 +252,7 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Generate Mask**: Generates a secondary output file containing a black and white mask of the text and images in the render. The alpha channel of the background color MUST be less than 255.
 
-**Sharpening**: Applies a sharpening filter to the rendered video. Slightly increases render time and file size. Works best with _Font Size_ 24 or larger.
+**Sharpening**: Applies a sharpening filter to the rendered video. Slightly increases render time and file size. Works best with *Font Size* 24 or larger.
 
 #### <ins>FFmpeg</ins>
 
@@ -267,6 +278,7 @@ If render speeds feel like they are too slow, try any of the following:
 | Change codec to H.264    |                               |                                           |
 
 ### Task Queue
+
 Create and manage multiple jobs.
 
 ![Figure 6.1](Images/taskqueueExample.png)
@@ -305,12 +317,14 @@ The Task Queue also features 3 types of mass downloading:
 **Search Clips**: A window to search all clips from a streamer that will all be processed with the same enqueue settings. See Figure 6.3 and Figure 6.5.
 
 ### Settings
+
 Manage the application's behavior.
 
 ![Figure 7.1](Images/settingsExample.png)
 <br><sup>*Figure 7.1*</sup>
 
 **Cache Folder**: The directory where temporary working files are stored. This includes VOD downloads, emotes, badges, and cheermotes.
+
 - **Clear**: Deletes all TwitchDownloader related cache files. Not recommended unless the application isn't behaving correctly.
 - **Browse**: Select a new folder to hold the temporary cache. Existing cache files will not be transferred.
 
@@ -341,6 +355,7 @@ Manage the application's behavior.
 ### Non-Error Issues
 
 Some issues are not considered to be errors. These should be reported as an [issue on github](https://github.com/lay295/TwitchDownloader/issues) along with the inputs used to cause the issue. Some examples of non-error issues include:
+
 - Video downloads get stuck at `Downloading: 99%` for longer than 5 minutes
 - Chat renders not updating status for more than 10 seconds
 - Chat renders missing comments
@@ -350,21 +365,23 @@ Some issues are not considered to be errors. These should be reported as an [iss
 ### Common Errors
 
 An error can be considered "common" if it has occurred before starting a job or immediately following the start of a job. A common error will also have friendly error message, sometimes accompanied by a popup, explaining what went wrong. Some examples of common errors include:
+
 - Unable to find thumbnail
-   - The VOD is either expired or currently live
+  - The VOD is either expired or currently live
 - Unable to get Video/Clip information
-   - The linked VOD/Clip is invalid, has been removed, or is private/sub-only and no valid OAuth was provided
+  - The linked VOD/Clip is invalid, has been removed, or is private/sub-only and no valid OAuth was provided
 - Unable to parse inputs
-   - One or more render inputs are invalid, refer to log
+  - One or more render inputs are invalid, refer to log
 
 ### Uncommon Errors
 
 An uncommon error can be characterized by a popup titled "Fatal Error" or an unfriendly error message. These should be reported as an [issue on github](https://github.com/lay295/TwitchDownloader/issues) along with the inputs used to cause the error. Some examples of uncommon errors include:
+
 - Error converting value 'XXX' to type 'XXX'. Path 'XXX', line #, position #.
 - Cannot access child value on Newtonsoft.Json.Linq.JValue.
 - Response status code does not indicate success: 404 (Not Found).
 - The pipe has been ended.
-   - An issue occurred with FFmpeg. Reset the arguments to default and try again. If still no success create a new issue on the github.
+  - An issue occurred with FFmpeg. Reset the arguments to default and try again. If still no success create a new issue on the github.
 
 To help us find the origin of an error, please enable `Verbose Errors` in the [settings](#settings) and take a screen capture of the resulting popup titled "Verbose Error Output".
 
@@ -384,7 +401,7 @@ Both a light and a dark theme are included with the application, along with an o
 
 To get started creating your own theme, simply duplicate one of the included themes and open it with your favorite text editor.
 
-The WPF application uses some elements from a package called _HandyControl_, which do not provide full theming support. Most HandyControl elements only support text and border recoloring, meaning the backgrounds must be either white or dark. To control this, set the `DarkHandyControl` boolean key to true or false.
+The WPF application uses some elements from a package called *HandyControl*, which do not provide full theming support. Most HandyControl elements only support text and border recoloring, meaning the backgrounds must be either white or dark. To control this, set the `DarkHandyControl` boolean key to true or false.
 
 To enable dark title bars with your theme, set the `DarkTitleBar` boolean key to true.
 
