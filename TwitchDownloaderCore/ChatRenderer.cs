@@ -250,18 +250,22 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static SKTypeface GetInterTypeface(SKFontStyle fontStyle)
+        private SKTypeface GetInterTypeface(SKFontStyle fontStyle)
         {
-            if (fontStyle == SKFontStyle.Bold)
+            // HACK: Normal and Bold look basically identical in Inter. Replace Bold with ExtraBold for now
+            if (fontStyle.Weight == (int)SKFontStyleWeight.Bold)
             {
-                using MemoryStream stream = new MemoryStream(Properties.Resources.InterBold);
-                return SKTypeface.FromStream(stream);
+                fontStyle = new SKFontStyle((int)SKFontStyleWeight.ExtraBold, fontStyle.Width, fontStyle.Slant);
             }
-            else
+
+            using var stream = fontStyle.Slant switch
             {
-                using MemoryStream stream = new MemoryStream(Properties.Resources.Inter);
-                return SKTypeface.FromStream(stream);
-            }
+                SKFontStyleSlant.Italic or SKFontStyleSlant.Oblique => new MemoryStream(Properties.Resources.InterVariableItalic),
+                _ => new MemoryStream(Properties.Resources.InterVariable)
+            };
+
+            using var typeface = SKTypeface.FromStream(stream);
+            return fontManager.MatchTypeface(typeface, fontStyle);
         }
 
         private void RenderVideoSection(int startTick, int endTick, FfmpegProcess ffmpegProcess, FfmpegProcess maskProcess = null, CancellationToken cancellationToken = new())
@@ -1755,12 +1759,13 @@ namespace TwitchDownloaderCore
             var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
-            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var upSnapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var downSnapThreshold = (int)Math.Round(24 * renderOptions.ReferenceScale);
             foreach (var emote in emoteTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                emote.SnapResize(newHeight, snapThreshold);
+                emote.SnapResize(newHeight, upSnapThreshold, downSnapThreshold);
             }
 
             return emoteTask;
@@ -1772,12 +1777,13 @@ namespace TwitchDownloaderCore
                 renderOptions.StvEmotes, renderOptions.AllowUnlistedEmotes, renderOptions.Offline, cancellationToken);
 
             var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
-            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var upSnapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var downSnapThreshold = (int)Math.Round(24 * renderOptions.ReferenceScale);
             foreach (var emote in emoteThirdTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                emote.SnapResize(newHeight, snapThreshold);
+                emote.SnapResize(newHeight, upSnapThreshold, downSnapThreshold);
             }
 
             return emoteThirdTask;
@@ -1788,12 +1794,13 @@ namespace TwitchDownloaderCore
             var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, _cacheDir, chatRoot.streamer.id.ToString(), _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
             var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
-            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var upSnapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
+            var downSnapThreshold = (int)Math.Round(24 * renderOptions.ReferenceScale);
             foreach (var cheer in cheerTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                cheer.SnapResize(newHeight, snapThreshold);
+                cheer.SnapResize(newHeight, upSnapThreshold, downSnapThreshold);
             }
 
             return cheerTask;

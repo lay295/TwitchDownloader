@@ -246,10 +246,10 @@ File the program will output to.
 (Default: `12`) Font size.
 
 **--message-fontstyle**
-(Default: `normal`) Font style of message. Valid values are **normal**, **bold**, and **italic**.
+(Default: `normal`) Font style of message. Valid values are **normal**, **bold**, **italic**, and **bolditalic**.
 
 **--username-fontstyle**
-(Default: `bold`) Font style of username. Valid values are **normal**, **bold**, and **italic**.
+(Default: `bold`) Font style of username. Valid values are **normal**, **bold**, **italic**, and **bolditalic**.
 
 **--timestamp**
 (Default: `false`) Enables timestamps to the left of messages, similar to VOD chat on Twitch.
@@ -494,7 +494,7 @@ Default true boolean flags must be assigned: `--default-true-flag=false`. Defaul
 Enum flag arguments may be assigned without spaces `--flag Value1,Value2,Value3` or with spaces when wrapped in quotes `--flag "Value1, Value2, Value3"` (see [String arguments](#string-arguments)).
 
 ### Time durations
-Time duration arguments may be formatted in milliseconds `###ms`, seconds `###s`, minutes `###m`, hours `###h`, or [time](https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0) (i.e. `hh:mm:ss`, `hh:mm`, `dd.hh:mm:ss.ms`).
+Time duration arguments may be formatted in milliseconds `###ms`, seconds `###s`, minutes `###m`, hours `###h`, or [time](https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0) (i.e. `hh:mm:ss`, `mm:ss`, `dd.hh:mm:ss.ms`).
 If the time duration is given as a number without a unit, seconds will be assumed. Decimals are supported.
 
 "Beginning" arguments set when trimming begins. For example, `--beginning 17s` will make the output start 17 seconds after the source begins.

@@ -1,10 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
+using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.Utils;
 
 namespace TwitchDownloaderWPF.TwitchTasks
 {
@@ -105,6 +111,42 @@ namespace TwitchDownloaderWPF.TwitchTasks
                     _ => null
                 };
             }
+        }
+
+        protected async Task<bool> DelayUntilVideoOffline(long videoId, ITaskLogger logger)
+        {
+            try
+            {
+                ChangeStatus(TwitchTaskStatus.Waiting);
+
+                var videoMonitor = new LiveVideoMonitor(videoId, logger);
+                while (await videoMonitor.IsVideoRecording(TokenSource.Token))
+                {
+                    var waitTime = Random.Shared.NextDouble(8, 14);
+                    await Task.Delay(TimeSpan.FromSeconds(waitTime), TokenSource.Token);
+                }
+
+                var thumbUrl = videoMonitor.LatestVideoResponse.data.video.thumbnailURLs.FirstOrDefault();
+                await MainWindow.pageQueue.Dispatcher.InvokeAsync(() =>
+                {
+                    if (ThumbnailService.TryGetThumb(thumbUrl, out var newThumb))
+                    {
+                        Info.Thumbnail = newThumb;
+                        OnPropertyChanged(nameof(Info));
+                    }
+                }, DispatcherPriority.Normal, TokenSource.Token);
+            }
+            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && TokenSource.IsCancellationRequested)
+            {
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Exception = ex;
+                return false;
+            }
+
+            return true;
         }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)

@@ -14,8 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\interbold.otf" />
-    <EmbeddedResource Include="Resources\interregular.otf" />
+    <EmbeddedResource Include="Resources\InterVariable.ttf" />
+    <EmbeddedResource Include="Resources\InterVariable-Italic.ttf" />
     <EmbeddedResource Include="Resources\chat-template.html" />
     <EmbeddedResource Include="Resources\noto-emoji-2.038.zip" />
     <None Include="Resources\TD-License" Visible="false" />

@@ -1,40 +1,42 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderWPF.Utils
 {
+    // ReSharper disable InconsistentlySynchronizedField
     internal class LiveVideoMonitor
     {
-        private DateTimeOffset _nextTimeToCheck;
-        private bool _lastCheck;
-        private int _consecutiveErrors;
-        private readonly long _videoId;
-        private readonly ITaskLogger _logger;
-
-        public LiveVideoMonitor(long videoId, ITaskLogger logger = null)
+        private class VideoState
         {
-            _videoId = videoId;
-            _logger = logger;
-        }
+            public DateTimeOffset NextTimeToCheck { get; private set; }
+            public bool LastCheck { get; private set; }
+            public GqlVideoResponse LatestVideoResponse { get; private set; }
+            public SemaphoreSlim Semaphore { get; }
+            public long VideoId { get; }
+            public int RefCount { get; set; }
 
-        private static double GenerateNextRandomInterval()
-        {
-            const int SECONDS_LOWER_BOUND = 30;
-            const int SECONDS_UPPER_BOUND = 34;
-            return Random.Shared.NextDouble(SECONDS_LOWER_BOUND, SECONDS_UPPER_BOUND);
-        }
+            private int _consecutiveErrors;
 
-        public async Task<bool> IsVideoRecording()
-        {
-            if (DateTimeOffset.UtcNow > _nextTimeToCheck)
+            public VideoState(long videoId)
+            {
+                LastCheck = true;
+                VideoId = videoId;
+                Semaphore = new SemaphoreSlim(1, 1);
+            }
+
+            public async Task CheckIsRecording(ITaskLogger logger)
             {
                 try
                 {
-                    var videoResponse = await TwitchHelper.GetVideoInfo(_videoId);
-                    _lastCheck = videoResponse.data.video.status == "RECORDING";
+                    LatestVideoResponse = await TwitchHelper.GetVideoInfo(VideoId);
+                    LastCheck = LatestVideoResponse.data.video.status == "RECORDING";
                     _consecutiveErrors = 0;
                 }
                 catch (Exception ex)
@@ -42,18 +44,71 @@ namespace TwitchDownloaderWPF.Utils
                     const int MAX_ERRORS = 6;
                     _consecutiveErrors++;
 
-                    _logger?.LogVerbose($"Error while getting monitor info for {_videoId}: {ex.Message} {MAX_ERRORS - _consecutiveErrors} retries left.");
+                    logger?.LogVerbose($"Error while getting monitor info for {VideoId}: {ex.Message} {MAX_ERRORS - _consecutiveErrors} retries left.");
                     if (_consecutiveErrors >= MAX_ERRORS)
                     {
-                        _logger?.LogError($"Error while getting monitor info for {_videoId}: {ex.Message} Assuming video is not live.");
-                        return false;
+                        logger?.LogError($"Error while getting monitor info for {VideoId}: {ex.Message} Assuming video is not live.");
+                        LastCheck = false;
                     }
                 }
 
-                _nextTimeToCheck = DateTimeOffset.UtcNow.AddSeconds(GenerateNextRandomInterval());
+                var randomOffset = Random.Shared.NextDouble(30, 40);
+                NextTimeToCheck = DateTimeOffset.UtcNow.AddSeconds(randomOffset);
+            }
+        }
+
+        private static readonly Dictionary<long, VideoState> VideoStateCache = new();
+
+        private readonly ITaskLogger _logger;
+        private readonly VideoState _state;
+
+        public GqlVideoResponse LatestVideoResponse => _state.LatestVideoResponse;
+
+        public LiveVideoMonitor(long videoId, ITaskLogger logger = null)
+        {
+            _logger = logger;
+
+            lock (VideoStateCache)
+            {
+                ref var state = ref CollectionsMarshal.GetValueRefOrAddDefault(VideoStateCache, videoId, out var exists);
+                if (!exists)
+                {
+                    state = new VideoState(videoId);
+                }
+
+                _state = state;
+                _state.RefCount++;
+            }
+        }
+
+        public async Task<bool> IsVideoRecording(CancellationToken cancellationToken)
+        {
+            await _state.Semaphore.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+            try
+            {
+                if (DateTimeOffset.UtcNow > _state.NextTimeToCheck)
+                {
+                    await _state.CheckIsRecording(_logger);
+                }
+            }
+            finally
+            {
+                _state.Semaphore.Release();
             }
 
-            return _lastCheck;
+            return _state.LastCheck;
+        }
+
+        ~LiveVideoMonitor()
+        {
+            lock (VideoStateCache)
+            {
+                _state.RefCount--;
+                if (_state.RefCount < 1)
+                {
+                    VideoStateCache.Remove(_state.VideoId);
+                }
+            }
         }
     }
 }

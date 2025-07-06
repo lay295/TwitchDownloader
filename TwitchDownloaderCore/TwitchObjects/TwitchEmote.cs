@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace TwitchDownloaderCore.TwitchObjects
@@ -31,12 +32,21 @@ namespace TwitchDownloaderCore.TwitchObjects
         public int Width => EmoteFrames[0].Width;
         public SKImageInfo Info => EmoteFrames[0].Info;
 
-        public TwitchEmote(byte[] imageData, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName, bool isZeroWidth = false)
+        public TwitchEmote(byte[] imageData, [AllowNull] SKCodec codec, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName, bool isZeroWidth = false)
         {
-            using MemoryStream ms = new MemoryStream(imageData);
-            Codec = SKCodec.Create(ms, out var result);
-            if (Codec is null)
-                throw new Exception($"Skia was unable to decode {imageName} ({imageId}). Returned: {result}");
+            if (codec is null)
+            {
+                var ms = new MemoryStream(imageData);
+                Codec = SKCodec.Create(ms, out var result);
+                if (Codec is null)
+                {
+                    throw new Exception($"Skia was unable to decode {imageName} ({imageId}). Returned: {result}");
+                }
+            }
+            else
+            {
+                Codec = codec;
+            }
 
             EmoteProvider = emoteProvider;
             Id = imageId;
@@ -104,18 +114,13 @@ namespace TwitchDownloaderCore.TwitchObjects
         /// Resizes the emote to have a <see cref="Height"/> of <paramref name="height"/>.
         /// If the nearest integer scale is within <paramref name="snapThreshold"/> of <paramref name="height"/>, it will be integer scaled instead.
         /// </summary>
-        public void SnapResize(int height, int snapThreshold)
+        public void SnapResize(int height, int snapThreshold) => SnapResize(height, snapThreshold, snapThreshold);
+
+        public void SnapResize(int height, int upSnapThreshold, int downSnapThreshold)
         {
             var codecInfo = Codec.Info;
 
-            if (snapThreshold != 0)
-            {
-                var o = (height + snapThreshold) % codecInfo.Height;
-                if (o <= snapThreshold * 2)
-                {
-                    height += snapThreshold - o;
-                }
-            }
+            height = TwitchHelper.SnapResizeHeight(height, upSnapThreshold, downSnapThreshold, codecInfo.Height);
 
             var imageInfo = new SKImageInfo((int)(height / (double)codecInfo.Height * codecInfo.Width), height);
             for (var i = 0; i < FrameCount; i++)
