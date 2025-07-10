@@ -262,7 +262,7 @@ Bundled FFmpeg binaries are fetched from [gyan.dev](https://www.gyan.dev/ffmpeg/
 
 FFmpeg binaries fetched are runtime are downloaded using [Xabe.FFmpeg.Downloader](https://github.com/tomaszzmuda/Xabe.FFmpeg) © Xabe.
 
-Chat Html exports utilize the _Inter_ typeface hosted by the [Google Fonts API](https://fonts.google.com/) © Google.
+Chat HTML exports utilize the _Inter_ typeface hosted by the [Google Fonts API](https://fonts.google.com/) © Google.
 
 For a full list of utilized external libraries, see [THIRD-PARTY-LICENSES.txt](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt).
 
