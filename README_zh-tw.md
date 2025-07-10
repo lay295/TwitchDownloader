@@ -225,7 +225,7 @@ dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 ```
 
-- 可接受的設定檔：`Windows`、`Linux`、`LinuxAlpine`、`LinuxArm`、`LinuxArm64`、`macOS`、`macOSArm64`
+- 可接受的設定檔：`Windows`、`Linux`、`LinuxAlpine`、`LinuxArm`、`LinuxArm64`、`MacOS`、`MacOSArm64`
 
 5. a) 定位至 GUI 構建資料夾：
 
@@ -253,7 +253,7 @@ cd TwitchDownloaderCLI/bin/Release/net6.0/publish
 
 FFmpeg 二進位制檔案和執行時的下載使用 [Xabe.FFmpeg.Downloader](https://github.com/tomaszzmuda/Xabe.FFmpeg) © Xabe
 
-聊天 HTML 匯出使用的 *Inter* 字型由 [Google Fonts API](https://fonts.google.com/) 託管 © Google
+聊天 HTML 匯出使用的 _Inter_ 字型由 [Google Fonts API](https://fonts.google.com/) 託管 © Google
 
 有關使用的外部庫的完整列表見 [THIRD-PARTY-LICENSES.txt](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt)
 

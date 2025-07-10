@@ -388,7 +388,7 @@ Downloads the chat of a VOD, highlight, or clip.
 
 如果你對自己的翻譯能力有信心，且 TwitchDownloaderWPF 尚未提供你的母語版本，或你的母語版本翻譯尚不完整，我們誠邀你加入翻譯團隊！
 
-如果你需要幫助，可以查閱 commit [53245be1fe55768d525905e81cc2cd0c12469b03](https://github.com/lay295/TwitchDownloader/blob/53245be1fe55768d525905e81cc2cd0c12469b03/TwitchDownloaderWPF/Services/AvailableCultures.cs)、查閱 [AvailableCultures.cs](Services/AvailableCultures.cs)、查閱原始[在地化討論貼](https://github.com/lay295/TwitchDownloader/issues/445)、或提交 [Issue](https://github.com/lay295/TwitchDownloader/issues/new/choose) 尋求幫助。
+如果你需要幫助，可以查閱 commit [53245be1fe55768d525905e81cc2cd0c12469b03](https://github.com/lay295/TwitchDownloader/commit/53245be1fe55768d525905e81cc2cd0c12469b03)、查閱 [AvailableCultures.cs](Services/AvailableCultures.cs)、查閱原始[在地化討論貼](https://github.com/lay295/TwitchDownloader/issues/445)、或提交 [Issue](https://github.com/lay295/TwitchDownloader/issues/new/choose) 尋求幫助。
 
 不確定的字串可保留英文原文。
 

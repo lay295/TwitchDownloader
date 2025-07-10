@@ -336,7 +336,7 @@ Twitch からクリップをダウンロードする。
 
 ### エラー以外の問題
 
-エラーとはみなされない問題もあります。これらは[Github Issue](https://github.com/lay295/TwitchDownloader/issues)として、問題の原因となった入力とともに報告する必要があります。エラーではない問題の例をいくつか挙げます：
+エラーとはみなされない問題もあります。これらは[GitHub Issue](https://github.com/lay295/TwitchDownloader/issues)として、問題の原因となった入力とともに報告する必要があります。エラーではない問題の例をいくつか挙げます：
 
 - 動画のダウンロードが`Downloading： 99%` が 5 分以上続く
 - チャットレンダリングのステータスが10秒以上更新されない
@@ -357,13 +357,13 @@ Twitch からクリップをダウンロードする。
 
 ### 一般的ではないエラー
 
-一般的でないエラーは、"Fatal Error"というタイトルのポップアップや、不親切なエラーメッセージによって特徴付けられます。これらのエラーは、[Github Issue](https://github.com/lay295/TwitchDownloader/issues)として、エラーの原因となった入力とともに報告する必要があります。一般的でないエラーの例としては、以下のようなものがあります：
+一般的でないエラーは、"Fatal Error"というタイトルのポップアップや、不親切なエラーメッセージによって特徴付けられます。これらのエラーは、[GitHub Issue](https://github.com/lay295/TwitchDownloader/issues)として、エラーの原因となった入力とともに報告する必要があります。一般的でないエラーの例としては、以下のようなものがあります：
 
 - Error converting value 'XXX' to type 'XXX'. Path 'XXX', line #, position #.
 - Cannot access child value on Newtonsoft.Json.Linq.JValue.
 - Response status code does not indicate success: 404 (Not Found).
 - The pipe has been ended.
-  - FFmpegで問題が発生しました。引数をデフォルトにリセットして再試行してください。それでも成功しない場合は、Githubに新しいIssueを作成してください。
+  - FFmpegで問題が発生しました。引数をデフォルトにリセットして再試行してください。それでも成功しない場合は、GitHubに新しいIssueを作成してください。
 
 エラーの原因を突き止めるために、[設定](#設定)で`詳細なエラー`を有効にして、"Verbose Error Output "というタイトルのポップアップのスクリーンキャプチャを取ってください。
 
@@ -373,7 +373,7 @@ Twitch からクリップをダウンロードする。
 
 もしあなたが翻訳を作成する能力に自信があり、TwitchDownloaderWPF があなたの母国語で利用できない場合、またはあなたの母国語の翻訳が不完全な場合、あなたの助けを歓迎します！
 
-もし始めるにあたってサポートが必要であれば、コミット [53245be1fe55768d525905e81cc2cd0c12469b03](https://github.com/lay295/TwitchDownloader/blob/53245be1fe55768d525905e81cc2cd0c12469b03/TwitchDownloaderWPF/Services/AvailableCultures.cs) を確認するか、[AvailableCultures.cs](Services/AvailableCultures.cs) を確認するか、オリジナルの [localization thread](https://github.com/lay295/TwitchDownloader/issues/445) を確認するか、[GithubIssueを作成して](https://github.com/lay295/TwitchDownloader/issues/new/choose) サポートを求めてみてください。（サポートやスレッドは基本的に英語です）
+もし始めるにあたってサポートが必要であれば、コミット [53245be1fe55768d525905e81cc2cd0c12469b03](https://github.com/lay295/TwitchDownloader/commit/53245be1fe55768d525905e81cc2cd0c12469b03) を確認するか、[AvailableCultures.cs](Services/AvailableCultures.cs) を確認するか、オリジナルの [localization thread](https://github.com/lay295/TwitchDownloader/issues/445) を確認するか、[GitHubIssueを作成して](https://github.com/lay295/TwitchDownloader/issues/new/choose) サポートを求めてみてください。（サポートやスレッドは基本的に英語です）
 
 文字列や文字列の一部をどのように翻訳したらよいかわからない場合は、英語のままでも構いません。
 

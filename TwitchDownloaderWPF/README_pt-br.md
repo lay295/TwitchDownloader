@@ -190,7 +190,7 @@ Para começar, clique no botão **Procurar** e selecione um chat JSON baixado an
 
 **Fundos Alternativos**: Alterna a cor de fundo de cada mensagem do chat para ajudar a diferenciá-las.  
 
-**Aumentar Visibilidade de Nome de Usuários**: Aumenta o contraste entre os nomes de usuário e o fundo, semelhante à opção *Readable Colors* do chat da Twitch. Se os contornos estiverem ativados, esta opção aumenta o contraste do nome de usuário contra o contorno em vez do fundo.  
+**Aumentar Visibilidade de Nome de Usuários**: Aumenta o contraste entre os nomes de usuário e o fundo, semelhante à opção _Readable Colors_ do chat da Twitch. Se os contornos estiverem ativados, esta opção aumenta o contraste do nome de usuário contra o contorno em vez do fundo.  
 
 **Emotes BTTV**: Habilita emotes do BTTV na renderização.  
 
@@ -206,7 +206,7 @@ Para começar, clique no botão **Procurar** e selecione um chat JSON baixado an
 
 **Lista de Palavras Banidas**: Uma lista separada por vírgulas e sem distinção entre maiúsculas e minúsculas de palavras que farão com que mensagens sejam removidas da renderização. Por exemplo, na Figura 5.2, qualquer mensagem que contenha `" pog "`, `"[pOg+"`, `"/POg9"` será removida da renderização. No entanto, qualquer mensagem contendo `" poggers "` não será removida.  
 
-**Fornecedor de Emojis**: O estilo de emojis usados na renderização. Atualmente, são suportados os *Twemoji* do Twitter, *Noto Color* do Google e os emojis do seu sistema (*Nenhum*).
+**Fornecedor de Emojis**: O estilo de emojis usados na renderização. Atualmente, são suportados os _Twemoji_ do Twitter, _Noto Color_ do Google e os emojis do seu sistema (_Nenhum_).
 
 #### <ins>Escala</ins>
 
@@ -376,7 +376,7 @@ O aplicativo WPF está disponível em vários idiomas, graças a membros generos
 
 Se você tem confiança em sua capacidade de criar uma tradução e o TwitchDownloaderWPF não está disponível no seu idioma nativo ou a tradução está incompleta, você pode ajudar!  
 
-Se precisar de ajuda para começar, revise o commit [53245be1fe55768d525905e81cc2cd0c12469b03](https://github.com/lay295/TwitchDownloader/blob/53245be1fe55768d525905e81cc2cd0c12469b03/TwitchDownloaderWPF/Services/AvailableCultures.cs), consulte o [AvailableCultures.cs](Services/AvailableCultures.cs), leia o tópico original [de localização](https://github.com/lay295/TwitchDownloader/issues/445) ou crie um [post de issue](https://github.com/lay295/TwitchDownloader/issues/new/choose) pedindo assistência.
+Se precisar de ajuda para começar, revise o commit [53245be1fe55768d525905e81cc2cd0c12469b03](https://github.com/lay295/TwitchDownloader/commit/53245be1fe55768d525905e81cc2cd0c12469b03), consulte o [AvailableCultures.cs](Services/AvailableCultures.cs), leia o tópico original [de localização](https://github.com/lay295/TwitchDownloader/issues/445) ou crie um [post de issue](https://github.com/lay295/TwitchDownloader/issues/new/choose) pedindo assistência.
 
 Se não tiver certeza de como traduzir uma string ou uma parte dela, pode deixar em inglês.
 
@@ -386,7 +386,7 @@ A aplicação inclui tanto um tema claro quanto um tema escuro, com a opção de
 
 Para começar a criar seu próprio tema, basta duplicar um dos temas incluídos e abri-lo com seu editor de texto favorito.
 
-A aplicação WPF usa alguns elementos de um pacote chamado *HandyControl*, que não fornece suporte completo para personalização de temas. A maioria dos elementos do HandyControl suporta apenas a recoloração do texto e das bordas, o que significa que os fundos devem ser brancos ou escuros. Para controlar isso, defina a chave booleana `DarkHandyControl` como verdadeira ou falsa.
+A aplicação WPF usa alguns elementos de um pacote chamado _HandyControl_, que não fornece suporte completo para personalização de temas. A maioria dos elementos do HandyControl suporta apenas a recoloração do texto e das bordas, o que significa que os fundos devem ser brancos ou escuros. Para controlar isso, defina a chave booleana `DarkHandyControl` como verdadeira ou falsa.
 
 Para habilitar barras de título escuras com seu tema, defina a chave booleana `DarkTitleBar` como verdadeira.
 

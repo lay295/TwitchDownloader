@@ -196,7 +196,7 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Alternate Backgrounds**: Alternates the background color of every other chat message to help tell them apart.
 
-**Increase Username Visibility**: Increases the contrast between usernames and the background, similarly to the *Readable Colors* option in Twitch chat. If render outlines are enabled, this option will increase username contrast against the outline instead of the background.
+**Increase Username Visibility**: Increases the contrast between usernames and the background, similarly to the _Readable Colors_ option in Twitch chat. If render outlines are enabled, this option will increase username contrast against the outline instead of the background.
 
 **BTTV Emotes**: Enables emotes from BTTV in the render.
 
@@ -214,7 +214,7 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Banned Words List**: A comma-separated, case-insensitive list of words that will cause messages to be removed from the render. For example, in Figure 5.2 any message that contains `" pog "`, `"[pOg+"`, `"/POg9"` will be removed from the render. Any message that contains `" poggers "` will not be removed.
 
-**Emoji Vendor**: The style of emojis used in the render. Currently Twitter's *Twemoji*, Google's *Noto Color*, and your system's (*None*) emojis are supported.
+**Emoji Vendor**: The style of emojis used in the render. Currently Twitter's _Twemoji_, Google's _Noto Color_, and your system's (_None_) emojis are supported.
 
 #### <ins>Scaling</ins>
 
@@ -252,7 +252,7 @@ the *Partial Render* option to render a smaller section of the chat, see Figure 
 
 **Generate Mask**: Generates a secondary output file containing a black and white mask of the text and images in the render. The alpha channel of the background color MUST be less than 255.
 
-**Sharpening**: Applies a sharpening filter to the rendered video. Slightly increases render time and file size. Works best with *Font Size* 24 or larger.
+**Sharpening**: Applies a sharpening filter to the rendered video. Slightly increases render time and file size. Works best with _Font Size_ 24 or larger.
 
 #### <ins>FFmpeg</ins>
 
@@ -354,7 +354,7 @@ Manage the application's behavior.
 
 ### Non-Error Issues
 
-Some issues are not considered to be errors. These should be reported as an [issue on github](https://github.com/lay295/TwitchDownloader/issues) along with the inputs used to cause the issue. Some examples of non-error issues include:
+Some issues are not considered to be errors. These should be reported as an [issue on GitHub](https://github.com/lay295/TwitchDownloader/issues) along with the inputs used to cause the issue. Some examples of non-error issues include:
 
 - Video downloads get stuck at `Downloading: 99%` for longer than 5 minutes
 - Chat renders not updating status for more than 10 seconds
@@ -375,13 +375,13 @@ An error can be considered "common" if it has occurred before starting a job or 
 
 ### Uncommon Errors
 
-An uncommon error can be characterized by a popup titled "Fatal Error" or an unfriendly error message. These should be reported as an [issue on github](https://github.com/lay295/TwitchDownloader/issues) along with the inputs used to cause the error. Some examples of uncommon errors include:
+An uncommon error can be characterized by a popup titled "Fatal Error" or an unfriendly error message. These should be reported as an [issue on GitHub](https://github.com/lay295/TwitchDownloader/issues) along with the inputs used to cause the error. Some examples of uncommon errors include:
 
 - Error converting value 'XXX' to type 'XXX'. Path 'XXX', line #, position #.
 - Cannot access child value on Newtonsoft.Json.Linq.JValue.
 - Response status code does not indicate success: 404 (Not Found).
 - The pipe has been ended.
-  - An issue occurred with FFmpeg. Reset the arguments to default and try again. If still no success create a new issue on the github.
+  - An issue occurred with FFmpeg. Reset the arguments to default and try again. If still no success create a new issue on GitHub.
 
 To help us find the origin of an error, please enable `Verbose Errors` in the [settings](#settings) and take a screen capture of the resulting popup titled "Verbose Error Output".
 
@@ -391,7 +391,7 @@ The WPF application is available in multiple languages thanks to generous member
 
 If you are confident in your ability to create a translation and TwitchDownloaderWPF is not available in your native language or the translation for your native language is incomplete, you are welcomed to help!
 
-If you need assistance getting started, try reviewing the commit [53245be1fe55768d525905e81cc2cd0c12469b03](https://github.com/lay295/TwitchDownloader/blob/53245be1fe55768d525905e81cc2cd0c12469b03/TwitchDownloaderWPF/Services/AvailableCultures.cs), review [AvailableCultures.cs](Services/AvailableCultures.cs), review the original [localization thread](https://github.com/lay295/TwitchDownloader/issues/445), or make an [issue post](https://github.com/lay295/TwitchDownloader/issues/new/choose) asking for assistance.
+If you need assistance getting started, try reviewing the commit [53245be1fe55768d525905e81cc2cd0c12469b03](https://github.com/lay295/TwitchDownloader/commit/53245be1fe55768d525905e81cc2cd0c12469b03), review [AvailableCultures.cs](Services/AvailableCultures.cs), review the original [localization thread](https://github.com/lay295/TwitchDownloader/issues/445), or make an [issue post](https://github.com/lay295/TwitchDownloader/issues/new/choose) asking for assistance.
 
 If you are unsure on how to translate a string or a portion of a string, it can be left in English.
 
@@ -401,7 +401,7 @@ Both a light and a dark theme are included with the application, along with an o
 
 To get started creating your own theme, simply duplicate one of the included themes and open it with your favorite text editor.
 
-The WPF application uses some elements from a package called *HandyControl*, which do not provide full theming support. Most HandyControl elements only support text and border recoloring, meaning the backgrounds must be either white or dark. To control this, set the `DarkHandyControl` boolean key to true or false.
+The WPF application uses some elements from a package called _HandyControl_, which do not provide full theming support. Most HandyControl elements only support text and border recoloring, meaning the backgrounds must be either white or dark. To control this, set the `DarkHandyControl` boolean key to true or false.
 
 To enable dark title bars with your theme, set the `DarkTitleBar` boolean key to true.
 
