@@ -71,6 +71,11 @@ namespace TwitchDownloaderWPF
 
         private void BtnSelectAll_OnClick(object sender, RoutedEventArgs e)
         {
+            SelectAllItems();
+        }
+
+        private void SelectAllItems()
+        {
             foreach (var gridItem in GridItems)
             {
                 gridItem.ShouldDelete = true;
@@ -103,6 +108,16 @@ namespace TwitchDownloaderWPF
             {
                 MessageBox.Show(this, exception.ToString(), Translations.Strings.FailedToCopyToClipboard, MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void MenuItemSelectAll_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem)
+            {
+                return;
+            }
+
+            SelectAllItems();
         }
 
         public DirectoryInfo[] GetItemsToDelete() => GridItems
