@@ -1055,4 +1055,7 @@
   <data name="AvatarScale" xml:space="preserve">
     <value>大頭貼比例：</value>
   </data>
+  <data name="FatalErrorMessage" xml:space="preserve">
+    <value>{0} can resume but may be unstable. Do you want to resume?</value><comment>{0} is the name of the application.</comment>
+  </data>
 </root>
