@@ -72,9 +72,9 @@ namespace TwitchDownloaderWPF
         private static void ShowRecoverableExceptionMessage(Exception exception)
         {
             var message = exception + Environment.NewLine + Environment.NewLine + Environment.NewLine + string.Format(Translations.Strings.FatalErrorMessage, nameof(TwitchDownloaderWPF));
-            var result = MessageBox.Show(message, Translations.Strings.FatalError, MessageBoxButton.OKCancel, MessageBoxImage.Error);
+            var result = MessageBox.Show(message, Translations.Strings.FatalError, MessageBoxButton.YesNo, MessageBoxImage.Error);
 
-            if (result is MessageBoxResult.OK)
+            if (result is MessageBoxResult.No)
             {
                 Current?.Shutdown();
             }

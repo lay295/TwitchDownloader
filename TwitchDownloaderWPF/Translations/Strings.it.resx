@@ -1055,6 +1055,6 @@
     <value>Avatar Scale:</value>
   </data>
   <data name="FatalErrorMessage" xml:space="preserve">
-    <value>Click "OK" to shut down {0} or "Cancel" to continue in an unstable state.</value><comment>{0} is the name of the application.</comment>
+    <value>{0} can resume but may be unstable. Do you want to continue?</value><comment>{0} is the name of the application.</comment>
   </data>
 </root>

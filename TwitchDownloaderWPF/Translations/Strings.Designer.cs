@@ -870,7 +870,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Click &quot;OK&quot; to shut down {0} or &quot;Cancel&quot; to continue in an unstable state..
+        ///   Looks up a localized string similar to {0} can resume but may be unstable. Do you want to continue?.
         /// </summary>
         public static string FatalErrorMessage {
             get {
