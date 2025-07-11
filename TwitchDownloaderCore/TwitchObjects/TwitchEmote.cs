@@ -112,10 +112,8 @@ namespace TwitchDownloaderCore.TwitchObjects
 
         /// <summary>
         /// Resizes the emote to have a <see cref="Height"/> of <paramref name="height"/>.
-        /// If the nearest integer scale is within <paramref name="snapThreshold"/> of <paramref name="height"/>, it will be integer scaled instead.
+        /// If the nearest integer scale is within <paramref name="upSnapThreshold"/> or <paramref name="downSnapThreshold"/> of <paramref name="height"/>, it will be integer scaled instead.
         /// </summary>
-        public void SnapResize(int height, int snapThreshold) => SnapResize(height, snapThreshold, snapThreshold);
-
         public void SnapResize(int height, int upSnapThreshold, int downSnapThreshold)
         {
             var codecInfo = Codec.Info;
@@ -133,10 +131,19 @@ namespace TwitchDownloaderCore.TwitchObjects
             }
         }
 
-        public void Scale(double newScale)
+        public void Scale(double newScale) => SnapScale(newScale, 0, 0);
+
+        public void SnapScale(double newScale, int upSnapThreshold, int downSnapThreshold)
         {
+            if (Math.Abs(newScale - 1) < 0.01)
+            {
+                return;
+            }
+
             var codecInfo = Codec.Info;
-            var imageInfo = new SKImageInfo((int)(codecInfo.Width * newScale), (int)(codecInfo.Height * newScale));
+            var height = TwitchHelper.SnapResizeHeight((int)(codecInfo.Height * newScale), upSnapThreshold, downSnapThreshold, codecInfo.Height);
+
+            var imageInfo = new SKImageInfo((int)(height / (double)codecInfo.Height * codecInfo.Width), height);
             for (var i = 0; i < FrameCount; i++)
             {
                 var newBitmap = new SKBitmap(imageInfo);
