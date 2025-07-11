@@ -204,6 +204,15 @@ namespace TwitchDownloaderCore.Tools
             taskIcon.Wait();
             var (bytes, codec) = taskIcon.Result;
 
+            if (bytes is null)
+            {
+                using var offlineBitmap = new SKBitmap((int)FinalIconSize, (int)FinalIconSize);
+                using (var offlineCanvas = new SKCanvas(offlineBitmap))
+                    offlineCanvas.Clear();
+                offlineBitmap.SetImmutable();
+                return SKImage.FromBitmap(offlineBitmap);
+            }
+
             SKBitmap tempBitmap;
             if (codec is null)
             {
