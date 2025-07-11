@@ -1748,7 +1748,7 @@ namespace TwitchDownloaderCore
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                badge.SnapResize(newHeight, snapThreshold);
+                badge.SnapResize(newHeight, snapThreshold, snapThreshold);
             }
 
             return badgeTask;
@@ -1758,14 +1758,13 @@ namespace TwitchDownloaderCore
         {
             var emoteTask = await TwitchHelper.GetEmotes(chatRoot.comments, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
-            var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
-            var upSnapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
-            var downSnapThreshold = (int)Math.Round(24 * renderOptions.ReferenceScale);
+            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
             foreach (var emote in emoteTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                emote.SnapResize(newHeight, upSnapThreshold, downSnapThreshold);
+                var newScale = 2.0 / emote.ImageScale * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                emote.SnapScale(newScale, snapThreshold, snapThreshold);
             }
 
             return emoteTask;
@@ -1776,14 +1775,13 @@ namespace TwitchDownloaderCore
             var emoteThirdTask = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.BttvEmotes, renderOptions.FfzEmotes,
                 renderOptions.StvEmotes, renderOptions.AllowUnlistedEmotes, renderOptions.Offline, cancellationToken);
 
-            var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
-            var upSnapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
-            var downSnapThreshold = (int)Math.Round(24 * renderOptions.ReferenceScale);
+            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
             foreach (var emote in emoteThirdTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                emote.SnapResize(newHeight, upSnapThreshold, downSnapThreshold);
+                var newScale = 2.0 / emote.ImageScale * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                emote.SnapScale(newScale, snapThreshold, snapThreshold);
             }
 
             return emoteThirdTask;
@@ -1793,14 +1791,14 @@ namespace TwitchDownloaderCore
         {
             var cheerTask = await TwitchHelper.GetBits(chatRoot.comments, _cacheDir, chatRoot.streamer.id.ToString(), _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
 
-            var newHeight = (int)Math.Round(60 * renderOptions.ReferenceScale * renderOptions.EmoteScale);
-            var upSnapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
-            var downSnapThreshold = (int)Math.Round(24 * renderOptions.ReferenceScale);
+            var snapThreshold = (int)Math.Round(4 * renderOptions.ReferenceScale);
             foreach (var cheer in cheerTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                cheer.SnapResize(newHeight, upSnapThreshold, downSnapThreshold);
+                var imageScale = cheer.tierList.FirstOrDefault().Value?.ImageScale ?? 2;
+                var newScale = 2.0 / imageScale * renderOptions.ReferenceScale * renderOptions.EmoteScale;
+                cheer.SnapScale(newScale, snapThreshold, snapThreshold);
             }
 
             return cheerTask;
