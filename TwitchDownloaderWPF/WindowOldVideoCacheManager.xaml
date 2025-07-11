@@ -24,7 +24,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="0" x:Name="DataGrid" Margin="6, 6, 6, 0" ItemsSource="{Binding GridItems}" IsReadOnly="False" AutoGenerateColumns="False" Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
+        <DataGrid Grid.Row="0" x:Name="DataGrid" Margin="6, 6, 6, 0" ItemsSource="{Binding GridItems}" CanUserResizeColumns="False" IsReadOnly="False" AutoGenerateColumns="False" Foreground="{DynamicResource AppText}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}">
             <DataGrid.Resources>
                 <ContextMenu x:Key="RowMenu">
                     <MenuItem Header="{lex:Loc ContextMenuOpenFolder}" Click="MenuItemOpenFolder_OnClick" Foreground="{DynamicResource AppText}">
@@ -44,6 +44,17 @@
                     <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
                 </Style>
             </DataGrid.RowStyle>
+
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="{lex:Loc SelectAll}" Click="MenuItemSelectAll_OnClick" Foreground="{DynamicResource AppText}">
+                        <MenuItem.Icon>
+                            <fa:SvgAwesome Icon="Solid_CheckSquare" Foreground="{DynamicResource AppText}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
             <DataGrid.Columns>
                 <!-- Workaround for DataGridCheckBoxColumn sometimes requiring multiple clicks to work for some reason -->
                 <DataGridTemplateColumn Header="{lex:Loc DeleteCacheColumnHeader}" MinWidth="55">
