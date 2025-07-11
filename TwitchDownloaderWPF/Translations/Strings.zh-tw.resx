@@ -897,7 +897,7 @@
     <value>{0} 已存在。</value>
   </data>
   <data name="FileAlreadyExistsBody" xml:space="preserve">
-    <value>檔案 {0} 已存在。你想要覆蓋它嗎？</value>
+    <value>檔案 {0} 已存在。確定要覆蓋它嗎？</value>
   </data>
   <data name="FileAlreadyExistsOverwrite" xml:space="preserve">
     <value>覆蓋</value>
@@ -1056,6 +1056,6 @@
     <value>大頭貼比例：</value>
   </data>
   <data name="FatalErrorMessage" xml:space="preserve">
-    <value>{0} can resume but may be unstable. Do you want to resume?</value><comment>{0} is the name of the application.</comment>
+    <value>{0} 可以復原，但可能不穩定。確定要復原嗎？</value><comment>{0} is the name of the application.</comment>
   </data>
 </root>
