@@ -536,6 +536,11 @@ namespace TwitchDownloaderCore
                     try
                     {
                         var (bytes, codec) = await GetImage(cacheFolder, emoteUrl, emote.Id, 2, emote.ImageType, false, logger, cancellationToken);
+                        if (bytes is null)
+                        {
+                            continue;
+                        }
+
                         var newEmote = new TwitchEmote(bytes, codec, EmoteProvider.ThirdParty, 2, emote.Id, emote.Code, emote.IsZeroWidth);
 
                         if (!emotes.TryAdd(emote.Code, newEmote))
@@ -624,6 +629,11 @@ namespace TwitchDownloaderCore
                 try
                 {
                     var (bytes, codec) = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, 2, "png", offline, logger, cancellationToken);
+                    if (bytes is null)
+                    {
+                        continue;
+                    }
+
                     var newEmote = new TwitchEmote(bytes, codec, EmoteProvider.FirstParty, 2, id, id);
 
                     if (!emotes.TryAdd(id, newEmote))
@@ -763,6 +773,11 @@ namespace TwitchDownloaderCore
                     {
                         string id = data.url.Split('/')[^2];
                         var (bytes, codec) = await GetImage(badgeFolder, data.url, id, 2, "png", false, logger, cancellationToken);
+                        if (bytes is null)
+                        {
+                            continue;
+                        }
+
                         versions.Add(version, new ChatBadgeData
                         {
                             title = data.title,
@@ -970,6 +985,11 @@ namespace TwitchDownloaderCore
                                     .ToString();
 
                                 var (bytes, codec) = await GetImage(bitFolder, url, node.id + tier.bits, 2, "gif", false, logger, cancellationToken);
+                                if (bytes is null)
+                                {
+                                    continue;
+                                }
+
                                 var emote = new TwitchEmote(bytes, codec, EmoteProvider.FirstParty, 2, prefix + minBits, prefix + minBits);
                                 tierList.Add(new KeyValuePair<int, TwitchEmote>(minBits, emote));
                             }
@@ -1019,6 +1039,11 @@ namespace TwitchDownloaderCore
                 catch (HttpRequestException ex)
                 {
                     logger.LogVerbose($"Error while fetching {url}: {ex.Message}");
+                    continue;
+                }
+
+                if (bytes is null)
+                {
                     continue;
                 }
 
