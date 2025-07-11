@@ -870,7 +870,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} can resume but may be unstable. Do you want to continue?.
+        ///   Looks up a localized string similar to {0} can resume but may be unstable. Do you want to resume?.
         /// </summary>
         public static string FatalErrorMessage {
             get {
