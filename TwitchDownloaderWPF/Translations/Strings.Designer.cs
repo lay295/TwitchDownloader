@@ -870,6 +870,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Click &quot;OK&quot; to shut down {0} or &quot;Cancel&quot; to continue in an unstable state..
+        /// </summary>
+        public static string FatalErrorMessage {
+            get {
+                return ResourceManager.GetString("FatalErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Input Arguments:.
         /// </summary>
         public static string FfmpegInputArguments {
