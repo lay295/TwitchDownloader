@@ -1810,7 +1810,7 @@ namespace TwitchDownloaderCore
         {
             var emojis = await TwitchHelper.GetEmojis(_cacheDir, renderOptions.EmojiVendor, _progress, cancellationToken);
 
-            var newHeight = (int)Math.Round(54 * renderOptions.ReferenceScale * renderOptions.EmojiScale);
+            var newHeight = (int)Math.Round(36 * renderOptions.ReferenceScale * renderOptions.EmojiScale);
 
             // We can't just enumerate the dictionary because of the version checks
             string[] emojiKeys = emojis.Keys.ToArray();
