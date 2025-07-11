@@ -25,7 +25,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string title { get; set; }
         public string description { get; set; }
         public byte[] bytes { get; set; }
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore]
         public SKCodec Codec { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string url { get; set; }
