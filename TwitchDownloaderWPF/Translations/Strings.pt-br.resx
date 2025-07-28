@@ -124,7 +124,7 @@
     <value>Adicionar à Fila</value>
   </data>
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
-    <value>Você selecionou um canal Alfa (transparência) para um container/codec que não o suporta. Remova transparêmcia ou codifique com MOV + RLE/PRORES ou WEBM + VP8/VP9</value>
+    <value>Você selecionou um canal Alfa (transparência) para um container/codec que não o suporta. Remova transparência ou codifique com MOV + RLE/PRORES ou WEBM + VP8/VP9</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Tema </value>
@@ -331,7 +331,7 @@
     <value>Por favor coloque um Link/ID de vídeo válido\nExamples:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
   </data>
   <data name="JsonFile" xml:space="preserve">
-    <value>Aqrquivo JSON:</value>
+    <value>Arquivo JSON:</value>
   </data>
   <data name="Length" xml:space="preserve">
     <value>Comprimento:</value>
@@ -473,7 +473,7 @@
     <comment>Deixe um espaço no final</comment>
   </data>
   <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
-    <value>Também embuta emotes third party no arquivo. O tamanho do arquivo será muito mais largo.</value>
+    <value>Também embuta emotes de terceiros no arquivo. O tamanho do arquivo será muito mais largo.</value>
   </data>
   <data name="TimestampFormat" xml:space="preserve">
     <value>Formato de Tempo:</value>
@@ -1044,15 +1044,15 @@
     <value>Limpar Canais Recentes</value>
   </data>
   <data name="ClearLog" xml:space="preserve">
-    <value>Clear Log</value>
+    <value>Limpar Log</value>
   </data>
   <data name="RenderUserAvatars" xml:space="preserve">
-    <value>User Avatars:</value>
+    <value>Avatares de usuário:</value>
   </data>
   <data name="AvatarScale" xml:space="preserve">
-    <value>Avatar Scale:</value>
+    <value>Escala do Avatar:</value>
   </data>
   <data name="FatalErrorMessage" xml:space="preserve">
-    <value>{0} can resume but may be unstable. Do you want to resume?</value><comment>{0} is the name of the application.</comment>
+    <value>{0} pode continuar, porém pode ser instável. Deseja continuar?</value><comment>{0} is the name of the application.</comment>
   </data>
 </root>
