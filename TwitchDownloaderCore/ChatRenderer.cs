@@ -250,22 +250,25 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private SKTypeface GetInterTypeface(SKFontStyle fontStyle)
+        private static SKTypeface GetInterTypeface(SKFontStyle fontStyle)
         {
-            // HACK: Normal and Bold look basically identical in Inter. Replace Bold with ExtraBold for now
-            if (fontStyle.Weight == (int)SKFontStyleWeight.Bold)
-            {
-                fontStyle = new SKFontStyle((int)SKFontStyleWeight.ExtraBold, fontStyle.Width, fontStyle.Slant);
+            MemoryStream stream = null;
+            try {
+                if (fontStyle == SKFontStyle.Bold)
+                    stream = new MemoryStream(Properties.Resources.InterBold);
+                else if (fontStyle == SKFontStyle.Italic)
+                    stream = new MemoryStream(Properties.Resources.InterItalic);
+                else if (fontStyle == SKFontStyle.BoldItalic)
+                    stream = new MemoryStream(Properties.Resources.InterBoldItalic);
+                else
+                    stream = new MemoryStream(Properties.Resources.Inter);
+
+                return SKTypeface.FromStream(stream);
             }
-
-            using var stream = fontStyle.Slant switch
+            finally
             {
-                SKFontStyleSlant.Italic or SKFontStyleSlant.Oblique => new MemoryStream(Properties.Resources.InterVariableItalic),
-                _ => new MemoryStream(Properties.Resources.InterVariable)
-            };
-
-            using var typeface = SKTypeface.FromStream(stream);
-            return fontManager.MatchTypeface(typeface, fontStyle);
+                stream?.Dispose();
+            }
         }
 
         private void RenderVideoSection(int startTick, int endTick, FfmpegProcess ffmpegProcess, FfmpegProcess maskProcess = null, CancellationToken cancellationToken = new())

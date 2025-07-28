@@ -82,9 +82,9 @@ namespace TwitchDownloaderCore.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] InterVariable {
+        internal static byte[] Inter {
             get {
-                object obj = ResourceManager.GetObject("InterVariable", resourceCulture);
+                object obj = ResourceManager.GetObject("Inter", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -92,9 +92,29 @@ namespace TwitchDownloaderCore.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] InterVariableItalic {
+        internal static byte[] InterBold {
             get {
-                object obj = ResourceManager.GetObject("InterVariableItalic", resourceCulture);
+                object obj = ResourceManager.GetObject("InterBold", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] InterBoldItalic {
+            get {
+                object obj = ResourceManager.GetObject("InterBoldItalic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] InterItalic {
+            get {
+                object obj = ResourceManager.GetObject("InterItalic", resourceCulture);
                 return ((byte[])(obj));
             }
         }
