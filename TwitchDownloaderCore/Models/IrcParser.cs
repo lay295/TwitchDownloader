@@ -58,6 +58,18 @@ namespace TwitchDownloaderCore.Models
                 }
             } while (lineEnd != -1 && (textStart += lineEnd) < textEnd);
 
+            // Sort messages by their timestamps, if they have one
+            messages.Sort((a, b) =>
+            {
+                if (a.TryGetTag("tmi-sent-ts", out var aMsStr) && long.TryParse(aMsStr, out var aMs) &&
+                    b.TryGetTag("tmi-sent-ts", out var bMsStr) && long.TryParse(bMsStr, out var bMs))
+                {
+                    return aMs.CompareTo(bMs);
+                }
+
+                return -1;
+            });
+
             return messages;
         }
 
