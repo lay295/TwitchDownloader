@@ -20,5 +20,16 @@ namespace TwitchDownloaderCore.Models
 
         [AllowNull]
         public Dictionary<string, string> Tags { get; init; }
+
+        public bool TryGetTag(string name, out string value)
+        {
+            if (Tags is null)
+            {
+                value = null;
+                return false;
+            }
+
+            return Tags.TryGetValue(name, out value);
+        }
     }
 }
