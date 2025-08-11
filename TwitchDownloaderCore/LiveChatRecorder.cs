@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -7,6 +8,7 @@ using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
 {
@@ -16,6 +18,8 @@ namespace TwitchDownloaderCore
         private readonly ITaskProgress _progress;
 
         private readonly TwitchIrcClient _ircClient;
+
+        public readonly ConcurrentQueue<Comment> Comments = new();
 
         public LiveChatRecorder(LiveChatRecorderOptions recorderOptions, ITaskProgress progress)
         {
@@ -51,13 +55,15 @@ namespace TwitchDownloaderCore
             // Open the destination file so that it exists in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
 
+            _ircClient.DebugFile = outputFs;
+
             try
             {
-                await RecordAsyncImpl(outputFileInfo, outputFs, cancellationToken);
+                await RecordAsyncImpl(cancellationToken);
             }
             catch
             {
-                await Task.Delay(100, CancellationToken.None);
+                await Task.Delay(100, cancellationToken);
 
                 TwitchHelper.CleanUpClaimedFile(outputFileInfo, outputFs, _progress);
 
@@ -65,7 +71,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task RecordAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, CancellationToken cancellationToken)
+        private async Task RecordAsyncImpl(CancellationToken cancellationToken)
         {
             await _ircClient.ConnectAsync(cancellationToken);
             await _ircClient.JoinChannelAsync(_recorderOptions.Channel, cancellationToken);
@@ -87,8 +93,11 @@ namespace TwitchDownloaderCore
                         var res = IrcMessageConverter.ToComment(message);
                         if (res is null)
                         {
-                            Console.WriteLine($"!!!! Failed to convert message: {message}");
+                            _progress.LogWarning($"Failed to convert message: {message}");
+                            continue;
                         }
+
+                        Comments.Enqueue(res);
                     }
                     catch (Exception ex)
                     {
