@@ -45,8 +45,8 @@ namespace TwitchDownloaderCore
                 throw new ArgumentException("Invalid channel name.");
             }
 
-            var outputFileInfo = TwitchHelper.ClaimFile(_recorderOptions.Filename, _recorderOptions.FileCollisionCallback, _progress);
-            _recorderOptions.Filename = outputFileInfo.FullName;
+            var outputFileInfo = TwitchHelper.ClaimFile(_recorderOptions.OutputFile, _recorderOptions.FileCollisionCallback, _progress);
+            _recorderOptions.OutputFile = outputFileInfo.FullName;
 
             // Open the destination file so that it exists in the filesystem.
             await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);

@@ -6,7 +6,7 @@ namespace TwitchDownloaderCore.Options
     public class LiveChatRecorderOptions
     {
         public string Channel { get; set; }
-        public string Filename { get; set; }
+        public string OutputFile { get; set; }
         public event EventHandler StopRecording;
         public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
 
