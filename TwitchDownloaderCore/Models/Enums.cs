@@ -33,19 +33,20 @@
     public enum IrcCommand
     {
         Unknown,
-        ClearChat,
-        ClearMsg,
-        GlobalUserState,
-        Notice,
-        Join,
-        Part,
-        Ping,
-        Pong,
-        PrivMsg,
-        Reconnect,
-        RoomState,
-        UserNotice,
-        UserState,
+        ClearChat, // CLEARCHAT
+        ClearMsg, // CLEARMSG
+        GlobalUserState, // GLOBALUSERSTATE
+        Notice, // NOTICE
+        Join, // JOIN
+        Part, // PART
+        Ping, // PING
+        Pong, // PONG
+        PrivMsg, // PRIVMSG
+        Reconnect, // RECONNECT
+        RoomState, // ROOMSTATE
+        UserNotice, // USERNOTICE
+        UserState, // USERSTATE
+        Cap, // CAP
         RplWelcome, // 001
         RplYourHost, // 002
         RplCreated, // 003
