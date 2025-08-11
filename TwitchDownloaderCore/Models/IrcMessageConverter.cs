@@ -132,6 +132,8 @@ namespace TwitchDownloaderCore.Models
                 }
             }
 
+            emoticons.Sort((a, b) => a.begin.CompareTo(b.begin));
+
             return emoticons;
         }
 
