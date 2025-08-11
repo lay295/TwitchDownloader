@@ -137,6 +137,15 @@ namespace TwitchDownloaderCore.Models
 
         private static List<Fragment> BuildFragmentList(List<Emoticon2> emoticons, string messageBody)
         {
+            if (emoticons.Count == 0)
+            {
+                return [new Fragment
+                {
+                    text = messageBody,
+                    emoticon = null
+                }];
+            }
+
             var fragments = new List<Fragment>();
             var prevFragment = 0;
             foreach (var emoticon in emoticons)
