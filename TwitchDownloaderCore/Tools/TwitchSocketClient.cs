@@ -164,22 +164,22 @@ namespace TwitchDownloaderCore.Tools
                 return ValueTask.CompletedTask;
 
             var byteCount = Encoding.UTF8.GetByteCount(str);
-            var arr = ArrayPool<byte>.Shared.Rent(byteCount);
-            var written = Encoding.UTF8.GetBytes(str, arr);
+            var bytes = ArrayPool<byte>.Shared.Rent(byteCount);
+            var written = Encoding.UTF8.GetBytes(str, bytes);
 
             Debug.Assert(byteCount == written);
 
-            return new ValueTask(SendAndReturn(this, arr, byteCount, cancellationToken, sensitive));
+            return new ValueTask(SendAndReturn(this, bytes, byteCount, cancellationToken, sensitive));
 
-            static async Task SendAndReturn(TwitchSocketClient client, byte[] arr, int byteCount, CancellationToken cancellationToken, bool sensitive)
+            static async Task SendAndReturn(TwitchSocketClient client, byte[] bytes, int byteCount, CancellationToken cancellationToken, bool sensitive)
             {
                 try
                 {
-                    await client.SendTextAsync(arr.AsMemory(0, byteCount), cancellationToken);
+                    await client.SendTextAsync(bytes.AsMemory(0, byteCount), cancellationToken);
                 }
                 finally
                 {
-                    ArrayPool<byte>.Shared.Return(arr, sensitive);
+                    ArrayPool<byte>.Shared.Return(bytes, sensitive);
                 }
             }
         }
