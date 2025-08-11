@@ -47,6 +47,8 @@ namespace TwitchDownloaderCore.Models
 
                 if (!TryParseMessage(workingSlice, out var newMessage))
                 {
+                    var failedMessage = text[textStart..Math.Max(lineEnd, text.Length - textStart)];
+                    _logger.LogWarning($"Failed to parse IRC message: {Encoding.UTF8.GetString(failedMessage).TrimEnd()}");
                     continue;
                 }
 
