@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Interfaces;
@@ -9,27 +8,27 @@ using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.Tools
 {
-    // TODO: Twitch website IRC client sends a PING exactly every 5 minutes
     public sealed class TwitchIrcClient : IDisposable
     {
         private static readonly string AnonymousUsername = $"justinfan{Random.Shared.Next(10_000, 99_999)}";
 
         public bool IsConnected => _client.SocketOpen;
 
-        public readonly ConcurrentQueue<byte[]> Messages = new();
+        public readonly ConcurrentQueue<IrcMessage> Messages = new();
 
         private readonly ITaskLogger _logger;
         private readonly TwitchSocketClient _client;
-        // private readonly IrcParser _ircParser;
+        private readonly IrcParser _ircParser;
 
         private string _joinedChannel;
+        private Timer _pingTimer;
 
         public TwitchIrcClient(ITaskLogger logger)
         {
             _logger = logger;
             _client = new TwitchSocketClient(logger);
             _client.MessageReceived += Client_OnMessageReceived;
-            // _ircParser = new IrcParser(logger);
+            _ircParser = new IrcParser(logger);
         }
 
         public async Task<bool> ConnectAsync(CancellationToken cancellationToken)
@@ -63,7 +62,17 @@ namespace TwitchDownloaderCore.Tools
             await _client.SendTextAsync($"NICK {AnonymousUsername}", cancellationToken);
             // await _client.SendTextAsync($"USER {AnonymousUsername} 8 * :{AnonymousUsername}", cancellationToken);
 
+            _pingTimer = new Timer(PingTimerCallback, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+
             return true;
+        }
+
+        private void PingTimerCallback(object state)
+        {
+            if (_client.SocketOpen)
+            {
+                _client.SendTextAsync("PING", CancellationToken.None);
+            }
         }
 
         public async Task<bool> JoinChannelAsync(string channelName, CancellationToken cancellationToken)
@@ -94,6 +103,13 @@ namespace TwitchDownloaderCore.Tools
             {
                 _logger.LogVerbose($"Leaving #{_joinedChannel}...");
                 await _client.SendTextAsync($"PART #{_joinedChannel}", cancellationToken);
+                _joinedChannel = null;
+            }
+
+            if (_pingTimer != null)
+            {
+                await _pingTimer.DisposeAsync();
+                _pingTimer = null;
             }
 
             var count = 0;
@@ -124,15 +140,26 @@ namespace TwitchDownloaderCore.Tools
                 return;
             }
 
-            // var messages = _ircParser.Parse(e.Buffer);
+            var messages = _ircParser.Parse(e.Buffer);
 
-            var str = Encoding.UTF8.GetString(e.Buffer);
-            Console.WriteLine(str.Trim());
+            foreach (var ircMessage in messages)
+            {
+                switch (ircMessage.Command)
+                {
+                    case IrcCommand.Ping:
+                        _client.SendTextAsync("PONG", CancellationToken.None);
+                        break;
+                    case IrcCommand.PrivMsg:
+                        Messages.Enqueue(ircMessage);
+                        break;
+                }
+            }
         }
 
         public void Dispose()
         {
             _client?.Dispose();
+            _pingTimer?.Dispose();
         }
     }
 }
