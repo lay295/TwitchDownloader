@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,11 @@ namespace TwitchDownloaderCore.Tools
         private static readonly string AnonymousUsername = $"justinfan{Random.Shared.Next(10_000, 99_999)}";
 
         public bool IsConnected => _client.SocketOpen;
+        public FileStream DebugFile
+        {
+            get => _client.DebugFile;
+            set => _client.DebugFile = value;
+        }
 
         public readonly ConcurrentQueue<IrcMessage> Messages = new();
 
@@ -173,7 +179,7 @@ namespace TwitchDownloaderCore.Tools
                 switch (ircMessage.Command)
                 {
                     case IrcCommand.Ping:
-                        _client.SendTextAsync("PONG", CancellationToken.None);
+                        _client.SendTextPooledAsync("PONG", CancellationToken.None);
                         break;
                     case IrcCommand.Reconnect:
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
