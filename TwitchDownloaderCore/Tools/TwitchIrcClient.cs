@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Interfaces;
@@ -57,10 +58,10 @@ namespace TwitchDownloaderCore.Tools
 
             _logger.LogVerbose("Connected to Twitch IRC");
 
-            await _client.SendTextAsync("CAP REQ :twitch.tv/commands twitch.tv/tags", cancellationToken);
-            // await _client.SendTextAsync("PASS SCHMOOPIIE", cancellationToken);
-            await _client.SendTextAsync($"NICK {AnonymousUsername}", cancellationToken);
-            // await _client.SendTextAsync($"USER {AnonymousUsername} 8 * :{AnonymousUsername}", cancellationToken);
+            await _client.SendTextPooledAsync("CAP REQ :twitch.tv/commands twitch.tv/tags", cancellationToken);
+            await _client.SendTextPooledAsync("PASS SCHMOOPIIE", cancellationToken);
+            await _client.SendTextPooledAsync($"NICK {AnonymousUsername}", cancellationToken);
+            await _client.SendTextPooledAsync($"USER {AnonymousUsername} 8 * :{AnonymousUsername}", cancellationToken);
 
             _pingTimer = new Timer(PingTimerCallback, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 
@@ -71,7 +72,7 @@ namespace TwitchDownloaderCore.Tools
         {
             if (_client.SocketOpen)
             {
-                _client.SendTextAsync("PING", CancellationToken.None);
+                _client.SendTextPooledAsync("PING", CancellationToken.None);
             }
         }
 
@@ -85,8 +86,26 @@ namespace TwitchDownloaderCore.Tools
 
             _logger.LogVerbose($"Joining #{channelName}...");
 
-            await _client.SendTextAsync($"JOIN #{channelName}", cancellationToken);
+            await _client.SendTextPooledAsync($"JOIN #{channelName}", cancellationToken);
             _joinedChannel = channelName;
+
+            return true;
+        }
+
+        public async Task<bool> LeaveChannelAsync(CancellationToken cancellationToken)
+        {
+            if (!_client.SocketOpen)
+            {
+                _logger.LogWarning("Tried to leave the channel on a closed socket.");
+                return false;
+            }
+
+            if (_joinedChannel != null)
+            {
+                _logger.LogVerbose($"Leaving #{_joinedChannel}...");
+                await _client.SendTextPooledAsync($"PART #{_joinedChannel}", cancellationToken);
+                _joinedChannel = null;
+            }
 
             return true;
         }
@@ -99,12 +118,7 @@ namespace TwitchDownloaderCore.Tools
                 return true;
             }
 
-            if (_joinedChannel != null)
-            {
-                _logger.LogVerbose($"Leaving #{_joinedChannel}...");
-                await _client.SendTextAsync($"PART #{_joinedChannel}", cancellationToken);
-                _joinedChannel = null;
-            }
+            await LeaveChannelAsync(cancellationToken);
 
             if (_pingTimer != null)
             {
@@ -131,6 +145,18 @@ namespace TwitchDownloaderCore.Tools
             return true;
         }
 
+        public async Task<bool> ReconnectAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInfo("Reconnecting to Twitch IRC...");
+
+            var channelName = _joinedChannel;
+
+            return await LeaveChannelAsync(cancellationToken)
+                   && await DisconnectAsync(cancellationToken)
+                   && await ConnectAsync(cancellationToken)
+                   && await JoinChannelAsync(channelName, cancellationToken);
+        }
+
         private void Client_OnMessageReceived(object sender, (byte[] Buffer, WebSocketMessageType MessageType) e)
         {
             if (e.MessageType is not WebSocketMessageType.Text)
@@ -149,8 +175,17 @@ namespace TwitchDownloaderCore.Tools
                     case IrcCommand.Ping:
                         _client.SendTextAsync("PONG", CancellationToken.None);
                         break;
+                    case IrcCommand.Reconnect:
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                        ReconnectAsync(CancellationToken.None);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                        break;
                     case IrcCommand.PrivMsg:
+                    case IrcCommand.UserNotice:
                         Messages.Enqueue(ircMessage);
+                        break;
+                    case IrcCommand.Unknown:
+                        _logger.LogWarning($"Got unknown IRC command: {Encoding.UTF8.GetString(e.Buffer).TrimEnd()}");
                         break;
                 }
             }
