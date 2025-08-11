@@ -29,9 +29,9 @@ namespace TwitchDownloaderCore.Models
             if (!ircMessage.TryGetTag("msg-id", out var msgId)) msgId = null;
             if (!ircMessage.TryGetTag("bits", out var bitsStr) || !int.TryParse(bitsStr, out var bits)) bits = 0;
 
-            var messageBody = BuildMessageBody(ircMessage, msgId);
+            var messageBody = BuildMessageBody(ircMessage, msgId, out var emoteOffset);
             var badges = BuildBadgeList(ircMessage);
-            var emoticons = BuildEmoticonList(ircMessage);
+            var emoticons = BuildEmoticonList(ircMessage, emoteOffset);
             var fragments = BuildFragmentList(emoticons, messageBody);
 
             return new Comment
@@ -68,7 +68,7 @@ namespace TwitchDownloaderCore.Models
             };
         }
 
-        private static string BuildMessageBody(IrcMessage ircMessage, string msgId)
+        private static string BuildMessageBody(IrcMessage ircMessage, string msgId, out int emoteOffset)
         {
             var messageBegin = ircMessage.ParametersRaw.IndexOf(':');
             var messageBody = messageBegin == -1
@@ -77,9 +77,20 @@ namespace TwitchDownloaderCore.Models
 
             if (ircMessage.TryGetTag("system-msg", out var systemMsg) && (msgId?.Contains("sub") ?? false))
             {
-                messageBody = string.IsNullOrEmpty(messageBody)
-                    ? systemMsg
-                    : $"{systemMsg} {messageBody}";
+                if (string.IsNullOrEmpty(messageBody))
+                {
+                    messageBody = systemMsg;
+                    emoteOffset = 0;
+                }
+                else
+                {
+                    messageBody = $"{systemMsg} {messageBody}";
+                    emoteOffset = systemMsg.Length + 1;
+                }
+            }
+            else
+            {
+                emoteOffset = 0;
             }
 
             return messageBody;
@@ -104,7 +115,7 @@ namespace TwitchDownloaderCore.Models
             return badges;
         }
 
-        private static List<Emoticon2> BuildEmoticonList(IrcMessage ircMessage)
+        private static List<Emoticon2> BuildEmoticonList(IrcMessage ircMessage, int emoteOffset)
         {
             var emoticons = new List<Emoticon2>();
             if (ircMessage.TryGetTag("emotes", out var ircEmotes) && ircEmotes != null)
@@ -125,8 +136,8 @@ namespace TwitchDownloaderCore.Models
                         emoticons.Add(new Emoticon2
                         {
                             _id = emoteName,
-                            begin = begin,
-                            end = end,
+                            begin = begin + emoteOffset,
+                            end = end + emoteOffset,
                         });
                     }
                 }
