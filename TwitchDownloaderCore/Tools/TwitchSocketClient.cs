@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Diagnostics;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,7 @@ namespace TwitchDownloaderCore.Tools
         private const int RECEIVE_BUFFER_SIZE = 4096;
 
         public bool SocketOpen => _socket?.State is WebSocketState.Open;
+        public FileStream DebugFile { get; set; }
 
         public event EventHandler<(byte[] Buffer, WebSocketMessageType MessageType)> MessageReceived;
 
@@ -94,6 +96,13 @@ namespace TwitchDownloaderCore.Tools
                         case WebSocketMessageType.Binary:
                             if (messageBuff.Length == 0)
                                 continue;
+
+                            if (DebugFile != null)
+                            {
+                                DebugFile.Write("vvv "u8);
+                                DebugFile.Write(messageBuff.AsSpan().TrimEnd("\r\n"u8));
+                                DebugFile.Write("\r\n"u8);
+                            }
 
                             MessageReceived?.Invoke(this, (messageBuff, messageType));
                             break;
@@ -188,6 +197,13 @@ namespace TwitchDownloaderCore.Tools
         {
             if (!SocketOpen)
                 return ValueTask.CompletedTask;
+
+            if (DebugFile != null)
+            {
+                DebugFile.Write("^^^ "u8);
+                DebugFile.Write(str.Span.TrimEnd("\r\n"u8));
+                DebugFile.Write("\r\n"u8);
+            }
 
             return _socket.SendAsync(str, WebSocketMessageType.Text, true, cancellation);
         }
