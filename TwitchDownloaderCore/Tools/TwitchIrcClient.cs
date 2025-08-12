@@ -57,7 +57,9 @@ namespace TwitchDownloaderCore.Tools
                     return false;
                 }
 
-                await Task.Delay(250 * count, cancellationToken);
+                var sleepTime = GetExponentialBackoff(count);
+                _logger.LogVerbose($"Failed to connect to Twitch IRC, retrying in {sleepTime:N0}ms...");
+                await Task.Delay(sleepTime, cancellationToken);
             }
 
             _logger.LogVerbose("Connected to Twitch IRC");
@@ -67,50 +69,20 @@ namespace TwitchDownloaderCore.Tools
             await _client.SendTextPooledAsync($"NICK {AnonymousUsername}", cancellationToken);
             await _client.SendTextPooledAsync($"USER {AnonymousUsername} 8 * :{AnonymousUsername}", cancellationToken);
 
-            _pingTimer = new Timer(PingTimerCallback, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+            _pingTimer = new Timer(PingTimerCallback, _client, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 
             return true;
-        }
 
-        private void PingTimerCallback(object state)
-        {
-            if (_client.SocketOpen)
+            static void PingTimerCallback(object state)
             {
-                _client.SendTextPooledAsync("PING", CancellationToken.None);
+                if (state is not TwitchSocketClient client)
+                    return;
+
+                if (client.SocketOpen)
+                {
+                    client.SendTextPooledAsync("PING", CancellationToken.None);
+                }
             }
-        }
-
-        public async Task<bool> JoinChannelAsync(string channelName, CancellationToken cancellationToken)
-        {
-            if (!_client.SocketOpen)
-            {
-                _logger.LogWarning($"Tried to join #{channelName}, but the socket was closed.");
-                return false;
-            }
-
-            _logger.LogVerbose($"Joining #{channelName}...");
-
-            await _client.SendTextPooledAsync($"JOIN #{channelName}", cancellationToken);
-            _joinedChannel = channelName;
-
-            return true;
-        }
-
-        public async Task<bool> LeaveChannelAsync(CancellationToken cancellationToken)
-        {
-            if (!_client.SocketOpen)
-            {
-                return true;
-            }
-
-            if (_joinedChannel != null)
-            {
-                _logger.LogVerbose($"Leaving #{_joinedChannel}...");
-                await _client.SendTextPooledAsync($"PART #{_joinedChannel}", cancellationToken);
-                _joinedChannel = null;
-            }
-
-            return true;
         }
 
         public async Task<bool> DisconnectAsync(CancellationToken cancellationToken)
@@ -141,7 +113,50 @@ namespace TwitchDownloaderCore.Tools
                     return false;
                 }
 
-                await Task.Delay(250 * count, cancellationToken);
+                var sleepTime = GetExponentialBackoff(count);
+                _logger.LogVerbose($"Failed to disconnect from Twitch IRC, retrying in {sleepTime:N0}ms...");
+                await Task.Delay(sleepTime, cancellationToken);
+            }
+
+            return true;
+        }
+
+        private static int GetExponentialBackoff(int count)
+        {
+            return (int)Math.Min(
+                Math.Pow(2.25, count) * Random.Shared.Next(50, 100),
+                5_000
+            );
+        }
+
+        public async Task<bool> JoinChannelAsync(string channelName, CancellationToken cancellationToken)
+        {
+            if (!_client.SocketOpen)
+            {
+                _logger.LogWarning($"Tried to join #{channelName}, but the socket was closed.");
+                return false;
+            }
+
+            _logger.LogVerbose($"Joining #{channelName}...");
+
+            await _client.SendTextPooledAsync($"JOIN #{channelName}", cancellationToken);
+            _joinedChannel = channelName;
+
+            return true;
+        }
+
+        public async Task<bool> LeaveChannelAsync(CancellationToken cancellationToken)
+        {
+            if (!_client.SocketOpen)
+            {
+                return true;
+            }
+
+            if (_joinedChannel != null)
+            {
+                _logger.LogVerbose($"Leaving #{_joinedChannel}...");
+                await _client.SendTextPooledAsync($"PART #{_joinedChannel}", cancellationToken);
+                _joinedChannel = null;
             }
 
             return true;
