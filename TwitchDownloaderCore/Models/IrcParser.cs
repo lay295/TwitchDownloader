@@ -125,7 +125,6 @@ namespace TwitchDownloaderCore.Models
 
         // https://modern.ircdocs.horse/#tags
         // https://ircv3.net/specs/extensions/message-tags.html#format
-        // This doesn't support valueless tags (e.g. @id=123AB;rose ->  {"id": "123AB", "rose": ""}) but Twitch doesn't seem to use them
         private bool TryParseTags(scoped ref ReadOnlySpan<byte> text, Dictionary<string, string> tags)
         {
             var workingSlice = text.TrimStart("@"u8);
@@ -133,17 +132,6 @@ namespace TwitchDownloaderCore.Models
             var done = false;
             do
             {
-                // Get tag name
-                var keyValueSeparator = workingSlice.IndexOf("="u8);
-                if (keyValueSeparator == -1)
-                {
-                    _logger.LogWarning($"Invalid tag found in message: {Encoding.UTF8.GetString(text)}");
-                    return false;
-                }
-
-                var tagName = workingSlice[..keyValueSeparator];
-                workingSlice = workingSlice[(keyValueSeparator + 1)..];
-
                 // Get tag separator
                 var tagSeparator = workingSlice.IndexOfAny("; "u8);
                 if (tagSeparator == -1)
@@ -152,8 +140,25 @@ namespace TwitchDownloaderCore.Models
                     return false;
                 }
 
-                var tagValue = workingSlice[..tagSeparator];
                 done = workingSlice[tagSeparator] == ' ';
+
+                // Get tag details
+                ReadOnlySpan<byte> tagName;
+                ReadOnlySpan<byte> tagValue;
+                var keyValueSeparator = workingSlice.IndexOf("="u8);
+                if (keyValueSeparator != -1)
+                {
+                    // Tag has a value
+                    tagName = workingSlice[..keyValueSeparator];
+                    tagValue = workingSlice[(keyValueSeparator + 1)..tagSeparator];
+                }
+                else
+                {
+                    // Tag doesn't have a value
+                    tagName = workingSlice[..tagSeparator];
+                    tagValue = default;
+                }
+
                 workingSlice = workingSlice[(tagSeparator + 1)..];
 
                 // Add to dictionary
