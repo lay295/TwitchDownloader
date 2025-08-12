@@ -56,6 +56,11 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         [InlineData(":justinfan1234!justinfan1234@justinfan1234.tmi.twitch.tv PART #streamer8", "justinfan1234", "justinfan1234", "justinfan1234.tmi.twitch.tv", IrcCommand.Part, "#streamer8")]
         [InlineData(":tmi.twitch.tv ROOMSTATE #streamer8", "tmi.twitch.tv", "", "", IrcCommand.RoomState, "#streamer8")]
         [InlineData(":viewer8!viewer8@viewer8.tmi.twitch.tv PRIVMSG #streamer8 :@viewer8 This is a message", "viewer8", "viewer8", "viewer8.tmi.twitch.tv", IrcCommand.PrivMsg, "#streamer8 :@viewer8 This is a message")]
+        [InlineData(":tmi.twitch.tv RECONNECT", "tmi.twitch.tv", "", "", IrcCommand.Reconnect, "")]
+        [InlineData("PING :tmi.twitch.tv", "", "", "", IrcCommand.Ping, ":tmi.twitch.tv")]
+        [InlineData("PONG :tmi.twitch.tv", "", "", "", IrcCommand.Pong, ":tmi.twitch.tv")]
+        [InlineData("PING", "", "", "", IrcCommand.Ping, "")]
+        [InlineData("PONG", "", "", "", IrcCommand.Pong, "")]
         public void CorrectlyParsesMessage_WithoutTags(string ircRaw, string serverOrNick, string user, string host, IrcCommand command, string parameters)
         {
             var parser = new IrcParser(StubTaskProgress.Instance);
