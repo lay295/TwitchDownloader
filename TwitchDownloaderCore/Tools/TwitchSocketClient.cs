@@ -86,6 +86,8 @@ namespace TwitchDownloaderCore.Tools
 
             try
             {
+                _logger.LogVerbose($"Listening for messages from {_connectedUri}...");
+
                 while (SocketOpen)
                 {
                     var (messageBuff, messageType) = await ReceiveMessageBuffer(receiveBuff, cancellationToken);
@@ -97,20 +99,11 @@ namespace TwitchDownloaderCore.Tools
                             if (messageBuff.Length == 0)
                                 continue;
 
-                            if (DebugFile != null)
-                            {
-                                lock (DebugFile)
-                                {
-                                    DebugFile.Write("vvv "u8);
-                                    DebugFile.Write(messageBuff.AsSpan().TrimEnd("\r\n"u8));
-                                    DebugFile.Write("\r\n"u8);
-                                }
-                            }
+                            WriteToDebugFile(messageBuff, "vvv"u8, true);
 
                             MessageReceived?.Invoke(this, (messageBuff, messageType));
                             break;
                         case WebSocketMessageType.Close:
-                            _logger.LogVerbose("Socket closed.");
                             return;
                         default:
                             _logger.LogWarning($"Received unknown message type: {(int)messageType}.");
@@ -120,6 +113,8 @@ namespace TwitchDownloaderCore.Tools
             }
             finally
             {
+                _logger.LogVerbose($"Stopped listening for messages from {_connectedUri}.");
+
                 ArrayPool<byte>.Shared.Return(receiveBuff, true);
             }
         }
@@ -201,15 +196,7 @@ namespace TwitchDownloaderCore.Tools
             if (!SocketOpen)
                 return ValueTask.CompletedTask;
 
-            if (DebugFile != null)
-            {
-                lock (DebugFile)
-                {
-                    DebugFile.Write("^^^ "u8);
-                    DebugFile.Write(str.Span.TrimEnd("\r\n"u8));
-                    DebugFile.Write("\r\n"u8);
-                }
-            }
+            WriteToDebugFile(str.Span, "^^^"u8);
 
             return _socket.SendAsync(str, WebSocketMessageType.Text, true, cancellation);
         }
@@ -219,15 +206,7 @@ namespace TwitchDownloaderCore.Tools
             if (!SocketOpen)
                 return ValueTask.CompletedTask;
 
-            if (DebugFile != null)
-            {
-                lock (DebugFile)
-                {
-                    DebugFile.Write("^^^ "u8);
-                    DebugFile.Write(message.Span.TrimEnd("\r\n"u8));
-                    DebugFile.Write("\r\n"u8);
-                }
-            }
+            WriteToDebugFile(message.Span, "^^^"u8);
 
             return _socket.SendAsync(message, WebSocketMessageType.Binary, true, cancellation);
         }
@@ -235,6 +214,23 @@ namespace TwitchDownloaderCore.Tools
         public void Dispose()
         {
             _socket?.Dispose();
+        }
+
+        private void WriteToDebugFile(ReadOnlySpan<byte> bytes, ReadOnlySpan<byte> prefix, bool flush = false)
+        {
+            if (DebugFile is null)
+            {
+                return;
+            }
+
+            lock (DebugFile)
+            {
+                DebugFile.Write(prefix);
+                DebugFile.Write(" "u8);
+                DebugFile.Write(bytes.TrimEnd("\r\n"u8));
+                DebugFile.Write("\r\n"u8);
+                if (flush) DebugFile.Flush();
+            }
         }
     }
 }
