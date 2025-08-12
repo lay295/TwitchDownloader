@@ -23,6 +23,14 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             "viewer8.tmi.twitch.tv",
             IrcCommand.PrivMsg,
             "#streamer8 :@viewer8 This is a message")]
+        [InlineData(
+            "@id=123AB;rose :viewer8!viewer8@viewer8.tmi.twitch.tv PRIVMSG #streamer8 :This is a message",
+            "{\"id\":\"123AB\",\"rose\":null}",
+            "viewer8",
+            "viewer8",
+            "viewer8.tmi.twitch.tv",
+            IrcCommand.PrivMsg,
+            "#streamer8 :This is a message")]
         public void CorrectlyParsesMessage_WithTags(string ircRaw, string tagsJson, string serverOrNick, string user, string host, IrcCommand command, string parameters)
         {
             var tags = JsonSerializer.Deserialize<Dictionary<string, string>>(tagsJson);
