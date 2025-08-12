@@ -258,9 +258,7 @@ namespace TwitchDownloaderCore.Models
             var commandLen = text.IndexOf(" "u8);
             if (commandLen == -1)
             {
-                _logger.LogWarning($"Invalid command found in message: {Encoding.UTF8.GetString(text)}");
-                command = IrcCommand.Unknown;
-                return false;
+                commandLen = text.Length;
             }
 
             var workingSlice = text[..commandLen];
@@ -300,7 +298,10 @@ namespace TwitchDownloaderCore.Models
                 _ => IrcCommand.Unknown
             };
 
-            text = text[(commandLen + 1)..];
+            text = commandLen == text.Length
+                ? ReadOnlySpan<byte>.Empty
+                : text[(commandLen + 1)..];
+
             return command != IrcCommand.Unknown;
         }
     }
