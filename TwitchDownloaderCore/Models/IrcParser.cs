@@ -20,22 +20,22 @@ namespace TwitchDownloaderCore.Models
         {
             var messages = new List<IrcMessage>();
 
-            var textStart = -1;
+            var lineStart = -1;
             var textEnd = text.Length;
             var lineEnd = -1;
             var iterations = 0;
             var maxIterations = text.Count((byte)'\n') + 1;
             do
             {
-                textStart++;
+                lineStart++;
                 iterations++;
                 if (iterations > maxIterations)
                     throw new Exception("Infinite loop encountered while decoding IRC messages.");
 
-                if (textStart >= textEnd)
+                if (lineStart >= textEnd)
                     break;
 
-                var workingSlice = text[textStart..];
+                var workingSlice = text[lineStart..];
                 lineEnd = workingSlice.IndexOf((byte)'\n');
                 if (lineEnd != -1)
                     workingSlice = workingSlice[..lineEnd].TrimEnd((byte)'\r');
@@ -47,18 +47,13 @@ namespace TwitchDownloaderCore.Models
 
                 if (!TryParseMessage(workingSlice, out var newMessage))
                 {
-                    var failedMessage = text[textStart..Math.Max(lineEnd, text.Length - textStart)];
+                    var failedMessage = text[lineStart..Math.Max(lineEnd, text.Length)];
                     _logger.LogWarning($"Failed to parse IRC message: {Encoding.UTF8.GetString(failedMessage).TrimEnd()}");
                     continue;
                 }
 
                 messages.Add(newMessage);
-
-                if (lineEnd == -1)
-                {
-                    break;
-                }
-            } while (lineEnd != -1 && (textStart += lineEnd) < textEnd);
+            } while (lineEnd != -1 && (lineStart += lineEnd) < textEnd);
 
             // Sort messages by their timestamps, if they have one
             messages.Sort((a, b) =>
