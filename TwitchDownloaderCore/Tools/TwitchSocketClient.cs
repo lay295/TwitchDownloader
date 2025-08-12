@@ -14,8 +14,8 @@ namespace TwitchDownloaderCore.Tools
     {
         private const int RECEIVE_BUFFER_SIZE = 4096;
 
-        public bool SocketOpen => _socket?.State is WebSocketState.Open;
-        public FileStream DebugFile { get; set; }
+        public bool SocketOpen => _socket.State is WebSocketState.Open;
+        public FileStream DebugFile { private get; set; }
 
         public event EventHandler<(byte[] Buffer, WebSocketMessageType MessageType)> MessageReceived;
 
@@ -69,6 +69,7 @@ namespace TwitchDownloaderCore.Tools
                 if (_socket.State is WebSocketState.Open or WebSocketState.Connecting)
                 {
                     await _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
+                    _socket.Dispose();
                 }
 
                 return true;
@@ -211,11 +212,6 @@ namespace TwitchDownloaderCore.Tools
             return _socket.SendAsync(message, WebSocketMessageType.Binary, true, cancellation);
         }
 
-        public void Dispose()
-        {
-            _socket?.Dispose();
-        }
-
         private void WriteToDebugFile(ReadOnlySpan<byte> bytes, ReadOnlySpan<byte> prefix, bool flush = false)
         {
             if (DebugFile is null)
@@ -225,12 +221,25 @@ namespace TwitchDownloaderCore.Tools
 
             lock (DebugFile)
             {
-                DebugFile.Write(prefix);
-                DebugFile.Write(" "u8);
-                DebugFile.Write(bytes.TrimEnd("\r\n"u8));
-                DebugFile.Write("\r\n"u8);
-                if (flush) DebugFile.Flush();
+                try
+                {
+                    DebugFile.Write(prefix);
+                    DebugFile.Write(" "u8);
+                    DebugFile.Write(bytes.TrimEnd("\r\n"u8));
+                    DebugFile.Write("\r\n"u8);
+                    if (flush) DebugFile.Flush();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogVerbose($"Failed to write to debug file: {ex.Message}");
+                }
             }
+        }
+
+        public void Dispose()
+        {
+            _socket?.Dispose();
+            DebugFile?.Dispose();
         }
     }
 }

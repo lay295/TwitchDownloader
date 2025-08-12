@@ -17,7 +17,6 @@ namespace TwitchDownloaderCore.Tools
         public bool IsConnected => _client.SocketOpen;
         public FileStream DebugFile
         {
-            get => _client.DebugFile;
             set => _client.DebugFile = value;
         }
 
