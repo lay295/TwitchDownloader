@@ -14,7 +14,8 @@ namespace TwitchDownloaderCore.Tools
     {
         private static readonly string AnonymousUsername = $"justinfan{Random.Shared.Next(10_000, 99_999)}";
 
-        public bool IsConnected => _client.SocketOpen;
+        public bool IsConnected => _reconnecting || _client.SocketOpen;
+
         public FileStream DebugFile
         {
             set => _client.DebugFile = value;
@@ -26,6 +27,7 @@ namespace TwitchDownloaderCore.Tools
         private readonly TwitchSocketClient _client;
         private readonly IrcParser _ircParser;
 
+        private bool _reconnecting;
         private string _joinedChannel;
         private Timer _pingTimer;
 
@@ -164,14 +166,27 @@ namespace TwitchDownloaderCore.Tools
 
         public async Task<bool> ReconnectAsync(CancellationToken cancellationToken)
         {
+            if (_reconnecting)
+                return false;
+
             _logger.LogInfo("Reconnecting to Twitch IRC...");
 
-            var channelName = _joinedChannel;
+            _reconnecting = true;
+            bool success;
+            try
+            {
+                var channelName = _joinedChannel;
+                success = await LeaveChannelAsync(cancellationToken)
+                          && await DisconnectAsync(cancellationToken)
+                          && await ConnectAsync(cancellationToken)
+                          && await JoinChannelAsync(channelName, cancellationToken);
+            }
+            finally
+            {
+                _reconnecting = false;
+            }
 
-            return await LeaveChannelAsync(cancellationToken)
-                   && await DisconnectAsync(cancellationToken)
-                   && await ConnectAsync(cancellationToken)
-                   && await JoinChannelAsync(channelName, cancellationToken);
+            return success;
         }
 
         private void Client_OnMessageReceived(object sender, (byte[] Buffer, WebSocketMessageType MessageType) e)
