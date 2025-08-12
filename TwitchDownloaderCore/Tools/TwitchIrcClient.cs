@@ -42,7 +42,6 @@ namespace TwitchDownloaderCore.Tools
         {
             if (_client.SocketOpen)
             {
-                _logger.LogWarning("Tried to connect to Twitch IRC multiple times.");
                 return true;
             }
 
@@ -102,8 +101,7 @@ namespace TwitchDownloaderCore.Tools
         {
             if (!_client.SocketOpen)
             {
-                _logger.LogWarning("Tried to leave the channel on a closed socket.");
-                return false;
+                return true;
             }
 
             if (_joinedChannel != null)
@@ -120,7 +118,6 @@ namespace TwitchDownloaderCore.Tools
         {
             if (!_client.SocketOpen)
             {
-                _logger.LogWarning("Tried to disconnect from an already closed socket.");
                 return true;
             }
 
@@ -167,8 +164,8 @@ namespace TwitchDownloaderCore.Tools
         {
             if (e.MessageType is not WebSocketMessageType.Text)
             {
-                _logger.LogWarning("Binary messages are not supported. Enable verbose logging for more info.");
-                _logger.LogVerbose($"Binary message content: {Convert.ToHexString(e.Buffer)}");
+                _logger.LogWarning("Binary messages are not supported. See verbose log for more info.");
+                _logger.LogVerbose($"Binary message content: {Convert.ToBase64String(e.Buffer)}");
                 return;
             }
 
@@ -179,7 +176,10 @@ namespace TwitchDownloaderCore.Tools
                 switch (ircMessage.Command)
                 {
                     case IrcCommand.Ping:
-                        _client.SendTextPooledAsync("PONG", CancellationToken.None);
+                        _client.SendTextPooledAsync(
+                            ircMessage.ParametersRaw is { Length: > 0 } ? $"PONG {ircMessage.ParametersRaw}" : "PONG",
+                            CancellationToken.None
+                        );
                         break;
                     case IrcCommand.Reconnect:
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
