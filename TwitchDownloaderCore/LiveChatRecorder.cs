@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +15,6 @@ namespace TwitchDownloaderCore
     {
         private readonly LiveChatRecorderOptions _recorderOptions;
         private readonly ITaskProgress _progress;
-
         private readonly TwitchIrcClient _ircClient;
 
         public readonly ConcurrentQueue<Comment> Comments = new();
@@ -52,10 +50,7 @@ namespace TwitchDownloaderCore
             var outputFileInfo = TwitchHelper.ClaimFile(_recorderOptions.OutputFile, _recorderOptions.FileCollisionCallback, _progress);
             _recorderOptions.OutputFile = outputFileInfo.FullName;
 
-            // Open the destination file so that it exists in the filesystem.
-            await using var outputFs = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
-
-            _ircClient.DebugFile = outputFs;
+            _ircClient.DebugFile = outputFileInfo;
 
             try
             {
@@ -65,7 +60,7 @@ namespace TwitchDownloaderCore
             {
                 await Task.Delay(100, cancellationToken);
 
-                TwitchHelper.CleanUpClaimedFile(outputFileInfo, outputFs, _progress);
+                TwitchHelper.CleanUpClaimedFile(outputFileInfo, null, _progress);
 
                 throw;
             }
