@@ -15,7 +15,7 @@ namespace TwitchDownloaderCore.Tools
         private const int RECEIVE_BUFFER_SIZE = 4096;
 
         public bool SocketOpen => _socket.State is WebSocketState.Open;
-        public FileStream DebugFile { private get; set; }
+        public FileInfo DebugFile { get; set; }
 
         public event EventHandler<(byte[] Buffer, WebSocketMessageType MessageType)> MessageReceived;
 
@@ -23,6 +23,7 @@ namespace TwitchDownloaderCore.Tools
 
         private ClientWebSocket _socket;
         private Uri _connectedUri;
+        private FileStream _debugFile;
 
         public TwitchSocketClient(ITaskLogger logger)
         {
@@ -117,6 +118,16 @@ namespace TwitchDownloaderCore.Tools
                 _logger.LogVerbose($"Stopped listening for messages from {_connectedUri}.");
 
                 ArrayPool<byte>.Shared.Return(receiveBuff, true);
+
+                try
+                {
+                    if (_debugFile != null)
+                    {
+                        await _debugFile.DisposeAsync();
+                        _debugFile = null;
+                    }
+                }
+                catch { }
             }
         }
 
@@ -223,11 +234,13 @@ namespace TwitchDownloaderCore.Tools
             {
                 try
                 {
-                    DebugFile.Write(prefix);
-                    DebugFile.Write(" "u8);
-                    DebugFile.Write(bytes.TrimEnd("\r\n"u8));
-                    DebugFile.Write("\r\n"u8);
-                    if (flush) DebugFile.Flush();
+                    _debugFile ??= new FileStream(DebugFile.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+
+                    _debugFile.Write(prefix);
+                    _debugFile.Write(" "u8);
+                    _debugFile.Write(bytes.TrimEnd("\r\n"u8));
+                    _debugFile.Write("\r\n"u8);
+                    if (flush) _debugFile.Flush();
                 }
                 catch (Exception ex)
                 {
@@ -239,7 +252,8 @@ namespace TwitchDownloaderCore.Tools
         public void Dispose()
         {
             _socket?.Dispose();
-            DebugFile?.Dispose();
+            _debugFile?.Dispose();
+            _debugFile = null;
         }
     }
 }
