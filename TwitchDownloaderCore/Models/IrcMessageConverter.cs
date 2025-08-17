@@ -29,7 +29,7 @@ namespace TwitchDownloaderCore.Models
             if (!ircMessage.TryGetTag("msg-id", out var msgId)) msgId = null;
             if (!ircMessage.TryGetTag("bits", out var bitsStr) || !int.TryParse(bitsStr, out var bits)) bits = 0;
 
-            var messageBody = BuildMessageBody(ircMessage, msgId, out var emoteOffset);
+            var messageBody = BuildMessageBody(ircMessage, out var emoteOffset);
             var badges = BuildBadgeList(ircMessage);
             var emoticons = BuildEmoticonList(ircMessage, emoteOffset);
             var fragments = BuildFragmentList(emoticons, messageBody);
@@ -68,14 +68,14 @@ namespace TwitchDownloaderCore.Models
             };
         }
 
-        private static string BuildMessageBody(IrcMessage ircMessage, string msgId, out int emoteOffset)
+        private static string BuildMessageBody(IrcMessage ircMessage, out int emoteOffset)
         {
             var messageBegin = ircMessage.ParametersRaw.IndexOf(':');
             var messageBody = messageBegin == -1
                 ? ""
                 : ircMessage.ParametersRaw[(messageBegin + 1)..];
 
-            if (ircMessage.TryGetTag("system-msg", out var systemMsg) && (msgId?.Contains("sub") ?? false))
+            if (ircMessage.TryGetTag("system-msg", out var systemMsg) && systemMsg != null)
             {
                 if (string.IsNullOrEmpty(messageBody))
                 {
