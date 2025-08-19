@@ -24,6 +24,14 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             IrcCommand.PrivMsg,
             "#streamer8 :@viewer8 This is a message")]
         [InlineData(
+            @"@badge-info=;badges=;color=#00FF7F;display-name=Viewer8;emotes=;flags=;id=96452401-2707-4d42-b373-8b2777217cc4;login=viewer8;mod=0;msg-id=raid;msg-param-displayName=Viewer8;msg-param-login=viewer8;msg-param-profileImageURL=https://static-cdn.jtvnw.net/jtv_user_pictures/96452401-2707-4d42-b373-8b2777217cc4-profile_image-%s.jpeg;msg-param-viewerCount=1;room-id=123465789;subscriber=0;system-msg=1\sraiders\sfrom\sViewer8\shave\sjoined!;tmi-sent-ts=1754700560200;user-id=123456789;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #streamer8",
+            "{\"badge-info\":null,\"badges\":null,\"color\":\"#00FF7F\",\"display-name\":\"Viewer8\",\"emotes\":null,\"flags\":null,\"id\":\"96452401-2707-4d42-b373-8b2777217cc4\",\"login\":\"viewer8\",\"mod\":\"0\",\"msg-id\":\"raid\",\"msg-param-displayName\":\"Viewer8\",\"msg-param-login\":\"viewer8\",\"msg-param-profileImageURL\":\"https://static-cdn.jtvnw.net/jtv_user_pictures/96452401-2707-4d42-b373-8b2777217cc4-profile_image-%s.jpeg\",\"msg-param-viewerCount\":\"1\",\"room-id\":\"123465789\",\"subscriber\":\"0\",\"system-msg\":\"1 raiders from Viewer8 have joined!\",\"tmi-sent-ts\":\"1754700560200\",\"user-id\":\"123456789\",\"user-type\":null,\"vip\":\"0\"}",
+            "tmi.twitch.tv",
+            "",
+            "",
+            IrcCommand.UserNotice,
+            "#streamer8")]
+        [InlineData(
             "@id=123AB;rose :viewer8!viewer8@viewer8.tmi.twitch.tv PRIVMSG #streamer8 :This is a message",
             "{\"id\":\"123AB\",\"rose\":null}",
             "viewer8",
