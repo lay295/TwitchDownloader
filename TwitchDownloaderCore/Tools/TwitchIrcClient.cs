@@ -27,10 +27,12 @@ namespace TwitchDownloaderCore.Tools
         private readonly ITaskLogger _logger;
         private readonly TwitchSocketClient _client;
         private readonly IrcParser _ircParser;
+        private readonly TimeSpan _pingInterval;
 
         private bool _reconnecting;
         private string _joinedChannel;
         private Timer _pingTimer;
+        private DateTimeOffset _lastMessage;
 
         public TwitchIrcClient(ITaskLogger logger)
         {
@@ -38,6 +40,7 @@ namespace TwitchDownloaderCore.Tools
             _client = new TwitchSocketClient(logger);
             _client.MessageReceived += Client_OnMessageReceived;
             _ircParser = new IrcParser(logger);
+            _pingInterval = TimeSpan.FromMinutes(5);
         }
 
         public async Task<bool> ConnectAsync(CancellationToken cancellationToken)
@@ -72,18 +75,27 @@ namespace TwitchDownloaderCore.Tools
             await _client.SendTextPooledAsync($"NICK {AnonymousUsername}", cancellationToken);
             await _client.SendTextPooledAsync($"USER {AnonymousUsername} 8 * :{AnonymousUsername}", cancellationToken);
 
-            _pingTimer = new Timer(PingTimerCallback, _client, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+            _pingTimer = new Timer(PingTimerCallback, this, _pingInterval, _pingInterval);
 
             return true;
 
             static void PingTimerCallback(object state)
             {
-                if (state is not TwitchSocketClient client)
+                if (state is not TwitchIrcClient ircClient)
                     return;
 
-                if (client.SocketOpen)
+                if (ircClient._client.SocketOpen)
                 {
-                    client.SendTextPooledAsync("PING", CancellationToken.None);
+                    ircClient._client.SendTextPooledAsync("PING", CancellationToken.None);
+                }
+
+                var messageTimeout = ircClient._pingInterval + TimeSpan.FromSeconds(10);
+                if (ircClient._lastMessage != default && DateTimeOffset.UtcNow - ircClient._lastMessage > messageTimeout)
+                {
+                    ircClient._logger.LogWarning($"Last response exceeds {messageTimeout.TotalMilliseconds:F0}ms timeout ({ircClient._lastMessage:u}), initiating reconnect.");
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    ircClient.ReconnectAsync(CancellationToken.None);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
             }
         }
@@ -203,6 +215,8 @@ namespace TwitchDownloaderCore.Tools
 
             foreach (var ircMessage in messages)
             {
+                _lastMessage = DateTimeOffset.UtcNow;
+
                 switch (ircMessage.Command)
                 {
                     case IrcCommand.Ping:
