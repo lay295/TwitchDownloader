@@ -42,8 +42,11 @@ namespace TwitchDownloaderCore.Tools
                 return false;
             }
 
-            if (_socket.State is WebSocketState.Closed)
+            if (_socket.State is not WebSocketState.Open and not WebSocketState.Connecting)
+            {
+                _socket.Abort();
                 _socket = new ClientWebSocket();
+            }
 
             try
             {
