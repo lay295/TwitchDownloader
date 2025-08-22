@@ -109,6 +109,9 @@ namespace TwitchDownloaderCore.Tools
                             MessageReceived?.Invoke(this, (messageBuff, messageType));
                             break;
                         case WebSocketMessageType.Close:
+                            WriteToDebugFile(messageBuff, "vvv"u8, true);
+
+                            MessageReceived?.Invoke(this, (messageBuff, messageType));
                             return;
                         default:
                             _logger.LogWarning($"Received unknown message type: {(int)messageType}.");
@@ -228,7 +231,7 @@ namespace TwitchDownloaderCore.Tools
 
         private void WriteToDebugFile(ReadOnlySpan<byte> bytes, ReadOnlySpan<byte> prefix, bool flush = false)
         {
-            if (DebugFile is null)
+            if (DebugFile is null || bytes.IsEmpty)
             {
                 return;
             }
@@ -237,7 +240,7 @@ namespace TwitchDownloaderCore.Tools
             {
                 try
                 {
-                    _debugFile ??= new FileStream(DebugFile.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+                    _debugFile ??= new FileStream(DebugFile.FullName, FileMode.Append, FileAccess.Write, FileShare.Read);
 
                     _debugFile.Write(prefix);
                     _debugFile.Write(" "u8);

@@ -68,7 +68,7 @@ namespace TwitchDownloaderCore.Tools
                 await Task.Delay(sleepTime, cancellationToken);
             }
 
-            _logger.LogVerbose("Connected to Twitch IRC");
+            _logger.LogInfo("Connected to Twitch IRC");
 
             await _client.SendTextPooledAsync("CAP REQ :twitch.tv/commands twitch.tv/tags", cancellationToken);
             await _client.SendTextPooledAsync("PASS SCHMOOPIIE", cancellationToken);
@@ -84,15 +84,12 @@ namespace TwitchDownloaderCore.Tools
                 if (state is not TwitchIrcClient ircClient)
                     return;
 
-                if (ircClient._client.SocketOpen)
-                {
-                    ircClient._client.SendTextPooledAsync("PING", CancellationToken.None);
-                }
+                ircClient._client.SendTextPooledAsync("PING", CancellationToken.None).AsTask().Wait(CancellationToken.None);
 
                 var messageTimeout = ircClient._pingInterval + TimeSpan.FromSeconds(10);
                 if (ircClient._lastMessage != default && DateTimeOffset.UtcNow - ircClient._lastMessage > messageTimeout)
                 {
-                    ircClient._logger.LogWarning($"Last response exceeds {messageTimeout.TotalMilliseconds:F0}ms timeout ({ircClient._lastMessage:u}), initiating reconnect.");
+                    ircClient._logger.LogWarning($"Last response exceeds {messageTimeout.TotalMilliseconds:F0}ms timeout ({ircClient._lastMessage:u}), initiating reconnect...");
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                     ircClient.ReconnectAsync(CancellationToken.None);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -204,11 +201,21 @@ namespace TwitchDownloaderCore.Tools
 
         private void Client_OnMessageReceived(object sender, (byte[] Buffer, WebSocketMessageType MessageType) e)
         {
-            if (e.MessageType is not WebSocketMessageType.Text)
+            switch (e.MessageType)
             {
-                _logger.LogWarning("Binary messages are not supported. See verbose log for more info.");
-                _logger.LogVerbose($"Binary message content: {Convert.ToBase64String(e.Buffer)}");
-                return;
+                case WebSocketMessageType.Binary:
+                    _logger.LogWarning("Binary messages are not supported. See verbose log for more info.");
+                    _logger.LogVerbose($"Binary message content: {Convert.ToBase64String(e.Buffer)}");
+                    return;
+                case WebSocketMessageType.Close:
+                    if (_pingTimer == null)
+                        return;
+
+                    _logger.LogWarning("Lost connection to Twitch IRC, initiating reconnect...");
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    ReconnectAsync(CancellationToken.None);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    return;
             }
 
             var messages = _ircParser.Parse(e.Buffer);
@@ -245,6 +252,7 @@ namespace TwitchDownloaderCore.Tools
         {
             _client?.Dispose();
             _pingTimer?.Dispose();
+            _pingTimer = null;
         }
     }
 }
