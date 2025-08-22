@@ -12,12 +12,14 @@ namespace TwitchDownloaderCore.Tools
 {
     public sealed class TwitchSocketClient : IDisposable
     {
+        public readonly record struct Message(byte[] Buffer, WebSocketMessageType MessageType);
+
         private const int RECEIVE_BUFFER_SIZE = 4096;
 
         public bool SocketOpen => _socket.State is WebSocketState.Open;
         public FileInfo DebugFile { get; set; }
 
-        public event EventHandler<(byte[] Buffer, WebSocketMessageType MessageType)> MessageReceived;
+        public event EventHandler<Message> MessageReceived;
 
         private readonly ITaskLogger _logger;
 
@@ -106,12 +108,12 @@ namespace TwitchDownloaderCore.Tools
 
                             WriteToDebugFile(messageBuff, "vvv"u8, true);
 
-                            MessageReceived?.Invoke(this, (messageBuff, messageType));
+                            MessageReceived?.Invoke(this, new Message(messageBuff, messageType));
                             break;
                         case WebSocketMessageType.Close:
                             WriteToDebugFile(messageBuff, "vvv"u8, true);
 
-                            MessageReceived?.Invoke(this, (messageBuff, messageType));
+                            MessageReceived?.Invoke(this, new Message(messageBuff, messageType));
                             return;
                         default:
                             _logger.LogWarning($"Received unknown message type: {(int)messageType}.");

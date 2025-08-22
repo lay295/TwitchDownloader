@@ -199,7 +199,7 @@ namespace TwitchDownloaderCore.Tools
             return success;
         }
 
-        private void Client_OnMessageReceived(object sender, (byte[] Buffer, WebSocketMessageType MessageType) e)
+        private void Client_OnMessageReceived(object sender, TwitchSocketClient.Message e)
         {
             switch (e.MessageType)
             {
