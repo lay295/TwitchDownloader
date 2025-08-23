@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,9 +14,8 @@ namespace TwitchDownloaderCore.Tools
 {
     public sealed class TwitchIrcClient : IDisposable
     {
+        private const string ANONYMOUS_PASSWORD = "SCHMOOPIIE";
         private static readonly string AnonymousUsername = $"justinfan{Random.Shared.Next(10_000, 99_999)}";
-
-        public bool IsConnected => _reconnecting || _client.SocketOpen;
 
         public FileInfo DebugFile
         {
@@ -22,8 +23,10 @@ namespace TwitchDownloaderCore.Tools
             set => _client.DebugFile = value;
         }
 
-        public readonly ConcurrentQueue<IrcMessage> Messages = new();
+        public bool IsConnected => _reconnecting || _pingTimer != null;
+        public bool HasNewMessages => !_messages.IsEmpty;
 
+        private readonly ConcurrentQueue<IrcMessage> _messages;
         private readonly ITaskLogger _logger;
         private readonly TwitchSocketClient _client;
         private readonly IrcParser _ircParser;
@@ -36,6 +39,7 @@ namespace TwitchDownloaderCore.Tools
 
         public TwitchIrcClient(ITaskLogger logger)
         {
+            _messages = new ConcurrentQueue<IrcMessage>();
             _logger = logger;
             _client = new TwitchSocketClient(logger);
             _client.MessageReceived += Client_OnMessageReceived;
@@ -71,7 +75,7 @@ namespace TwitchDownloaderCore.Tools
             _logger.LogInfo("Connected to Twitch IRC");
 
             await _client.SendTextPooledAsync("CAP REQ :twitch.tv/commands twitch.tv/tags", cancellationToken);
-            await _client.SendTextPooledAsync("PASS SCHMOOPIIE", cancellationToken);
+            await _client.SendTextPooledAsync($"PASS {ANONYMOUS_PASSWORD}", cancellationToken);
             await _client.SendTextPooledAsync($"NICK {AnonymousUsername}", cancellationToken);
             await _client.SendTextPooledAsync($"USER {AnonymousUsername} 8 * :{AnonymousUsername}", cancellationToken);
 
@@ -84,33 +88,33 @@ namespace TwitchDownloaderCore.Tools
                 if (state is not TwitchIrcClient ircClient)
                     return;
 
+                ircClient.EnsureSocketConnected(CancellationToken.None).AsTask().Wait(CancellationToken.None);
+
                 ircClient._client.SendTextPooledAsync("PING", CancellationToken.None).AsTask().Wait(CancellationToken.None);
 
                 var messageTimeout = ircClient._pingInterval + TimeSpan.FromSeconds(10);
                 if (ircClient._lastMessage != default && DateTimeOffset.UtcNow - ircClient._lastMessage > messageTimeout)
                 {
                     ircClient._logger.LogWarning($"Last response exceeds {messageTimeout.TotalMilliseconds:F0}ms timeout ({ircClient._lastMessage:u}), initiating reconnect...");
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    ircClient.ReconnectAsync(CancellationToken.None);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    ircClient.ReconnectAsync(CancellationToken.None).Wait(CancellationToken.None);
                 }
             }
         }
 
         public async Task<bool> DisconnectAsync(CancellationToken cancellationToken)
         {
+            if (_pingTimer != null)
+            {
+                await _pingTimer.DisposeAsync();
+                _pingTimer = null;
+            }
+
             if (!_client.SocketOpen)
             {
                 return true;
             }
 
             await LeaveChannelAsync(cancellationToken);
-
-            if (_pingTimer != null)
-            {
-                await _pingTimer.DisposeAsync();
-                _pingTimer = null;
-            }
 
             var count = 0;
             const int MAX_TRIES = 5;
@@ -143,14 +147,15 @@ namespace TwitchDownloaderCore.Tools
 
         public async Task<bool> JoinChannelAsync(string channelName, CancellationToken cancellationToken)
         {
-            if (!_client.SocketOpen)
+            if (!IsConnected)
             {
                 _logger.LogWarning($"Tried to join #{channelName}, but the socket was closed.");
                 return false;
             }
 
-            _logger.LogVerbose($"Joining #{channelName}...");
+            await EnsureSocketConnected(cancellationToken);
 
+            _logger.LogVerbose($"Joining #{channelName}...");
             await _client.SendTextPooledAsync($"JOIN #{channelName}", cancellationToken);
             _joinedChannel = channelName;
 
@@ -199,6 +204,26 @@ namespace TwitchDownloaderCore.Tools
             return success;
         }
 
+        public async IAsyncEnumerable<IrcMessage> GetNewMessagesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            await EnsureSocketConnected(cancellationToken);
+
+            while (_messages.TryDequeue(out var message))
+            {
+                yield return message;
+            }
+        }
+
+        private ValueTask EnsureSocketConnected(CancellationToken cancellationToken)
+        {
+            if (_pingTimer != null && !_reconnecting && !_client.SocketOpen)
+            {
+                return new ValueTask(ReconnectAsync(cancellationToken));
+            }
+
+            return ValueTask.CompletedTask;
+        }
+
         private void Client_OnMessageReceived(object sender, TwitchSocketClient.Message e)
         {
             switch (e.MessageType)
@@ -208,13 +233,11 @@ namespace TwitchDownloaderCore.Tools
                     _logger.LogVerbose($"Binary message content: {Convert.ToBase64String(e.Buffer)}");
                     return;
                 case WebSocketMessageType.Close:
-                    if (_pingTimer == null)
+                    if (!IsConnected)
                         return;
 
                     _logger.LogWarning("Lost connection to Twitch IRC, initiating reconnect...");
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    ReconnectAsync(CancellationToken.None);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    _ = ReconnectAsync(CancellationToken.None);
                     return;
             }
 
@@ -233,13 +256,11 @@ namespace TwitchDownloaderCore.Tools
                         );
                         break;
                     case IrcCommand.Reconnect:
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                        ReconnectAsync(CancellationToken.None);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                        _ = ReconnectAsync(CancellationToken.None);
                         break;
                     case IrcCommand.PrivMsg:
                     case IrcCommand.UserNotice:
-                        Messages.Enqueue(ircMessage);
+                        _messages.Enqueue(ircMessage);
                         break;
                     case IrcCommand.Unknown:
                         _logger.LogWarning($"Got unknown IRC command: {Encoding.UTF8.GetString(e.Buffer).TrimEnd()}");

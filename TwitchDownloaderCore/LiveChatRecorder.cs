@@ -29,9 +29,7 @@ namespace TwitchDownloaderCore
             {
                 _progress.LogInfo("Stopping recording...");
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                _ircClient.DisconnectAsync(CancellationToken.None);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                _ = _ircClient.DisconnectAsync(CancellationToken.None);
             };
         }
 
@@ -71,17 +69,17 @@ namespace TwitchDownloaderCore
             await _ircClient.ConnectAsync(cancellationToken);
             await _ircClient.JoinChannelAsync(_recorderOptions.Channel, cancellationToken);
 
-            await PrintMessages(cancellationToken);
+            await ProcessMessages(cancellationToken);
 
             await _ircClient.LeaveChannelAsync(cancellationToken);
             await _ircClient.DisconnectAsync(cancellationToken);
         }
 
-        private async Task PrintMessages(CancellationToken cancellationToken)
+        private async Task ProcessMessages(CancellationToken cancellationToken)
         {
             do
             {
-                while (_ircClient.Messages.TryDequeue(out var message))
+                await foreach (var message in _ircClient.GetNewMessagesAsync(cancellationToken))
                 {
                     try
                     {
@@ -101,7 +99,7 @@ namespace TwitchDownloaderCore
                 }
 
                 await Task.Delay(50, cancellationToken);
-            } while (_ircClient.IsConnected);
+            } while (_ircClient.IsConnected || _ircClient.HasNewMessages);
         }
 
         public void Dispose()
