@@ -130,10 +130,13 @@ namespace TwitchDownloaderCore.Tools
 
                 try
                 {
-                    if (_debugFile != null)
+                    lock (DebugFile)
                     {
-                        await _debugFile.DisposeAsync();
-                        _debugFile = null;
+                        if (_debugFile != null)
+                        {
+                            _debugFile.Dispose();
+                            _debugFile = null;
+                        }
                     }
                 }
                 catch { }
