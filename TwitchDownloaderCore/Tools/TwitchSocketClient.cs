@@ -90,14 +90,15 @@ namespace TwitchDownloaderCore.Tools
         private async Task ReceiveMessages(CancellationToken cancellationToken)
         {
             var receiveBuff = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_SIZE);
+            var socket = _socket; // Track only the socket from when we started listening to avoid multiple loops listening to the same socket
 
             try
             {
                 _logger.LogVerbose($"Listening for messages from {_connectedUri}...");
 
-                while (SocketOpen)
+                while (socket.State is WebSocketState.Open)
                 {
-                    var (messageBuff, messageType) = await ReceiveMessageBuffer(receiveBuff, cancellationToken);
+                    var (messageBuff, messageType) = await ReceiveMessageBuffer(socket, receiveBuff, cancellationToken);
 
                     switch (messageType)
                     {
@@ -139,7 +140,7 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        private async Task<(byte[] MessageBuff, WebSocketMessageType MessageType)> ReceiveMessageBuffer(byte[] receiveBuff, CancellationToken cancellationToken)
+        private static async Task<(byte[] MessageBuff, WebSocketMessageType MessageType)> ReceiveMessageBuffer(ClientWebSocket socket, byte[] receiveBuff, CancellationToken cancellationToken)
         {
             var messageBuff = Array.Empty<byte>();
             var messageLen = 0;
@@ -149,7 +150,7 @@ namespace TwitchDownloaderCore.Tools
             {
                 try
                 {
-                    receiveResult = await _socket.ReceiveAsync(receiveBuff.AsMemory(), cancellationToken);
+                    receiveResult = await socket.ReceiveAsync(receiveBuff.AsMemory(), cancellationToken);
                 }
                 catch (TaskCanceledException)
                 {
