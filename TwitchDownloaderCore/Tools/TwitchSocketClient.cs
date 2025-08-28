@@ -6,6 +6,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderCore.Tools
@@ -57,7 +58,7 @@ namespace TwitchDownloaderCore.Tools
                 await _socket.ConnectAsync(uri, cancellationToken);
                 _connectedUri = uri;
 
-                _ = Task.Factory.StartNew(async () => await ReceiveMessages(cancellationToken), cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                _ = Task.Factory.StartNew(() => ReceiveMessages(cancellationToken), cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
                 return SocketOpen;
             }
@@ -87,7 +88,7 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        private async Task ReceiveMessages(CancellationToken cancellationToken)
+        private void ReceiveMessages(CancellationToken cancellationToken)
         {
             var receiveBuff = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_SIZE);
             var socket = _socket; // Track only the socket from when we started listening to avoid multiple loops listening to the same socket
@@ -98,7 +99,7 @@ namespace TwitchDownloaderCore.Tools
 
                 while (socket.State is WebSocketState.Open)
                 {
-                    var (messageBuff, messageType) = await ReceiveMessageBuffer(socket, receiveBuff, cancellationToken);
+                    var (messageBuff, messageType) = ReceiveMessageBuffer(socket, receiveBuff, cancellationToken);
 
                     switch (messageType)
                     {
@@ -143,7 +144,7 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        private static async Task<(byte[] MessageBuff, WebSocketMessageType MessageType)> ReceiveMessageBuffer(ClientWebSocket socket, byte[] receiveBuff, CancellationToken cancellationToken)
+        private static (byte[] MessageBuff, WebSocketMessageType MessageType) ReceiveMessageBuffer(ClientWebSocket socket, byte[] receiveBuff, CancellationToken cancellationToken)
         {
             var messageBuff = Array.Empty<byte>();
             var messageLen = 0;
@@ -153,7 +154,7 @@ namespace TwitchDownloaderCore.Tools
             {
                 try
                 {
-                    receiveResult = await socket.ReceiveAsync(receiveBuff.AsMemory(), cancellationToken);
+                    receiveResult = socket.ReceiveAsync(receiveBuff.AsMemory(), cancellationToken).RunSynchronously();
                 }
                 catch (TaskCanceledException)
                 {
