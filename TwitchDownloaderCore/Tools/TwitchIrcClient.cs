@@ -59,7 +59,7 @@ namespace TwitchDownloaderCore.Tools
             }
 
             var count = 0;
-            const int MAX_TRIES = 5;
+            const int MAX_TRIES = 8;
             while (true)
             {
                 if (await _client.ConnectAsync(new Uri("wss://irc-ws.chat.twitch.tv/"), cancellationToken))
@@ -121,7 +121,7 @@ namespace TwitchDownloaderCore.Tools
             await LeaveChannelAsync(cancellationToken);
 
             var count = 0;
-            const int MAX_TRIES = 5;
+            const int MAX_TRIES = 8;
             while (true)
             {
                 if (await _client.DisconnectAsync(cancellationToken))
@@ -145,7 +145,7 @@ namespace TwitchDownloaderCore.Tools
         {
             return (int)Math.Min(
                 Math.Pow(2.25, count) * Random.Shared.Next(50, 100),
-                5_000
+                30_000
             );
         }
 
