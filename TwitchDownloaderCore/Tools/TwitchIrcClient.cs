@@ -14,6 +14,8 @@ namespace TwitchDownloaderCore.Tools
 {
     public sealed class TwitchIrcClient : IDisposable
     {
+        private const int FALSE = 0;
+        private const int TRUE = 1;
         private const string ANONYMOUS_PASSWORD = "SCHMOOPIIE";
         private static readonly string AnonymousUsername = $"justinfan{Random.Shared.Next(10_000, 99_999)}";
 
@@ -23,8 +25,10 @@ namespace TwitchDownloaderCore.Tools
             set => _client.DebugFile = value;
         }
 
-        public bool IsConnected => _reconnecting || _pingTimer != null;
+        public bool IsConnected => Reconnecting || _pingTimer != null;
         public bool HasNewMessages => !_messages.IsEmpty;
+
+        private bool Reconnecting => _reconnecting != FALSE;
 
         private readonly ConcurrentQueue<IrcMessage> _messages;
         private readonly ITaskLogger _logger;
@@ -32,7 +36,7 @@ namespace TwitchDownloaderCore.Tools
         private readonly IrcParser _ircParser;
         private readonly TimeSpan _pingInterval;
 
-        private bool _reconnecting;
+        private int _reconnecting;
         private string _joinedChannel;
         private Timer _pingTimer;
         private DateTimeOffset _lastMessage;
@@ -181,12 +185,11 @@ namespace TwitchDownloaderCore.Tools
 
         public async Task<bool> ReconnectAsync(CancellationToken cancellationToken)
         {
-            if (_reconnecting)
+            if (Interlocked.Exchange(ref _reconnecting, TRUE) != FALSE)
                 return false;
 
             _logger.LogInfo("Reconnecting to Twitch IRC...");
 
-            _reconnecting = true;
             bool success;
             try
             {
@@ -198,7 +201,7 @@ namespace TwitchDownloaderCore.Tools
             }
             finally
             {
-                _reconnecting = false;
+                Interlocked.Exchange(ref _reconnecting, FALSE);
             }
 
             return success;
@@ -216,7 +219,7 @@ namespace TwitchDownloaderCore.Tools
 
         private ValueTask EnsureSocketConnected(CancellationToken cancellationToken)
         {
-            if (_pingTimer != null && !_reconnecting && !_client.SocketOpen)
+            if (IsConnected && !Reconnecting && !_client.SocketOpen)
             {
                 return new ValueTask(ReconnectAsync(cancellationToken));
             }
