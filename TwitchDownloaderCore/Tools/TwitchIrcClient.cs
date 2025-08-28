@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;
 
@@ -92,15 +93,22 @@ namespace TwitchDownloaderCore.Tools
                 if (state is not TwitchIrcClient ircClient)
                     return;
 
-                ircClient.EnsureSocketConnected(CancellationToken.None).AsTask().Wait(CancellationToken.None);
-
-                ircClient._client.SendTextPooledAsync("PING", CancellationToken.None).AsTask().Wait(CancellationToken.None);
-
-                var messageTimeout = ircClient._pingInterval + TimeSpan.FromSeconds(10);
-                if (ircClient._lastMessage != default && DateTimeOffset.UtcNow - ircClient._lastMessage > messageTimeout)
+                try
                 {
-                    ircClient._logger.LogWarning($"Last response exceeds {messageTimeout.TotalMilliseconds:F0}ms timeout ({ircClient._lastMessage:u}), initiating reconnect...");
-                    ircClient.ReconnectAsync(CancellationToken.None).Wait(CancellationToken.None);
+                    ircClient.EnsureSocketConnected(CancellationToken.None).RunSynchronously();
+
+                    ircClient._client.SendTextPooledAsync("PING", CancellationToken.None).RunSynchronously();
+
+                    var messageTimeout = ircClient._pingInterval + TimeSpan.FromSeconds(10);
+                    if (ircClient._lastMessage != default && DateTimeOffset.UtcNow - ircClient._lastMessage > messageTimeout)
+                    {
+                        ircClient._logger.LogWarning($"Last response exceeds {messageTimeout.TotalMilliseconds:F0}ms timeout ({ircClient._lastMessage:u}), initiating reconnect...");
+                        ircClient.ReconnectAsync(CancellationToken.None).GetAwaiter().GetResult();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ircClient._logger.LogError($"Error in IRC ping callback: {ex.Message}");
                 }
             }
         }
