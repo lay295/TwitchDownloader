@@ -66,7 +66,7 @@ namespace TwitchDownloaderCore.Tools
                 if (await _client.ConnectAsync(new Uri("wss://irc-ws.chat.twitch.tv/"), cancellationToken))
                     break;
 
-                if (++count >= 5)
+                if (++count >= MAX_TRIES)
                 {
                     _logger.LogWarning($"Failed to connect to Twitch IRC after {MAX_TRIES} tries.");
                     return false;
