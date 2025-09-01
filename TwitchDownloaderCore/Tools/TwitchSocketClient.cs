@@ -47,8 +47,9 @@ namespace TwitchDownloaderCore.Tools
 
             if (_socket.State is not WebSocketState.Open and not WebSocketState.Connecting)
             {
-                _socket.Abort();
+                var oldSocket = _socket;
                 _socket = new ClientWebSocket();
+                oldSocket.Dispose();
             }
 
             try
@@ -93,6 +94,7 @@ namespace TwitchDownloaderCore.Tools
             var receiveBuff = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_SIZE);
             var socket = _socket; // Track only the socket from when we started listening to avoid multiple loops listening to the same socket
 
+            var sentCloseMessage = false;
             try
             {
                 _logger.LogVerbose($"Listening for messages from {_connectedUri}...");
@@ -115,6 +117,7 @@ namespace TwitchDownloaderCore.Tools
                         case WebSocketMessageType.Close:
                             WriteToDebugFile(messageBuff, "vvv"u8, true);
 
+                            sentCloseMessage = true;
                             MessageReceived?.Invoke(this, new Message(messageBuff, messageType));
                             return;
                         default:
@@ -125,6 +128,13 @@ namespace TwitchDownloaderCore.Tools
             }
             finally
             {
+                // Ensure a close message is sent to event subscribers
+                // Only send if the observed socket is the current socket to avoid potential race condition feedback loops
+                if (!sentCloseMessage && ReferenceEquals(socket, _socket))
+                {
+                    MessageReceived?.Invoke(this, new Message([], WebSocketMessageType.Close));
+                }
+
                 _logger.LogVerbose($"Stopped listening for messages from {_connectedUri}.");
 
                 ArrayPool<byte>.Shared.Return(receiveBuff, true);
