@@ -198,11 +198,10 @@ namespace TwitchDownloaderCore.Tools
 
             _logger.LogInfo("Reconnecting to Twitch IRC...");
 
-            bool success;
             try
             {
                 var channelName = _joinedChannel;
-                success = await LeaveChannelAsync(cancellationToken)
+                return await LeaveChannelAsync(cancellationToken)
                           && await DisconnectAsync(cancellationToken)
                           && await ConnectAsync(cancellationToken)
                           && await JoinChannelAsync(channelName, cancellationToken);
@@ -211,8 +210,6 @@ namespace TwitchDownloaderCore.Tools
             {
                 Interlocked.Exchange(ref _reconnecting, FALSE);
             }
-
-            return success;
         }
 
         public async IAsyncEnumerable<IrcMessage> GetNewMessagesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
@@ -225,14 +222,14 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        private ValueTask EnsureSocketConnected(CancellationToken cancellationToken)
+        private ValueTask<bool> EnsureSocketConnected(CancellationToken cancellationToken)
         {
             if (IsConnected && !Reconnecting && !_client.SocketOpen)
             {
-                return new ValueTask(ReconnectAsync(cancellationToken));
+                return new ValueTask<bool>(ReconnectAsync(cancellationToken));
             }
 
-            return ValueTask.CompletedTask;
+            return ValueTask.FromResult(IsConnected);
         }
 
         private void Client_OnMessageReceived(object sender, TwitchSocketClient.Message e)
