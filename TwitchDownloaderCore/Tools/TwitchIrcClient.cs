@@ -60,7 +60,7 @@ namespace TwitchDownloaderCore.Tools
             }
 
             var count = 0;
-            const int MAX_TRIES = 8;
+            const int MAX_TRIES = 10;
             while (true)
             {
                 if (await _client.ConnectAsync(new Uri("wss://irc-ws.chat.twitch.tv/"), cancellationToken))
@@ -129,7 +129,7 @@ namespace TwitchDownloaderCore.Tools
             await LeaveChannelAsync(cancellationToken);
 
             var count = 0;
-            const int MAX_TRIES = 8;
+            const int MAX_TRIES = 10;
             while (true)
             {
                 if (await _client.DisconnectAsync(cancellationToken))
