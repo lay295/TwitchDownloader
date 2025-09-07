@@ -72,21 +72,21 @@ namespace TwitchDownloaderCore.Tools
 
         public async Task<bool> DisconnectAsync(CancellationToken cancellationToken)
         {
+            var socket = _socket;
             try
             {
-                if (_socket.State is WebSocketState.Open or WebSocketState.Connecting)
+                if (socket.State is WebSocketState.Open or WebSocketState.Connecting)
                 {
-                    await _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
-                    _socket.Dispose();
+                    await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
+                    socket.Dispose();
                 }
-
-                return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to disconnect socket: {ex.Message}");
-                return false;
             }
+
+            return socket.State is not WebSocketState.Open and not WebSocketState.Connecting;
         }
 
         private void ReceiveMessages(CancellationToken cancellationToken)
