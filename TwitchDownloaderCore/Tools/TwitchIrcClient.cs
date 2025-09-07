@@ -40,7 +40,7 @@ namespace TwitchDownloaderCore.Tools
         private int _reconnecting;
         private string _joinedChannel;
         private Timer _pingTimer;
-        private DateTimeOffset _lastMessage;
+        private DateTimeOffset _lastPing;
 
         public TwitchIrcClient(ITaskLogger logger)
         {
@@ -84,33 +84,48 @@ namespace TwitchDownloaderCore.Tools
             await _client.SendTextPooledAsync($"NICK {AnonymousUsername}", cancellationToken);
             await _client.SendTextPooledAsync($"USER {AnonymousUsername} 8 * :{AnonymousUsername}", cancellationToken);
 
-            _pingTimer = new Timer(PingTimerCallback, this, _pingInterval, _pingInterval);
+            var timerInterval = TimeSpan.FromSeconds(10);
+            _pingTimer = new Timer(PingTimerCallback, new object(), timerInterval, timerInterval);
 
             return true;
+        }
 
-            static void PingTimerCallback(object state)
+        // This callback should just send pings, but ClientWebSocket doesn't inform us through ReceiveAsync() if the connection times out so we need to check manually :/
+        private void PingTimerCallback(object state)
+        {
+            // Only allow one simultaneous ping/keepalive check
+            if (!Monitor.TryEnter(state))
             {
-                if (state is not TwitchIrcClient ircClient)
-                    return;
+                return;
+            }
 
+            // Keepalive check
+            try
+            {
+                EnsureSocketConnected(CancellationToken.None).RunSynchronously();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in keepalive check: {ex.Message}");
+            }
+
+            // Send PING
+            var now = DateTimeOffset.UtcNow;
+            if (now - _lastPing > _pingInterval)
+            {
                 try
                 {
-                    ircClient.EnsureSocketConnected(CancellationToken.None).RunSynchronously();
-
-                    ircClient._client.SendTextPooledAsync("PING", CancellationToken.None).RunSynchronously();
-
-                    var messageTimeout = ircClient._pingInterval + TimeSpan.FromSeconds(10);
-                    if (ircClient._lastMessage != default && DateTimeOffset.UtcNow - ircClient._lastMessage > messageTimeout)
-                    {
-                        ircClient._logger.LogWarning($"Last response exceeds {messageTimeout.TotalMilliseconds:F0}ms timeout ({ircClient._lastMessage:u}), initiating reconnect...");
-                        ircClient.ReconnectAsync(CancellationToken.None).GetAwaiter().GetResult();
-                    }
+                    _client.SendTextPooledAsync("PING", CancellationToken.None).RunSynchronously();
+                    _lastPing = now;
                 }
                 catch (Exception ex)
                 {
-                    ircClient._logger.LogError($"Error in IRC ping callback: {ex.Message}");
+                    _logger.LogError($"Error when pinging Twitch IRC: {ex.Message}");
                 }
             }
+
+            // Release lock
+            Monitor.Exit(state);
         }
 
         public async Task<bool> DisconnectAsync(CancellationToken cancellationToken)
@@ -253,8 +268,6 @@ namespace TwitchDownloaderCore.Tools
 
             foreach (var ircMessage in messages)
             {
-                _lastMessage = DateTimeOffset.UtcNow;
-
                 switch (ircMessage.Command)
                 {
                     case IrcCommand.Ping:
