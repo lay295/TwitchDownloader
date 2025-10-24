@@ -4,6 +4,7 @@ A Windows WPF desktop application that implements the core functionality wrapped
 
 This document is also available in:
 
+- [**German / Deutsch**](README_de.md)
 - [**Japanese / 日本語**](README_ja.md)
 - [**Portuguese (Brazil) / Português (Brasil)**](README_pt-br.md)
 - [**Simplified Chinese / 简体中文**](README_zh-cn.md)
