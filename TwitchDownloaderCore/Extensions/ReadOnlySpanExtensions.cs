@@ -200,7 +200,7 @@ namespace TwitchDownloaderCore.Extensions
             return -1;
         }
 
-        public static int Count(this ReadOnlySpan<char> str, char character)
+        public static int Count<T>(this ReadOnlySpan<T> str, T character) where T : struct, IEquatable<T>
         {
             if (str.IsEmpty)
                 return 0;
@@ -216,6 +216,19 @@ namespace TwitchDownloaderCore.Extensions
             }
 
             return count;
+        }
+
+        public static bool IsWhiteSpace(this ReadOnlySpan<byte> str)
+        {
+            foreach (var b in str)
+            {
+                if (!char.IsWhiteSpace((char)b))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
