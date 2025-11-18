@@ -21,6 +21,7 @@ This document is also available in:
 - [**Turkish / Türkçe**](README_tr.md)
 - [**Simplified Chinese / 简体中文**](README_zh-cn.md)
 - [**Traditonal Chinese / 繁體中文**](README_zh-tw.md)
+- [**French / Français**](README_fr.md)
 
 ## What Can It Do?
 
