@@ -1,4 +1,3 @@
-<!-- ...existing code... -->
 <div align="center">
   <a href="https://github.com/lay295/TwitchDownloader">
     <img src="TwitchDownloaderWPF/Images/Logo.png" alt="Logo" width="80" height="80">
