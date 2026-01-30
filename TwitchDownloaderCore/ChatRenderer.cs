@@ -1544,7 +1544,7 @@ namespace TwitchDownloaderCore
             if (bgSat > 28 && fgSat > 28)
             {
                 const float HUE_WIDTH = 360;
-                const int ADJUST_THRESHOLD = 25;
+                const int ADJUST_THRESHOLD = 35;
                 Debug.Assert(ADJUST_THRESHOLD < HUE_WIDTH / 2);
 
                 // Compute computer lower and higher hue diff to ensure we wrap around for reds
