@@ -1543,16 +1543,31 @@ namespace TwitchDownloaderCore
             // Adjust hue on colored backgrounds
             if (bgSat > 28 && fgSat > 28)
             {
-                var hueDiff = fgHue - bgHue;
-                const int HUE_THRESHOLD = 25;
-                if (Math.Abs(hueDiff) < HUE_THRESHOLD)
-                {
-                    var diffSign = hueDiff < 0 ? -1 : 1; // Math.Sign returns 1, -1, or 0. We only want 1 or -1.
-                    fgHue = bgHue + HUE_THRESHOLD * diffSign;
+                const float HUE_WIDTH = 360;
+                const int ADJUST_THRESHOLD = 25;
+                Debug.Assert(ADJUST_THRESHOLD < HUE_WIDTH / 2);
 
-                    if (fgHue < 0) fgHue += 360;
-                    fgHue %= 360;
-                }
+                // Compute computer lower and higher hue diff to ensure we wrap around for reds
+                //       hue:   [||||||||||]
+                //   not red:   [    ^     ]    ^
+                // upper red: ^ [        ^ ]
+                // lower red:   [^         ]^
+                var hueDiff1 = fgHue - (bgHue > HUE_WIDTH / 2 ? bgHue - HUE_WIDTH : bgHue);
+                var hueDiff2 = fgHue - (bgHue > HUE_WIDTH / 2 ? bgHue : bgHue + HUE_WIDTH);
+
+                // Take smallest diff, or skip if both are >ADJUST_THRESHOLD
+                float hueDiff;
+                if (Math.Abs(hueDiff1) <= ADJUST_THRESHOLD) hueDiff = hueDiff1;
+                else if (Math.Abs(hueDiff2) <= ADJUST_THRESHOLD) hueDiff = hueDiff2;
+                else goto SkipHueAdjust;
+
+                var diffSign = hueDiff < 0 ? -1 : 1; // Math.Sign returns 1, -1, or 0. We only want 1 or -1.
+                fgHue = bgHue + ADJUST_THRESHOLD * diffSign;
+
+                if (fgHue < 0) fgHue += HUE_WIDTH;
+                fgHue %= HUE_WIDTH;
+
+                SkipHueAdjust: ;
             }
 
             return SKColor.FromHsl(fgHue, Math.Min(fgSat, 90), fgLight);
