@@ -28,8 +28,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             paint.BlendMode = SKBlendMode.Src;
 
             var backgrounds = new[] { SKColors.Black, SKColors.White, SKColors.Gray, SKColors.Red, SKColors.Blue, SKColors.Lime };
-            foreach (var (i, background) in backgrounds.Index())
+            for (var i = 0; i < backgrounds.Length; i++)
             {
+                var background = backgrounds[i];
                 var tileStartX = TILE_W * i;
                 DrawTile(tileStartX, TILE_H * 0, background, false); // Row 0 (reference)
                 DrawTile(tileStartX, TILE_H * 1, background, true); // Row 1 (adjusted)
