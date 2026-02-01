@@ -21,6 +21,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="Xunit.SkippableFact" Version="1.5.61" />
     </ItemGroup>
 
     <ItemGroup>
