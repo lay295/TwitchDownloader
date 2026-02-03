@@ -4,12 +4,16 @@ using System.Text.RegularExpressions;
 
 namespace TwitchDownloaderCore.Tools
 {
-    public static class IdParse
+    public static partial class IdParse
     {
-        // TODO: Use source generators when .NET7
-        private static readonly Regex VideoId = new(@"(?<=^|twitch\.tv\/videos\/)\d+(?=\/?(?:$|\?))", RegexOptions.Compiled);
-        private static readonly Regex HighlightId = new(@"(?<=^|twitch\.tv\/\w+\/v(?:ideo)?\/)\d+(?=\/?(?:$|\?))", RegexOptions.Compiled);
-        private static readonly Regex ClipId = new(@"(?<=^|(?:clips\.)?twitch\.tv\/(?:\w+\/clip\/)?)[\w-]+?(?=\/?(?:$|\?))", RegexOptions.Compiled);
+        [GeneratedRegex("""(?<=^|twitch\.tv\/videos\/)\d+(?=\/?(?:$|\?))""")]
+        private static partial Regex VideoId { get; }
+
+        [GeneratedRegex("""(?<=^|twitch\.tv\/\w+\/v(?:ideo)?\/)\d+(?=\/?(?:$|\?))""")]
+        private static partial Regex HighlightId { get; }
+
+        [GeneratedRegex("""(?<=^|(?:clips\.)?twitch\.tv\/(?:\w+\/clip\/)?)[\w-]+?(?=\/?(?:$|\?))""")]
+        private static partial Regex ClipId { get; }
 
         /// <returns>A <see cref="Match"/> of the video's id or <see langword="null"/>.</returns>
         [return: MaybeNull]

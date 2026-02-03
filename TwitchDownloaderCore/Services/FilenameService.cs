@@ -9,8 +9,23 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Services
 {
-    public static class FilenameService
+    public static partial class FilenameService
     {
+        [GeneratedRegex("""{date_custom="(.*?)"}""")]
+        private static partial Regex DateCustomRegex { get; }
+
+        [GeneratedRegex("""{trim_start_custom="(.*?)"}""")]
+        private static partial Regex TrimStartCustomRegex { get; }
+
+        [GeneratedRegex("""{trim_end_custom="(.*?)"}""")]
+        private static partial Regex TrimEndCustomRegex { get; }
+
+        [GeneratedRegex("""{trim_length_custom="(.*?)"}""")]
+        private static partial Regex TrimLengthCustomRegex { get; }
+
+        [GeneratedRegex("""{length_custom="(.*?)"}""")]
+        private static partial Regex LengthCustomRegex { get; }
+
         public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date, [AllowNull] string channel, [AllowNull] string channelId, TimeSpan trimStart, TimeSpan trimEnd, TimeSpan videoLength, long viewCount,
             [AllowNull] string game, [AllowNull] string clipper = null, [AllowNull] string clipperId = null)
         {
@@ -34,32 +49,27 @@ namespace TwitchDownloaderCore.Services
 
             if (template.Contains("{date_custom="))
             {
-                var dateRegex = new Regex("{date_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, dateRegex, date);
+                ReplaceCustomWithFormattable(stringBuilder, DateCustomRegex, date);
             }
 
             if (template.Contains("{trim_start_custom="))
             {
-                var trimStartRegex = new Regex("{trim_start_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, trimStartRegex, trimStart, TimeSpanHFormat.ReusableInstance);
+                ReplaceCustomWithFormattable(stringBuilder, TrimStartCustomRegex, trimStart, TimeSpanHFormat.ReusableInstance);
             }
 
             if (template.Contains("{trim_end_custom="))
             {
-                var trimEndRegex = new Regex("{trim_end_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, trimEndRegex, trimEnd, TimeSpanHFormat.ReusableInstance);
+                ReplaceCustomWithFormattable(stringBuilder, TrimEndCustomRegex, trimEnd, TimeSpanHFormat.ReusableInstance);
             }
 
             if (template.Contains("{trim_length_custom="))
             {
-                var lengthRegex = new Regex("{trim_length_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, lengthRegex, trimLength, TimeSpanHFormat.ReusableInstance);
+                ReplaceCustomWithFormattable(stringBuilder, TrimLengthCustomRegex, trimLength, TimeSpanHFormat.ReusableInstance);
             }
 
             if (template.Contains("{length_custom="))
             {
-                var lengthRegex = new Regex("{length_custom=\"(.*?)\"}");
-                ReplaceCustomWithFormattable(stringBuilder, lengthRegex, videoLength, TimeSpanHFormat.ReusableInstance);
+                ReplaceCustomWithFormattable(stringBuilder, LengthCustomRegex, videoLength, TimeSpanHFormat.ReusableInstance);
             }
 
             var fileName = stringBuilder.ToString();
@@ -72,7 +82,6 @@ namespace TwitchDownloaderCore.Services
             do
             {
                 // There's probably a better way to do this that doesn't require calling ToString()
-                // However we need .NET7+ for span support in the regex matcher.
                 var match = regex.Match(sb.ToString());
                 if (!match.Success)
                     break;
@@ -89,7 +98,7 @@ namespace TwitchDownloaderCore.Services
 
         private static string[] GetTemplateSubfolders(ref string fullPath)
         {
-            var returnString = fullPath.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+            var returnString = fullPath.Split(['\\', '/'], StringSplitOptions.RemoveEmptyEntries);
             fullPath = returnString[^1];
             Array.Resize(ref returnString, returnString.Length - 1);
 
@@ -103,8 +112,10 @@ namespace TwitchDownloaderCore.Services
 
         private static readonly char[] FilenameInvalidChars = Path.GetInvalidFileNameChars();
 
-        // TODO: Use nameof(filename) when C# 11+
-        [return: NotNullIfNotNull("filename")]
+        [GeneratedRegex("""(?<=\d):(?=\d\d)""")]
+        private static partial Regex TimestampRegex { get; }
+
+        [return: NotNullIfNotNull(nameof(filename))]
         public static string ReplaceInvalidFilenameChars([AllowNull] string filename)
         {
             if (string.IsNullOrEmpty(filename))
@@ -112,12 +123,11 @@ namespace TwitchDownloaderCore.Services
                 return filename;
             }
 
-            const string TIMESTAMP_PATTERN = /*lang=regex*/ @"(?<=\d):(?=\d\d)";
-            var newName = Regex.Replace(filename, TIMESTAMP_PATTERN, "_");
+            var newName = TimestampRegex.Replace(filename, "_");
 
-            if (newName.AsSpan().IndexOfAny("\"*:<>?|/\\") != -1)
+            if (newName.AsSpan().IndexOfAny("""*":<>?|/\""") != -1)
             {
-                newName = string.Create(filename.Length, filename, (span, str) =>
+                newName = string.Create(filename.Length, filename, static (span, str) =>
                 {
                     const int FULL_WIDTH_OFFSET = 0xFEE0; // https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
                     for (var i = 0; i < str.Length; i++)
@@ -125,7 +135,7 @@ namespace TwitchDownloaderCore.Services
                         var ch = str[i];
                         span[i] = ch switch
                         {
-                            '\"' or '*' or ':' or '<' or '>' or '?' or '|' or '/' or '\\' => (char)(ch + FULL_WIDTH_OFFSET),
+                            '*' or '"' or ':' or '<' or '>' or '?' or '|' or '/' or '\\' => (char)(ch + FULL_WIDTH_OFFSET),
                             _ => ch
                         };
                     }

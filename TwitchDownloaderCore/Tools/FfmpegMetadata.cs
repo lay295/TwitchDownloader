@@ -12,7 +12,7 @@ namespace TwitchDownloaderCore.Tools
     // https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
     public static class FfmpegMetadata
     {
-        private const string LINE_FEED = "\u000A";
+        private const string LINE_FEED = "\n";
 
         public static async Task SerializeAsync(string filePath, string videoId, VideoInfo videoInfo, TimeSpan startOffset, TimeSpan videoLength, IEnumerable<VideoMomentEdge> videoMomentEdges)
         {
@@ -128,8 +128,7 @@ namespace TwitchDownloaderCore.Tools
         }
 
         // https://trac.ffmpeg.org/ticket/11096 The Ffmpeg documentation is outdated and =;# do not need to be escaped.
-        // TODO: Use nameof(filename) when C# 11+
-        [return: NotNullIfNotNull("str")]
+        [return: NotNullIfNotNull(nameof(str))]
         private static string EscapeMetadataValue([AllowNull] string str)
         {
             if (string.IsNullOrWhiteSpace(str))

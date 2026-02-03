@@ -187,7 +187,7 @@ chmod +x ffmpeg
 
 ## 必要条件
 
-- [.NET 6.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [.NET 10.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - 約1GBのディスク空き容量
 
 ## ビルド手順
@@ -229,13 +229,13 @@ dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 5. a) GUIのビルドフォルダに移動する:
 
 ```
-cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
+cd TwitchDownloaderWPF/bin/Release/net10.0-windows/publish/win-x64
 ```
 
 1. b) CLIのビルドフォルダに移動する:
 
 ```
-cd TwitchDownloaderCLI/bin/Release/net6.0/publish
+cd TwitchDownloaderCLI/bin/Release/net10.0/publish
 ```
 
 # Third Party Credits

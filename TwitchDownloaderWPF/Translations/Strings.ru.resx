@@ -124,14 +124,14 @@
     <value>Добавить в очередь</value>
   </data>
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
-    <value>Вы выбрали альфа канал(прозрачность) для неподдерживаемого контейнера/кодека. Удалите прозрачность либо используйте кодек MOV + RLE/PRORES or WEBM + VP8/VP9</value>
+    <value>Вы выбрали альфа-канал(прозрачность) для неподдерживаемого контейнера/кодека. Удалите прозрачность либо используйте кодек MOV + RLE/PRORES или WEBM + VP8/VP9</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Тема  </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ApplicationThemeTooltip" xml:space="preserve">
-    <value>Нажми чтобы узнать как создать свою тему!</value>
+    <value>Нажми, чтобы узнать как создать свою тему!</value>
   </data>
   <data name="AvailableParameters" xml:space="preserve">
     <value>Доступные параметры:</value>
@@ -144,13 +144,13 @@
     <comment>Leaving a trailing space</comment>
   </data>
   <data name="BannedWordsListTooltip" xml:space="preserve">
-    <value>Список игнорируемых слов и фраз - разделенных запятой, пробелы вокруг запятых игнорируются, НЕ чувствительно к регистру.</value>
+    <value>Список игнорируемых слов и фраз — разделённых запятой, пробелы вокруг запятых игнорируются, НЕ чувствительно к регистру.</value>
   </data>
   <data name="Browse" xml:space="preserve">
     <value>Обзор</value>
   </data>
   <data name="BttvEmotes" xml:space="preserve">
-    <value>BTTV Эмоции:</value>
+    <value>Смайлики BTTV:</value>
   </data>
   <data name="CacheFolder" xml:space="preserve">
     <value>Папка чата:</value>
@@ -201,7 +201,7 @@
     <value>Очистить</value>
   </data>
   <data name="ClearCacheConfirmation" xml:space="preserve">
-    <value>Вы уверенны что хотите очистить кэш?\nЭто необходимо только в случае если программа работает неправильно</value>
+    <value>Вы уверенны что хотите очистить кеш?\nЭто необходимо только в случае, если программа работает неправильно</value>
   </data>
   <data name="ClipDownload" xml:space="preserve">
     <value>Скачать клип</value>
@@ -225,19 +225,19 @@
     <value>Обрезать:</value>
   </data>
   <data name="DateCustomFormatting" xml:space="preserve">
-    <value>date_custom форматирование основанно на</value>
+    <value>Форматирование date_custom основано на</value>
   </data>
   <data name="DateCustomFormattingHyperlink" xml:space="preserve">
-    <value>C# строках стандартных форматов даты и времени</value>
+    <value>Стандартных строках форматов C# даты и времени</value>
   </data>
   <data name="DeleteConfirmation" xml:space="preserve">
     <value>Подтвердите удаление</value>
   </data>
   <data name="DonateTooltip" xml:space="preserve">
-    <value>Часто импользуете программу и хотите поддержать меня? Подарите мне чашечку кофе :)</value>
+    <value>Часто используете программу и хотите поддержать меня? Подарите мне чашечку кофе :)</value>
   </data>
   <data name="Download" xml:space="preserve">
-    <value>Загрузка</value>
+    <value>Скачать</value>
   </data>
   <data name="ChatDownloadThreads" xml:space="preserve">
     <value>Подключения:</value>
@@ -256,14 +256,14 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedImagesTooltip" xml:space="preserve">
-    <value>Скачивать эмодзи, значки и приветствия в загружаемый файл для офлайн-рендеринга. Полезно для архивации, размер файла будет больше.</value>
+    <value>Скачивать смайлики, значки и приветствия в загружаемый файл для офлайн-рендеринга. Полезно для архивации, размер файла будет больше.</value>
   </data>
   <data name="EmbedMissing" xml:space="preserve">
-    <value>Скачивать отсуствующие </value>
+    <value>Скачивать отсутствующие </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="EmbedMissingTooltip" xml:space="preserve">
-    <value>Скачивать отсутсвующие эмодзи, значки, приветсвия. Уже скачанные изображения не будут затронуты.</value>
+    <value>Скачивать отсутствующие смайлики, значки, приветствия. Уже скачанные изображения не будут затронуты.</value>
   </data>
   <data name="EnqueueDownload" xml:space="preserve">
     <value>Отправить в очередь загрузок</value>
@@ -279,19 +279,19 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="FfmpegInputArguments" xml:space="preserve">
-    <value>Input Arguments:</value>
+    <value>Вводные аргументы:</value>
   </data>
   <data name="FfmpegOptionsHyperlink" xml:space="preserve">
-    <value>Нажмите здесь чтобы узнать больше об опциях FFmpeg</value>
+    <value>Нажмите здесь, чтобы узнать больше параметрах FFmpeg</value>
   </data>
   <data name="FfmpegOutputArguments" xml:space="preserve">
-    <value>Output Arguments:</value>
+    <value>Выходные аргументы:</value>
   </data>
   <data name="FfmpegReset" xml:space="preserve">
     <value>Сбросить</value>
   </data>
   <data name="FfzEmotes" xml:space="preserve">
-    <value>FFZ Эмодзи:</value>
+    <value>Смайлики FFZ:</value>
   </data>
   <data name="FontColor" xml:space="preserve">
     <value>Цвет шрифта:</value>
@@ -303,14 +303,14 @@
     <value>Получить информацию</value>
   </data>
   <data name="HideDonationButton" xml:space="preserve">
-    <value>Скрыть кнопку донатов:</value>
+    <value>Скрыть кнопку пожертвований:</value>
   </data>
   <data name="IgnoreUsersList" xml:space="preserve">
     <value>Список игнорируемых пользователей </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
-    <value>Список никнеймов - разделенных запятой, пробелы вокруг запятых игнорируются, НЕ чувствительно к регистру.</value>
+    <value>Список ников — разделённых запятой, пробелы вокруг запятых игнорируются, НЕ чувствительно к регистру.</value>
   </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
     <value>Неправильная ссылка/ID клипа</value>
@@ -331,33 +331,33 @@
     <value>Пожалуйста, введите правильную ссылку/ID видео\nПример:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
   </data>
   <data name="JsonFile" xml:space="preserve">
-    <value>JSON Файл:</value>
+    <value>JSON-файл:</value>
   </data>
   <data name="Length" xml:space="preserve">
     <value>Длина:</value>
   </data>
   <data name="ListOfVodsClips" xml:space="preserve">
-    <value>Список Видео/Клипов (одно на строку)</value>
+    <value>Список видео/клипов (одно на строку)</value>
   </data>
   <data name="LogHeader" xml:space="preserve">
-    <value>Лог:</value>
+    <value>Отчёт:</value>
   </data>
   <data name="MassDownloads" xml:space="preserve">
-    <value>Массовая загрузка</value>
+    <value>Массовое скачивание</value>
   </data>
   <data name="Oauth" xml:space="preserve">
     <value>OAuth (необязательно) </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="OAuthTooltip" xml:space="preserve">
-    <value>Необходимо для видео доступных только подписчикам. Все сторонние OAuth токены не будут работать. Нажмите чтобы просмотреть YouTube видеоинструкцию получения OAuth token.</value>
+    <value>Необходимо для видео доступных только подписчикам. Все сторонние OAuth-токены не будут работать. Нажмите, чтобы просмотреть YouTube-видеоинструкцию получения токена OAuth.</value>
   </data>
   <data name="Offline" xml:space="preserve">
-    <value>Оффлайн </value>
+    <value>Не в сети </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="OfflineTooltip" xml:space="preserve">
-    <value>Рендерить чать используя только ресурсы из json файла.</value>
+    <value>Рендерить чат, используя только ресурсы из JSON-файла.</value>
   </data>
   <data name="Outline" xml:space="preserve">
     <value>Контур:</value>
@@ -375,7 +375,7 @@
     <value>Рендер</value>
   </data>
   <data name="RenderFfmpegWarning" xml:space="preserve">
-    <value>Опции только для продвинутых пользователй. Если вы получате сообщение об ошибке канала то опции ниже возможно являются причиной ошибки.</value>
+    <value>Параметры только для продвинутых пользователей. Могут стать причиной сообщения об ошибке канала.</value>
   </data>
   <data name="RenderFileFormat" xml:space="preserve">
     <value>Формат файла:</value>
@@ -405,14 +405,14 @@
     <value>Масштабирование</value>
   </data>
   <data name="RenderWidthHeightMustBeEven" xml:space="preserve">
-    <value>Ширина и высота должны быть четными</value>
+    <value>Ширина и высота должны быть чётными</value>
   </data>
   <data name="ReplaceEmbeds" xml:space="preserve">
-    <value>Заменять скачаные </value>
+    <value>Заменять скачанные </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ReplaceEmbedsTooltip" xml:space="preserve">
-    <value>Заменять все скачанные эмодзи, значки и приведствия в файле. Все скачанные изображения будут замененны!</value>
+    <value>Заменять все скачанные смайлики, значки и приветствия в файле. Все скачанные изображения будут заменены!</value>
   </data>
   <data name="SearchClips" xml:space="preserve">
     <value>Поиск клипов</value>
@@ -454,7 +454,7 @@
     <value>Стример:</value>
   </data>
   <data name="StvEmotes" xml:space="preserve">
-    <value>7TV Эмодзи:</value>
+    <value>Смайлики 7TV:</value>
   </data>
   <data name="SubMessages" xml:space="preserve">
     <value>Сообщения подписчиков:</value>
@@ -469,11 +469,11 @@
     <value>Очередь заданий</value>
   </data>
   <data name="ThirdPartyEmotes" xml:space="preserve">
-    <value>Сторонние эмодзи </value>
+    <value>Сторонние смайлики </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
-    <value>Также встраивать сторонние эмодзи в файл. Размер файла будет значительно больше.</value>
+    <value>Также встраивать сторонние смайлики в файл. Размер файла будет значительно больше.</value>
   </data>
   <data name="TimestampFormat" xml:space="preserve">
     <value>Формат времени:</value>
@@ -482,7 +482,7 @@
     <value>Нет</value>
   </data>
   <data name="TimestampRelative" xml:space="preserve">
-    <value>Relative</value>
+    <value>Относительный</value>
   </data>
   <data name="Timestamps" xml:space="preserve">
     <value>Временные метки:</value>
@@ -503,31 +503,31 @@
     <value>Топ 24 часа</value>
   </data>
   <data name="UnableToFindThumbnail" xml:space="preserve">
-    <value>Не удалось найти превью</value>
+    <value>Не удалось найти миниатюру</value>
   </data>
   <data name="UnableToGetClipInfo" xml:space="preserve">
-    <value>Не удалось найти информацию о клипе. Пожалуйста перепроверьте ID клипа и попробуйте заново.</value>
+    <value>Не удалось найти информацию о клипе. Пожалуйста, перепроверьте ID клипа и попробуйте заново.</value>
   </data>
   <data name="UnableToGetInfo" xml:space="preserve">
     <value>Не удалось получить информацию</value>
   </data>
   <data name="UnableToGetInfoMessage" xml:space="preserve">
-    <value>Ну удалось найти информацию о видео/клипе. Пожалуйста проверьте вашу ссылку и попробуйте заново.</value>
+    <value>Ну удалось найти информацию о видео/клипе. Пожалуйста, проверьте вашу ссылку и попробуйте заново.</value>
   </data>
   <data name="UnableToGetVideoInfo" xml:space="preserve">
-    <value>Не удалось получить информацию о видео. Пожалуйта убедитесь, что ссылка/ID видео правильные и попробуйте заново.</value>
+    <value>Не удалось получить информацию о видео. Пожалуйста, убедитесь что ссылка/ID видео правильные и попробуйте заново.</value>
   </data>
   <data name="UnableToParseInputs" xml:space="preserve">
-    <value>Не удалось распознать ввод</value>
+    <value>Не удалось распознать вводные данные</value>
   </data>
   <data name="UnableToParseInputsMessage" xml:space="preserve">
-    <value>Пожалуйста перепроверьте введенные значения</value>
+    <value>Пожалуйста перепроверьте введённые значения</value>
   </data>
   <data name="UnableToParseLink" xml:space="preserve">
     <value>Не удалось распознать ссылку</value>
   </data>
   <data name="UnableToParseLinkMessage" xml:space="preserve">
-    <value>Пожалуйта перепроверьте ссылку на видео/клип.</value>
+    <value>Пожалуйста, перепроверьте ссылку на видео/клип</value>
   </data>
   <data name="Unknown" xml:space="preserve">
     <value>Неизвестно</value>
@@ -563,7 +563,7 @@
     <value>Загрузки видео</value>
   </data>
   <data name="VodExpiredOrIdCorrupt" xml:space="preserve">
-    <value>Видео больше не доступно или сохраненный ID поврежден</value>
+    <value>Видео недоступно или сохранённый ID повреждён</value>
   </data>
   <data name="VodLinkId" xml:space="preserve">
     <value>Ссылка/ID видео:</value>
@@ -597,13 +597,13 @@
     <value>Масштаб значков:</value>
   </data>
   <data name="EmojiScale" xml:space="preserve">
-    <value>Размер смайлов:</value>
-  </data>
-  <data name="EmoteScale" xml:space="preserve">
     <value>Размер эмодзи:</value>
   </data>
+  <data name="EmoteScale" xml:space="preserve">
+    <value>Размер смайлов:</value>
+  </data>
   <data name="EmoteSpacingScale" xml:space="preserve">
-    <value>Расстояние между эмодзи:</value>
+    <value>Расстояние между смайлами:</value>
   </data>
   <data name="SidePaddingScale" xml:space="preserve">
     <value>Размер бокового отступа:</value>
@@ -625,17 +625,17 @@
     <value>Критическая ошибка</value>
   </data>
   <data name="ThemeNotFound" xml:space="preserve">
-    <value>Тема не найденна</value>
+    <value>Тема не найдена</value>
   </data>
   <data name="ThemeNotFoundMessage" xml:space="preserve">
-    <value>{0} не найденна. Откат на системную</value>
+    <value>{0} не найдена. Откат на системную</value>
   </data>
   <data name="MessageDispersion" xml:space="preserve">
     <value>Разбиение </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="MessageDispersionTooltip" xml:space="preserve">
-    <value>С ноября 2022 года в результате изменения API Twitch сообщения чата загружаются не более одного за одну секунду. Если в секунду отправленно несколько сообщений, они будут распределены по нескольким секундам, для улучшения потока чата.</value>
+    <value>С ноября 2022 года в результате изменения API Twitch сообщения чата загружаются не более одного за одну секунду. Если в секунду отправлено несколько сообщений, они будут распределены по нескольким секундам, для улучшения потока чата.</value>
   </data>
   <data name="ChatCompression" xml:space="preserve">
     <value>Сжатие:</value>
@@ -654,22 +654,22 @@
     <value>Общие настройки</value>
   </data>
   <data name="TitleEnqueueOptions" xml:space="preserve">
-    <value>Опции очереди</value>
+    <value>Параметры очереди</value>
   </data>
   <data name="TitleRenderRange" xml:space="preserve">
-    <value>Выберите диапазон рендера (Секунды)</value>
+    <value>Выберите диапазон рендера (сек.)</value>
   </data>
   <data name="TitleUrlList" xml:space="preserve">
-    <value>Список URL для массовой загузки</value>
+    <value>Список URL для массового скачивания</value>
   </data>
   <data name="TitleVideoMassDownloader" xml:space="preserve">
-    <value>Массовая загрузка видео</value>
+    <value>Массовое скачивание видео</value>
   </data>
   <data name="TitleClipMassDownloader" xml:space="preserve">
-    <value>Массовая загрузка клипов</value>
+    <value>Массовое скачивание клипов</value>
   </data>
   <data name="ApplicationLanguageTooltip" xml:space="preserve">
-    <value>TwitchDownloaderWPF не доступен на твоем языке? Нажми здесь чтобы узнать как помочь с переводом!</value>
+    <value>TwitchDownloaderWPF недоступен на твоём языке? Нажми здесь, чтобы узнать как помочь с переводом!</value>
   </data>
   <data name="InvalidFolderPath" xml:space="preserve">
     <value>Неправильный путь к папке</value>
@@ -681,7 +681,7 @@
     <value>Отменено</value>
   </data>
   <data name="StatusCanceling" xml:space="preserve">
-    <value>Отменяем</value>
+    <value>Отмена</value>
   </data>
   <data name="MaximumThreadBandwidth" xml:space="preserve">
     <value>Максимальная пропускная способность </value>
@@ -700,13 +700,13 @@
     <value>Формат времени:</value>
   </data>
   <data name="NoJsonFilesSelected" xml:space="preserve">
-    <value>Не выбран JSON файл</value>
+    <value>Не выбран JSON-файл</value>
   </data>
   <data name="InsufficientAccessMayNeedOauth" xml:space="preserve">
-    <value>Не удалось получить доступ. Возможно нужна OAuth авторизация.</value>
+    <value>Не удалось получить доступ. Возможно, нужна авторизация OAuth.</value>
   </data>
   <data name="EmojiVendor" xml:space="preserve">
-    <value>Поставщик смайлов:</value>
+    <value>Поставщик эмодзи:</value>
   </data>
   <data name="EmojiVendorNotoColor" xml:space="preserve">
     <value>Google</value>
@@ -718,16 +718,16 @@
     <value>Нет</value>
   </data>
   <data name="MaskWithNoAlpha" xml:space="preserve">
-    <value>Вы включили опции генерации маски вместе с непрозрачным фоном. Уменшите прозрачность фона или выключите генерацию маски.</value>
+    <value>Вы включили параметры генерации маски вместе с прозрачным фоном. Уменьшите прозрачность фона или отключите генерацию маски.</value>
   </data>
   <data name="OutlineScale" xml:space="preserve">
     <value>Размер обводки:</value>
   </data>
   <data name="TimeSpanCustomFormatting" xml:space="preserve">
-    <value>trim_start_custom and trim_end_custom форматирование основанно на</value>
+    <value>Форматирование trim_start_custom и trim_end_custom основано на</value>
   </data>
   <data name="TimeSpanCustomFormattingHyperlink" xml:space="preserve">
-    <value>C# строки стандартного формата TimeSpan</value>
+    <value>Стандартные строки C# формата TimeSpan</value>
   </data>
   <data name="UnknownErrorOccurred" xml:space="preserve">
     <value>Неизвестная ошибка</value>
@@ -736,22 +736,23 @@
     <value>Убрать задачу не удалось</value>
   </data>
   <data name="CancelTaskBeforeRemoving" xml:space="preserve">
-    <value>Пожалуйста завершите задачу или подождите пока она выполнится прежде чем убирать её</value>
+    <value>Пожалуйста, завершите задачу или подождите пока она выполнится, прежде чем убирать её</value>
   </data>
   <data name="UnableToDownloadFfmpeg" xml:space="preserve">
     <value>Не удалось скачать FFmpeg</value>
   </data>
   <data name="UnableToDownloadFfmpegFull" xml:space="preserve">
-    <value>Не удалось скачать FFmpeg. Пожалуйста скачайте самостоятельно его с {0} и положите его в {1}</value>
+    <value>Не удалось скачать FFmpeg. Пожалуйста, скачайте самостоятельно его с {0} и положите его в {1}</value>
   </data>
   <data name="AlternateBackgroundColor" xml:space="preserve">
     <value>Другой цвет фона:</value>
   </data>
   <data name="AlternateMessageBackgrounds" xml:space="preserve">
-    <value>Другие фоны </value><comment>Leave a trailing space</comment>
+    <value>Другие фоны </value>
+	<comment>Leave a trailing space</comment>
   </data>
   <data name="AlternateMessageBackgroundsTooltip" xml:space="preserve">
-    <value>Меняет цвет фона для каждого сообщения чтобы отделить их</value>
+    <value>Меняет цвет фона для каждого сообщения, чтобы отделить их</value>
   </data>
   <data name="EncodeClipMetadata" xml:space="preserve">
     <value>Зашифровать метаданные:</value>
@@ -760,7 +761,7 @@
     <value>Ошибка</value>
   </data>
   <data name="UnableToStartWindowsThemeWatcher" xml:space="preserve">
-    <value>Не получилось запустить Windows application theme watcher. Код ошибки: {0}</value>
+    <value>Не получилось запустить программу наблюдения за темами Windows. Код ошибки: {0}</value>
   </data>
   <data name="LabelVideosPerPage" xml:space="preserve">
     <value>Видео на странице:</value>
@@ -784,10 +785,11 @@
     <value>Подтверждение сброса настроек</value>
   </data>
   <data name="TheApplicationMustBeRestartedMessage" xml:space="preserve">
-    <value>Приложение должно быть перезапущено чтобы применить изменения.</value>
+    <value>Приложение должно быть перезапущено для применения изменений.</value>
   </data>
   <data name="RestartTheApplication" xml:space="preserve">
-    <value>Пожалуйста перезагрузите {0}</value><comment>{0} is the name of the application.</comment>
+    <value>Пожалуйста, перезагрузи {0}</value>
+	<comment>{0} is the name of the application.</comment>
   </data>
   <data name="ButtonRestoreDefaultSettings" xml:space="preserve">
     <value>Сбросить к заводским</value>
@@ -805,10 +807,10 @@
     <value>Открыть папку</value>
   </data>
   <data name="PreferredQuality" xml:space="preserve">
-    <value>Предподчтительное качество:</value>
+    <value>Предпочтительное качество:</value>
   </data>
   <data name="TitleWindowOldVideoCacheManager" xml:space="preserve">
-    <value>Выберите кэш для удаления</value>
+    <value>Выберите кеш для удаления</value>
   </data>
   <data name="SizeOfAllFiles" xml:space="preserve">
     <value>Итоговый размер:</value>
@@ -826,22 +828,22 @@
     <value>Размер</value>
   </data>
   <data name="FileAgeInDays" xml:space="preserve">
-    <value>{0:N0} дней</value>
+    <value>{0:N0} дн.</value>
   </data>
   <data name="LogLevels" xml:space="preserve">
-    <value>Уровень логов:</value>
+    <value>Уровень отчётов:</value>
   </data>
   <data name="LogLevelVerbose" xml:space="preserve">
-    <value>Verbose</value>
+    <value>Подробный</value>
   </data>
   <data name="LogLevelInfo" xml:space="preserve">
     <value>Информация</value>
   </data>
   <data name="LogLevelWarning" xml:space="preserve">
-    <value>Предупреждение</value>
+    <value>Предупреждения</value>
   </data>
   <data name="LogLevelError" xml:space="preserve">
-    <value>Ошибка</value>
+    <value>Ошибки</value>
   </data>
   <data name="LogLevelFfmpeg" xml:space="preserve">
     <value>FFmpeg</value>
@@ -868,10 +870,10 @@
     <value>Стример</value>
   </data>
   <data name="BadgeMaskModerator" xml:space="preserve">
-    <value>Модеры</value>
+    <value>Модераторы</value>
   </data>
   <data name="BadgeMaskVIP" xml:space="preserve">
-    <value>Випы</value>
+    <value>VIP-пользователи</value>
   </data>
   <data name="BadgeMaskSubscriber" xml:space="preserve">
     <value>Подписчики</value>
@@ -880,7 +882,7 @@
     <value>Прогнозы</value>
   </data>
   <data name="BadgeMaskNoAudioNoVideo" xml:space="preserve">
-    <value>Нет аудио/Видео</value>
+    <value>Без аудио/видео</value>
   </data>
   <data name="BadgeMaskTwitchPrime" xml:space="preserve">
     <value>Подписка Prime</value>
@@ -895,7 +897,7 @@
     <value>{0} уже существует.</value>
   </data>
   <data name="FileAlreadyExistsBody" xml:space="preserve">
-    <value>Файл с именем {0} уже существует. Вы хотите заменить его?</value>
+    <value>Файл с именем «{0}» уже существует. Вы хотите заменить его?</value>
   </data>
   <data name="FileAlreadyExistsOverwrite" xml:space="preserve">
     <value>Заменить</value>
@@ -919,7 +921,8 @@
     <value>Запомнить выбор на эту сессию</value>
   </data>
   <data name="VideoTrimMode" xml:space="preserve">
-    <value>Режим обрезки </value><comment>Leave a trailing space</comment>
+    <value>Режим обрезки </value>
+	<comment>Leave a trailing space</comment>
   </data>
   <data name="VideoTrimModeSafe" xml:space="preserve">
     <value>Безопасный режим</value>
@@ -931,129 +934,130 @@
     <value>Иногда обрезанное видео может испытывать проблемы с заиканьем в первых/последних нескольких секунд. Безопасная обрезка гарантирует отсутствие заикания, но может немного удлинить видео.</value>
   </data>
   <data name="TaskRetry" xml:space="preserve">
-    <value>Retry</value>
+    <value>Повторить</value>
   </data>
   <data name="UnableToGetChannelVideos" xml:space="preserve">
-    <value>Unable to Get Videos</value>
+    <value>Не удалось получить видео</value>
   </data>
   <data name="UnableToGetChannelVideosMessage" xml:space="preserve">
-    <value>Unable to get channel videos: {0}</value>
+    <value>Не удалось получить видео канала: {0}</value>
   </data>
   <data name="UnableToGetChannelClips" xml:space="preserve">
-    <value>Unable to Get Clips</value>
+    <value>Не удалось получить клипы</value>
   </data>
   <data name="UnableToGetChannelClipsMessage" xml:space="preserve">
-    <value>Unable to get channel clips: {0}</value>
+    <value>Не удалось получить клипы канала: {0}</value>
   </data>
   <data name="FilenameParameterTitleTooltip" xml:space="preserve">
-    <value>The title of the video/clip.</value>
+    <value>Название видео/клипа.</value>
   </data>
   <data name="FilenameParameterIdTooltip" xml:space="preserve">
-    <value>The ID of the video/clip.</value>
+    <value>ID видео/клипа.</value>
   </data>
   <data name="FilenameParameterDateTooltip" xml:space="preserve">
-    <value>The date that the video/clip was created in the format M-d-yy.</value>
+    <value>Дата создания видео/клипа в формате М-д-гг.</value>
   </data>
   <data name="FilenameParameterDateCustomTooltip" xml:space="preserve">
-    <value>The date that the video/clip was created in a customizable format.</value>
+    <value>Дата создания видео/клипа в настраиваемом формате.</value>
   </data>
   <data name="FilenameParameterChannelTooltip" xml:space="preserve">
-    <value>The display name of the channel which owns the video/clip/chat.</value>
+    <value>Отображаемое имя канала, которому принадлежит видео/клип/чат.</value>
   </data>
   <data name="FilenameParameterRandomStringTooltip" xml:space="preserve">
-    <value>A string of 11 random characters.</value>
+    <value>Строка из 11 случайных символов.</value>
   </data>
   <data name="FilenameParameterTrimStartTooltip" xml:space="preserve">
-    <value>The start trim of the video/chat in the format hh-mm-ss.</value>
+    <value>Начало обрезки видео/чата в формате чч-мм-сс.</value>
   </data>
   <data name="FilenameParameterTrimStartCustomTooltip" xml:space="preserve">
-    <value>The start trim of the video/chat in a customizable format.</value>
+    <value>Начало обрезки видео/чата в настраиваемом формате.</value>
   </data>
   <data name="FilenameParameterTrimEndTooltip" xml:space="preserve">
-    <value>The end trim of the video/chat in the format hh-mm-ss.</value>
+    <value>Конец обрезки видео/чата в формате чч-мм-сс.</value>
   </data>
   <data name="FilenameParameterTrimEndCustomTooltip" xml:space="preserve">
-    <value>The end trim of the video/chat in a customizable format.</value>
+    <value>Конец обрезки видео/чата в настраиваемом формате.</value>
   </data>
   <data name="FilenameParameterLengthTooltip" xml:space="preserve">
-    <value>The length (excluding trim) of the video/clip/chat in the format hh-mm-ss.</value>
+    <value>Длительность (без учёта обрезки) видео/клипа/чата в формате чч-мм-сс.</value>
   </data>
   <data name="FilenameParameterLengthCustomTooltip" xml:space="preserve">
-    <value>The length (excluding trim) of the video/clip/chat in a customizable format.</value>
+    <value>Длительность (без учёта обрезки) видео/клипа/чата в настраиваемом формате.</value>
   </data>
   <data name="FilenameParameterViewsTooltip" xml:space="preserve">
-    <value>The amount of views the video/clip has.</value>
+    <value>Количество просмотров видео/клипа.</value>
   </data>
   <data name="FilenameParameterGameTooltip" xml:space="preserve">
-    <value>The display name of the primary game/category in the video/clip/chat.</value>
+    <value>Отображаемое название основной игры/категории в видео/клипе/чате.</value>
   </data>
   <data name="FileCollisionBehavior" xml:space="preserve">
-    <value>File Collision Behavior</value>
+    <value>Поведение при конфликте файлов</value>
   </data>
   <data name="FileCollisionBehaviorTooltip" xml:space="preserve">
-    <value>The default handling for file collisions in the task queue. If a choice has already been remembered for the current session, an application restart will be required to override it.</value>
+    <value>Стандартная обработка конфликтов файлов в очереди заданий. Если для текущей сессии уже был запомнен выбор, для его переопределения потребуется перезапуск приложения.</value>
   </data>
   <data name="FileCollisionBehaviorAsk" xml:space="preserve">
-    <value>Ask</value>
+    <value>Спросить</value>
   </data>
   <data name="FileCollisionBehaviorOverwrite" xml:space="preserve">
-    <value>Overwrite</value>
+    <value>Перезаписать</value>
   </data>
   <data name="FileCollisionBehaviorRename" xml:space="preserve">
-    <value>Rename</value>
+    <value>Переименовать</value>
   </data>
   <data name="FileCollisionBehaviorCancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Отменить</value>
   </data>
   <data name="FilenameParameterChannelIdTooltip" xml:space="preserve">
-    <value>The ID of the channel which owns the video/clip/chat.</value>
+    <value>ID канала, которому принадлежит видео/клип/чат.</value>
   </data>
   <data name="FilenameParameterClipperTooltip" xml:space="preserve">
-    <value>The display name of the channel which created the clip, or empty for videos.</value>
+    <value>Отображаемое имя канала, который создал клип, или пустое поле для видео.</value>
   </data>
   <data name="FilenameParameterClipperIdTooltip" xml:space="preserve">
-    <value>The ID of the channel which created the clip, or empty for videos.</value>
+    <value>ID канала, на котором был создан клип, или пустое поле для видео.</value>
   </data>
   <data name="FailedToCopyToClipboard" xml:space="preserve">
-    <value>Failed to Copy to Clipboard</value>
+    <value>Не удалось скопировать в буфер обмена</value>
   </data>
   <data name="FilenameParameterTrimLengthTooltip" xml:space="preserve">
-    <value>The length (including trim) of the video/clip/chat in the format hh-mm-ss.</value>
+    <value>Длительность (включая обрезку) видео/клипа/чата в формате чч-мм-сс.</value>
   </data>
   <data name="FilenameParameterTrimLengthCustomTooltip" xml:space="preserve">
-    <value>The length (including trim) of the video/clip/chat in a customizable format.</value>
+    <value>Длительность (включая обрезку) видео/клипа/чата в настраиваемом формате.</value>
   </data>
   <data name="VideoTypeAllVideos" xml:space="preserve">
-    <value>All Videos</value>
+    <value>Все видеоматериалы</value>
   </data>
   <data name="VideoTypePastBroadcasts" xml:space="preserve">
-    <value>Broadcasts</value>
+    <value>Трансляции</value>
   </data>
   <data name="VideoTypeHighlights" xml:space="preserve">
-    <value>Highlights</value>
+    <value>Яркие моменты</value>
   </data>
   <data name="VideoTypeUploads" xml:space="preserve">
-    <value>Uploads</value>
+    <value>Загрузки</value>
   </data>
   <data name="DelayDownload" xml:space="preserve">
-    <value>Delay Download Until Broadcast Finished</value>
+    <value>Отложить скачивание до окончания трансляции</value>
   </data>
   <data name="ReduceMotion" xml:space="preserve">
-    <value>Reduce Motion:</value>
+    <value>Уменьшить движение:</value>
   </data>
   <data name="ClearRecentChannels" xml:space="preserve">
-    <value>Clear Recent Channels</value>
+    <value>Очистить недавние каналы</value>
   </data>
   <data name="ClearLog" xml:space="preserve">
-    <value>Clear Log</value>
+    <value>Очистить отчёт</value>
   </data>
   <data name="RenderUserAvatars" xml:space="preserve">
-    <value>User Avatars:</value>
+    <value>Аватары пользователей:</value>
   </data>
   <data name="AvatarScale" xml:space="preserve">
-    <value>Avatar Scale:</value>
+    <value>Масштаб аватара:</value>
   </data>
   <data name="FatalErrorMessage" xml:space="preserve">
-    <value>{0} can resume but may be unstable. Do you want to resume?</value><comment>{0} is the name of the application.</comment>
+    <value>{0} может возобновить работу, но может быть нестабильным. Хотите возобновить?</value>
+	<comment>{0} is the name of the application.</comment>
   </data>
 </root>

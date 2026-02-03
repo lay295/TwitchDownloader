@@ -20,6 +20,7 @@ namespace TwitchDownloaderWPF.Services
 
         public static readonly Culture English;
         public static readonly Culture Spanish;
+        public static readonly Culture German;
         public static readonly Culture French;
         public static readonly Culture Italian;
         public static readonly Culture Japanese;
@@ -35,10 +36,11 @@ namespace TwitchDownloaderWPF.Services
         // ReSharper disable StringLiteralTypo
         static AvailableCultures()
         {
-            All = new[]
-            {
+            All =
+            [
                 English = new Culture("en-US", "English"),
                 Spanish = new Culture("es-ES", "Español"),
+                German = new Culture("de-DE", "Deutsch"),
                 French = new Culture("fr-FR", "Français"),
                 Italian = new Culture("it-it", "Italiano"),
                 Japanese = new Culture("ja-JP", "日本語"),
@@ -49,7 +51,7 @@ namespace TwitchDownloaderWPF.Services
                 Ukrainian = new Culture("uk-ua", "Українська"),
                 SimplifiedChinese = new Culture("zh-CN", "简体中文"),
                 TraditionalChinese = new Culture("zh-TW", "繁體中文"),
-            };
+            ];
         }
         // ReSharper restore StringLiteralTypo
     }

@@ -161,7 +161,7 @@ chmod +x ffmpeg
 
 ## Requisitos
 
-- [.NET 6.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [.NET 10.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
 ## Instrucciones de Compilación
 
@@ -200,13 +200,13 @@ dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Perfil>
 5. a) Navega hasta la carpeta de la compilación de la GUI:
 
 ```
-cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
+cd TwitchDownloaderWPF/bin/Release/net10.0-windows/publish/win-x64
 ```
 
 5. b) Navega hasta la carpeta de la compilación de la CLI:
 
 ```
-cd TwitchDownloaderCLI/bin/Release/net6.0/publish
+cd TwitchDownloaderCLI/bin/Release/net10.0/publish
 ```
 
 # Licencia

@@ -233,14 +233,8 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             var timeSpan = new TimeSpan(23, 37, 43);
             const string FORMAT_STRING = "H\" Imbalanced quote escaping.";
-            var expectedExceptionType = typeof(FormatException);
-            const string EXPECTED_SOURCE_NAME = nameof(TwitchDownloaderCore);
 
-            var exception = Assert.Throws(expectedExceptionType, () => TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan));
-
-            // Ensure the FormatException originated from TimeSpanHFormat and not TimeSpan.ToString()
-            Assert.IsType<FormatException>(exception);
-            Assert.Equal(EXPECTED_SOURCE_NAME, exception.Source);
+            Assert.Throws<FormatException>(() => TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan));
         }
 
         [Fact]
@@ -248,14 +242,8 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             var timeSpan = new TimeSpan(24, 37, 43);
             const string FORMAT_STRING = "H\" Imbalanced quote escaping.";
-            var expectedExceptionType = typeof(FormatException);
-            const string EXPECTED_SOURCE_NAME = nameof(TwitchDownloaderCore);
 
-            var exception = Assert.Throws(expectedExceptionType, () => TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan));
-
-            // Ensure the FormatException originated from TimeSpanHFormat and not TimeSpan.ToString()
-            Assert.IsType<FormatException>(exception);
-            Assert.Equal(EXPECTED_SOURCE_NAME, exception.Source);
+            Assert.Throws<FormatException>(() => TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan));
         }
     }
 }

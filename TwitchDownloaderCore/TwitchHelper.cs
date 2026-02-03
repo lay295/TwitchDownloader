@@ -15,7 +15,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Mono.Unix;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
@@ -32,7 +31,7 @@ namespace TwitchDownloaderCore
             Timeout = TimeSpan.FromSeconds(20)
         };
 
-        private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
+        private static readonly string[] BttvZeroWidth = ["SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat"];
         private const string SEVEN_TV_PROXY_HOST = "7tv-imageproxy.twitcharchives.workers.dev";
 
         public static async Task<GqlVideoResponse> GetVideoInfo(long videoId)
@@ -166,7 +165,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"operationName\":\"ShareClipRenderStatus\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"f130048a462a0ac86bb54d653c968c514e9ab9ca94db52368c1179e97b0f16eb\"}}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"operationName\":\"ShareClipRenderStatus\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"761bc03a4b100ec4f73fa78a5011847bb8ad7693d223d055fd013f79390acd41\"}}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -1137,7 +1136,7 @@ namespace TwitchDownloaderCore
         }
 
         /// <inheritdoc cref="Directory.CreateDirectory"/>
-        public static DirectoryInfo CreateDirectory(string path)
+        public static DirectoryInfo CreateDirectory(string path, ITaskLogger logger = null)
         {
             DirectoryInfo directoryInfo = Directory.CreateDirectory(path);
 
@@ -1145,23 +1144,26 @@ namespace TwitchDownloaderCore
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    SetDirectoryPermissions(path);
+                    Set777UnixFilePermissions(directoryInfo);
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                logger?.LogVerbose($"Failed to set unix file mode for {directoryInfo.FullName}: {e.Message}");
+            }
 
             return directoryInfo;
         }
 
-        [SupportedOSPlatform("linux")]
-        [SupportedOSPlatform("osx")]
-        private static void SetDirectoryPermissions(string path)
+        [UnsupportedOSPlatform("windows")]
+        public static FileSystemInfo Set777UnixFilePermissions(FileSystemInfo fileSystemInfo)
         {
-            var folderInfo = new UnixFileInfo(path);
-            folderInfo.FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute |
-                                               FileAccessPermissions.GroupRead | FileAccessPermissions.GroupWrite |
-                                               FileAccessPermissions.OtherRead | FileAccessPermissions.OtherWrite;
-            folderInfo.Refresh();
+            fileSystemInfo.UnixFileMode = UnixFileMode.OtherExecute | UnixFileMode.OtherWrite | UnixFileMode.OtherRead
+                                          | UnixFileMode.GroupExecute | UnixFileMode.GroupWrite | UnixFileMode.GroupRead
+                                          | UnixFileMode.UserExecute | UnixFileMode.UserWrite | UnixFileMode.UserRead;
+
+            fileSystemInfo.Refresh();
+            return fileSystemInfo;
         }
 
         /// <summary>
@@ -1320,7 +1322,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"extensions\":{\"persistedQuery\":{\"sha256Hash\":\"8d2793384aac3773beab5e59bd5d6f585aedb923d292800119e03d40cd0f9b41\",\"version\":1}},\"operationName\":\"VideoPlayer_ChapterSelectButtonVideo\",\"variables\":{\"videoID\":\"" + videoId + "\"}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"extensions\":{\"persistedQuery\":{\"sha256Hash\":\"71835d5ef425e154bf282453a926d99b328cdc5e32f36d3a209d0f4778b41203\",\"version\":1}},\"operationName\":\"VideoPlayer_ChapterSelectButtonVideo\",\"variables\":{\"videoID\":\"" + videoId + "\"}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
