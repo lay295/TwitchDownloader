@@ -284,7 +284,7 @@ namespace TwitchDownloaderWPF
 
         private static void RemoveTask(TwitchTask task)
         {
-            if (task.CanRun() || task.Status is TwitchTaskStatus.Running || (task.Status is TwitchTaskStatus.Waiting && !task.CanCancel))
+            if (task.Status is TwitchTaskStatus.Running || (task.Status is TwitchTaskStatus.Waiting && !task.CanCancel))
             {
                 MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.CancelTaskBeforeRemoving, Translations.Strings.TaskCouldNotBeRemoved, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
