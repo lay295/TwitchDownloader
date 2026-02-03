@@ -32,7 +32,7 @@ namespace TwitchDownloaderCore
             Timeout = TimeSpan.FromSeconds(20)
         };
 
-        private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
+        private static readonly string[] BttvZeroWidth = ["SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat"];
         private const string SEVEN_TV_PROXY_HOST = "7tv-imageproxy.twitcharchives.workers.dev";
 
         public static async Task<GqlVideoResponse> GetVideoInfo(long videoId)
