@@ -13,6 +13,7 @@
 
 This document is also available in:
 
+- [**German / Deutsch**](README_de.md)]
 - [**Italian / Italiano**](README_it.md)
 - [**Japanese / 日本語**](README_ja.md)
 - [**Portuguese (Brazil) / Português (Brasil)**](README_pt-br.md)
