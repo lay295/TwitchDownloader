@@ -78,3 +78,188 @@ set /p vodid="Enter VOD ID: "
 TwitchDownloaderCLI.exe videodownload --id %vodid% --ffmpeg-path "ffmpeg.exe" -o %vodid%.mp4
 TwitchDownloaderCLI.exe chatdownload --id %vodid% -o %vodid%_chat.json -E
 TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framerate 30 --update-rate 0 --font-size 18 -o %vodid%_chat.mp4
+
+```
+
+## Windows – Erste Schritte
+
+1. Gehe zu [Releases](https://github.com/lay295/TwitchDownloader/releases/) und lade die neueste Version für Windows herunter oder [erstelle sie aus dem Quellcode](#building-from-source).
+2. Extrahiere `TwitchDownloaderCLI.exe`.
+3. Navigiere zu dem Ordner, in dem du die ausführbare Datei extrahiert hast:
+
+```
+cd C:\folder\containing\TwitchDownloaderCLI
+```
+
+4. Falls du FFmpeg nicht hast, kannst du es über den [Chocolatey-Paketmanager](https://community.chocolatey.org/) installieren oder als eigenständige Datei von [ffmpeg.org](https://ffmpeg.org/download.html) herunterladen oder mit TwitchDownloaderCLI verwenden:
+
+```
+TwitchDownloaderCLI.exe ffmpeg --download
+```
+
+5. Du kannst TwitchDownloaderCLI nun verwenden, zum Beispiel:
+
+```
+TwitchDownloaderCLI.exe videodownload --id <vod-id-here> -o out.mp4
+```
+
+Weitere Beispielbefehle findest du in der [CLI README](TwitchDownloaderCLI/README.md#example-commands).
+
+## Linux – Erste Schritte
+
+1. Einige Distributionen, wie Linux Alpine, haben keine Schriftarten für manche Sprachen (Arabisch, Persisch, Thai, etc.). Falls das auf dich zutrifft, installiere zusätzliche Schriftartenfamilien wie [Noto](https://fonts.google.com/noto/specimen/Noto+Sans) oder schau auf der Wiki-Seite deiner Distribution nach Schriftarten, da sie möglicherweise einen Installationsbefehl für dieses spezifische Szenario hat, wie beispielsweise die [Linux Alpine](https://wiki.alpinelinux.org/wiki/Fonts) Schriftartenseite.
+2. Stelle sicher, dass beide `fontconfig` und `libfontconfig1` installiert sind. `apt-get install fontconfig libfontconfig1` auf Ubuntu.
+3. Gehe zu [Releases](https://github.com/lay295/TwitchDownloader/releases/) und lade die neueste Binärdatei für Linux herunter, hole das [AUR-Paket](https://aur.archlinux.org/packages/twitch-downloader-bin/) für Arch Linux oder [erstelle sie aus dem Quellcode](#building-from-source).
+4. Extrahiere `TwitchDownloaderCLI`.
+5. Navigiere zu dem Ordner, in dem du die Binärdatei extrahiert hast:
+
+```
+cd directory/containing/TwitchDownloaderCLI
+```
+
+6. Gib der Binärdatei Ausführungsrechte:
+
+```
+sudo chmod +x TwitchDownloaderCLI
+```
+
+7. a) Falls du FFmpeg nicht hast, solltest du es systemweit über den Paketmanager deiner Distribution installieren, du kannst es aber auch als eigenständige Datei von [ffmpeg.org](https://ffmpeg.org/download.html) herunterladen oder mit TwitchDownloaderCLI verwenden:
+
+```
+./TwitchDownloaderCLI ffmpeg --download
+```
+
+7. b) Falls du es als eigenständige Datei heruntergeladen hast, musst du ihm auch Ausführungsrechte geben mit:
+
+```
+sudo chmod +x ffmpeg
+```
+
+8. Du kannst TwitchDownloaderCLI nun verwenden, zum Beispiel:
+
+```
+./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
+```
+
+Weitere Beispielbefehle findest du in der [CLI README](TwitchDownloaderCLI/README.md#example-commands).
+
+## MacOS – Erste Schritte
+
+1. Falls dein Gerät einen Apple Silicon M-Series-Prozessor hat, stelle sicher, dass du die arm64-Binärdatei herunterlädst. Falls du jedoch die x64-Binärdatei auf Apple Silicon verwenden möchtest, muss sie über eine Terminalsitzung ausgeführt werden, die unter Rosetta 2 läuft:
+
+```
+arch -x86_64 zsh
+```
+
+2. Gehe zu [Releases](https://github.com/lay295/TwitchDownloader/releases/) und lade die neueste Binärdatei für MacOS herunter oder [erstelle sie aus dem Quellcode](#building-from-source).
+3. Extrahiere `TwitchDownloaderCLI`.
+4. Navigiere zu dem Ordner, in dem du die Binärdatei extrahiert hast:
+
+```
+cd directory/containing/TwitchDownloaderCLI
+```
+
+5. Gib der Binärdatei Ausführungsrechte im Terminal:
+
+```
+chmod +x TwitchDownloaderCLI
+```
+
+6. a) Falls du FFmpeg nicht hast, kannst du es systemweit über den [Homebrew-Paketmanager](https://brew.sh/) installieren oder du kannst es als eigenständige Datei von [ffmpeg.org](https://ffmpeg.org/download.html) herunterladen oder mit TwitchDownloaderCLI verwenden:
+
+```
+./TwitchDownloaderCLI ffmpeg --download
+```
+
+6. b) Falls du es als eigenständige Datei heruntergeladen hast, musst du ihm auch Ausführungsrechte geben mit:
+
+```
+chmod +x ffmpeg
+```
+
+7. Du kannst TwitchDownloaderCLI nun verwenden, zum Beispiel:
+
+```
+./TwitchDownloaderCLI videodownload --id <vod-id-here> -o out.mp4
+```
+
+Weitere Beispielbefehle findest du in der [CLI README](TwitchDownloaderCLI/README.md#example-commands).
+
+## Aus dem Quellcode erstellen
+
+### Anforderungen
+
+- [.NET 10.0.x SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+- Etwa 1GB Speicherplatz
+
+## Build-Anweisungen
+
+1. Clone das Repository:
+
+```
+git clone https://github.com/lay295/TwitchDownloader.git
+```
+
+2. Navigiere zum Lösungsordner:
+
+```
+cd TwitchDownloader
+```
+
+3. Stelle die Lösung wieder her:
+
+```
+dotnet restore
+```
+
+- Nicht-Windows-Geräte müssen möglicherweise explizit ein Projekt angeben, das wiederhergestellt werden soll, z. B. `dotnet restore TwitchDownloaderCLI`
+
+4. a) GUI erstellen:
+
+```
+dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
+```
+
+4. b) CLI erstellen:
+
+```
+dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
+```
+
+- Anwendbare Profile: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
+
+5. a) Navigiere zum GUI-Build-Ordner:
+
+```
+cd TwitchDownloaderWPF/bin/Release/net10.0-windows/publish/win-x64
+```
+
+5. b) Navigiere zum CLI-Build-Ordner:
+
+```
+cd TwitchDownloaderCLI/bin/Release/net10.0/publish
+```
+
+## Danksagungen an Dritte
+
+Chat-Renders werden mit [SkiaSharp](https://github.com/mono/SkiaSharp) und [HarfBuzzSharp](https://github.com/mono/SkiaSharp) © Microsoft Corporation gerendert.
+
+Chat-Renders werden kodiert und Video-Downloads werden mit [FFmpeg](https://ffmpeg.org/) © Die FFmpeg-Entwickler abgeschlossen.
+
+Chat-Renders können [Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google und Mitwirkende verwenden.
+
+Chat-Renders können [Twemoji](https://github.com/twitter/twemoji) © Twitter und Mitwirkende verwenden.
+
+Gebündelte FFmpeg-Binärdateien werden von [gyan.dev](https://www.gyan.dev/ffmpeg/) © Gyan Doshi abgerufen.
+
+FFmpeg-Binärdateien, die zur Laufzeit abgerufen werden, werden mit [Xabe.FFmpeg.Downloader](https://github.com/tomaszzmuda/Xabe.FFmpeg) © Xabe heruntergeladen.
+
+Chat-HTML-Exporte verwenden die _Inter_-Schriftart, die von der [Google Fonts API](https://fonts.google.com/) © Google gehostet wird.
+
+Eine vollständige Liste der verwendeten externen Bibliotheken findest du in [THIRD-PARTY-LICENSES.txt](./TwitchDownloaderCore/Resources/THIRD-PARTY-LICENSES.txt).
+
+## Lizenz
+
+[MIT](./LICENSE.txt)
+
+TwitchDownloader ist in keiner Weise mit Twitch Interactive, Inc. oder seinen Tochtergesellschaften verbunden.
