@@ -113,7 +113,7 @@ namespace TwitchDownloaderCore.Services
         private static readonly char[] FilenameInvalidChars = Path.GetInvalidFileNameChars();
 
         [GeneratedRegex("""(?<=\d):(?=\d\d)""")]
-        private static partial Regex TimestampPatternRegex { get; }
+        private static partial Regex TimestampRegex { get; }
 
         [return: NotNullIfNotNull(nameof(filename))]
         public static string ReplaceInvalidFilenameChars([AllowNull] string filename)
@@ -123,11 +123,11 @@ namespace TwitchDownloaderCore.Services
                 return filename;
             }
 
-            var newName = TimestampPatternRegex.Replace(filename, "_");
+            var newName = TimestampRegex.Replace(filename, "_");
 
             if (newName.AsSpan().IndexOfAny("""*":<>?|/\""") != -1)
             {
-                newName = string.Create(filename.Length, filename, (span, str) =>
+                newName = string.Create(filename.Length, filename, static (span, str) =>
                 {
                     const int FULL_WIDTH_OFFSET = 0xFEE0; // https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
                     for (var i = 0; i < str.Length; i++)

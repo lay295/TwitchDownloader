@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
-using Mono.Unix;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -191,13 +190,13 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static FileAccessPermissions? GetUnixFilePermissions(ITaskProgress progress, string currentExePath)
+        private static UnixFileMode? GetUnixFilePermissions(ITaskProgress progress, string currentExePath)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 try
                 {
-                    return new UnixFileInfo(currentExePath).FileAccessPermissions;
+                    return new FileInfo(currentExePath).UnixFileMode;
                 }
                 catch (Exception ex)
                 {
@@ -206,6 +205,27 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             return null;
+        }
+
+        private static void ApplyUnixFilePermissions(ITaskProgress progress, string currentExePath, UnixFileMode? previousPermissions)
+        {
+            if (!previousPermissions.HasValue)
+            {
+                return;
+            }
+
+            try
+            {
+                var fi = new FileInfo(currentExePath);
+                fi.UnixFileMode = previousPermissions.Value;
+                fi.Refresh();
+            }
+            catch (Exception ex)
+            {
+                var processFilename = Path.GetFileName(currentExePath);
+                var chmodCommand = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "chmod +x" : "sudo chmod +x";
+                progress.LogError($"Unable to restore previous file permissions: {ex.Message} Please run '{chmodCommand} {processFilename}' to allow {processFilename} to be executed.");
+            }
         }
 
         private static void BackupCurrentExecutable(string currentExePath, ITaskProgress progress)
@@ -248,29 +268,6 @@ namespace TwitchDownloaderCLI.Modes
             }
 
             progress.ReportProgress(100);
-        }
-
-        private static void ApplyUnixFilePermissions(ITaskProgress progress, string currentExePath, FileAccessPermissions? previousPermissions)
-        {
-            if (!previousPermissions.HasValue)
-            {
-                return;
-            }
-
-            try
-            {
-                var ufi = new UnixFileInfo(currentExePath)
-                {
-                    FileAccessPermissions = previousPermissions.Value
-                };
-                ufi.Refresh();
-            }
-            catch (Exception ex)
-            {
-                var processFilename = Path.GetFileName(currentExePath);
-                var chmodCommand = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "chmod +x" : "sudo chmod +x";
-                progress.LogError($"Unable to restore previous file permissions: {ex.Message} Please run '{chmodCommand} {processFilename}' to allow {processFilename} to be executed.");
-            }
         }
     }
 }
