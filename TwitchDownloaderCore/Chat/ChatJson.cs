@@ -90,14 +90,14 @@ namespace TwitchDownloaderCore.Chat
                         var legacyEmbeddedData = embeddedDataElement.Deserialize<LegacyEmbeddedData>(options: _jsonSerializerOptions);
                         returnChatRoot.embeddedData = new EmbeddedData
                         {
-                            firstParty = legacyEmbeddedData?.firstParty ?? new List<EmbedEmoteData>(),
-                            thirdParty = legacyEmbeddedData?.thirdParty ?? new List<EmbedEmoteData>(),
+                            firstParty = legacyEmbeddedData?.firstParty ?? [],
+                            thirdParty = legacyEmbeddedData?.thirdParty ?? [],
                             twitchBadges = legacyEmbeddedData?.twitchBadges.Select(item => new EmbedChatBadge
                             {
                                 name = item.name,
                                 versions = item.versions.Select(x => new KeyValuePair<string, ChatBadgeData>(x.Key, new ChatBadgeData { bytes = x.Value })).ToDictionary(k => k.Key, v => v.Value),
-                            }).ToList() ?? new List<EmbedChatBadge>(),
-                            twitchBits = legacyEmbeddedData?.twitchBits ?? new List<EmbedCheerEmote>()
+                            }).ToList() ?? [],
+                            twitchBits = legacyEmbeddedData?.twitchBits ?? []
                         };
                     }
                 }
@@ -213,7 +213,7 @@ namespace TwitchDownloaderCore.Chat
                 {
                     try
                     {
-                        var userInfo = await TwitchHelper.GetUserInfo(new[] { assumedId.ToString() });
+                        var userInfo = await TwitchHelper.GetUserInfo([assumedId.ToString()]);
                         assumedName ??= userInfo.data.users.FirstOrDefault()?.displayName;
                         assumedLogin ??= userInfo.data.users.FirstOrDefault()?.login;
                     }
@@ -232,7 +232,7 @@ namespace TwitchDownloaderCore.Chat
             {
                 try
                 {
-                    var userInfo = await TwitchHelper.GetUserInfo(new[] { chatRoot.streamer.id.ToString() });
+                    var userInfo = await TwitchHelper.GetUserInfo([chatRoot.streamer.id.ToString()]);
                     chatRoot.streamer.login = userInfo.data.users.FirstOrDefault()?.login;
                 }
                 catch { /* ignored */ }

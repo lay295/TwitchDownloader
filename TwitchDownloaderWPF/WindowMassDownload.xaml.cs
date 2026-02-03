@@ -28,9 +28,9 @@ namespace TwitchDownloaderWPF
         };
 
         public DownloadType downloaderType { get; set; }
-        public ObservableCollection<TaskData> videoList { get; set; } = new ObservableCollection<TaskData>();
-        public readonly List<TaskData> selectedItems = new List<TaskData>();
-        public readonly List<string> cursorList = new List<string>();
+        public ObservableCollection<TaskData> videoList { get; set; } = [];
+        public readonly List<TaskData> selectedItems = [];
+        public readonly List<string> cursorList = [];
         public int cursorIndex = 0;
         public User currentChannel;
         public string period = "";
@@ -83,7 +83,7 @@ namespace TwitchDownloaderWPF
                 {
                     try
                     {
-                        var idRes = await TwitchHelper.GetUserIds(new[] { textTrimmed.ToLowerInvariant() });
+                        var idRes = await TwitchHelper.GetUserIds([textTrimmed.ToLowerInvariant()]);
                         var infoRes = await TwitchHelper.GetUserInfo(idRes.data.users.Select(x => x.id));
                         currentChannel = infoRes.data.users[0];
                     }

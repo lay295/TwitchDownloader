@@ -501,7 +501,7 @@ namespace TwitchDownloaderCore
             }
             lastUpdate?.Image.Dispose();
 
-            List<CommentSection> commentList = lastUpdate?.Comments ?? new List<CommentSection>();
+            List<CommentSection> commentList = lastUpdate?.Comments ?? [];
 
             int oldCommentIndex = -1;
             if (commentList.Count > 0)
@@ -596,7 +596,7 @@ namespace TwitchDownloaderCore
                 {
                     if (comment.message.fragments == null && comment.message.body != null)
                     {
-                        comment.message.fragments = new List<Fragment> { new() { text = comment.message.body } };
+                        comment.message.fragments = [new Fragment { text = comment.message.body }];
                     }
 
                     highlightType = HighlightType.ChannelPointHighlight;
@@ -1758,7 +1758,7 @@ namespace TwitchDownloaderCore
             // Do not fetch if badges are disabled
             if (!renderOptions.ChatBadges)
             {
-                return new List<ChatBadge>();
+                return [];
             }
 
             var badgeTask = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);

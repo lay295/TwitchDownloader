@@ -82,7 +82,7 @@ namespace TwitchDownloaderCore.Chat
         private static async Task BuildThirdPartyDictionary(ChatRoot chatRoot, bool embedData, Dictionary<string, EmbedEmoteData> thirdEmoteData, ITaskLogger logger, CancellationToken cancellationToken)
         {
             EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmotesMetadata(chatRoot.streamer.id, true, true, true, true, logger, cancellationToken);
-            List<EmoteResponseItem> itemList = new();
+            List<EmoteResponseItem> itemList = [];
             itemList.AddRange(emotes.BTTV);
             itemList.AddRange(emotes.FFZ);
             itemList.AddRange(emotes.STV);
@@ -154,7 +154,7 @@ namespace TwitchDownloaderCore.Chat
         {
             var message = new StringBuilder(comment.message.body.Length);
 
-            comment.message.fragments ??= new List<Fragment> { new() { text = comment.message.body } };
+            comment.message.fragments ??= [new Fragment { text = comment.message.body }];
 
             foreach (var fragment in comment.message.fragments)
             {

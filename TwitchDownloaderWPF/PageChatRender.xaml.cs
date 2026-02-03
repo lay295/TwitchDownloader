@@ -36,9 +36,9 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageChatRender : Page
     {
-        public List<string> ffmpegLog = new List<string>();
+        public List<string> ffmpegLog = [];
         public SKFontManager fontManager = SKFontManager.CreateDefault();
-        public string[] FileNames = Array.Empty<string>();
+        public string[] FileNames = [];
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageChatRender()
@@ -485,10 +485,10 @@ namespace TwitchDownloaderWPF
             Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 18 -b:v 2M -deadline realtime -quality realtime -speed 3 -pix_fmt yuva420p \"{save_path}\"" };
             Codec rleCodec = new Codec() { Name = "RLE", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v qtrle -pix_fmt argb \"{save_path}\"" };
             Codec proresCodec = new Codec() { Name = "ProRes", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v prores_ks -qscale:v 62 -pix_fmt argb \"{save_path}\"" };
-            VideoContainer mp4Container = new VideoContainer() { Name = "MP4", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec } };
-            VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, rleCodec, proresCodec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec } };
-            VideoContainer webmContainer = new VideoContainer() { Name = "WEBM", SupportedCodecs = new List<Codec>() { vp8Codec, vp9Codec } };
-            VideoContainer mkvContainer = new VideoContainer() { Name = "MKV", SupportedCodecs = new List<Codec>() { h264Codec, h265Codec, vp8Codec, vp9Codec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec } };
+            VideoContainer mp4Container = new VideoContainer() { Name = "MP4", SupportedCodecs = [h264Codec, h265Codec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec] };
+            VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = [h264Codec, h265Codec, rleCodec, proresCodec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec] };
+            VideoContainer webmContainer = new VideoContainer() { Name = "WEBM", SupportedCodecs = [vp8Codec, vp9Codec] };
+            VideoContainer mkvContainer = new VideoContainer() { Name = "MKV", SupportedCodecs = [h264Codec, h265Codec, vp8Codec, vp9Codec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec] };
             comboFormat.Items.Add(mp4Container);
             comboFormat.Items.Add(movContainer);
             comboFormat.Items.Add(webmContainer);

@@ -77,8 +77,8 @@ namespace TwitchDownloaderCore.Models
             private List<KeyValuePair<string, string>> _unparsedValues;
             public IReadOnlyList<KeyValuePair<string, string>> UnparsedValues
             {
-                get => _unparsedValues ??= new List<KeyValuePair<string, string>>();
-                init => _unparsedValues = new List<KeyValuePair<string, string>>(value);
+                get => _unparsedValues ??= [];
+                init => _unparsedValues = [..value];
             }
 
             public override string ToString()
@@ -138,7 +138,7 @@ namespace TwitchDownloaderCore.Models
                 public override string ToString()
                 {
                     var sb = new StringBuilder();
-                    ReadOnlySpan<char> itemSeparator = stackalloc char[] { ',' };
+                    ReadOnlySpan<char> itemSeparator = [','];
 
                     if (!string.IsNullOrWhiteSpace(Uri))
                         sb.AppendKeyQuoteValue(URI_KEY, Uri, itemSeparator);
@@ -227,7 +227,7 @@ namespace TwitchDownloaderCore.Models
                 public override string ToString()
                 {
                     var sb = new StringBuilder(MEDIA_INFO_KEY);
-                    ReadOnlySpan<char> keyValueSeparator = stackalloc char[] { ',' };
+                    ReadOnlySpan<char> keyValueSeparator = [','];
 
                     if (Type != MediaType.Unknown)
                         sb.AppendKeyValue("TYPE=", Type.AsString(), keyValueSeparator);
@@ -268,7 +268,7 @@ namespace TwitchDownloaderCore.Models
                 {
                     ProgramId = programId;
                     Bandwidth = bandwidth;
-                    Codecs = codecs ?? Array.Empty<string>();
+                    Codecs = codecs ?? [];
                     Resolution = resolution;
                     Video = video;
                     Framerate = framerate;
@@ -276,7 +276,7 @@ namespace TwitchDownloaderCore.Models
 
                 public int ProgramId { get; internal set; }
                 public int Bandwidth { get; internal set; }
-                public IReadOnlyList<string> Codecs { get; internal set; } = Array.Empty<string>();
+                public IReadOnlyList<string> Codecs { get; internal set; } = [];
                 public StreamResolution Resolution { get; internal set; }
                 public string Video { get; internal set; }
                 public decimal Framerate { get; internal set; }
@@ -284,7 +284,7 @@ namespace TwitchDownloaderCore.Models
                 public override string ToString()
                 {
                     var sb = new StringBuilder(STREAM_INFO_KEY);
-                    ReadOnlySpan<char> keyValueSeparator = stackalloc char[] { ',' };
+                    ReadOnlySpan<char> keyValueSeparator = [','];
 
                     if (ProgramId != default)
                         sb.AppendKeyValue("PROGRAM-ID=", ProgramId, keyValueSeparator);
