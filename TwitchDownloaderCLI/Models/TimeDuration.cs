@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace TwitchDownloaderCLI.Models
 {
-    public readonly record struct TimeDuration
+    public readonly partial record struct TimeDuration
     {
         public static TimeDuration MinusOneSeconds { get; } = new(-1 * TimeSpan.TicksPerSecond);
 
@@ -55,10 +55,16 @@ namespace TwitchDownloaderCLI.Models
             throw new FormatException();
         }
 
+        [GeneratedRegex("""^(\d{1,}):(\d{1,2})(?:\.(\d{1,3})\d*)?$""")]
+        private static partial Regex TimespanShortTimeRegex { get; }
+
+        [GeneratedRegex("""^(?:(\d{1,})[.:])?(\d{2,}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,3})\d*)?$""")]
+        private static partial Regex TimespanLongTimeRegex { get; }
+
         private static TimeSpan ParseTimeSpan(string str)
         {
             // TimeSpan.Parse interprets '10:30' as 10 hours, 30 minutes when we want it to mean 10 minutes, 30 seconds
-            var match = Regex.Match(str, @"^(\d{1,}):(\d{1,2})(?:\.(\d{1,3})\d*)?$");
+            var match = TimespanShortTimeRegex.Match(str);
             if (match.Success)
             {
                 if (!int.TryParse(match.Groups[1].ValueSpan, out var minutes)) minutes = 0;
@@ -69,7 +75,7 @@ namespace TwitchDownloaderCLI.Models
             }
 
             // TimeSpan.Parse interprets '36:01:02' as 36 days, 1 hour, and 2 minutes, so we need to manually parse it ourselves
-            match = Regex.Match(str, @"^(?:(\d{1,})[.:])?(\d{2,}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,3})\d*)?$");
+            match = TimespanLongTimeRegex.Match(str);
             if (match.Success)
             {
                 if (!int.TryParse(match.Groups[1].ValueSpan, out var days)) days = 0;
@@ -84,35 +90,47 @@ namespace TwitchDownloaderCLI.Models
             return TimeSpan.Parse(str); // Parse formats not covered by the regex
         }
 
-        private static long GetMultiplier(string input, out ReadOnlySpan<char> trimmedInput)
+        [GeneratedRegex(@"\dms$", RegexOptions.RightToLeft)]
+        private static partial Regex MillisecondMultiplierRegex { get; }
+
+        [GeneratedRegex(@"\ds$", RegexOptions.RightToLeft)]
+        private static partial Regex SecondMultiplierRegex { get; }
+
+        [GeneratedRegex(@"\dm$", RegexOptions.RightToLeft)]
+        private static partial Regex MinuteMultiplierRegex { get; }
+
+        [GeneratedRegex(@"\dh$", RegexOptions.RightToLeft)]
+        private static partial Regex HourMultiplierRegex { get; }
+
+        private static long GetMultiplier(ReadOnlySpan<char> input, out ReadOnlySpan<char> trimmedInput)
         {
             if (char.IsDigit(input[^1]))
             {
-                trimmedInput = input.AsSpan();
+                trimmedInput = input;
                 return TimeSpan.TicksPerSecond;
             }
 
-            if (Regex.IsMatch(input, @"\dms$", RegexOptions.RightToLeft))
+            if (MillisecondMultiplierRegex.IsMatch(input))
             {
-                trimmedInput = input.AsSpan()[..^2];
+                trimmedInput = input[..^2];
                 return TimeSpan.TicksPerMillisecond;
             }
 
-            if (Regex.IsMatch(input, @"\ds$", RegexOptions.RightToLeft))
+            if (SecondMultiplierRegex.IsMatch(input))
             {
-                trimmedInput = input.AsSpan()[..^1];
+                trimmedInput = input[..^1];
                 return TimeSpan.TicksPerSecond;
             }
 
-            if (Regex.IsMatch(input, @"\dm$", RegexOptions.RightToLeft))
+            if (MinuteMultiplierRegex.IsMatch(input))
             {
-                trimmedInput = input.AsSpan()[..^1];
+                trimmedInput = input[..^1];
                 return TimeSpan.TicksPerMinute;
             }
 
-            if (Regex.IsMatch(input, @"\dh$", RegexOptions.RightToLeft))
+            if (HourMultiplierRegex.IsMatch(input))
             {
-                trimmedInput = input.AsSpan()[..^1];
+                trimmedInput = input[..^1];
                 return TimeSpan.TicksPerHour;
             }
 
