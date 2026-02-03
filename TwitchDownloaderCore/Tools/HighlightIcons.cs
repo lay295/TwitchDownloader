@@ -30,7 +30,7 @@ namespace TwitchDownloaderCore.Tools
         Unknown
     }
 
-    public sealed class HighlightIcons : IDisposable
+    public sealed partial class HighlightIcons : IDisposable
     {
         public bool Disposed { get; private set; }
 
@@ -49,9 +49,17 @@ namespace TwitchDownloaderCore.Tools
 
         private const int ICON_SIZE = 72; // Icon SVG strings are scaled for 72x72
 
-        private static readonly Regex SubMessageRegex = new(@"^((?:\w+ )?subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d{1,3} months(?:, currently on a \d{1,3} month streak)?! )(.+)$", RegexOptions.Compiled);
-        private static readonly Regex GiftAnonymousRegex = new(@"^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d", RegexOptions.Compiled);
-        private static readonly Regex WatchStreakRegex = new(@"^((?:\w+ )?watched \d+ consecutive streams this month and sparked a watch streak! )(.+)$", RegexOptions.Compiled);
+        [GeneratedRegex("""^((?:\w+ )?subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d{1,3} months(?:, currently on a \d{1,3} month streak)?! )(.+)$""")]
+        private static partial Regex SubMessageRegex { get; }
+
+        [GeneratedRegex("""^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d""")]
+        private static partial Regex GiftAnonymousRegex {get;}
+
+        [GeneratedRegex("""^((?:\w+ )?watched \d+ consecutive streams this month and sparked a watch streak! )(.+)$""")]
+        private static partial Regex WatchStreakRegex {get;}
+
+        [GeneratedRegex("""^We added \d+ Gift Subs (?:AND \d+ Bonus Gift Subs )?to """)]
+        private static partial Regex SubtemberRegex { get; }
 
         private SKImage _subscribedTierIcon;
         private SKImage _subscribedPrimeIcon;
@@ -133,20 +141,18 @@ namespace TwitchDownloaderCore.Tools
 
                 if (bodyWithoutName.StartsWith(" converted from a"))
                 {
-                    // TODO: use bodyWithoutName when .NET 7
-                    var convertedToMatch = Regex.Match(comment.message.body, $@"(?<=^{comment.commenter.display_name} converted from a (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)");
-                    if (!convertedToMatch.Success)
-                        return HighlightType.None;
-
-                    // TODO: use ValueSpan when .NET 7
-                    return convertedToMatch.Value switch
+                    var slice = bodyWithoutName[17..];
+                    foreach (var match in Regex.EnumerateMatches(slice, @"(?<= (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)"))
                     {
-                        "Prime" => HighlightType.SubscribedPrime,
-                        "Tier 1" => HighlightType.SubscribedTier,
-                        "Tier 2" => HighlightType.SubscribedTier,
-                        "Tier 3" => HighlightType.SubscribedTier,
-                        _ => HighlightType.None
-                    };
+                        return slice.Slice(match.Index, match.Length) switch
+                        {
+                            "Prime" => HighlightType.SubscribedPrime,
+                            "Tier 1" or "Tier 2" or "Tier 3" => HighlightType.SubscribedTier,
+                            _ => HighlightType.None
+                        };
+                    }
+
+                    return HighlightType.None;
                 }
             }
 
@@ -158,19 +164,22 @@ namespace TwitchDownloaderCore.Tools
 
             if (char.IsDigit(bodySpan[0]) && bodySpan.EndsWith(" have joined! "))
             {
-                // TODO: use bodySpan when .NET 7
-                if (Regex.IsMatch(comment.message.body, $@"^\d+ raiders from {comment.commenter.display_name} have joined! "))
+                if (Regex.IsMatch(bodySpan, $@"^\d+ raiders from {comment.commenter.display_name} have joined! "))
                     return HighlightType.Raid;
             }
 
             const string TWITCH_ACCOUNT_ID = "12826";
             const string ANONYMOUS_GIFT_ACCOUNT_ID = "274598607"; // Display name is 'AnAnonymousGifter'
-            if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID or TWITCH_ACCOUNT_ID && GiftAnonymousRegex.IsMatch(comment.message.body))
+            if (comment.commenter._id is ANONYMOUS_GIFT_ACCOUNT_ID or TWITCH_ACCOUNT_ID
+                && GiftAnonymousRegex.IsMatch(comment.message.body))
+            {
                 return HighlightType.GiftedAnonymous;
+            }
 
             const string VALORANT_ACCOUNT_ID = "490592527";
-            if (comment.commenter._id is TWITCH_ACCOUNT_ID or VALORANT_ACCOUNT_ID && comment.message.body.EndsWith("'s gift! ") &&
-                Regex.IsMatch(comment.message.body, @"^We added \d+ Gift Subs (?:AND \d+ Bonus Gift Subs )?to "))
+            if (comment.commenter._id is TWITCH_ACCOUNT_ID or VALORANT_ACCOUNT_ID &&
+                comment.message.body.EndsWith("'s gift! ") &&
+                SubtemberRegex.IsMatch(comment.message.body))
             {
                 // TODO: Make a dedicated enum value for bonus gift subs?
                 return HighlightType.GiftedMany;

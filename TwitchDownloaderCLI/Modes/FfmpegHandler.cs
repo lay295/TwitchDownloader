@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Mono.Unix;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
+using TwitchDownloaderCore;
 using TwitchDownloaderCore.Interfaces;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
@@ -46,11 +46,7 @@ namespace TwitchDownloaderCLI.Modes
 
             try
             {
-                var ffmpegFileInfo = new UnixFileInfo("ffmpeg")
-                {
-                    FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute | FileAccessPermissions.GroupReadWriteExecute | FileAccessPermissions.OtherReadWriteExecute,
-                };
-                ffmpegFileInfo.Refresh();
+                TwitchHelper.Set777UnixFilePermissions(new FileInfo(FfmpegExecutableName));
             }
             catch
             {

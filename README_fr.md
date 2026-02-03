@@ -189,7 +189,7 @@ Des exemples supplémentaires sont disponibles dans le [README de la CLI](Twitch
 
 ## Prérequis
 
-- SDK [.NET 6.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- SDK [.NET 10.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - Environ 1 Go d’espace disque
 
 ## Instructions de compilation
@@ -231,13 +231,13 @@ dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 5. a) Accédez au dossier de build du GUI :
 
 ```
-cd TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64
+cd TwitchDownloaderWPF/bin/Release/net10.0-windows/publish/win-x64
 ```
 
 5. b) Accédez au dossier de build de la CLI :
 
 ```
-cd TwitchDownloaderCLI/bin/Release/net6.0/publish
+cd TwitchDownloaderCLI/bin/Release/net10.0/publish
 ```
 
 # Crédits tiers

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using CommandLine.Text;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes;
@@ -13,7 +14,7 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI
 {
-    internal static class Program
+    internal static partial class Program
     {
         private static void Main(string[] args)
         {
@@ -76,6 +77,9 @@ namespace TwitchDownloaderCLI
             Environment.Exit(1);
         }
 
+        [GeneratedRegex("""(?<=\d)\+[0-9a-f]+""")]
+        private static partial Regex GitHashRegex { get; }
+
         private static void WriteApplicationBanner(ITwitchDownloaderArgs args)
         {
             if (args.ShowBanner == false || (args.LogLevel & LogLevel.None) != 0)
@@ -87,7 +91,7 @@ namespace TwitchDownloaderCLI
 
 #if !DEBUG
             // Remove git commit hash from version string
-            nameVersionString = System.Text.RegularExpressions.Regex.Replace(nameVersionString, @"(?<=\d)\+[0-9a-f]+", "");
+            nameVersionString = GitHashRegex.Replace(nameVersionString, "");
 #endif
 
             Console.WriteLine($"{nameVersionString} {CopyrightInfo.Default.ToString()!.Replace("\u00A9", "(c)")}");

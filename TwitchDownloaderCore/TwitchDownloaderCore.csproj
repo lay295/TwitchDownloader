@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RepositoryUrl>https://github.com/lay295/TwitchDownloader</RepositoryUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Lewis Pardo</Authors>
     <Version>1.1.6</Version>
     <Platforms>AnyCPU;x64</Platforms>
-    <LangVersion>10</LangVersion>
+    <LangVersion>default</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!--TODO: <Nullable>enable</Nullable> once we have required keyword-->
   </PropertyGroup>
@@ -29,12 +29,11 @@
   <ItemGroup>
     <PackageReference Include="HarfBuzzSharp" Version="7.3.0.3" />
     <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="7.3.0.3" />
-    <PackageReference Include="Mono.Posix" Version="7.1.0-final.1.21458.1" />
     <PackageReference Include="SkiaSharp" Version="2.88.9" />
     <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.9" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.9" />
     <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="2.88.9" />
-    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="System.Text.Json" Version="10.0.2" />
     <PackageReference Include="Unicode.net" Version="2.0.0" />
   </ItemGroup>
 

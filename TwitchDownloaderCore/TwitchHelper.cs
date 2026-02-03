@@ -15,7 +15,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Mono.Unix;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
@@ -32,7 +31,7 @@ namespace TwitchDownloaderCore
             Timeout = TimeSpan.FromSeconds(20)
         };
 
-        private static readonly string[] BttvZeroWidth = { "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat" };
+        private static readonly string[] BttvZeroWidth = ["SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat"];
         private const string SEVEN_TV_PROXY_HOST = "7tv-imageproxy.twitcharchives.workers.dev";
 
         public static async Task<GqlVideoResponse> GetVideoInfo(long videoId)
@@ -1137,7 +1136,7 @@ namespace TwitchDownloaderCore
         }
 
         /// <inheritdoc cref="Directory.CreateDirectory"/>
-        public static DirectoryInfo CreateDirectory(string path)
+        public static DirectoryInfo CreateDirectory(string path, ITaskLogger logger = null)
         {
             DirectoryInfo directoryInfo = Directory.CreateDirectory(path);
 
@@ -1145,23 +1144,26 @@ namespace TwitchDownloaderCore
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    SetDirectoryPermissions(path);
+                    Set777UnixFilePermissions(directoryInfo);
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                logger?.LogVerbose($"Failed to set unix file mode for {directoryInfo.FullName}: {e.Message}");
+            }
 
             return directoryInfo;
         }
 
-        [SupportedOSPlatform("linux")]
-        [SupportedOSPlatform("osx")]
-        private static void SetDirectoryPermissions(string path)
+        [UnsupportedOSPlatform("windows")]
+        public static FileSystemInfo Set777UnixFilePermissions(FileSystemInfo fileSystemInfo)
         {
-            var folderInfo = new UnixFileInfo(path);
-            folderInfo.FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute |
-                                               FileAccessPermissions.GroupRead | FileAccessPermissions.GroupWrite |
-                                               FileAccessPermissions.OtherRead | FileAccessPermissions.OtherWrite;
-            folderInfo.Refresh();
+            fileSystemInfo.UnixFileMode = UnixFileMode.OtherExecute | UnixFileMode.OtherWrite | UnixFileMode.OtherRead
+                                          | UnixFileMode.GroupExecute | UnixFileMode.GroupWrite | UnixFileMode.GroupRead
+                                          | UnixFileMode.UserExecute | UnixFileMode.UserWrite | UnixFileMode.UserRead;
+
+            fileSystemInfo.Refresh();
+            return fileSystemInfo;
         }
 
         /// <summary>

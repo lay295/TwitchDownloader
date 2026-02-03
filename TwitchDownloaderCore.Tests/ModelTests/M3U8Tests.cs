@@ -267,22 +267,22 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             var streams = new M3U8.Stream[]
             {
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "1080p60", false, false),
-                    new M3U8.Stream.ExtStreamInfo(0, 5898203, new[] { "avc1.64002A", "mp4a.40.2" }, (1920, 1080), "chunked", 59.995m),
+                    new M3U8.Stream.ExtStreamInfo(0, 5898203, ["avc1.64002A", "mp4a.40.2"], (1920, 1080), "chunked", 59.995m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/chunked/index-dvr.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 3443956, new[] { "avc1.4D0020", "mp4a.40.2" }, (1280, 720), "720p60", 59.995m),
+                    new M3U8.Stream.ExtStreamInfo(0, 3443956, ["avc1.4D0020", "mp4a.40.2"], (1280, 720), "720p60", 59.995m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/720p60/index-dvr.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1454397, new[] { "avc1.4D001F", "mp4a.40.2" }, (852, 480), "480p30", 29.998m),
+                    new M3U8.Stream.ExtStreamInfo(0, 1454397, ["avc1.4D001F", "mp4a.40.2"], (852, 480), "480p30", 29.998m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/480p30/index-dvr.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "audio_only", "Audio Only", false, false),
-                    new M3U8.Stream.ExtStreamInfo(0, 220328, new[] { "mp4a.40.2" }, (0, 0), "audio_only", 0m),
+                    new M3U8.Stream.ExtStreamInfo(0, 220328, ["mp4a.40.2"], (0, 0), "audio_only", 0m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/audio_only/index-dvr.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 708016, new[] { "avc1.4D001E", "mp4a.40.2" }, (640, 360), "360p30", 29.998m),
+                    new M3U8.Stream.ExtStreamInfo(0, 708016, ["avc1.4D001E", "mp4a.40.2"], (640, 360), "360p30", 29.998m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/360p30/index-dvr.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "160p30", "160p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 288409, new[] { "avc1.4D000C", "mp4a.40.2" }, (284, 160), "160p30", 29.998m),
+                    new M3U8.Stream.ExtStreamInfo(0, 288409, ["avc1.4D000C", "mp4a.40.2"], (284, 160), "160p30", 29.998m),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/160p30/index-dvr.m3u8")
             };
 
@@ -480,19 +480,19 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             var streams = new M3U8.Stream[]
             {
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "1080p60", "1080p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, (1920, 1080), "1080p60", 60m),
+                    new M3U8.Stream.ExtStreamInfo(1, 9878400, ["avc1.64002A", "mp4a.40.2"], (1920, 1080), "1080p60", 60m),
                     "1080p60/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 3330599, new[] { "avc1.4D401F", "mp4a.40.2" }, (1280, 720), "720p60", 60m),
+                    new M3U8.Stream.ExtStreamInfo(1, 3330599, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), "720p60", 60m),
                     "720p60/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 1335600, new[] { "avc1.4D401F", "mp4a.40.2" }, (852, 480), "480p30", 30m),
+                    new M3U8.Stream.ExtStreamInfo(1, 1335600, ["avc1.4D401F", "mp4a.40.2"], (852, 480), "480p30", 30m),
                     "480p30/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 630000, new[] { "avc1.4D401F", "mp4a.40.2" }, (640, 360), "360p30", 30m),
+                    new M3U8.Stream.ExtStreamInfo(1, 630000, ["avc1.4D401F", "mp4a.40.2"], (640, 360), "360p30", 30m),
                     "360p30/playlist.m3u8"),
                 new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "160p30", "160p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(1, 230000, new[] { "avc1.4D401F", "mp4a.40.2" }, (284, 160), "160p30", 30m),
+                    new M3U8.Stream.ExtStreamInfo(1, 230000, ["avc1.4D401F", "mp4a.40.2"], (284, 160), "160p30", 30m),
                     "160p30/playlist.m3u8")
             };
 
