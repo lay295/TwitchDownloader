@@ -35,9 +35,8 @@ namespace TwitchDownloaderCore.Chat
 
             await using var sw = new StreamWriter(outputStream, leaveOpen: true);
 
-            while (!templateReader.EndOfStream)
+            while (await templateReader.ReadLineAsync(cancellationToken) is { } line)
             {
-                var line = await templateReader.ReadLineAsync();
                 switch (line)
                 {
                     case "<!-- TITLE -->":
