@@ -14,7 +14,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 10.0.x
       - name: Run TwitchDownloaderCLI Tests
         run: dotnet test TwitchDownloaderCLI.Tests
       - name: Run TwitchDownloaderCore Tests
@@ -30,7 +30,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 10.0.x
     - name: Build Windows GUI
       run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=Portable
     
@@ -45,12 +45,12 @@ jobs:
         file-name: ffmpeg.zip
         
     - name: Bundle FFmpeg
-      run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64/ffmpeg.exe
+      run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/Release/net10.0-windows/publish/win-x64/ffmpeg.exe
       
     - name: Zip Windows GUI
       uses: vimtor/action-zip@v1.2
       with:
-        files: "TwitchDownloaderWPF/bin/Release/net6.0-windows/publish/win-x64"
+        files: "TwitchDownloaderWPF/bin/Release/net10.0-windows/publish/win-x64"
         dest: TwitchDownloaderGUI-Windows-x64.zip
 
     - name: Upload Windows GUI Artifact Asset
@@ -67,7 +67,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 10.0.x
     - name: Build Windows CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=Windows -p:DebugType=Portable
     - name: Build Linux CLI
@@ -82,31 +82,31 @@ jobs:
     - name: Zip Windows CLI
       uses: vimtor/action-zip@v1.2
       with:
-        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/Windows"
+        files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/Windows"
         dest: TwitchDownloaderCLI-Windows-x64.zip
         
     - name: Zip Linux CLI
       uses: vimtor/action-zip@v1.2
       with:
-        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/Linux"
+        files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/Linux"
         dest: TwitchDownloaderCLI-Linux-x64.zip
         
     - name: Zip LinuxAlpine CLI
       uses: vimtor/action-zip@v1.2
       with:
-        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxAlpine"
+        files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/LinuxAlpine"
         dest: TwitchDownloaderCLI-LinuxAlpine-x64.zip
     
     - name: Zip LinuxArm CLI
       uses: vimtor/action-zip@v1.2
       with:
-        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm"
+        files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/LinuxArm"
         dest: TwitchDownloaderCLI-LinuxArm.zip
         
     - name: Zip LinuxArm64 CLI
       uses: vimtor/action-zip@v1.2
       with:
-        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/LinuxArm64"
+        files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/LinuxArm64"
         dest: TwitchDownloaderCLI-LinuxArm64.zip
 
     - name: Upload Windows CLI Artifact Asset
@@ -147,7 +147,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 10.0.x
     - name: Build MacOS CLI
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOS -p:DebugType=Portable
     - name: Build MacOSArm64 CLI
@@ -156,13 +156,13 @@ jobs:
     - name: Zip MacOS CLI
       uses: vimtor/action-zip@v1.2
       with:
-        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOS"
+        files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/MacOS"
         dest: TwitchDownloaderCLI-MacOS-x64.zip
 
     - name: Zip MacOSArm64 CLI
       uses: vimtor/action-zip@v1.2
       with:
-        files: "TwitchDownloaderCLI/bin/Release/net6.0/publish/MacOSArm64"
+        files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/MacOSArm64"
         dest: TwitchDownloaderCLI-MacOSArm64.zip
 
     - name: Upload MacOS CLI Artifact Asset

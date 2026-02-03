@@ -494,7 +494,7 @@ Default true boolean flags must be assigned: `--default-true-flag=false`. Defaul
 Enum flag arguments may be assigned without spaces `--flag Value1,Value2,Value3` or with spaces when wrapped in quotes `--flag "Value1, Value2, Value3"` (see [String arguments](#string-arguments)).
 
 ### Time durations
-Time duration arguments may be formatted in milliseconds `###ms`, seconds `###s`, minutes `###m`, hours `###h`, or [time](https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0) (i.e. `hh:mm:ss`, `mm:ss`, `dd.hh:mm:ss.ms`).
+Time duration arguments may be formatted in milliseconds `###ms`, seconds `###s`, minutes `###m`, hours `###h`, or [time](https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-10.0) (i.e. `hh:mm:ss`, `mm:ss`, `dd.hh:mm:ss.ms`).
 If the time duration is given as a number without a unit, seconds will be assumed. Decimals are supported.
 
 "Beginning" arguments set when trimming begins. For example, `--beginning 17s` will make the output start 17 seconds after the source begins.
