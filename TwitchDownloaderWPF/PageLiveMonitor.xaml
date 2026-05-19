@@ -1,0 +1,95 @@
+<Page x:Class="TwitchDownloaderWPF.PageLiveMonitor"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:lex="http://wpflocalizeextension.codeplex.com"
+      lex:LocalizeDictionary.DesignCulture=""
+      lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
+      lex:ResxLocalizationProvider.DefaultDictionary="Strings"
+      xmlns:hc="https://handyorg.github.io/handycontrol"
+      xmlns:fa="http://schemas.fontawesome.com/icons/"
+      mc:Ignorable="d"
+      d:DesignHeight="400" d:DesignWidth="800"
+      Title="PageLiveMonitor" Initialized="Page_Initialized" Loaded="Page_Loaded">
+    <Grid Background="{DynamicResource AppBackground}" Margin="20,15,20,10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,90,0">
+            <TextBlock Text="Live Monitor" FontWeight="Bold" FontSize="18" Foreground="{DynamicResource AppText}"/>
+            <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"
+                       Text="Monitors the channels below. When a channel goes live, the in-progress VOD (and optionally chat) is added to the queue with 'delay until offline' enabled, so the entire stream is downloaded retroactively once it ends. The channel must have VODs/archive enabled on Twitch."/>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                <TextBlock Text="Channels (Twitch login names)" Foreground="{DynamicResource AppText}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBox x:Name="textChannel" MinWidth="160" KeyDown="textChannel_KeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <Button x:Name="btnAddChannel" Content="Add" MinWidth="50" Margin="4,0,0,0" Click="btnAddChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                </StackPanel>
+                <ListBox x:Name="listChannels" Height="170" Margin="0,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <Button x:Name="btnRemoveChannel" Content="Remove Selected" Margin="0,4,0,0" Click="btnRemoveChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Save to:" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                    <TextBox x:Name="textFolder" MinWidth="280" Margin="6,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <Button x:Name="btnFolder" Content="..." MinWidth="34" Margin="4,0,0,0" Click="btnFolder_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Quality:" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                    <ComboBox x:Name="comboQuality" SelectedIndex="0" MinWidth="120" Margin="6,0,0,0" ToolTip="Quality used once the stream ends and the VOD is downloaded" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                        <ComboBoxItem Content="Source"/>
+                        <ComboBoxItem Content="1440p"/>
+                        <ComboBoxItem Content="1080p"/>
+                        <ComboBoxItem Content="720p"/>
+                        <ComboBoxItem Content="480p"/>
+                        <ComboBoxItem Content="360p"/>
+                        <ComboBoxItem Content="160p"/>
+                        <ComboBoxItem Content="144p"/>
+                        <ComboBoxItem Content="Worst"/>
+                        <ComboBoxItem Content="Audio Only"/>
+                    </ComboBox>
+                    <TextBlock Text="Poll every (sec):" VerticalAlignment="Center" Margin="16,0,0,0" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numPoll" Value="60" Minimum="30" Maximum="3600" Width="80" Margin="6,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="{lex:Loc VideoDownloadThreads}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numThreads" Value="4" Minimum="1" Maximum="50" Width="80" Margin="6,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
+                <CheckBox x:Name="checkChat" Content="Also download chat (JSON, gzip) for each recorded stream" Margin="0,10,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                    <Button x:Name="btnToggle" Content="Start Monitoring" MinWidth="140" Height="34" Click="btnToggle_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                    <TextBlock x:Name="textState" Text="Stopped" VerticalAlignment="Center" Margin="12,0,0,0" FontWeight="Bold" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Margin="0,14,0,0">
+            <TextBlock Text="Log" Foreground="{DynamicResource AppText}"/>
+            <RichTextBox x:Name="textLog" IsReadOnly="True" Margin="0,3,0,0" Height="150" VerticalScrollBarVisibility="Auto" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                <RichTextBox.Resources>
+                    <Style TargetType="{x:Type Paragraph}">
+                        <Setter Property="Margin" Value="0"/>
+                    </Style>
+                </RichTextBox.Resources>
+            </RichTextBox>
+        </StackPanel>
+    </Grid>
+</Page>
