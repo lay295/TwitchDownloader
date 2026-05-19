@@ -41,6 +41,8 @@ namespace TwitchDownloaderWPF
             InitializeComponent();
         }
 
+        public bool IsActionInProgress => BtnCancel.Visibility == Visibility.Visible;
+
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
             await GetClipInfo();
@@ -59,7 +61,7 @@ namespace TwitchDownloaderWPF
             {
                 btnGetInfo.IsEnabled = false;
                 comboQuality.Items.Clear();
-                var clipRenderStatus = await TwitchHelper.GetShareClipRenderStatus(clipId);
+                var clipRenderStatus = await TwitchHelper.GetShareClipRenderStatus(clipId, Settings.Default.OAuth);
                 var clip = clipRenderStatus.data.clip;
 
                 var thumbUrl = clip.thumbnailURL;
@@ -271,6 +273,7 @@ namespace TwitchDownloaderWPF
             {
                 Filename = fileName,
                 Id = clipId,
+                Oauth = Settings.Default.OAuth,
                 Quality = comboQuality.Text,
                 ThrottleKib = Settings.Default.DownloadThrottleEnabled
                     ? Settings.Default.MaximumBandwidthKib

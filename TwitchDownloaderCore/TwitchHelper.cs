@@ -64,6 +64,34 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlVideoTokenResponse>();
         }
 
+        public static async Task<GqlVideoTokenResponse> GetLiveStreamToken(string channelLogin, string authToken)
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"operationName\":\"PlaybackAccessToken_Template\",\"query\":\"query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: \\\"web\\\", playerBackend: \\\"mediaplayer\\\", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: \\\"web\\\", playerBackend: \\\"mediaplayer\\\", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}\",\"variables\":{\"isLive\":true,\"login\":\"" + channelLogin + "\",\"isVod\":false,\"vodID\":\"\",\"playerType\":\"site\"}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            if (!string.IsNullOrWhiteSpace(authToken))
+                request.Headers.Add("Authorization", $"OAuth {authToken}");
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<GqlVideoTokenResponse>();
+        }
+
+        public static async Task<string> GetLiveStreamPlaylist(string channelLogin, string token, string sig)
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri($"https://usher.ttvnw.net/api/channel/hls/{channelLogin}.m3u8?sig={sig}&token={Uri.EscapeDataString(token)}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h265,h264&fast_bread=true"),
+                Method = HttpMethod.Get
+            };
+            using var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
+
         public static async Task<string> GetVideoPlaylist(long videoId, string token, string sig)
         {
             HttpRequestMessage request;
@@ -124,7 +152,7 @@ namespace TwitchDownloaderCore
             return false;
         }
 
-        public static async Task<GqlClipResponse> GetClipInfo(object clipId)
+        public static async Task<GqlClipResponse> GetClipInfo(object clipId, string oauth = null)
         {
             var request = new HttpRequestMessage()
             {
@@ -133,12 +161,14 @@ namespace TwitchDownloaderCore
                 Content = new StringContent("{\"query\":\"query{clip(slug:\\\"" + clipId + "\\\"){title,thumbnailURL,createdAt,curator{id,displayName,login},durationSeconds,broadcaster{id,displayName,login},videoOffsetSeconds,video{id},viewCount,game{id,displayName,boxArtURL}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            if (!string.IsNullOrWhiteSpace(oauth))
+                request.Headers.Add("Authorization", $"OAuth {oauth}");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlClipResponse>();
         }
 
-        public static async Task<GqlClipTokenResponse> GetClipLinks(string clipId)
+        public static async Task<GqlClipTokenResponse> GetClipLinks(string clipId, string oauth = null)
         {
             var request = new HttpRequestMessage()
             {
@@ -147,6 +177,8 @@ namespace TwitchDownloaderCore
                 Content = new StringContent("{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            if (!string.IsNullOrWhiteSpace(oauth))
+                request.Headers.Add("Authorization", $"OAuth {oauth}");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
@@ -159,7 +191,7 @@ namespace TwitchDownloaderCore
             return gqlClipTokenResponses;
         }
 
-        public static async Task<GqlShareClipRenderStatusResponse> GetShareClipRenderStatus(string clipId)
+        public static async Task<GqlShareClipRenderStatusResponse> GetShareClipRenderStatus(string clipId, string oauth = null)
         {
             var request = new HttpRequestMessage()
             {
@@ -168,6 +200,8 @@ namespace TwitchDownloaderCore
                 Content = new StringContent("{\"operationName\":\"ShareClipRenderStatus\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"761bc03a4b100ec4f73fa78a5011847bb8ad7693d223d055fd013f79390acd41\"}}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            if (!string.IsNullOrWhiteSpace(oauth))
+                request.Headers.Add("Authorization", $"OAuth {oauth}");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 

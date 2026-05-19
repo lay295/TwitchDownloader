@@ -11,8 +11,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Navigation;
+using System.Linq;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderWPF.Services;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
@@ -29,6 +31,7 @@ namespace TwitchDownloaderWPF
         public static PageChatDownload pageChatDownload = new PageChatDownload();
         public static PageChatUpdate pageChatUpdate = new PageChatUpdate();
         public static PageChatRender pageChatRender = new PageChatRender();
+        public static PageLiveMonitor pageLiveMonitor = new PageLiveMonitor();
         public static PageQueue pageQueue = new PageQueue();
 
         public MainWindow()
@@ -59,6 +62,11 @@ namespace TwitchDownloaderWPF
         private void btnChatRender_Click(object sender, RoutedEventArgs e)
         {
             Main.Content = pageChatRender;
+        }
+
+        private void btnLiveMonitor_Click(object sender, RoutedEventArgs e)
+        {
+            Main.Content = pageLiveMonitor;
         }
 
         private void btnQueue_Click(object sender, RoutedEventArgs e)
@@ -190,6 +198,40 @@ namespace TwitchDownloaderWPF
             }
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!IsAnyOperationRunning())
+                return;
+
+            var result = MessageBox.Show(this,
+                Translations.Strings.ExitWhileRunningMessage.Replace(@"\n", Environment.NewLine),
+                Translations.Strings.ExitWhileRunningTitle,
+                MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                e.Cancel = true;
+            }
+        }
+
+        private static bool IsAnyOperationRunning()
+        {
+            lock (PageQueue.taskLock)
+            {
+                if (PageQueue.taskList.Any(task => task.Status is TwitchTaskStatus.Running or TwitchTaskStatus.Stopping))
+                {
+                    return true;
+                }
+            }
+
+            return pageVodDownload.IsActionInProgress
+                   || pageClipDownload.IsActionInProgress
+                   || pageChatDownload.IsActionInProgress
+                   || pageChatUpdate.IsActionInProgress
+                   || pageChatRender.IsActionInProgress
+                   || pageLiveMonitor.IsMonitoring;
+        }
+
         private void Main_OnNavigated(object sender, NavigationEventArgs e)
         {
             UpdateSelectedBigButton();
@@ -202,6 +244,7 @@ namespace TwitchDownloaderWPF
             ((TextBlock)btnChatDownload.Content).TextDecorations = null;
             ((TextBlock)btnChatUpdate.Content).TextDecorations = null;
             ((TextBlock)btnChatRender.Content).TextDecorations = null;
+            ((TextBlock)btnLiveMonitor.Content).TextDecorations = null;
             ((TextBlock)btnQueue.Content).TextDecorations = null;
 
             var newPage = Main.Content;
@@ -224,6 +267,10 @@ namespace TwitchDownloaderWPF
             else if (ReferenceEquals(newPage, pageChatRender))
             {
                 ((TextBlock)btnChatRender.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageLiveMonitor))
+            {
+                ((TextBlock)btnLiveMonitor.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageQueue))
             {
