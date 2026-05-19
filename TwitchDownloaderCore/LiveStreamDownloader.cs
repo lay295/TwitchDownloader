@@ -60,7 +60,9 @@ namespace TwitchDownloaderCore
             if (!isLive)
             {
                 _progress.LogWarning($"'{channel}' is not live (status: {video.status ?? "unknown"}). Downloading the complete VOD instead.");
-                await new VideoDownloader(BuildOptions(outputFile, null, null), _progress).DownloadAsync(cancellationToken);
+                await new VideoDownloader(BuildOptions(outputFile,
+                    _options.TrimBeginning ? _options.TrimBeginningTime : (TimeSpan?)null,
+                    _options.TrimEnding ? _options.TrimEndingTime : (TimeSpan?)null), _progress).DownloadAsync(cancellationToken);
                 _progress.ReportProgress(100);
                 return;
             }
@@ -121,7 +123,9 @@ namespace TwitchDownloaderCore
                 // almost always be done before the user ever stops the recording.
                 using var backCatalogCts = new CancellationTokenSource();
 
-                var backCatalogTask = new VideoDownloader(BuildOptions(partA, null, splitTime), _progress)
+                var backCatalogTask = new VideoDownloader(BuildOptions(partA,
+                    _options.TrimBeginning ? _options.TrimBeginningTime : (TimeSpan?)null,
+                    splitTime), _progress)
                     .DownloadAsync(backCatalogCts.Token);
 
                 // Live tail listens to the user's cancellation token — pressing Cancel

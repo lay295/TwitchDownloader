@@ -684,6 +684,12 @@ namespace TwitchDownloaderWPF
 
         private void BtnSyncToChat_Click(object sender, RoutedEventArgs e)
         {
+            if (currentVideoId == 0)
+            {
+                MessageBox.Show(Application.Current.MainWindow!, "No VOD is loaded on the VOD Download page.", "Nothing to Sync", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
             var chat = MainWindow.pageChatDownload;
 
             // Copy URL

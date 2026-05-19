@@ -1,3 +1,5 @@
+using System;
+
 namespace TwitchDownloaderCore.Options
 {
     public class LiveStreamDownloadOptions
@@ -20,5 +22,10 @@ namespace TwitchDownloaderCore.Options
         public int DownloadThreads { get; set; } = 4;
         public int ThrottleKib { get; set; } = -1;
         public string TempFolder { get; set; }
+
+        public bool TrimBeginning { get; set; }
+        public TimeSpan TrimBeginningTime { get; set; }
+        public bool TrimEnding { get; set; }
+        public TimeSpan TrimEndingTime { get; set; }
     }
 }
