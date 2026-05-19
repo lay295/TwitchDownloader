@@ -88,6 +88,7 @@ namespace TwitchDownloaderCore
         private SKPaint nameFont;
         private SKPaint outlinePaint;
         private readonly HighlightIcons highlightIcons;
+        private int _usernameCenteredY;
 
         public ChatRenderer(ChatRenderOptions chatRenderOptions, ITaskProgress progress)
         {
@@ -157,6 +158,11 @@ namespace TwitchDownloaderCore
                 (int)messageFont.MeasureText("0:00:00"),
                 (int)messageFont.MeasureText("00:00:00")
             };
+
+            // Cache username vertical centering offset (constant for the whole render)
+            SKRect nameBounds = new SKRect();
+            nameFont.MeasureText("ABC123", ref nameBounds);
+            _usernameCenteredY = (int)(((renderOptions.SectionHeight - nameBounds.Height) / 2.0) + nameBounds.Height);
 
             // Rough estimation of the width of a single block art character
             renderOptions.BlockArtCharWidth = GetFallbackFont('█').MeasureText("█");
@@ -1512,21 +1518,14 @@ namespace TwitchDownloaderCore
                 : nameFont.Clone();
 
             userPaint.Color = userColor;
-            userPaint.TextSize = (float)renderOptions.EffectiveUsernameFontSize;
             var userName = appendColon
                 ? comment.commenter.display_name + ":"
                 : comment.commenter.display_name;
 
-            // Center the username text using its own font metrics so it scales from the middle,
-            // matching badge centering behavior (badgeY = (sectionHeight - badgeHeight) / 2).
-            // The global sectionDefaultYPos is computed for messageFont, not the username font.
-            SKRect userNameBounds = new SKRect();
-            userPaint.MeasureText("ABC123", ref userNameBounds);
-            int userCenteredY = (int)(((renderOptions.SectionHeight - userNameBounds.Height) / 2.0) + userNameBounds.Height);
             int savedY = drawPos.Y;
-            drawPos.Y = userCenteredY;
+            drawPos.Y = _usernameCenteredY;
             DrawText(userName, userPaint, true, sectionImages, ref drawPos, defaultPos, false);
-            drawPos.Y = savedY; // restore for subsequent message text
+            drawPos.Y = savedY;
         }
 
         private SKColor AdjustUsernameVisibility(SKColor userColor, SKColor backgroundColor)
