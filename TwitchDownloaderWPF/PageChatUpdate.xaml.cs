@@ -46,6 +46,8 @@ namespace TwitchDownloaderWPF
             InitializeComponent();
         }
 
+        public bool IsActionInProgress => BtnCancel.Visibility == Visibility.Visible;
+
         private async void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
