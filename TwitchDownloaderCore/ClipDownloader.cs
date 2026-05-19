@@ -112,7 +112,7 @@ namespace TwitchDownloaderCore
 
         private async Task<(GqlShareClipRenderStatusResponse clipInfo, string downloadUrl)> GetClipInfo()
         {
-            var clipRenderStatus = await TwitchHelper.GetShareClipRenderStatus(downloadOptions.Id);
+            var clipRenderStatus = await TwitchHelper.GetShareClipRenderStatus(downloadOptions.Id, downloadOptions.Oauth);
             var clip = clipRenderStatus.data.clip;
 
             if (clip.playbackAccessToken is null)
@@ -200,6 +200,7 @@ namespace TwitchDownloaderCore
                     await Task.Delay(100, cancellationToken);
                 }
 
+                process?.Dispose();
                 File.Delete(metadataFile);
             }
         }

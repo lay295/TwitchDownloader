@@ -569,11 +569,12 @@ namespace TwitchDownloaderCore
                 return;
 
             // TimeSpan.Parse insists that hours cannot be greater than 24, thus we must use the TimeSpan ctor.
+            // ffmpeg reports time as HH:MM:SS.CC where CC is centiseconds (hundredths), not milliseconds.
             if (!int.TryParse(encodingTimeMatch.Groups[1].ValueSpan, out var hours)) return;
             if (!int.TryParse(encodingTimeMatch.Groups[2].ValueSpan, out var minutes)) return;
             if (!int.TryParse(encodingTimeMatch.Groups[3].ValueSpan, out var seconds)) return;
-            if (!int.TryParse(encodingTimeMatch.Groups[4].ValueSpan, out var milliseconds)) return;
-            var encodingTime = new TimeSpan(0, hours, minutes, seconds, milliseconds);
+            if (!int.TryParse(encodingTimeMatch.Groups[4].ValueSpan, out var centiseconds)) return;
+            var encodingTime = new TimeSpan(0, hours, minutes, seconds, centiseconds * 10);
 
             var percent = (int)Math.Round(encodingTime / videoLength * 100);
 
