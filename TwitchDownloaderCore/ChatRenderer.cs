@@ -60,6 +60,18 @@ namespace TwitchDownloaderCore
 
         private static readonly IReadOnlyDictionary<int, string> AllEmojiSequences = Emoji.All.ToFrozenDictionary(e => e.SortOrder, e => e.Sequence.AsString.Replace("️", ""));
 
+        // Index emojis by the first Unicode code point of their normalized sequence for fast prefix lookup
+        private static readonly FrozenDictionary<string, SingleEmoji[]> EmojiByLeadCodePoint =
+            Emoji.All
+                .GroupBy(static e =>
+                {
+                    var seq = AllEmojiSequences[e.SortOrder];
+                    if (seq.Length == 0) return null;
+                    return char.IsHighSurrogate(seq[0]) && seq.Length > 1 ? seq[..2] : seq[..1];
+                })
+                .Where(static g => g.Key is not null)
+                .ToFrozenDictionary(g => g.Key, g => g.ToArray());
+
         private readonly ITaskProgress _progress;
         private readonly ChatRenderOptions renderOptions;
         private readonly string _cacheDir;
@@ -1008,6 +1020,7 @@ namespace TwitchDownloaderCore
 
             var enumerator = StringInfo.GetTextElementEnumerator(fragmentString);
             StringBuilder nonEmojiBuffer = new();
+            var emojiBag = new List<SingleEmoji>();
             while (enumerator.MoveNext())
             {
                 var textElement = enumerator.GetTextElement();
@@ -1024,8 +1037,19 @@ namespace TwitchDownloaderCore
                     continue;
                 }
 
-                var emojiBag = new List<SingleEmoji>();
-                foreach (var emoji in Emoji.All)
+                // Narrow candidates to emojis sharing the same leading code point
+                var leadKey = char.IsHighSurrogate(normalizedElement[0]) && normalizedElement.Length > 1
+                    ? normalizedElement[..2]
+                    : normalizedElement[..1];
+
+                if (!EmojiByLeadCodePoint.TryGetValue(leadKey, out var candidates))
+                {
+                    nonEmojiBuffer.Append(textElement);
+                    continue;
+                }
+
+                emojiBag.Clear();
+                foreach (var emoji in candidates)
                 {
                     if (normalizedElement.StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
                         emojiBag.Add(emoji);
