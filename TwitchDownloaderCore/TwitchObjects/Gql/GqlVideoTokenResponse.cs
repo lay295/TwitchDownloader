@@ -3,6 +3,7 @@
     public class GqlVideoData
     {
         public VideoPlaybackAccessToken videoPlaybackAccessToken { get; set; }
+        public VideoPlaybackAccessToken streamPlaybackAccessToken { get; set; }
     }
 
     public class GqlVideoTokenResponse

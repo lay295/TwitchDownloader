@@ -146,7 +146,6 @@ namespace TwitchDownloaderCore.Services
             return newName.ReplaceAny(FilenameInvalidChars, '_');
         }
 
-        [return: MaybeNull]
         public static string GuessVodFileExtension([AllowNull] string qualityString)
         {
             if (string.IsNullOrWhiteSpace(qualityString))
@@ -159,14 +158,7 @@ namespace TwitchDownloaderCore.Services
                 return ".m4a";
             }
 
-            if (char.IsDigit(qualityString[0])
-                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase)
-                || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
-            {
-                return ".mp4";
-            }
-
-            return null;
+            return ".mp4";
         }
 
         public static FileInfo GetNonCollidingName(FileInfo fileInfo)

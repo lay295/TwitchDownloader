@@ -428,6 +428,24 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("ChatFontSize", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Username Size:.
+        /// </summary>
+        public static string ChatUsernameFontSize {
+            get {
+                return ResourceManager.GetString("ChatUsernameFontSize", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to the username font size tooltip.
+        /// </summary>
+        public static string ChatUsernameFontSizeTooltip {
+            get {
+                return ResourceManager.GetString("ChatUsernameFontSizeTooltip", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Height: ähnelt.
@@ -1344,6 +1362,24 @@ namespace TwitchDownloaderWPF.Translations {
         public static string IgnoreUsersListTooltip {
             get {
                 return ResourceManager.GetString("IgnoreUsersListTooltip", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Highlight Users List .
+        /// </summary>
+        public static string HighlightUsersList {
+            get {
+                return ResourceManager.GetString("HighlightUsersList", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to the highlight users list tooltip.
+        /// </summary>
+        public static string HighlightUsersListTooltip {
+            get {
+                return ResourceManager.GetString("HighlightUsersListTooltip", resourceCulture);
             }
         }
         
@@ -2658,6 +2694,30 @@ namespace TwitchDownloaderWPF.Translations {
         public static string VerboseErrorOutput {
             get {
                 return ResourceManager.GetString("VerboseErrorOutput", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Tasks Still Running.
+        /// </summary>
+        public static string LiveMonitor {
+            get {
+                return ResourceManager.GetString("LiveMonitor", resourceCulture);
+            }
+        }
+
+        public static string ExitWhileRunningTitle {
+            get {
+                return ResourceManager.GetString("ExitWhileRunningTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to the exit-while-running confirmation.
+        /// </summary>
+        public static string ExitWhileRunningMessage {
+            get {
+                return ResourceManager.GetString("ExitWhileRunningMessage", resourceCulture);
             }
         }
         
