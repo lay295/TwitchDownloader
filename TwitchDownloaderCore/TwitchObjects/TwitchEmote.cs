@@ -79,8 +79,7 @@ namespace TwitchDownloaderCore.TwitchObjects
             {
                 for (int i = 0; i < EmoteFrameDurations.Count; i++)
                 {
-                    EmoteFrameDurations.RemoveAt(i);
-                    EmoteFrameDurations.Insert(i, 10);
+                    EmoteFrameDurations[i] = 10;
                 }
                 TotalDuration = EmoteFrameDurations.Count * 10;
             }
@@ -98,15 +97,52 @@ namespace TwitchDownloaderCore.TwitchObjects
         private void ExtractFrames()
         {
             var codecInfo = Codec.Info;
-            for (int i = 0; i < FrameCount; i++)
+            var imageInfo = new SKImageInfo(codecInfo.Width, codecInfo.Height);
+
+            if (FrameCount == 1)
             {
-                SKImageInfo imageInfo = new SKImageInfo(codecInfo.Width, codecInfo.Height);
-                SKBitmap newBitmap = new SKBitmap(imageInfo);
-                IntPtr pointer = newBitmap.GetPixels();
-                SKCodecOptions codecOptions = new SKCodecOptions(i);
-                Codec.GetPixels(imageInfo, pointer, codecOptions);
-                newBitmap.SetImmutable();
-                EmoteFrames.Add(newBitmap);
+                var singleBitmap = new SKBitmap(imageInfo);
+                Codec.GetPixels(imageInfo, singleBitmap.GetPixels(), new SKCodecOptions(0));
+                singleBitmap.SetImmutable();
+                EmoteFrames.Add(singleBitmap);
+                return;
+            }
+
+            // For animated images, frames may be encoded as deltas on top of a prior frame.
+            // We must pre-fill each work bitmap with its required prior frame before decoding.
+            var frameInfos = Codec.FrameInfo;
+            var priorFrames = new SKBitmap[FrameCount];
+            try
+            {
+                for (int i = 0; i < FrameCount; i++)
+                {
+                    var workBitmap = new SKBitmap(imageInfo);
+
+                    int requiredFrame = i < frameInfos.Length ? frameInfos[i].RequiredFrame : -1;
+
+                    if (requiredFrame >= 0 && priorFrames[requiredFrame] != null)
+                    {
+                        // Pre-fill the destination with the prior frame's composited pixels
+                        priorFrames[requiredFrame].CopyTo(workBitmap);
+                    }
+
+                    Codec.GetPixels(imageInfo, workBitmap.GetPixels(), new SKCodecOptions(i, requiredFrame));
+
+                    // Keep a mutable copy so subsequent frames can use it as their prior frame
+                    var priorCopy = new SKBitmap(imageInfo);
+                    workBitmap.CopyTo(priorCopy);
+                    priorFrames[i] = priorCopy;
+
+                    workBitmap.SetImmutable();
+                    EmoteFrames.Add(workBitmap);
+                }
+            }
+            finally
+            {
+                foreach (var frame in priorFrames)
+                {
+                    frame?.Dispose();
+                }
             }
         }
 

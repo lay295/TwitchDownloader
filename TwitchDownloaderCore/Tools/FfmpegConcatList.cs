@@ -24,7 +24,7 @@ namespace TwitchDownloaderCore.Tools
                 cancellationToken.ThrowIfCancellationRequested();
 
                 await sw.WriteAsync("file '");
-                await sw.WriteAsync(DownloadTools.RemoveQueryString(stream.Path));
+                await sw.WriteAsync(DownloadTools.RemoveQueryString(stream.Path).Replace("#", @"\#"));
                 await sw.WriteLineAsync('\'');
 
                 foreach (var id in streamIds.Ids)

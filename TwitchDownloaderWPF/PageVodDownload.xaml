@@ -71,7 +71,6 @@
                 <TextBlock HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc VideoTrimMode}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc VideoTrimModeTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                 <TextBlock Text="{lex:Loc TrimVideo}" HorizontalAlignment="Right" Margin="0,10,0,0" Foreground="{DynamicResource AppText}" />
                 <TextBlock Text="{lex:Loc VideoDownloadThreads}" HorizontalAlignment="Right" Margin="0,46,0,0" Foreground="{DynamicResource AppText}" />
-                <TextBlock HorizontalAlignment="Right" Margin="0,21,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc Oauth}"/><Hyperlink NavigateUri="https://www.youtube.com/watch?v=1MBsUoFGuls" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc OauthTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
             </StackPanel>
             <StackPanel>
                 <TextBlock x:Name="labelLength" Text="0:0:0" Margin="5,0,0,0" Foreground="{DynamicResource AppText}" />
@@ -96,7 +95,6 @@
                         <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numEndSecond" ValueChanged="numEndSecond_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
                     <hc:NumericUpDown Margin="0,5,0,0" Minimum="1" Value="4" Maximum="20" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                    <TextBox x:Name="TextOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" TextChanged="TextOauth_TextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
             </StackPanel>
         </StackPanel>
@@ -105,10 +103,12 @@
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
                         <MenuItem x:Name="MenuItemEnqueue" Header="{lex:Loc EnqueueDownload}" Click="MenuItemEnqueue_Click"/>
+                        <MenuItem x:Name="MenuItemSplitByChapters" Header="Split by chapters..." Click="MenuItemSplitByChapters_Click"/>
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
             <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc TaskCancel}" Click="BtnCancel_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="BtnSyncToChat" Height="40" MinWidth="120" Margin="6,6,0,0" Content="→ Sync to Chat" Click="BtnSyncToChat_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </StackPanel>
         <!-- RIGHT -->
         <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">

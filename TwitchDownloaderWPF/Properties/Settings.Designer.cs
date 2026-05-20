@@ -57,6 +57,18 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FontSize"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double UsernameFontScale {
+            get {
+                return ((double)(this["UsernameFontScale"]));
+            }
+            set {
+                this["UsernameFontScale"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -441,6 +453,18 @@ namespace TwitchDownloaderWPF.Properties {
                 this["UpgradeRequired"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SettingsImported {
+            get {
+                return ((bool)(this["SettingsImported"]));
+            }
+            set {
+                this["SettingsImported"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -597,7 +621,235 @@ namespace TwitchDownloaderWPF.Properties {
                 this["IgnoreUsersList"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string HighlightUsersList {
+            get {
+                return ((string)(this["HighlightUsersList"]));
+            }
+            set {
+                this["HighlightUsersList"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("255")]
+        public byte HighlightUsersColorR {
+            get {
+                return ((byte)(this["HighlightUsersColorR"]));
+            }
+            set {
+                this["HighlightUsersColorR"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("215")]
+        public byte HighlightUsersColorG {
+            get {
+                return ((byte)(this["HighlightUsersColorG"]));
+            }
+            set {
+                this["HighlightUsersColorG"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public byte HighlightUsersColorB {
+            get {
+                return ((byte)(this["HighlightUsersColorB"]));
+            }
+            set {
+                this["HighlightUsersColorB"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LiveMonitorChannels {
+            get {
+                return ((string)(this["LiveMonitorChannels"]));
+            }
+            set {
+                this["LiveMonitorChannels"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("60")]
+        public int LiveMonitorPollSeconds {
+            get {
+                return ((int)(this["LiveMonitorPollSeconds"]));
+            }
+            set {
+                this["LiveMonitorPollSeconds"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LiveMonitorDownloadChat {
+            get {
+                return ((bool)(this["LiveMonitorDownloadChat"]));
+            }
+            set {
+                this["LiveMonitorDownloadChat"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LiveMonitorDownloadMode {
+            get {
+                return ((int)(this["LiveMonitorDownloadMode"]));
+            }
+            set {
+                this["LiveMonitorDownloadMode"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LiveMonitorAutoStart {
+            get {
+                return ((bool)(this["LiveMonitorAutoStart"]));
+            }
+            set {
+                this["LiveMonitorAutoStart"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LiveMonitorFolder {
+            get {
+                return ((string)(this["LiveMonitorFolder"]));
+            }
+            set {
+                this["LiveMonitorFolder"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LiveMonitorQuality {
+            get {
+                return ((string)(this["LiveMonitorQuality"]));
+            }
+            set {
+                this["LiveMonitorQuality"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LiveMonitorTrimBeginning {
+            get {
+                return ((bool)(this["LiveMonitorTrimBeginning"]));
+            }
+            set {
+                this["LiveMonitorTrimBeginning"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LiveMonitorTrimBeginningHour {
+            get {
+                return ((int)(this["LiveMonitorTrimBeginningHour"]));
+            }
+            set {
+                this["LiveMonitorTrimBeginningHour"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LiveMonitorTrimBeginningMinute {
+            get {
+                return ((int)(this["LiveMonitorTrimBeginningMinute"]));
+            }
+            set {
+                this["LiveMonitorTrimBeginningMinute"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LiveMonitorTrimBeginningSecond {
+            get {
+                return ((int)(this["LiveMonitorTrimBeginningSecond"]));
+            }
+            set {
+                this["LiveMonitorTrimBeginningSecond"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LiveMonitorTrimEnding {
+            get {
+                return ((bool)(this["LiveMonitorTrimEnding"]));
+            }
+            set {
+                this["LiveMonitorTrimEnding"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LiveMonitorTrimEndingHour {
+            get {
+                return ((int)(this["LiveMonitorTrimEndingHour"]));
+            }
+            set {
+                this["LiveMonitorTrimEndingHour"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LiveMonitorTrimEndingMinute {
+            get {
+                return ((int)(this["LiveMonitorTrimEndingMinute"]));
+            }
+            set {
+                this["LiveMonitorTrimEndingMinute"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LiveMonitorTrimEndingSecond {
+            get {
+                return ((int)(this["LiveMonitorTrimEndingSecond"]));
+            }
+            set {
+                this["LiveMonitorTrimEndingSecond"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
@@ -1026,6 +1278,66 @@ namespace TwitchDownloaderWPF.Properties {
             }
             set {
                 this["AvatarScale"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool NotifyOnTaskComplete {
+            get {
+                return ((bool)(this["NotifyOnTaskComplete"]));
+            }
+            set {
+                this["NotifyOnTaskComplete"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastEnqueuePresetName {
+            get {
+                return ((string)(this["LastEnqueuePresetName"]));
+            }
+            set {
+                this["LastEnqueuePresetName"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastRenderPresetName {
+            get {
+                return ((string)(this["LastRenderPresetName"]));
+            }
+            set {
+                this["LastRenderPresetName"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LiveMonitorAutoRender {
+            get {
+                return ((bool)(this["LiveMonitorAutoRender"]));
+            }
+            set {
+                this["LiveMonitorAutoRender"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LiveMonitorAutoRenderPreset {
+            get {
+                return ((string)(this["LiveMonitorAutoRenderPreset"]));
+            }
+            set {
+                this["LiveMonitorAutoRenderPreset"] = value;
             }
         }
     }

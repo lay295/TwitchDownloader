@@ -10,7 +10,7 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="{lex:Loc TitleEnqueueOptions}" MinHeight="300" Height="300" MinWidth="500" Width="500" SizeToContent="WidthAndHeight" SourceInitialized="Window_OnSourceInitialized" Background="{DynamicResource AppBackground}">
+        Title="{lex:Loc TitleEnqueueOptions}" MinHeight="300" Height="300" MinWidth="500" Width="500" SizeToContent="WidthAndHeight" SourceInitialized="Window_OnSourceInitialized" Loaded="WindowQueueOptions_Loaded" Background="{DynamicResource AppBackground}">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
@@ -28,6 +28,12 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1">
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                <TextBlock Text="Preset:" Margin="0,5,5,0" Foreground="{DynamicResource AppText}"/>
+                <ComboBox x:Name="comboPresets" Width="200" Margin="0,0,5,0" SelectionChanged="ComboPresets_SelectionChanged" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}" DisplayMemberPath="Name"/>
+                <Button Content="Save" Width="50" Margin="0,0,4,0" Click="BtnSavePreset_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <Button Content="Delete" Width="55" Click="BtnDeletePreset_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            </StackPanel>
             <WrapPanel Orientation="Horizontal">
                 <TextBlock Text="{lex:Loc DownloadFolder}" HorizontalAlignment="Left" Margin="0,6,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppText}"/>
                 <TextBox x:Name="textFolder" HorizontalAlignment="Left" Height="23" Margin="3,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" MinWidth="300" TextChanged="TextFolder_OnTextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
@@ -48,7 +54,9 @@
                     <ComboBoxItem Content="Worst" />
                 </ComboBox>
             </StackPanel>
-            <CheckBox x:Name="checkDelay" Content="{lex:Loc DelayDownload}" HorizontalAlignment="Left" Margin="25,0,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" IsEnabled="False" />
+            <CheckBox x:Name="checkDelay" Content="{lex:Loc DelayDownload}" HorizontalAlignment="Left" Margin="25,0,0,0" VerticalAlignment="Top" Checked="checkDelay_Checked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" IsEnabled="False" />
+            <CheckBox x:Name="checkLive" Content="{lex:Loc LiveDownload}" ToolTip="{lex:Loc LiveDownloadTooltip}" HorizontalAlignment="Left" Margin="25,2,0,0" VerticalAlignment="Top" Checked="checkLive_Checked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" IsEnabled="False" />
+            <CheckBox x:Name="checkSplitByChapters" Content="Split by chapters" HorizontalAlignment="Left" Margin="25,2,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             <CheckBox x:Name="checkChat" Content="{lex:Loc DownloadChat}" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Checked="checkChat_Checked" Unchecked="checkChat_Unchecked" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             <StackPanel Margin="20,0,0,0">
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
