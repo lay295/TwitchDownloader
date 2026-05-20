@@ -188,11 +188,16 @@ namespace TwitchDownloaderWPF
         {
             var chatEnabled = checkChat.IsChecked.GetValueOrDefault();
             var hasPresets = comboRenderPreset.Items.Count > 0;
+
+            // Auto-render checkbox and default-preset combo require chat download + at least one preset
             checkAutoRender.IsEnabled = chatEnabled && hasPresets;
             comboRenderPreset.IsEnabled = chatEnabled && hasPresets && checkAutoRender.IsChecked.GetValueOrDefault();
-            comboChannelPreset.IsEnabled = chatEnabled && hasPresets && checkAutoRender.IsChecked.GetValueOrDefault();
             if (!chatEnabled || !hasPresets)
                 checkAutoRender.IsChecked = false;
+
+            // Per-channel override can be set any time there are presets (selection is independent
+            // of whether auto-render is currently on)
+            comboChannelPreset.IsEnabled = hasPresets;
         }
 
         /// <summary>
