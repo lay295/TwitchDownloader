@@ -23,7 +23,7 @@
         <StackPanel Grid.Row="0" Margin="0,0,90,0">
             <TextBlock Text="Live Monitor" FontWeight="Bold" FontSize="18" Foreground="{DynamicResource AppText}"/>
             <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"
-                       Text="Monitors the channels below. When a channel goes live, the already-aired back-catalog is downloaded immediately (multi-threaded) while the live tail is recorded concurrently with ffmpeg. Chat can optionally be queued alongside. The channel must have VODs/archive enabled on Twitch."/>
+                       Text="Monitors the channels below and queues downloads when a channel goes live. The channel must have VODs/archive enabled on Twitch."/>
         </StackPanel>
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
             <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
@@ -54,7 +54,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                     <TextBlock Text="Quality:" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
-                    <ComboBox x:Name="comboQuality" SelectedIndex="0" MinWidth="120" Margin="6,0,0,0" ToolTip="Quality used once the stream ends and the VOD is downloaded" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                    <ComboBox x:Name="comboQuality" SelectedIndex="0" MinWidth="120" Margin="6,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                         <ComboBoxItem Content="Source"/>
                         <ComboBoxItem Content="1440p"/>
                         <ComboBoxItem Content="1080p"/>
@@ -73,9 +73,21 @@
                     <TextBlock Text="{lex:Loc VideoDownloadThreads}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
                     <hc:NumericUpDown x:Name="numThreads" Value="4" Minimum="1" Maximum="50" Width="80" Margin="6,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 </StackPanel>
-                <CheckBox x:Name="checkChat" Content="Also download chat (JSON, gzip) for each recorded stream" Margin="0,10,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                <CheckBox x:Name="checkSplitChapters" Content="Split VOD by chapters when stream ends (queues one download per chapter)" Margin="0,6,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Download mode:" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                    <ComboBox x:Name="comboDownloadMode" SelectedIndex="0" Margin="6,0,0,0"
+                              SelectionChanged="comboDownloadMode_SelectionChanged"
+                              Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                        <ComboBoxItem Content="Live (back-catalog + concurrent ffmpeg recording)"
+                                      ToolTip="Downloads already-aired segments immediately (multi-threaded) while recording the live tail with ffmpeg at the same time."/>
+                        <ComboBoxItem Content="After stream ends (full VOD)"
+                                      ToolTip="Waits for the stream to finish, then queues a standard VOD download of the complete recording."/>
+                        <ComboBoxItem Content="After stream ends — split by chapters"
+                                      ToolTip="Waits for the stream to finish, then queues one VOD download per game chapter."/>
+                    </ComboBox>
+                </StackPanel>
+                <CheckBox x:Name="checkChat" Content="Also download chat (JSON, gzip) for each recorded stream" Margin="0,8,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                     <CheckBox x:Name="checkTrimStart" VerticalAlignment="Center" BorderBrush="{DynamicResource AppElementBorder}" Checked="checkTrimStart_CheckStateChanged" Unchecked="checkTrimStart_CheckStateChanged"/>
                     <TextBlock Text="Trim start" VerticalAlignment="Center" Margin="3,0,0,0" Foreground="{DynamicResource AppText}"/>
                     <hc:NumericUpDown x:Name="numTrimStartHour"   Minimum="0" Maximum="48" Value="0" Width="60" Margin="6,0,2,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
@@ -91,9 +103,10 @@
                     <hc:NumericUpDown x:Name="numTrimEndSecond" Minimum="0" Maximum="59" Value="0" Width="60" Margin="2,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                     <TextBlock Text="h  m  s" VerticalAlignment="Center" Margin="4,0,0,0" FontSize="10" Foreground="{DynamicResource AppText}" Opacity="0.6"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                     <Button x:Name="btnToggle" Content="Start Monitoring" MinWidth="140" Height="34" Click="btnToggle_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
                     <TextBlock x:Name="textState" Text="Stopped" VerticalAlignment="Center" Margin="12,0,0,0" FontWeight="Bold" Foreground="{DynamicResource AppText}"/>
+                    <CheckBox x:Name="checkAutoStart" Content="Auto-start on launch" VerticalAlignment="Center" Margin="16,0,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" ToolTip="Automatically begin monitoring when the app starts (requires at least one channel and a valid output folder)"/>
                 </StackPanel>
             </StackPanel>
         </Grid>
