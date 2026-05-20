@@ -277,6 +277,10 @@ namespace TwitchDownloaderWPF
 
         private void comboDownloadMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Guard: fires during XAML init before the trim controls exist yet
+            if (checkTrimStart is null || checkTrimEnd is null)
+                return;
+
             // Trim is meaningless for split-by-chapters mode (chapter boundaries are the trim points)
             var isSplitMode = comboDownloadMode.SelectedIndex == ModeAfterEndSplit;
             SetTrimControlsAvailable(!isSplitMode);
