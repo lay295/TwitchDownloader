@@ -32,6 +32,26 @@ namespace TwitchDownloaderCore
     {
         private static readonly HttpClient HttpClient = new();
 
+        // Tracks every ffmpeg process currently recording a live tail so they can be
+        // killed if the host application exits without going through normal cancellation.
+        private static readonly HashSet<Process> _activeFfmpegProcesses = new();
+        private static readonly object _activeFfmpegLock = new();
+
+        static LiveStreamDownloader()
+        {
+            AppDomain.CurrentDomain.ProcessExit += static (_, _) =>
+            {
+                lock (_activeFfmpegLock)
+                {
+                    foreach (var p in _activeFfmpegProcesses)
+                    {
+                        try { if (!p.HasExited) p.Kill(entireProcessTree: true); } catch { /* best-effort */ }
+                    }
+                    _activeFfmpegProcesses.Clear();
+                }
+            };
+        }
+
         private readonly LiveStreamDownloadOptions _options;
         private readonly ITaskProgress _progress;
 
@@ -57,13 +77,17 @@ namespace TwitchDownloaderCore
 
             // Clean up any leftover part files from a previous interrupted session
             // (e.g. the app was closed mid-recording and restarted while the stream is still live).
+            // The ProcessExit handler kills any surviving ffmpeg before we reach this point,
+            // so the files should be unlocked. If somehow a file is still locked, log and continue.
             var stalePartA = Path.Combine(Path.GetDirectoryName(outputFile) ?? "", Path.GetFileNameWithoutExtension(outputFile) + ".partA" + extension);
             var stalePartB = Path.Combine(Path.GetDirectoryName(outputFile) ?? "", Path.GetFileNameWithoutExtension(outputFile) + ".partB" + extension);
             if (File.Exists(stalePartA) || File.Exists(stalePartB))
             {
                 _progress.LogInfo("Removing leftover part files from a previous interrupted session.");
-                TryDelete(stalePartA);
-                TryDelete(stalePartB);
+                if (!TryDelete(stalePartA))
+                    _progress.LogWarning($"Could not delete stale part file (still locked?): {stalePartA}");
+                if (!TryDelete(stalePartB))
+                    _progress.LogWarning($"Could not delete stale part file (still locked?): {stalePartB}");
             }
 
             // If the broadcast already ended, the in-progress VOD is just a normal finished
@@ -303,6 +327,7 @@ namespace TwitchDownloaderCore
             };
 
             process.Start();
+            lock (_activeFfmpegLock) { _activeFfmpegProcesses.Add(process); }
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
@@ -325,6 +350,10 @@ namespace TwitchDownloaderCore
                     try { if (!process.HasExited) process.Kill(true); } catch { /* ignored */ }
                 }
                 throw;
+            }
+            finally
+            {
+                lock (_activeFfmpegLock) { _activeFfmpegProcesses.Remove(process); }
             }
 
             if (process.ExitCode != 0)
@@ -412,14 +441,15 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static void TryDelete(string path)
+        private static bool TryDelete(string path)
         {
             try
             {
                 if (!string.IsNullOrEmpty(path) && File.Exists(path))
                     File.Delete(path);
+                return true;
             }
-            catch { /* best effort */ }
+            catch { return false; }
         }
     }
 }
