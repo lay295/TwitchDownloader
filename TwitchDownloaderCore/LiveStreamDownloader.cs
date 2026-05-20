@@ -55,6 +55,17 @@ namespace TwitchDownloaderCore
 
             var (outputFile, extension) = ResolveOutputPath();
 
+            // Clean up any leftover part files from a previous interrupted session
+            // (e.g. the app was closed mid-recording and restarted while the stream is still live).
+            var stalePartA = Path.Combine(Path.GetDirectoryName(outputFile) ?? "", Path.GetFileNameWithoutExtension(outputFile) + ".partA" + extension);
+            var stalePartB = Path.Combine(Path.GetDirectoryName(outputFile) ?? "", Path.GetFileNameWithoutExtension(outputFile) + ".partB" + extension);
+            if (File.Exists(stalePartA) || File.Exists(stalePartB))
+            {
+                _progress.LogInfo("Removing leftover part files from a previous interrupted session.");
+                TryDelete(stalePartA);
+                TryDelete(stalePartB);
+            }
+
             // If the broadcast already ended, the in-progress VOD is just a normal finished
             // VOD - one multi-threaded download, no split, no stitch.
             if (!isLive)

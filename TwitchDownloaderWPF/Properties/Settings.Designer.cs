@@ -708,13 +708,25 @@ namespace TwitchDownloaderWPF.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool LiveMonitorSplitChapters {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LiveMonitorDownloadMode {
             get {
-                return ((bool)(this["LiveMonitorSplitChapters"]));
+                return ((int)(this["LiveMonitorDownloadMode"]));
             }
             set {
-                this["LiveMonitorSplitChapters"] = value;
+                this["LiveMonitorDownloadMode"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LiveMonitorAutoStart {
+            get {
+                return ((bool)(this["LiveMonitorAutoStart"]));
+            }
+            set {
+                this["LiveMonitorAutoStart"] = value;
             }
         }
 

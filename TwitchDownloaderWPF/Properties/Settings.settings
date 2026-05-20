@@ -173,7 +173,10 @@
     <Setting Name="LiveMonitorDownloadChat" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="LiveMonitorSplitChapters" Type="System.Boolean" Scope="User">
+    <Setting Name="LiveMonitorDownloadMode" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="LiveMonitorAutoStart" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="LiveMonitorFolder" Type="System.String" Scope="User">
