@@ -1316,5 +1316,29 @@ namespace TwitchDownloaderWPF.Properties {
                 this["LastRenderPresetName"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LiveMonitorAutoRender {
+            get {
+                return ((bool)(this["LiveMonitorAutoRender"]));
+            }
+            set {
+                this["LiveMonitorAutoRender"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LiveMonitorAutoRenderPreset {
+            get {
+                return ((string)(this["LiveMonitorAutoRenderPreset"]));
+            }
+            set {
+                this["LiveMonitorAutoRenderPreset"] = value;
+            }
+        }
     }
 }

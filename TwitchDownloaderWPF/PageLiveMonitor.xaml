@@ -42,8 +42,12 @@
                     <TextBox x:Name="textChannel" MinWidth="160" KeyDown="textChannel_KeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                     <Button x:Name="btnAddChannel" Content="Add" MinWidth="50" Margin="4,0,0,0" Click="btnAddChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
                 </StackPanel>
-                <ListBox x:Name="listChannels" Height="170" Margin="0,6,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <ListBox x:Name="listChannels" Height="120" Margin="0,6,0,0" SelectionChanged="listChannels_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 <Button x:Name="btnRemoveChannel" Content="Remove Selected" Margin="0,4,0,0" Click="btnRemoveChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <TextBlock Text="Render preset for selected channel:" Margin="0,8,0,0" FontSize="11" Opacity="0.75" Foreground="{DynamicResource AppText}"/>
+                <ComboBox x:Name="comboChannelPreset" Margin="0,3,0,0" SelectionChanged="comboChannelPreset_SelectionChanged"
+                          ToolTip="Override the render preset for the selected channel. Use '(default)' to inherit the global preset."
+                          Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             </StackPanel>
 
             <StackPanel Grid.Column="1">
@@ -86,7 +90,17 @@
                                       ToolTip="Waits for the stream to finish, then queues one VOD download per game chapter."/>
                     </ComboBox>
                 </StackPanel>
-                <CheckBox x:Name="checkChat" Content="Also download chat (JSON, gzip) for each recorded stream" Margin="0,8,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <CheckBox x:Name="checkChat" Content="Also download chat (JSON, gzip) for each recorded stream" Margin="0,8,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" Checked="checkChat_CheckStateChanged" Unchecked="checkChat_CheckStateChanged"/>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <CheckBox x:Name="checkAutoRender" Content="Also render chat after download" VerticalAlignment="Center"
+                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"
+                              ToolTip="Automatically queue a chat render once the chat download finishes. Uses the preset selected below (or per-channel override)."
+                              Checked="checkAutoRender_CheckStateChanged" Unchecked="checkAutoRender_CheckStateChanged"/>
+                    <ComboBox x:Name="comboRenderPreset" Margin="8,0,0,0" MinWidth="140"
+                              ToolTip="Default render preset used when no per-channel override is set."
+                              SelectionChanged="comboRenderPreset_SelectionChanged"
+                              Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                     <CheckBox x:Name="checkTrimStart" VerticalAlignment="Center" BorderBrush="{DynamicResource AppElementBorder}" Checked="checkTrimStart_CheckStateChanged" Unchecked="checkTrimStart_CheckStateChanged"/>
                     <TextBlock Text="Trim start" VerticalAlignment="Center" Margin="3,0,0,0" Foreground="{DynamicResource AppText}"/>

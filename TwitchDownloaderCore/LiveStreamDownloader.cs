@@ -122,6 +122,7 @@ namespace TwitchDownloaderCore
 
             int splitSegmentIndex;
             TimeSpan splitTime;
+            TimeSpan lastSegmentDuration;
             try
             {
                 var mediaString = await HttpClient.GetStringAsync(mediaUrl, cancellationToken);
@@ -129,20 +130,35 @@ namespace TwitchDownloaderCore
                 var segments = media.Streams ?? Array.Empty<M3U8.Stream>();
                 splitSegmentIndex = segments.Length;
                 splitTime = TimeSpan.FromSeconds((double)segments.Sum(s => s.PartInfo?.Duration ?? 0m));
+                lastSegmentDuration = segments.Length > 0
+                    ? TimeSpan.FromSeconds((double)(segments[^1].PartInfo?.Duration ?? 10m))
+                    : TimeSpan.Zero;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Could not read the live media playlist to find the split point: {ex.Message}", ex);
             }
 
-            if (splitSegmentIndex <= 0 || splitTime <= TimeSpan.FromSeconds(1))
+            // Need at least 2 segments so that partA gets at least one and partB gets the last.
+            if (splitSegmentIndex <= 1 || splitTime <= TimeSpan.FromSeconds(1))
             {
-                // Nothing meaningful aired yet - just record everything live with ffmpeg.
+                // Nothing (or almost nothing) meaningful aired yet - just record everything live with ffmpeg.
                 _progress.LogInfo("Nothing has aired yet; recording the whole broadcast live.");
                 await RecordLiveTail(mediaUrl, 0, outputFile, extension, channel, cancellationToken);
                 _progress.ReportProgress(100);
                 return;
             }
+
+            // Split strategy: give the LAST already-aired segment exclusively to the live tail (partB).
+            // partA gets everything up to (but not including) that segment.
+            // partB starts from that last segment via -live_start_index.
+            //
+            // Why: some ffmpeg versions clamp -live_start_index to last_seq_no when the requested
+            // index equals the current playlist length. Using N-1 (a definitely-present segment)
+            // avoids this, and keeping it exclusively in partB prevents a ~10 s repeated block at
+            // the join point.
+            var partATrimEnd = splitTime - lastSegmentDuration - TimeSpan.FromMilliseconds(100);
+            var ffmpegStartIndex = splitSegmentIndex - 1;
 
             var partA = Path.Combine(Path.GetDirectoryName(outputFile) ?? "", Path.GetFileNameWithoutExtension(outputFile) + ".partA" + extension);
             var partB = Path.Combine(Path.GetDirectoryName(outputFile) ?? "", Path.GetFileNameWithoutExtension(outputFile) + ".partB" + extension);
@@ -160,12 +176,12 @@ namespace TwitchDownloaderCore
 
                 var backCatalogTask = new VideoDownloader(BuildOptions(partA,
                     _options.TrimBeginning ? _options.TrimBeginningTime : (TimeSpan?)null,
-                    splitTime), _progress)
+                    partATrimEnd), _progress)
                     .DownloadAsync(backCatalogCts.Token);
 
                 // Live tail listens to the user's cancellation token — pressing Cancel
                 // gracefully stops the ffmpeg recording and lets us stitch what we have.
-                var liveTailTask = RecordLiveTail(mediaUrl, splitSegmentIndex, partB, extension, channel, cancellationToken);
+                var liveTailTask = RecordLiveTail(mediaUrl, ffmpegStartIndex, partB, extension, channel, cancellationToken);
 
                 bool stoppedEarly = false;
                 try
