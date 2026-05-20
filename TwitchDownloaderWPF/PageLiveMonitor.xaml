@@ -44,10 +44,31 @@
                 </StackPanel>
                 <ListBox x:Name="listChannels" Height="120" Margin="0,6,0,0" SelectionChanged="listChannels_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 <Button x:Name="btnRemoveChannel" Content="Remove Selected" Margin="0,4,0,0" Click="btnRemoveChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-                <TextBlock Text="Render preset for selected channel:" Margin="0,8,0,0" FontSize="11" Opacity="0.75" Foreground="{DynamicResource AppText}"/>
-                <ComboBox x:Name="comboChannelPreset" Margin="0,3,0,0" SelectionChanged="comboChannelPreset_SelectionChanged"
-                          ToolTip="Override the render preset for the selected channel. Use '(default)' to inherit the global preset."
-                          Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button x:Name="btnSaveChannelSettings" Content="Save for channel" IsEnabled="False" MinWidth="118"
+                            ToolTip="Save the current page settings as the profile for the selected channel."
+                            Click="btnSaveChannelSettings_Click"
+                            Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                    <Button x:Name="btnLoadChannelSettings" Content="Load" IsEnabled="False" MinWidth="46" Margin="4,0,0,0"
+                            ToolTip="Apply the selected channel's saved settings to the page."
+                            Click="btnLoadChannelSettings_Click"
+                            Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                    <Button x:Name="btnClearChannelSettings" Content="Clear" IsEnabled="False" MinWidth="46" Margin="4,0,0,0"
+                            ToolTip="Remove the saved settings for this channel (reverts to page defaults)."
+                            Click="btnClearChannelSettings_Click"
+                            Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBlock Text="Copy from:" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource AppText}"/>
+                    <ComboBox x:Name="comboCopyFrom" Margin="4,0,0,0" MinWidth="90"
+                              ToolTip="Channel whose saved settings will be copied to the selected channel."
+                              Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <Button x:Name="btnCopyChannelSettings" Content="Copy" IsEnabled="False" MinWidth="44" Margin="4,0,0,0"
+                            ToolTip="Copy the chosen channel's saved settings to the selected channel."
+                            Click="btnCopyChannelSettings_Click"
+                            Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                </StackPanel>
+                <TextBlock x:Name="textChannelSettingsStatus" Margin="0,4,0,0" FontSize="10" Opacity="0.7" Foreground="{DynamicResource AppText}" Text=""/>
             </StackPanel>
 
             <StackPanel Grid.Column="1">

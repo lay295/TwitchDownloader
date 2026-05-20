@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -28,27 +29,25 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageLiveMonitor : Page
     {
-        // Download modes stored in LiveMonitorDownloadMode setting
+        // Download modes
         private const int ModeLive = 0;
         private const int ModeAfterEnd = 1;
         private const int ModeAfterEndSplit = 2;
 
-        private const string DefaultPresetItem = "(default)";
-
         private readonly ObservableCollection<string> _channels = new();
         private readonly HashSet<long> _queuedVodIds = new();
 
-        // vodId → (channel login, output folder, splitByChapters) for deferred downloads
-        private readonly Dictionary<long, (string channel, string folder, bool splitChapters)> _pendingDownloads = new();
+        // vodId → (channel login, settings snapshot) for deferred (post-stream) downloads
+        private readonly Dictionary<long, (string channel, LiveMonitorChannelSettings settings)> _pendingDownloads = new();
 
         // Render presets loaded from ChatRenderPresetService
         private List<ChatRenderPreset> _renderPresets = new();
 
-        // Per-channel render preset overrides: channel login → preset name
-        private Dictionary<string, string> _channelPresets = new();
+        // Per-channel full settings profiles
+        private Dictionary<string, LiveMonitorChannelSettings> _channelSettings = new();
 
-        // Guard flag to suppress SelectionChanged side effects during programmatic updates
-        private bool _suppressPresetSelectionChanged;
+        // Guard: suppresses SaveSettings() side-effects during programmatic combo updates
+        private bool _suppressSelectionChanged;
 
         private readonly DispatcherTimer _pollTimer = new();
         private bool _polling;
@@ -109,13 +108,16 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            // Load render presets and per-channel overrides
-            _channelPresets = LiveMonitorPresetService.Load();
+            // Load render presets and per-channel settings profiles
+            _channelSettings = LiveMonitorChannelSettingsService.Load();
             RefreshPresetCombos();
 
             // Restore auto-render settings
             checkAutoRender.IsChecked = Settings.Default.LiveMonitorAutoRender;
             UpdateAutoRenderEnabled();
+
+            // Initialise per-channel settings UI
+            RefreshChannelSettingsUI();
 
             // Defer auto-start so the main window has finished loading first
             if (Settings.Default.LiveMonitorAutoStart)
@@ -128,16 +130,14 @@ namespace TwitchDownloaderWPF
         // ── Render preset helpers ─────────────────────────────────────────────
 
         /// <summary>
-        /// Reloads the render preset lists and repopulates both combo boxes.
+        /// Reloads the render preset list and repopulates <see cref="comboRenderPreset"/>.
         /// </summary>
         private void RefreshPresetCombos()
         {
             _renderPresets = ChatRenderPresetService.Load();
-
             var presetNames = _renderPresets.Select(p => p.Name).ToList();
 
-            // comboRenderPreset: default preset for all channels
-            _suppressPresetSelectionChanged = true;
+            _suppressSelectionChanged = true;
             comboRenderPreset.Items.Clear();
             foreach (var name in presetNames)
                 comboRenderPreset.Items.Add(name);
@@ -147,79 +147,36 @@ namespace TwitchDownloaderWPF
                 comboRenderPreset.SelectedItem = savedDefault;
             else if (comboRenderPreset.Items.Count > 0)
                 comboRenderPreset.SelectedIndex = 0;
-            _suppressPresetSelectionChanged = false;
+            _suppressSelectionChanged = false;
 
-            // comboChannelPreset: per-channel override (first item = use default)
-            _suppressPresetSelectionChanged = true;
-            comboChannelPreset.Items.Clear();
-            comboChannelPreset.Items.Add(DefaultPresetItem);
-            foreach (var name in presetNames)
-                comboChannelPreset.Items.Add(name);
-            _suppressPresetSelectionChanged = false;
-
-            RefreshChannelPresetCombo();
             UpdateAutoRenderEnabled();
         }
 
         /// <summary>
-        /// Updates comboChannelPreset to reflect the selected channel's override (or default).
-        /// </summary>
-        private void RefreshChannelPresetCombo()
-        {
-            _suppressPresetSelectionChanged = true;
-            if (listChannels.SelectedItem is string channel &&
-                _channelPresets.TryGetValue(channel, out var presetName) &&
-                comboChannelPreset.Items.Contains(presetName))
-            {
-                comboChannelPreset.SelectedItem = presetName;
-            }
-            else
-            {
-                comboChannelPreset.SelectedIndex = comboChannelPreset.Items.Count > 0 ? 0 : -1;
-            }
-            _suppressPresetSelectionChanged = false;
-        }
-
-        /// <summary>
-        /// Enables/disables checkAutoRender and comboRenderPreset based on whether
-        /// chat download and presets are available.
+        /// Enables/disables auto-render controls based on whether chat download and presets are available.
         /// </summary>
         private void UpdateAutoRenderEnabled()
         {
             var chatEnabled = checkChat.IsChecked.GetValueOrDefault();
             var hasPresets = comboRenderPreset.Items.Count > 0;
 
-            // Auto-render checkbox and default-preset combo require chat download + at least one preset
             checkAutoRender.IsEnabled = chatEnabled && hasPresets;
             comboRenderPreset.IsEnabled = chatEnabled && hasPresets && checkAutoRender.IsChecked.GetValueOrDefault();
             if (!chatEnabled || !hasPresets)
                 checkAutoRender.IsChecked = false;
-
-            // Per-channel override can be set any time there are presets (selection is independent
-            // of whether auto-render is currently on)
-            comboChannelPreset.IsEnabled = hasPresets;
         }
 
         /// <summary>
-        /// Returns the render preset to use for a given channel login.
-        /// Per-channel override takes priority; falls back to the global default.
-        /// Returns null if no preset is available.
+        /// Returns the render preset to use for a given effective settings snapshot.
+        /// Falls back to the first available preset if the specified name is not found.
         /// </summary>
-        private ChatRenderPreset GetRenderPresetForChannel(string channel)
+        private ChatRenderPreset GetRenderPresetForSettings(LiveMonitorChannelSettings eff)
         {
-            // Per-channel override
-            if (_channelPresets.TryGetValue(channel, out var overrideName))
+            if (!string.IsNullOrEmpty(eff.RenderPreset))
             {
-                var found = _renderPresets.FirstOrDefault(p => p.Name == overrideName);
+                var found = _renderPresets.FirstOrDefault(p => p.Name == eff.RenderPreset);
                 if (found != null) return found;
             }
-
-            // Global default
-            var defaultName = comboRenderPreset.SelectedItem as string;
-            if (!string.IsNullOrEmpty(defaultName))
-                return _renderPresets.FirstOrDefault(p => p.Name == defaultName);
-
-            // Fallback: first available
             return _renderPresets.FirstOrDefault();
         }
 
@@ -303,6 +260,131 @@ namespace TwitchDownloaderWPF
                 _ => ".mp4",
             };
 
+        // ── Per-channel settings helpers ──────────────────────────────────────
+
+        /// <summary>
+        /// Captures the current page UI state as a <see cref="LiveMonitorChannelSettings"/> snapshot.
+        /// </summary>
+        private LiveMonitorChannelSettings GetCurrentPageSettings() => new()
+        {
+            Folder = textFolder.Text,
+            Quality = SelectedQuality,
+            DownloadMode = DownloadMode,
+            PollSeconds = (int)numPoll.Value,
+            Threads = (int)numThreads.Value,
+            DownloadChat = checkChat.IsChecked.GetValueOrDefault(),
+            AutoRender = checkAutoRender.IsChecked.GetValueOrDefault(),
+            RenderPreset = comboRenderPreset.SelectedItem as string ?? "",
+            TrimBeginning = checkTrimStart.IsChecked.GetValueOrDefault(),
+            TrimBeginningHour = (int)numTrimStartHour.Value,
+            TrimBeginningMinute = (int)numTrimStartMinute.Value,
+            TrimBeginningSecond = (int)numTrimStartSecond.Value,
+            TrimEnding = checkTrimEnd.IsChecked.GetValueOrDefault(),
+            TrimEndingHour = (int)numTrimEndHour.Value,
+            TrimEndingMinute = (int)numTrimEndMinute.Value,
+            TrimEndingSecond = (int)numTrimEndSecond.Value,
+        };
+
+        /// <summary>
+        /// Applies a <see cref="LiveMonitorChannelSettings"/> snapshot to the page UI controls.
+        /// </summary>
+        private void ApplySettingsToPage(LiveMonitorChannelSettings s)
+        {
+            textFolder.Text = s.Folder;
+
+            foreach (ComboBoxItem item in comboQuality.Items)
+            {
+                if ((item.Content as string) == s.Quality)
+                {
+                    comboQuality.SelectedItem = item;
+                    break;
+                }
+            }
+
+            comboDownloadMode.SelectedIndex = Math.Clamp(s.DownloadMode, 0, 2);
+            numPoll.Value = Math.Max(30, s.PollSeconds);
+            numThreads.Value = Math.Max(1, s.Threads);
+
+            checkChat.IsChecked = s.DownloadChat;
+            checkAutoRender.IsChecked = s.AutoRender;
+
+            if (!string.IsNullOrEmpty(s.RenderPreset))
+            {
+                foreach (string item in comboRenderPreset.Items)
+                {
+                    if (item == s.RenderPreset)
+                    {
+                        comboRenderPreset.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
+
+            numTrimStartHour.Value = s.TrimBeginningHour;
+            numTrimStartMinute.Value = s.TrimBeginningMinute;
+            numTrimStartSecond.Value = s.TrimBeginningSecond;
+            checkTrimStart.IsChecked = s.TrimBeginning;
+
+            numTrimEndHour.Value = s.TrimEndingHour;
+            numTrimEndMinute.Value = s.TrimEndingMinute;
+            numTrimEndSecond.Value = s.TrimEndingSecond;
+            checkTrimEnd.IsChecked = s.TrimEnding;
+
+            var isSplitMode = s.DownloadMode == ModeAfterEndSplit;
+            SetTrimControlsAvailable(!isSplitMode);
+            SetTrimStartEnabled(s.TrimBeginning && !isSplitMode);
+            SetTrimEndEnabled(s.TrimEnding && !isSplitMode);
+            UpdateAutoRenderEnabled();
+        }
+
+        /// <summary>
+        /// Returns the saved settings for <paramref name="channel"/> if they exist,
+        /// otherwise a snapshot of the current page state.
+        /// </summary>
+        private LiveMonitorChannelSettings GetEffectiveSettings(string channel) =>
+            _channelSettings.TryGetValue(channel, out var saved) ? saved : GetCurrentPageSettings();
+
+        /// <summary>
+        /// Refreshes the per-channel settings buttons, status label, and copy-from combo
+        /// to reflect the currently selected channel.
+        /// </summary>
+        private void RefreshChannelSettingsUI()
+        {
+            var channel = listChannels.SelectedItem as string;
+            var hasChannel = channel != null;
+            var hasSaved = hasChannel && _channelSettings.ContainsKey(channel!);
+
+            btnSaveChannelSettings.IsEnabled = hasChannel;
+            btnLoadChannelSettings.IsEnabled = hasSaved;
+            btnClearChannelSettings.IsEnabled = hasSaved;
+
+            textChannelSettingsStatus.Text = hasChannel
+                ? (hasSaved
+                    ? $"Custom settings saved for '{channel}'"
+                    : $"No saved settings for '{channel}' — using page defaults")
+                : "";
+
+            RefreshCopyFromCombo(channel);
+        }
+
+        /// <summary>
+        /// Rebuilds the copy-from combo with channels (other than <paramref name="selectedChannel"/>)
+        /// that have saved settings.
+        /// </summary>
+        private void RefreshCopyFromCombo(string selectedChannel)
+        {
+            comboCopyFrom.Items.Clear();
+            foreach (var ch in _channelSettings.Keys.OrderBy(x => x))
+            {
+                if (ch != selectedChannel)
+                    comboCopyFrom.Items.Add(ch);
+            }
+            if (comboCopyFrom.Items.Count > 0)
+                comboCopyFrom.SelectedIndex = 0;
+
+            btnCopyChannelSettings.IsEnabled = selectedChannel != null && comboCopyFrom.Items.Count > 0;
+        }
+
         // ── UI event handlers ─────────────────────────────────────────────────
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)
@@ -361,10 +443,7 @@ namespace TwitchDownloaderWPF
                 textLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}"));
         }
 
-        private void btnAddChannel_Click(object sender, RoutedEventArgs e)
-        {
-            AddChannel();
-        }
+        private void btnAddChannel_Click(object sender, RoutedEventArgs e) => AddChannel();
 
         private void textChannel_KeyDown(object sender, KeyEventArgs e)
         {
@@ -396,8 +475,7 @@ namespace TwitchDownloaderWPF
             textChannel.Clear();
             SaveSettings();
 
-            // If monitoring is already running, check this channel immediately rather
-            // than waiting for the next timer tick — it may already be live.
+            // If monitoring is already running, check this channel immediately
             if (IsMonitoring)
                 _ = PollAsync();
         }
@@ -407,9 +485,10 @@ namespace TwitchDownloaderWPF
             if (listChannels.SelectedItem is string channel)
             {
                 _channels.Remove(channel);
-                _channelPresets.Remove(channel);
-                LiveMonitorPresetService.Save(_channelPresets);
+                if (_channelSettings.Remove(channel))
+                    LiveMonitorChannelSettingsService.Save(_channelSettings);
                 SaveSettings();
+                RefreshChannelSettingsUI();
             }
         }
 
@@ -440,9 +519,13 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(textFolder.Text) || !Directory.Exists(textFolder.Text))
+            // A valid global output folder is required for any channel that does not have its own saved settings
+            bool anyChannelNeedsGlobalFolder = _channels.Any(c => !_channelSettings.ContainsKey(c));
+            if (anyChannelNeedsGlobalFolder && (string.IsNullOrWhiteSpace(textFolder.Text) || !Directory.Exists(textFolder.Text)))
             {
-                MessageBox.Show(Application.Current.MainWindow!, "Choose a valid output folder.", "Live Monitor", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Application.Current.MainWindow!,
+                    "Choose a valid output folder, or save per-channel settings for every monitored channel.",
+                    "Live Monitor", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -463,9 +546,12 @@ namespace TwitchDownloaderWPF
 
         private void TryAutoStart()
         {
-            if (IsMonitoring)
-                return;
-            if (_channels.Count == 0 || !Directory.Exists(textFolder.Text))
+            if (IsMonitoring) return;
+            if (_channels.Count == 0) return;
+
+            // Same folder check as btnToggle_Click
+            bool anyChannelNeedsGlobalFolder = _channels.Any(c => !_channelSettings.ContainsKey(c));
+            if (anyChannelNeedsGlobalFolder && !Directory.Exists(textFolder.Text))
                 return;
 
             AppendLog("Auto-starting monitoring (configured at launch).");
@@ -483,7 +569,7 @@ namespace TwitchDownloaderWPF
 
         private void listChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            RefreshChannelPresetCombo();
+            RefreshChannelSettingsUI();
         }
 
         private void comboDownloadMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -507,23 +593,9 @@ namespace TwitchDownloaderWPF
             SaveSettings();
         }
 
-        private void comboChannelPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_suppressPresetSelectionChanged) return;
-            if (listChannels?.SelectedItem is not string channel) return;
-
-            var selected = comboChannelPreset.SelectedItem as string;
-            if (string.IsNullOrEmpty(selected) || selected == DefaultPresetItem)
-                _channelPresets.Remove(channel);
-            else
-                _channelPresets[channel] = selected;
-
-            LiveMonitorPresetService.Save(_channelPresets);
-        }
-
         private void comboRenderPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_suppressPresetSelectionChanged) return;
+            if (_suppressSelectionChanged) return;
             SaveSettings();
         }
 
@@ -538,6 +610,53 @@ namespace TwitchDownloaderWPF
             UpdateAutoRenderEnabled();
             SaveSettings();
         }
+
+        // ── Per-channel settings buttons ──────────────────────────────────────
+
+        private void btnSaveChannelSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (listChannels.SelectedItem is not string channel) return;
+            _channelSettings[channel] = GetCurrentPageSettings();
+            LiveMonitorChannelSettingsService.Save(_channelSettings);
+            RefreshChannelSettingsUI();
+            AppendLog($"Saved settings for '{channel}'.");
+        }
+
+        private void btnLoadChannelSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (listChannels.SelectedItem is not string channel) return;
+            if (!_channelSettings.TryGetValue(channel, out var settings)) return;
+            ApplySettingsToPage(settings);
+            SaveSettings();
+            AppendLog($"Loaded saved settings for '{channel}'.");
+        }
+
+        private void btnClearChannelSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (listChannels.SelectedItem is not string channel) return;
+            _channelSettings.Remove(channel);
+            LiveMonitorChannelSettingsService.Save(_channelSettings);
+            RefreshChannelSettingsUI();
+            AppendLog($"Cleared saved settings for '{channel}' — will use page defaults.");
+        }
+
+        private void btnCopyChannelSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (listChannels.SelectedItem is not string targetChannel) return;
+            if (comboCopyFrom.SelectedItem is not string sourceChannel) return;
+            if (!_channelSettings.TryGetValue(sourceChannel, out var source)) return;
+
+            // Deep-copy via JSON round-trip
+            var json = JsonSerializer.Serialize(source);
+            _channelSettings[targetChannel] = JsonSerializer.Deserialize<LiveMonitorChannelSettings>(json)!;
+
+            ApplySettingsToPage(_channelSettings[targetChannel]);
+            LiveMonitorChannelSettingsService.Save(_channelSettings);
+            RefreshChannelSettingsUI();
+            AppendLog($"Copied settings from '{sourceChannel}' to '{targetChannel}'.");
+        }
+
+        // ── Trim helpers ──────────────────────────────────────────────────────
 
         private void SetTrimControlsAvailable(bool available)
         {
@@ -575,8 +694,7 @@ namespace TwitchDownloaderWPF
 
         private async System.Threading.Tasks.Task PollAsync()
         {
-            if (_polling)
-                return;
+            if (_polling) return;
 
             _polling = true;
             try
@@ -597,7 +715,9 @@ namespace TwitchDownloaderWPF
                         if (info?.data?.video is null || info.data.video.status != "RECORDING")
                             continue;
 
-                        EnqueueRecording(channel, vodId, info);
+                        // Snapshot settings at detection time; used for the entire lifetime of this recording
+                        var eff = GetEffectiveSettings(channel);
+                        EnqueueRecording(channel, vodId, info, eff);
                         _queuedVodIds.Add(vodId);
                     }
                     catch (Exception ex)
@@ -616,10 +736,9 @@ namespace TwitchDownloaderWPF
 
         private async System.Threading.Tasks.Task CheckPendingDownloadsAsync()
         {
-            if (_pendingDownloads.Count == 0)
-                return;
+            if (_pendingDownloads.Count == 0) return;
 
-            foreach (var (vodId, (channel, folder, splitChapters)) in _pendingDownloads.ToArray())
+            foreach (var (vodId, (channel, settings)) in _pendingDownloads.ToArray())
             {
                 try
                 {
@@ -629,10 +748,10 @@ namespace TwitchDownloaderWPF
 
                     _pendingDownloads.Remove(vodId);
 
-                    if (splitChapters)
-                        await EnqueueChapterSplitsAsync(vodId, info, channel, folder);
+                    if (settings.DownloadMode == ModeAfterEndSplit)
+                        await EnqueueChapterSplitsAsync(vodId, info, channel, settings);
                     else
-                        EnqueueFinishedVod(vodId, info, channel, folder);
+                        EnqueueFinishedVod(vodId, info, channel, settings);
                 }
                 catch (Exception ex)
                 {
@@ -641,7 +760,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void EnqueueFinishedVod(long vodId, GqlVideoResponse info, string channel, string folder)
+        private void EnqueueFinishedVod(long vodId, GqlVideoResponse info, string channel, LiveMonitorChannelSettings settings)
         {
             var video = info.data.video;
             var vodLength = TimeSpan.FromSeconds(video.lengthSeconds);
@@ -650,23 +769,23 @@ namespace TwitchDownloaderWPF
             var streamerId = video.owner?.id;
             var game = video.game?.displayName ?? "";
             var createdAt = video.createdAt;
-            var ext = FilenameService.GuessVodFileExtension(SelectedQuality);
+            var ext = FilenameService.GuessVodFileExtension(settings.Quality);
 
-            var trimBeginning = checkTrimStart.IsChecked.GetValueOrDefault();
-            var trimEnding = checkTrimEnd.IsChecked.GetValueOrDefault();
+            var trimBeginning = settings.TrimBeginning;
+            var trimEnding = settings.TrimEnding;
             var trimStart = trimBeginning
-                ? new TimeSpan((int)numTrimStartHour.Value, (int)numTrimStartMinute.Value, (int)numTrimStartSecond.Value)
+                ? new TimeSpan(settings.TrimBeginningHour, settings.TrimBeginningMinute, settings.TrimBeginningSecond)
                 : TimeSpan.Zero;
             var trimEnd = trimEnding
-                ? new TimeSpan((int)numTrimEndHour.Value, (int)numTrimEndMinute.Value, (int)numTrimEndSecond.Value)
+                ? new TimeSpan(settings.TrimEndingHour, settings.TrimEndingMinute, settings.TrimEndingSecond)
                 : vodLength;
 
             var baseName = FilenameService.GetFilename(Settings.Default.TemplateVod, title, vodId.ToString(),
                 createdAt, streamer, streamerId, trimStart, trimEnd, vodLength, video.viewCount, game);
-            var vodPath = Path.Combine(folder, baseName + ext);
+            var vodPath = Path.Combine(settings.Folder, baseName + ext);
             TwitchHelper.CreateDirectory(Path.GetDirectoryName(vodPath));
 
-            var options = BuildVodOptions(vodId, vodPath, trimStart, trimEnd, trimBeginning, trimEnding);
+            var options = BuildVodOptions(vodId, vodPath, trimStart, trimEnd, trimBeginning, trimEnding, settings);
             var task = new VodDownloadTask { DownloadOptions = options, Info = { Title = title.Length > 0 ? title : streamer } };
             task.ChangeStatus(TwitchTaskStatus.Ready);
             lock (PageQueue.taskLock) { PageQueue.taskList.Add(task); }
@@ -674,7 +793,7 @@ namespace TwitchDownloaderWPF
             AppendLog($"Stream ended — queued full VOD download for {vodId} ({title}).");
         }
 
-        private async System.Threading.Tasks.Task EnqueueChapterSplitsAsync(long vodId, GqlVideoResponse info, string channel, string folder)
+        private async System.Threading.Tasks.Task EnqueueChapterSplitsAsync(long vodId, GqlVideoResponse info, string channel, LiveMonitorChannelSettings settings)
         {
             var video = info.data.video;
             var vodLength = TimeSpan.FromSeconds(video.lengthSeconds);
@@ -683,7 +802,7 @@ namespace TwitchDownloaderWPF
             var streamerId = video.owner?.id;
             var game = video.game?.displayName ?? "";
             var createdAt = video.createdAt;
-            var ext = FilenameService.GuessVodFileExtension(SelectedQuality);
+            var ext = FilenameService.GuessVodFileExtension(settings.Quality);
 
             try
             {
@@ -695,9 +814,9 @@ namespace TwitchDownloaderWPF
                     AppendLog($"VOD {vodId} has only one chapter — queuing as single download.");
                     var baseName = FilenameService.GetFilename(Settings.Default.TemplateVod, title, vodId.ToString(),
                         createdAt, streamer, streamerId, TimeSpan.Zero, vodLength, vodLength, video.viewCount, game);
-                    var vodPath = Path.Combine(folder, baseName + ext);
+                    var vodPath = Path.Combine(settings.Folder, baseName + ext);
                     TwitchHelper.CreateDirectory(Path.GetDirectoryName(vodPath));
-                    var singleOptions = BuildVodOptions(vodId, vodPath, TimeSpan.Zero, vodLength, false, false);
+                    var singleOptions = BuildVodOptions(vodId, vodPath, TimeSpan.Zero, vodLength, false, false, settings);
                     var singleTask = new VodDownloadTask { DownloadOptions = singleOptions, Info = { Title = title } };
                     singleTask.ChangeStatus(TwitchTaskStatus.Ready);
                     lock (PageQueue.taskLock) { PageQueue.taskList.Add(singleTask); }
@@ -720,10 +839,10 @@ namespace TwitchDownloaderWPF
                         var baseName = FilenameService.GetFilename(Settings.Default.TemplateVod, title, vodId.ToString(),
                             createdAt, streamer, streamerId, chapterStart, chapterEnd, vodLength, video.viewCount, gameName)
                             + $"_ch{i + 1:D2}";
-                        var vodPath = Path.Combine(folder, baseName + ext);
+                        var vodPath = Path.Combine(settings.Folder, baseName + ext);
                         TwitchHelper.CreateDirectory(Path.GetDirectoryName(vodPath));
 
-                        var options = BuildVodOptions(vodId, vodPath, chapterStart, chapterEnd, true, true);
+                        var options = BuildVodOptions(vodId, vodPath, chapterStart, chapterEnd, true, true, settings);
                         var task = new VodDownloadTask
                         {
                             DownloadOptions = options,
@@ -740,18 +859,22 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private VideoDownloadOptions BuildVodOptions(long vodId, string filename, TimeSpan trimStart, TimeSpan trimEnd, bool trimBeginning, bool trimEnding)
+        private static VideoDownloadOptions BuildVodOptions(
+            long vodId, string filename,
+            TimeSpan trimStart, TimeSpan trimEnd,
+            bool trimBeginning, bool trimEnding,
+            LiveMonitorChannelSettings settings)
         {
             return new VideoDownloadOptions
             {
                 Id = vodId,
-                Quality = SelectedQuality,
+                Quality = settings.Quality,
                 Filename = filename,
                 TrimBeginning = trimBeginning,
                 TrimBeginningTime = trimStart,
                 TrimEnding = trimEnding,
                 TrimEndingTime = trimEnd,
-                DownloadThreads = (int)numThreads.Value,
+                DownloadThreads = settings.Threads,
                 ThrottleKib = Settings.Default.DownloadThrottleEnabled ? Settings.Default.MaximumBandwidthKib : -1,
                 Oauth = Settings.Default.OAuth,
                 FfmpegPath = "ffmpeg",
@@ -761,7 +884,7 @@ namespace TwitchDownloaderWPF
             };
         }
 
-        private void EnqueueRecording(string channel, long vodId, GqlVideoResponse info)
+        private void EnqueueRecording(string channel, long vodId, GqlVideoResponse info, LiveMonitorChannelSettings eff)
         {
             var video = info.data.video;
             var streamer = video.owner?.displayName ?? channel;
@@ -769,32 +892,32 @@ namespace TwitchDownloaderWPF
             var createdAt = video.createdAt;
             var title = video.title ?? "";
             var game = video.game?.displayName ?? "";
-            var folder = textFolder.Text;
-            var mode = DownloadMode;
+            var folder = eff.Folder;
+            var mode = eff.DownloadMode;
 
             var baseName = FilenameService.GetFilename(Settings.Default.TemplateVod, title, vodId.ToString(), createdAt, streamer, streamerId,
                 TimeSpan.Zero, TimeSpan.FromSeconds(video.lengthSeconds), TimeSpan.FromSeconds(video.lengthSeconds), video.viewCount, game);
 
             if (mode == ModeLive)
             {
-                var vodPath = Path.Combine(folder, baseName + FilenameService.GuessVodFileExtension(SelectedQuality));
+                var vodPath = Path.Combine(folder, baseName + FilenameService.GuessVodFileExtension(eff.Quality));
                 TwitchHelper.CreateDirectory(Path.GetDirectoryName(vodPath));
 
                 var liveOptions = new LiveStreamDownloadOptions
                 {
                     Id = vodId,
                     Channel = channel,
-                    Quality = SelectedQuality,
+                    Quality = eff.Quality,
                     Filename = vodPath,
-                    DownloadThreads = (int)numThreads.Value,
+                    DownloadThreads = eff.Threads,
                     ThrottleKib = Settings.Default.DownloadThrottleEnabled ? Settings.Default.MaximumBandwidthKib : -1,
                     Oauth = Settings.Default.OAuth,
                     FfmpegPath = "ffmpeg",
                     TempFolder = Settings.Default.TempPath,
-                    TrimBeginning = checkTrimStart.IsChecked.GetValueOrDefault(),
-                    TrimBeginningTime = new TimeSpan((int)numTrimStartHour.Value, (int)numTrimStartMinute.Value, (int)numTrimStartSecond.Value),
-                    TrimEnding = checkTrimEnd.IsChecked.GetValueOrDefault(),
-                    TrimEndingTime = new TimeSpan((int)numTrimEndHour.Value, (int)numTrimEndMinute.Value, (int)numTrimEndSecond.Value),
+                    TrimBeginning = eff.TrimBeginning,
+                    TrimBeginningTime = new TimeSpan(eff.TrimBeginningHour, eff.TrimBeginningMinute, eff.TrimBeginningSecond),
+                    TrimEnding = eff.TrimEnding,
+                    TrimEndingTime = new TimeSpan(eff.TrimEndingHour, eff.TrimEndingMinute, eff.TrimEndingSecond),
                 };
 
                 var downloadTask = new LiveStreamDownloadTask
@@ -813,17 +936,16 @@ namespace TwitchDownloaderWPF
             }
             else
             {
-                var splitChapters = mode == ModeAfterEndSplit;
-                _pendingDownloads[vodId] = (channel, folder, splitChapters);
+                _pendingDownloads[vodId] = (channel, eff);
 
-                if (splitChapters)
+                if (mode == ModeAfterEndSplit)
                     AppendLog($"'{channel}' is LIVE — will split VOD {vodId} by chapters when stream ends.");
                 else
                     AppendLog($"'{channel}' is LIVE — will queue full VOD {vodId} when stream ends.");
             }
 
             // ── Chat download (+ optional auto-render) ──────────────────────
-            if (!checkChat.IsChecked.GetValueOrDefault())
+            if (!eff.DownloadChat)
                 return;
 
             var chatBaseName = FilenameService.GetFilename(Settings.Default.TemplateChat, title, vodId.ToString(),
@@ -852,14 +974,12 @@ namespace TwitchDownloaderWPF
             {
                 PageQueue.taskList.Add(chatTask);
 
-                // Auto-render: queue a ChatRenderTask that waits for the chat download to finish
-                if (checkAutoRender.IsChecked.GetValueOrDefault())
+                if (eff.AutoRender)
                 {
-                    var preset = GetRenderPresetForChannel(channel);
+                    var preset = GetRenderPresetForSettings(eff);
                     if (preset != null)
                     {
-                        // Derive render output path from the chat file path
-                        var chatFile = chatOptions.Filename; // ends in .json.gz
+                        var chatFile = chatOptions.Filename;
                         var renderBase = chatFile.EndsWith(chatOptions.FileExtension, StringComparison.OrdinalIgnoreCase)
                             ? chatFile[..^chatOptions.FileExtension.Length]
                             : chatFile;
