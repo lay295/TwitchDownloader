@@ -209,6 +209,9 @@
     <Setting Name="LiveMonitorTrimEndingSecond" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="LiveMonitorDownloadThreads" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4</Value>
+    </Setting>
     <Setting Name="ChatBadgeMask" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>

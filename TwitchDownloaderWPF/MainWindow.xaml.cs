@@ -228,8 +228,7 @@ namespace TwitchDownloaderWPF
                    || pageClipDownload.IsActionInProgress
                    || pageChatDownload.IsActionInProgress
                    || pageChatUpdate.IsActionInProgress
-                   || pageChatRender.IsActionInProgress
-                   || pageLiveMonitor.IsMonitoring;
+                   || pageChatRender.IsActionInProgress;
         }
 
         private void Main_OnNavigated(object sender, NavigationEventArgs e)

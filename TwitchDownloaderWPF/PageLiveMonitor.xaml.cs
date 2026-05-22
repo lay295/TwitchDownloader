@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
@@ -46,6 +47,10 @@ namespace TwitchDownloaderWPF
         // Per-channel full settings profiles
         private Dictionary<string, LiveMonitorChannelSettings> _channelSettings = new();
 
+        // Guard: suppresses SaveSettings() during Page_Initialized to avoid saving partially-loaded state.
+        // Set to false (and SaveSettings called once) at the end of Page_Initialized.
+        private bool _isInitializing = true;
+
         // Guard: suppresses SaveSettings() side-effects during programmatic combo updates
         private bool _suppressSelectionChanged;
 
@@ -62,6 +67,7 @@ namespace TwitchDownloaderWPF
 
         private void Page_Initialized(object sender, EventArgs e)
         {
+            SystemEvents.PowerModeChanged += OnPowerModeChanged;
             listChannels.ItemsSource = _channels;
 
             foreach (var channel in (Settings.Default.LiveMonitorChannels ?? "")
@@ -72,7 +78,7 @@ namespace TwitchDownloaderWPF
 
             textFolder.Text = Settings.Default.LiveMonitorFolder;
             numPoll.Value = Math.Max(30, Settings.Default.LiveMonitorPollSeconds);
-            numThreads.Value = Math.Max(1, Settings.Default.VodDownloadThreads);
+            numThreads.Value = Math.Max(1, Settings.Default.LiveMonitorDownloadThreads);
             checkChat.IsChecked = Settings.Default.LiveMonitorDownloadChat;
 
             var downloadMode = Math.Clamp(Settings.Default.LiveMonitorDownloadMode, 0, 2);
@@ -122,6 +128,11 @@ namespace TwitchDownloaderWPF
             // Defer auto-start so the main window has finished loading first
             if (Settings.Default.LiveMonitorAutoStart)
                 Dispatcher.InvokeAsync(TryAutoStart, DispatcherPriority.Background);
+
+            // All controls are now loaded — persist once with the full correct state,
+            // then allow individual-control handlers to save on subsequent user changes.
+            _isInitializing = false;
+            SaveSettings();
         }
 
         private string SelectedQuality => (comboQuality.SelectedItem as ComboBoxItem)?.Content as string ?? "Source";
@@ -411,12 +422,35 @@ namespace TwitchDownloaderWPF
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
         }
 
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
+            SystemEvents.PowerModeChanged -= OnPowerModeChanged;
+        }
+
+        private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            if (e.Mode == PowerModes.Suspend && IsMonitoring)
+            {
+                // Live downloads use a long-lived ffmpeg process that will be suspended with the PC.
+                // On resume, ffmpeg reconnects but the rolling live-playlist window will have advanced,
+                // leaving a gap in any active live recording.  Warn the user so they know to check files.
+                AppendLog("⚠ PC is going to sleep — any active live recording may have a gap when it resumes. " +
+                          "Consider using \"After Stream Ends\" mode for unattended recording.");
+            }
+            else if (e.Mode == PowerModes.Resume && IsMonitoring)
+            {
+                AppendLog("PC resumed from sleep. Checking stream status...");
+                // Trigger an immediate poll so we react quickly to any streams that ended during sleep.
+                _ = PollAsync();
+            }
+        }
+
         private void SaveSettings()
         {
             Settings.Default.LiveMonitorChannels = string.Join(",", _channels);
             Settings.Default.LiveMonitorFolder = textFolder.Text;
             Settings.Default.LiveMonitorQuality = SelectedQuality;
-            Settings.Default.VodDownloadThreads = (int)numThreads.Value;
+            Settings.Default.LiveMonitorDownloadThreads = (int)numThreads.Value;
             Settings.Default.LiveMonitorPollSeconds = (int)numPoll.Value;
             Settings.Default.LiveMonitorDownloadChat = checkChat.IsChecked.GetValueOrDefault();
             Settings.Default.LiveMonitorDownloadMode = DownloadMode;
@@ -577,6 +611,7 @@ namespace TwitchDownloaderWPF
             // Guard: fires during XAML init before the trim controls exist yet
             if (checkTrimStart is null || checkTrimEnd is null)
                 return;
+            if (_isInitializing) return;
 
             var isSplitMode = comboDownloadMode.SelectedIndex == ModeAfterEndSplit;
             SetTrimControlsAvailable(!isSplitMode);
@@ -595,18 +630,20 @@ namespace TwitchDownloaderWPF
 
         private void comboRenderPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_suppressSelectionChanged) return;
+            if (_suppressSelectionChanged || _isInitializing) return;
             SaveSettings();
         }
 
         private void checkChat_CheckStateChanged(object sender, RoutedEventArgs e)
         {
+            if (_isInitializing) return;
             UpdateAutoRenderEnabled();
             SaveSettings();
         }
 
         private void checkAutoRender_CheckStateChanged(object sender, RoutedEventArgs e)
         {
+            if (_isInitializing) return;
             UpdateAutoRenderEnabled();
             SaveSettings();
         }
@@ -680,13 +717,39 @@ namespace TwitchDownloaderWPF
 
         private void checkTrimStart_CheckStateChanged(object sender, RoutedEventArgs e)
         {
+            if (_isInitializing) return;
             SetTrimStartEnabled(checkTrimStart.IsChecked.GetValueOrDefault());
             SaveSettings();
         }
 
         private void checkTrimEnd_CheckStateChanged(object sender, RoutedEventArgs e)
         {
+            if (_isInitializing) return;
             SetTrimEndEnabled(checkTrimEnd.IsChecked.GetValueOrDefault());
+            SaveSettings();
+        }
+
+        private void comboQuality_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isInitializing) return;
+            SaveSettings();
+        }
+
+        private void numPoll_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        {
+            if (_isInitializing) return;
+            SaveSettings();
+        }
+
+        private void numThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        {
+            if (_isInitializing) return;
+            SaveSettings();
+        }
+
+        private void checkAutoStart_CheckStateChanged(object sender, RoutedEventArgs e)
+        {
+            if (_isInitializing) return;
             SaveSettings();
         }
 
@@ -768,7 +831,7 @@ namespace TwitchDownloaderWPF
             var streamer = video.owner?.displayName ?? channel;
             var streamerId = video.owner?.id;
             var game = video.game?.displayName ?? "";
-            var createdAt = video.createdAt;
+            var createdAt = Settings.Default.UTCVideoTime ? video.createdAt : video.createdAt.ToLocalTime();
             var ext = FilenameService.GuessVodFileExtension(settings.Quality);
 
             var trimBeginning = settings.TrimBeginning;
@@ -801,7 +864,7 @@ namespace TwitchDownloaderWPF
             var streamer = video.owner?.displayName ?? channel;
             var streamerId = video.owner?.id;
             var game = video.game?.displayName ?? "";
-            var createdAt = video.createdAt;
+            var createdAt = Settings.Default.UTCVideoTime ? video.createdAt : video.createdAt.ToLocalTime();
             var ext = FilenameService.GuessVodFileExtension(settings.Quality);
 
             try
@@ -884,6 +947,46 @@ namespace TwitchDownloaderWPF
             };
         }
 
+        /// <summary>
+        /// Replaces live-monitor-specific filename tokens before the template is passed to
+        /// <see cref="FilenameService.GetFilename"/>.
+        /// <list type="bullet">
+        ///   <item><term>{live_start}</term><description>Time already elapsed in the stream when the recording began (hh-mm-ss).</description></item>
+        ///   <item><term>{live_cutoff}</term><description>Always empty at queue time — the file is renamed with the actual stop
+        ///   timestamp (<c>_stopped-HH-mm</c>) if the recording is cancelled before the stream ends.</description></item>
+        /// </list>
+        /// For non-live recordings these tokens are stripped by <see cref="FilenameService.GetFilename"/>.
+        /// </summary>
+        private static string ApplyLiveTokensToTemplate(string template, TimeSpan liveStart)
+        {
+            if (!template.Contains("{live_start}"))
+                return template;
+
+            var startStr = TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", liveStart);
+            return template.Replace("{live_start}", startStr);
+        }
+
+        /// <summary>
+        /// Renames <paramref name="filePath"/> by inserting a <c>_stopped-HH-mm</c> suffix
+        /// (using the current local time) before the extension.  Called when a live recording
+        /// is cancelled before the stream ends so the file can be distinguished from a
+        /// complete recording.  Errors are swallowed — this is best-effort.
+        /// </summary>
+        private static void TryAppendCancelledSuffix(string filePath)
+        {
+            try
+            {
+                if (!File.Exists(filePath)) return;
+                var dir = Path.GetDirectoryName(filePath) ?? "";
+                var stem = Path.GetFileNameWithoutExtension(filePath);
+                var ext = Path.GetExtension(filePath);
+                var suffix = $"_stopped-{DateTime.Now:HH-mm}";
+                var newPath = Path.Combine(dir, stem + suffix + ext);
+                File.Move(filePath, newPath);
+            }
+            catch { /* best-effort rename — do not surface errors from a background callback */ }
+        }
+
         private void EnqueueRecording(string channel, long vodId, GqlVideoResponse info, LiveMonitorChannelSettings eff)
         {
             var video = info.data.video;
@@ -895,7 +998,14 @@ namespace TwitchDownloaderWPF
             var folder = eff.Folder;
             var mode = eff.DownloadMode;
 
-            var baseName = FilenameService.GetFilename(Settings.Default.TemplateVod, title, vodId.ToString(), createdAt, streamer, streamerId,
+            // How far into the stream we are detecting it (i.e., already-aired content before we started recording).
+            var liveStart = TimeSpan.FromSeconds(video.lengthSeconds);
+
+            // Respect the UTCVideoTime setting, same as PageVodDownload does.
+            var createdAtLocal = Settings.Default.UTCVideoTime ? createdAt : createdAt.ToLocalTime();
+
+            var vodTemplate = ApplyLiveTokensToTemplate(Settings.Default.TemplateVod, liveStart);
+            var baseName = FilenameService.GetFilename(vodTemplate, title, vodId.ToString(), createdAtLocal, streamer, streamerId,
                 TimeSpan.Zero, TimeSpan.FromSeconds(video.lengthSeconds), TimeSpan.FromSeconds(video.lengthSeconds), video.viewCount, game);
 
             if (mode == ModeLive)
@@ -927,6 +1037,18 @@ namespace TwitchDownloaderWPF
                 };
                 downloadTask.ChangeStatus(TwitchTaskStatus.Ready);
 
+                // When the user cancels the task mid-stream, rename the output file so it's
+                // clearly distinguishable from a complete recording.
+                var capturedVodPath = vodPath;
+                downloadTask.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(TwitchTask.Status)
+                        && downloadTask.Status == TwitchTaskStatus.Canceled)
+                    {
+                        TryAppendCancelledSuffix(capturedVodPath);
+                    }
+                };
+
                 lock (PageQueue.taskLock)
                 {
                     PageQueue.taskList.Add(downloadTask);
@@ -948,8 +1070,9 @@ namespace TwitchDownloaderWPF
             if (!eff.DownloadChat)
                 return;
 
-            var chatBaseName = FilenameService.GetFilename(Settings.Default.TemplateChat, title, vodId.ToString(),
-                createdAt, streamer, streamerId, TimeSpan.Zero, TimeSpan.FromSeconds(video.lengthSeconds),
+            var chatTemplate = ApplyLiveTokensToTemplate(Settings.Default.TemplateChat, liveStart);
+            var chatBaseName = FilenameService.GetFilename(chatTemplate, title, vodId.ToString(),
+                createdAtLocal, streamer, streamerId, TimeSpan.Zero, TimeSpan.FromSeconds(video.lengthSeconds),
                 TimeSpan.FromSeconds(video.lengthSeconds), video.viewCount, game);
 
             var chatOptions = new ChatDownloadOptions

@@ -852,6 +852,18 @@ namespace TwitchDownloaderWPF.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public int LiveMonitorDownloadThreads {
+            get {
+                return ((int)(this["LiveMonitorDownloadThreads"]));
+            }
+            set {
+                this["LiveMonitorDownloadThreads"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int ChatBadgeMask {
             get {

@@ -82,13 +82,30 @@ namespace TwitchDownloaderCore
         private Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
         private Dictionary<string, SKBitmap> avatarCache = new Dictionary<string, SKBitmap>();
         private Dictionary<int, SKPaint> fallbackFontCache = new Dictionary<int, SKPaint>();
-        private bool noFallbackFontFound = false;
         private readonly SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont;
         private SKPaint nameFont;
         private SKPaint outlinePaint;
         private readonly HighlightIcons highlightIcons;
         private int _usernameCenteredY;
+
+        // Animated-emote compositing cache:
+        // Instead of allocating a new SKBitmap every tick, we keep a single persistent bitmap and
+        // canvas.  On cache hits (same comment set, same emote frame indices) the bitmap is returned
+        // directly.  On cache misses we CopyTo it in-place (no allocation) and redraw the emotes
+        // using the same canvas object.  This eliminates both the per-frame SKBitmap allocation and
+        // the per-frame SKCanvas creation that Skia's internal bookkeeping would otherwise incur.
+        private SKBitmap _animComposedFrame;
+        private SKCanvas _animCanvas;
+        private int _animComposedForCommentIndex = int.MinValue;
+        private readonly List<int> _animLastFrameIndices = new();
+
+        // Mask computation cache: _frameGeneration is incremented whenever the rendered pixels change
+        // (new latestUpdate, animated-emote cache miss, or transition between animated/non-animated).
+        // FillMaskBuffer is skipped when _lastMaskGeneration == _frameGeneration because the alpha
+        // channel — and therefore the mask — is identical to what was written on the previous tick.
+        private int _frameGeneration = 0;
+        private int _lastMaskGeneration = -1;
 
         public ChatRenderer(ChatRenderOptions chatRenderOptions, ITaskProgress progress)
         {
@@ -183,8 +200,8 @@ namespace TwitchDownloaderCore
                 maskFileInfo.Delete();
 
             FfmpegProcess ffmpegProcess = GetFfmpegProcess(outputFileInfo);
-            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(maskFileInfo) : null;
-            _progress.SetTemplateStatus(@"Rendering Video {0}% ({1:h\hm\ms\s} Elapsed | {2:h\hm\ms\s} Remaining)", 0, TimeSpan.Zero, TimeSpan.Zero);
+            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(maskFileInfo, isMask: true) : null;
+            _progress.SetTemplateStatus(@"Rendering Video {0}% ({1:h\hm\ms\s} Elapsed | {2:h\hm\ms\s} Remaining | {3:F2}x)", 0, TimeSpan.Zero, TimeSpan.Zero);
 
             try
             {
@@ -300,6 +317,10 @@ namespace TwitchDownloaderCore
             if (maskProcess != null)
                 maskStream = new BinaryWriter(maskProcess.StandardInput.BaseStream);
 
+            // Pre-allocate a single reusable buffer for the mask.  The mask pipe uses gray (8-bit)
+            // pixel format so only one byte per pixel is needed — 4× smaller than bgra.
+            byte[] maskBuffer = maskProcess != null ? new byte[renderOptions.ChatWidth * renderOptions.ChatHeight] : null;
+
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(ffmpegProcess.SavePath);
 
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -315,7 +336,10 @@ namespace TwitchDownloaderCore
 
                 if (currentTick % renderOptions.UpdateFrame == 0)
                 {
-                    latestUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, latestUpdate);
+                    var newUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, latestUpdate);
+                    if (!ReferenceEquals(newUpdate, latestUpdate))
+                        _frameGeneration++;
+                    latestUpdate = newUpdate;
                 }
 
                 SKBitmap frame = null;
@@ -327,15 +351,20 @@ namespace TwitchDownloaderCore
                     if (!renderOptions.SkipDriveWaiting)
                         DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
 
-                    ffmpegStream.Write(frame.Bytes);
+                    unsafe { ffmpegStream.Write(new ReadOnlySpan<byte>((void*)frame.GetPixels(), frame.Info.BytesSize)); }
 
                     if (maskProcess != null)
                     {
                         if (!renderOptions.SkipDriveWaiting)
                             DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
 
-                        SetFrameMask(frame);
-                        maskStream.Write(frame.Bytes);
+                        // Only recompute when the frame pixels actually changed.
+                        if (_frameGeneration != _lastMaskGeneration)
+                        {
+                            FillMaskBuffer(frame, maskBuffer);
+                            _lastMaskGeneration = _frameGeneration;
+                        }
+                        maskStream.Write(maskBuffer);
                     }
                 }
                 finally
@@ -355,15 +384,20 @@ namespace TwitchDownloaderCore
                     var secondsLeft = percent > 0
                         ? (int)(100 / percent * elapsedSeconds - elapsedSeconds)
                         : 0;
-                    _progress.ReportProgress((int)Math.Round(percent), elapsed, TimeSpan.FromSeconds(secondsLeft));
+                    var speed = percent > 0
+                        ? (currentTick - startTick) / (double)renderOptions.Framerate / elapsedSeconds
+                        : 0;
+                    _progress.ReportProgress((int)Math.Round(percent), elapsed, TimeSpan.FromSeconds(secondsLeft), speed);
                 }
             }
 
             stopwatch.Stop();
-            _progress.ReportProgress(100, stopwatch.Elapsed, TimeSpan.Zero);
+            var finalSpeed = (endTick - startTick) / (double)renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds;
+            _progress.ReportProgress(100, stopwatch.Elapsed, TimeSpan.Zero, finalSpeed);
             _progress.LogInfo($"FINISHED. RENDER TIME: {stopwatch.Elapsed.TotalSeconds:F1}s SPEED: {(endTick - startTick) / (double)renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds:F2}x");
 
             latestUpdate?.Image.Dispose();
+            InvalidateAnimCache();
 
             ffmpegStream.Dispose();
             maskStream?.Dispose();
@@ -372,23 +406,29 @@ namespace TwitchDownloaderCore
             maskProcess?.WaitForExit(100_000);
         }
 
-        private static void SetFrameMask(SKBitmap frame)
+        /// <summary>
+        /// Writes the alpha channel of <paramref name="frame"/> into <paramref name="maskBuffer"/> as
+        /// a flat 8-bit grayscale image (one byte per pixel).  The mask ffmpeg process reads this with
+        /// <c>-pix_fmt gray</c>, so a single byte is all that is needed — 4× smaller than bgra.
+        /// </summary>
+        private static unsafe void FillMaskBuffer(SKBitmap frame, byte[] maskBuffer)
         {
-            // Copy alpha channel into RGB, set alpha to 0xFF to produce a luma-matte image
-            unsafe
+            var src = (uint*)frame.GetPixels();
+            fixed (byte* dst = maskBuffer)
             {
-                var pixels = new Span<uint>((void*)frame.GetPixels(), frame.Width * frame.Height);
-                for (int i = 0; i < pixels.Length; i++)
-                {
-                    uint alpha = pixels[i] >> 24;
-                    pixels[i] = alpha | (alpha << 8) | (alpha << 16) | 0xFF000000u;
-                }
+                int count = frame.Width * frame.Height;
+                for (int i = 0; i < count; i++)
+                    dst[i] = (byte)(src[i] >> 24);
             }
         }
 
-        private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo)
+        private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo, bool isMask = false)
         {
             string savePath = fileInfo.FullName;
+
+            // The mask pipe uses 8-bit grayscale (one byte per pixel = the alpha channel).
+            // All other streams use the native Skia colour format (bgra / rgba).
+            string pixFmt = isMask ? "gray" : (SKImageInfo.PlatformColorType == SKColorType.Bgra8888 ? "bgra" : "rgba");
 
             string inputArgs = new StringBuilder(renderOptions.InputArgs)
                 .Replace("{fps}", renderOptions.Framerate.ToString())
@@ -396,8 +436,13 @@ namespace TwitchDownloaderCore
                 .Replace("{width}", renderOptions.ChatWidth.ToString())
                 .Replace("{save_path}", savePath)
                 .Replace("{max_int}", int.MaxValue.ToString())
-                .Replace("{pix_fmt}", SKImageInfo.PlatformColorType == SKColorType.Bgra8888 ? "bgra" : "rgba")
+                .Replace("{pix_fmt}", pixFmt)
                 .ToString();
+
+            // Fallback for saved settings that still have the old literal pixel format.
+            // If the template used {pix_fmt} the replacement above already handled it; these are no-ops in that case.
+            if (isMask)
+                inputArgs = inputArgs.Replace("-pix_fmt bgra", "-pix_fmt gray").Replace("-pix_fmt rgba", "-pix_fmt gray");
             string outputArgs = new StringBuilder(renderOptions.OutputArgs)
                 .Replace("{fps}", renderOptions.Framerate.ToString())
                 .Replace("{height}", renderOptions.ChatHeight.ToString())
@@ -441,67 +486,162 @@ namespace TwitchDownloaderCore
         private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
         {
             currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos);
-            var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
+            var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentFrame.CommentIndex, currentTick);
             return (frame, isCopyFrame);
         }
 
-        private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(SKBitmap updateFrame, List<CommentSection> comments, int currentTick)
+        /// <summary>
+        /// Returns a frame with animated emotes composited on top of <paramref name="updateFrame"/>.
+        /// When neither the visible comment set nor any emote frame index has changed since the last
+        /// call, the previously-composed bitmap is returned directly (no copy), giving a large speedup
+        /// for high-framerate renders where animation advances slower than the video frame rate.
+        /// </summary>
+        private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(
+            SKBitmap updateFrame, List<CommentSection> comments, int commentIndex, int currentTick)
         {
-            // If we are generating a mask then we need to produce a copy
-            if (!renderOptions.GenerateMask)
-            {
-                bool hasAnimatedEmotes = false;
-                foreach (var comment in comments)
-                {
-                    if (comment.Emotes.Count > 0)
-                    {
-                        hasAnimatedEmotes = true;
-                        break;
-                    }
-                }
-                if (!hasAnimatedEmotes)
-                {
-                    // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
-                    return (updateFrame, false);
-                }
-            }
-
-            SKBitmap newFrame = updateFrame.Copy();
-            int frameHeight = renderOptions.ChatHeight;
             long currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
-            using (SKCanvas frameCanvas = new SKCanvas(newFrame))
-            {
-                for (int c = comments.Count - 1; c >= 0; c--)
-                {
-                    var comment = comments[c];
-                    frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
-                    foreach ((Point drawPoint, TwitchEmote emote) in comment.Emotes)
-                    {
-                        if (emote.FrameCount > 1)
-                        {
-                            int frameIndex = emote.EmoteFrameDurations.Count - 1;
-                            long imageFrame = currentTickMs % (emote.TotalDuration * 10);
-                            for (int i = 0; i < emote.EmoteFrameDurations.Count; i++)
-                            {
-                                if (imageFrame - emote.EmoteFrameDurations[i] * 10 <= 0)
-                                {
-                                    frameIndex = i;
-                                    break;
-                                }
-                                imageFrame -= emote.EmoteFrameDurations[i] * 10;
-                            }
 
-                            frameCanvas.DrawBitmap(emote.EmoteFrames[frameIndex], drawPoint.X, drawPoint.Y + frameHeight);
-                        }
+            // Fast path: no animated emotes in any visible comment.
+            bool hasAnimatedEmotes = false;
+            foreach (var comment in comments)
+            {
+                if (comment.Emotes.Count > 0) { hasAnimatedEmotes = true; break; }
+            }
+            if (!hasAnimatedEmotes)
+            {
+                // Only bump the generation on the actual animated→static transition, not every static frame.
+                if (_animComposedForCommentIndex != int.MinValue)
+                    _frameGeneration++;
+                InvalidateAnimCache();
+                return (updateFrame, false);
+            }
+
+            // Cache hit: same comment set AND every animated emote is on the same frame index.
+            if (_animComposedFrame != null
+                && commentIndex == _animComposedForCommentIndex
+                && AnimCacheIsValid(comments, currentTickMs))
+            {
+                return (_animComposedFrame, false);
+            }
+
+            // Cache miss: recompose into the persistent bitmap (allocation-free after first use).
+            _frameGeneration++;
+            ComposeAnimatedFrame(updateFrame, comments, currentTickMs);
+            _animComposedForCommentIndex = commentIndex;
+            RecordAnimFrameIndices(comments, currentTickMs);
+
+            return (_animComposedFrame, false); // owned by the cache; caller must not dispose
+        }
+
+        /// <summary>
+        /// Updates <see cref="_animComposedFrame"/> in-place with <paramref name="updateFrame"/> as the
+        /// background and the current animated-emote frames composited on top.  Allocates the backing
+        /// bitmap and canvas only on the first call (or after an explicit final dispose); every subsequent
+        /// call reuses both objects so the hot path is allocation-free.
+        /// </summary>
+        private void ComposeAnimatedFrame(SKBitmap updateFrame, List<CommentSection> comments, long currentTickMs)
+        {
+            // Allocate once; reuse for every subsequent miss.
+            if (_animComposedFrame == null)
+            {
+                _animComposedFrame = new SKBitmap(updateFrame.Info);
+                _animCanvas = new SKCanvas(_animComposedFrame);
+            }
+
+            // Copy pixels directly into the existing native buffer.
+            // CopyTo(bitmap) would do an internal swap() that replaces the pixel-ref, which
+            // invalidates _animCanvas (it keeps a pointer to the old buffer).  A raw memcpy
+            // writes into the buffer that the canvas is already bound to.
+            unsafe
+            {
+                int byteCount = _animComposedFrame.Info.BytesSize;
+                Buffer.MemoryCopy(
+                    (void*)updateFrame.GetPixels(),
+                    (void*)_animComposedFrame.GetPixels(),
+                    byteCount, byteCount);
+            }
+
+            int frameHeight = renderOptions.ChatHeight;
+            for (int c = comments.Count - 1; c >= 0; c--)
+            {
+                var comment = comments[c];
+                frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
+                foreach ((Point drawPoint, TwitchEmote emote) in comment.Emotes)
+                {
+                    if (emote.FrameCount > 1)
+                    {
+                        int frameIndex = ComputeAnimFrameIndex(emote, currentTickMs);
+                        _animCanvas.DrawBitmap(emote.EmoteFrames[frameIndex], drawPoint.X, drawPoint.Y + frameHeight);
                     }
                 }
             }
-            return (newFrame, true);
+        }
+
+        /// <summary>
+        /// Computes which frame of <paramref name="emote"/> should be displayed at
+        /// <paramref name="currentTickMs"/> milliseconds into the render.
+        /// </summary>
+        private static int ComputeAnimFrameIndex(TwitchEmote emote, long currentTickMs)
+        {
+            long imageFrame = currentTickMs % (emote.TotalDuration * 10);
+            for (int i = 0; i < emote.EmoteFrameDurations.Count; i++)
+            {
+                if (imageFrame - emote.EmoteFrameDurations[i] * 10 <= 0)
+                    return i;
+                imageFrame -= emote.EmoteFrameDurations[i] * 10;
+            }
+            return emote.EmoteFrameDurations.Count - 1;
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> when every animated emote in <paramref name="comments"/>
+        /// is on the same frame index as when the cache was last built.
+        /// </summary>
+        private bool AnimCacheIsValid(List<CommentSection> comments, long currentTickMs)
+        {
+            int i = 0;
+            for (int c = comments.Count - 1; c >= 0; c--)
+            {
+                foreach (var (_, emote) in comments[c].Emotes)
+                {
+                    if (emote.FrameCount > 1)
+                    {
+                        if (i >= _animLastFrameIndices.Count) return false;
+                        if (ComputeAnimFrameIndex(emote, currentTickMs) != _animLastFrameIndices[i]) return false;
+                        i++;
+                    }
+                }
+            }
+            return i == _animLastFrameIndices.Count;
+        }
+
+        /// <summary>Snapshots the current frame index of every animated emote for cache-validity checks.</summary>
+        private void RecordAnimFrameIndices(List<CommentSection> comments, long currentTickMs)
+        {
+            _animLastFrameIndices.Clear();
+            for (int c = comments.Count - 1; c >= 0; c--)
+            {
+                foreach (var (_, emote) in comments[c].Emotes)
+                {
+                    if (emote.FrameCount > 1)
+                        _animLastFrameIndices.Add(ComputeAnimFrameIndex(emote, currentTickMs));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Marks the animated-frame cache as invalid so the next tick triggers a full recompose.
+        /// The backing bitmap and canvas are intentionally kept alive for reuse — only their
+        /// <em>validity</em> state is reset here.  True cleanup happens in <see cref="Dispose(bool)"/>.
+        /// </summary>
+        private void InvalidateAnimCache()
+        {
+            _animComposedForCommentIndex = int.MinValue;
+            _animLastFrameIndices.Clear();
         }
 
         private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
         {
-            SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
             double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
             int newestCommentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds);
 
@@ -510,6 +650,8 @@ namespace TwitchDownloaderCore
                 return lastUpdate;
             }
             lastUpdate?.Image.Dispose();
+
+            SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
 
             List<CommentSection> commentList = lastUpdate?.Comments ?? [];
 
@@ -1959,11 +2101,8 @@ namespace TwitchDownloaderCore
             if (newPaint.Typeface == null)
             {
                 newPaint.Typeface = SKTypeface.Default;
-                if (!noFallbackFontFound)
-                {
-                    noFallbackFontFound = true;
-                    _progress.LogWarning("No valid typefaces were found for some messages.");
-                }
+                // Warn once per unique unsupported codepoint (fallbackFontCache already deduplicates calls).
+                _progress.LogWarning($"No system typeface found for U+{input:X4} ('{char.ConvertFromUtf32(input)}'). It will render as □.");
             }
 
             fallbackPaint = newPaint;
@@ -2059,6 +2198,10 @@ namespace TwitchDownloaderCore
                     messageFont?.Dispose();
                     outlinePaint?.Dispose();
                     highlightIcons?.Dispose();
+                    _animCanvas?.Dispose();
+                    _animCanvas = null;
+                    _animComposedFrame?.Dispose();
+                    _animComposedFrame = null;
 
                     badgeList.Clear();
                     emoteList.Clear();

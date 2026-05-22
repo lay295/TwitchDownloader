@@ -11,7 +11,7 @@
       xmlns:fa="http://schemas.fontawesome.com/icons/"
       mc:Ignorable="d"
       d:DesignHeight="400" d:DesignWidth="800"
-      Title="PageLiveMonitor" Initialized="Page_Initialized" Loaded="Page_Loaded">
+      Title="PageLiveMonitor" Initialized="Page_Initialized" Loaded="Page_Loaded" Unloaded="Page_Unloaded">
     <Grid Background="{DynamicResource AppBackground}" Margin="20,15,20,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -79,7 +79,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                     <TextBlock Text="Quality:" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
-                    <ComboBox x:Name="comboQuality" SelectedIndex="0" MinWidth="120" Margin="6,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                    <ComboBox x:Name="comboQuality" SelectedIndex="0" MinWidth="120" Margin="6,0,0,0" SelectionChanged="comboQuality_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
                         <ComboBoxItem Content="Source"/>
                         <ComboBoxItem Content="1440p"/>
                         <ComboBoxItem Content="1080p"/>
@@ -92,11 +92,11 @@
                         <ComboBoxItem Content="Audio Only"/>
                     </ComboBox>
                     <TextBlock Text="Poll every (sec):" VerticalAlignment="Center" Margin="16,0,0,0" Foreground="{DynamicResource AppText}"/>
-                    <hc:NumericUpDown x:Name="numPoll" Value="60" Minimum="30" Maximum="3600" Width="80" Margin="6,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numPoll" Value="60" Minimum="30" Maximum="3600" Width="80" Margin="6,0,0,0" ValueChanged="numPoll_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                     <TextBlock Text="{lex:Loc VideoDownloadThreads}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
-                    <hc:NumericUpDown x:Name="numThreads" Value="4" Minimum="1" Maximum="50" Width="80" Margin="6,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numThreads" Value="4" Minimum="1" Maximum="50" Width="80" Margin="6,0,0,0" ValueChanged="numThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                     <TextBlock Text="Download mode:" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
@@ -141,7 +141,7 @@
                 <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                     <Button x:Name="btnToggle" Content="Start Monitoring" MinWidth="140" Height="34" Click="btnToggle_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
                     <TextBlock x:Name="textState" Text="Stopped" VerticalAlignment="Center" Margin="12,0,0,0" FontWeight="Bold" Foreground="{DynamicResource AppText}"/>
-                    <CheckBox x:Name="checkAutoStart" Content="Auto-start on launch" VerticalAlignment="Center" Margin="16,0,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" ToolTip="Automatically begin monitoring when the app starts (requires at least one channel and a valid output folder)"/>
+                    <CheckBox x:Name="checkAutoStart" Content="Auto-start on launch" VerticalAlignment="Center" Margin="16,0,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" ToolTip="Automatically begin monitoring when the app starts (requires at least one channel and a valid output folder)" Checked="checkAutoStart_CheckStateChanged" Unchecked="checkAutoStart_CheckStateChanged"/>
                 </StackPanel>
             </StackPanel>
         </Grid>

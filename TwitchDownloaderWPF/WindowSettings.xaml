@@ -190,6 +190,12 @@
                 <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterGameTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {game}
                 </Run>
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterLiveStartTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                    {live_start}
+                </Run>
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterLiveCutoffTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                    {live_cutoff}
+                </Run>
                 <LineBreak/>
                 <Run Text="{lex:Loc DateCustomFormatting}" />
                 <Hyperlink NavigateUri="https://learn.microsoft.com/dotnet/standard/base-types/custom-date-and-time-format-strings" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}"><Run Text="{lex:Loc DateCustomFormattingHyperlink}" /></Hyperlink>

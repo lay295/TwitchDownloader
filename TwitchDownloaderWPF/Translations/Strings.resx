@@ -1044,6 +1044,12 @@
   <data name="FilenameParameterTrimLengthCustomTooltip" xml:space="preserve">
     <value>The length (including trim) of the video/clip/chat in a customizable format.</value>
   </data>
+  <data name="FilenameParameterLiveStartTooltip" xml:space="preserve">
+    <value>Live Monitor only: how far into the stream the recording began (hh-mm-ss). Empty for non-live downloads.</value>
+  </data>
+  <data name="FilenameParameterLiveCutoffTooltip" xml:space="preserve">
+    <value>Live Monitor only: the time at which the recording was cut off early via trim end (hh-mm-ss). Empty if the recording ran to stream end.</value>
+  </data>
   <data name="VideoTypeAllVideos" xml:space="preserve">
     <value>All Videos</value>
   </data>

@@ -45,7 +45,11 @@ namespace TwitchDownloaderCore.Services
                 .Replace("{trim_length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimLength))
                 .Replace("{length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", videoLength))
                 .Replace("{views}", viewCount.ToString(CultureInfo.CurrentCulture))
-                .Replace("{game}", ReplaceInvalidFilenameChars(game));
+                .Replace("{game}", ReplaceInvalidFilenameChars(game))
+                // Live Monitor tokens — replaced with real values by PageLiveMonitor before this call;
+                // stripped here so they leave no literal text in filenames from other download paths.
+                .Replace("{live_start}", "")
+                .Replace("{live_cutoff}", "");
 
             if (template.Contains("{date_custom="))
             {
