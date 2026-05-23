@@ -105,6 +105,9 @@ namespace TwitchDownloaderWPF.Utils
         }
 
         public void ReportProgress(int percent, TimeSpan time1, TimeSpan time2)
+            => ReportProgress(percent, time1, time2, 0.0);
+
+        public void ReportProgress(int percent, TimeSpan time1, TimeSpan time2, double speed)
         {
             lock (this)
             {
@@ -123,7 +126,7 @@ namespace TwitchDownloaderWPF.Utils
                     return;
                 }
 
-                var status = string.Format(_status, percent, time1, time2);
+                var status = string.Format(_status, percent, time1, time2, speed);
                 _handleStatus?.Invoke(status);
             }
         }
