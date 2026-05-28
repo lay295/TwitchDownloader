@@ -503,10 +503,15 @@ namespace TwitchDownloaderCore
             long currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
 
             // Fast path: no animated emotes in any visible comment.
+            // Note: comment.Emotes holds both static (FrameCount == 1) and animated (FrameCount > 1)
+            // emotes, so we must check FrameCount explicitly rather than just Count > 0.
             bool hasAnimatedEmotes = false;
-            foreach (var comment in comments)
+            for (int ci = 0; ci < comments.Count && !hasAnimatedEmotes; ci++)
             {
-                if (comment.Emotes.Count > 0) { hasAnimatedEmotes = true; break; }
+                foreach (var (_, emote) in comments[ci].Emotes)
+                {
+                    if (emote.FrameCount > 1) { hasAnimatedEmotes = true; break; }
+                }
             }
             if (!hasAnimatedEmotes)
             {
