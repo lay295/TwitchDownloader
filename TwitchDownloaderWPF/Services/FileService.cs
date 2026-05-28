@@ -25,8 +25,7 @@ namespace TwitchDownloaderWPF.Services
             {
                 FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe"),
                 Arguments = args,
-                UseShellExecute = true,
-                WorkingDirectory = directoryInfo.FullName
+                UseShellExecute = false
             });
         }
     }
