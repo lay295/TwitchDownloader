@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -842,6 +843,91 @@ namespace TwitchDownloaderCore
             return string.Join(' ', codepointList);
         }
 
+        /// <summary>
+        /// Converts a normalized text element (U+FE0F already stripped) into the emoji image-cache key format
+        /// used by <see cref="TwitchHelper.GetEmojis"/>: uppercase hex codepoints separated by spaces,
+        /// e.g. 🫡 → "1FAE1", 🏳‍🌈 → "1F3F3 1F308".
+        /// Returns <see langword="null"/> when the input is empty or contains only U+FE0F.
+        /// </summary>
+        private static string ComputeEmojiCacheKey(string normalizedElement)
+        {
+            if (string.IsNullOrEmpty(normalizedElement))
+                return null;
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < normalizedElement.Length;)
+            {
+                int cp;
+                if (i + 1 < normalizedElement.Length && char.IsSurrogatePair(normalizedElement[i], normalizedElement[i + 1]))
+                {
+                    cp = char.ConvertToUtf32(normalizedElement[i], normalizedElement[i + 1]);
+                    i += 2;
+                }
+                else
+                {
+                    cp = normalizedElement[i];
+                    i++;
+                }
+
+                if (cp == 0xFE0F) continue;
+                if (sb.Length > 0) sb.Append(' ');
+                sb.Append(cp.ToString("X"));
+            }
+            return sb.Length > 0 ? sb.ToString() : null;
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> if <paramref name="text"/> contains any supplementary emoji
+        /// codepoint that lies above U+1F9FF (i.e. beyond the range covered by <see cref="EmojiRegex"/>).
+        /// This allows newer emoji to enter <see cref="DrawEmojiMessage"/> even before the regex is updated.
+        /// </summary>
+        private static bool ContainsSupplementaryEmoji(string text)
+        {
+            for (int i = 0; i < text.Length - 1; i++)
+            {
+                char hi = text[i];
+                // Quick filter: emoji high surrogates for U+1F000–U+1FFFF are \uD83C–\uD83F
+                if (hi < '\uD83C' || hi > '\uD83F') continue;
+                if (!char.IsLowSurrogate(text[i + 1])) continue;
+                int cp = char.ConvertToUtf32(hi, text[i + 1]);
+                // We only need to catch codepoints *above* what EmojiRegex already handles.
+                // EmojiRegex currently covers up to U+1FAFF within \uD83E (U+1F400–U+1FAFF range via \uDE00–\uDEFF).
+                // Anything above U+1F9FF that lands here is a candidate.
+                if (cp > 0x1F9FF) return true;
+            }
+            return false;
+        }
+
+        /// <summary>Draws a single <paramref name="emojiImage"/> at the current draw position.</summary>
+        private void DrawEmojiBitmap(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, SKBitmap emojiImage, bool highlightWords)
+        {
+            SKImageInfo emojiImageInfo = emojiImage.Info;
+
+            if (drawPos.X + emojiImageInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
+            {
+                AddImageSection(sectionImages, ref drawPos, defaultPos);
+            }
+
+            Point emotePoint = new Point
+            {
+                X = drawPos.X + (int)Math.Ceiling(renderOptions.EmoteSpacing / 2d),
+                Y = (int)((renderOptions.SectionHeight - emojiImageInfo.Height) / 2.0)
+            };
+
+            using (SKCanvas canvas = new SKCanvas(sectionImages.Last().bitmap))
+            {
+                if (highlightWords)
+                {
+                    using var paint = new SKPaint { Color = Purple };
+                    canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImageInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
+                }
+
+                canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
+            }
+
+            drawPos.X += emojiImageInfo.Width + renderOptions.EmoteSpacing;
+        }
+
         private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, int commentIndex, ref Point drawPos, ref Point defaultPos)
         {
             if (renderOptions.Timestamp)
@@ -1085,7 +1171,7 @@ namespace TwitchDownloaderCore
             {
                 DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, emote, highlightWords);
             }
-            else if (!skipEmoji && EmojiRegex.IsMatch(fragmentPart))
+            else if (!skipEmoji && (EmojiRegex.IsMatch(fragmentPart) || ContainsSupplementaryEmoji(fragmentPart)))
             {
                 DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
             }
@@ -1192,6 +1278,19 @@ namespace TwitchDownloaderCore
 
                 if (!EmojiByLeadCodePoint.TryGetValue(leadKey, out var candidates))
                 {
+                    // Unicode.net may not recognize this emoji (e.g. it's newer than the library's data).
+                    // Try looking it up directly in our image cache by codepoint.
+                    var directKey = ComputeEmojiCacheKey(normalizedElement);
+                    if (directKey is not null && emojiCache.TryGetValue(directKey, out var directBitmap))
+                    {
+                        if (nonEmojiBuffer.Length > 0)
+                        {
+                            DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
+                            nonEmojiBuffer.Clear();
+                        }
+                        DrawEmojiBitmap(sectionImages, ref drawPos, defaultPos, directBitmap, highlightWords);
+                        continue;
+                    }
                     nonEmojiBuffer.Append(textElement);
                     continue;
                 }
@@ -1224,6 +1323,19 @@ namespace TwitchDownloaderCore
 
                 if (emojiMatchesCount == 0)
                 {
+                    // All Emoji.All candidates were absent from the image cache.
+                    // Try a direct cache lookup by codepoint in case the image exists under a different key.
+                    var directKey2 = ComputeEmojiCacheKey(normalizedElement);
+                    if (directKey2 is not null && emojiCache.TryGetValue(directKey2, out var directBitmap2))
+                    {
+                        if (nonEmojiBuffer.Length > 0)
+                        {
+                            DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
+                            nonEmojiBuffer.Clear();
+                        }
+                        DrawEmojiBitmap(sectionImages, ref drawPos, defaultPos, directBitmap2, highlightWords);
+                        continue;
+                    }
                     nonEmojiBuffer.Append(textElement);
                     continue;
                 }
@@ -1932,6 +2044,12 @@ namespace TwitchDownloaderCore
             emojiCache = emojiTask.Result;
             avatarCache = avatarTask.Result;
 
+            // Download any emoji that appear in chat but are missing from the embedded pack
+            if (renderOptions.EmojiVendor != EmojiVendor.None && !renderOptions.Offline)
+            {
+                await DownloadMissingEmojiAsync(cancellationToken);
+            }
+
             badgeList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
             emoteList.Sort((a, b) => string.Compare(a.Id, b.Id, StringComparison.Ordinal));
             emoteThirdList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
@@ -2035,6 +2153,107 @@ namespace TwitchDownloaderCore
             return emojis;
         }
 
+        /// <summary>
+        /// Scans all chat messages for emoji codepoints not present in the embedded pack and attempts to
+        /// download them from the Twemoji CDN (jsDelivr). Downloaded images are persisted to the local
+        /// emoji cache folder so they survive future renders without another network round-trip.
+        /// </summary>
+        private async Task DownloadMissingEmojiAsync(CancellationToken cancellationToken)
+        {
+            var emojiFolder = Path.Combine(_cacheDir, "emojis", renderOptions.EmojiVendor.EmojiFolder());
+
+            // Collect the cache keys of emoji that appear in the chat but have no image yet
+            var missingKeys = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var comment in chatRoot.comments)
+            {
+                var body = comment.message?.body;
+                if (string.IsNullOrEmpty(body)) continue;
+
+                var enumerator = StringInfo.GetTextElementEnumerator(body);
+                while (enumerator.MoveNext())
+                {
+                    var element = enumerator.GetTextElement().Replace("️", "");
+                    if (element.Length < 2 || !char.IsHighSurrogate(element[0])) continue;
+
+                    int cp = char.ConvertToUtf32(element[0], element[1]);
+                    if (cp < 0x1F000) continue; // Not a supplementary emoji
+
+                    var key = ComputeEmojiCacheKey(element);
+                    if (key is not null && !emojiCache.ContainsKey(key))
+                        missingKeys.Add(key);
+                }
+            }
+
+            if (missingKeys.Count == 0) return;
+
+            _progress.LogVerbose($"Fetching {missingKeys.Count} emoji not bundled with the app from Twemoji CDN...");
+
+            // Target size must match GetScaledEmojis so all emoji bitmaps are the same height
+            var newHeight = (int)Math.Round(36 * renderOptions.ReferenceScale * renderOptions.EmojiScale);
+
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+            foreach (var key in missingKeys)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Check the local disk cache first (written by a previous render at 72×72)
+                var localFile = Path.Combine(emojiFolder, $"{key}.PNG");
+                if (File.Exists(localFile))
+                {
+                    try
+                    {
+                        await using var fs = File.OpenRead(localFile);
+                        var cached = SKBitmap.Decode(fs);
+                        if (cached is not null)
+                        {
+                            emojiCache[key] = ScaleEmojiBitmap(cached, newHeight);
+                            continue;
+                        }
+                    }
+                    catch { /* Corrupt cached file — fall through and re-download */ }
+                }
+
+                // Twemoji CDN URL: "1FAE9" → "1fae9.png", "1F1E6 1F1E8" → "1f1e6-1f1e8.png"
+                var cdnName = key.ToLowerInvariant().Replace(' ', '-') + ".png";
+                var url = $"https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/72x72/{cdnName}";
+
+                try
+                {
+                    using var response = await client.GetAsync(url, cancellationToken);
+                    if (!response.IsSuccessStatusCode) continue;
+
+                    var data = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                    var raw = SKBitmap.Decode(data);
+                    if (raw is null) continue;
+
+                    emojiCache[key] = ScaleEmojiBitmap(raw, newHeight);
+
+                    // Persist the 72×72 source to disk; future renders will scale it themselves
+                    try { await File.WriteAllBytesAsync(localFile, data, CancellationToken.None); }
+                    catch { /* Non-fatal: disk-cache write failed (permissions, disk full, etc.) */ }
+
+                    _progress.LogVerbose($"Downloaded emoji U+{key.Replace(" ", " U+")} from CDN.");
+                }
+                catch (OperationCanceledException) { throw; }
+                catch
+                {
+                    // CDN unreachable or emoji not yet in Twemoji — leave it as □, no warning needed
+                }
+            }
+        }
+
+        /// <summary>Scales <paramref name="source"/> to <paramref name="newHeight"/> while preserving aspect ratio, disposing the original.</summary>
+        private static SKBitmap ScaleEmojiBitmap(SKBitmap source, int newHeight)
+        {
+            var oldInfo = source.Info;
+            var imageInfo = new SKImageInfo((int)(newHeight / (double)oldInfo.Height * oldInfo.Width), newHeight);
+            var scaled = new SKBitmap(imageInfo);
+            source.ScalePixels(scaled, SKFilterQuality.High);
+            source.Dispose();
+            scaled.SetImmutable();
+            return scaled;
+        }
+
         private async Task<Dictionary<string, SKBitmap>> GetScaledAvatars(CancellationToken cancellationToken)
         {
             var avatars = await TwitchHelper.GetAvatars(chatRoot.comments, DefaultAvatarUrls, _cacheDir, _progress, renderOptions.Offline, cancellationToken);
@@ -2102,7 +2321,15 @@ namespace TwitchDownloaderCore
             {
                 newPaint.Typeface = SKTypeface.Default;
                 // Warn once per unique unsupported codepoint (fallbackFontCache already deduplicates calls).
-                _progress.LogWarning($"No system typeface found for U+{input:X4} ('{char.ConvertFromUtf32(input)}'). It will render as □.");
+                // Emoji-range codepoints without a system typeface are expected (new emoji not yet in any installed font)
+                // and are already handled by the image cache; log at verbose to avoid alarming the user.
+                bool isEmojiRange = input is (>= 0x2600 and <= 0x27BF)  // Miscellaneous Symbols
+                    or (>= 0x1F000 and <= 0x1FFFF)                       // Supplementary Multilingual Plane emoji
+                    or (>= 0x1FA00 and <= 0x1FAFF);                      // Symbols and Pictographs Extended-A
+                if (isEmojiRange)
+                    _progress.LogVerbose($"No system typeface found for U+{input:X4} ('{char.ConvertFromUtf32(input)}'). It will render as □.");
+                else
+                    _progress.LogWarning($"No system typeface found for U+{input:X4} ('{char.ConvertFromUtf32(input)}'). It will render as □.");
             }
 
             fallbackPaint = newPaint;
