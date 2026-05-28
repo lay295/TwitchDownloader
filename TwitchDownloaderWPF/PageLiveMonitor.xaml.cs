@@ -1079,7 +1079,7 @@ namespace TwitchDownloaderWPF
             {
                 Id = vodId.ToString(),
                 DownloadFormat = ChatFormat.Json,
-                Compression = ChatCompression.Gzip,
+                Compression = (ChatCompression)Settings.Default.ChatJsonCompression,
                 DelayDownload = true,
                 DownloadThreads = 1,
                 TempFolder = Settings.Default.TempPath,
