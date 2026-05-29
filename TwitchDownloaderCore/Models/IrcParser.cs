@@ -24,7 +24,7 @@ namespace TwitchDownloaderCore.Models
             var textEnd = text.Length;
             var lineEnd = -1;
             var iterations = 0;
-            var maxIterations = text.Count((byte)'\n') + 1;
+            var maxIterations = MemoryExtensions.Count(text, (byte)'\n') + 1;
             do
             {
                 lineStart++;
