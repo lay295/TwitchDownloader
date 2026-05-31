@@ -377,9 +377,7 @@ namespace TwitchDownloaderCore
                 0x40, 0x01, 0x7F, 0xFC, 0x00, 0xD0, 0x00, 0x07,
             ];
 
-            _progress.ReportProgress(0);
-            var partCount = downloadState.PartCount;
-            var doneCount = 0;
+            var stubCount = 0;
 
             using var headerFs = !string.IsNullOrWhiteSpace(downloadState.HeaderFile)
                 ? File.OpenRead(downloadState.HeaderFile)
@@ -410,15 +408,22 @@ namespace TwitchDownloaderCore
                         headerFs.Seek(0, SeekOrigin.Begin);
                         headerFs.CopyTo(fs);
                     }
+
+                    stubCount++;
                 }
                 catch (Exception ex)
                 {
                     _progress.LogVerbose($"Failed to write stub for part {partName}: {ex.Message}");
                 }
+            }
 
-                doneCount++;
-                var percent = (int)(doneCount / (double)partCount * 100);
-                _progress.ReportProgress(percent);
+            if (stubCount > 0)
+            {
+                _progress.LogInfo($"Failed to redownload {stubCount} parts, using stubs instead");
+            }
+            else
+            {
+                _progress.LogInfo("Successfully redownloaded missing parts");
             }
         }
 
