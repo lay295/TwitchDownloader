@@ -226,7 +226,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(VideoDownloadState downloadState, CancellationToken cancellationToken)
+        private async Task DownloadVideoPartsAsync(VideoDownloadState downloadState, CancellationToken cancellationToken, bool reportProgress = true)
         {
             var downloadThreads = new VideoDownloadThread[downloadOptions.DownloadThreads];
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
@@ -235,12 +235,12 @@ namespace TwitchDownloaderCore
             }
 
             var partCount = downloadState.PartCount;
-            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, downloadState, partCount, true, cancellationToken);
+            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, downloadState, partCount, true, cancellationToken, reportProgress);
 
             LogDownloadThreadExceptions(downloadExceptions);
         }
 
-        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, int partCount, bool limitThreadRestarts, CancellationToken cancellationToken)
+        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, int partCount, bool limitThreadRestarts, CancellationToken cancellationToken, bool reportProgress)
         {
             var allThreadsExited = false;
             var previousDoneCount = 0;
@@ -253,7 +253,7 @@ namespace TwitchDownloaderCore
                 {
                     previousDoneCount = downloadState.PartQueue.Count;
                     var percent = (int)((partCount - previousDoneCount) / (double)partCount * 100);
-                    _progress.ReportProgress(percent);
+                    if (reportProgress) { _progress.ReportProgress(percent); }
                 }
 
                 allThreadsExited = true;
@@ -281,7 +281,7 @@ namespace TwitchDownloaderCore
                 await Task.Delay(100, cancellationToken);
             } while (!allThreadsExited);
 
-            _progress.ReportProgress(100);
+            if (reportProgress) { _progress.ReportProgress(100); }
 
             if (restartedThreads >= maxRestartedThreads)
             {
@@ -346,7 +346,7 @@ namespace TwitchDownloaderCore
                 }
 
                 _progress.LogInfo($"{invalidCount} parts were missing or corrupt and will be redownloaded.");
-                await DownloadVideoPartsAsync(downloadState, cancellationToken).ConfigureAwait(false);
+                await DownloadVideoPartsAsync(downloadState, cancellationToken, false).ConfigureAwait(false);
 
                 try
                 {
