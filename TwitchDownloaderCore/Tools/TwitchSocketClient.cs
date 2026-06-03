@@ -78,12 +78,17 @@ namespace TwitchDownloaderCore.Tools
                 if (socket.State is WebSocketState.Open or WebSocketState.Connecting)
                 {
                     await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
-                    socket.Dispose();
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to disconnect socket: {ex.Message}");
+                // TODO: why does it always result in "The remote party closed the WebSocket connection without completing the close handshake."
+                // for now just disabled because the result is the desired one anyway
+                // _logger.LogError($"Failed to disconnect socket: {ex.Message}");
+            }
+            finally
+            {
+                socket.Dispose();
             }
 
             return socket.State is not WebSocketState.Open and not WebSocketState.Connecting;

@@ -720,13 +720,12 @@ namespace TwitchDownloaderCore
 
                 try
                 {
-                    var (bytes, codec) = await GetImage(emoteFolder, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, 2, "png", offline, logger, cancellationToken);
-                    if (bytes is null)
+                    var newEmote = await GetFirstPartyEmote(id, emoteFolder, offline, logger, cancellationToken);
+
+                    if (newEmote is null)
                     {
                         continue;
                     }
-
-                    var newEmote = new TwitchEmote(bytes, codec, EmoteProvider.FirstParty, 2, id, id);
 
                     if (!emotes.TryAdd(id, newEmote))
                     {
@@ -1348,6 +1347,18 @@ namespace TwitchDownloaderCore
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlUserInfoResponse>();
+        }
+
+        public static async Task<TwitchEmote> GetFirstPartyEmote(string id, DirectoryInfo cacheDir, bool offline, ITaskLogger logger, CancellationToken cancellationToken)
+        {
+            var (bytes, codec) = await GetImage(cacheDir, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, 2, "png", offline, logger, cancellationToken);
+
+            if (bytes is null)
+            {
+                return null;
+            }
+
+            return new TwitchEmote(bytes, codec, EmoteProvider.FirstParty, 2, id, id);
         }
 
         public static async Task<(byte[], SKCodec)> GetImage(DirectoryInfo cacheDir, string url, string imageId, int imageScale, string imageType, bool offline, ITaskLogger logger, CancellationToken cancellationToken = default)
