@@ -26,13 +26,9 @@ namespace TwitchDownloaderCLI.Modes
             {
                 Channel = inputOptions.Channel,
                 OutputFile = inputOptions.OutputFile,
+                NextStream = !!inputOptions.NextStream,
+                Duration = (TimeSpan)inputOptions.Duration,
                 FileCollisionCallback = collisionHandler.HandleCollisionCallback,
-            };
-
-            Console.CancelKeyPress += (_, args) =>
-            {
-                options.OnStopRecording();
-                args.Cancel = true;
             };
 
             return options;

@@ -80,7 +80,9 @@ namespace TwitchDownloaderCore.Tools
                     await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
                 }
             }
+            #pragma warning disable CS0168 // Variable is declared but never used
             catch (Exception ex)
+            #pragma warning restore CS0168
             {
                 // TODO: why does it always result in "The remote party closed the WebSocket connection without completing the close handshake."
                 // for now just disabled because the result is the desired one anyway

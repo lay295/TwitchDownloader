@@ -33,11 +33,12 @@ namespace TwitchDownloaderCore
             _cacheDir = CacheDirectoryService.GetCacheDirectory("");
             _emoteCache = new DirectoryInfo(Path.Combine(_cacheDir, "emotes"));
 
-            recorderOptions.StopRecording += (_, _) =>
-            {
-                _progress.LogInfo("Stopping recording...");
-                _ = _ircClient.DisconnectAsync(CancellationToken.None);
-            };
+            // recorderOptions.StopRecording += (_, _) =>
+            // {
+            //     _progress.LogInfo("Stopping recording...");
+            //     _ = _ircClient.DisconnectAsync(CancellationToken.None);
+            // };
+
         }
 
         public async Task RecordAsync(CancellationToken cancellationToken)

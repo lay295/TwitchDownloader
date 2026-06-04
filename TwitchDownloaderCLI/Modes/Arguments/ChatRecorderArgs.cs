@@ -9,8 +9,14 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option('u', "channel", Required = true, HelpText = "The channel to record.")]
         public string Channel { get; set; }
 
-        [Option('o', "output", Default = "irc.txt", HelpText = "Path to output file. Not yet implemented.")]
+        [Option('o', "output", Default = "irc.txt", HelpText = "Path to output file.")]
         public string OutputFile { get; set; }
+
+        [Option("duration", Required = true, SetName = "recordForDuration", HelpText = "How long to record. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
+        public TimeDuration Duration { get; set; }
+
+        [Option("next-stream", Required = true, SetName = "recordWholeStream", HelpText = "Record the whole of the next stream.")]
+        public bool NextStream { get; set; }
 
         // Interface args
         public OverwriteBehavior OverwriteBehavior { get; set; }
