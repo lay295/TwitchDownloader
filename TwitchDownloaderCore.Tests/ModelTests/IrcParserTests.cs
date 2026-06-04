@@ -48,7 +48,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             var parsed = parser.Parse(ircBytes);
 
             Assert.NotNull(parsed);
-            Assert.Equal(1, parsed.Count);
+            Assert.Single(parsed);
             Assert.Equal(serverOrNick, parsed[0].Nickname);
             Assert.Equal(user, parsed[0].User);
             Assert.Equal(host, parsed[0].Host);
@@ -85,7 +85,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             var parsed = parser.Parse(ircBytes);
 
             Assert.NotNull(parsed);
-            Assert.Equal(1, parsed.Count);
+            Assert.Single(parsed);
             Assert.Equal(serverOrNick, parsed[0].Nickname);
             Assert.Equal(user, parsed[0].User);
             Assert.Equal(host, parsed[0].Host);
