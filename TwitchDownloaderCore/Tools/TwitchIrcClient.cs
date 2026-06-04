@@ -1,300 +1,150 @@
+
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.Tools
 {
-    public sealed class TwitchIrcClient : IDisposable
-    {
-        private const int FALSE = 0;
-        private const int TRUE = 1;
-        private const string ANONYMOUS_PASSWORD = "SCHMOOPIIE";
-        private static readonly string AnonymousUsername = $"justinfan{Random.Shared.Next(10_000, 99_999)}";
+	public sealed class TwitchIrcClient
+	{
+		private const string ANONYMOUS_PASSWORD = "SCHMOOPIIE";
+		private static readonly string AnonymousUsername = $"justinfan{Random.Shared.Next(10_000, 99_999)}";
 
-        public FileInfo DebugFile
-        {
-            get => _client.DebugFile;
-            set => _client.DebugFile = value;
-        }
 
-        public bool IsConnected => Reconnecting || _pingTimer != null;
-        public bool HasNewMessages => !_messages.IsEmpty;
+		public static ChannelReader<IrcMessage> MessagesFor(string channelName, CancellationToken stopListening, ITaskLogger logger)
+		{
+			var channel = Channel.CreateUnbounded<IrcMessage>();
 
-        private bool Reconnecting => _reconnecting != FALSE;
+			_ = RunMessagePump(channelName, channel.Writer, stopListening, logger);
 
-        private readonly ConcurrentQueue<IrcMessage> _messages;
-        private readonly ITaskLogger _logger;
-        private readonly TwitchSocketClient _client;
-        private readonly IrcParser _ircParser;
-        private readonly TimeSpan _pingInterval;
+			return channel;
+		}
 
-        private int _reconnecting;
-        private string _joinedChannel;
-        private Timer _pingTimer;
-        private DateTimeOffset _lastPing;
+		private static async Task RunMessagePump(
+			string channelName,
+			ChannelWriter<IrcMessage> channel,
+			CancellationToken stopListening,
+			ITaskLogger logger
+		)
+		{
+			try
+			{
+				var parser = new IrcParser(logger);
+				using var client = new TwitchSocketClient(logger);
+				client.DebugFile = new FileInfo("debug.txt");
 
-        public TwitchIrcClient(ITaskLogger logger)
-        {
-            _messages = new ConcurrentQueue<IrcMessage>();
-            _logger = logger;
-            _client = new TwitchSocketClient(logger);
-            _client.MessageReceived += Client_OnMessageReceived;
-            _ircParser = new IrcParser(logger);
-            _pingInterval = TimeSpan.FromMinutes(5);
-        }
+				while (!stopListening.IsCancellationRequested)
+				{
+					// this is used to signal a need for reconnection, which is then awaited and leads to this while loop being restarted
+					var reconnectionRequired = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        public async Task<bool> ConnectAsync(CancellationToken cancellationToken)
-        {
-            if (_client.SocketOpen)
-            {
-                return true;
-            }
+					EventHandler<TwitchSocketClient.Message> eventHandler = (object sender, TwitchSocketClient.Message msg) => HandleMessageReceived(sender, msg, client, channel, reconnectionRequired, logger, parser);
+					client.MessageReceived += eventHandler;
 
-            var count = 0;
-            const int MAX_TRIES = 10;
-            while (true)
-            {
-                if (await _client.ConnectAsync(new Uri("wss://irc-ws.chat.twitch.tv/"), cancellationToken))
-                    break;
+					await ConnectToTwitchIrc(client, stopListening, logger);
 
-                if (++count >= MAX_TRIES)
-                {
-                    _logger.LogWarning($"Failed to connect to Twitch IRC after {MAX_TRIES} tries.");
-                    return false;
-                }
+					await client.SendTextPooledAsync("CAP REQ :twitch.tv/commands twitch.tv/tags", CancellationToken.None);
+					await client.SendTextPooledAsync($"PASS {ANONYMOUS_PASSWORD}", CancellationToken.None);
+					await client.SendTextPooledAsync($"NICK {AnonymousUsername}", CancellationToken.None);
+					await client.SendTextPooledAsync($"USER {AnonymousUsername} 8 * :{AnonymousUsername}", CancellationToken.None);
+					logger.LogVerbose($"Joining #{channelName}...");
+					await client.SendTextPooledAsync($"JOIN #{channelName}", CancellationToken.None);
 
-                var sleepTime = GetExponentialBackoff(count);
-                _logger.LogVerbose($"Failed to connect to Twitch IRC, retrying in {sleepTime:N0}ms...");
-                await Task.Delay(sleepTime, cancellationToken);
-            }
+					// this waits for either a need for reconnection or the desired end of the listening
+					// WhenAny will mask the stopListening throw, so Disconnect happens either way
+					var completedTask = await Task.WhenAny(reconnectionRequired.Task, Task.Delay(Timeout.Infinite, stopListening));
 
-            _logger.LogInfo("Connected to Twitch IRC");
+					client.MessageReceived -= eventHandler;
+					await client.DisconnectAsync(CancellationToken.None);
+				}
 
-            await _client.SendTextPooledAsync("CAP REQ :twitch.tv/commands twitch.tv/tags", cancellationToken);
-            await _client.SendTextPooledAsync($"PASS {ANONYMOUS_PASSWORD}", cancellationToken);
-            await _client.SendTextPooledAsync($"NICK {AnonymousUsername}", cancellationToken);
-            await _client.SendTextPooledAsync($"USER {AnonymousUsername} 8 * :{AnonymousUsername}", cancellationToken);
+				channel.TryComplete();
+			}
+			catch (OperationCanceledException)
+			{
+				channel.TryComplete();
+			}
+			catch (Exception ex)
+			{
+				channel.TryComplete(ex);
+			}
+		}
 
-            var timerInterval = TimeSpan.FromSeconds(10);
-            _pingTimer = new Timer(PingTimerCallback, new object(), timerInterval, timerInterval);
+		private static async Task<bool> ConnectToTwitchIrc(TwitchSocketClient client, CancellationToken cancellationToken, ITaskLogger logger)
+		{
+			var count = 0;
+			const int MAX_TRIES = 10;
+			while (true)
+			{
+				if (await client.ConnectAsync(new Uri("wss://irc-ws.chat.twitch.tv/"), cancellationToken))
+					return true;
 
-            return true;
-        }
+				if (++count >= MAX_TRIES)
+				{
+					logger.LogWarning($"Failed to connect to Twitch IRC after {MAX_TRIES} tries.");
+					return false;
+				}
 
-        // This callback should just send pings, but ClientWebSocket doesn't inform us through ReceiveAsync() if the connection times out so we need to check manually :/
-        private void PingTimerCallback(object state)
-        {
-            // Only allow one simultaneous ping/keepalive check
-            if (!Monitor.TryEnter(state))
-            {
-                return;
-            }
+				var sleepTime = GetExponentialBackoff(count);
+				logger.LogVerbose($"Failed to connect to Twitch IRC, retrying in {sleepTime:N0}ms...");
+				await Task.Delay(sleepTime, cancellationToken);
+			}
+		}
 
-            // Keepalive check
-            try
-            {
-                EnsureSocketConnected(CancellationToken.None).RunSynchronously();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in keepalive check: {ex.Message}");
-            }
+		private static int GetExponentialBackoff(int count)
+		{
+			return (int)Math.Min(
+				Math.Pow(2.25, count) * Random.Shared.Next(50, 100),
+				30_000
+			);
+		}
 
-            // Send PING
-            var now = DateTimeOffset.UtcNow;
-            if (now - _lastPing > _pingInterval)
-            {
-                try
-                {
-                    _client.SendTextPooledAsync("PING", CancellationToken.None).RunSynchronously();
-                    _lastPing = now;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Error when pinging Twitch IRC: {ex.Message}");
-                }
-            }
+		private static void HandleMessageReceived(object sender, TwitchSocketClient.Message e, TwitchSocketClient client, ChannelWriter<IrcMessage> writer, TaskCompletionSource reconnectRequired, ITaskLogger logger, IrcParser parser)
+		{
+			switch (e.MessageType)
+			{
+				case WebSocketMessageType.Binary:
+					logger.LogWarning("Binary messages are not supported. See verbose log for more info.");
+					logger.LogVerbose($"Binary message content: {Convert.ToBase64String(e.Buffer)}");
+					return;
+				case WebSocketMessageType.Close:
+					// this can happen when legitimatly closing after finishing to collect all data.
+					// Still, if something else triggers it, we need to reconnect, otherwise the stopListening check will catch it
+					reconnectRequired.TrySetResult();
+					return;
+			}
 
-            // Release lock
-            Monitor.Exit(state);
-        }
+			var messages = parser.Parse(e.Buffer);
 
-        public async Task<bool> DisconnectAsync(CancellationToken cancellationToken)
-        {
-            if (_pingTimer != null)
-            {
-                await _pingTimer.DisposeAsync();
-                _pingTimer = null;
-            }
-
-            if (!_client.SocketOpen)
-            {
-                return true;
-            }
-
-            await LeaveChannelAsync(cancellationToken);
-
-            var count = 0;
-            const int MAX_TRIES = 10;
-            while (true)
-            {
-                if (await _client.DisconnectAsync(cancellationToken))
-                    break;
-
-                if (++count >= MAX_TRIES)
-                {
-                    _logger.LogWarning($"Failed to disconnect from Twitch IRC after {MAX_TRIES} tries.");
-                    return false;
-                }
-
-                var sleepTime = GetExponentialBackoff(count);
-                _logger.LogVerbose($"Failed to disconnect from Twitch IRC, retrying in {sleepTime:N0}ms...");
-                await Task.Delay(sleepTime, cancellationToken);
-            }
-
-            return true;
-        }
-
-        private static int GetExponentialBackoff(int count)
-        {
-            return (int)Math.Min(
-                Math.Pow(2.25, count) * Random.Shared.Next(50, 100),
-                30_000
-            );
-        }
-
-        public async Task<bool> JoinChannelAsync(string channelName, CancellationToken cancellationToken)
-        {
-            if (!IsConnected)
-            {
-                _logger.LogWarning($"Tried to join #{channelName}, but the socket was closed.");
-                return false;
-            }
-
-            await EnsureSocketConnected(cancellationToken);
-
-            _logger.LogVerbose($"Joining #{channelName}...");
-            await _client.SendTextPooledAsync($"JOIN #{channelName}", cancellationToken);
-            _joinedChannel = channelName;
-
-            return true;
-        }
-
-        public async Task<bool> LeaveChannelAsync(CancellationToken cancellationToken)
-        {
-            if (!_client.SocketOpen)
-            {
-                return true;
-            }
-
-            if (_joinedChannel != null)
-            {
-                _logger.LogVerbose($"Leaving #{_joinedChannel}...");
-                await _client.SendTextPooledAsync($"PART #{_joinedChannel}", cancellationToken);
-                _joinedChannel = null;
-            }
-
-            return true;
-        }
-
-        public async Task<bool> ReconnectAsync(CancellationToken cancellationToken)
-        {
-            if (Interlocked.Exchange(ref _reconnecting, TRUE) != FALSE)
-                return false;
-
-            _logger.LogInfo("Reconnecting to Twitch IRC...");
-
-            try
-            {
-                var channelName = _joinedChannel;
-                return await LeaveChannelAsync(cancellationToken)
-                          && await DisconnectAsync(cancellationToken)
-                          && await ConnectAsync(cancellationToken)
-                          && await JoinChannelAsync(channelName, cancellationToken);
-            }
-            finally
-            {
-                Interlocked.Exchange(ref _reconnecting, FALSE);
-            }
-        }
-
-        public async IAsyncEnumerable<IrcMessage> GetNewMessagesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
-        {
-            await EnsureSocketConnected(cancellationToken);
-
-            while (_messages.TryDequeue(out var message))
-            {
-                yield return message;
-            }
-        }
-
-        private ValueTask<bool> EnsureSocketConnected(CancellationToken cancellationToken)
-        {
-            if (IsConnected && !Reconnecting && !_client.SocketOpen)
-            {
-                return new ValueTask<bool>(ReconnectAsync(cancellationToken));
-            }
-
-            return ValueTask.FromResult(IsConnected);
-        }
-
-        private void Client_OnMessageReceived(object sender, TwitchSocketClient.Message e)
-        {
-            switch (e.MessageType)
-            {
-                case WebSocketMessageType.Binary:
-                    _logger.LogWarning("Binary messages are not supported. See verbose log for more info.");
-                    _logger.LogVerbose($"Binary message content: {Convert.ToBase64String(e.Buffer)}");
-                    return;
-                case WebSocketMessageType.Close:
-                    if (!IsConnected)
-                        return;
-
-                    _logger.LogWarning("Lost connection to Twitch IRC, initiating reconnect...");
-                    _ = ReconnectAsync(CancellationToken.None);
-                    return;
-            }
-
-            var messages = _ircParser.Parse(e.Buffer);
-
-            foreach (var ircMessage in messages)
-            {
-                switch (ircMessage.Command)
-                {
-                    case IrcCommand.Ping:
-                        _client.SendTextPooledAsync(
-                            ircMessage.ParametersRaw is { Length: > 0 } ? $"PONG {ircMessage.ParametersRaw}" : "PONG",
-                            CancellationToken.None
-                        );
-                        break;
-                    case IrcCommand.Reconnect:
-                        _ = ReconnectAsync(CancellationToken.None);
-                        break;
-                    case IrcCommand.PrivMsg:
-                    case IrcCommand.UserNotice:
-                        _messages.Enqueue(ircMessage);
-                        break;
-                    case IrcCommand.Unknown:
-                        _logger.LogWarning($"Got unknown IRC command: {Encoding.UTF8.GetString(e.Buffer).TrimEnd()}");
-                        break;
-                }
-            }
-        }
-
-        public void Dispose()
-        {
-            _client?.Dispose();
-            _pingTimer?.Dispose();
-            _pingTimer = null;
-        }
-    }
+			foreach (var ircMessage in messages)
+			{
+				switch (ircMessage.Command)
+				{
+					case IrcCommand.Ping:
+						client.SendTextPooledAsync(
+							ircMessage.ParametersRaw is { Length: > 0 } ? $"PONG {ircMessage.ParametersRaw}" : "PONG",
+							CancellationToken.None
+						);
+						break;
+					case IrcCommand.Reconnect:
+						logger.LogVerbose("Twitch requested reconnect, initiating reconnect...");
+						reconnectRequired.TrySetResult();
+						break;
+					case IrcCommand.PrivMsg:
+					case IrcCommand.UserNotice:
+						writer.TryWrite(ircMessage);
+						break;
+					case IrcCommand.Unknown:
+						logger.LogWarning($"Got unknown IRC command: {Encoding.UTF8.GetString(e.Buffer).TrimEnd()}");
+						break;
+				}
+			}
+		}
+	}
 }

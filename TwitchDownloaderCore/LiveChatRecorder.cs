@@ -15,11 +15,11 @@ using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore
 {
-    public class LiveChatRecorder : IDisposable
+    public class LiveChatRecorder
     {
         private readonly LiveChatRecorderOptions _recorderOptions;
+        private readonly CancellationTokenSource _cancellationSource;
         private readonly ITaskProgress _progress;
-        private readonly TwitchIrcClient _ircClient;
 
         private readonly string _cacheDir;
         private readonly DirectoryInfo _emoteCache;
@@ -28,17 +28,11 @@ namespace TwitchDownloaderCore
         {
             _recorderOptions = recorderOptions;
             _progress = progress;
-            _ircClient = new TwitchIrcClient(progress);
 
             _cacheDir = CacheDirectoryService.GetCacheDirectory("");
             _emoteCache = new DirectoryInfo(Path.Combine(_cacheDir, "emotes"));
 
-            // recorderOptions.StopRecording += (_, _) =>
-            // {
-            //     _progress.LogInfo("Stopping recording...");
-            //     _ = _ircClient.DisconnectAsync(CancellationToken.None);
-            // };
-
+            _cancellationSource = new CancellationTokenSource(_recorderOptions.NextStream ? new TimeSpan(0, 1, 0) : _recorderOptions.Duration);
         }
 
         public async Task RecordAsync(CancellationToken cancellationToken)
@@ -57,18 +51,17 @@ namespace TwitchDownloaderCore
             _recorderOptions.OutputFile = outputFileInfo.FullName;
 
             var debugFileInfo = TwitchHelper.ClaimFile(_recorderOptions.OutputFile + ".debug.txt", _recorderOptions.FileCollisionCallback, _progress);
-            _ircClient.DebugFile = debugFileInfo;
 
             try
             {
-                var chatRoot = await RecordAsyncImpl(cancellationToken);
+                var chatRoot = await ProcessMessages();
 
                 var outputStream = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
                 await ChatJson.SerializeAsync(outputStream, chatRoot, cancellationToken);
             }
             catch
             {
-                await Task.Delay(100, cancellationToken);
+                await Task.Delay(100);
 
                 TwitchHelper.CleanUpClaimedFile(outputFileInfo, null, _progress);
                 TwitchHelper.CleanUpClaimedFile(debugFileInfo, null, _progress);
@@ -77,20 +70,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<ChatRoot> RecordAsyncImpl(CancellationToken cancellationToken)
-        {
-            await _ircClient.ConnectAsync(cancellationToken);
-            await _ircClient.JoinChannelAsync(_recorderOptions.Channel, cancellationToken);
-
-            var chatRoot = await ProcessMessages(cancellationToken);
-
-            await _ircClient.LeaveChannelAsync(cancellationToken);
-            await _ircClient.DisconnectAsync(cancellationToken);
-
-            return chatRoot;
-        }
-
-        private async Task<ChatRoot> ProcessMessages(CancellationToken cancellationToken)
+        private async Task<ChatRoot> ProcessMessages()
         {
             ConcurrentQueue<Comment> Comments = new();
 
@@ -105,39 +85,34 @@ namespace TwitchDownloaderCore
                 embeddedData = new EmbeddedData()
             };
 
-            do
+            await foreach (var message in TwitchIrcClient.MessagesFor(_recorderOptions.Channel, _cancellationSource.Token, _progress).ReadAllAsync())
             {
-                await foreach (var message in _ircClient.GetNewMessagesAsync(cancellationToken))
+                try
                 {
-                    try
+                    var comment = IrcMessageConverter.ToComment(message);
+                    if (comment is null)
                     {
-                        var comment = IrcMessageConverter.ToComment(message);
-                        if (comment is null)
-                        {
-                            _progress.LogWarning($"Failed to convert message: {message}");
-                            continue;
-                        }
-
-                        Comments.Enqueue(comment);
-
-                        foreach (var emoticon in comment.message.emoticons)
-                        {
-                            _ = firstPartyEmotes.GetOrAdd(emoticon._id, emoticonId => TwitchHelper.GetFirstPartyEmote(emoticonId, _emoteCache, false, _progress, CancellationToken.None));
-                        }
-
+                        _progress.LogWarning($"Failed to convert message: {message}");
+                        continue;
                     }
-                    catch (Exception ex)
+
+                    Comments.Enqueue(comment);
+
+                    foreach (var emoticon in comment.message.emoticons)
                     {
-                        Console.WriteLine(ex);
+                        _ = firstPartyEmotes.GetOrAdd(emoticon._id, emoticonId => TwitchHelper.GetFirstPartyEmote(emoticonId, _emoteCache, false, _progress, CancellationToken.None));
                     }
+
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
 
-                await Task.Delay(50, cancellationToken);
-            } while (_ircClient.IsConnected || _ircClient.HasNewMessages);
-
-            foreach (var kvp in firstPartyEmotes)
+            foreach (var emoteTask in firstPartyEmotes.Values)
             {
-                var emote = await kvp.Value;
+                var emote = await emoteTask;
                 var newEmote = new EmbedEmoteData
                 {
                     id = emote.Id,
@@ -153,11 +128,6 @@ namespace TwitchDownloaderCore
             chatRoot.comments = Comments.ToList();
 
             return chatRoot;
-        }
-
-        public void Dispose()
-        {
-            _ircClient?.Dispose();
         }
     }
 }

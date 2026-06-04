@@ -16,7 +16,7 @@ namespace TwitchDownloaderCLI.Modes
             var collisionHandler = new FileCollisionHandler(inputOptions, progress);
             var recorderOptions = GetRecorderOptions(inputOptions, collisionHandler, progress);
 
-            using var chatRecorder = new LiveChatRecorder(recorderOptions, progress);
+            var chatRecorder = new LiveChatRecorder(recorderOptions, progress);
             chatRecorder.RecordAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
 
