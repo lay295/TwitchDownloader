@@ -74,7 +74,7 @@ namespace TwitchDownloaderCore
         {
             ConcurrentQueue<Comment> Comments = new();
 
-            ConcurrentDictionary<string, Task<TwitchEmote>> firstPartyEmotes = new();
+            var firstPartyEmoteLoader = new FirstParteEmoteLoader(_progress, _emoteCache);
 
             var chatRoot = new ChatRoot
             {
@@ -98,10 +98,7 @@ namespace TwitchDownloaderCore
 
                     Comments.Enqueue(comment);
 
-                    foreach (var emoticon in comment.message.emoticons)
-                    {
-                        _ = firstPartyEmotes.GetOrAdd(emoticon._id, emoticonId => TwitchHelper.GetFirstPartyEmote(emoticonId, _emoteCache, false, _progress, CancellationToken.None));
-                    }
+                    firstPartyEmoteLoader.ProcessComment(comment);
 
                 }
                 catch (Exception ex)
@@ -110,24 +107,46 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            foreach (var emoteTask in firstPartyEmotes.Values)
-            {
-                var emote = await emoteTask;
-                var newEmote = new EmbedEmoteData
-                {
-                    id = emote.Id,
-                    imageScale = emote.ImageScale,
-                    data = emote.ImageData,
-                    width = emote.Width / emote.ImageScale,
-                    height = emote.Height / emote.ImageScale,
-                };
-
-                chatRoot.embeddedData.firstParty.Add(newEmote);
-            }
-
             chatRoot.comments = Comments.ToList();
+            chatRoot.embeddedData.firstParty = await firstPartyEmoteLoader.GetList();
 
             return chatRoot;
+        }
+
+        private class FirstParteEmoteLoader
+        {
+            private readonly ITaskLogger _logger;
+            private readonly DirectoryInfo _cache;
+            private ConcurrentDictionary<string, Task<TwitchEmote>> _firstPartyEmotes = new();
+
+            public FirstParteEmoteLoader(ITaskLogger logger, DirectoryInfo cache)
+            {
+                _logger = logger;
+                _cache = cache;
+            }
+
+            public void ProcessComment(Comment comment)
+            {
+                foreach (var emoticon in comment.message.emoticons)
+                {
+                    _ = _firstPartyEmotes.GetOrAdd(emoticon._id, emoticonId => TwitchHelper.GetFirstPartyEmote(emoticonId, _cache, false, _logger, CancellationToken.None));
+                }
+            }
+
+            public async Task<List<EmbedEmoteData>> GetList()
+            {
+                var downloadedEmotes = await Task.WhenAll(_firstPartyEmotes.Values);
+                return downloadedEmotes
+                    .Select(emote => new EmbedEmoteData
+                    {
+                        id = emote.Id,
+                        imageScale = emote.ImageScale,
+                        data = emote.ImageData,
+                        width = emote.Width / emote.ImageScale,
+                        height = emote.Height / emote.ImageScale,
+                    })
+                    .ToList();
+            }
         }
     }
 }
