@@ -33,7 +33,7 @@ namespace TwitchDownloaderCore.Chat
         /// <exception cref="NotSupportedException">The file is not a valid chat format.</exception>
         public static async Task<ChatRoot> DeserializeAsync(string filePath, bool getComments = true, bool onlyFirstAndLastComments = false, bool getEmbeds = true, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+            ArgumentNullException.ThrowIfNull(filePath);
 
             if (!File.Exists(filePath))
                 throw new IOException("Json file does not exist");
