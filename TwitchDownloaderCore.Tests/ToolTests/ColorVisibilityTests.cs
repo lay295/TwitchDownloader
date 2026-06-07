@@ -26,6 +26,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             using var canvas = new SKCanvas(bitmap);
             using var paint = new SKPaint();
             paint.BlendMode = SKBlendMode.Src;
+            paint.TextAlign = SKTextAlign.Center;
 
             var backgrounds = new[] { SKColors.Black, SKColors.White, SKColors.Gray, SKColors.Red, SKColors.Blue, SKColors.Lime };
             for (var i = 0; i < backgrounds.Length; i++)
@@ -51,6 +52,11 @@ namespace TwitchDownloaderCore.Tests.ToolTests
                 paint.Color = background;
                 canvas.DrawRect(startX, startY, TILE_W, TILE_H, paint);
 
+                paint.Color = SKColors.Gray;
+                paint.BlendMode = SKBlendMode.Difference;
+                canvas.DrawText(adjust ? "adjusted" : "reference", startX + TILE_W / 2, startY + 12, paint);
+                paint.BlendMode = SKBlendMode.Src;
+
                 // Hue sweep
                 for (var x = 0; x < HUE_LEN; x++)
                 for (var y = 0; y < SAT_LEN; y++)
@@ -74,7 +80,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
                 }
             }
 
-            void AssertPixelMatrix(int startX, float bgHue, SKColor background)
+            void AssertPixelMatrix(int tileStartX, float bgHue, SKColor background)
             {
                 const int MATRIX_W = 9;
                 const int MATRIX_H = 9;
@@ -89,17 +95,17 @@ namespace TwitchDownloaderCore.Tests.ToolTests
                     if (y2 < 0) y2 += SAT_LEN;
                     y2 %= SAT_LEN;
 
-                    var sourcePx = bitmap.GetPixel(
-                        TILE_X_OFFSET + startX + x2,
+                    var refPx = bitmap.GetPixel(
+                        TILE_X_OFFSET + tileStartX + x2,
                         TILE_Y_OFFSET + TILE_H * 0 + y2
                     );
-                    var actualPx = bitmap.GetPixel(
-                        TILE_X_OFFSET + startX + x2,
+                    var adjPx = bitmap.GetPixel(
+                        TILE_X_OFFSET + tileStartX + x2,
                         TILE_Y_OFFSET + TILE_H * 1 + y2
                     );
 
-                    Assert.NotEqual(background, actualPx);
-                    Assert.NotEqual(sourcePx, actualPx);
+                    Assert.NotEqual(background, adjPx);
+                    Assert.NotEqual(refPx, adjPx);
                 }
             }
         }
