@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
@@ -770,7 +771,7 @@ namespace TwitchDownloaderCore
                     Dictionary<string, ChatBadgeData> versions = new();
                     foreach (var (version, data) in badge.versions)
                     {
-                        string id = data.url.Split('/')[^2];
+                        string id = data.url.GetNthOccurrence('/', ^2).ToString();
                         var (bytes, codec) = await GetImage(badgeFolder, data.url, id, 2, "png", false, logger, cancellationToken);
                         if (bytes is null)
                         {

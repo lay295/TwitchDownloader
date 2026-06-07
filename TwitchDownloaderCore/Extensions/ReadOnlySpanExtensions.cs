@@ -199,5 +199,86 @@ namespace TwitchDownloaderCore.Extensions
 
             return -1;
         }
+
+        /// <inheritdoc cref="string.IndexOf(char, int)"/>
+        public static int IndexOf<T>(this ReadOnlySpan<T> str, T value, int startIndex) where T : IEquatable<T>
+        {
+            var result = str[startIndex..].IndexOf(value);
+
+            return result < 0 ? result : result + startIndex;
+        }
+
+        /// <inheritdoc cref="string.LastIndexOf(char, int)"/>
+        public static int LastIndexOf<T>(this ReadOnlySpan<T> str, T value, int startIndex) where T : IEquatable<T>
+        {
+            return str[..(startIndex + 1)].LastIndexOf(value);
+        }
+
+        /// <summary>Returns the N-th occurrence of a substring between 2 occurrences of a <paramref name="delimiter"/> or the start/end of a span.</summary>
+        /// <example>
+        /// <see cref="GetNthOccurrence"/>("1/2/3", '/', 0) -> "1"
+        /// <see cref="GetNthOccurrence"/>("1/2/3", '/', 1) -> "2"
+        /// <see cref="GetNthOccurrence"/>("1/2/3", '/', 2) -> "3"
+        /// <see cref="GetNthOccurrence"/>("1/2/3", '/', ^1) -> "3"
+        /// <see cref="GetNthOccurrence"/>("1/2/3", '/', ^2) -> "2"
+        /// <see cref="GetNthOccurrence"/>("1/2/3", '/', ^3) -> "1"
+        /// <see cref="GetNthOccurrence"/>("1/2/3", '/', 10) -> <see cref="ArgumentOutOfRangeException"/>
+        /// <see cref="GetNthOccurrence"/>("123", '/', 0) -> "123"
+        /// </example>
+        /// <param name="str">The source span.</param>
+        /// <param name="delimiter">The delimiter.</param>
+        /// <param name="index">The N-th delimited range to extract.</param>
+        /// <returns>A slice of the source span.</returns>
+        public static ReadOnlySpan<char> GetNthOccurrence(this ReadOnlySpan<char> str, char delimiter, Index index)
+        {
+            if (str.IsEmpty)
+            {
+                return str;
+            }
+
+            var idxB = index.IsFromEnd ? str.Length : -1;
+            var indexValue = index.IsFromEnd ? index.Value - 1 : index.Value;
+            var currentIndex = 0;
+            while (true)
+            {
+                int idxA;
+                if (index.IsFromEnd)
+                {
+                    idxA = idxB > 0
+                        ? str.LastIndexOf(delimiter, idxB - 1)
+                        : -1;
+                }
+                else
+                {
+                    idxA = str.IndexOf(delimiter, idxB + 1);
+                }
+
+                if (currentIndex == indexValue)
+                {
+                    // If no delimiters were found and Index is 0, return the whole string
+                    if (currentIndex == 0 && idxA == -1)
+                    {
+                        return str;
+                    }
+
+                    if (index.IsFromEnd)
+                    {
+                        return str[(idxA + 1)..idxB];
+                    }
+
+                    if (idxA == -1) idxA = str.Length;
+                    return str[(idxB + 1)..idxA];
+                }
+
+                // Index is out of range of delimiter chars, throw
+                if (idxA < 0 || currentIndex > indexValue)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
+                idxB = idxA;
+                currentIndex++;
+            }
+        }
     }
 }
