@@ -28,7 +28,7 @@ namespace TwitchDownloaderCore
     {
         private static readonly HttpClient httpClient = new()
         {
-            Timeout = TimeSpan.FromSeconds(20)
+            Timeout = TimeSpan.FromSeconds(60)
         };
 
         private static readonly string[] BttvZeroWidth = ["SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat"];
