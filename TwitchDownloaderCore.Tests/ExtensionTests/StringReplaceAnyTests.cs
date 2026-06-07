@@ -1,8 +1,9 @@
+using System.Buffers;
 using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderCore.Tests.ExtensionTests
 {
-    // ReSharper disable StringLiteralTypo
+    // ReSharper disable StringLiteralTypo InvokeAsExtensionMember
     public class StringReplaceAnyTests
     {
         [Fact]
@@ -16,7 +17,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             var replaceResult2 = replaceResult1.Replace(OLD_CHARS[1], NEW_CHAR);
             var replaceResult3 = replaceResult2.Replace(OLD_CHARS[2], NEW_CHAR);
 
-            var replaceAnyResult = replaceResult2.ReplaceAny(OLD_CHARS, NEW_CHAR);
+            var replaceAnyResult = StringExtensions.ReplaceAny(STRING, SearchValues.Create(OLD_CHARS), NEW_CHAR);
 
             Assert.Equal(replaceResult3, replaceAnyResult);
         }
@@ -29,7 +30,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             const char NEW_CHAR = 'L';
             const string EXPECTED = "SOLLY LOL TLALLIC NaL.";
 
-            var result = STRING.ReplaceAny(OLD_CHARS, NEW_CHAR);
+            var result = StringExtensions.ReplaceAny(STRING, SearchValues.Create(OLD_CHARS), NEW_CHAR);
 
             Assert.Equal(EXPECTED, result);
         }
@@ -41,7 +42,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             const string OLD_CHARS = "";
             const char NEW_CHAR = 'L';
 
-            var result = STRING.ReplaceAny(OLD_CHARS, NEW_CHAR);
+            var result = StringExtensions.ReplaceAny(STRING, SearchValues.Create(OLD_CHARS), NEW_CHAR);
 
             Assert.Same(STRING, result);
         }
@@ -53,7 +54,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             const string OLD_CHARS = "PogU";
             const char NEW_CHAR = 'L';
 
-            var result = STRING.ReplaceAny(OLD_CHARS, NEW_CHAR);
+            var result = StringExtensions.ReplaceAny(STRING, SearchValues.Create(OLD_CHARS), NEW_CHAR);
 
             Assert.Same(STRING, result);
         }

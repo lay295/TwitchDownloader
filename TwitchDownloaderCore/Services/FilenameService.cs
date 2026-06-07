@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -110,7 +111,7 @@ namespace TwitchDownloaderCore.Services
             return returnString;
         }
 
-        private static readonly char[] FilenameInvalidChars = Path.GetInvalidFileNameChars();
+        private static readonly SearchValues<char> FilenameInvalidChars = SearchValues.Create(Path.GetInvalidFileNameChars());
 
         [GeneratedRegex("""(?<=\d):(?=\d\d)""")]
         private static partial Regex TimestampRegex { get; }
