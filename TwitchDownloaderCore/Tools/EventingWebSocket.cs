@@ -60,7 +60,9 @@ namespace TwitchDownloaderCore.Tools
                     while (!result.EndOfMessage);
 
                     var message = new Message { MessageType = result.MessageType, Buffer = messageBuffer.ToArray() };
-                    MessageReceived?.Invoke(this, message);
+
+                    // ignore errors in the handler
+                    try { MessageReceived?.Invoke(this, message); } catch {}
                 }
             }
             catch (OperationCanceledException) { }
