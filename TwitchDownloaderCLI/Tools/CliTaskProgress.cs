@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCore.Interfaces;
 
@@ -25,6 +26,7 @@ namespace TwitchDownloaderCLI.Tools
         private TimeSpan _lastTime2 = new(-1);
 
         private readonly LogLevel _logLevel;
+        private readonly Lock _writeLock = new();
 
         public CliTaskProgress(LogLevel logLevel)
         {
@@ -38,7 +40,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Status) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 _status = status;
                 _statusIsTemplate = false;
@@ -51,7 +53,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Status) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 _status = statusTemplate;
                 _statusIsTemplate = true;
@@ -70,7 +72,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Status) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 _status = statusTemplate;
                 _statusIsTemplate = true;
@@ -89,7 +91,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Status) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 if ((!_lastWriteHadNewLine && _lastPercent == percent)
                     || !_statusIsTemplate)
@@ -109,7 +111,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Status) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 if ((!_lastWriteHadNewLine && _lastPercent == percent && _lastTime1 == time1 && _lastTime2 == time2)
                     || !_statusIsTemplate)
@@ -154,7 +156,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Verbose) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 WriteNewLineMessage(VERBOSE_LOG_PREAMBLE, logMessage);
             }
@@ -164,7 +166,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Verbose) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 WriteNewLineMessage(VERBOSE_LOG_PREAMBLE, logMessage.ToStringAndClear());
             }
@@ -174,7 +176,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Info) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 WriteNewLineMessage(INFO_LOG_PREAMBLE, logMessage);
             }
@@ -184,7 +186,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Info) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 WriteNewLineMessage(INFO_LOG_PREAMBLE, logMessage.ToStringAndClear());
             }
@@ -194,7 +196,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Warning) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 WriteNewLineMessage(WARNING_LOG_PREAMBLE, logMessage);
             }
@@ -204,7 +206,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Warning) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 WriteNewLineMessage(WARNING_LOG_PREAMBLE, logMessage.ToStringAndClear());
             }
@@ -214,7 +216,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Error) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 WriteNewLineMessage(ERROR_LOG_PREAMBLE, logMessage);
             }
@@ -224,7 +226,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Error) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 WriteNewLineMessage(ERROR_LOG_PREAMBLE, logMessage.ToStringAndClear());
             }
@@ -234,7 +236,7 @@ namespace TwitchDownloaderCLI.Tools
         {
             if ((_logLevel & LogLevel.Ffmpeg) == 0) return;
 
-            lock (this)
+            lock (_writeLock)
             {
                 WriteNewLineMessage(FFMPEG_LOG_PREAMBLE, logMessage);
             }
@@ -264,7 +266,7 @@ namespace TwitchDownloaderCLI.Tools
 
         public void Dispose()
         {
-            lock (this)
+            lock (_writeLock)
             {
                 CheckLastWriteHadNewLine();
             }

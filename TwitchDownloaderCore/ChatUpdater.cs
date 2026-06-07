@@ -19,7 +19,7 @@ namespace TwitchDownloaderCore
     public sealed class ChatUpdater
     {
         public ChatRoot chatRoot { get; internal set; } = new();
-        private readonly object _trimChatRootLock = new();
+        private readonly Lock _trimChatRootLock = new();
 
         private readonly ChatUpdateOptions _updateOptions;
         private readonly ITaskProgress _progress;

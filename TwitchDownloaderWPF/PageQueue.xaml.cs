@@ -16,7 +16,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageQueue : Page
     {
-        public static readonly object taskLock = new object();
+        public static readonly Lock taskLock = new();
         public static ObservableCollection<TwitchTask> taskList { get; } = new();
         private static readonly BackgroundWorker taskManager = new BackgroundWorker();
 
