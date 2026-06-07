@@ -27,4 +27,34 @@
         Safe,
         Exact
     }
+
+    // https://dev.twitch.tv/docs/chat/irc/#irc-command-reference
+    // https://modern.ircdocs.horse/#numerics
+    public enum IrcCommand
+    {
+        Unknown,
+        ClearChat, // CLEARCHAT
+        ClearMsg, // CLEARMSG
+        GlobalUserState, // GLOBALUSERSTATE
+        Notice, // NOTICE
+        Join, // JOIN
+        Part, // PART
+        Ping, // PING
+        Pong, // PONG
+        PrivMsg, // PRIVMSG
+        Reconnect, // RECONNECT
+        RoomState, // ROOMSTATE
+        UserNotice, // USERNOTICE
+        UserState, // USERSTATE
+        Cap, // CAP
+        RplWelcome, // 001
+        RplYourHost, // 002
+        RplCreated, // 003
+        RplMyInfo, // 004
+        RplNameReply, // 353
+        RplEndOfNames, // 366
+        RplMotd, // 372
+        RplMotdStart, // 375
+        RplEndOfMod, // 376
+    }
 }
