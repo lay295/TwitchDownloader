@@ -824,7 +824,7 @@ namespace TwitchDownloaderCore
                         await ms.CopyToAsync(fs, cancellationToken);
                     }
 
-                    using var archive = ZipFile.OpenRead(emojiZipPath);
+                    await using var archive = await ZipFile.OpenReadAsync(emojiZipPath, cancellationToken);
                     var emojiAssetsPath = emojiVendor.AssetPath();
                     var emojis = archive.Entries
                         .Where(x => !string.IsNullOrWhiteSpace(x.Name) && Path.GetDirectoryName(x.FullName) == emojiAssetsPath);
@@ -838,7 +838,7 @@ namespace TwitchDownloaderCore
                         {
                             try
                             {
-                                emoji.ExtractToFile(filePath);
+                                await emoji.ExtractToFileAsync(filePath, cancellationToken);
                             }
                             catch { /* Being written by a parallel process? */ }
                         }
@@ -1009,7 +1009,7 @@ namespace TwitchDownloaderCore
 
         public static async Task<Dictionary<string, SKBitmap>> GetAvatars(List<Comment> comments, string[] defaultAvatars, string cacheFolder, ITaskLogger logger, bool offline = false, CancellationToken cancellationToken = default)
         {
-            var urls = new HashSet<string>(defaultAvatars ?? Array.Empty<string>());
+            var urls = new HashSet<string>(defaultAvatars ?? []);
             foreach (var comment in comments)
             {
                 var logo = comment.commenter.logo;
@@ -1136,7 +1136,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        /// <inheritdoc cref="Directory.CreateDirectory"/>
+        /// <inheritdoc cref="Directory.CreateDirectory(string)"/>
         public static DirectoryInfo CreateDirectory(string path, ITaskLogger logger = null)
         {
             DirectoryInfo directoryInfo = Directory.CreateDirectory(path);
