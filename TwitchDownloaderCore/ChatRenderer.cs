@@ -153,7 +153,7 @@ namespace TwitchDownloaderCore
 
             if (renderOptions.DisperseCommentOffsets)
             {
-                DisperseCommentOffsets(chatRoot.comments);
+                DisperseCommentOffsets(chatRoot.comments, chatRoot.video?.created_at ?? default);
             }
             FloorCommentOffsets(chatRoot.comments);
 
@@ -218,20 +218,43 @@ namespace TwitchDownloaderCore
         }
 
         /* Due to Twitch changing the API to return only whole number offsets, renders have become less readable.
-         * To get around this we can disperse comment offsets according to their creation date milliseconds to
-         * help bring back the better readability of comments coming in 1-by-1 */
-        private static void DisperseCommentOffsets(List<Comment> comments)
+         * To get around this we can recover the original sub-second precision by comparing each comment's
+         * created_at to the video's created_at, giving us the exact millisecond offset within the video. */
+        private static void DisperseCommentOffsets(List<Comment> comments, DateTime videoCreatedAt)
         {
             // Enumerating over a span is faster than a list
             var commentSpan = CollectionsMarshal.AsSpan(comments);
 
+            if (videoCreatedAt != default)
+            {
+                // Preferred path: derive the exact fractional-second position from the difference between
+                // the comment and video creation timestamps.  contentOffsetSeconds is kept as the
+                // authoritative whole-second anchor; only its sub-second part is replaced.
+                // The sanity check (< 1.5s divergence) guards against clips, where video.created_at is
+                // the clip's creation date rather than the original VOD start.
+                foreach (var c in commentSpan)
+                {
+                    if (c.content_offset_seconds % 1 == 0 && c.created_at != default)
+                    {
+                        double exactOffset = (c.created_at - videoCreatedAt).TotalSeconds;
+                        if (Math.Abs(exactOffset - c.content_offset_seconds) < 1.5)
+                        {
+                            // content_offset_seconds is already a whole number here, so just append the fractional part.
+                            c.content_offset_seconds += exactOffset - Math.Floor(exactOffset);
+                        }
+                    }
+                }
+                return;
+            }
+
+            // Fallback for older chat files that predate video.created_at storage: approximate the
+            // sub-second position from the comment's millisecond component alone.
             foreach (var c in commentSpan)
             {
                 if (c.content_offset_seconds % 1 == 0 && c.created_at.Millisecond != 0)
                 {
                     const int MILLIS_PER_HALF_SECOND = 500;
                     const double MILLIS_PER_SECOND = 1000.0;
-                    // Finding the difference between the creation dates and offsets is inconsistent. This approximation looks better more often.
                     c.content_offset_seconds += (c.created_at.Millisecond - MILLIS_PER_HALF_SECOND) / MILLIS_PER_SECOND;
                 }
             }
