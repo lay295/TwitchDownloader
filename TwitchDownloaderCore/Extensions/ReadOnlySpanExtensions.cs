@@ -199,23 +199,5 @@ namespace TwitchDownloaderCore.Extensions
 
             return -1;
         }
-
-        public static int Count(this ReadOnlySpan<char> str, char character)
-        {
-            if (str.IsEmpty)
-                return 0;
-
-            var count = 0;
-            var temp = str;
-            int index;
-
-            while ((index = temp.IndexOf(character)) != -1)
-            {
-                count++;
-                temp = temp[(index + 1)..];
-            }
-
-            return count;
-        }
     }
 }
