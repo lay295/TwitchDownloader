@@ -154,6 +154,165 @@ namespace TwitchDownloaderCore
             return false;
         }
 
+        /// <summary>
+        /// Twitch VOD segments are written to public, unauthenticated CDN buckets whose path is
+        /// deterministically derived from the broadcast's login, stream id, and start time — even
+        /// when the channel has "Store past broadcasts" disabled. This fetches the live/most-recent
+        /// broadcast metadata needed to reconstruct that path.
+        /// </summary>
+        public static async Task<GqlStreamMetadataResponse> GetStreamMetadata(string channelLogin)
+        {
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"query\":\"query{user(login:\\\"" + channelLogin + "\\\"){id,login,displayName,stream{id,createdAt}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<GqlStreamMetadataResponse>();
+        }
+
+        // Public Twitch VOD CDN hosts. Segments for a given broadcast live on exactly one of these,
+        // so the reconstructed path must be probed against each until one responds.
+        private static readonly string[] VodCdnDomains =
+        {
+            "https://d2e2de1etea730.cloudfront.net",
+            "https://dqrpb9wgowsf5.cloudfront.net",
+            "https://ds0h3roq6wcgc.cloudfront.net",
+            "https://d2nvs31859zcd8.cloudfront.net",
+            "https://d2aba1wr3818hz.cloudfront.net",
+            "https://d3c27h4odz752x.cloudfront.net",
+            "https://dgeft87wbj63p.cloudfront.net",
+            "https://d1m7jfoe9zdc1j.cloudfront.net",
+            "https://d3vd9lfkzbru3h.cloudfront.net",
+            "https://d2vjef5jvl6bfs.cloudfront.net",
+            "https://d1ymi26ma8va5x.cloudfront.net",
+            "https://d1mhjrowxxagfy.cloudfront.net",
+            "https://ddacn6pr5v0tl.cloudfront.net",
+            "https://d3aqoihi2n8ty8.cloudfront.net",
+            "https://vod-secure.twitch.tv",
+            "https://vod-metro.twitch.tv",
+            "https://vod-pop-secure.twitch.tv",
+        };
+
+        // Quality renditions to look for, best first. The source rendition ("chunked") is preferred,
+        // but it is not always retained, so we fall back to transcodes so recovery still succeeds.
+        private static readonly string[] VodQualityRenditions =
+        {
+            "chunked", "1080p60", "1080p30", "720p60", "720p30", "480p30", "360p30", "160p30",
+        };
+
+        /// <summary>
+        /// Reconstructs the public DVR playlist (<c>index-dvr.m3u8</c>) URL for a broadcast from its
+        /// login, stream id, and start time, then probes the known Twitch CDN hosts to find which one
+        /// is actually serving it. Host probing is done concurrently and the best available quality
+        /// rendition is selected. Returns the working media-playlist URL, or <see langword="null"/>
+        /// if nothing responds (e.g. the broadcast is too old and its segments have been purged).
+        /// </summary>
+        /// <param name="channelLogin">The broadcaster's login (lowercase channel name).</param>
+        /// <param name="streamId">The broadcast/stream id from <see cref="GetStreamMetadata"/>.</param>
+        /// <param name="startTime">The broadcast start time (stream <c>createdAt</c>).</param>
+        public static async Task<string> RecoverHiddenVodPlaylistUrl(string channelLogin, string streamId, DateTimeOffset startTime, ITaskLogger logger = null, CancellationToken cancellationToken = default)
+        {
+            var login = channelLogin.ToLowerInvariant();
+            var startUnix = startTime.ToUnixTimeSeconds();
+
+            // The path hash uses integer unix seconds, but the reported start time can be off by a
+            // second due to sub-second rounding, so probe a tiny window around it (exact first).
+            var candidateTimestamps = new List<long> { startUnix };
+            for (long offset = 1; offset <= 2; offset++)
+            {
+                candidateTimestamps.Add(startUnix - offset);
+                candidateTimestamps.Add(startUnix + offset);
+            }
+
+            // Phase 1: locate the CDN host serving this broadcast by probing the source rendition across
+            // all hosts concurrently. This is the fast common path.
+            foreach (var candidateUnix in candidateTimestamps)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var pathSegment = BuildVodPathSegment(login, streamId, candidateUnix);
+
+                var hostBaseUrl = await FindServingCdnHostAsync(pathSegment, "chunked", cancellationToken);
+                if (hostBaseUrl is not null)
+                {
+                    var url = $"{hostBaseUrl}/chunked/index-dvr.m3u8";
+                    logger?.LogInfo($"Recovered hidden VOD playlist (source) at {url}");
+                    return url;
+                }
+            }
+
+            // Phase 2: source wasn't found anywhere. Try transcode renditions at the exact timestamp,
+            // best quality first, in case only transcodes were retained.
+            var exactSegment = BuildVodPathSegment(login, streamId, startUnix);
+            foreach (var quality in VodQualityRenditions)
+            {
+                if (quality == "chunked") continue;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var hostBaseUrl = await FindServingCdnHostAsync(exactSegment, quality, cancellationToken);
+                if (hostBaseUrl is not null)
+                {
+                    var url = $"{hostBaseUrl}/{quality}/index-dvr.m3u8";
+                    logger?.LogWarning($"Source rendition was unavailable; recovered hidden VOD at {quality}: {url}");
+                    return url;
+                }
+            }
+
+            logger?.LogWarning($"Could not recover a hidden VOD for '{channelLogin}' (stream {streamId}). The broadcast may be too old — DVR segments are typically purged within a day or two.");
+            return null;
+        }
+
+        private static string BuildVodPathSegment(string login, string streamId, long startUnix)
+        {
+            var baseString = $"{login}_{streamId}_{startUnix}";
+            var hash = Convert.ToHexStringLower(SHA1.HashData(Encoding.UTF8.GetBytes(baseString)))[..20];
+            return $"{hash}_{baseString}";
+        }
+
+        /// <summary>
+        /// Probes every known CDN host concurrently for <c>{host}/{pathSegment}/{quality}/index-dvr.m3u8</c>
+        /// and returns the base URL (<c>{host}/{pathSegment}</c>) of the first host that responds, cancelling
+        /// the remaining probes. Returns <see langword="null"/> if no host serves it.
+        /// </summary>
+        private static async Task<string> FindServingCdnHostAsync(string pathSegment, string quality, CancellationToken cancellationToken)
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            var probes = VodCdnDomains.Select(async domain =>
+            {
+                var baseUrl = $"{domain}/{pathSegment}";
+                try
+                {
+                    using var request = new HttpRequestMessage(HttpMethod.Head, $"{baseUrl}/{quality}/index-dvr.m3u8");
+                    using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                    return response.IsSuccessStatusCode ? baseUrl : null;
+                }
+                catch
+                {
+                    // Host unreachable, rejected the request, or the probe was cancelled by a winner.
+                    return null;
+                }
+            }).ToList();
+
+            while (probes.Count > 0)
+            {
+                var finished = await Task.WhenAny(probes);
+                probes.Remove(finished);
+
+                var baseUrl = await finished;
+                if (baseUrl is not null)
+                {
+                    await cts.CancelAsync(); // stop the remaining in-flight probes
+                    return baseUrl;
+                }
+            }
+
+            return null;
+        }
+
         public static async Task<GqlClipResponse> GetClipInfo(object clipId, string oauth = null)
         {
             var request = new HttpRequestMessage()

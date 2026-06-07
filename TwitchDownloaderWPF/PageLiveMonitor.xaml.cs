@@ -41,6 +41,18 @@ namespace TwitchDownloaderWPF
         // vodId → (channel login, settings snapshot) for deferred (post-stream) downloads
         private readonly Dictionary<long, (string channel, LiveMonitorChannelSettings settings)> _pendingDownloads = new();
 
+        // Hidden-broadcast recovery (channels with "Store past broadcasts" disabled): we detect these
+        // via stream metadata, dedupe by stream id, and capture the metadata while live so the broadcast
+        // can be recovered after the stream ends (the metadata is unavailable once offline).
+        private readonly HashSet<string> _queuedStreamIds = new();
+        private readonly Dictionary<string, HiddenBroadcast> _pendingHiddenDownloads = new();
+        // Consecutive "stream gone" observations per pending broadcast. A single null reading can be a
+        // transient GQL blip, so we require confirmation before treating the broadcast as ended.
+        private readonly Dictionary<string, int> _hiddenEndStrikes = new();
+        private const int HiddenEndConfirmations = 2;
+
+        private sealed record HiddenBroadcast(string Channel, string Login, string StreamId, DateTimeOffset CreatedAt, LiveMonitorChannelSettings Settings);
+
         // Render presets loaded from ChatRenderPresetService
         private List<ChatRenderPreset> _renderPresets = new();
 
@@ -285,6 +297,7 @@ namespace TwitchDownloaderWPF
             Threads = (int)numThreads.Value,
             DownloadChat = checkChat.IsChecked.GetValueOrDefault(),
             AutoRender = checkAutoRender.IsChecked.GetValueOrDefault(),
+            RecoverHiddenVods = checkRecoverHidden.IsChecked.GetValueOrDefault(),
             RenderPreset = comboRenderPreset.SelectedItem as string ?? "",
             TrimBeginning = checkTrimStart.IsChecked.GetValueOrDefault(),
             TrimBeginningHour = (int)numTrimStartHour.Value,
@@ -318,6 +331,7 @@ namespace TwitchDownloaderWPF
 
             checkChat.IsChecked = s.DownloadChat;
             checkAutoRender.IsChecked = s.AutoRender;
+            checkRecoverHidden.IsChecked = s.RecoverHiddenVods;
 
             if (!string.IsNullOrEmpty(s.RenderPreset))
             {
@@ -648,6 +662,12 @@ namespace TwitchDownloaderWPF
             SaveSettings();
         }
 
+        private void checkRecoverHidden_CheckStateChanged(object sender, RoutedEventArgs e)
+        {
+            if (_isInitializing) return;
+            SaveSettings();
+        }
+
         // ── Per-channel settings buttons ──────────────────────────────────────
 
         private void btnSaveChannelSettings_Click(object sender, RoutedEventArgs e)
@@ -768,20 +788,28 @@ namespace TwitchDownloaderWPF
                     {
                         var videos = await TwitchHelper.GetGqlVideos(channel, "", 1, "ARCHIVE");
                         var node = videos?.data?.user?.videos?.edges?.FirstOrDefault()?.node;
-                        if (node is null || !long.TryParse(node.id, out var vodId))
-                            continue;
+                        if (node is not null && long.TryParse(node.id, out var vodId))
+                        {
+                            if (_queuedVodIds.Contains(vodId))
+                                continue;
 
-                        if (_queuedVodIds.Contains(vodId))
-                            continue;
+                            var info = await TwitchHelper.GetVideoInfo(vodId);
+                            if (info?.data?.video is { status: "RECORDING" })
+                            {
+                                // Snapshot settings at detection time; used for the entire lifetime of this recording
+                                var eff = GetEffectiveSettings(channel);
+                                EnqueueRecording(channel, vodId, info, eff);
+                                _queuedVodIds.Add(vodId);
+                                continue;
+                            }
+                        }
 
-                        var info = await TwitchHelper.GetVideoInfo(vodId);
-                        if (info?.data?.video is null || info.data.video.status != "RECORDING")
-                            continue;
-
-                        // Snapshot settings at detection time; used for the entire lifetime of this recording
-                        var eff = GetEffectiveSettings(channel);
-                        EnqueueRecording(channel, vodId, info, eff);
-                        _queuedVodIds.Add(vodId);
+                        // No in-progress published VOD. The channel may still be live with "Store past
+                        // broadcasts" disabled — which the archive list cannot detect — so fall back to
+                        // stream metadata, but only if the user opted into hidden-VOD recovery here.
+                        var settings = GetEffectiveSettings(channel);
+                        if (settings.RecoverHiddenVods)
+                            await TryDetectHiddenBroadcastAsync(channel, settings);
                     }
                     catch (Exception ex)
                     {
@@ -790,6 +818,7 @@ namespace TwitchDownloaderWPF
                 }
 
                 await CheckPendingDownloadsAsync();
+                await CheckPendingHiddenDownloadsAsync();
             }
             finally
             {
@@ -821,6 +850,112 @@ namespace TwitchDownloaderWPF
                     AppendLog($"Error checking deferred download for VOD {vodId}: {ex.Message}");
                 }
             }
+        }
+
+        /// <summary>
+        /// Detects a live broadcast on a channel that has no published archive VOD (i.e. "Store past
+        /// broadcasts" is disabled) and captures the stream id + start time needed to recover it later.
+        /// Real-time recording and chapter splitting are not possible for hidden broadcasts, so all
+        /// modes fall back to a single post-stream recovery.
+        /// </summary>
+        private async System.Threading.Tasks.Task TryDetectHiddenBroadcastAsync(string channel, LiveMonitorChannelSettings settings)
+        {
+            var metadata = await TwitchHelper.GetStreamMetadata(channel);
+            var stream = metadata?.data?.user?.stream;
+            if (stream is null || string.IsNullOrEmpty(stream.id))
+                return; // not live
+
+            if (_queuedStreamIds.Contains(stream.id))
+                return; // already captured this broadcast
+
+            var login = metadata.data.user.login ?? channel;
+            _pendingHiddenDownloads[stream.id] = new HiddenBroadcast(channel, login, stream.id, stream.createdAt, settings);
+            _queuedStreamIds.Add(stream.id);
+
+            if (settings.DownloadMode == ModeLive)
+                AppendLog($"'{channel}' is LIVE with past broadcasts disabled — real-time recording isn't available for hidden channels, so it will be recovered when the stream ends.");
+            else if (settings.DownloadMode == ModeAfterEndSplit)
+                AppendLog($"'{channel}' is LIVE with past broadcasts disabled — chapter splitting needs published VOD data, so the whole broadcast will be recovered as one file when the stream ends.");
+            else
+                AppendLog($"'{channel}' is LIVE with past broadcasts disabled — will recover the hidden broadcast when the stream ends.");
+        }
+
+        /// <summary>
+        /// Polls captured hidden broadcasts and, once the stream has ended (its stream id is no longer
+        /// live), enqueues a hidden-VOD recovery download using the metadata captured while it was live.
+        /// </summary>
+        private async System.Threading.Tasks.Task CheckPendingHiddenDownloadsAsync()
+        {
+            if (_pendingHiddenDownloads.Count == 0) return;
+
+            foreach (var (streamId, pending) in _pendingHiddenDownloads.ToArray())
+            {
+                try
+                {
+                    var metadata = await TwitchHelper.GetStreamMetadata(pending.Channel);
+                    var stream = metadata?.data?.user?.stream;
+
+                    // Still the same live broadcast → not ended yet; clear any pending strike.
+                    if (stream is not null && stream.id == streamId)
+                    {
+                        _hiddenEndStrikes.Remove(streamId);
+                        continue;
+                    }
+
+                    // The stream appears to have ended. Require a couple of consecutive confirmations so
+                    // a transient null reading doesn't trigger a premature (partial, non-retried) recovery.
+                    var strikes = _hiddenEndStrikes.GetValueOrDefault(streamId) + 1;
+                    if (strikes < HiddenEndConfirmations)
+                    {
+                        _hiddenEndStrikes[streamId] = strikes;
+                        continue;
+                    }
+
+                    _hiddenEndStrikes.Remove(streamId);
+                    _pendingHiddenDownloads.Remove(streamId);
+                    EnqueueHiddenRecoveryVod(pending);
+                }
+                catch (Exception ex)
+                {
+                    AppendLog($"Error checking hidden broadcast for '{pending.Channel}': {ex.Message}");
+                }
+            }
+        }
+
+        private void EnqueueHiddenRecoveryVod(HiddenBroadcast pending)
+        {
+            var settings = pending.Settings;
+            var createdAtLocal = Settings.Default.UTCVideoTime ? pending.CreatedAt.UtcDateTime : pending.CreatedAt.LocalDateTime;
+            var ext = FilenameService.GuessVodFileExtension(settings.Quality);
+
+            var baseName = FilenameService.GetFilename(Settings.Default.TemplateVod, $"Hidden broadcast {pending.StreamId}", pending.StreamId,
+                createdAtLocal, pending.Login, null, TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero, 0, "");
+            var vodPath = Path.Combine(settings.Folder, baseName + ext);
+            TwitchHelper.CreateDirectory(Path.GetDirectoryName(vodPath));
+
+            var options = new VideoDownloadOptions
+            {
+                Id = 0,
+                RecoverHiddenVod = true,
+                ChannelLogin = pending.Login,
+                StreamId = pending.StreamId,
+                StreamStartTime = pending.CreatedAt,
+                Quality = "chunked",
+                Filename = vodPath,
+                DownloadThreads = settings.Threads,
+                ThrottleKib = Settings.Default.DownloadThrottleEnabled ? Settings.Default.MaximumBandwidthKib : -1,
+                Oauth = Settings.Default.OAuth,
+                FfmpegPath = "ffmpeg",
+                TempFolder = Settings.Default.TempPath,
+                TrimMode = VideoTrimMode.Exact,
+                FileCollisionCallback = info => info,
+            };
+
+            var task = new VodDownloadTask { DownloadOptions = options, Info = { Title = $"{pending.Login} — recovered broadcast" } };
+            task.ChangeStatus(TwitchTaskStatus.Ready);
+            lock (PageQueue.taskLock) { PageQueue.taskList.Add(task); }
+
+            AppendLog($"Stream ended — queued hidden VOD recovery for '{pending.Login}' (stream {pending.StreamId}).");
         }
 
         private void EnqueueFinishedVod(long vodId, GqlVideoResponse info, string channel, LiveMonitorChannelSettings settings)
