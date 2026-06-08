@@ -24,6 +24,9 @@ namespace TwitchDownloaderCore.Tools
 		private readonly Channel<EventHubMessage> _notifications = Channel.CreateUnbounded<EventHubMessage>();
 		public ChannelReader<EventHubMessage> Notifications { get => _notifications.Reader; }
 
+		// this is set when receiving a welcome message and gets cleaned up before using it to recover a connection
+		private string _recoveryUrl;
+
 		public TwitchEventHub(ITaskLogger logger)
 		{
 			_logger = logger;
@@ -85,13 +88,13 @@ namespace TwitchDownloaderCore.Tools
 					websocket.MessageReceived += eventHandler;
 
 					// connect to the underlying websocket
-					await websocket.ConnectAsync(new Uri("wss://hermes.twitch.tv/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko"), _endConnection.Token);
+					var uri = new Uri(_recoveryUrl ?? "wss://hermes.twitch.tv/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko");
+					_recoveryUrl = null;
+					await websocket.ConnectAsync(uri, _endConnection.Token);
 
 					// register subscription message handler
 					using var subscriptionProcessingCancellationSource = new CancellationTokenSource();
 					var subscriptionProcessingTask = ProcessSubscriptionRequests(websocket, subscriptionProcessingCancellationSource.Token);
-
-					// TODO: restore subscriptions if no recoveryUrl was used.
 
 					// wait until either the end of the connection is desired or a reconnection is needed
 					// reconnection might be needed if: the underlying websocket closes for some reason, the subscription processing errors out
@@ -104,7 +107,19 @@ namespace TwitchDownloaderCore.Tools
 
 					// remove message handler and close connection
 					websocket.MessageReceived -= eventHandler;
-					await websocket.CloseAsync();
+					if (_endConnection.IsCancellationRequested)
+					{
+						await websocket.CloseAsync();
+					}
+					else
+					{
+						/*
+						we need to use the recoveryUrl, which gets invalidated upon normal close
+						the connection for the recovery url would be instant refused, leading to a 
+						in my tests there usually weren't any messages being lost, but technically there could be
+						messages arriving in between deregistering the message handler and connecting with the new websocket
+						*/ 
+					}
 				}
 			}
 			catch (OperationCanceledException)
@@ -130,6 +145,7 @@ namespace TwitchDownloaderCore.Tools
 				case WebSocketMessageType.Close:
 					// this can happen when legitimatly closing after finishing to collect all data.
 					// Still, if something else triggers it, we need to reconnect, otherwise the stopListening check will catch it
+					_logger.LogVerbose($"received close request from underlying websocket");
 					reconnectRequired.TrySetResult();
 					return;
 			}
@@ -140,7 +156,8 @@ namespace TwitchDownloaderCore.Tools
 			switch (message.Data)
 			{
 				case WelcomeData welcomeData:
-					// TODO: handle welcome
+					_recoveryUrl = welcomeData.recoveryUrl;
+					// TODO: keepaliveSec handling
 					break;
 				case SubscribeResponseData subscribeResponse:
 					// for expected subscriptions, complete the subscription task instead of calling the regular message handler
@@ -196,6 +213,7 @@ namespace TwitchDownloaderCore.Tools
 			{
 				_subscriptionRequestsWaitingForSending.Writer.TryComplete();
 				_notifications.Writer.TryComplete();
+				// this ends the connection loop and cleans up the underlying websocket
 				_endConnection.Cancel();
 			}
 			finally
