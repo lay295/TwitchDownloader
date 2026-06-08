@@ -198,25 +198,93 @@ namespace TwitchDownloaderCore
         };
 
         // Quality renditions to look for, best first. The source rendition ("chunked") is preferred,
-        // but it is not always retained, so we fall back to transcodes so recovery still succeeds.
+        // but it is not always retained, so transcodes are probed too. "audio_only" is last.
         private static readonly string[] VodQualityRenditions =
         {
-            "chunked", "1080p60", "1080p30", "720p60", "720p30", "480p30", "360p30", "160p30",
+            "chunked", "1080p60", "1080p30", "720p60", "720p30", "480p30", "360p30", "160p30", "audio_only",
         };
 
         /// <summary>
-        /// Reconstructs the public DVR playlist (<c>index-dvr.m3u8</c>) URL for a broadcast from its
-        /// login, stream id, and start time, then probes the known Twitch CDN hosts to find which one
-        /// is actually serving it. Host probing is done concurrently and the best available quality
-        /// rendition is selected. Returns the working media-playlist URL, or <see langword="null"/>
-        /// if nothing responds (e.g. the broadcast is too old and its segments have been purged).
+        /// Friendly display name for a DVR rendition folder (e.g. <c>chunked</c> → <c>Source</c>).
+        /// </summary>
+        public static string DescribeVodRendition(string rendition) => rendition switch
+        {
+            "chunked" => "Source",
+            "audio_only" => "Audio Only",
+            _ => rendition,
+        };
+
+        /// <summary>
+        /// Resolves the base URL (<c>{host}/{pathSegment}</c>) of the CDN host serving a hidden broadcast,
+        /// then probes which quality renditions are actually available under it. Returns a null base URL
+        /// and empty list if the broadcast cannot be located (e.g. its segments have been purged).
+        /// </summary>
+        public static async Task<(string baseUrl, IReadOnlyList<string> qualities)> RecoverHiddenVodQualities(
+            string channelLogin, string streamId, DateTimeOffset startTime, ITaskLogger logger = null, CancellationToken cancellationToken = default)
+        {
+            var baseUrl = await ResolveHiddenVodBaseUrlAsync(channelLogin.ToLowerInvariant(), streamId, startTime, cancellationToken);
+            if (baseUrl is null)
+            {
+                logger?.LogWarning($"Could not locate the broadcast's segments on any known Twitch CDN for '{channelLogin}' (stream {streamId}).");
+                return (null, Array.Empty<string>());
+            }
+
+            var qualities = await ProbeAvailableQualitiesAsync(baseUrl, cancellationToken);
+            return (baseUrl, qualities);
+        }
+
+        /// <summary>
+        /// Reconstructs the public DVR playlist (<c>index-dvr.m3u8</c>) URL for a broadcast and returns the
+        /// requested quality rendition if it exists, otherwise the best available one. Returns
+        /// <see langword="null"/> if the broadcast cannot be located.
         /// </summary>
         /// <param name="channelLogin">The broadcaster's login (lowercase channel name).</param>
         /// <param name="streamId">The broadcast/stream id from <see cref="GetStreamMetadata"/>.</param>
         /// <param name="startTime">The broadcast start time (stream <c>createdAt</c>).</param>
-        public static async Task<string> RecoverHiddenVodPlaylistUrl(string channelLogin, string streamId, DateTimeOffset startTime, ITaskLogger logger = null, CancellationToken cancellationToken = default)
+        /// <param name="preferredQuality">Rendition folder to prefer (e.g. <c>chunked</c>, <c>720p60</c>); null = best available.</param>
+        public static async Task<string> RecoverHiddenVodPlaylistUrl(string channelLogin, string streamId, DateTimeOffset startTime, string preferredQuality = null, ITaskLogger logger = null, CancellationToken cancellationToken = default)
         {
-            var login = channelLogin.ToLowerInvariant();
+            var baseUrl = await ResolveHiddenVodBaseUrlAsync(channelLogin.ToLowerInvariant(), streamId, startTime, cancellationToken);
+            if (baseUrl is null)
+            {
+                logger?.LogWarning($"Could not recover a hidden VOD for '{channelLogin}' (stream {streamId}). The broadcast may be too old — DVR segments are typically purged within a day or two.");
+                return null;
+            }
+
+            // Try the requested rendition first, then fall through the priority list.
+            var ordered = new List<string>();
+            if (!string.IsNullOrWhiteSpace(preferredQuality))
+                ordered.Add(preferredQuality);
+            foreach (var q in VodQualityRenditions)
+                if (!ordered.Contains(q))
+                    ordered.Add(q);
+
+            foreach (var quality in ordered)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var url = $"{baseUrl}/{quality}/index-dvr.m3u8";
+                if (await UrlExistsAsync(url, cancellationToken))
+                {
+                    if (!string.IsNullOrWhiteSpace(preferredQuality) && quality != preferredQuality)
+                        logger?.LogWarning($"Requested quality '{preferredQuality}' was unavailable; recovered '{quality}' instead: {url}");
+                    else
+                        logger?.LogInfo($"Recovered hidden VOD playlist ({quality}) at {url}");
+                    return url;
+                }
+            }
+
+            logger?.LogWarning($"Located the broadcast on the CDN but none of the known quality renditions were available for '{channelLogin}' (stream {streamId}).");
+            return null;
+        }
+
+        /// <summary>
+        /// Finds the CDN host serving a broadcast and returns its base URL (<c>{host}/{pathSegment}</c>),
+        /// probing a small timestamp window for rounding. Source is tried first across all hosts; if it
+        /// is not retained, transcode renditions are tried at the exact timestamp. Returns <see langword="null"/>
+        /// if no host serves the broadcast.
+        /// </summary>
+        private static async Task<string> ResolveHiddenVodBaseUrlAsync(string login, string streamId, DateTimeOffset startTime, CancellationToken cancellationToken)
+        {
             var startUnix = startTime.ToUnixTimeSeconds();
 
             // The path hash uses integer unix seconds, but the reported start time can be off by a
@@ -228,41 +296,50 @@ namespace TwitchDownloaderCore
                 candidateTimestamps.Add(startUnix + offset);
             }
 
-            // Phase 1: locate the CDN host serving this broadcast by probing the source rendition across
-            // all hosts concurrently. This is the fast common path.
             foreach (var candidateUnix in candidateTimestamps)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var pathSegment = BuildVodPathSegment(login, streamId, candidateUnix);
-
-                var hostBaseUrl = await FindServingCdnHostAsync(pathSegment, "chunked", cancellationToken);
-                if (hostBaseUrl is not null)
-                {
-                    var url = $"{hostBaseUrl}/chunked/index-dvr.m3u8";
-                    logger?.LogInfo($"Recovered hidden VOD playlist (source) at {url}");
-                    return url;
-                }
+                var baseUrl = await FindServingCdnHostAsync(BuildVodPathSegment(login, streamId, candidateUnix), "chunked", cancellationToken);
+                if (baseUrl is not null)
+                    return baseUrl;
             }
 
-            // Phase 2: source wasn't found anywhere. Try transcode renditions at the exact timestamp,
-            // best quality first, in case only transcodes were retained.
+            // Source wasn't found anywhere; the broadcast may only have transcodes retained.
             var exactSegment = BuildVodPathSegment(login, streamId, startUnix);
             foreach (var quality in VodQualityRenditions)
             {
                 if (quality == "chunked") continue;
                 cancellationToken.ThrowIfCancellationRequested();
-
-                var hostBaseUrl = await FindServingCdnHostAsync(exactSegment, quality, cancellationToken);
-                if (hostBaseUrl is not null)
-                {
-                    var url = $"{hostBaseUrl}/{quality}/index-dvr.m3u8";
-                    logger?.LogWarning($"Source rendition was unavailable; recovered hidden VOD at {quality}: {url}");
-                    return url;
-                }
+                var baseUrl = await FindServingCdnHostAsync(exactSegment, quality, cancellationToken);
+                if (baseUrl is not null)
+                    return baseUrl;
             }
 
-            logger?.LogWarning($"Could not recover a hidden VOD for '{channelLogin}' (stream {streamId}). The broadcast may be too old — DVR segments are typically purged within a day or two.");
             return null;
+        }
+
+        /// <summary>Probes all known renditions under <paramref name="baseUrl"/> concurrently and returns those that exist, best first.</summary>
+        private static async Task<IReadOnlyList<string>> ProbeAvailableQualitiesAsync(string baseUrl, CancellationToken cancellationToken)
+        {
+            var checks = VodQualityRenditions
+                .Select(async q => await UrlExistsAsync($"{baseUrl}/{q}/index-dvr.m3u8", cancellationToken) ? q : null)
+                .ToArray();
+            var results = await Task.WhenAll(checks);
+            return results.Where(q => q is not null).Select(q => q!).ToList();
+        }
+
+        private static async Task<bool> UrlExistsAsync(string url, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Head, url);
+                using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private static string BuildVodPathSegment(string login, string streamId, long startUnix)

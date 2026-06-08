@@ -113,9 +113,9 @@
                 </StackPanel>
                 <CheckBox x:Name="checkChat" Content="Also download chat (JSON, gzip) for each recorded stream" Margin="0,8,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" Checked="checkChat_CheckStateChanged" Unchecked="checkChat_CheckStateChanged"/>
                 <CheckBox x:Name="checkRecoverHidden" Margin="0,8,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"
-                          ToolTip="When a monitored channel goes live with &quot;Store past broadcasts&quot; disabled (no published VOD), reconstruct the broadcast from Twitch's public CDN and queue it for download once the stream ends. Unofficial and best-effort: only works while the segments still exist on the CDN (usually within a day or two of the stream ending), downloads source quality only, real-time and chapter-split modes fall back to a single recovery, and this may stop working if Twitch changes their CDN scheme."
+                          ToolTip="When a monitored channel goes live with &quot;Store past broadcasts&quot; disabled (no published VOD), reconstruct the broadcast from Twitch's public CDN and queue it for download once the stream ends. The channel's quality setting is used, falling back to the best retained rendition. Unofficial and best-effort: only works while the segments still exist on the CDN (usually within a day or two of the stream ending), real-time and chapter-split modes fall back to a single recovery, and this may stop working if Twitch changes their CDN scheme."
                           Checked="checkRecoverHidden_CheckStateChanged" Unchecked="checkRecoverHidden_CheckStateChanged">
-                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource AppText}"><Run Text="Recover hidden VODs from channels with past broadcasts disabled (unofficial, source only)"/></TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource AppText}"><Run Text="Recover hidden VODs from channels with past broadcasts disabled (unofficial, best-effort)"/></TextBlock>
                 </CheckBox>
                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                     <CheckBox x:Name="checkAutoRender" Content="Also render chat after download" VerticalAlignment="Center"

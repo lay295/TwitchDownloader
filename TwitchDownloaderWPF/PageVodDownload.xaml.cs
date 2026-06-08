@@ -157,7 +157,20 @@ namespace TwitchDownloaderWPF
                 imgThumbnail.Source = image;
 
                 comboQuality.Items.Clear();
-                comboQuality.Items.Add(new ComboBoxItem { Content = "Source", Tag = "chunked" });
+                var (_, qualities) = await TwitchHelper.RecoverHiddenVodQualities(recoverChannelLogin, recoverStreamId, recoverStreamStartTime);
+                if (qualities.Count == 0)
+                {
+                    // Couldn't probe the CDN (shouldn't happen while live) — offer source and let the
+                    // downloader fall back if it turns out to be unavailable.
+                    comboQuality.Items.Add(new ComboBoxItem { Content = "Source", Tag = "chunked" });
+                    AppendLog("Could not probe available qualities; defaulting to Source.");
+                }
+                else
+                {
+                    foreach (var q in qualities)
+                        comboQuality.Items.Add(new ComboBoxItem { Content = TwitchHelper.DescribeVodRendition(q), Tag = q });
+                    AppendLog($"Available qualities: {string.Join(", ", qualities.Select(TwitchHelper.DescribeVodRendition))}.");
+                }
                 comboQuality.SelectedIndex = 0;
 
                 // Length is unknown ahead of time for a live/hidden broadcast.

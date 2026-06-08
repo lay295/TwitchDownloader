@@ -741,7 +741,7 @@ namespace TwitchDownloaderCore
                 downloadOptions.StreamStartTime = startTime;
             }
 
-            var playlistUrl = await TwitchHelper.RecoverHiddenVodPlaylistUrl(login, streamId, startTime, _progress, cancellationToken);
+            var playlistUrl = await TwitchHelper.RecoverHiddenVodPlaylistUrl(login, streamId, startTime, downloadOptions.Quality, _progress, cancellationToken);
             if (string.IsNullOrEmpty(playlistUrl))
             {
                 throw new InvalidOperationException(

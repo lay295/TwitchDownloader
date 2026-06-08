@@ -922,6 +922,19 @@ namespace TwitchDownloaderWPF
             }
         }
 
+        // Maps a Live Monitor quality name (e.g. "Source", "720p60", "Audio Only") to a DVR rendition
+        // folder used by hidden-VOD recovery. Unknown values pass through; the downloader degrades to the
+        // best available rendition if the mapped folder isn't present.
+        private static string MapQualityToRendition(string quality)
+        {
+            return quality?.Trim().ToLowerInvariant() switch
+            {
+                null or "" or "source" or "chunked" => "chunked",
+                "audio only" or "audio_only" => "audio_only",
+                var q => q.Replace(" ", ""),
+            };
+        }
+
         private void EnqueueHiddenRecoveryVod(HiddenBroadcast pending)
         {
             var settings = pending.Settings;
@@ -940,7 +953,9 @@ namespace TwitchDownloaderWPF
                 ChannelLogin = pending.Login,
                 StreamId = pending.StreamId,
                 StreamStartTime = pending.CreatedAt,
-                Quality = "chunked",
+                // Map the per-channel quality to a DVR rendition folder; the downloader falls back to the
+                // best available rendition if this exact one wasn't retained.
+                Quality = MapQualityToRendition(settings.Quality),
                 Filename = vodPath,
                 DownloadThreads = settings.Threads,
                 ThrottleKib = Settings.Default.DownloadThrottleEnabled ? Settings.Default.MaximumBandwidthKib : -1,
