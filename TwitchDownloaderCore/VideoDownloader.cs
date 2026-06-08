@@ -226,7 +226,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task DownloadVideoPartsAsync(VideoDownloadState downloadState, CancellationToken cancellationToken, bool reportProgress = true)
+        private async Task DownloadVideoPartsAsync(VideoDownloadState downloadState, CancellationToken cancellationToken)
         {
             var downloadThreads = new VideoDownloadThread[downloadOptions.DownloadThreads];
             for (var i = 0; i < downloadOptions.DownloadThreads; i++)
@@ -234,26 +234,26 @@ namespace TwitchDownloaderCore
                 downloadThreads[i] = new VideoDownloadThread(downloadState, _httpClient, _vodCacheDir, downloadOptions.ThrottleKib, _progress, cancellationToken);
             }
 
-            var partCount = downloadState.PartCount;
-            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, downloadState, partCount, true, cancellationToken, reportProgress);
+            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, downloadState, true, cancellationToken);
 
             LogDownloadThreadExceptions(downloadExceptions);
         }
 
-        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, int partCount, bool limitThreadRestarts, CancellationToken cancellationToken, bool reportProgress)
+        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
-            var previousDoneCount = 0;
+            var totalPartsToDownload = downloadState.PartQueue.Count;
+            var previousMissingCount = 0;
             var restartedThreads = 0;
-            var maxRestartedThreads = limitThreadRestarts ? (int)Math.Ceiling(partCount * 0.95) : int.MaxValue;
+            var maxRestartedThreads = limitThreadRestarts ? (int)Math.Ceiling(totalPartsToDownload * 0.95) : int.MaxValue;
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
-                if (downloadState.PartQueue.Count != previousDoneCount)
+                if (downloadState.PartQueue.Count != previousMissingCount)
                 {
-                    previousDoneCount = downloadState.PartQueue.Count;
-                    var percent = (int)((partCount - previousDoneCount) / (double)partCount * 100);
-                    if (reportProgress) { _progress.ReportProgress(percent); }
+                    previousMissingCount = downloadState.PartQueue.Count;
+                    var percent = (int)((totalPartsToDownload - previousMissingCount) / (double)totalPartsToDownload * 100);
+                    _progress.ReportProgress(percent);
                 }
 
                 allThreadsExited = true;
@@ -281,7 +281,7 @@ namespace TwitchDownloaderCore
                 await Task.Delay(100, cancellationToken);
             } while (!allThreadsExited);
 
-            if (reportProgress) { _progress.ReportProgress(100); }
+            _progress.ReportProgress(100);
 
             if (restartedThreads >= maxRestartedThreads)
             {
@@ -346,11 +346,20 @@ namespace TwitchDownloaderCore
                 }
 
                 _progress.LogInfo($"{invalidCount} parts were missing or corrupt and will be redownloaded.");
-                await DownloadVideoPartsAsync(downloadState, cancellationToken, false).ConfigureAwait(false);
+                _progress.SetTemplateStatus("Redownloading Missing Parts {0}%", 0);
+                await DownloadVideoPartsAsync(downloadState, cancellationToken).ConfigureAwait(false);
 
                 try
                 {
-                    await Task.Run(() => EmitPartStubs(downloadState), cancellationToken).ConfigureAwait(false);
+                    var stubCount = await Task.Run(() => EmitPartStubs(downloadState), cancellationToken).ConfigureAwait(false);
+                    if (stubCount > 0)
+                    {
+                        _progress.LogWarning($"Failed to redownload {stubCount} parts, using stubs instead");
+                    }
+                    else
+                    {
+                        _progress.LogInfo("Successfully redownloaded missing parts");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -359,7 +368,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void EmitPartStubs(VideoDownloadState downloadState)
+        private int EmitPartStubs(VideoDownloadState downloadState)
         {
             byte[] transportStreamStub =
             [
@@ -417,14 +426,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            if (stubCount > 0)
-            {
-                _progress.LogInfo($"Failed to redownload {stubCount} parts, using stubs instead");
-            }
-            else
-            {
-                _progress.LogInfo("Successfully redownloaded missing parts");
-            }
+            return stubCount;
         }
 
         private int GetInvalidParts(VideoDownloadState downloadState)
