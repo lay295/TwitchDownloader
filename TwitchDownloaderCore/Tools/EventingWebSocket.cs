@@ -11,6 +11,9 @@ namespace TwitchDownloaderCore.Tools
 {
     public sealed class EventingWebSocket : IDisposable
     {
+        private static int nextEventingWebSocketId = 0;
+        private readonly int _instanceId = nextEventingWebSocketId++;
+
         public readonly record struct Message(byte[] Buffer, WebSocketMessageType MessageType);
 
         private readonly ITaskLogger _logger;
@@ -27,7 +30,7 @@ namespace TwitchDownloaderCore.Tools
 
         public async Task ConnectAsync(Uri uri, CancellationToken cancellationToken = default)
         {
-            _logger.LogVerbose($"Connecting to {uri}...");
+            _logger.LogVerbose($"[{_instanceId}] Connecting to {uri}...");
             await _socket.ConnectAsync(uri, cancellationToken);
 
             _receiveLoopCts = new CancellationTokenSource();
@@ -41,7 +44,7 @@ namespace TwitchDownloaderCore.Tools
 
         private async Task ReceiveLoopAsync(Uri uri, CancellationToken cancellationToken)
         {
-            _logger.LogVerbose($"Listening for messages from {uri}...");
+            _logger.LogVerbose($"[{_instanceId}] Listening for messages from {uri}...");
             var buffer = new byte[4096];
 
             try
@@ -68,11 +71,11 @@ namespace TwitchDownloaderCore.Tools
             catch (OperationCanceledException) { }
             catch (Exception ex)
             {
-                _logger.LogError($"websocket receive loop failed unexpectedly: {ex.GetType()} {ex.Message}");
+                _logger.LogError($"[{_instanceId}] websocket receive loop failed unexpectedly: {ex.GetType()} {ex.Message}");
             }
             finally
             {
-                _logger.LogVerbose($"Stopped listening for messages from {uri}.");
+                _logger.LogVerbose($"[{_instanceId}] Stopped listening for messages from {uri}.");
             }
         }
 
