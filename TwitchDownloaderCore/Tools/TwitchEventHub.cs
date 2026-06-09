@@ -26,6 +26,8 @@ namespace TwitchDownloaderCore.Tools
 
 		// this is set when receiving a welcome message and gets cleaned up before using it to recover a connection
 		private string _recoveryUrl;
+		private TimeSpan _keepAliveSec = TimeSpan.Zero;
+		private DateTimeOffset _lastMessageReceived;
 
 		public TwitchEventHub(ITaskLogger logger)
 		{
@@ -92,21 +94,25 @@ namespace TwitchDownloaderCore.Tools
 					_recoveryUrl = null;
 					await websocket.ConnectAsync(uri, _endConnection.Token);
 
-					// register subscription message handler
-					using var subscriptionProcessingCancellationSource = new CancellationTokenSource();
-					var subscriptionProcessingTask = ProcessSubscriptionRequests(websocket, subscriptionProcessingCancellationSource.Token);
+					// setup handling loops
+					using var supportLoopCancellationSource = new CancellationTokenSource();
+					var subscriptionProcessingTask = ProcessSubscriptionRequests(websocket, supportLoopCancellationSource.Token);
+					var monitoringKeepaliveTask = MonitorConnectionKeepalive(reconnectionRequired, supportLoopCancellationSource.Token);
 
 					// wait until either the end of the connection is desired or a reconnection is needed
 					// reconnection might be needed if: the underlying websocket closes for some reason, the subscription processing errors out
-					var completedTask = await Task.WhenAny(reconnectionRequired.Task, subscriptionProcessingTask, endConnectionTask);
+					var completedTask = await Task.WhenAny(reconnectionRequired.Task, subscriptionProcessingTask, monitoringKeepaliveTask, endConnectionTask);
 
 					// ensure that the subscription processing ends cleanly before websocket is closed
 					// this is important for the recoveryUrl to truly give all subscriptions that are processed
-					subscriptionProcessingCancellationSource.Cancel();
+					supportLoopCancellationSource.Cancel();
 					await subscriptionProcessingTask;
 
-					// remove message handler and close connection
+					// remove message handler and clean up connection state
 					websocket.MessageReceived -= eventHandler;
+					_keepAliveSec = TimeSpan.Zero;
+					_lastMessageReceived = default;
+
 					if (_endConnection.IsCancellationRequested)
 					{
 						await websocket.CloseAsync();
@@ -115,10 +121,10 @@ namespace TwitchDownloaderCore.Tools
 					{
 						/*
 						we need to use the recoveryUrl, which gets invalidated upon normal close
-						the connection for the recovery url would be instant refused, leading to a 
+						the connection for the recovery url would be instant refused 
 						in my tests there usually weren't any messages being lost, but technically there could be
 						messages arriving in between deregistering the message handler and connecting with the new websocket
-						*/ 
+						*/
 					}
 				}
 			}
@@ -136,6 +142,8 @@ namespace TwitchDownloaderCore.Tools
 
 		private void OnMessageReceived(object sender, EventingWebSocket.Message msgEvent, TaskCompletionSource reconnectRequired)
 		{
+			_lastMessageReceived = DateTimeOffset.UtcNow;
+
 			switch (msgEvent.MessageType)
 			{
 				case WebSocketMessageType.Binary:
@@ -151,13 +159,16 @@ namespace TwitchDownloaderCore.Tools
 			}
 
 			var message = JsonSerializer.Deserialize<EventHubMessage>(msgEvent.Buffer, _jsonSerializerOptions);
-			_logger.LogVerbose($"event message received {message.Data?.GetType()}");
+			if (message.Data is not null)
+			{
+				_logger.LogVerbose($"event message received {message.Data?.GetType()}");
+			}
 
 			switch (message.Data)
 			{
 				case WelcomeData welcomeData:
 					_recoveryUrl = welcomeData.recoveryUrl;
-					// TODO: keepaliveSec handling
+					_keepAliveSec = TimeSpan.FromSeconds(welcomeData.keepaliveSec);
 					break;
 				case SubscribeResponseData subscribeResponse:
 					// for expected subscriptions, complete the subscription task instead of calling the regular message handler
@@ -172,6 +183,39 @@ namespace TwitchDownloaderCore.Tools
 				case NotificationData:
 					_notifications.Writer.TryWrite(message);
 					break;
+			}
+		}
+
+		private async Task MonitorConnectionKeepalive(TaskCompletionSource reconnectRequired, CancellationToken cancellationToken)
+		{
+			try
+			{
+				while (!cancellationToken.IsCancellationRequested)
+				{
+					if (_keepAliveSec == TimeSpan.Zero)
+					{
+						// welcome mesage not yet received
+						await Task.Delay(1000, cancellationToken);
+						continue;
+					}
+
+					var nextDeadline = _lastMessageReceived + (TimeSpan)_keepAliveSec;
+					var delay = nextDeadline - DateTimeOffset.UtcNow;
+
+					if (delay < TimeSpan.Zero)
+					{
+						_logger.LogVerbose("keepalive failure, requiring reconnect");
+						reconnectRequired.TrySetResult();
+						return;
+					}
+
+					await Task.Delay(delay, cancellationToken);
+				}
+			}
+			catch (OperationCanceledException) { }
+			catch (Exception ex)
+			{
+				_logger.LogError($"monitoring the connection failed unexpectedly {ex.GetType()} {ex.Message}");
 			}
 		}
 
