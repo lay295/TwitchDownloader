@@ -159,18 +159,16 @@ namespace TwitchDownloaderCore.Tools
 			}
 
 			var message = JsonSerializer.Deserialize<EventHubMessage>(msgEvent.Buffer, _jsonSerializerOptions);
-			if (message.Data is not null)
-			{
-				_logger.LogVerbose($"event message received {message.Data?.GetType()}");
-			}
 
 			switch (message.Data)
 			{
 				case WelcomeData welcomeData:
+					_logger.LogVerbose($"welcome message received: [{welcomeData.sessionId}] {welcomeData.keepaliveSec}s");
 					_recoveryUrl = welcomeData.recoveryUrl;
 					_keepAliveSec = TimeSpan.FromSeconds(welcomeData.keepaliveSec);
 					break;
 				case SubscribeResponseData subscribeResponse:
+					_logger.LogVerbose($"subscribe response: {subscribeResponse.result} -> {subscribeResponse.subscription.id}");
 					// for expected subscriptions, complete the subscription task instead of calling the regular message handler
 					if (_subscriptionResponseHandlers.TryRemove(subscribeResponse.subscription.id, out var subscriptionTaskSource))
 					{
@@ -178,7 +176,7 @@ namespace TwitchDownloaderCore.Tools
 					}
 					break;
 				case null:
-					// TODO: keepalive handling
+					// keepalive whose only purpose it was to update _lastMessageReceived
 					break;
 				case NotificationData:
 					_notifications.Writer.TryWrite(message);
@@ -199,7 +197,7 @@ namespace TwitchDownloaderCore.Tools
 						continue;
 					}
 
-					var nextDeadline = _lastMessageReceived + (TimeSpan)_keepAliveSec;
+					var nextDeadline = _lastMessageReceived + _keepAliveSec;
 					var delay = nextDeadline - DateTimeOffset.UtcNow;
 
 					if (delay < TimeSpan.Zero)
