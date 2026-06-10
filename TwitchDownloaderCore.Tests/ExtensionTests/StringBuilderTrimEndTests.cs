@@ -3,6 +3,7 @@ using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderCore.Tests.ExtensionTests
 {
+    // ReSharper disable InvokeAsExtensionMember
     public class StringBuilderTrimEndTests
     {
         [Theory]
@@ -11,11 +12,11 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
         [InlineData("oo", "o", "")]
         [InlineData("Foo", "L", "Foo")]
         [InlineData("Foo", "oL", "F")]
-        public void CorrectlyTrimsCharacters(string baseString, string trimChars, string expectedResult)
+        public void TrimsCorrectCharacters(string baseString, string trimChars, string expectedResult)
         {
             var sb = new StringBuilder(baseString);
 
-            sb.TrimEnd(trimChars);
+            StringBuilderExtensions.TrimEnd(sb, trimChars);
 
             Assert.Equal(expectedResult, sb.ToString());
         }

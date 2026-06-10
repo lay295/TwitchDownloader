@@ -136,25 +136,21 @@ namespace TwitchDownloaderWPF
 
             public readonly DirectoryInfo Directory;
 
-            private bool _shouldDelete;
-
             public bool ShouldDelete
             {
-                get => _shouldDelete;
-                set => SetField(ref _shouldDelete, value);
+                get;
+                set => SetField(ref field, value);
             }
 
             public int Age { get; }
 
             public string Path => Directory.FullName;
 
-            private string _size = "";
-
             public string Size
             {
-                get => _size;
-                private set => SetField(ref _size, value);
-            }
+                get;
+                private set => SetField(ref field, value);
+            } = "";
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -165,7 +161,9 @@ namespace TwitchDownloaderWPF
 
             private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
             {
-                if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+                if (EqualityComparer<T>.Default.Equals(field, value))
+                    return false;
+
                 field = value;
                 OnPropertyChanged(propertyName);
                 return true;

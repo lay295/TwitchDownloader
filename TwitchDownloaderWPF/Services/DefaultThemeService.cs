@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderWPF.Services
 {
@@ -18,11 +19,9 @@ namespace TwitchDownloaderWPF.Services
                 using var themeStream = GetResourceStream(themeResourcePath);
                 if (themeStream is null) continue;
 
-                var themePathSplit = themeResourcePath.Split(".");
-
-                var themeName = themePathSplit[^2];
-                var themeExtension = themePathSplit[^1];
-                var themeFullPath = Path.Combine("Themes", $"{themeName}.{themeExtension}");
+                var themeName = themeResourcePath.GetNthOccurrence('.', ^2);
+                var themeExtension = Path.GetExtension(themeResourcePath.AsSpan());
+                var themeFullPath = Path.Combine("Themes", $"{themeName}{themeExtension}");
 
                 try
                 {

@@ -5,15 +5,15 @@ namespace TwitchDownloaderCore.Models.Interfaces
 {
     public interface IVideoQualities<out T> : IEnumerable<IVideoQuality<T>>
     {
-        public IReadOnlyList<IVideoQuality<T>> Qualities { get; }
+        IReadOnlyList<IVideoQuality<T>> Qualities { get; }
 
         [return: MaybeNull]
-        public IVideoQuality<T> GetQuality([AllowNull] string qualityString);
+        IVideoQuality<T> GetQuality([AllowNull] string qualityString);
 
         [return: MaybeNull]
-        public IVideoQuality<T> BestQuality();
+        IVideoQuality<T> BestQuality();
 
         [return: MaybeNull]
-        public IVideoQuality<T> WorstQuality();
+        IVideoQuality<T> WorstQuality();
     }
 }

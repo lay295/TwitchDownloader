@@ -102,10 +102,7 @@ namespace TwitchDownloaderCore.Extensions
                 return m3u8;
             }
 
-            // There's probably a better way to do this, but it doesn't really matter
-            var pathParts = m3u8.Streams.First().Path.Split('/');
-            pathParts[^2] = "{0}"; // *.cloudfront.net/abc_123/quality/index-dvr.m3u8
-            var pathFormat = string.Join('/', pathParts);
+            var pathFormat = m3u8.Streams.First().Path.ReplaceNthOccurrence('/', ^2, "{0}");
 
             var unavailableStreams = unavailableMedia.Select(x =>
             {

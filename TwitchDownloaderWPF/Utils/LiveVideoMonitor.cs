@@ -57,6 +57,7 @@ namespace TwitchDownloaderWPF.Utils
             }
         }
 
+        private static readonly Lock VideoStateCacheLock = new();
         private static readonly Dictionary<long, VideoState> VideoStateCache = new();
 
         private readonly ITaskLogger _logger;
@@ -68,7 +69,7 @@ namespace TwitchDownloaderWPF.Utils
         {
             _logger = logger;
 
-            lock (VideoStateCache)
+            lock (VideoStateCacheLock)
             {
                 ref var state = ref CollectionsMarshal.GetValueRefOrAddDefault(VideoStateCache, videoId, out var exists);
                 if (!exists)
@@ -101,7 +102,7 @@ namespace TwitchDownloaderWPF.Utils
 
         ~LiveVideoMonitor()
         {
-            lock (VideoStateCache)
+            lock (VideoStateCacheLock)
             {
                 _state.RefCount--;
                 if (_state.RefCount < 1)

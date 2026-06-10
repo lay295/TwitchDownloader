@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -63,7 +61,7 @@ namespace TwitchDownloaderCLI.Modes
             var urlBase = Regex.Match(origUrl, @"(.*)\/").Groups[1].Value;
 
             // Construct the appropriate package name
-            var packageName = ConstructPackageName(origUrl.Split('/').Last());
+            var packageName = ConstructPackageName(origUrl.GetNthOccurrence('/', ^1).ToString());
             if (string.IsNullOrWhiteSpace(packageName))
             {
                 progress.LogVerbose($"Could not construct package name for arch: {RuntimeInformation.OSArchitecture}, RID: {RuntimeInformation.RuntimeIdentifier}");
@@ -145,7 +143,7 @@ namespace TwitchDownloaderCLI.Modes
             progress.SetTemplateStatus("Downloading Update {0}%", 0);
 
             var updateDir = Path.GetDirectoryName(currentExePath)!;
-            var archivePath = Path.Combine(updateDir, url.Split('/').Last());
+            var archivePath = Path.Combine(updateDir, url.GetNthOccurrence('/', ^1).ToString());
             await DownloadUpdateArchive(url, progress, archivePath).ConfigureAwait(false);
 
             // Get old unix file permissions

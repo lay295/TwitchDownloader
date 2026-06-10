@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
@@ -770,7 +771,7 @@ namespace TwitchDownloaderCore
                     Dictionary<string, ChatBadgeData> versions = new();
                     foreach (var (version, data) in badge.versions)
                     {
-                        string id = data.url.Split('/')[^2];
+                        string id = data.url.GetNthOccurrence('/', ^2).ToString();
                         var (bytes, codec) = await GetImage(badgeFolder, data.url, id, 2, "png", false, logger, cancellationToken);
                         if (bytes is null)
                         {
@@ -823,7 +824,7 @@ namespace TwitchDownloaderCore
                         await ms.CopyToAsync(fs, cancellationToken);
                     }
 
-                    using var archive = ZipFile.OpenRead(emojiZipPath);
+                    await using var archive = await ZipFile.OpenReadAsync(emojiZipPath, cancellationToken);
                     var emojiAssetsPath = emojiVendor.AssetPath();
                     var emojis = archive.Entries
                         .Where(x => !string.IsNullOrWhiteSpace(x.Name) && Path.GetDirectoryName(x.FullName) == emojiAssetsPath);
@@ -837,7 +838,7 @@ namespace TwitchDownloaderCore
                         {
                             try
                             {
-                                emoji.ExtractToFile(filePath);
+                                await emoji.ExtractToFileAsync(filePath, cancellationToken);
                             }
                             catch { /* Being written by a parallel process? */ }
                         }
@@ -1008,7 +1009,7 @@ namespace TwitchDownloaderCore
 
         public static async Task<Dictionary<string, SKBitmap>> GetAvatars(List<Comment> comments, string[] defaultAvatars, string cacheFolder, ITaskLogger logger, bool offline = false, CancellationToken cancellationToken = default)
         {
-            var urls = new HashSet<string>(defaultAvatars ?? Array.Empty<string>());
+            var urls = new HashSet<string>(defaultAvatars ?? []);
             foreach (var comment in comments)
             {
                 var logo = comment.commenter.logo;
@@ -1135,7 +1136,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        /// <inheritdoc cref="Directory.CreateDirectory"/>
+        /// <inheritdoc cref="Directory.CreateDirectory(string)"/>
         public static DirectoryInfo CreateDirectory(string path, ITaskLogger logger = null)
         {
             DirectoryInfo directoryInfo = Directory.CreateDirectory(path);

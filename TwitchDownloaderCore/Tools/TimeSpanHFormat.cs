@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 using TwitchDownloaderCore.Extensions;
 
@@ -50,7 +51,7 @@ namespace TwitchDownloaderCore.Tools
                 var newFormat = format.Length <= 256 ? stackalloc char[format.Length] : new char[format.Length];
                 if (!format.AsSpan().TryReplaceNonEscaped(newFormat, 'H', 'h'))
                 {
-                    throw new Exception($"Failed to convert format string: {format}. This should not be possible.");
+                    throw new UnreachableException($"Failed to convert format string: {format}.");
                 }
 
                 // If the format contains more than 2 sequential unescaped h's, it will throw a format exception. If so, we can fallback to our parser.

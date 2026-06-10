@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderWPF.Models;
 
@@ -16,6 +17,7 @@ namespace TwitchDownloaderWPF.Utils
         private TimeSpan _lastTime2 = new(-1);
 
         private readonly LogLevel _logLevel;
+        private readonly Lock _writeLock = new();
 
         private readonly Action<int> _handlePercent;
         private readonly Action<string> _handleStatus;
@@ -49,7 +51,7 @@ namespace TwitchDownloaderWPF.Utils
 
         public void SetStatus(string status)
         {
-            lock (this)
+            lock (_writeLock)
             {
                 _status = status;
                 _statusIsTemplate = false;
@@ -60,7 +62,7 @@ namespace TwitchDownloaderWPF.Utils
 
         public void SetTemplateStatus([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string statusTemplate, int initialPercent)
         {
-            lock (this)
+            lock (_writeLock)
             {
                 _status = statusTemplate;
                 _statusIsTemplate = true;
@@ -72,7 +74,7 @@ namespace TwitchDownloaderWPF.Utils
 
         public void SetTemplateStatus([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string statusTemplate, int initialPercent, TimeSpan initialTime1, TimeSpan initialTime2)
         {
-            lock (this)
+            lock (_writeLock)
             {
                 _status = statusTemplate;
                 _statusIsTemplate = true;
@@ -84,7 +86,7 @@ namespace TwitchDownloaderWPF.Utils
 
         public void ReportProgress(int percent)
         {
-            lock (this)
+            lock (_writeLock)
             {
                 if (_lastPercent == percent)
                 {
@@ -106,7 +108,7 @@ namespace TwitchDownloaderWPF.Utils
 
         public void ReportProgress(int percent, TimeSpan time1, TimeSpan time2)
         {
-            lock (this)
+            lock (_writeLock)
             {
                 if (_lastPercent == percent && _lastTime1 == time1 && _lastTime2 == time2)
                 {

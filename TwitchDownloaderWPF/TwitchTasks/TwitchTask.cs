@@ -19,59 +19,52 @@ namespace TwitchDownloaderWPF.TwitchTasks
         public event PropertyChangedEventHandler PropertyChanged;
         public TaskData Info { get; } = new();
 
-        private int _progress;
         public int Progress
         {
-            get => _progress;
-            protected set => SetField(ref _progress, value);
+            get;
+            protected set => SetField(ref field, value);
         }
 
-        private TwitchTaskStatus _status = TwitchTaskStatus.Ready;
         public TwitchTaskStatus Status
         {
-            get => _status;
-            private set => SetField(ref _status, value);
-        }
+            get;
+            private set => SetField(ref field, value);
+        } = TwitchTaskStatus.Ready;
 
-        private string _displayStatus;
         public string DisplayStatus
         {
-            get => _displayStatus;
-            protected set => SetField(ref _displayStatus, value);
+            get;
+            protected set => SetField(ref field, value);
         }
 
-        private string _statusImage;
         public string StatusImage
         {
-            get => _statusImage;
-            private set => SetField(ref _statusImage, value);
+            get;
+            private set => SetField(ref field, value);
         }
 
         protected CancellationTokenSource TokenSource { get; set; } = new();
         public TwitchTask DependantTask { get; init; }
         public abstract string TaskType { get; }
 
-        private Exception _exception;
         public Exception Exception
         {
-            get => _exception;
-            protected set => SetField(ref _exception, value);
+            get;
+            protected set => SetField(ref field, value);
         }
 
         public abstract string OutputFile { get; }
 
-        private bool _canCancel;
         public bool CanCancel
         {
-            get => _canCancel;
-            protected set => SetField(ref _canCancel, value);
+            get;
+            protected set => SetField(ref field, value);
         }
 
-        private bool _canReinitialize;
         public bool CanReinitialize
         {
-            get => _canReinitialize;
-            protected set => SetField(ref _canReinitialize, value);
+            get;
+            protected set => SetField(ref field, value);
         }
 
         public void Cancel()
