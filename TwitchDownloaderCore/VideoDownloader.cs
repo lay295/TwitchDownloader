@@ -234,25 +234,25 @@ namespace TwitchDownloaderCore
                 downloadThreads[i] = new VideoDownloadThread(downloadState, _httpClient, _vodCacheDir, downloadOptions.ThrottleKib, _progress, cancellationToken);
             }
 
-            var partCount = downloadState.PartCount;
-            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, downloadState, partCount, true, cancellationToken);
+            var downloadExceptions = await WaitForDownloadThreads(downloadThreads, downloadState, true, cancellationToken);
 
             LogDownloadThreadExceptions(downloadExceptions);
         }
 
-        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, int partCount, bool limitThreadRestarts, CancellationToken cancellationToken)
+        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
-            var previousDoneCount = 0;
+            var totalPartsToDownload = downloadState.PartQueue.Count;
+            var previousMissingCount = 0;
             var restartedThreads = 0;
-            var maxRestartedThreads = limitThreadRestarts ? (int)Math.Ceiling(partCount * 0.95) : int.MaxValue;
+            var maxRestartedThreads = limitThreadRestarts ? (int)Math.Ceiling(totalPartsToDownload * 0.95) : int.MaxValue;
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
-                if (downloadState.PartQueue.Count != previousDoneCount)
+                if (downloadState.PartQueue.Count != previousMissingCount)
                 {
-                    previousDoneCount = downloadState.PartQueue.Count;
-                    var percent = (int)((partCount - previousDoneCount) / (double)partCount * 100);
+                    previousMissingCount = downloadState.PartQueue.Count;
+                    var percent = (int)((totalPartsToDownload - previousMissingCount) / (double)totalPartsToDownload * 100);
                     _progress.ReportProgress(percent);
                 }
 
@@ -346,11 +346,20 @@ namespace TwitchDownloaderCore
                 }
 
                 _progress.LogInfo($"{invalidCount} parts were missing or corrupt and will be redownloaded.");
+                _progress.SetTemplateStatus("Redownloading Missing Parts {0}%", 0);
                 await DownloadVideoPartsAsync(downloadState, cancellationToken).ConfigureAwait(false);
 
                 try
                 {
-                    await Task.Run(() => EmitPartStubs(downloadState), cancellationToken).ConfigureAwait(false);
+                    var stubCount = await Task.Run(() => EmitPartStubs(downloadState), cancellationToken).ConfigureAwait(false);
+                    if (stubCount > 0)
+                    {
+                        _progress.LogWarning($"Failed to redownload {stubCount} parts, using stubs instead");
+                    }
+                    else
+                    {
+                        _progress.LogInfo("Successfully redownloaded missing parts");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -359,7 +368,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void EmitPartStubs(VideoDownloadState downloadState)
+        private int EmitPartStubs(VideoDownloadState downloadState)
         {
             byte[] transportStreamStub =
             [
@@ -377,9 +386,7 @@ namespace TwitchDownloaderCore
                 0x40, 0x01, 0x7F, 0xFC, 0x00, 0xD0, 0x00, 0x07,
             ];
 
-            _progress.ReportProgress(0);
-            var partCount = downloadState.PartCount;
-            var doneCount = 0;
+            var stubCount = 0;
 
             using var headerFs = !string.IsNullOrWhiteSpace(downloadState.HeaderFile)
                 ? File.OpenRead(downloadState.HeaderFile)
@@ -410,16 +417,16 @@ namespace TwitchDownloaderCore
                         headerFs.Seek(0, SeekOrigin.Begin);
                         headerFs.CopyTo(fs);
                     }
+
+                    stubCount++;
                 }
                 catch (Exception ex)
                 {
                     _progress.LogVerbose($"Failed to write stub for part {partName}: {ex.Message}");
                 }
-
-                doneCount++;
-                var percent = (int)(doneCount / (double)partCount * 100);
-                _progress.ReportProgress(percent);
             }
+
+            return stubCount;
         }
 
         private int GetInvalidParts(VideoDownloadState downloadState)
