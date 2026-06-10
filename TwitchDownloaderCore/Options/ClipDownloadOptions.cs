@@ -6,6 +6,7 @@ namespace TwitchDownloaderCore.Options
     public class ClipDownloadOptions
     {
         public string Id { get; set; }
+        public string Oauth { get; set; }
         public string Quality { get; set; }
         public string Filename { get; set; }
         public int ThrottleKib { get; set; }

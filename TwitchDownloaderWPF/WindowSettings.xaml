@@ -48,6 +48,10 @@
                 <CheckBox x:Name="CheckReduceMotion" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckReduceMotion_OnCheckedChanged" Unchecked="CheckReduceMotion_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                <TextBlock Margin="3,4,3,3" Text="Notify on task complete" Foreground="{DynamicResource AppText}" />
+                <CheckBox x:Name="CheckNotifyOnTaskComplete" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0" Checked="CheckNotifyOnTaskComplete_OnCheckedChanged" Unchecked="CheckNotifyOnTaskComplete_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,3,3,4" Text="{lex:Loc SettingsTimeFormat}" Foreground="{DynamicResource AppText}" />
                 <RadioButton x:Name="RadioTimeFormatUtc" Content="{lex:Loc TimestampUtc}" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 <RadioButton x:Name="RadioTimeFormatLocal" IsChecked="True" Content="{lex:Loc TimestampLocal}" Margin="3,0,0,0" Checked="RadioTimeFormat_OnCheckedChanged" Unchecked="RadioTimeFormat_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
@@ -105,6 +109,10 @@
                 <CheckBox x:Name="CheckThrottleEnabled" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="1, 6, 3, 3" Checked="CheckThrottleEnabled_OnCheckedChanged" Unchecked="CheckThrottleEnabled_OnCheckedChanged" BorderBrush="{DynamicResource AppElementBorder}" />
                 <hc:NumericUpDown x:Name="NumMaximumBandwidth" Value="4096" Minimum="1" Maximum="122070" ValueChanged="NumMaximumBandwidth_OnValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 <TextBlock Margin="3,7,0,0" Text="KiB/s" Foreground="{DynamicResource AppText}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                <TextBlock Margin="3,6,3,3" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc Oauth}"/><Hyperlink NavigateUri="https://www.youtube.com/watch?v=1MBsUoFGuls" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc OauthTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                <TextBox x:Name="TextOauth" Margin="3" MinWidth="200" MaxWidth="400" TextChanged="TextOauth_OnTextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
             </StackPanel>
             <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
                 <TextBlock Margin="3,6,3,3" Text="{lex:Loc LogLevels}" Foreground="{DynamicResource AppText}" />
@@ -181,6 +189,12 @@
                 </Run>
                 <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterGameTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
                     {game}
+                </Run>
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterLiveStartTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                    {live_start}
+                </Run>
+                <Run MouseDown="FilenameParameter_MouseDown" ToolTip="{lex:Loc FilenameParameterLiveCutoffTooltip}" ToolTipService.ShowDuration="30000" Cursor="Hand" FontWeight="Bold">
+                    {live_cutoff}
                 </Run>
                 <LineBreak/>
                 <Run Text="{lex:Loc DateCustomFormatting}" />

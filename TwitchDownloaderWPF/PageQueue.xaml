@@ -137,6 +137,13 @@
                 <Button x:Name="btnUrlList" Content="{lex:Loc UrlList}" Margin="0,11,0,0" Width="165" Click="btnUrlList_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
                 <Button x:Name="btnVods" Content="{lex:Loc SearchVods}" Margin="0,8,0,0" Width="165" Click="btnVods_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
                 <Button x:Name="btnClips" Content="{lex:Loc SearchClips}" Margin="0,8,0,0" Width="165" Click="btnClips_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <hc:Divider Content="When Queue Finishes" HorizontalAlignment="Center" Margin="0,10,0,0" FontWeight="Bold" MinWidth="180" LineStroke="{DynamicResource AppDivider}" Foreground="{DynamicResource AppDividerText}"/>
+                <ComboBox x:Name="comboQueueFinish" Margin="0,8,0,0" Width="165" SelectionChanged="ComboQueueFinish_SelectionChanged" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}">
+                    <ComboBoxItem Content="Do Nothing" IsSelected="True"/>
+                    <ComboBoxItem Content="Sleep"/>
+                    <ComboBoxItem Content="Hibernate"/>
+                    <ComboBoxItem Content="Shutdown"/>
+                </ComboBox>
             </StackPanel>
         </StackPanel>
     </Grid>

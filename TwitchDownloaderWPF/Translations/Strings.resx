@@ -179,6 +179,12 @@
   <data name="ChatFontSize" xml:space="preserve">
     <value>Font Size:</value>
   </data>
+  <data name="ChatUsernameFontSize" xml:space="preserve">
+    <value>Username Size:</value>
+  </data>
+  <data name="ChatUsernameFontSizeTooltip" xml:space="preserve">
+    <value>Username size relative to the message font size. 1.0 = same size as the message text, 2.0 = twice as large.</value>
+  </data>
   <data name="ChatHeight" xml:space="preserve">
     <value>Height:</value>
   </data>
@@ -311,6 +317,13 @@
   </data>
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
     <value>List of usernames - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+  </data>
+  <data name="HighlightUsersList" xml:space="preserve">
+    <value>Highlight Users List </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="HighlightUsersListTooltip" xml:space="preserve">
+    <value>List of usernames whose names will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
   </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
     <value>Invalid Clip Link/ID</value>
@@ -540,6 +553,15 @@
   </data>
   <data name="UrlList" xml:space="preserve">
     <value>URL List</value>
+  </data>
+  <data name="LiveMonitor" xml:space="preserve">
+    <value>Live Monitor</value>
+  </data>
+  <data name="ExitWhileRunningTitle" xml:space="preserve">
+    <value>Tasks Still Running</value>
+  </data>
+  <data name="ExitWhileRunningMessage" xml:space="preserve">
+    <value>One or more downloads or renders are still in progress. If you exit now, they will be canceled and any partial files may be left behind.\n\nAre you sure you want to exit?</value>
   </data>
   <data name="VerboseErrorOutput" xml:space="preserve">
     <value>Verbose Error Output</value>
@@ -1022,6 +1044,12 @@
   <data name="FilenameParameterTrimLengthCustomTooltip" xml:space="preserve">
     <value>The length (including trim) of the video/clip/chat in a customizable format.</value>
   </data>
+  <data name="FilenameParameterLiveStartTooltip" xml:space="preserve">
+    <value>Live Monitor only: how far into the stream the recording began (hh-mm-ss). Empty for non-live downloads.</value>
+  </data>
+  <data name="FilenameParameterLiveCutoffTooltip" xml:space="preserve">
+    <value>Live Monitor only: the time at which the recording was cut off early via trim end (hh-mm-ss). Empty if the recording ran to stream end.</value>
+  </data>
   <data name="VideoTypeAllVideos" xml:space="preserve">
     <value>All Videos</value>
   </data>
@@ -1036,6 +1064,12 @@
   </data>
   <data name="DelayDownload" xml:space="preserve">
     <value>Delay Download Until Broadcast Finished</value>
+  </data>
+  <data name="LiveDownload" xml:space="preserve">
+    <value>Live Download (record stream in real time)</value>
+  </data>
+  <data name="LiveDownloadTooltip" xml:space="preserve">
+    <value>Starts recording the live stream immediately and keeps recording until the broadcast ends or you cancel. If VODs are enabled on the channel, the stream's backlog (the portion that aired before you started recording) will also be downloaded automatically. Use this instead of "Delay Download Until Broadcast Finished" if you want a real-time recording rather than waiting for the full VOD afterward.</value>
   </data>
   <data name="ReduceMotion" xml:space="preserve">
     <value>Reduce Motion:</value>

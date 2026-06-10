@@ -39,12 +39,15 @@ namespace TwitchDownloaderWPF
         public int viewCount;
         public string game;
         public string streamerId;
+        public bool vodIsLive;
         private CancellationTokenSource _cancellationTokenSource;
 
         public PageVodDownload()
         {
             InitializeComponent();
         }
+
+        public bool IsActionInProgress => BtnCancel.Visibility == Visibility.Visible;
 
         private void SetEnabled(bool isEnabled)
         {
@@ -81,7 +84,118 @@ namespace TwitchDownloaderWPF
 
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
-            await GetVideoInfo();
+            if (checkRecoverHidden.IsChecked == true)
+                await GetHiddenVodInfo();
+            else
+                await GetVideoInfo();
+        }
+
+        // Captured stream metadata for hidden-VOD recovery. Populated by GetHiddenVodInfo while the
+        // channel is live, since this data is unavailable once the stream ends.
+        private string recoverChannelLogin;
+        private string recoverStreamId;
+        private DateTimeOffset recoverStreamStartTime;
+
+        private void checkRecoverHidden_Changed(object sender, RoutedEventArgs e)
+        {
+            var recover = checkRecoverHidden.IsChecked == true;
+            textRecoverWarning.Visibility = recover ? Visibility.Visible : Visibility.Collapsed;
+            labelUrl.Text = recover ? "Channel:" : Translations.Strings.VodLinkId;
+
+            // The recovered playlist is always source quality; trimming and metadata don't apply the
+            // same way, but trimming the downloaded segments still works, so leave those controls as-is.
+            SetEnabled(false);
+            recoverChannelLogin = null;
+            recoverStreamId = null;
+        }
+
+        private async Task GetHiddenVodInfo()
+        {
+            var channel = textUrl.Text.Trim();
+            if (string.IsNullOrWhiteSpace(channel))
+            {
+                MessageBox.Show(Application.Current.MainWindow!, "Enter a channel name to recover a hidden VOD from.", Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Accept a full URL or a bare login.
+            channel = channel.TrimEnd('/');
+            var lastSlash = channel.LastIndexOf('/');
+            if (lastSlash >= 0)
+                channel = channel[(lastSlash + 1)..];
+            channel = channel.ToLowerInvariant();
+
+            try
+            {
+                var metadata = await TwitchHelper.GetStreamMetadata(channel);
+                var user = metadata?.data?.user;
+                if (user is null)
+                {
+                    throw new InvalidOperationException($"No Twitch channel found for '{channel}'.");
+                }
+                if (user.stream is null)
+                {
+                    throw new InvalidOperationException(
+                        $"'{channel}' is not currently live. Hidden VOD recovery needs the stream id and start time, " +
+                        "which Twitch only exposes while the channel is live.");
+                }
+
+                recoverChannelLogin = user.login ?? channel;
+                recoverStreamId = user.stream.id;
+                recoverStreamStartTime = user.stream.createdAt;
+
+                textStreamer.Text = user.displayName ?? user.login ?? channel;
+                streamerId = user.id;
+                textTitle.Text = $"Hidden broadcast (stream {recoverStreamId})";
+                var startLocal = Settings.Default.UTCVideoTime ? recoverStreamStartTime.UtcDateTime : recoverStreamStartTime.LocalDateTime;
+                textCreatedAt.Text = startLocal.ToString(CultureInfo.CurrentCulture);
+                currentVideoTime = startLocal;
+                currentVideoId = 0;
+                vodIsLive = true;
+
+                _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out var image);
+                imgThumbnail.Source = image;
+
+                comboQuality.Items.Clear();
+                var (_, qualities) = await TwitchHelper.RecoverHiddenVodQualities(recoverChannelLogin, recoverStreamId, recoverStreamStartTime);
+                if (qualities.Count == 0)
+                {
+                    // Couldn't probe the CDN (shouldn't happen while live) — offer source and let the
+                    // downloader fall back if it turns out to be unavailable.
+                    comboQuality.Items.Add(new ComboBoxItem { Content = "Source", Tag = "chunked" });
+                    AppendLog("Could not probe available qualities; defaulting to Source.");
+                }
+                else
+                {
+                    foreach (var q in qualities)
+                        comboQuality.Items.Add(new ComboBoxItem { Content = TwitchHelper.DescribeVodRendition(q), Tag = q });
+                    AppendLog($"Available qualities: {string.Join(", ", qualities.Select(TwitchHelper.DescribeVodRendition))}.");
+                }
+                comboQuality.SelectedIndex = 0;
+
+                // Length is unknown ahead of time for a live/hidden broadcast.
+                vodLength = TimeSpan.Zero;
+                labelLength.Text = "Unknown (live)";
+                numStartHour.Maximum = 48;
+                numEndHour.Maximum = 48;
+                numStartHour.Value = numStartMinute.Value = numStartSecond.Value = 0;
+                numEndHour.Value = numEndMinute.Value = numEndSecond.Value = 0;
+                viewCount = 0;
+                game = Translations.Strings.UnknownGame;
+
+                AppendLog($"Captured live metadata for '{recoverChannelLogin}' (stream {recoverStreamId}, started {recoverStreamStartTime:u}).");
+                SetEnabled(true);
+            }
+            catch (Exception ex)
+            {
+                btnGetInfo.IsEnabled = true;
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                MessageBox.Show(Application.Current.MainWindow!, ex.Message, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private async Task GetVideoInfo()
@@ -97,7 +211,7 @@ namespace TwitchDownloaderWPF
             try
             {
                 Task<GqlVideoResponse> taskVideoInfo = TwitchHelper.GetVideoInfo(videoId);
-                Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, TextOauth.Text);
+                Task<GqlVideoTokenResponse> taskAccessToken = TwitchHelper.GetVideoToken(videoId, Settings.Default.OAuth);
                 await Task.WhenAll(taskVideoInfo, taskAccessToken);
 
                 if (taskAccessToken.Result.data.videoPlaybackAccessToken is null)
@@ -174,6 +288,7 @@ namespace TwitchDownloaderWPF
                 labelLength.Text = vodLength.ToString("c");
                 viewCount = taskVideoInfo.Result.data.video.viewCount;
                 game = taskVideoInfo.Result.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
+                vodIsLive = string.Equals(taskVideoInfo.Result.data.video.status, "recording", StringComparison.OrdinalIgnoreCase);
 
                 UpdateVideoSizeEstimates();
 
@@ -215,7 +330,7 @@ namespace TwitchDownloaderWPF
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
                     vodLength, viewCount, game) + FilenameService.GuessVodFileExtension(((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString())),
-                Oauth = TextOauth.Text,
+                Oauth = Settings.Default.OAuth,
                 Quality = ((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString(),
                 Id = currentVideoId,
                 TrimBeginning = checkStart.IsChecked.GetValueOrDefault(),
@@ -231,11 +346,24 @@ namespace TwitchDownloaderWPF
             else if (RadioTrimExact.IsChecked == true)
                 options.TrimMode = VideoTrimMode.Exact;
 
+            if (checkRecoverHidden.IsChecked == true)
+            {
+                options.RecoverHiddenVod = true;
+                options.ChannelLogin = recoverChannelLogin;
+                options.StreamId = recoverStreamId;
+                options.StreamStartTime = recoverStreamStartTime;
+            }
+
             return options;
         }
 
         private void UpdateVideoSizeEstimates()
         {
+            // Hidden-VOD recovery uses a plain string quality tag ("chunked") and an unknown length,
+            // so there is nothing to estimate.
+            if (checkRecoverHidden.IsChecked == true)
+                return;
+
             int selectedIndex = comboQuality.SelectedIndex;
 
             var trimStart = checkStart.IsChecked == true
@@ -355,7 +483,6 @@ namespace TwitchDownloaderWPF
             SetEnabledTrimEnd(false);
             WebRequest.DefaultWebProxy = null;
             numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
-            TextOauth.Text = Settings.Default.OAuth;
             _ = (VideoTrimMode)Settings.Default.VodTrimMode switch
             {
                 VideoTrimMode.Exact => RadioTrimExact.IsChecked = true,
@@ -368,15 +495,6 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized && numDownloadThreads.IsEnabled)
             {
                 Settings.Default.VodDownloadThreads = (int)numDownloadThreads.Value;
-                Settings.Default.Save();
-            }
-        }
-
-        private void TextOauth_TextChanged(object sender, RoutedEventArgs e)
-        {
-            if (this.IsInitialized)
-            {
-                Settings.Default.OAuth = TextOauth.Text;
                 Settings.Default.Save();
             }
         }
@@ -589,6 +707,133 @@ namespace TwitchDownloaderWPF
                 Settings.Default.VodTrimMode = (int)VideoTrimMode.Exact;
                 Settings.Default.Save();
             }
+        }
+
+        private async void MenuItemSplitByChapters_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentVideoId == 0)
+            {
+                MessageBox.Show(Application.Current.MainWindow!, "Please load a VOD first.", "No VOD Loaded", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                btnGetInfo.IsEnabled = false;
+                SplitBtnDownload.IsEnabled = false;
+
+                var videoInfo = new TwitchDownloaderCore.TwitchObjects.Gql.VideoInfo
+                {
+                    lengthSeconds = (int)vodLength.TotalSeconds,
+                    game = new TwitchDownloaderCore.TwitchObjects.Gql.Game { displayName = game }
+                };
+
+                var chapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(currentVideoId, videoInfo);
+                var chapters = chapterResponse.data.video.moments.edges;
+
+                if (chapters.Count <= 1)
+                {
+                    MessageBox.Show(Application.Current.MainWindow!, "This VOD has only one chapter — nothing to split.", "Single Chapter", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var msg = $"Enqueue {chapters.Count} separate downloads (one per chapter)?";
+                if (MessageBox.Show(Application.Current.MainWindow!, msg, "Split by Chapters", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                    return;
+
+                string folder = Settings.Default.QueueFolder;
+                string quality = ((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString();
+                string ext = FilenameService.GuessVodFileExtension(quality);
+                var trimMode = RadioTrimSafe.IsChecked == true ? VideoTrimMode.Safe : VideoTrimMode.Exact;
+
+                lock (PageQueue.taskLock)
+                {
+                    for (int i = 0; i < chapters.Count; i++)
+                    {
+                        var chapter = chapters[i].node;
+                        var startSec = chapter.positionMilliseconds / 1000;
+                        var endSec = startSec + chapter.durationMilliseconds / 1000;
+                        var chapterStart = TimeSpan.FromSeconds(startSec);
+                        var chapterEnd = TimeSpan.FromSeconds(Math.Min(endSec, (int)vodLength.TotalSeconds));
+                        var gameName = chapter.details?.game?.displayName ?? chapter.description ?? game;
+
+                        var options = new VideoDownloadOptions
+                        {
+                            DownloadThreads = (int)numDownloadThreads.Value,
+                            ThrottleKib = Settings.Default.DownloadThrottleEnabled ? Settings.Default.MaximumBandwidthKib : -1,
+                            Filename = Path.Combine(folder,
+                                FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(),
+                                    currentVideoTime, textStreamer.Text, streamerId,
+                                    chapterStart, chapterEnd, vodLength, viewCount, gameName) + $"_ch{i + 1:D2}" + ext),
+                            Oauth = Settings.Default.OAuth,
+                            Quality = quality,
+                            Id = currentVideoId,
+                            TrimBeginning = true,
+                            TrimBeginningTime = chapterStart,
+                            TrimEnding = true,
+                            TrimEndingTime = chapterEnd,
+                            FfmpegPath = "ffmpeg",
+                            TempFolder = Settings.Default.TempPath,
+                            TrimMode = trimMode
+                        };
+
+                        var task = new TwitchTasks.VodDownloadTask
+                        {
+                            DownloadOptions = options,
+                            Info =
+                            {
+                                Title = $"{textTitle.Text} — {gameName} (Ch. {i + 1})",
+                                Thumbnail = imgThumbnail.Source
+                            }
+                        };
+                        PageQueue.taskList.Add(task);
+                    }
+                }
+
+                // Navigate to queue to show the newly added tasks
+                if (Application.Current.MainWindow is MainWindow mw)
+                    mw.Main.Content = MainWindow.pageQueue;
+            }
+            catch (Exception ex)
+            {
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                MessageBox.Show(Application.Current.MainWindow!, "Failed to fetch chapters: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                btnGetInfo.IsEnabled = true;
+                SplitBtnDownload.IsEnabled = true;
+            }
+        }
+
+        private void BtnSyncToChat_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentVideoId == 0)
+            {
+                MessageBox.Show(Application.Current.MainWindow!, "No VOD is loaded on the VOD Download page.", "Nothing to Sync", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var chat = MainWindow.pageChatDownload;
+
+            // Copy URL
+            chat.textUrl.Text = textUrl.Text;
+
+            // Copy trim start
+            chat.CheckTrimStart.IsChecked = checkStart.IsChecked;
+            chat.numStartHour.Value = numStartHour.Value;
+            chat.numStartMinute.Value = numStartMinute.Value;
+            chat.numStartSecond.Value = numStartSecond.Value;
+
+            // Copy trim end
+            chat.CheckTrimEnd.IsChecked = checkEnd.IsChecked;
+            chat.numEndHour.Value = numEndHour.Value;
+            chat.numEndMinute.Value = numEndMinute.Value;
+            chat.numEndSecond.Value = numEndSecond.Value;
+
+            // Navigate to chat download page
+            if (Application.Current.MainWindow is MainWindow mw)
+                mw.Main.Content = MainWindow.pageChatDownload;
         }
     }
 }

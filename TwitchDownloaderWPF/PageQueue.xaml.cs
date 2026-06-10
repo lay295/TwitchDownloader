@@ -1,5 +1,6 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +20,7 @@ namespace TwitchDownloaderWPF
         public static readonly Lock taskLock = new();
         public static ObservableCollection<TwitchTask> taskList { get; } = new();
         private static readonly BackgroundWorker taskManager = new BackgroundWorker();
+        private static volatile string _queueFinishAction = "Do Nothing";
 
         public PageQueue()
         {
@@ -59,6 +61,9 @@ namespace TwitchDownloaderWPF
                             case VodDownloadTask:
                                 currentVod++;
                                 break;
+                            case LiveStreamDownloadTask:
+                                currentVod++;
+                                break;
                             case ClipDownloadTask:
                                 currentClip++;
                                 break;
@@ -85,6 +90,10 @@ namespace TwitchDownloaderWPF
                                 currentVod++;
                                 task.RunAsync();
                                 break;
+                            case LiveStreamDownloadTask when currentVod < maxVod:
+                                currentVod++;
+                                task.RunAsync();
+                                break;
                             case ClipDownloadTask when currentClip < maxClip:
                                 currentClip++;
                                 task.RunAsync();
@@ -103,10 +112,69 @@ namespace TwitchDownloaderWPF
                                 break;
                         }
                     }
+
+                    // Queue-finish action
+                    if (_queueFinishAction != "Do Nothing" && taskList.Count > 0)
+                    {
+                        bool allTerminal = taskList.All(t => t.Status is TwitchTaskStatus.Finished or TwitchTaskStatus.Failed or TwitchTaskStatus.Canceled);
+                        if (allTerminal)
+                        {
+                            bool allSucceeded = taskList.All(t => t.Status == TwitchTaskStatus.Finished);
+                            bool anyFailed = taskList.Any(t => t.Status == TwitchTaskStatus.Failed);
+                            var action = _queueFinishAction;
+                            _queueFinishAction = "Do Nothing";
+                            // Reset combo on UI thread
+                            Application.Current.Dispatcher.BeginInvoke(() =>
+                            {
+                                if (MainWindow.pageQueue?.comboQueueFinish is { } c) c.SelectedIndex = 0;
+                            });
+                            if (allSucceeded)
+                            {
+                                // All tasks finished successfully — execute the action
+                                System.Threading.Tasks.Task.Run(async () =>
+                                {
+                                    await System.Threading.Tasks.Task.Delay(2000);
+                                    ExecuteQueueFinishAction(action);
+                                });
+                            }
+                            else if (anyFailed)
+                            {
+                                // One or more tasks failed — notify and skip the action
+                                Application.Current.Dispatcher.BeginInvoke(() =>
+                                {
+                                    NotificationService.Show(
+                                        "Queue finished with errors",
+                                        $"'{action}' was not executed because one or more tasks failed.",
+                                        isError: true);
+                                });
+                            }
+                            // else all cancelled — reset silently (already done above)
+                        }
+                    }
                 }
 
                 Thread.Sleep(1000);
             }
+        }
+
+        [System.Runtime.InteropServices.DllImport("Powrprof.dll", SetLastError = true)]
+        [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+        private static extern bool SetSuspendState(bool hibernate, bool forceCritical, bool disableWakeEvent);
+
+        private static void ExecuteQueueFinishAction(string action)
+        {
+            switch (action)
+            {
+                case "Sleep":     SetSuspendState(false, false, false); break;
+                case "Hibernate": SetSuspendState(true, false, false); break;
+                case "Shutdown":  Process.Start(new ProcessStartInfo("shutdown", "/s /t 30") { UseShellExecute = true }); break;
+            }
+        }
+
+        private void ComboQueueFinish_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+                _queueFinishAction = (e.AddedItems[0] as ComboBoxItem)?.Content?.ToString() ?? "Do Nothing";
         }
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)

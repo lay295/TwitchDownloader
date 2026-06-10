@@ -1,0 +1,165 @@
+<Page x:Class="TwitchDownloaderWPF.PageLiveMonitor"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:lex="http://wpflocalizeextension.codeplex.com"
+      lex:LocalizeDictionary.DesignCulture=""
+      lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
+      lex:ResxLocalizationProvider.DefaultDictionary="Strings"
+      xmlns:hc="https://handyorg.github.io/handycontrol"
+      xmlns:fa="http://schemas.fontawesome.com/icons/"
+      mc:Ignorable="d"
+      d:DesignHeight="400" d:DesignWidth="800"
+      Title="PageLiveMonitor" Initialized="Page_Initialized" Loaded="Page_Loaded" Unloaded="Page_Unloaded">
+    <Grid Background="{DynamicResource AppBackground}" Margin="20,15,20,10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,90,0">
+            <TextBlock Text="Live Monitor" FontWeight="Bold" FontSize="18" Foreground="{DynamicResource AppText}"/>
+            <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{DynamicResource AppText}"
+                       Text="Monitors the channels below and queues downloads when a channel goes live. The channel must have VODs/archive enabled on Twitch."/>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                <TextBlock Text="Channels (Twitch login names)" Foreground="{DynamicResource AppText}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBox x:Name="textChannel" MinWidth="160" KeyDown="textChannel_KeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <Button x:Name="btnAddChannel" Content="Add" MinWidth="50" Margin="4,0,0,0" Click="btnAddChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                </StackPanel>
+                <ListBox x:Name="listChannels" Height="120" Margin="0,6,0,0" SelectionChanged="listChannels_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <Button x:Name="btnRemoveChannel" Content="Remove Selected" Margin="0,4,0,0" Click="btnRemoveChannel_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button x:Name="btnSaveChannelSettings" Content="Save for channel" IsEnabled="False" MinWidth="118"
+                            ToolTip="Save the current page settings as the profile for the selected channel."
+                            Click="btnSaveChannelSettings_Click"
+                            Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                    <Button x:Name="btnLoadChannelSettings" Content="Load" IsEnabled="False" MinWidth="46" Margin="4,0,0,0"
+                            ToolTip="Apply the selected channel's saved settings to the page."
+                            Click="btnLoadChannelSettings_Click"
+                            Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                    <Button x:Name="btnClearChannelSettings" Content="Clear" IsEnabled="False" MinWidth="46" Margin="4,0,0,0"
+                            ToolTip="Remove the saved settings for this channel (reverts to page defaults)."
+                            Click="btnClearChannelSettings_Click"
+                            Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBlock Text="Copy from:" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource AppText}"/>
+                    <ComboBox x:Name="comboCopyFrom" Margin="4,0,0,0" MinWidth="90"
+                              ToolTip="Channel whose saved settings will be copied to the selected channel."
+                              Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <Button x:Name="btnCopyChannelSettings" Content="Copy" IsEnabled="False" MinWidth="44" Margin="4,0,0,0"
+                            ToolTip="Copy the chosen channel's saved settings to the selected channel."
+                            Click="btnCopyChannelSettings_Click"
+                            Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                </StackPanel>
+                <TextBlock x:Name="textChannelSettingsStatus" Margin="0,4,0,0" FontSize="10" Opacity="0.7" Foreground="{DynamicResource AppText}" Text=""/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Save to:" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                    <TextBox x:Name="textFolder" MinWidth="280" Margin="6,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <Button x:Name="btnFolder" Content="..." MinWidth="34" Margin="4,0,0,0" Click="btnFolder_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Quality:" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                    <ComboBox x:Name="comboQuality" SelectedIndex="0" MinWidth="120" Margin="6,0,0,0" SelectionChanged="comboQuality_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                        <ComboBoxItem Content="Source"/>
+                        <ComboBoxItem Content="1440p"/>
+                        <ComboBoxItem Content="1080p"/>
+                        <ComboBoxItem Content="720p"/>
+                        <ComboBoxItem Content="480p"/>
+                        <ComboBoxItem Content="360p"/>
+                        <ComboBoxItem Content="160p"/>
+                        <ComboBoxItem Content="144p"/>
+                        <ComboBoxItem Content="Worst"/>
+                        <ComboBoxItem Content="Audio Only"/>
+                    </ComboBox>
+                    <TextBlock Text="Poll every (sec):" VerticalAlignment="Center" Margin="16,0,0,0" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numPoll" Value="60" Minimum="30" Maximum="3600" Width="80" Margin="6,0,0,0" ValueChanged="numPoll_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="{lex:Loc VideoDownloadThreads}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numThreads" Value="4" Minimum="1" Maximum="50" Width="80" Margin="6,0,0,0" ValueChanged="numThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Download mode:" VerticalAlignment="Center" Foreground="{DynamicResource AppText}"/>
+                    <ComboBox x:Name="comboDownloadMode" SelectedIndex="0" Margin="6,0,0,0"
+                              SelectionChanged="comboDownloadMode_SelectionChanged"
+                              Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                        <ComboBoxItem Content="Live (back-catalog + concurrent ffmpeg recording)"
+                                      ToolTip="Downloads already-aired segments immediately (multi-threaded) while recording the live tail with ffmpeg at the same time."/>
+                        <ComboBoxItem Content="After stream ends (full VOD)"
+                                      ToolTip="Waits for the stream to finish, then queues a standard VOD download of the complete recording."/>
+                        <ComboBoxItem Content="After stream ends — split by chapters"
+                                      ToolTip="Waits for the stream to finish, then queues one VOD download per game chapter."/>
+                    </ComboBox>
+                </StackPanel>
+                <CheckBox x:Name="checkChat" Content="Also download chat (JSON, gzip) for each recorded stream" Margin="0,8,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" Checked="checkChat_CheckStateChanged" Unchecked="checkChat_CheckStateChanged"/>
+                <CheckBox x:Name="checkRecoverHidden" Margin="0,8,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"
+                          ToolTip="When a monitored channel goes live with &quot;Store past broadcasts&quot; disabled (no published VOD), reconstruct the broadcast from Twitch's public CDN and queue it for download once the stream ends. The channel's quality setting is used, falling back to the best retained rendition. Unofficial and best-effort: only works while the segments still exist on the CDN (usually within a day or two of the stream ending), real-time and chapter-split modes fall back to a single recovery, and this may stop working if Twitch changes their CDN scheme."
+                          Checked="checkRecoverHidden_CheckStateChanged" Unchecked="checkRecoverHidden_CheckStateChanged">
+                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource AppText}"><Run Text="Recover hidden VODs from channels with past broadcasts disabled (unofficial, best-effort)"/></TextBlock>
+                </CheckBox>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <CheckBox x:Name="checkAutoRender" Content="Also render chat after download" VerticalAlignment="Center"
+                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"
+                              ToolTip="Automatically queue a chat render once the chat download finishes. Uses the preset selected below (or per-channel override)."
+                              Checked="checkAutoRender_CheckStateChanged" Unchecked="checkAutoRender_CheckStateChanged"/>
+                    <ComboBox x:Name="comboRenderPreset" Margin="8,0,0,0" MinWidth="140"
+                              ToolTip="Default render preset used when no per-channel override is set."
+                              SelectionChanged="comboRenderPreset_SelectionChanged"
+                              Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <CheckBox x:Name="checkTrimStart" VerticalAlignment="Center" BorderBrush="{DynamicResource AppElementBorder}" Checked="checkTrimStart_CheckStateChanged" Unchecked="checkTrimStart_CheckStateChanged"/>
+                    <TextBlock Text="Trim start" VerticalAlignment="Center" Margin="3,0,0,0" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numTrimStartHour"   Minimum="0" Maximum="48" Value="0" Width="60" Margin="6,0,2,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numTrimStartMinute" Minimum="0" Maximum="59" Value="0" Width="60" Margin="2,0,2,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numTrimStartSecond" Minimum="0" Maximum="59" Value="0" Width="60" Margin="2,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <TextBlock Text="h  m  s" VerticalAlignment="Center" Margin="4,0,0,0" FontSize="10" Foreground="{DynamicResource AppText}" Opacity="0.6"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <CheckBox x:Name="checkTrimEnd" VerticalAlignment="Center" BorderBrush="{DynamicResource AppElementBorder}" Checked="checkTrimEnd_CheckStateChanged" Unchecked="checkTrimEnd_CheckStateChanged"/>
+                    <TextBlock Text="Trim end" VerticalAlignment="Center" Margin="3,0,0,0" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numTrimEndHour"   Minimum="0" Maximum="48" Value="0" Width="60" Margin="6,0,2,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numTrimEndMinute" Minimum="0" Maximum="59" Value="0" Width="60" Margin="2,0,2,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <hc:NumericUpDown x:Name="numTrimEndSecond" Minimum="0" Maximum="59" Value="0" Width="60" Margin="2,0,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <TextBlock Text="h  m  s" VerticalAlignment="Center" Margin="4,0,0,0" FontSize="10" Foreground="{DynamicResource AppText}" Opacity="0.6"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <Button x:Name="btnToggle" Content="Start Monitoring" MinWidth="140" Height="34" Click="btnToggle_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                    <TextBlock x:Name="textState" Text="Stopped" VerticalAlignment="Center" Margin="12,0,0,0" FontWeight="Bold" Foreground="{DynamicResource AppText}"/>
+                    <CheckBox x:Name="checkAutoStart" Content="Auto-start on launch" VerticalAlignment="Center" Margin="16,0,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" ToolTip="Automatically begin monitoring when the app starts (requires at least one channel and a valid output folder)" Checked="checkAutoStart_CheckStateChanged" Unchecked="checkAutoStart_CheckStateChanged"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Margin="0,14,0,0">
+            <TextBlock Text="Log" Foreground="{DynamicResource AppText}"/>
+            <RichTextBox x:Name="textLog" IsReadOnly="True" Margin="0,3,0,0" Height="150" VerticalScrollBarVisibility="Auto" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                <RichTextBox.Resources>
+                    <Style TargetType="{x:Type Paragraph}">
+                        <Setter Property="Margin" Value="0"/>
+                    </Style>
+                </RichTextBox.Resources>
+            </RichTextBox>
+        </StackPanel>
+    </Grid>
+</Page>

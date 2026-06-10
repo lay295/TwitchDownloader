@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,6 +18,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
@@ -24,6 +26,7 @@ using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderWPF.Extensions;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 using MessageBox = System.Windows.MessageBox;
@@ -41,11 +44,27 @@ namespace TwitchDownloaderWPF
         public string[] FileNames = [];
         private CancellationTokenSource _cancellationTokenSource;
 
+        // Preset support
+        private bool _applyingPreset = false;
+
+        // Embedded preview support
+        private readonly List<string> _previewTempFiles = new();
+        private CancellationTokenSource _previewCts;
+        private bool _previewIsPlaying = false;
+        private DispatcherTimer _previewTimer;
+        private double _previewMediaDuration = 30;
+        private double _chatTotalDuration = 0;
+        private bool _previewSliderUserDragging = true;
+        private List<BitmapImage> _previewFrames = new();
+        private int _currentPreviewFrameIdx = 0;
+
         public PageChatRender()
         {
             InitializeComponent();
             App.CultureServiceSingleton.CultureChanged += OnCultureChanged;
         }
+
+        public bool IsActionInProgress => BtnCancel.Visibility == Visibility.Visible;
 
         private void OnCultureChanged(object sender, CultureInfo e)
         {
@@ -97,6 +116,7 @@ namespace TwitchDownloaderWPF
             SKColor backgroundColor = new(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
             SKColor altBackgroundColor = new(colorAlternateBackground.SelectedColor.Value.R, colorAlternateBackground.SelectedColor.Value.G, colorAlternateBackground.SelectedColor.Value.B, colorAlternateBackground.SelectedColor.Value.A);
             SKColor messageColor = new(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
+            SKColor highlightUsersColor = new(colorHighlightUsers.SelectedColor.Value.R, colorHighlightUsers.SelectedColor.Value.G, colorHighlightUsers.SelectedColor.Value.B);
             ChatRenderOptions options = new()
             {
                 OutputFile = filename,
@@ -112,6 +132,7 @@ namespace TwitchDownloaderWPF
                 Outline = checkOutline.IsChecked.GetValueOrDefault(),
                 Font = (string)comboFont.SelectedItem,
                 FontSize = numFontSize.Value,
+                UsernameFontScale = double.Parse(textUsernameScale.Text, CultureInfo.CurrentCulture),
                 UpdateRate = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture),
                 EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture),
                 BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture),
@@ -125,6 +146,8 @@ namespace TwitchDownloaderWPF
                 AccentStrokeScale = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture),
                 VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture),
                 IgnoreUsersArray = textIgnoreUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                HighlightUsersArray = textHighlightUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                HighlightUsersColor = highlightUsersColor,
                 BannedWordsArray = textBannedWordsList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 Timestamp = checkTimestamp.IsChecked.GetValueOrDefault(),
                 MessageColor = messageColor,
@@ -174,6 +197,7 @@ namespace TwitchDownloaderWPF
                 textHeight.Text = Settings.Default.Height.ToString();
                 textWidth.Text = Settings.Default.Width.ToString();
                 numFontSize.Value = Settings.Default.FontSize;
+                textUsernameScale.Text = Settings.Default.UsernameFontScale.ToString("0.0#");
                 textUpdateTime.Text = Settings.Default.UpdateTime.ToString("0.0#");
                 colorFont.SelectedColor = System.Windows.Media.Color.FromRgb(Settings.Default.FontColorR, Settings.Default.FontColorG, Settings.Default.FontColorB);
                 textFramerate.Text = Settings.Default.Framerate.ToString();
@@ -194,6 +218,8 @@ namespace TwitchDownloaderWPF
                 textAccentIndentScale.Text = Settings.Default.AccentIndentScale.ToString("0.0#");
                 textOutlineScale.Text = Settings.Default.OutlineScale.ToString("0.0#");
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
+                textHighlightUsersList.Text = Settings.Default.HighlightUsersList;
+                colorHighlightUsers.SelectedColor = System.Windows.Media.Color.FromRgb(Settings.Default.HighlightUsersColorR, Settings.Default.HighlightUsersColorG, Settings.Default.HighlightUsersColorB);
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
                 checkRenderAvatars.IsChecked = Settings.Default.RenderUserAvatars;
@@ -310,6 +336,11 @@ namespace TwitchDownloaderWPF
             }
             Settings.Default.IgnoreUsersList = string.Join(",", textIgnoreUsersList.Text
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            Settings.Default.HighlightUsersList = string.Join(",", textHighlightUsersList.Text
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            Settings.Default.HighlightUsersColorR = colorHighlightUsers.SelectedColor.GetValueOrDefault().R;
+            Settings.Default.HighlightUsersColorG = colorHighlightUsers.SelectedColor.GetValueOrDefault().G;
+            Settings.Default.HighlightUsersColorB = colorHighlightUsers.SelectedColor.GetValueOrDefault().B;
             Settings.Default.BannedWordsList = string.Join(",", textBannedWordsList.Text
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             if (RadioEmojiNotoColor.IsChecked == true)
@@ -330,6 +361,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.Height = int.Parse(textHeight.Text);
                 Settings.Default.Width = int.Parse(textWidth.Text);
                 Settings.Default.FontSize = (float)numFontSize.Value;
+                Settings.Default.UsernameFontScale = double.Parse(textUsernameScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.UpdateTime = double.Parse(textUpdateTime.Text, CultureInfo.CurrentCulture);
                 Settings.Default.Framerate = int.Parse(textFramerate.Text);
                 Settings.Default.EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
@@ -376,6 +408,7 @@ namespace TwitchDownloaderWPF
                 _ = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textUsernameScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
@@ -475,16 +508,16 @@ namespace TwitchDownloaderWPF
             }
             comboFont.SelectedItem = "Inter Embedded";
 
-            Codec h264Codec = new Codec() { Name = "H264", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx264 -preset:v veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h264NvencCodec = new Codec() { Name = "H264 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_nvenc -preset:v p4 -cq 20 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h264AmfCodec = new Codec() { Name = "H264 AMD", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_amf -preset:v p4 -cq 20 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h265Codec = new Codec() { Name = "H265", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx265 -preset:v veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h265NvencCodec = new Codec() { Name = "H265 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v hevc_nvenc -preset:v p4 -cq 21 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h265AmfCodec = new Codec() { Name = "H265 AMD", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v hevc_amf -preset:v p4 -cq 21 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec vp8Codec = new Codec() { Name = "VP8", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx -crf 18 -b:v 2M -pix_fmt yuva420p -auto-alt-ref 0 \"{save_path}\"" };
-            Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 18 -b:v 2M -deadline realtime -quality realtime -speed 3 -pix_fmt yuva420p \"{save_path}\"" };
-            Codec rleCodec = new Codec() { Name = "RLE", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v qtrle -pix_fmt argb \"{save_path}\"" };
-            Codec proresCodec = new Codec() { Name = "ProRes", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v prores_ks -qscale:v 62 -pix_fmt argb \"{save_path}\"" };
+            Codec h264Codec = new Codec() { Name = "H264", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v libx264 -preset:v veryfast -crf 18 -pix_fmt yuv420p -movflags +faststart \"{save_path}\"" };
+            Codec h264NvencCodec = new Codec() { Name = "H264 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_nvenc -preset:v p4 -cq 20 -pix_fmt yuv420p -movflags +faststart \"{save_path}\"" };
+            Codec h264AmfCodec = new Codec() { Name = "H264 AMD", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_amf -preset:v p4 -cq 20 -pix_fmt yuv420p -movflags +faststart \"{save_path}\"" };
+            Codec h265Codec = new Codec() { Name = "H265", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v libx265 -preset:v veryfast -crf 18 -pix_fmt yuv420p -movflags +faststart \"{save_path}\"" };
+            Codec h265NvencCodec = new Codec() { Name = "H265 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v hevc_nvenc -preset:v p4 -cq 21 -pix_fmt yuv420p -movflags +faststart \"{save_path}\"" };
+            Codec h265AmfCodec = new Codec() { Name = "H265 AMD", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v hevc_amf -preset:v p4 -cq 21 -pix_fmt yuv420p -movflags +faststart \"{save_path}\"" };
+            Codec vp8Codec = new Codec() { Name = "VP8", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx -crf 18 -b:v 2M -pix_fmt yuva420p -auto-alt-ref 0 \"{save_path}\"" };
+            Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 18 -b:v 2M -deadline realtime -quality realtime -speed 3 -pix_fmt yuva420p \"{save_path}\"" };
+            Codec rleCodec = new Codec() { Name = "RLE", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v qtrle -pix_fmt argb \"{save_path}\"" };
+            Codec proresCodec = new Codec() { Name = "ProRes", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v prores_ks -qscale:v 62 -pix_fmt argb \"{save_path}\"" };
             VideoContainer mp4Container = new VideoContainer() { Name = "MP4", SupportedCodecs = [h264Codec, h265Codec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec] };
             VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = [h264Codec, h265Codec, rleCodec, proresCodec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec] };
             VideoContainer webmContainer = new VideoContainer() { Name = "WEBM", SupportedCodecs = [vp8Codec, vp9Codec] };
@@ -504,11 +537,31 @@ namespace TwitchDownloaderWPF
             comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskOthers, Tag = ChatBadgeType.Other });
 
             LoadSettings();
+            LoadRenderPresets();
+
+            _previewTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+            _previewTimer.Tick += PreviewTimer_Tick;
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             SaveSettings();
+            _previewTimer?.Stop();
+            _previewCts?.Cancel();
+            _previewFrames = new();
+            Task.Run(async () =>
+            {
+                await Task.Delay(1500);
+                foreach (var f in _previewTempFiles)
+                {
+                    try
+                    {
+                        if (Directory.Exists(f)) Directory.Delete(f, recursive: true);
+                        else File.Delete(f);
+                    }
+                    catch { /* ignored */ }
+                }
+            });
         }
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)
@@ -767,6 +820,20 @@ namespace TwitchDownloaderWPF
 
             FileNames = textJson.Text.Split("&&", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             UpdateActionButtons(false);
+
+            // Update preview position slider when a new file is loaded
+            if (FileNames.Length > 0 && File.Exists(FileNames[0]))
+            {
+                _chatTotalDuration = TryReadChatDuration(FileNames[0]);
+                if (_chatTotalDuration > 0)
+                {
+                    sliderPreview.Maximum = _chatTotalDuration;
+                    double mid = _chatTotalDuration / 2.0;
+                    sliderPreview.Value = mid;
+                    var midTs = TimeSpan.FromSeconds(mid);
+                    textPreviewPos.Text = $"{(int)midTs.TotalHours}:{midTs.Minutes:D2}:{midTs.Seconds:D2}";
+                }
+            }
         }
 
         private void FfmpegParameter_MouseDown(object sender, MouseButtonEventArgs e)
@@ -799,6 +866,588 @@ namespace TwitchDownloaderWPF
                 return textFfmpegOutput;
 
             return null;
+        }
+
+        // ── Preset support ─────────────────────────────────────────────────
+
+        private void LoadRenderPresets()
+        {
+            _applyingPreset = true;
+            try
+            {
+                var presets = ChatRenderPresetService.Load();
+                comboRenderPresets.ItemsSource = presets;
+                comboRenderPresets.SelectedIndex = -1;
+                var lastName = Settings.Default.LastRenderPresetName;
+                if (!string.IsNullOrEmpty(lastName))
+                {
+                    var idx = presets.FindIndex(p => p.Name == lastName);
+                    if (idx >= 0) comboRenderPresets.SelectedIndex = idx;
+                }
+            }
+            finally
+            {
+                _applyingPreset = false;
+            }
+        }
+
+        private void ComboRenderPresets_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_applyingPreset || !IsInitialized)
+                return;
+
+            if (comboRenderPresets.SelectedItem is ChatRenderPreset preset)
+            {
+                ApplyRenderPreset(preset);
+                Settings.Default.LastRenderPresetName = preset.Name;
+                Settings.Default.Save();
+            }
+        }
+
+        private void ApplyRenderPreset(ChatRenderPreset preset)
+        {
+            _applyingPreset = true;
+            try
+            {
+                if (preset.Width > 0) textWidth.Text = preset.Width.ToString();
+                if (preset.Height > 0) textHeight.Text = preset.Height.ToString();
+                if (!string.IsNullOrEmpty(preset.Font)) comboFont.SelectedItem = preset.Font;
+                if (preset.FontSize > 0) numFontSize.Value = preset.FontSize;
+
+                colorBackground.SelectedColor = System.Windows.Media.Color.FromArgb(
+                    (byte)preset.BackgroundColorA, (byte)preset.BackgroundColorR,
+                    (byte)preset.BackgroundColorG, (byte)preset.BackgroundColorB);
+                colorAlternateBackground.SelectedColor = System.Windows.Media.Color.FromArgb(
+                    (byte)preset.AltBackgroundColorA, (byte)preset.AltBackgroundColorR,
+                    (byte)preset.AltBackgroundColorG, (byte)preset.AltBackgroundColorB);
+                colorFont.SelectedColor = System.Windows.Media.Color.FromRgb(
+                    (byte)preset.MessageColorR, (byte)preset.MessageColorG, (byte)preset.MessageColorB);
+                colorHighlightUsers.SelectedColor = System.Windows.Media.Color.FromRgb(
+                    (byte)preset.HighlightUsersColorR, (byte)preset.HighlightUsersColorG, (byte)preset.HighlightUsersColorB);
+
+                checkOutline.IsChecked = preset.Outline;
+                checkTimestamp.IsChecked = preset.Timestamp;
+                checkBTTV.IsChecked = preset.Bttv;
+                checkFFZ.IsChecked = preset.Ffz;
+                checkSTV.IsChecked = preset.Stv;
+                checkSub.IsChecked = preset.SubMessages;
+                checkBadge.IsChecked = preset.Badges;
+                checkRenderAvatars.IsChecked = preset.RenderAvatars;
+                checkOffline.IsChecked = preset.Offline;
+                checkDispersion.IsChecked = preset.Dispersion;
+                checkAlternateMessageBackgrounds.IsChecked = preset.AlternateBackgrounds;
+                checkAdjustUsernameVisibility.IsChecked = preset.AdjustUsernameVisibility;
+
+                textUpdateTime.Text = preset.UpdateRate.ToString("0.0#", CultureInfo.CurrentCulture);
+                textFramerate.Text = preset.Framerate.ToString();
+                checkMask.IsChecked = preset.GenerateMask;
+                CheckRenderSharpening.IsChecked = preset.ChatRenderSharpening;
+
+                textEmoteScale.Text = preset.EmoteScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textBadgeScale.Text = preset.BadgeScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textEmojiScale.Text = preset.EmojiScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textAvatarScale.Text = preset.AvatarScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textVerticalScale.Text = preset.VerticalScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textSidePaddingScale.Text = preset.SidePaddingScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textSectionHeightScale.Text = preset.SectionHeightScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textWordSpaceScale.Text = preset.WordSpaceScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textEmoteSpaceScale.Text = preset.EmoteSpaceScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textAccentStrokeScale.Text = preset.AccentStrokeScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textAccentIndentScale.Text = preset.AccentIndentScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textOutlineScale.Text = preset.OutlineScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textUsernameScale.Text = preset.UsernameScale.ToString("0.0#", CultureInfo.CurrentCulture);
+
+                textIgnoreUsersList.Text = preset.IgnoreUsers ?? "";
+                textHighlightUsersList.Text = preset.HighlightUsers ?? "";
+                textBannedWordsList.Text = preset.BannedWords ?? "";
+
+                RadioEmojiNotoColor.IsChecked = preset.EmojiVendor == (int)EmojiVendor.GoogleNotoColor;
+                RadioEmojiTwemoji.IsChecked = preset.EmojiVendor == (int)EmojiVendor.TwitterTwemoji;
+                RadioEmojiNone.IsChecked = preset.EmojiVendor == (int)EmojiVendor.None;
+
+                comboBadges.SelectedItems.Clear();
+                var badgeMask = (ChatBadgeType)preset.ChatBadgeMask;
+                foreach (CheckComboBoxItem item in comboBadges.Items)
+                {
+                    if (badgeMask.HasFlag((Enum)item.Tag))
+                        comboBadges.SelectedItems.Add(item);
+                }
+
+                if (!string.IsNullOrEmpty(preset.VideoContainer))
+                {
+                    foreach (VideoContainer container in comboFormat.Items)
+                    {
+                        if (container.Name == preset.VideoContainer)
+                        {
+                            comboFormat.SelectedItem = container;
+                            comboCodec.Items.Clear();
+                            foreach (Codec codec in container.SupportedCodecs)
+                            {
+                                comboCodec.Items.Add(codec);
+                                if (codec.Name == preset.VideoCodec)
+                                    comboCodec.SelectedItem = codec;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(preset.FfmpegInput)) textFfmpegInput.Text = preset.FfmpegInput;
+                if (!string.IsNullOrEmpty(preset.FfmpegOutput)) textFfmpegOutput.Text = preset.FfmpegOutput;
+            }
+            finally
+            {
+                _applyingPreset = false;
+            }
+        }
+
+        private ChatRenderPreset GetCurrentRenderPreset()
+        {
+            int badgeMask = 0;
+            foreach (var item in comboBadges.SelectedItems)
+                badgeMask += (int)((CheckComboBoxItem)item).Tag;
+
+            int emojiVendor = RadioEmojiTwemoji.IsChecked == true
+                ? (int)EmojiVendor.TwitterTwemoji
+                : RadioEmojiNone.IsChecked == true
+                    ? (int)EmojiVendor.None
+                    : (int)EmojiVendor.GoogleNotoColor;
+
+            return new ChatRenderPreset
+            {
+                Width = int.TryParse(textWidth.Text, out var w) ? w : 0,
+                Height = int.TryParse(textHeight.Text, out var h) ? h : 0,
+                Font = comboFont.SelectedItem?.ToString(),
+                FontSize = numFontSize.Value,
+                BackgroundColorA = colorBackground.SelectedColor?.A ?? 255,
+                BackgroundColorR = colorBackground.SelectedColor?.R ?? 17,
+                BackgroundColorG = colorBackground.SelectedColor?.G ?? 17,
+                BackgroundColorB = colorBackground.SelectedColor?.B ?? 17,
+                AltBackgroundColorA = colorAlternateBackground.SelectedColor?.A ?? 255,
+                AltBackgroundColorR = colorAlternateBackground.SelectedColor?.R ?? 25,
+                AltBackgroundColorG = colorAlternateBackground.SelectedColor?.G ?? 25,
+                AltBackgroundColorB = colorAlternateBackground.SelectedColor?.B ?? 25,
+                MessageColorR = colorFont.SelectedColor?.R ?? 255,
+                MessageColorG = colorFont.SelectedColor?.G ?? 255,
+                MessageColorB = colorFont.SelectedColor?.B ?? 255,
+                HighlightUsersColorR = colorHighlightUsers.SelectedColor?.R ?? 255,
+                HighlightUsersColorG = colorHighlightUsers.SelectedColor?.G ?? 215,
+                HighlightUsersColorB = colorHighlightUsers.SelectedColor?.B ?? 0,
+                Outline = checkOutline.IsChecked.GetValueOrDefault(),
+                Timestamp = checkTimestamp.IsChecked.GetValueOrDefault(),
+                Bttv = checkBTTV.IsChecked.GetValueOrDefault(),
+                Ffz = checkFFZ.IsChecked.GetValueOrDefault(),
+                Stv = checkSTV.IsChecked.GetValueOrDefault(),
+                SubMessages = checkSub.IsChecked.GetValueOrDefault(),
+                Badges = checkBadge.IsChecked.GetValueOrDefault(),
+                RenderAvatars = checkRenderAvatars.IsChecked.GetValueOrDefault(),
+                Offline = checkOffline.IsChecked.GetValueOrDefault(),
+                Dispersion = checkDispersion.IsChecked.GetValueOrDefault(),
+                AlternateBackgrounds = checkAlternateMessageBackgrounds.IsChecked.GetValueOrDefault(),
+                AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault(),
+                UpdateRate = double.TryParse(textUpdateTime.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ur) ? ur : 0.5,
+                Framerate = int.TryParse(textFramerate.Text, out var fr) ? fr : 30,
+                GenerateMask = checkMask.IsChecked.GetValueOrDefault(),
+                ChatRenderSharpening = CheckRenderSharpening.IsChecked.GetValueOrDefault(),
+                EmoteScale = double.TryParse(textEmoteScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var es) ? es : 1.0,
+                BadgeScale = double.TryParse(textBadgeScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var bs) ? bs : 1.0,
+                EmojiScale = double.TryParse(textEmojiScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ejs) ? ejs : 1.0,
+                AvatarScale = double.TryParse(textAvatarScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var avs) ? avs : 1.0,
+                VerticalScale = double.TryParse(textVerticalScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var vs) ? vs : 1.0,
+                SidePaddingScale = double.TryParse(textSidePaddingScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var sps) ? sps : 1.0,
+                SectionHeightScale = double.TryParse(textSectionHeightScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var shs) ? shs : 1.0,
+                WordSpaceScale = double.TryParse(textWordSpaceScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var wss) ? wss : 1.0,
+                EmoteSpaceScale = double.TryParse(textEmoteSpaceScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ess) ? ess : 1.0,
+                AccentStrokeScale = double.TryParse(textAccentStrokeScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ass) ? ass : 1.0,
+                AccentIndentScale = double.TryParse(textAccentIndentScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ais) ? ais : 1.0,
+                OutlineScale = double.TryParse(textOutlineScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var os) ? os : 1.0,
+                UsernameScale = double.TryParse(textUsernameScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var us) ? us : 1.0,
+                IgnoreUsers = textIgnoreUsersList.Text,
+                HighlightUsers = textHighlightUsersList.Text,
+                BannedWords = textBannedWordsList.Text,
+                EmojiVendor = emojiVendor,
+                ChatBadgeMask = badgeMask,
+                FfmpegInput = textFfmpegInput.Text,
+                FfmpegOutput = textFfmpegOutput.Text,
+                VideoContainer = (comboFormat.SelectedItem as VideoContainer)?.Name,
+                VideoCodec = (comboCodec.SelectedItem as Codec)?.Name,
+            };
+        }
+
+        private void BtnSaveRenderPreset_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new WindowInputText("Save Preset", "Enter a name for this preset:", (comboRenderPresets.SelectedItem as ChatRenderPreset)?.Name ?? "")
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() != true || string.IsNullOrWhiteSpace(dialog.InputValue))
+                return;
+
+            var preset = GetCurrentRenderPreset();
+            preset.Name = dialog.InputValue;
+            ChatRenderPresetService.AddOrUpdate(preset);
+
+            LoadRenderPresets();
+
+            var presets = ChatRenderPresetService.Load();
+            var savedIndex = presets.FindIndex(p => p.Name == preset.Name);
+            if (savedIndex >= 0)
+            {
+                _applyingPreset = true;
+                comboRenderPresets.SelectedIndex = savedIndex;
+                _applyingPreset = false;
+            }
+        }
+
+        private void BtnDeleteRenderPreset_Click(object sender, RoutedEventArgs e)
+        {
+            if (comboRenderPresets.SelectedItem is not ChatRenderPreset preset)
+                return;
+
+            var result = MessageBox.Show(Application.Current.MainWindow!, $"Delete preset '{preset.Name}'?", "Delete Preset", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            ChatRenderPresetService.Delete(preset.Name);
+            LoadRenderPresets();
+        }
+
+        // ── Embedded preview support ───────────────────────────────────────
+
+        private static double TryReadChatDuration(string inputFile)
+        {
+            if (string.IsNullOrEmpty(inputFile) || !File.Exists(inputFile))
+                return 0;
+            try
+            {
+                var buffer = new byte[8192];
+                using var fs = new FileStream(inputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                int bytesRead = fs.Read(buffer, 0, buffer.Length);
+                var text = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
+
+                var endMatch = Regex.Match(text, @"""end""\s*:\s*([\d.]+)");
+                var startMatch = Regex.Match(text, @"""start""\s*:\s*([\d.]+)");
+
+                double end = 0, start = 0;
+                if (endMatch.Success)
+                    double.TryParse(endMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out end);
+                if (startMatch.Success)
+                    double.TryParse(startMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out start);
+
+                return end > 0 ? (end - start) : 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private void RadioPreviewMode_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized) return;
+            bool imageMode = radioPreviewImage.IsChecked == true;
+            panelVideoPreview.Visibility = imageMode ? Visibility.Collapsed : Visibility.Visible;
+            if (!imageMode && _previewFrames.Count > 0)
+            {
+                sliderPreview.Maximum = _previewMediaDuration;
+            }
+            else if (_chatTotalDuration > 0)
+            {
+                sliderPreview.Maximum = _chatTotalDuration;
+            }
+        }
+
+        private void BtnPreviewMidpoint_Click(object sender, RoutedEventArgs e)
+        {
+            if (_chatTotalDuration > 0)
+            {
+                double mid = _chatTotalDuration / 2.0;
+                sliderPreview.Value = mid;
+                var ts = TimeSpan.FromSeconds(mid);
+                textPreviewPos.Text = $"{(int)ts.TotalHours}:{ts.Minutes:D2}:{ts.Seconds:D2}";
+            }
+        }
+
+        private void SliderPreview_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_previewSliderUserDragging || !IsInitialized) return;
+
+            bool imageMode = radioPreviewImage.IsChecked == true;
+            if (imageMode)
+            {
+                var ts = TimeSpan.FromSeconds(e.NewValue);
+                textPreviewPos.Text = $"{(int)ts.TotalHours}:{ts.Minutes:D2}:{ts.Seconds:D2}";
+            }
+            else if (_previewFrames.Count > 0)
+            {
+                int idx = (int)(e.NewValue * 4.0);
+                _currentPreviewFrameIdx = Math.Clamp(idx, 0, _previewFrames.Count - 1);
+                imgPreview.Source = _previewFrames[_currentPreviewFrameIdx];
+            }
+        }
+
+        private async void BtnPreviewRender_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileNames.Length == 0 || string.IsNullOrWhiteSpace(FileNames[0]))
+            {
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!ValidateInputs())
+            {
+                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToParseInputsMessage, Translations.Strings.UnableToParseInputs, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!TimeSpan.TryParse(textPreviewPos.Text, out TimeSpan pos))
+            {
+                MessageBox.Show(Application.Current.MainWindow!, "Invalid position. Use H:MM:SS format.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            bool imageMode = radioPreviewImage.IsChecked == true;
+            int videoDuration = 30;
+            if (!imageMode && (!int.TryParse(textPreviewDuration.Text, out videoDuration) || videoDuration <= 0))
+                videoDuration = 30;
+
+            _previewCts?.Cancel();
+            _previewCts = new CancellationTokenSource();
+
+            _previewFrames = new();
+            _currentPreviewFrameIdx = 0;
+            _previewIsPlaying = false;
+            btnPreviewPlayPause.Content = "Play";
+            _previewTimer?.Stop();
+
+            var tempFile = Path.Combine(Path.GetTempPath(), $"tdw_preview_{Guid.NewGuid():N}.mp4");
+            _previewTempFiles.Add(tempFile);
+
+            var options = GetOptions(tempFile);
+            options.InputFile = FileNames[0];
+            options.StartOverride = (int)pos.TotalSeconds;
+            options.GenerateMask = false;
+            options.EndOverride = imageMode
+                ? (int)pos.TotalSeconds + 2
+                : (int)pos.TotalSeconds + videoDuration;
+            if (imageMode) options.Framerate = 1;
+
+
+            Dispatcher.BeginInvoke(() =>
+            {
+                progressPreview.Visibility = Visibility.Visible;
+                progressPreview.IsIndeterminate = true;
+                btnPreviewRender.IsEnabled = false;
+                imgPreview.Visibility = Visibility.Collapsed;
+                panelVideoPreview.Visibility = Visibility.Collapsed;
+                textPreviewStatus.Text = "Rendering...";
+                textPreviewStatus.Visibility = Visibility.Visible;
+            });
+
+            string capturedTempFile = tempFile;
+            bool cancelled = false;
+            try
+            {
+                var progress = new WpfTaskProgress(
+                    pct => Dispatcher.BeginInvoke(() => { progressPreview.IsIndeterminate = false; progressPreview.Value = pct; }),
+                    _ => { });
+
+                var renderer = new ChatRenderer(options, progress);
+                await renderer.ParseJsonAsync(_previewCts.Token);
+                await renderer.RenderVideoAsync(_previewCts.Token);
+
+                if (_previewCts.Token.IsCancellationRequested)
+                {
+                    cancelled = true;
+                    return;
+                }
+
+                if (imageMode)
+                {
+                    // Extract first frame as PNG using ffmpeg
+                    var tempPng = Path.Combine(Path.GetTempPath(), $"tdw_preview_{Guid.NewGuid():N}.png");
+                    _previewTempFiles.Add(tempPng);
+
+                    var psi = new ProcessStartInfo("ffmpeg", $"-y -i \"{capturedTempFile}\" -vframes 1 \"{tempPng}\"")
+                    {
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                    using var ffmpegProcess = Process.Start(psi);
+                    if (ffmpegProcess != null)
+                        await ffmpegProcess.WaitForExitAsync(_previewCts.Token);
+
+                    if (File.Exists(tempPng) && new FileInfo(tempPng).Length > 0)
+                    {
+                        // Load on UI thread to avoid cross-thread bitmap issues
+                        Dispatcher.BeginInvoke(() =>
+                        {
+                            try
+                            {
+                                var bitmap = new BitmapImage();
+                                bitmap.BeginInit();
+                                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                                bitmap.UriSource = new Uri(tempPng);
+                                bitmap.EndInit();
+                                bitmap.Freeze();
+                                imgPreview.Source = bitmap;
+                                imgPreview.Visibility = Visibility.Visible;
+                                textPreviewStatus.Visibility = Visibility.Collapsed;
+                            }
+                            catch (Exception bex)
+                            {
+                                textPreviewStatus.Text = $"Image load error: {bex.Message}";
+                                textPreviewStatus.Visibility = Visibility.Visible;
+                            }
+                        });
+                    }
+                    else
+                    {
+                        Dispatcher.BeginInvoke(() =>
+                        {
+                            textPreviewStatus.Text = "Frame extraction failed. Ensure ffmpeg is on PATH.";
+                            textPreviewStatus.Visibility = Visibility.Visible;
+                        });
+                    }
+                }
+                else
+                {
+                    // Video mode: extract frames via ffmpeg to avoid WMF codec dependency
+                    _previewMediaDuration = videoDuration;
+                    var tempFrameDir = Path.Combine(Path.GetTempPath(), $"tdw_prevframes_{Guid.NewGuid():N}");
+                    Directory.CreateDirectory(tempFrameDir);
+                    _previewTempFiles.Add(tempFrameDir);
+
+                    Dispatcher.BeginInvoke(() => { progressPreview.IsIndeterminate = true; progressPreview.Visibility = Visibility.Visible; });
+
+                    var framePsi = new ProcessStartInfo(options.FfmpegPath,
+                        $"-y -i \"{capturedTempFile}\" -vf fps=4 \"{tempFrameDir}\\frame%05d.png\"")
+                    {
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    };
+                    using var frameProc = Process.Start(framePsi);
+                    if (frameProc != null) await frameProc.WaitForExitAsync(_previewCts.Token);
+
+                    var frames = new List<BitmapImage>();
+                    foreach (var f in Directory.GetFiles(tempFrameDir, "frame*.png").OrderBy(x => x))
+                    {
+                        try
+                        {
+                            var bmp = new BitmapImage();
+                            bmp.BeginInit();
+                            bmp.CacheOption = BitmapCacheOption.OnLoad;
+                            bmp.UriSource = new Uri(f);
+                            bmp.EndInit();
+                            bmp.Freeze();
+                            frames.Add(bmp);
+                        }
+                        catch { /* skip unreadable frame */ }
+                    }
+
+                    _previewFrames = frames;
+                    _currentPreviewFrameIdx = 0;
+
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        sliderPreview.Maximum = videoDuration;
+                        if (_previewFrames.Count > 0)
+                        {
+                            imgPreview.Source = _previewFrames[0];
+                            imgPreview.Visibility = Visibility.Visible;
+                            panelVideoPreview.Visibility = Visibility.Visible;
+                            textPreviewStatus.Visibility = Visibility.Collapsed;
+                            _previewIsPlaying = true;
+                            btnPreviewPlayPause.Content = "Pause";
+                            textPreviewTime.Text = $"0:00 / {FormatPreviewTime(TimeSpan.FromSeconds(_previewMediaDuration))}";
+                            _previewTimer?.Start();
+                        }
+                        else
+                        {
+                            textPreviewStatus.Text = "Frame extraction failed. Ensure ffmpeg is on PATH.";
+                            textPreviewStatus.Visibility = Visibility.Visible;
+                        }
+                    });
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                cancelled = true;
+                Dispatcher.BeginInvoke(() =>
+                {
+                    textPreviewStatus.Text = "Render canceled.";
+                    textPreviewStatus.Visibility = Visibility.Visible;
+                });
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.BeginInvoke(() =>
+                {
+                    textPreviewStatus.Text = $"Render error: {ex.Message}";
+                    textPreviewStatus.Visibility = Visibility.Visible;
+                });
+            }
+            finally
+            {
+                Dispatcher.BeginInvoke(() =>
+                {
+                    progressPreview.Visibility = Visibility.Collapsed;
+                    btnPreviewRender.IsEnabled = true;
+                });
+            }
+        }
+
+        private void BtnPreviewFullscreen_Click(object sender, RoutedEventArgs e)
+        {
+            if (imgPreview.Source == null) return;
+
+            var win = new System.Windows.Window
+            {
+                Title = "Preview",
+                WindowState = WindowState.Maximized,
+                Background = System.Windows.Media.Brushes.Black
+            };
+            win.Content = new System.Windows.Controls.Image
+            {
+                Source = imgPreview.Source,
+                Stretch = System.Windows.Media.Stretch.Uniform
+            };
+            win.KeyDown += (s, ke) => { if (ke.Key == System.Windows.Input.Key.Escape || ke.Key == System.Windows.Input.Key.F11) win.Close(); };
+            win.Show();
+        }
+
+        private static string FormatPreviewTime(TimeSpan t) =>
+            t.TotalHours >= 1 ? $"{(int)t.TotalHours}:{t.Minutes:D2}:{t.Seconds:D2}" : $"{t.Minutes}:{t.Seconds:D2}";
+
+        private void BtnPreviewPlayPause_Click(object sender, RoutedEventArgs e)
+        {
+            if (_previewFrames.Count == 0) return;
+
+            if (_previewIsPlaying)
+            {
+                _previewIsPlaying = false;
+                btnPreviewPlayPause.Content = "Play";
+                _previewTimer?.Stop();
+            }
+            else
+            {
+                _previewIsPlaying = true;
+                btnPreviewPlayPause.Content = "Pause";
+                _previewTimer?.Start();
+            }
+        }
+
+        private void PreviewTimer_Tick(object sender, EventArgs e)
+        {
+            if (_previewFrames.Count == 0) return;
+            _currentPreviewFrameIdx = (_currentPreviewFrameIdx + 1) % _previewFrames.Count;
+            imgPreview.Source = _previewFrames[_currentPreviewFrameIdx];
+            double t = _currentPreviewFrameIdx / 4.0;
+            _previewSliderUserDragging = false;
+            sliderPreview.Value = Math.Min(t, _previewMediaDuration);
+            _previewSliderUserDragging = true;
+            textPreviewTime.Text = $"{FormatPreviewTime(TimeSpan.FromSeconds(t))} / {FormatPreviewTime(TimeSpan.FromSeconds(_previewMediaDuration))}";
         }
     }
 

@@ -67,6 +67,8 @@ namespace TwitchDownloaderWPF
             CheckThrottleEnabled.IsChecked = Settings.Default.DownloadThrottleEnabled;
             RadioTimeFormatUtc.IsChecked = Settings.Default.UTCVideoTime;
             CheckReduceMotion.IsChecked = Settings.Default.ReduceMotion;
+            CheckNotifyOnTaskComplete.IsChecked = Settings.Default.NotifyOnTaskComplete;
+            TextOauth.Text = Settings.Default.OAuth;
 
             if (Directory.Exists("Themes"))
             {
@@ -391,6 +393,22 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.ReduceMotion = CheckReduceMotion.IsChecked.GetValueOrDefault();
+        }
+
+        private void CheckNotifyOnTaskComplete_OnCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.NotifyOnTaskComplete = CheckNotifyOnTaskComplete.IsChecked.GetValueOrDefault();
+        }
+
+        private void TextOauth_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.OAuth = TextOauth.Text;
         }
     }
 }

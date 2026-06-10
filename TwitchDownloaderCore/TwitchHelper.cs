@@ -11,7 +11,9 @@ using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,6 +65,34 @@ namespace TwitchDownloaderCore
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlVideoTokenResponse>();
+        }
+
+        public static async Task<GqlVideoTokenResponse> GetLiveStreamToken(string channelLogin, string authToken)
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"operationName\":\"PlaybackAccessToken_Template\",\"query\":\"query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: \\\"web\\\", playerBackend: \\\"mediaplayer\\\", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: \\\"web\\\", playerBackend: \\\"mediaplayer\\\", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}\",\"variables\":{\"isLive\":true,\"login\":\"" + channelLogin + "\",\"isVod\":false,\"vodID\":\"\",\"playerType\":\"site\"}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            if (!string.IsNullOrWhiteSpace(authToken))
+                request.Headers.Add("Authorization", $"OAuth {authToken}");
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<GqlVideoTokenResponse>();
+        }
+
+        public static async Task<string> GetLiveStreamPlaylist(string channelLogin, string token, string sig)
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri($"https://usher.ttvnw.net/api/channel/hls/{channelLogin}.m3u8?sig={sig}&token={Uri.EscapeDataString(token)}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h265,h264&fast_bread=true"),
+                Method = HttpMethod.Get
+            };
+            using var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
         }
 
         public static async Task<string> GetVideoPlaylist(long videoId, string token, string sig)
@@ -125,7 +155,243 @@ namespace TwitchDownloaderCore
             return false;
         }
 
-        public static async Task<GqlClipResponse> GetClipInfo(object clipId)
+        /// <summary>
+        /// Twitch VOD segments are written to public, unauthenticated CDN buckets whose path is
+        /// deterministically derived from the broadcast's login, stream id, and start time — even
+        /// when the channel has "Store past broadcasts" disabled. This fetches the live/most-recent
+        /// broadcast metadata needed to reconstruct that path.
+        /// </summary>
+        public static async Task<GqlStreamMetadataResponse> GetStreamMetadata(string channelLogin)
+        {
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"query\":\"query{user(login:\\\"" + channelLogin + "\\\"){id,login,displayName,stream{id,createdAt}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<GqlStreamMetadataResponse>();
+        }
+
+        // Public Twitch VOD CDN hosts. Segments for a given broadcast live on exactly one of these,
+        // so the reconstructed path must be probed against each until one responds.
+        private static readonly string[] VodCdnDomains =
+        {
+            "https://d2e2de1etea730.cloudfront.net",
+            "https://dqrpb9wgowsf5.cloudfront.net",
+            "https://ds0h3roq6wcgc.cloudfront.net",
+            "https://d2nvs31859zcd8.cloudfront.net",
+            "https://d2aba1wr3818hz.cloudfront.net",
+            "https://d3c27h4odz752x.cloudfront.net",
+            "https://dgeft87wbj63p.cloudfront.net",
+            "https://d1m7jfoe9zdc1j.cloudfront.net",
+            "https://d3vd9lfkzbru3h.cloudfront.net",
+            "https://d2vjef5jvl6bfs.cloudfront.net",
+            "https://d1ymi26ma8va5x.cloudfront.net",
+            "https://d1mhjrowxxagfy.cloudfront.net",
+            "https://ddacn6pr5v0tl.cloudfront.net",
+            "https://d3aqoihi2n8ty8.cloudfront.net",
+            "https://vod-secure.twitch.tv",
+            "https://vod-metro.twitch.tv",
+            "https://vod-pop-secure.twitch.tv",
+        };
+
+        // Quality renditions to look for, best first. The source rendition ("chunked") is preferred,
+        // but it is not always retained, so transcodes are probed too. "audio_only" is last.
+        private static readonly string[] VodQualityRenditions =
+        {
+            "chunked", "1080p60", "1080p30", "720p60", "720p30", "480p30", "360p30", "160p30", "audio_only",
+        };
+
+        /// <summary>
+        /// Friendly display name for a DVR rendition folder (e.g. <c>chunked</c> → <c>Source</c>).
+        /// </summary>
+        public static string DescribeVodRendition(string rendition) => rendition switch
+        {
+            "chunked" => "Source",
+            "audio_only" => "Audio Only",
+            _ => rendition,
+        };
+
+        /// <summary>
+        /// Resolves the base URL (<c>{host}/{pathSegment}</c>) of the CDN host serving a hidden broadcast,
+        /// then probes which quality renditions are actually available under it. Returns a null base URL
+        /// and empty list if the broadcast cannot be located (e.g. its segments have been purged).
+        /// </summary>
+        public static async Task<(string baseUrl, IReadOnlyList<string> qualities)> RecoverHiddenVodQualities(
+            string channelLogin, string streamId, DateTimeOffset startTime, ITaskLogger logger = null, CancellationToken cancellationToken = default)
+        {
+            var baseUrl = await ResolveHiddenVodBaseUrlAsync(channelLogin.ToLowerInvariant(), streamId, startTime, cancellationToken);
+            if (baseUrl is null)
+            {
+                logger?.LogWarning($"Could not locate the broadcast's segments on any known Twitch CDN for '{channelLogin}' (stream {streamId}).");
+                return (null, Array.Empty<string>());
+            }
+
+            var qualities = await ProbeAvailableQualitiesAsync(baseUrl, cancellationToken);
+            return (baseUrl, qualities);
+        }
+
+        /// <summary>
+        /// Reconstructs the public DVR playlist (<c>index-dvr.m3u8</c>) URL for a broadcast and returns the
+        /// requested quality rendition if it exists, otherwise the best available one. Returns
+        /// <see langword="null"/> if the broadcast cannot be located.
+        /// </summary>
+        /// <param name="channelLogin">The broadcaster's login (lowercase channel name).</param>
+        /// <param name="streamId">The broadcast/stream id from <see cref="GetStreamMetadata"/>.</param>
+        /// <param name="startTime">The broadcast start time (stream <c>createdAt</c>).</param>
+        /// <param name="preferredQuality">Rendition folder to prefer (e.g. <c>chunked</c>, <c>720p60</c>); null = best available.</param>
+        public static async Task<string> RecoverHiddenVodPlaylistUrl(string channelLogin, string streamId, DateTimeOffset startTime, string preferredQuality = null, ITaskLogger logger = null, CancellationToken cancellationToken = default)
+        {
+            var baseUrl = await ResolveHiddenVodBaseUrlAsync(channelLogin.ToLowerInvariant(), streamId, startTime, cancellationToken);
+            if (baseUrl is null)
+            {
+                logger?.LogWarning($"Could not recover a hidden VOD for '{channelLogin}' (stream {streamId}). The broadcast may be too old — DVR segments are typically purged within a day or two.");
+                return null;
+            }
+
+            // Try the requested rendition first, then fall through the priority list.
+            var ordered = new List<string>();
+            if (!string.IsNullOrWhiteSpace(preferredQuality))
+                ordered.Add(preferredQuality);
+            foreach (var q in VodQualityRenditions)
+                if (!ordered.Contains(q))
+                    ordered.Add(q);
+
+            foreach (var quality in ordered)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var url = $"{baseUrl}/{quality}/index-dvr.m3u8";
+                if (await UrlExistsAsync(url, cancellationToken))
+                {
+                    if (!string.IsNullOrWhiteSpace(preferredQuality) && quality != preferredQuality)
+                        logger?.LogWarning($"Requested quality '{preferredQuality}' was unavailable; recovered '{quality}' instead: {url}");
+                    else
+                        logger?.LogInfo($"Recovered hidden VOD playlist ({quality}) at {url}");
+                    return url;
+                }
+            }
+
+            logger?.LogWarning($"Located the broadcast on the CDN but none of the known quality renditions were available for '{channelLogin}' (stream {streamId}).");
+            return null;
+        }
+
+        /// <summary>
+        /// Finds the CDN host serving a broadcast and returns its base URL (<c>{host}/{pathSegment}</c>),
+        /// probing a small timestamp window for rounding. Source is tried first across all hosts; if it
+        /// is not retained, transcode renditions are tried at the exact timestamp. Returns <see langword="null"/>
+        /// if no host serves the broadcast.
+        /// </summary>
+        private static async Task<string> ResolveHiddenVodBaseUrlAsync(string login, string streamId, DateTimeOffset startTime, CancellationToken cancellationToken)
+        {
+            var startUnix = startTime.ToUnixTimeSeconds();
+
+            // The path hash uses integer unix seconds, but the reported start time can be off by a
+            // second due to sub-second rounding, so probe a tiny window around it (exact first).
+            var candidateTimestamps = new List<long> { startUnix };
+            for (long offset = 1; offset <= 2; offset++)
+            {
+                candidateTimestamps.Add(startUnix - offset);
+                candidateTimestamps.Add(startUnix + offset);
+            }
+
+            foreach (var candidateUnix in candidateTimestamps)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var baseUrl = await FindServingCdnHostAsync(BuildVodPathSegment(login, streamId, candidateUnix), "chunked", cancellationToken);
+                if (baseUrl is not null)
+                    return baseUrl;
+            }
+
+            // Source wasn't found anywhere; the broadcast may only have transcodes retained.
+            var exactSegment = BuildVodPathSegment(login, streamId, startUnix);
+            foreach (var quality in VodQualityRenditions)
+            {
+                if (quality == "chunked") continue;
+                cancellationToken.ThrowIfCancellationRequested();
+                var baseUrl = await FindServingCdnHostAsync(exactSegment, quality, cancellationToken);
+                if (baseUrl is not null)
+                    return baseUrl;
+            }
+
+            return null;
+        }
+
+        /// <summary>Probes all known renditions under <paramref name="baseUrl"/> concurrently and returns those that exist, best first.</summary>
+        private static async Task<IReadOnlyList<string>> ProbeAvailableQualitiesAsync(string baseUrl, CancellationToken cancellationToken)
+        {
+            var checks = VodQualityRenditions
+                .Select(async q => await UrlExistsAsync($"{baseUrl}/{q}/index-dvr.m3u8", cancellationToken) ? q : null)
+                .ToArray();
+            var results = await Task.WhenAll(checks);
+            return results.Where(q => q is not null).Select(q => q!).ToList();
+        }
+
+        private static async Task<bool> UrlExistsAsync(string url, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Head, url);
+                using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string BuildVodPathSegment(string login, string streamId, long startUnix)
+        {
+            var baseString = $"{login}_{streamId}_{startUnix}";
+            var hash = Convert.ToHexStringLower(SHA1.HashData(Encoding.UTF8.GetBytes(baseString)))[..20];
+            return $"{hash}_{baseString}";
+        }
+
+        /// <summary>
+        /// Probes every known CDN host concurrently for <c>{host}/{pathSegment}/{quality}/index-dvr.m3u8</c>
+        /// and returns the base URL (<c>{host}/{pathSegment}</c>) of the first host that responds, cancelling
+        /// the remaining probes. Returns <see langword="null"/> if no host serves it.
+        /// </summary>
+        private static async Task<string> FindServingCdnHostAsync(string pathSegment, string quality, CancellationToken cancellationToken)
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            var probes = VodCdnDomains.Select(async domain =>
+            {
+                var baseUrl = $"{domain}/{pathSegment}";
+                try
+                {
+                    using var request = new HttpRequestMessage(HttpMethod.Head, $"{baseUrl}/{quality}/index-dvr.m3u8");
+                    using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                    return response.IsSuccessStatusCode ? baseUrl : null;
+                }
+                catch
+                {
+                    // Host unreachable, rejected the request, or the probe was cancelled by a winner.
+                    return null;
+                }
+            }).ToList();
+
+            while (probes.Count > 0)
+            {
+                var finished = await Task.WhenAny(probes);
+                probes.Remove(finished);
+
+                var baseUrl = await finished;
+                if (baseUrl is not null)
+                {
+                    await cts.CancelAsync(); // stop the remaining in-flight probes
+                    return baseUrl;
+                }
+            }
+
+            return null;
+        }
+
+        public static async Task<GqlClipResponse> GetClipInfo(object clipId, string oauth = null)
         {
             var request = new HttpRequestMessage()
             {
@@ -134,12 +400,14 @@ namespace TwitchDownloaderCore
                 Content = new StringContent("{\"query\":\"query{clip(slug:\\\"" + clipId + "\\\"){title,thumbnailURL,createdAt,curator{id,displayName,login},durationSeconds,broadcaster{id,displayName,login},videoOffsetSeconds,video{id},viewCount,game{id,displayName,boxArtURL}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            if (!string.IsNullOrWhiteSpace(oauth))
+                request.Headers.Add("Authorization", $"OAuth {oauth}");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<GqlClipResponse>();
         }
 
-        public static async Task<GqlClipTokenResponse> GetClipLinks(string clipId)
+        public static async Task<GqlClipTokenResponse> GetClipLinks(string clipId, string oauth = null)
         {
             var request = new HttpRequestMessage()
             {
@@ -148,6 +416,8 @@ namespace TwitchDownloaderCore
                 Content = new StringContent("{\"operationName\":\"VideoAccessToken_Clip\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11\"}}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            if (!string.IsNullOrWhiteSpace(oauth))
+                request.Headers.Add("Authorization", $"OAuth {oauth}");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
@@ -160,7 +430,7 @@ namespace TwitchDownloaderCore
             return gqlClipTokenResponses;
         }
 
-        public static async Task<GqlShareClipRenderStatusResponse> GetShareClipRenderStatus(string clipId)
+        public static async Task<GqlShareClipRenderStatusResponse> GetShareClipRenderStatus(string clipId, string oauth = null)
         {
             var request = new HttpRequestMessage()
             {
@@ -169,6 +439,8 @@ namespace TwitchDownloaderCore
                 Content = new StringContent("{\"operationName\":\"ShareClipRenderStatus\",\"variables\":{\"slug\":\"" + clipId + "\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"761bc03a4b100ec4f73fa78a5011847bb8ad7693d223d055fd013f79390acd41\"}}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            if (!string.IsNullOrWhiteSpace(oauth))
+                request.Headers.Add("Authorization", $"OAuth {oauth}");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
@@ -471,11 +743,21 @@ namespace TwitchDownloaderCore
 
             EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, logger, cancellationToken);
 
+            // For each provider: persist fresh metadata to disk so future sessions can fall back to it
+            // when the API is unavailable. If the API call already failed (null), try loading the cached list.
+            var metadataCacheAge = TimeSpan.FromHours(24);
+            if (bttv)
+                emoteDataResponse.BTTV = await RefreshOrLoadProviderMetadata(bttvFolder, emoteDataResponse.BTTV, "BetterTTV", metadataCacheAge, logger, cancellationToken);
+            if (ffz)
+                emoteDataResponse.FFZ = await RefreshOrLoadProviderMetadata(ffzFolder, emoteDataResponse.FFZ, "FFZ", metadataCacheAge, logger, cancellationToken);
+            if (stv)
+                emoteDataResponse.STV = await RefreshOrLoadProviderMetadata(stvFolder, emoteDataResponse.STV, "7TV", metadataCacheAge, logger, cancellationToken);
+
             if (bttv)
             {
                 try
                 {
-                    await FetchEmoteImages(comments, emoteDataResponse.BTTV, emotes, bttvFolder, logger, cancellationToken);
+                    await FetchEmoteImages(comments, emoteDataResponse.BTTV, emotes, bttvFolder, "BetterTTV", logger, cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -487,7 +769,7 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    await FetchEmoteImages(comments, emoteDataResponse.FFZ, emotes, ffzFolder, logger, cancellationToken);
+                    await FetchEmoteImages(comments, emoteDataResponse.FFZ, emotes, ffzFolder, "FFZ", logger, cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -499,7 +781,20 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    await FetchEmoteImages(comments, emoteDataResponse.STV, emotes, stvFolder, logger, cancellationToken);
+                    await FetchEmoteImages(comments, emoteDataResponse.STV, emotes, stvFolder, "7TV", logger, cancellationToken);
+
+                    // When metadata failed (STV is null), FetchEmoteImages returned early without touching
+                    // the cache. Report whether previously cached images exist so the user knows what to expect.
+                    if (emoteDataResponse.STV is null)
+                    {
+                        // Both the API and the metadata cache failed. Report image cache status for context.
+                        stvFolder.Refresh();
+                        var cachedCount = stvFolder.Exists ? stvFolder.GetFiles("*_2.*").Length : 0;
+                        if (cachedCount > 0)
+                            logger.LogWarning($"7TV API and metadata cache were both unavailable. {cachedCount} cached 7TV emote image(s) exist but cannot be matched — new 7TV emotes will not appear, embedded ones may still be present.");
+                        else
+                            logger.LogInfo("7TV API and metadata cache were both unavailable and no cached 7TV emotes were found — only embedded 7TV emotes will appear.");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -509,9 +804,12 @@ namespace TwitchDownloaderCore
 
             return emotes.Values.ToList();
 
-            static async Task FetchEmoteImages([AllowNull] IEnumerable<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, Dictionary<string, TwitchEmote> emotes,
-                DirectoryInfo cacheFolder, ITaskLogger logger, CancellationToken cancellationToken)
+            static async Task FetchEmoteImages([AllowNull] IEnumerable<Comment> comments, [AllowNull] IEnumerable<EmoteResponseItem> emoteResponse, Dictionary<string, TwitchEmote> emotes,
+                DirectoryInfo cacheFolder, string providerName, ITaskLogger logger, CancellationToken cancellationToken)
             {
+                if (emoteResponse is null)
+                    return;
+
                 if (!cacheFolder.Exists)
                     cacheFolder = CreateDirectory(cacheFolder.FullName);
 
@@ -529,9 +827,12 @@ namespace TwitchDownloaderCore
                         select emote;
                 }
 
+                int fromCache = 0, downloaded = 0;
                 foreach (var emote in emoteResponseQuery)
                 {
                     var emoteUrl = emote.ImageUrl.Replace("[scale]", "2");
+                    var expectedCachePath = Path.Combine(cacheFolder.FullName, $"{emote.Id}_2.{emote.ImageType}");
+                    bool wasInCache = File.Exists(expectedCachePath);
 
                     try
                     {
@@ -548,12 +849,71 @@ namespace TwitchDownloaderCore
                             // Should never occur, but just in case
                             newEmote.Dispose();
                         }
+                        else if (wasInCache)
+                        {
+                            fromCache++;
+                        }
+                        else
+                        {
+                            downloaded++;
+                        }
                     }
                     catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                     {
                         logger.LogWarning($"Got {(int)ex.StatusCode}: {ex.StatusCode} when fetching {emote.Code} ({emoteUrl}).");
                     }
                 }
+
+                var total = fromCache + downloaded;
+                if (total > 0)
+                    logger.LogInfo($"Loaded {total} {providerName} emote(s) — {fromCache} from cache, {downloaded} newly downloaded.");
+                else
+                    logger.LogVerbose($"No {providerName} emotes found in this chat.");
+            }
+
+            static async Task<List<EmoteResponseItem>> RefreshOrLoadProviderMetadata(
+                DirectoryInfo folder, List<EmoteResponseItem> freshData, string providerName,
+                TimeSpan maxAge, ITaskLogger logger, CancellationToken ct)
+            {
+                var cacheFile = new FileInfo(Path.Combine(folder.FullName, "metadata.json"));
+
+                if (freshData is not null)
+                {
+                    // Persist fresh metadata so future sessions can fall back to it.
+                    try
+                    {
+                        if (!folder.Exists)
+                            CreateDirectory(folder.FullName);
+                        await File.WriteAllBytesAsync(cacheFile.FullName, JsonSerializer.SerializeToUtf8Bytes(freshData), ct);
+                    }
+                    catch { /* best-effort — never block rendering on a metadata write failure */ }
+                    return freshData;
+                }
+
+                // API failed — try falling back to a previously cached emote list.
+                try
+                {
+                    if (!cacheFile.Exists)
+                        return null;
+
+                    if (DateTime.UtcNow - cacheFile.LastWriteTimeUtc > maxAge)
+                        return null;
+
+                    var bytes = await File.ReadAllBytesAsync(cacheFile.FullName, ct);
+                    var cached = JsonSerializer.Deserialize<List<EmoteResponseItem>>(bytes);
+                    if (cached is { Count: > 0 })
+                    {
+                        var ageHours = (DateTime.UtcNow - cacheFile.LastWriteTimeUtc).TotalHours;
+                        logger.LogInfo($"{providerName} API unavailable. Using cached emote list from {ageHours:F1}h ago ({cached.Count} emotes).");
+                        return cached;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogVerbose($"Failed to load cached {providerName} emote metadata: {ex.Message}");
+                }
+
+                return null;
             }
 
             static void LogProviderException(Exception ex, string providerName, ITaskLogger logger)

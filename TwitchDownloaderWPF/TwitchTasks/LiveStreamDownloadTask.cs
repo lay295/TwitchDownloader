@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore;
@@ -7,9 +7,9 @@ using TwitchDownloaderWPF.Utils;
 
 namespace TwitchDownloaderWPF.TwitchTasks
 {
-    internal class VodDownloadTask : TwitchTask
+    internal class LiveStreamDownloadTask : TwitchTask
     {
-        public VideoDownloadOptions DownloadOptions { get; init; }
+        public LiveStreamDownloadOptions DownloadOptions { get; init; }
         public override string TaskType { get; } = Translations.Strings.VodDownload;
         public override string OutputFile => DownloadOptions.Filename;
 
@@ -31,19 +31,6 @@ namespace TwitchDownloaderWPF.TwitchTasks
         {
             var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
 
-            // Hidden-VOD recovery is keyed on a channel + captured stream metadata, not a published
-            // video id, so the offline-delay poll (which queries a video id) does not apply.
-            if (DownloadOptions.DelayDownload && !DownloadOptions.RecoverHiddenVod)
-            {
-                var success = await DelayUntilVideoOffline(DownloadOptions.Id, progress);
-                if (!success)
-                {
-                    ChangeStatus(TwitchTaskStatus.Failed);
-                    CanReinitialize = true;
-                    return;
-                }
-            }
-
             if (TokenSource.IsCancellationRequested)
             {
                 TokenSource.Dispose();
@@ -52,7 +39,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            VideoDownloader downloader = new VideoDownloader(DownloadOptions, progress);
+            var downloader = new LiveStreamDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
 
             try
@@ -71,6 +58,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             }
             catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && TokenSource.IsCancellationRequested)
             {
+                // The recording was stopped by the user - whatever was captured is kept.
                 ChangeStatus(TwitchTaskStatus.Canceled);
                 CanReinitialize = true;
             }

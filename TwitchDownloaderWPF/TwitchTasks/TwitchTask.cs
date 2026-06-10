@@ -104,6 +104,14 @@ namespace TwitchDownloaderWPF.TwitchTasks
                     _ => null
                 };
             }
+
+            if (Settings.Default.NotifyOnTaskComplete)
+            {
+                if (newStatus == TwitchTaskStatus.Finished)
+                    NotificationService.Show(Info.Title ?? TaskType, "Download complete", false);
+                else if (newStatus == TwitchTaskStatus.Failed)
+                    NotificationService.Show(Info.Title ?? TaskType, "Task failed", true);
+            }
         }
 
         protected async Task<bool> DelayUntilVideoOffline(long videoId, ITaskLogger logger)
