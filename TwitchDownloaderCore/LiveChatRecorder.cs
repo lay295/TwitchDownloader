@@ -23,6 +23,7 @@ namespace TwitchDownloaderCore
 
         private readonly string _cacheDir;
         private readonly DirectoryInfo _emoteCache;
+        private readonly DirectoryInfo _badgeCacheDir;
 
         public LiveChatRecorder(LiveChatRecorderOptions recorderOptions, ITaskProgress progress)
         {
@@ -31,6 +32,7 @@ namespace TwitchDownloaderCore
 
             _cacheDir = CacheDirectoryService.GetCacheDirectory("");
             _emoteCache = new DirectoryInfo(Path.Combine(_cacheDir, "emotes"));
+            _badgeCacheDir = new DirectoryInfo(Path.Combine(_cacheDir, "badges"));
 
             _cancellationSource = new CancellationTokenSource(_recorderOptions.NextStream ? new TimeSpan(0, 1, 0) : _recorderOptions.Duration);
         }
@@ -47,6 +49,8 @@ namespace TwitchDownloaderCore
                 throw new ArgumentException("Invalid channel name.");
             }
 
+            var testEventHubTask = TestEventHub();
+
             var outputFileInfo = TwitchHelper.ClaimFile(_recorderOptions.OutputFile, _recorderOptions.FileCollisionCallback, _progress);
             _recorderOptions.OutputFile = outputFileInfo.FullName;
 
@@ -58,6 +62,8 @@ namespace TwitchDownloaderCore
 
                 var outputStream = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
                 await ChatJson.SerializeAsync(outputStream, chatRoot, cancellationToken);
+
+                await testEventHubTask;
             }
             catch
             {
@@ -75,6 +81,7 @@ namespace TwitchDownloaderCore
             ConcurrentQueue<Comment> Comments = new();
 
             var firstPartyEmoteLoader = new FirstParteEmoteLoader(_progress, _emoteCache);
+            var badgeLoader = new BadgeLoader(0, _progress, _badgeCacheDir);
 
             var chatRoot = new ChatRoot
             {
@@ -99,6 +106,7 @@ namespace TwitchDownloaderCore
                     Comments.Enqueue(comment);
 
                     firstPartyEmoteLoader.ProcessComment(comment);
+                    badgeLoader.ProcessComment(comment);
 
                 }
                 catch (Exception ex)
@@ -109,44 +117,32 @@ namespace TwitchDownloaderCore
 
             chatRoot.comments = Comments.ToList();
             chatRoot.embeddedData.firstParty = await firstPartyEmoteLoader.GetList();
+            chatRoot.embeddedData.twitchBadges = await badgeLoader.GetList();
 
             return chatRoot;
         }
 
-        private class FirstParteEmoteLoader
+        private async Task TestEventHub()
         {
-            private readonly ITaskLogger _logger;
-            private readonly DirectoryInfo _cache;
-            private ConcurrentDictionary<string, Task<TwitchEmote>> _firstPartyEmotes = new();
+            using var eventHub = new TwitchEventHub(_progress);
 
-            public FirstParteEmoteLoader(ITaskLogger logger, DirectoryInfo cache)
-            {
-                _logger = logger;
-                _cache = cache;
-            }
+            await eventHub.Subscribe(TwitchEventHub.TwitchChatEvent.VideoPlaybackById, "112295341");
 
-            public void ProcessComment(Comment comment)
+            try
             {
-                foreach (var emoticon in comment.message.emoticons)
+                await foreach (var message in eventHub.Notifications.ReadAllAsync(new CancellationTokenSource(_recorderOptions.Duration).Token))
                 {
-                    _ = _firstPartyEmotes.GetOrAdd(emoticon._id, emoticonId => TwitchHelper.GetFirstPartyEmote(emoticonId, _cache, false, _logger, CancellationToken.None));
+                    if (message.Data is not NotificationData)
+                    {
+                        _progress.LogInfo($"unexpected message type: {message.Data.GetType()}");
+                        continue;
+                    }
+                    _progress.LogInfo($"Message: {((NotificationData)message.Data).pubsub}");
                 }
             }
-
-            public async Task<List<EmbedEmoteData>> GetList()
-            {
-                var downloadedEmotes = await Task.WhenAll(_firstPartyEmotes.Values);
-                return downloadedEmotes
-                    .Select(emote => new EmbedEmoteData
-                    {
-                        id = emote.Id,
-                        imageScale = emote.ImageScale,
-                        data = emote.ImageData,
-                        width = emote.Width / emote.ImageScale,
-                        height = emote.Height / emote.ImageScale,
-                    })
-                    .ToList();
-            }
+            catch { }
+            _progress.LogInfo("end of readallasync");
+            return;
         }
     }
 }

@@ -772,11 +772,22 @@ namespace TwitchDownloaderCore
 
             List<EmbedChatBadge> badges = new List<EmbedChatBadge>();
 
-            var nameList = comments.Where(comment => comment.message.user_badges != null)
-                .SelectMany(comment => comment.message.user_badges)
-                .Where(badge => !string.IsNullOrWhiteSpace(badge._id))
-                .Where(badge => globalBadges.ContainsKey(badge._id) || subBadges.ContainsKey(badge._id))
-                .Select(badge => badge._id).Distinct();
+            IEnumerable<string> nameList;
+
+            if (comments is not null)
+            {
+                // all badges that are used in the comments if provided
+                nameList = comments.Where(comment => comment.message.user_badges != null)
+                    .SelectMany(comment => comment.message.user_badges)
+                    .Where(badge => !string.IsNullOrWhiteSpace(badge._id))
+                    .Where(badge => globalBadges.ContainsKey(badge._id) || subBadges.ContainsKey(badge._id))
+                    .Select(badge => badge._id).Distinct();
+            }
+            else
+            {
+                // just all badges if no comments are provided
+                nameList = globalBadges.Keys.Concat(subBadges.Keys);
+            }
 
             foreach (var name in nameList)
             {
@@ -857,34 +868,16 @@ namespace TwitchDownloaderCore
 
             foreach (var badge in badgesData.Where(badge => !badges.ContainsKey(badge.name)))
             {
-                try
+                var newBadge = await GetChatBadge(badge, badgeFolder, logger, cancellationToken);
+                if (newBadge is null)
                 {
-                    Dictionary<string, ChatBadgeData> versions = new();
-                    foreach (var (version, data) in badge.versions)
-                    {
-                        string id = data.url.GetNthOccurrence('/', ^2).ToString();
-                        var (bytes, codec) = await GetImage(badgeFolder, data.url, id, 2, "png", false, logger, cancellationToken);
-                        if (bytes is null)
-                        {
-                            continue;
-                        }
-
-                        versions.Add(version, new ChatBadgeData
-                        {
-                            title = data.title,
-                            description = data.description,
-                            bytes = bytes,
-                            Codec = codec,
-                        });
-                    }
-
-                    var newBadge = new ChatBadge(badge.name, versions);
-                    if (!badges.TryAdd(badge.name, newBadge))
-                    {
-                        newBadge.Dispose();
-                    }
+                    continue;
                 }
-                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
+                if (!badges.TryAdd(badge.name, newBadge))
+                {
+                    newBadge.Dispose();
+                }
+
             }
 
             return badges.Values.ToList();
@@ -1359,6 +1352,38 @@ namespace TwitchDownloaderCore
             }
 
             return new TwitchEmote(bytes, codec, EmoteProvider.FirstParty, 2, id, id);
+        }
+
+        public static async Task<ChatBadge> GetChatBadge(EmbedChatBadge badge, DirectoryInfo cacheDir, ITaskLogger logger, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Dictionary<string, ChatBadgeData> versions = new();
+                foreach (var (version, data) in badge.versions)
+                {
+                    string id = data.url.GetNthOccurrence('/', ^2).ToString();
+                    var (bytes, codec) = await GetImage(cacheDir, data.url, id, 2, "png", false, logger, cancellationToken).ConfigureAwait(false);
+                    if (bytes is null)
+                    {
+                        continue;
+                    }
+
+                    versions.Add(version, new ChatBadgeData
+                    {
+                        title = data.title,
+                        description = data.description,
+                        bytes = bytes,
+                        Codec = codec,
+                    });
+                }
+
+                var newBadge = new ChatBadge(badge.name, versions);
+                return newBadge;
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
 
         public static async Task<(byte[], SKCodec)> GetImage(DirectoryInfo cacheDir, string url, string imageId, int imageScale, string imageType, bool offline, ITaskLogger logger, CancellationToken cancellationToken = default)

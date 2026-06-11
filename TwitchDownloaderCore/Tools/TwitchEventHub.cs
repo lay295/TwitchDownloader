@@ -37,6 +37,7 @@ namespace TwitchDownloaderCore.Tools
 
 		public Task<SubscribeResponseData> Subscribe(TwitchChatEvent evt, string streamerId)
 		{
+			// TODO: timeout or what happens when there is no open connection/the loop ended?
 			string topic;
 			switch (evt)
 			{
@@ -92,6 +93,7 @@ namespace TwitchDownloaderCore.Tools
 					// connect to the underlying websocket
 					var uri = new Uri(_recoveryUrl ?? "wss://hermes.twitch.tv/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko");
 					_recoveryUrl = null;
+					// TODO: retry connect as in irc client
 					await websocket.ConnectAsync(uri, _endConnection.Token);
 
 					// setup handling loops
