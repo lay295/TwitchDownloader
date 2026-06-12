@@ -12,12 +12,13 @@ namespace TwitchDownloaderCore.Tools
     public sealed class EventingWebSocket : IDisposable
     {
         private static int nextEventingWebSocketId = 0;
-        private readonly int _instanceId = nextEventingWebSocketId++;
+        public readonly int _instanceId = nextEventingWebSocketId++;
 
         public readonly record struct Message(byte[] Buffer, WebSocketMessageType MessageType);
 
         private readonly ITaskLogger _logger;
         private readonly ClientWebSocket _socket = new();
+        public WebSocketState State { get => _socket.State; }
         private CancellationTokenSource _receiveLoopCts;
         private Task _receiveLoopTask;
 
@@ -39,6 +40,7 @@ namespace TwitchDownloaderCore.Tools
 
         public Task CloseAsync(CancellationToken cancellationToken = default)
         {
+            _logger.LogVerbose($"[{_instanceId}] close frame send");
             return _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
         }
 
@@ -57,12 +59,16 @@ namespace TwitchDownloaderCore.Tools
 
                     do
                     {
+                        _logger.LogVerbose($"{_instanceId} call ReceiveAsync");
                         result = await _socket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
+                        _logger.LogVerbose($"{_instanceId} after ReceiveAsync");
                         messageBuffer.Write(buffer, 0, result.Count);
                     }
                     while (!result.EndOfMessage);
 
                     var message = new Message { MessageType = result.MessageType, Buffer = messageBuffer.ToArray() };
+
+                    if(message.MessageType == WebSocketMessageType.Close) { _logger.LogVerbose($"[{_instanceId}] close frame received"); }
 
                     // ignore errors in the handler
                     try { MessageReceived?.Invoke(this, message); } catch {}
@@ -112,6 +118,7 @@ namespace TwitchDownloaderCore.Tools
 
         public void Dispose()
         {
+            _logger.LogVerbose($"[{_instanceId}] dispose initiated");
             _receiveLoopCts?.Cancel();
 
             try
