@@ -40,7 +40,7 @@ namespace TwitchDownloaderCore.Tools
                     'h' => TimeSpan.FromHours(time),
                     'm' => TimeSpan.FromMinutes(time),
                     's' => TimeSpan.FromSeconds(time),
-                    _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
+                    _ => throw new ArgumentException($"Invalid unit: {unit}", nameof(input))
                 };
 
                 // Only parse the unit once

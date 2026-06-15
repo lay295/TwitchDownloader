@@ -13,32 +13,35 @@ namespace TwitchDownloaderCore.Extensions
         // The default size from Stream.GetCopyBufferSize() is 81,920.
         private const int STREAM_DEFAULT_BUFFER_LENGTH = 81_920;
 
-        public static async Task ProgressCopyToAsync(this Stream source, Stream destination, long? sourceLength, IProgress<StreamCopyProgress> progress = null,
-            CancellationToken cancellationToken = default)
+        extension(Stream source)
         {
-            if (!sourceLength.HasValue || progress is null)
+            public async Task ProgressCopyToAsync(Stream destination, long? sourceLength, IProgress<StreamCopyProgress> progress = null,
+            CancellationToken cancellationToken = default)
             {
-                await source.CopyToAsync(destination, cancellationToken);
-                return;
-            }
-
-            var rentedBuffer = ArrayPool<byte>.Shared.Rent(STREAM_DEFAULT_BUFFER_LENGTH);
-
-            long totalBytesRead = 0;
-            try
-            {
-                int bytesRead;
-                while ((bytesRead = await source.ReadAsync(rentedBuffer, 0, rentedBuffer.Length, cancellationToken).ConfigureAwait(false)) != 0)
+                if (!sourceLength.HasValue || progress is null)
                 {
-                    await destination.WriteAsync(rentedBuffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
-
-                    totalBytesRead += bytesRead;
-                    progress.Report(new StreamCopyProgress(sourceLength.Value, totalBytesRead));
+                    await source.CopyToAsync(destination, cancellationToken);
+                    return;
                 }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(rentedBuffer, true);
+
+                var rentedBuffer = ArrayPool<byte>.Shared.Rent(STREAM_DEFAULT_BUFFER_LENGTH);
+
+                long totalBytesRead = 0;
+                try
+                {
+                    int bytesRead;
+                    while ((bytesRead = await source.ReadAsync(rentedBuffer, cancellationToken).ConfigureAwait(false)) != 0)
+                    {
+                        await destination.WriteAsync(rentedBuffer.AsMemory(0, bytesRead), cancellationToken).ConfigureAwait(false);
+
+                        totalBytesRead += bytesRead;
+                        progress.Report(new StreamCopyProgress(sourceLength.Value, totalBytesRead));
+                    }
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(rentedBuffer, true);
+                }
             }
         }
     }

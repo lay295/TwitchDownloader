@@ -321,7 +321,7 @@ namespace TwitchDownloaderWPF
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
                 if (queue.ShowDialog().GetValueOrDefault())
-                    this.Close();
+                    Close();
             }
         }
 
@@ -454,7 +454,7 @@ namespace TwitchDownloaderWPF
 
         private void UpdateRecentChannels()
         {
-            var recentChannels = Settings.Default.RecentChannels ?? new StringCollection();
+            var recentChannels = Settings.Default.RecentChannels ?? [];
 
             if (!string.IsNullOrWhiteSpace(currentChannel?.login))
             {

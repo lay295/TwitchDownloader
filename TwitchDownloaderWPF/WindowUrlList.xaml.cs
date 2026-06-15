@@ -24,11 +24,11 @@ namespace TwitchDownloaderWPF
         private async void btnQueue_Click(object sender, RoutedEventArgs e)
         {
             btnQueue.IsEnabled = false;
-            List<string> idList = new List<string>();
-            List<string> invalidList = new List<string>();
-            List<string> errorList = new List<string>();
-            List<TaskData> dataList = new List<TaskData>();
-            Dictionary<string, string> idDict = new Dictionary<string, string>();
+            List<string> idList = [];
+            List<string> invalidList = [];
+            List<string> errorList = [];
+            List<TaskData> dataList = [];
+            Dictionary<string, string> idDict = [];
 
             var urls = textList.Text.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             foreach (var url in urls)
@@ -53,9 +53,9 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            Dictionary<int, string> taskDict = new Dictionary<int, string>();
-            List<Task<GqlVideoResponse>> taskVideoList = new List<Task<GqlVideoResponse>>();
-            List<Task<GqlClipResponse>> taskClipList = new List<Task<GqlClipResponse>>();
+            Dictionary<int, string> taskDict = [];
+            List<Task<GqlVideoResponse>> taskVideoList = [];
+            List<Task<GqlClipResponse>> taskClipList = [];
 
             foreach (var id in idList)
             {
@@ -166,7 +166,7 @@ namespace TwitchDownloaderWPF
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             if (queue.ShowDialog().GetValueOrDefault())
-                this.Close();
+                Close();
 
             btnQueue.IsEnabled = true;
         }

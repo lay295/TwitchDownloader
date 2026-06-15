@@ -4,9 +4,12 @@ namespace TwitchDownloaderCore.Extensions
 {
     public static class RandomExtensions
     {
-        public static double NextDouble(this Random random, double min, double max)
+        extension(Random random)
         {
-            return random.NextDouble() * (max - min) + min;
+            public double NextDouble(double min, double max)
+            {
+                return random.NextDouble() * (max - min) + min;
+            }
         }
     }
 }

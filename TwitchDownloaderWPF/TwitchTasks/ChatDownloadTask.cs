@@ -50,7 +50,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            ChatDownloader downloader = new ChatDownloader(DownloadOptions, progress);
+            ChatDownloader downloader = new(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {

@@ -13,23 +13,16 @@ namespace TwitchDownloaderWPF.Utils
     // ReSharper disable InconsistentlySynchronizedField
     internal class LiveVideoMonitor
     {
-        private class VideoState
+        private class VideoState(long videoId)
         {
             public DateTimeOffset NextTimeToCheck { get; private set; }
-            public bool LastCheck { get; private set; }
+            public bool LastCheck { get; private set; } = true;
             public GqlVideoResponse LatestVideoResponse { get; private set; }
-            public SemaphoreSlim Semaphore { get; }
-            public long VideoId { get; }
+            public SemaphoreSlim Semaphore { get; } = new SemaphoreSlim(1, 1);
+            public long VideoId { get; } = videoId;
             public int RefCount { get; set; }
 
             private int _consecutiveErrors;
-
-            public VideoState(long videoId)
-            {
-                LastCheck = true;
-                VideoId = videoId;
-                Semaphore = new SemaphoreSlim(1, 1);
-            }
 
             public async Task CheckIsRecording(ITaskLogger logger)
             {
@@ -58,7 +51,7 @@ namespace TwitchDownloaderWPF.Utils
         }
 
         private static readonly Lock VideoStateCacheLock = new();
-        private static readonly Dictionary<long, VideoState> VideoStateCache = new();
+        private static readonly Dictionary<long, VideoState> VideoStateCache = [];
 
         private readonly ITaskLogger _logger;
         private readonly VideoState _state;

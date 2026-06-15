@@ -5,15 +5,18 @@ namespace TwitchDownloaderCore.Extensions
 {
     public static class StringBuilderExtensions
     {
-        public static StringBuilder TrimEnd(this StringBuilder sb, ReadOnlySpan<char> trimChars)
+        extension(StringBuilder sb)
         {
-            var trimLength = 0;
-            while (sb.Length - trimLength > 0 && trimChars.Contains(sb[^(trimLength + 1)]))
+            public StringBuilder TrimEnd(ReadOnlySpan<char> trimChars)
             {
-                trimLength++;
-            }
+                var trimLength = 0;
+                while (sb.Length - trimLength > 0 && trimChars.Contains(sb[^(trimLength + 1)]))
+                {
+                    trimLength++;
+                }
 
-            return sb.Remove(sb.Length - trimLength, trimLength);
+                return sb.Remove(sb.Length - trimLength, trimLength);
+            }
         }
     }
 }

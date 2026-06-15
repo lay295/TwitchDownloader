@@ -27,7 +27,7 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        private static void TryCopyIfDifferent(Stream resourceStream, string filePath)
+        private static void TryCopyIfDifferent(MemoryStream resourceStream, string filePath)
         {
             try
             {

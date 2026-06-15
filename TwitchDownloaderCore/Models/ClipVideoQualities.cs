@@ -76,7 +76,7 @@ namespace TwitchDownloaderCore.Models
 
         public override IVideoQuality<ClipQuality> BestQuality()
         {
-            if (Qualities is null)
+            if (Qualities is null || Qualities.Count == 0)
             {
                 return null;
             }
@@ -89,12 +89,12 @@ namespace TwitchDownloaderCore.Models
 
             bestQuality ??= Qualities.MaxBy(x => x.Resolution.Height);
 
-            return bestQuality ?? Qualities.FirstOrDefault();
+            return bestQuality ?? Qualities[0];
         }
 
         private IVideoQuality<ClipQuality> BestPortraitQuality()
         {
-            if (Qualities is null)
+            if (Qualities is null || Qualities.Count == 0)
             {
                 return null;
             }
@@ -105,12 +105,12 @@ namespace TwitchDownloaderCore.Models
 
             bestQuality ??= Qualities.MaxBy(x => x.Resolution.Height);
 
-            return bestQuality ?? Qualities.FirstOrDefault();
+            return bestQuality ?? Qualities[0];
         }
 
         public override IVideoQuality<ClipQuality> WorstQuality()
         {
-            if (Qualities is null)
+            if (Qualities is null || Qualities.Count == 0)
             {
                 return null;
             }
@@ -121,12 +121,12 @@ namespace TwitchDownloaderCore.Models
 
             worstQuality ??= Qualities.MinBy(x => x.Resolution.Height);
 
-            return worstQuality ?? Qualities.LastOrDefault();
+            return worstQuality ?? Qualities[^1];
         }
 
         private IVideoQuality<ClipQuality> WorstPortraitQuality()
         {
-            if (Qualities is null)
+            if (Qualities is null || Qualities.Count == 0)
             {
                 return null;
             }
@@ -137,7 +137,7 @@ namespace TwitchDownloaderCore.Models
 
             worstQuality ??= Qualities.MinBy(x => x.Resolution.Height);
 
-            return worstQuality ?? Qualities.LastOrDefault();
+            return worstQuality ?? Qualities[^1];
         }
     }
 }

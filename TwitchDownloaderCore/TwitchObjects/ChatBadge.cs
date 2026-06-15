@@ -43,7 +43,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public ChatBadge(string name, Dictionary<string, ChatBadgeData> versions)
         {
             Name = name;
-            Versions = new Dictionary<string, SKBitmap>();
+            Versions = [];
             VersionsData = versions;
 
             foreach (var (versionName, versionData) in versions)
@@ -54,9 +54,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                     // For some reason, twitch has corrupted images sometimes :) for example
                     // https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
                     using var ms = new MemoryStream(versionData.bytes);
-                    using var codec = SKCodec.Create(ms, out var result);
-                    if (codec is null)
-                        throw new Exception($"Skia was unable to decode badge {versionName} ({name}). Returned: {result}");
+                    using var codec = SKCodec.Create(ms, out var result) ?? throw new Exception($"Skia was unable to decode badge {versionName} ({name}). Returned: {result}");
 
                     badgeImage = SKBitmap.Decode(codec);
                 }

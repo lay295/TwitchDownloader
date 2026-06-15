@@ -5,28 +5,31 @@ namespace TwitchDownloaderCore.Extensions
 {
     public static class JsonElementExtensions
     {
-        public static List<T> DeserializeFirstAndLastFromList<T>(this JsonElement arrayElement, JsonSerializerOptions options = null)
+        extension(JsonElement arrayElement)
         {
-            // It's not the prettiest, but for arrays with thousands of objects it can save whole seconds and prevent tons of fragmented memory
-            var list = new List<T>(2);
-            JsonElement lastElement = default;
-            foreach (var element in arrayElement.EnumerateArray())
+            public List<T> DeserializeFirstAndLastFromList<T>(JsonSerializerOptions options = null)
             {
-                if (list.Count == 0)
+                // It's not the prettiest, but for arrays with thousands of objects it can save whole seconds and prevent tons of fragmented memory
+                var list = new List<T>(2);
+                JsonElement lastElement = default;
+                foreach (var element in arrayElement.EnumerateArray())
                 {
-                    list.Add(element.Deserialize<T>(options: options));
-                    continue;
+                    if (list.Count == 0)
+                    {
+                        list.Add(element.Deserialize<T>(options: options));
+                        continue;
+                    }
+
+                    lastElement = element;
                 }
 
-                lastElement = element;
-            }
+                if (lastElement.ValueKind != JsonValueKind.Undefined)
+                {
+                    list.Add(lastElement.Deserialize<T>(options: options));
+                }
 
-            if (lastElement.ValueKind != JsonValueKind.Undefined)
-            {
-                list.Add(lastElement.Deserialize<T>(options: options));
+                return list;
             }
-
-            return list;
         }
     }
 }

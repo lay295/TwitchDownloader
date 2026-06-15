@@ -205,7 +205,7 @@ namespace TwitchDownloaderWPF
 
         public VideoDownloadOptions GetOptions(string filename, string folder)
         {
-            VideoDownloadOptions options = new VideoDownloadOptions
+            VideoDownloadOptions options = new()
             {
                 DownloadThreads = (int)numDownloadThreads.Value,
                 ThrottleKib = Settings.Default.DownloadThrottleEnabled
@@ -285,7 +285,7 @@ namespace TwitchDownloaderWPF
         private static long ValidateUrl(string text)
         {
             var vodIdMatch = IdParse.MatchVideoId(text);
-            if (vodIdMatch is {Success: true} && long.TryParse(vodIdMatch.ValueSpan, out var vodId))
+            if (vodIdMatch is { Success: true } && long.TryParse(vodIdMatch.ValueSpan, out var vodId))
             {
                 return vodId;
             }
@@ -365,7 +365,7 @@ namespace TwitchDownloaderWPF
 
         private void numDownloadThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized && numDownloadThreads.IsEnabled)
+            if (IsInitialized && numDownloadThreads.IsEnabled)
             {
                 Settings.Default.VodDownloadThreads = (int)numDownloadThreads.Value;
                 Settings.Default.Save();
@@ -374,7 +374,7 @@ namespace TwitchDownloaderWPF
 
         private void TextOauth_TextChanged(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.OAuth = TextOauth.Text;
                 Settings.Default.Save();
@@ -431,7 +431,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog
+            SaveFileDialog saveFileDialog = new()
             {
                 Filter = comboQuality.Text.Contains("Audio", StringComparison.OrdinalIgnoreCase) ? "M4A Files | *.m4a" : "MP4 Files | *.mp4",
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text, streamerId,
@@ -451,7 +451,7 @@ namespace TwitchDownloaderWPF
             options.CacheCleanerCallback = HandleCacheCleanerCallback;
 
             var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
-            VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
+            VideoDownloader currentDownload = new(options, downloadProgress);
             _cancellationTokenSource = new CancellationTokenSource();
 
             SetImage("Images/ppOverheat.gif", true);

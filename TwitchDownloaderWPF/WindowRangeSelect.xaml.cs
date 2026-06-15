@@ -52,7 +52,7 @@ namespace TwitchDownloaderWPF
             {
                 Invalid = true;
             }
-            this.Close();
+            Close();
         }
 
         private void numStart_TextChanged(object sender, TextChangedEventArgs e)

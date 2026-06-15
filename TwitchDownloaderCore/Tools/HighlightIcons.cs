@@ -52,11 +52,14 @@ namespace TwitchDownloaderCore.Tools
         [GeneratedRegex("""^((?:\w+ )?subscribed (?:with Prime|at Tier \d)\. They've subscribed for \d{1,3} months(?:, currently on a \d{1,3} month streak)?! )(.+)$""")]
         private static partial Regex SubMessageRegex { get; }
 
+        [GeneratedRegex(@"(?<= (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)")]
+        private static partial Regex SubConversionMessageRegex { get; }
+
         [GeneratedRegex("""^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d""")]
-        private static partial Regex GiftAnonymousRegex {get;}
+        private static partial Regex GiftAnonymousRegex { get; }
 
         [GeneratedRegex("""^((?:\w+ )?watched \d+ consecutive streams this month and sparked a watch streak! )(.+)$""")]
-        private static partial Regex WatchStreakRegex {get;}
+        private static partial Regex WatchStreakRegex { get; }
 
         [GeneratedRegex("""^We added \d+ Gift Subs (?:AND \d+ Bonus Gift Subs )?to """)]
         private static partial Regex SubtemberRegex { get; }
@@ -77,7 +80,7 @@ namespace TwitchDownloaderCore.Tools
         private readonly double _fontSize;
         private readonly bool _outline;
         private readonly SKPaint _outlinePaint;
-        private readonly Dictionary<SKColor, SKPaint> _iconPaints = new();
+        private readonly Dictionary<SKColor, SKPaint> _iconPaints = [];
 
         public HighlightIcons(ChatRenderOptions renderOptions, string cacheDir, SKColor iconPurple, SKPaint outlinePaint)
         {
@@ -142,7 +145,7 @@ namespace TwitchDownloaderCore.Tools
                 if (bodyWithoutName.StartsWith(" converted from a"))
                 {
                     var slice = bodyWithoutName[17..];
-                    foreach (var match in Regex.EnumerateMatches(slice, @"(?<= (?:Prime|Tier \d) sub to a )(?:Prime|Tier \d)"))
+                    foreach (var match in SubConversionMessageRegex.EnumerateMatches(slice))
                     {
                         return slice.Slice(match.Index, match.Length) switch
                         {
@@ -273,9 +276,11 @@ namespace TwitchDownloaderCore.Tools
 
             if (!exists)
             {
-                iconPaint = new SKPaint();
-                iconPaint.Color = iconColor;
-                iconPaint.IsAntialias = true;
+                iconPaint = new SKPaint
+                {
+                    Color = iconColor,
+                    IsAntialias = true
+                };
             }
 
             return iconPaint;
@@ -376,7 +381,7 @@ namespace TwitchDownloaderCore.Tools
             customMessageComment.message.fragments.RemoveAt(0);
             return (streakMessageComment, customMessageComment);
         }
-#region ImplementIDisposable
+        #region ImplementIDisposable
 
         public void Dispose()
         {
@@ -413,6 +418,6 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-#endregion
+        #endregion
     }
 }

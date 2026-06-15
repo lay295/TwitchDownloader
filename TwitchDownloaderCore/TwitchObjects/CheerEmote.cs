@@ -10,7 +10,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public bool Disposed { get; private set; } = false;
         public string prefix { get; set; }
-        public List<KeyValuePair<int, TwitchEmote>> tierList { get; set; } = new List<KeyValuePair<int, TwitchEmote>>();
+        public List<KeyValuePair<int, TwitchEmote>> tierList { get; set; } = [];
 
         public KeyValuePair<int, TwitchEmote> getTier(int value)
         {

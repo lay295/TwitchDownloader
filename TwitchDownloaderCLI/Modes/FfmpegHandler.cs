@@ -27,7 +27,7 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static void DownloadFfmpeg(ITaskProgress progress)
+        private static void DownloadFfmpeg(CliTaskProgress progress)
         {
             if (File.Exists(FfmpegExecutableName))
             {

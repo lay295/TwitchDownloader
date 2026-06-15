@@ -215,8 +215,10 @@ namespace TwitchDownloaderCLI.Modes
 
             try
             {
-                var fi = new FileInfo(currentExePath);
-                fi.UnixFileMode = previousPermissions.Value;
+                var fi = new FileInfo(currentExePath)
+                {
+                    UnixFileMode = previousPermissions.Value
+                };
                 fi.Refresh();
             }
             catch (Exception ex)

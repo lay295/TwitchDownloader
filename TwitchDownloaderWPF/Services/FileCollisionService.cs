@@ -1,8 +1,8 @@
+using Ookii.Dialogs.Wpf;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
-using Ookii.Dialogs.Wpf;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
@@ -46,16 +46,22 @@ namespace TwitchDownloaderWPF.Services
 
             dialog.ButtonStyle = TaskDialogButtonStyle.CommandLinks;
 
-            var overwriteButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsOverwrite);
-            overwriteButton.CommandLinkNote = Translations.Strings.FileAlreadyExistsOverwriteDescription;
+            var overwriteButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsOverwrite)
+            {
+                CommandLinkNote = Translations.Strings.FileAlreadyExistsOverwriteDescription
+            };
             dialog.Buttons.Add(overwriteButton);
 
-            var renameButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsRename);
-            renameButton.CommandLinkNote = Translations.Strings.FileAlreadyExistsRenameDescription;
+            var renameButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsRename)
+            {
+                CommandLinkNote = Translations.Strings.FileAlreadyExistsRenameDescription
+            };
             dialog.Buttons.Add(renameButton);
 
-            var cancelButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsCancel);
-            cancelButton.CommandLinkNote = Translations.Strings.FileAlreadyExistsCancelDescription;
+            var cancelButton = new TaskDialogButton(Translations.Strings.FileAlreadyExistsCancel)
+            {
+                CommandLinkNote = Translations.Strings.FileAlreadyExistsCancelDescription
+            };
             dialog.Buttons.Add(cancelButton);
 
             dialog.VerificationText = Translations.Strings.FileAlreadyExistsRememberMyChoice;

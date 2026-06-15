@@ -50,7 +50,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            VideoDownloader downloader = new VideoDownloader(DownloadOptions, progress);
+            VideoDownloader downloader = new(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
 
             try

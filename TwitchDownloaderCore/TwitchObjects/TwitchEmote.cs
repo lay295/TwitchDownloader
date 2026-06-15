@@ -20,8 +20,8 @@ namespace TwitchDownloaderCore.TwitchObjects
         public SKCodec Codec { get; }
         public byte[] ImageData { get; set; }
         public EmoteProvider EmoteProvider { get; set; }
-        public List<SKBitmap> EmoteFrames { get; } = new List<SKBitmap>();
-        public List<int> EmoteFrameDurations { get; private set; } = new List<int>();
+        public List<SKBitmap> EmoteFrames { get; } = [];
+        public List<int> EmoteFrameDurations { get; private set; } = [];
         public int TotalDuration { get; set; }
         public string Name { get; }
         public string Id { get; }
@@ -37,11 +37,7 @@ namespace TwitchDownloaderCore.TwitchObjects
             if (codec is null)
             {
                 var ms = new MemoryStream(imageData);
-                Codec = SKCodec.Create(ms, out var result);
-                if (Codec is null)
-                {
-                    throw new Exception($"Skia was unable to decode {imageName} ({imageId}). Returned: {result}");
-                }
+                Codec = SKCodec.Create(ms, out var result) ?? throw new Exception($"Skia was unable to decode {imageName} ({imageId}). Returned: {result}");
             }
             else
             {
@@ -100,10 +96,10 @@ namespace TwitchDownloaderCore.TwitchObjects
             var codecInfo = Codec.Info;
             for (int i = 0; i < FrameCount; i++)
             {
-                SKImageInfo imageInfo = new SKImageInfo(codecInfo.Width, codecInfo.Height);
-                SKBitmap newBitmap = new SKBitmap(imageInfo);
+                SKImageInfo imageInfo = new(codecInfo.Width, codecInfo.Height);
+                SKBitmap newBitmap = new(imageInfo);
                 IntPtr pointer = newBitmap.GetPixels();
-                SKCodecOptions codecOptions = new SKCodecOptions(i);
+                SKCodecOptions codecOptions = new(i);
                 Codec.GetPixels(imageInfo, pointer, codecOptions);
                 newBitmap.SetImmutable();
                 EmoteFrames.Add(newBitmap);

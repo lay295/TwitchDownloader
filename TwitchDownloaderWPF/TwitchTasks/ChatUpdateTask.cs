@@ -38,7 +38,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             }
 
             var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
-            ChatUpdater updater = new ChatUpdater(UpdateOptions, progress);
+            ChatUpdater updater = new(UpdateOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {

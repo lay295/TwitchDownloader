@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore.Chat
                             }
                             foreach (var badge in chatRoot.embeddedData.twitchBadges)
                             {
-                                foreach(var (version, badgeData) in badge.versions)
+                                foreach (var (version, badgeData) in badge.versions)
                                 {
                                     await sw.WriteLineAsync(".badge-" + badge.name + "-" + version + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(badgeData.bytes) + "\"); }");
                                 }

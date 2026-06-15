@@ -16,7 +16,7 @@ namespace TwitchDownloaderWPF
 {
     public partial class WindowOldVideoCacheManager : Window
     {
-        public ObservableCollection<GridItem> GridItems { get; } = new();
+        public ObservableCollection<GridItem> GridItems { get; } = [];
         private long _totalSize;
 
         public WindowOldVideoCacheManager(IEnumerable<DirectoryInfo> directories)

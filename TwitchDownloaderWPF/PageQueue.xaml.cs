@@ -1,13 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderWPF.Properties;
-using System.Diagnostics;
-using System.IO;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.TwitchTasks;
 
 namespace TwitchDownloaderWPF
 {
@@ -16,9 +16,9 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageQueue : Page
     {
-        public static readonly Lock taskLock = new();
-        public static ObservableCollection<TwitchTask> taskList { get; } = new();
-        private static readonly BackgroundWorker taskManager = new BackgroundWorker();
+        public static readonly Lock TaskLock = new();
+        public static ObservableCollection<TwitchTask> taskList { get; } = [];
+        private static readonly BackgroundWorker taskManager = new();
 
         public PageQueue()
         {
@@ -47,7 +47,7 @@ namespace TwitchDownloaderWPF
                 int currentChat = 0;
                 int currentRender = 0;
 
-                lock (taskLock)
+                lock (TaskLock)
                 {
                     foreach (var task in taskList)
                     {
@@ -132,7 +132,7 @@ namespace TwitchDownloaderWPF
 
         private void numVod_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.LimitVod = (int)numVod.Value;
                 Settings.Default.Save();
@@ -141,7 +141,7 @@ namespace TwitchDownloaderWPF
 
         private void numClip_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.LimitClip = (int)numClip.Value;
                 Settings.Default.Save();
@@ -150,7 +150,7 @@ namespace TwitchDownloaderWPF
 
         private void numChat_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.LimitChat = (int)numChat.Value;
                 Settings.Default.Save();
@@ -159,7 +159,7 @@ namespace TwitchDownloaderWPF
 
         private void numRender_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.LimitRender = (int)numRender.Value;
                 Settings.Default.Save();
@@ -292,7 +292,7 @@ namespace TwitchDownloaderWPF
 
             task.Cancel();
 
-            lock (taskLock)
+            lock (TaskLock)
             {
                 if (!taskList.Remove(task))
                 {
@@ -359,7 +359,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            lock (taskLock)
+            lock (TaskLock)
             {
                 var index = taskList.IndexOf(task);
                 if (index < 1)
@@ -376,7 +376,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            lock (taskLock)
+            lock (TaskLock)
             {
                 var index = taskList.IndexOf(task);
                 if (index == -1 || index == taskList.Count - 1)

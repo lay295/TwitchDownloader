@@ -7,16 +7,10 @@ using TwitchDownloaderCore.Services;
 
 namespace TwitchDownloaderCLI.Tools
 {
-    internal class FileCollisionHandler
+    internal class FileCollisionHandler(IFileCollisionArgs collisionArgs, ITaskLogger logger)
     {
-        private readonly IFileCollisionArgs _collisionArgs;
-        private readonly ITaskLogger _logger;
-
-        public FileCollisionHandler(IFileCollisionArgs collisionArgs, ITaskLogger logger)
-        {
-            _collisionArgs = collisionArgs;
-            _logger = logger;
-        }
+        private readonly IFileCollisionArgs _collisionArgs = collisionArgs;
+        private readonly ITaskLogger _logger = logger;
 
         public FileInfo HandleCollisionCallback(FileInfo fileInfo)
         {

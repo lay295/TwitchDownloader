@@ -71,11 +71,11 @@ namespace TwitchDownloaderCore.Models
             ByteRange currentByteRange = default;
             Stream.ExtPartInfo currentExtPartInfo = null;
 
-            var textStart = -1;
-            var textEnd = text.Length;
-            var lineEnd = -1;
-            var iterations = 0;
-            var maxIterations = text.Count('\n') + 1;
+            int textStart = -1;
+            int textEnd = text.Length;
+            int lineEnd;
+            int iterations = 0;
+            int maxIterations = text.Count('\n') + 1;
             do
             {
                 textStart++;
@@ -179,7 +179,7 @@ namespace TwitchDownloaderCore.Models
                 private PlaylistType? _type;
                 private uint? _mediaSequence;
                 private ExtMap _map;
-                private readonly Dictionary<string, string> _sessionData = new();
+                private readonly Dictionary<string, string> _sessionData = [];
 
                 // Twitch specific
                 private uint? _twitchLiveSequence;
@@ -187,7 +187,7 @@ namespace TwitchDownloaderCore.Models
                 private decimal? _twitchTotalSeconds;
 
                 // Other headers that we don't have dedicated properties for. Useful for debugging.
-                private readonly List<KeyValuePair<string, string>> _unparsedValues = new();
+                private readonly List<KeyValuePair<string, string>> _unparsedValues = [];
 
                 public Builder ParseAndAppend(ReadOnlySpan<char> text)
                 {
@@ -427,6 +427,9 @@ namespace TwitchDownloaderCore.Models
                     }
                 }
 
+                [GeneratedRegex(@"p\d+$", RegexOptions.RightToLeft)]
+                private static partial Regex FramerateRegex { get; }
+
                 public static ExtStreamInfo Parse(ReadOnlySpan<char> text)
                 {
                     var streamInfo = new ExtStreamInfo();
@@ -478,7 +481,7 @@ namespace TwitchDownloaderCore.Models
                     } while (true);
 
                     // Sometimes Twitch's M3U8 response lacks a Framerate value, among other things. We can just guess the framerate using the Video value.
-                    if (streamInfo.Framerate == 0 && Regex.IsMatch(streamInfo.Video, @"p\d+$", RegexOptions.RightToLeft))
+                    if (streamInfo.Framerate == 0 && FramerateRegex.IsMatch(streamInfo.Video))
                     {
                         var index = streamInfo.Video.LastIndexOf('p');
                         streamInfo.Framerate = int.Parse(streamInfo.Video.AsSpan(index + 1));

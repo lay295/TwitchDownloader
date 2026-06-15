@@ -82,11 +82,9 @@ namespace TwitchDownloaderCore
                             Encoding.UTF8, "application/json");
                     }
 
-                    using (var httpResponse = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
-                    {
-                        httpResponse.EnsureSuccessStatusCode();
-                        commentResponse = await httpResponse.Content.ReadFromJsonAsync<GqlCommentResponse>(options: null, cancellationToken);
-                    }
+                    using var httpResponse = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    httpResponse.EnsureSuccessStatusCode();
+                    commentResponse = await httpResponse.Content.ReadFromJsonAsync<GqlCommentResponse>(options: null, cancellationToken);
                 }
                 catch (HttpRequestException ex)
                 {
@@ -153,7 +151,7 @@ namespace TwitchDownloaderCore
 
         private List<Comment> ConvertComments(CommentVideo video, DateTime videoCreatedAt)
         {
-            List<Comment> returnList = new List<Comment>(video.comments.edges.Count);
+            List<Comment> returnList = new(video.comments.edges.Count);
 
             foreach (var comment in video.comments.edges)
             {
@@ -368,7 +366,7 @@ namespace TwitchDownloaderCore
                 FileInfo = new ChatRootInfo { Version = ChatRootVersion.CurrentVersion, CreatedAt = DateTime.Now },
                 streamer = new Streamer(),
                 video = new Video(),
-                comments = new List<Comment>()
+                comments = []
             };
 
             string videoId = downloadOptions.Id;
@@ -620,12 +618,12 @@ namespace TwitchDownloaderCore
                 var newBit = new EmbedCheerEmote
                 {
                     prefix = bit.prefix,
-                    tierList = new Dictionary<int, EmbedEmoteData>()
+                    tierList = []
                 };
 
                 foreach (KeyValuePair<int, TwitchEmote> emotePair in bit.tierList)
                 {
-                    EmbedEmoteData newEmote = new EmbedEmoteData
+                    EmbedEmoteData newEmote = new()
                     {
                         id = emotePair.Value.Id,
                         imageScale = emotePair.Value.ImageScale,

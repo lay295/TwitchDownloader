@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Microsoft.Win32;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
@@ -178,7 +178,7 @@ namespace TwitchDownloaderWPF
                     downloadOptions.DelayDownload = checkDelay.IsChecked.GetValueOrDefault();
                     downloadOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                    VodDownloadTask downloadTask = new VodDownloadTask
+                    VodDownloadTask downloadTask = new()
                     {
                         DownloadOptions = downloadOptions,
                         Info =
@@ -188,7 +188,7 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(downloadTask);
                     }
@@ -226,7 +226,7 @@ namespace TwitchDownloaderWPF
                             chatOptions.TrimEndingTime = downloadOptions.TrimEndingTime.TotalSeconds;
                         }
 
-                        ChatDownloadTask chatTask = new ChatDownloadTask
+                        ChatDownloadTask chatTask = new()
                         {
                             DownloadOptions = chatOptions,
                             Info =
@@ -236,7 +236,7 @@ namespace TwitchDownloaderWPF
                             }
                         };
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(chatTask);
                         }
@@ -252,7 +252,7 @@ namespace TwitchDownloaderWPF
                             renderOptions.InputFile = chatOptions.Filename;
                             renderOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                            ChatRenderTask renderTask = new ChatRenderTask
+                            ChatRenderTask renderTask = new()
                             {
                                 DownloadOptions = renderOptions,
                                 Info =
@@ -264,14 +264,14 @@ namespace TwitchDownloaderWPF
                             };
                             renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
 
-                            lock (PageQueue.taskLock)
+                            lock (PageQueue.TaskLock)
                             {
                                 PageQueue.taskList.Add(renderTask);
                             }
                         }
                     }
 
-                    this.Close();
+                    Close();
                 }
 
                 if (_parentPage is PageClipDownload clipDownloadPage)
@@ -296,7 +296,7 @@ namespace TwitchDownloaderWPF
                         }
                     }
 
-                    ClipDownloadOptions downloadOptions = new ClipDownloadOptions
+                    ClipDownloadOptions downloadOptions = new()
                     {
                         Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateClip, clipDownloadPage.textTitle.Text, clipDownloadPage.clipId,
                             clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, clipDownloadPage.streamerId, TimeSpan.Zero, clipDownloadPage.clipLength,
@@ -312,7 +312,7 @@ namespace TwitchDownloaderWPF
                         FileCollisionCallback = HandleFileCollisionCallback,
                     };
 
-                    ClipDownloadTask downloadTask = new ClipDownloadTask
+                    ClipDownloadTask downloadTask = new()
                     {
                         DownloadOptions = downloadOptions,
                         Info =
@@ -322,7 +322,7 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(downloadTask);
                     }
@@ -351,7 +351,7 @@ namespace TwitchDownloaderWPF
                             clipDownloadPage.viewCount, clipDownloadPage.game, clipDownloadPage.clipperName, clipDownloadPage.clipId) + chatOptions.FileExtension);
                         chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                        ChatDownloadTask chatTask = new ChatDownloadTask
+                        ChatDownloadTask chatTask = new()
                         {
                             DownloadOptions = chatOptions,
                             Info =
@@ -361,7 +361,7 @@ namespace TwitchDownloaderWPF
                             }
                         };
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(chatTask);
                         }
@@ -377,7 +377,7 @@ namespace TwitchDownloaderWPF
                             renderOptions.InputFile = chatOptions.Filename;
                             renderOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                            ChatRenderTask renderTask = new ChatRenderTask
+                            ChatRenderTask renderTask = new()
                             {
                                 DownloadOptions = renderOptions,
                                 Info =
@@ -389,14 +389,14 @@ namespace TwitchDownloaderWPF
                             };
                             renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
 
-                            lock (PageQueue.taskLock)
+                            lock (PageQueue.TaskLock)
                             {
                                 PageQueue.taskList.Add(renderTask);
                             }
                         }
                     }
 
-                    this.Close();
+                    Close();
                 }
 
                 if (_parentPage is PageChatDownload chatDownloadPage)
@@ -422,7 +422,7 @@ namespace TwitchDownloaderWPF
                     }
 
                     ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
-                    chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatDownloadPage.textTitle.Text, chatOptions.Id,chatDownloadPage.currentVideoTime, chatDownloadPage.textStreamer.Text,
+                    chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatDownloadPage.textTitle.Text, chatOptions.Id, chatDownloadPage.currentVideoTime, chatDownloadPage.textStreamer.Text,
                         chatDownloadPage.streamerId,
                         chatOptions.TrimBeginning ? TimeSpan.FromSeconds(chatOptions.TrimBeginningTime) : TimeSpan.Zero,
                         chatOptions.TrimEnding ? TimeSpan.FromSeconds(chatOptions.TrimEndingTime) : chatDownloadPage.vodLength,
@@ -430,7 +430,7 @@ namespace TwitchDownloaderWPF
                     chatOptions.DelayDownload = checkDelayChat.IsChecked.GetValueOrDefault();
                     chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                    ChatDownloadTask chatTask = new ChatDownloadTask
+                    ChatDownloadTask chatTask = new()
                     {
                         DownloadOptions = chatOptions,
                         Info =
@@ -440,7 +440,7 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(chatTask);
                     }
@@ -451,7 +451,7 @@ namespace TwitchDownloaderWPF
                         renderOptions.InputFile = chatOptions.Filename;
                         renderOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                        ChatRenderTask renderTask = new ChatRenderTask
+                        ChatRenderTask renderTask = new()
                         {
                             DownloadOptions = renderOptions,
                             Info =
@@ -463,13 +463,13 @@ namespace TwitchDownloaderWPF
                         };
                         renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(renderTask);
                         }
                     }
 
-                    this.Close();
+                    Close();
                 }
 
                 if (_parentPage is PageChatUpdate chatUpdatePage)
@@ -503,7 +503,7 @@ namespace TwitchDownloaderWPF
                         chatUpdatePage.VideoLength, chatUpdatePage.ViewCount, chatUpdatePage.Game, chatUpdatePage.ClipperName, chatUpdatePage.ClipperId) + chatOptions.FileExtension);
                     chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                    ChatUpdateTask chatTask = new ChatUpdateTask
+                    ChatUpdateTask chatTask = new()
                     {
                         UpdateOptions = chatOptions,
                         Info =
@@ -513,12 +513,12 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(chatTask);
                     }
 
-                    this.Close();
+                    Close();
                 }
 
                 if (_parentPage is PageChatRender chatRenderPage)
@@ -551,7 +551,7 @@ namespace TwitchDownloaderWPF
                         renderOptions.InputFile = fileName;
                         renderOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                        ChatRenderTask renderTask = new ChatRenderTask
+                        ChatRenderTask renderTask = new()
                         {
                             DownloadOptions = renderOptions,
                             Info =
@@ -565,12 +565,12 @@ namespace TwitchDownloaderWPF
                             renderTask.Info.Thumbnail = image;
                         }
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(renderTask);
                         }
 
-                        this.Close();
+                        Close();
                     }
                 }
             }
@@ -608,7 +608,7 @@ namespace TwitchDownloaderWPF
                 {
                     if (taskData.Id.All(char.IsDigit))
                     {
-                        VideoDownloadOptions downloadOptions = new VideoDownloadOptions
+                        VideoDownloadOptions downloadOptions = new()
                         {
                             Oauth = Settings.Default.OAuth,
                             TempFolder = Settings.Default.TempPath,
@@ -629,7 +629,7 @@ namespace TwitchDownloaderWPF
                             downloadOptions.TrimEnding ? downloadOptions.TrimEndingTime : TimeSpan.FromSeconds(taskData.Length),
                             TimeSpan.FromSeconds(taskData.Length), taskData.Views, taskData.Game) + FilenameService.GuessVodFileExtension(downloadOptions.Quality));
 
-                        VodDownloadTask downloadTask = new VodDownloadTask
+                        VodDownloadTask downloadTask = new()
                         {
                             DownloadOptions = downloadOptions,
                             Info =
@@ -639,14 +639,14 @@ namespace TwitchDownloaderWPF
                             }
                         };
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(downloadTask);
                         }
                     }
                     else
                     {
-                        ClipDownloadOptions downloadOptions = new ClipDownloadOptions
+                        ClipDownloadOptions downloadOptions = new()
                         {
                             Id = taskData.Id,
                             Quality = (ComboPreferredQuality.SelectedItem as ComboBoxItem)?.Content as string,
@@ -661,7 +661,7 @@ namespace TwitchDownloaderWPF
                             FileCollisionCallback = HandleFileCollisionCallback,
                         };
 
-                        ClipDownloadTask downloadTask = new ClipDownloadTask
+                        ClipDownloadTask downloadTask = new()
                         {
                             DownloadOptions = downloadOptions,
                             Info =
@@ -671,7 +671,7 @@ namespace TwitchDownloaderWPF
                             }
                         };
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(downloadTask);
                         }
@@ -680,7 +680,7 @@ namespace TwitchDownloaderWPF
 
                 if (checkChat.IsChecked.GetValueOrDefault())
                 {
-                    ChatDownloadOptions downloadOptions = new ChatDownloadOptions
+                    ChatDownloadOptions downloadOptions = new()
                     {
                         EmbedData = checkEmbed.IsChecked.GetValueOrDefault(),
                         BttvEmotes = CheckBttvEmbed.IsChecked.GetValueOrDefault(),
@@ -707,7 +707,7 @@ namespace TwitchDownloaderWPF
                         downloadOptions.TrimEnding ? TimeSpan.FromSeconds(downloadOptions.TrimEndingTime) : TimeSpan.FromSeconds(taskData.Length),
                         TimeSpan.FromSeconds(taskData.Length), taskData.Views, taskData.Game, taskData.ClipperName, taskData.ClipperId) + downloadOptions.FileExtension);
 
-                    ChatDownloadTask downloadTask = new ChatDownloadTask
+                    ChatDownloadTask downloadTask = new()
                     {
                         DownloadOptions = downloadOptions,
                         Info =
@@ -717,7 +717,7 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(downloadTask);
                     }
@@ -734,7 +734,7 @@ namespace TwitchDownloaderWPF
                         renderOptions.InputFile = downloadOptions.Filename;
                         renderOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                        ChatRenderTask renderTask = new ChatRenderTask
+                        ChatRenderTask renderTask = new()
                         {
                             DownloadOptions = renderOptions,
                             Info =
@@ -746,7 +746,7 @@ namespace TwitchDownloaderWPF
                         };
                         renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(renderTask);
                         }
@@ -754,8 +754,8 @@ namespace TwitchDownloaderWPF
                 }
             }
 
-            this.DialogResult = true;
-            this.Close();
+            DialogResult = true;
+            Close();
         }
 
         private void btnFolder_Click(object sender, RoutedEventArgs e)
@@ -824,7 +824,7 @@ namespace TwitchDownloaderWPF
 
         private void radioJson_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 checkEmbed.IsEnabled = true;
                 CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
@@ -835,7 +835,7 @@ namespace TwitchDownloaderWPF
 
         private void radioTxt_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 checkEmbed.IsEnabled = false;
                 CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = false;
@@ -846,7 +846,7 @@ namespace TwitchDownloaderWPF
 
         private void radioHTML_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 checkEmbed.IsEnabled = true;
                 CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
@@ -862,7 +862,7 @@ namespace TwitchDownloaderWPF
 
         private void CheckVideo_OnChecked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 ComboPreferredQuality.IsEnabled = checkVideo.IsChecked.GetValueOrDefault();
                 checkDelay.IsEnabled = checkVideo.IsChecked.GetValueOrDefault();

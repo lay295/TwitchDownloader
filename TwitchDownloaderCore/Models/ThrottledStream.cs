@@ -87,7 +87,7 @@ namespace TwitchDownloaderCore.Models
 
             if (diff <= 0)
             {
-                var waitInSec = ((diff * -1.0) / (MaximumBytesPerSecond));
+                var waitInSec = diff * -1.0 / MaximumBytesPerSecond;
 
                 await Task.Delay((int)(waitInSec * 1000)).ConfigureAwait(false);
             }

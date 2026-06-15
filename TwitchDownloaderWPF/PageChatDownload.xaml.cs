@@ -293,7 +293,7 @@ namespace TwitchDownloaderWPF
 
         public ChatDownloadOptions GetOptions(string filename)
         {
-            ChatDownloadOptions options = new ChatDownloadOptions();
+            ChatDownloadOptions options = new();
 
             if (radioJson.IsChecked == true)
                 options.DownloadFormat = ChatFormat.Json;
@@ -311,14 +311,14 @@ namespace TwitchDownloaderWPF
             if (CheckTrimStart.IsChecked == true)
             {
                 options.TrimBeginning = true;
-                TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
+                TimeSpan start = new((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
                 options.TrimBeginningTime = (int)start.TotalSeconds;
             }
 
             if (CheckTrimEnd.IsChecked == true)
             {
                 options.TrimEnding = true;
-                TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
+                TimeSpan end = new((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
                 options.TrimEndingTime = (int)end.TotalSeconds;
             }
 
@@ -381,7 +381,7 @@ namespace TwitchDownloaderWPF
 
         private void NumChatDownloadThreads_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 NumChatDownloadThreads.Value = Math.Clamp((int)NumChatDownloadThreads.Value, 1, 50);
                 Settings.Default.ChatDownloadThreads = (int)NumChatDownloadThreads.Value;
@@ -391,7 +391,7 @@ namespace TwitchDownloaderWPF
 
         private void checkEmbed_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.ChatEmbedEmotes = true;
                 Settings.Default.Save();
@@ -403,7 +403,7 @@ namespace TwitchDownloaderWPF
 
         private void checkEmbed_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.ChatEmbedEmotes = false;
                 Settings.Default.Save();
@@ -415,7 +415,7 @@ namespace TwitchDownloaderWPF
 
         private void checkBttvEmbed_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.BTTVEmotes = true;
                 Settings.Default.Save();
@@ -424,7 +424,7 @@ namespace TwitchDownloaderWPF
 
         private void checkBttvEmbed_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.BTTVEmotes = false;
                 Settings.Default.Save();
@@ -433,7 +433,7 @@ namespace TwitchDownloaderWPF
 
         private void checkFfzEmbed_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.FFZEmotes = true;
                 Settings.Default.Save();
@@ -442,7 +442,7 @@ namespace TwitchDownloaderWPF
 
         private void checkFfzEmbed_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.FFZEmotes = false;
                 Settings.Default.Save();
@@ -451,7 +451,7 @@ namespace TwitchDownloaderWPF
 
         private void checkStvEmbed_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.STVEmotes = true;
                 Settings.Default.Save();
@@ -460,7 +460,7 @@ namespace TwitchDownloaderWPF
 
         private void checkStvEmbed_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 Settings.Default.STVEmotes = false;
                 Settings.Default.Save();
@@ -469,7 +469,7 @@ namespace TwitchDownloaderWPF
 
         private void radioJson_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 timeText.Visibility = Visibility.Collapsed;
                 timeOptions.Visibility = Visibility.Collapsed;
@@ -486,7 +486,7 @@ namespace TwitchDownloaderWPF
 
         private void radioHTML_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 timeText.Visibility = Visibility.Collapsed;
                 timeOptions.Visibility = Visibility.Collapsed;
@@ -503,7 +503,7 @@ namespace TwitchDownloaderWPF
 
         private void radioText_Checked(object sender, RoutedEventArgs e)
         {
-            if (this.IsInitialized)
+            if (IsInitialized)
             {
                 timeText.Visibility = Visibility.Visible;
                 timeOptions.Visibility = Visibility.Visible;

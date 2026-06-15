@@ -64,7 +64,7 @@ namespace TwitchDownloaderCore.Models
             private Dictionary<string, string> _sessionData;
             public IReadOnlyDictionary<string, string> SessionData
             {
-                get => _sessionData ??= new Dictionary<string, string>();
+                get => _sessionData ??= [];
                 init => _sessionData = new Dictionary<string, string>(value);
             }
 
@@ -78,7 +78,7 @@ namespace TwitchDownloaderCore.Models
             public IReadOnlyList<KeyValuePair<string, string>> UnparsedValues
             {
                 get => _unparsedValues ??= [];
-                init => _unparsedValues = [..value];
+                init => _unparsedValues = [.. value];
             }
 
             public override string ToString()
