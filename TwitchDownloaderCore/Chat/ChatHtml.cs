@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Text;
 using System.Web;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
@@ -20,12 +14,12 @@ namespace TwitchDownloaderCore.Chat
         /// </summary>
         public static async Task SerializeAsync(Stream outputStream, string filePath, ChatRoot chatRoot, ITaskLogger logger, bool embedData = true, CancellationToken cancellationToken = default)
         {
-            Dictionary<string, EmbedEmoteData> thirdEmoteData = new();
+            Dictionary<string, EmbedEmoteData> thirdEmoteData = [];
             await BuildThirdPartyDictionary(chatRoot, embedData, thirdEmoteData, logger, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            Dictionary<string, EmbedChatBadge> chatBadgeData = new();
+            Dictionary<string, EmbedChatBadge> chatBadgeData = [];
             await BuildChatBadgesDictionary(chatRoot, embedData, chatBadgeData, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -99,8 +93,10 @@ namespace TwitchDownloaderCore.Chat
                 }
                 else
                 {
-                    EmbedEmoteData embedEmoteData = new();
-                    embedEmoteData.url = item.ImageUrl.Replace("[scale]", "1");
+                    EmbedEmoteData embedEmoteData = new()
+                    {
+                        url = item.ImageUrl.Replace("[scale]", "1")
+                    };
                     thirdEmoteData[item.Code] = embedEmoteData;
                 }
             }
@@ -120,7 +116,7 @@ namespace TwitchDownloaderCore.Chat
             }
         }
 
-        private static string GetChatBadgesHtml(bool embedData, IReadOnlyDictionary<string, EmbedChatBadge> chatBadgeData, Comment comment)
+        private static string GetChatBadgesHtml(bool embedData, Dictionary<string, EmbedChatBadge> chatBadgeData, Comment comment)
         {
             if (comment.message.user_badges is null || comment.message.user_badges.Count == 0)
                 return "";
@@ -149,7 +145,7 @@ namespace TwitchDownloaderCore.Chat
             return string.Join(' ', badgesHtml);
         }
 
-        private static string GetMessageHtml(bool embedEmotes, IReadOnlyDictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
+        private static string GetMessageHtml(bool embedEmotes, Dictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
         {
             var message = new StringBuilder(comment.message.body.Length);
 

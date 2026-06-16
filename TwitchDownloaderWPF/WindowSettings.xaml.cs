@@ -1,10 +1,8 @@
 ﻿using HandyControl.Data;
 using Microsoft.Win32;
-using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;

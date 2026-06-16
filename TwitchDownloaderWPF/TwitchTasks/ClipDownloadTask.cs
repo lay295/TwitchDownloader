@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using TwitchDownloaderCore;
+﻿using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderWPF.Utils;
 

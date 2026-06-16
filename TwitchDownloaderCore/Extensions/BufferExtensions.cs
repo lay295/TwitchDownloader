@@ -1,5 +1,4 @@
 using SkiaSharp;
-using System;
 using System.Buffers;
 using System.Text;
 using Buffer = HarfBuzzSharp.Buffer;

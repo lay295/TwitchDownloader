@@ -1,5 +1,3 @@
-using System;
-
 namespace TwitchDownloaderCore.Extensions
 {
     public static class ReadOnlySpanExtensions

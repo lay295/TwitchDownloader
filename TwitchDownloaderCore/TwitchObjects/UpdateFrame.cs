@@ -1,5 +1,4 @@
 ﻿using SkiaSharp;
-using System.Collections.Generic;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
