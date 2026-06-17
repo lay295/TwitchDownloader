@@ -534,7 +534,7 @@ namespace TwitchDownloaderCore
 
                 logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
-                HandleFfmpegOutput(e.Data, EncodingTimeRegex, videoLength);
+                HandleFfmpegOutput(e.Data, videoLength);
             };
 
             _progress.LogVerbose($"Running \"{downloadOptions.FfmpegPath}\" in \"{process.StartInfo.WorkingDirectory}\" with args: {CombineArguments(process.StartInfo.ArgumentList)}");
@@ -567,9 +567,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void HandleFfmpegOutput(string output, Regex encodingTimeRegex, TimeSpan videoLength)
+        private void HandleFfmpegOutput(string output, TimeSpan videoLength)
         {
-            var encodingTimeMatch = encodingTimeRegex.Match(output);
+            var encodingTimeMatch = EncodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
                 return;
 
