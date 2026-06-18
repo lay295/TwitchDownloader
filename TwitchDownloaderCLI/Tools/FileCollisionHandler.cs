@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCore.Interfaces;
@@ -5,10 +7,16 @@ using TwitchDownloaderCore.Services;
 
 namespace TwitchDownloaderCLI.Tools
 {
-    internal class FileCollisionHandler(IFileCollisionArgs collisionArgs, ITaskLogger logger)
+    internal class FileCollisionHandler
     {
-        private readonly IFileCollisionArgs _collisionArgs = collisionArgs;
-        private readonly ITaskLogger _logger = logger;
+        private readonly IFileCollisionArgs _collisionArgs;
+        private readonly ITaskLogger _logger;
+
+        public FileCollisionHandler(IFileCollisionArgs collisionArgs, ITaskLogger logger)
+        {
+            _collisionArgs = collisionArgs;
+            _logger = logger;
+        }
 
         public FileInfo HandleCollisionCallback(FileInfo fileInfo)
         {

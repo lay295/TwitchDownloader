@@ -1,68 +1,68 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <RepositoryUrl>https://github.com/lay295/TwitchDownloader</RepositoryUrl>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Authors>Lewis Pardo</Authors>
-        <Version>1.56.3</Version>
-        <Platforms>AnyCPU;x64</Platforms>
-        <LangVersion>default</LangVersion>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <!--TODO: <Nullable>enable</Nullable> once we have required keyword-->
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RepositoryUrl>https://github.com/lay295/TwitchDownloader</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Lewis Pardo</Authors>
+    <Version>1.56.3</Version>
+    <Platforms>AnyCPU;x64</Platforms>
+    <LangVersion>default</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!--TODO: <Nullable>enable</Nullable> once we have required keyword-->
+  </PropertyGroup>
 
-    <ItemGroup>
-        <!--<EmbeddedResource Include="Resources\InterVariable.ttf" />-->
-        <!--<EmbeddedResource Include="Resources\InterVariable-Italic.ttf" />-->
-        <EmbeddedResource Include="Resources\Inter-Regular.ttf" />
-        <EmbeddedResource Include="Resources\Inter-Italic.ttf" />
-        <EmbeddedResource Include="Resources\Inter-Bold.ttf" />
-        <EmbeddedResource Include="Resources\Inter-BoldItalic.ttf" />
-        <EmbeddedResource Include="Resources\chat-template.html" />
-        <EmbeddedResource Include="Resources\noto-emoji-2.038.zip" />
-        <None Include="Resources\TD-License" Visible="false" />
-        <EmbeddedResource Include="Resources\THIRD-PARTY-LICENSES.txt" />
-    </ItemGroup>
+  <ItemGroup>
+    <!--<EmbeddedResource Include="Resources\InterVariable.ttf" />-->
+    <!--<EmbeddedResource Include="Resources\InterVariable-Italic.ttf" />-->
+    <EmbeddedResource Include="Resources\Inter-Regular.ttf" />
+    <EmbeddedResource Include="Resources\Inter-Italic.ttf" />
+    <EmbeddedResource Include="Resources\Inter-Bold.ttf" />
+    <EmbeddedResource Include="Resources\Inter-BoldItalic.ttf" />
+    <EmbeddedResource Include="Resources\chat-template.html" />
+    <EmbeddedResource Include="Resources\noto-emoji-2.038.zip" />
+    <None Include="Resources\TD-License" Visible="false" />
+    <EmbeddedResource Include="Resources\THIRD-PARTY-LICENSES.txt" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="HarfBuzzSharp" Version="8.3.1.2" />
-        <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.2" />
-        <PackageReference Include="SkiaSharp" Version="2.88.9" />
-        <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.9" />
-        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.9" />
-        <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="2.88.9" />
-        <PackageReference Include="Unicode.net" Version="2.0.0" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="HarfBuzzSharp" Version="8.3.1.2" />
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.2" />
+    <PackageReference Include="SkiaSharp" Version="2.88.9" />
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.9" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.9" />
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="2.88.9" />
+    <PackageReference Include="System.Text.Json" Version="10.0.2" />
+    <PackageReference Include="Unicode.net" Version="2.0.0" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <None Include="Resources\TD-License">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-            <TargetPath>COPYRIGHT.txt</TargetPath>
-            <Visible>false</Visible>
-        </None>
-        <ContentWithTargetPath Include="Resources\THIRD-PARTY-LICENSES.txt">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-            <TargetPath>THIRD-PARTY-LICENSES.txt</TargetPath>
-            <Visible>false</Visible>
-        </ContentWithTargetPath>
-    </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\TD-License">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>COPYRIGHT.txt</TargetPath>
+      <Visible>false</Visible>
+    </None>
+    <ContentWithTargetPath Include="Resources\THIRD-PARTY-LICENSES.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>THIRD-PARTY-LICENSES.txt</TargetPath>
+      <Visible>false</Visible>
+    </ContentWithTargetPath>
+  </ItemGroup>
 
-    <ItemGroup>
-        <Compile Update="Properties\Resources.Designer.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Resources.resx</DependentUpon>
-        </Compile>
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
-    <ItemGroup>
-        <EmbeddedResource Update="Properties\Resources.resx">
-            <Generator>ResXFileCodeGenerator</Generator>
-            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-    </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>

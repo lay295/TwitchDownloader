@@ -1,21 +1,19 @@
+using System;
 using System.Text;
 
 namespace TwitchDownloaderCore.Extensions
 {
     public static class StringBuilderExtensions
     {
-        extension(StringBuilder sb)
+        public static StringBuilder TrimEnd(this StringBuilder sb, ReadOnlySpan<char> trimChars)
         {
-            public StringBuilder TrimEnd(ReadOnlySpan<char> trimChars)
+            var trimLength = 0;
+            while (sb.Length - trimLength > 0 && trimChars.Contains(sb[^(trimLength + 1)]))
             {
-                var trimLength = 0;
-                while (sb.Length - trimLength > 0 && trimChars.Contains(sb[^(trimLength + 1)]))
-                {
-                    trimLength++;
-                }
-
-                return sb.Remove(sb.Length - trimLength, trimLength);
+                trimLength++;
             }
+
+            return sb.Remove(sb.Length - trimLength, trimLength);
         }
     }
 }

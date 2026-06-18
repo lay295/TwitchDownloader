@@ -1,9 +1,11 @@
 ﻿using AutoUpdaterDotNET;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -21,15 +23,12 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static PageVodDownload pageVodDownload = new();
-        public static PageClipDownload pageClipDownload = new();
-        public static PageChatDownload pageChatDownload = new();
-        public static PageChatUpdate pageChatUpdate = new();
-        public static PageChatRender pageChatRender = new();
-        public static PageQueue pageQueue = new();
-
-        [GeneratedRegex("{crop_(?=(?:start|end)(?:_|}))")]
-        private static partial Regex OldCropParametersRegex { get; }
+        public static PageVodDownload pageVodDownload = new PageVodDownload();
+        public static PageClipDownload pageClipDownload = new PageClipDownload();
+        public static PageChatDownload pageChatDownload = new PageChatDownload();
+        public static PageChatUpdate pageChatUpdate = new PageChatUpdate();
+        public static PageChatRender pageChatRender = new PageChatRender();
+        public static PageQueue pageQueue = new PageQueue();
 
         public MainWindow()
         {
@@ -76,9 +75,9 @@ namespace TwitchDownloaderWPF
             Main.Content = pageVodDownload;
 
             // Replace old crop parameters with new trim parameters
-            Settings.Default.TemplateVod  = OldCropParametersRegex.Replace(Settings.Default.TemplateVod , "{trim_");
-            Settings.Default.TemplateClip = OldCropParametersRegex.Replace(Settings.Default.TemplateClip, "{trim_");
-            Settings.Default.TemplateChat = OldCropParametersRegex.Replace(Settings.Default.TemplateChat, "{trim_");
+            Settings.Default.TemplateVod = Regex.Replace(Settings.Default.TemplateVod, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
+            Settings.Default.TemplateClip = Regex.Replace(Settings.Default.TemplateClip, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
+            Settings.Default.TemplateChat = Regex.Replace(Settings.Default.TemplateChat, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
             Settings.Default.Save();
 
             // Flash the window taskbar icon if it is not in the foreground. This is to mitigate a problem where

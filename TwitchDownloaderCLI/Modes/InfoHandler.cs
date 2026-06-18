@@ -1,9 +1,13 @@
-﻿using Spectre.Console;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Web;
+using Spectre.Console;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -61,7 +65,7 @@ namespace TwitchDownloaderCLI.Modes
                     HandleVodJson();
                     break;
                 default:
-                    throw new ArgumentException(null, nameof(inputOptions));
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -226,7 +230,7 @@ namespace TwitchDownloaderCLI.Modes
                     HandleClipJson();
                     break;
                 default:
-                    throw new ArgumentException(null, nameof(inputOptions));
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -410,7 +414,7 @@ namespace TwitchDownloaderCLI.Modes
         }
 
         // cmd.exe only supports chars from codepage 437, so the default console encoding on Windows is codepage 437 instead of UTF-8
-        private static void SetUtf8Encoding(bool useUtf8, CliTaskProgress logger)
+        private static void SetUtf8Encoding(bool useUtf8, ITaskLogger logger)
         {
             if (!useUtf8 || Console.OutputEncoding.CodePage == Encoding.UTF8.CodePage)
             {

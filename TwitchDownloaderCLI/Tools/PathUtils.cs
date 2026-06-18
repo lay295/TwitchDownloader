@@ -1,4 +1,7 @@
-﻿namespace TwitchDownloaderCLI.Tools
+﻿using System;
+using System.IO;
+
+namespace TwitchDownloaderCLI.Tools
 {
     internal static class PathUtils
     {

@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace TwitchDownloaderCore.Tools
@@ -25,7 +27,7 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        private static void TryCopyIfDifferent(MemoryStream resourceStream, string filePath)
+        private static void TryCopyIfDifferent(Stream resourceStream, string filePath)
         {
             try
             {

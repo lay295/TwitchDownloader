@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore.Tools

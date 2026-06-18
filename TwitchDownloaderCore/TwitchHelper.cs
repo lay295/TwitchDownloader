@@ -1,13 +1,20 @@
 ﻿using SkiaSharp;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
@@ -18,11 +25,8 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public static partial class TwitchHelper
+    public static class TwitchHelper
     {
-        [GeneratedRegex(@"\d+_\d+$", RegexOptions.RightToLeft)]
-        private static partial Regex VideoFolderRegex { get; }
-
         private static readonly HttpClient httpClient = new()
         {
             Timeout = TimeSpan.FromSeconds(60)
@@ -261,7 +265,7 @@ namespace TwitchDownloaderCore
                 var message = ex switch
                 {
                     HttpRequestException { StatusCode: not null } hre => $"{providerName} returned {(int)hre.StatusCode}: {hre.StatusCode}.",
-                    HttpRequestException { InnerException: not null } when ex.Message.Contains("SSL") => $"{ex.Message[..^1]}: {ex.InnerException.Message}",
+                    HttpRequestException { InnerException: not null } when ex.Message.Contains("SSL") => $"{ex.Message.Remove(ex.Message.Length - 1)}: {ex.InnerException.Message}",
                     TaskCanceledException when ex.Message.Contains("HttpClient.Timeout") => $"{providerName} timed out.",
                     _ => ex.Message
                 };
@@ -425,7 +429,7 @@ namespace TwitchDownloaderCore
             // No 3rd party emotes are wanted
             if (!bttv && !ffz && !stv)
             {
-                return [];
+                return new List<TwitchEmote>();
             }
 
             var emotes = new Dictionary<string, TwitchEmote>();
@@ -461,9 +465,9 @@ namespace TwitchDownloaderCore
                 return emotes.Values.ToList();
             }
 
-            DirectoryInfo bttvFolder = new(Path.Combine(cacheFolder, "bttv"));
-            DirectoryInfo ffzFolder = new(Path.Combine(cacheFolder, "ffz"));
-            DirectoryInfo stvFolder = new(Path.Combine(cacheFolder, "stv"));
+            DirectoryInfo bttvFolder = new DirectoryInfo(Path.Combine(cacheFolder, "bttv"));
+            DirectoryInfo ffzFolder = new DirectoryInfo(Path.Combine(cacheFolder, "ffz"));
+            DirectoryInfo stvFolder = new DirectoryInfo(Path.Combine(cacheFolder, "stv"));
 
             EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, logger, cancellationToken);
 
@@ -557,7 +561,7 @@ namespace TwitchDownloaderCore
                 var message = ex switch
                 {
                     HttpRequestException { StatusCode: not null } hre => $"{providerName} returned {(int)hre.StatusCode}: {hre.StatusCode}.",
-                    HttpRequestException { InnerException: not null } when ex.Message.Contains("SSL") => $"{ex.Message[..^1]}: {ex.InnerException.Message}",
+                    HttpRequestException { InnerException: not null } when ex.Message.Contains("SSL") => $"{ex.Message.Remove(ex.Message.Length - 1)}: {ex.InnerException.Message}",
                     TaskCanceledException when ex.Message.Contains("HttpClient.Timeout") => $"{providerName} timed out.",
                     _ => ex.Message
                 };
@@ -570,7 +574,7 @@ namespace TwitchDownloaderCore
         {
             var emotes = new Dictionary<string, TwitchEmote>();
 
-            DirectoryInfo emoteFolder = new(Path.Combine(cacheFolder, "emotes"));
+            DirectoryInfo emoteFolder = new DirectoryInfo(Path.Combine(cacheFolder, "emotes"));
             if (!emoteFolder.Exists)
                 emoteFolder = CreateDirectory(emoteFolder.FullName);
 
@@ -675,7 +679,7 @@ namespace TwitchDownloaderCore
             subBadgeResponse.EnsureSuccessStatusCode();
             var subBadges = (await subBadgeResponse.Content.ReadFromJsonAsync<GqlSubBadgeResponse>(cancellationToken: cancellationToken)).data.user.badges.GroupBy(x => x.name).ToDictionary(x => x.Key, x => x.ToList());
 
-            List<EmbedChatBadge> badges = [];
+            List<EmbedChatBadge> badges = new List<EmbedChatBadge>();
 
             var nameList = comments.Where(comment => comment.message.user_badges != null)
                 .SelectMany(comment => comment.message.user_badges)
@@ -685,7 +689,7 @@ namespace TwitchDownloaderCore
 
             foreach (var name in nameList)
             {
-                Dictionary<string, ChatBadgeData> versions = [];
+                Dictionary<string, ChatBadgeData> versions = new();
                 if (globalBadges.TryGetValue(name, out var globalBadge))
                 {
                     foreach (var badge in globalBadge)
@@ -733,7 +737,7 @@ namespace TwitchDownloaderCore
 
                     try
                     {
-                        ChatBadge newBadge = new(data.name, data.versions);
+                        ChatBadge newBadge = new ChatBadge(data.name, data.versions);
 
                         if (!badges.TryAdd(data.name, newBadge))
                         {
@@ -756,7 +760,7 @@ namespace TwitchDownloaderCore
 
             List<EmbedChatBadge> badgesData = await GetChatBadgesData(comments, streamerId, cancellationToken);
 
-            DirectoryInfo badgeFolder = new(Path.Combine(cacheFolder, "badges"));
+            DirectoryInfo badgeFolder = new DirectoryInfo(Path.Combine(cacheFolder, "badges"));
             if (!badgeFolder.Exists)
                 badgeFolder = CreateDirectory(badgeFolder.FullName);
 
@@ -764,7 +768,7 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    Dictionary<string, ChatBadgeData> versions = [];
+                    Dictionary<string, ChatBadgeData> versions = new();
                     foreach (var (version, data) in badge.versions)
                     {
                         string id = data.url.GetNthOccurrence('/', ^2).ToString();
@@ -891,8 +895,8 @@ namespace TwitchDownloaderCore
 
                     try
                     {
-                        List<KeyValuePair<int, TwitchEmote>> tierList = [];
-                        CheerEmote newEmote = new() { prefix = data.prefix, tierList = tierList };
+                        List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
+                        CheerEmote newEmote = new CheerEmote() { prefix = data.prefix, tierList = tierList };
                         foreach (var (cost, cheermote) in data.tierList)
                         {
                             var tierEmote = new TwitchEmote(cheermote.data, null, EmoteProvider.FirstParty, cheermote.imageScale, cheermote.id, cheermote.name);
@@ -929,13 +933,18 @@ namespace TwitchDownloaderCore
             cheerResponseMessage.EnsureSuccessStatusCode();
             var cheerResponse = await cheerResponseMessage.Content.ReadFromJsonAsync<GqlCheerResponse>(cancellationToken: cancellationToken);
 
-            DirectoryInfo bitFolder = new(Path.Combine(cacheFolder, "bits"));
+            DirectoryInfo bitFolder = new DirectoryInfo(Path.Combine(cacheFolder, "bits"));
             if (!bitFolder.Exists)
                 bitFolder = CreateDirectory(bitFolder.FullName);
 
             if (cheerResponse?.data != null)
             {
-                List<CheerGroup> groupList = [.. cheerResponse.data.cheerConfig.groups];
+                List<CheerGroup> groupList = new List<CheerGroup>();
+
+                foreach (CheerGroup group in cheerResponse.data.cheerConfig.groups)
+                {
+                    groupList.Add(group);
+                }
 
                 if (cheerResponse.data.user?.cheer?.cheerGroups != null)
                 {
@@ -962,8 +971,8 @@ namespace TwitchDownloaderCore
                         string prefix = node.prefix;
                         try
                         {
-                            List<KeyValuePair<int, TwitchEmote>> tierList = [];
-                            CheerEmote newEmote = new() { prefix = prefix, tierList = tierList };
+                            List<KeyValuePair<int, TwitchEmote>> tierList = new List<KeyValuePair<int, TwitchEmote>>();
+                            CheerEmote newEmote = new CheerEmote() { prefix = prefix, tierList = tierList };
                             foreach (Tier tier in node.tiers)
                             {
                                 int minBits = tier.bits;
@@ -1073,8 +1082,13 @@ namespace TwitchDownloaderCore
                 }
                 else
                 {
-                    // I would prefer to not throw here, but the alternative is refactoring the task queue :/
-                    fileInfo = fileAlreadyExistsCallback(fileInfo) ?? throw new FileNotFoundException("No destination file was provided, aborting.");
+                    fileInfo = fileAlreadyExistsCallback(fileInfo);
+
+                    if (fileInfo is null)
+                    {
+                        // I would prefer to not throw here, but the alternative is refactoring the task queue :/
+                        throw new FileNotFoundException("No destination file was provided, aborting.");
+                    }
 
                     if (fullPath != fileInfo.FullName)
                     {
@@ -1169,13 +1183,14 @@ namespace TwitchDownloaderCore
                 return;
             }
 
+            var videoFolderRegex = new Regex(@"\d+_\d+$", RegexOptions.RightToLeft);
             var allCacheDirectories = Directory.GetDirectories(cacheFolder);
 
-            var oldVideoCaches = 
-                allCacheDirectories
-                .Where(directory => VideoFolderRegex.IsMatch(directory))
-                .Select(directory => new DirectoryInfo(directory))
-                .Where(directoryInfo => DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7)
+            var oldVideoCaches = (from directory in allCacheDirectories
+                    where videoFolderRegex.IsMatch(directory)
+                    let directoryInfo = new DirectoryInfo(directory)
+                    where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7
+                    select directoryInfo)
                 .ToArray();
 
             if (oldVideoCaches.Length == 0)
@@ -1315,7 +1330,7 @@ namespace TwitchDownloaderCore
             response.EnsureSuccessStatusCode();
 
             var chapterResponse = await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
-            chapterResponse.data.video.moments ??= new VideoMomentConnection { edges = [] };
+            chapterResponse.data.video.moments ??= new VideoMomentConnection { edges = new List<VideoMomentEdge>() };
 
             // For some reason durations can be negative sometimes
             foreach (var edge in chapterResponse.data.video.moments.edges)
@@ -1408,7 +1423,7 @@ namespace TwitchDownloaderCore
 
                 if (upSnapThreshold != 0)
                 {
-                    var o = imageHeight - desiredHeight % imageHeight;
+                    var o = imageHeight - (desiredHeight % imageHeight);
                     if (o <= upSnapThreshold)
                     {
                         desiredHeight += o;

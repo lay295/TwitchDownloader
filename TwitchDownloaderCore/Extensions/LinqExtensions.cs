@@ -1,18 +1,19 @@
-﻿namespace TwitchDownloaderCore.Extensions
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace TwitchDownloaderCore.Extensions
 {
     public static class LinqExtensions
     {
-        extension<TSource>(IEnumerable<TSource> enumerable)
+        public static IEnumerable<TSource> WhereOnlyIf<TSource>(this IEnumerable<TSource> enumerable, Func<TSource, bool> predicate, bool shouldFilter)
         {
-            public IEnumerable<TSource> WhereOnlyIf(Func<TSource, bool> predicate, bool shouldFilter)
+            if (shouldFilter)
             {
-                if (shouldFilter)
-                {
-                    return enumerable.Where(predicate);
-                }
-
-                return enumerable;
+                return enumerable.Where(predicate);
             }
+
+            return enumerable;
         }
     }
 }

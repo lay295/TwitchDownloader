@@ -1,4 +1,5 @@
-﻿using TwitchDownloaderCore.Extensions;
+﻿using System.Collections.Generic;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.Tools

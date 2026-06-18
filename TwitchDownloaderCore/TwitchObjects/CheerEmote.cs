@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -7,7 +10,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public bool Disposed { get; private set; } = false;
         public string prefix { get; set; }
-        public List<KeyValuePair<int, TwitchEmote>> tierList { get; set; } = [];
+        public List<KeyValuePair<int, TwitchEmote>> tierList { get; set; } = new List<KeyValuePair<int, TwitchEmote>>();
 
         public KeyValuePair<int, TwitchEmote> getTier(int value)
         {

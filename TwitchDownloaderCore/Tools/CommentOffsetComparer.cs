@@ -1,4 +1,5 @@
-﻿using TwitchDownloaderCore.TwitchObjects;
+﻿using System.Collections.Generic;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Tools
 {

@@ -1,6 +1,6 @@
-using SkiaSharp;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using SkiaSharp;
 
 namespace TwitchDownloaderCore.Tests.ToolTests
 {

@@ -1,8 +1,15 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
@@ -12,14 +19,8 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public sealed partial class VideoDownloader
+    public sealed class VideoDownloader
     {
-        [GeneratedRegex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)", RegexOptions.Compiled)]
-        private static partial Regex EncodingTimeRegex { get; }
-
-        [GeneratedRegex(@"-muted-\w+(?=\.m3u8$)")]
-        private static partial Regex MutedHighlightRegex { get; }
-
         private readonly VideoDownloadOptions downloadOptions;
         private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
         private readonly ITaskProgress _progress;
@@ -100,7 +101,7 @@ namespace TwitchDownloaderCore
                                          "If you encounter playback issues, try using an FFmpeg-based application like MPV, Kdenlive, or Blender, or re-encode the video file as H.264/AVC or H.265/HEVC with FFmpeg or Handbrake.");
                 }
 
-                var headerFile = await GetHeaderFile(playlist, baseUrl);
+                var headerFile = await GetHeaderFile(playlist, baseUrl, cancellationToken);
 
                 _progress.SetTemplateStatus("Downloading {0}% [2/4]", 0);
 
@@ -172,7 +173,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<string> GetHeaderFile(M3U8 playlist, Uri baseUrl)
+        private async Task<string> GetHeaderFile(M3U8 playlist, Uri baseUrl, CancellationToken cancellationToken)
         {
             var map = playlist.FileMetadata.Map;
             if (string.IsNullOrWhiteSpace(map?.Uri))
@@ -240,7 +241,7 @@ namespace TwitchDownloaderCore
 
         private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
-            bool allThreadsExited;
+            var allThreadsExited = false;
             var totalPartsToDownload = downloadState.PartQueue.Count;
             var previousMissingCount = 0;
             var restartedThreads = 0;
@@ -525,6 +526,7 @@ namespace TwitchDownloaderCore
                 process.StartInfo.ArgumentList.Add(arg);
             }
 
+            var encodingTimeRegex = new Regex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)", RegexOptions.Compiled);
             var logQueue = new ConcurrentQueue<string>();
 
             process.ErrorDataReceived += (sender, e) =>
@@ -534,7 +536,7 @@ namespace TwitchDownloaderCore
 
                 logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
-                HandleFfmpegOutput(e.Data, videoLength);
+                HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength);
             };
 
             _progress.LogVerbose($"Running \"{downloadOptions.FfmpegPath}\" in \"{process.StartInfo.WorkingDirectory}\" with args: {CombineArguments(process.StartInfo.ArgumentList)}");
@@ -567,9 +569,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void HandleFfmpegOutput(string output, TimeSpan videoLength)
+        private void HandleFfmpegOutput(string output, Regex encodingTimeRegex, TimeSpan videoLength)
         {
-            var encodingTimeMatch = EncodingTimeRegex.Match(output);
+            var encodingTimeMatch = encodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
                 return;
 
@@ -595,7 +597,7 @@ namespace TwitchDownloaderCore
             catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
             {
                 // Hacky workaround for old highlights that were muted
-                var newUrl = MutedHighlightRegex.Replace(playlistUrl, "");
+                var newUrl = Regex.Replace(playlistUrl, @"-muted-\w+(?=\.m3u8$)", "");
                 if (playlistUrl == newUrl)
                     throw;
 
@@ -615,7 +617,7 @@ namespace TwitchDownloaderCore
             return (playlist, airDate);
         }
 
-        private Range GetStreamListTrim(M3U8.Stream[] streamList, out TimeSpan videoLength, out decimal startOffset, out decimal endDuration)
+        private Range GetStreamListTrim(IList<M3U8.Stream> streamList, out TimeSpan videoLength, out decimal startOffset, out decimal endDuration)
         {
             startOffset = 0;
             endDuration = 0;
@@ -638,13 +640,13 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            var endIndex = streamList.Length;
+            var endIndex = streamList.Count;
             var endTime = streamList.Sum(x => x.PartInfo.Duration);
             var endOffset = 0m;
             if (downloadOptions.TrimEnding)
             {
                 var trimTotalSeconds = (decimal)downloadOptions.TrimEndingTime.TotalSeconds;
-                for (var i = streamList.Length - 1; i >= 0; i--)
+                for (var i = streamList.Count - 1; i >= 0; i--)
                 {
                     var videoPart = streamList[i];
                     if (endTime - videoPart.PartInfo.Duration < trimTotalSeconds)
@@ -665,7 +667,7 @@ namespace TwitchDownloaderCore
                 startOffset = endOffset = endDuration = 0;
             }
 
-            videoLength = TimeSpan.FromSeconds((double)(endTime - endOffset - (startTime + startOffset)));
+            videoLength = TimeSpan.FromSeconds((double)((endTime - endOffset) - (startTime + startOffset)));
 
             return new Range(startIndex, endIndex);
         }

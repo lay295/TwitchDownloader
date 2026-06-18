@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Models.Interfaces;
 
@@ -61,7 +64,7 @@ namespace TwitchDownloaderCore.Models
 
         public override IVideoQuality<M3U8.Stream> BestQuality()
         {
-            if (Qualities is null || Qualities.Count == 0)
+            if (Qualities is null)
             {
                 return null;
             }
@@ -75,7 +78,7 @@ namespace TwitchDownloaderCore.Models
 
         public override IVideoQuality<M3U8.Stream> WorstQuality()
         {
-            if (Qualities is null || Qualities.Count == 0)
+            if (Qualities is null)
             {
                 return null;
             }
@@ -84,7 +87,7 @@ namespace TwitchDownloaderCore.Models
                 .Where(x => !x.Item.IsSource() && !x.Item.IsAudioOnly())
                 .MinBy(x => x.Item.StreamInfo.Resolution.Width * x.Item.StreamInfo.Resolution.Height * x.Item.StreamInfo.Framerate);
 
-            return worstQuality ?? Qualities[^1];
+            return worstQuality ?? Qualities.FirstOrDefault();
         }
     }
 }

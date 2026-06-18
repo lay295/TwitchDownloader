@@ -1,4 +1,6 @@
 ﻿using SkiaSharp;
+using System;
+using System.IO;
 using TwitchDownloaderCore.Chat;
 
 namespace TwitchDownloaderCore.Options
@@ -49,8 +51,8 @@ namespace TwitchDownloaderCore.Options
         public string TempFolder { get; set; }
         public bool SubMessages { get; set; }
         public bool ChatBadges { get; set; }
-        public string[] IgnoreUsersArray { get; set; } = [];
-        public string[] BannedWordsArray { get; set; } = [];
+        public string[] IgnoreUsersArray { get; set; } = Array.Empty<string>();
+        public string[] BannedWordsArray { get; set; } = Array.Empty<string>();
         public double EmoteScale { get; set; } = 1.0;
         public double BadgeScale { get; set; } = 1.0;
         public double EmojiScale { get; set; } = 1.0;

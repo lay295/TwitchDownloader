@@ -1,4 +1,7 @@
-﻿using TwitchDownloaderCore;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderWPF.Utils;
 
@@ -47,7 +50,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            VideoDownloader downloader = new(DownloadOptions, progress);
+            VideoDownloader downloader = new VideoDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
 
             try

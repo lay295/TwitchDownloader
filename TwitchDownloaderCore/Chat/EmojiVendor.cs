@@ -1,4 +1,6 @@
-﻿using TwitchDownloaderCore.Properties;
+﻿using System;
+using System.IO;
+using TwitchDownloaderCore.Properties;
 
 namespace TwitchDownloaderCore.Chat
 {

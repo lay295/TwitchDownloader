@@ -1,4 +1,7 @@
-﻿namespace TwitchDownloaderCore.TwitchObjects.Gql
+﻿using System;
+using System.Collections.Generic;
+
+namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
     public class UserInfoData
     {

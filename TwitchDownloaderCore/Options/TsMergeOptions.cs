@@ -1,4 +1,7 @@
-﻿namespace TwitchDownloaderCore.Options
+﻿using System;
+using System.IO;
+
+namespace TwitchDownloaderCore.Options
 {
     public class TsMergeOptions
     {

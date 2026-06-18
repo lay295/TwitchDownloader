@@ -1,4 +1,5 @@
-﻿using TwitchDownloaderCLI.Modes.Arguments;
+﻿using System.Threading;
+using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;

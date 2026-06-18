@@ -1,3 +1,4 @@
+using System;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCore.Interfaces;
 

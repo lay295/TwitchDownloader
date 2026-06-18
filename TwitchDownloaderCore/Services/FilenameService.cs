@@ -1,6 +1,8 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
@@ -25,20 +27,8 @@ namespace TwitchDownloaderCore.Services
         [GeneratedRegex("""{length_custom="(.*?)"}""")]
         private static partial Regex LengthCustomRegex { get; }
 
-        public static string GetFilename(
-                        string   template,
-            [AllowNull] string   title,
-            [AllowNull] string   id,
-                        DateTime date,
-            [AllowNull] string   channel,
-            [AllowNull] string   channelId,
-                        TimeSpan trimStart,
-                        TimeSpan trimEnd,
-                        TimeSpan videoLength,
-                        long     viewCount,
-            [AllowNull] string   game,
-            [AllowNull] string   clipper = null,
-            [AllowNull] string   clipperId = null)
+        public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date, [AllowNull] string channel, [AllowNull] string channelId, TimeSpan trimStart, TimeSpan trimEnd, TimeSpan videoLength, long viewCount,
+            [AllowNull] string game, [AllowNull] string clipper = null, [AllowNull] string clipperId = null)
         {
             var trimLength = trimEnd - trimStart;
 
@@ -50,7 +40,7 @@ namespace TwitchDownloaderCore.Services
                 .Replace("{clipper}", ReplaceInvalidFilenameChars(clipper))
                 .Replace("{clipper_id}", ReplaceInvalidFilenameChars(clipperId))
                 .Replace("{date}", date.ToString("M-d-yy"))
-                .Replace("{random_string}", Path.GetRandomFileName()[..8]) // Remove the period
+                .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
                 .Replace("{trim_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
                 .Replace("{trim_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimEnd))
                 .Replace("{trim_length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimLength))
@@ -88,9 +78,7 @@ namespace TwitchDownloaderCore.Services
             return Path.Combine(Path.Combine(additionalSubfolders), ReplaceInvalidFilenameChars(fileName));
         }
 
-#pragma warning disable CA1859 // Use concrete types when possible for improved performance
         private static void ReplaceCustomWithFormattable<TFormattable>(StringBuilder sb, Regex regex, TFormattable formattable, [AllowNull] IFormatProvider formatProvider = null) where TFormattable : IFormattable
-#pragma warning restore CA1859 // Use concrete types when possible for improved performance
         {
             do
             {
@@ -123,7 +111,6 @@ namespace TwitchDownloaderCore.Services
             return returnString;
         }
 
-        private static readonly SearchValues<char> CommonInvalidChars = SearchValues.Create("""*":<>?|/\""");
         private static readonly SearchValues<char> FilenameInvalidChars = SearchValues.Create(Path.GetInvalidFileNameChars());
 
         [GeneratedRegex("""(?<=\d):(?=\d\d)""")]
@@ -139,7 +126,7 @@ namespace TwitchDownloaderCore.Services
 
             var newName = TimestampRegex.Replace(filename, "_");
 
-            if (newName.AsSpan().IndexOfAny(CommonInvalidChars) != -1)
+            if (newName.AsSpan().IndexOfAny("""*":<>?|/\""") != -1)
             {
                 newName = string.Create(filename.Length, filename, static (span, str) =>
                 {
@@ -175,7 +162,6 @@ namespace TwitchDownloaderCore.Services
 
             if (char.IsDigit(qualityString[0])
                 || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase)
-                || qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase)
                 || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
             {
                 return ".mp4";

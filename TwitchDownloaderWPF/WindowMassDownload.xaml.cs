@@ -1,5 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -316,7 +321,7 @@ namespace TwitchDownloaderWPF
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
                 if (queue.ShowDialog().GetValueOrDefault())
-                    Close();
+                    this.Close();
             }
         }
 
@@ -449,7 +454,7 @@ namespace TwitchDownloaderWPF
 
         private void UpdateRecentChannels()
         {
-            var recentChannels = Settings.Default.RecentChannels ?? [];
+            var recentChannels = Settings.Default.RecentChannels ?? new StringCollection();
 
             if (!string.IsNullOrWhiteSpace(currentChannel?.login))
             {

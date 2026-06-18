@@ -226,11 +226,11 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             for (var i = 0; i < m3u8.Streams.Length; i++)
             {
                 var stream = m3u8.Streams[i];
-                var (programDateTime, duration, isLive, path) = streamValues[i];
-                Assert.Equal(programDateTime, stream.ProgramDateTime);
-                Assert.Equal(duration, stream.PartInfo.Duration);
-                Assert.Equal(isLive, stream.PartInfo.Live);
-                Assert.Equal(path, stream.Path);
+                var expectedStream = streamValues[i];
+                Assert.Equal(expectedStream.programDateTime, stream.ProgramDateTime);
+                Assert.Equal(expectedStream.duration, stream.PartInfo.Duration);
+                Assert.Equal(expectedStream.isLive, stream.PartInfo.Live);
+                Assert.Equal(expectedStream.path, stream.Path);
             }
         }
 

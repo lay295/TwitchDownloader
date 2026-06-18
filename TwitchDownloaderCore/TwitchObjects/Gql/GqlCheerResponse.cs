@@ -1,4 +1,6 @@
-﻿namespace TwitchDownloaderCore.TwitchObjects.Gql
+﻿using System.Collections.Generic;
+
+namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
     public class Tier
     {

@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace TwitchDownloaderCore.Tools
 {
@@ -38,7 +40,7 @@ namespace TwitchDownloaderCore.Tools
                     'h' => TimeSpan.FromHours(time),
                     'm' => TimeSpan.FromMinutes(time),
                     's' => TimeSpan.FromSeconds(time),
-                    _ => throw new ArgumentException($"Invalid unit: {unit}", nameof(input))
+                    _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
                 };
 
                 // Only parse the unit once

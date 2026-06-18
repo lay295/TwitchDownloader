@@ -1,22 +1,21 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 namespace TwitchDownloaderWPF.Services
 {
     [SupportedOSPlatform("windows")]
-    public static unsafe partial class NativeFunctions
+    public static unsafe class NativeFunctions
     {
-        [LibraryImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute")]
-        public static partial int SetWindowAttribute(IntPtr handle, int attribute, void* attributeValue, uint attributeSize);
+        [DllImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute", PreserveSig = true)]
+        public static extern int SetWindowAttribute(IntPtr handle, int attribute, void* attributeValue, uint attributeSize);
 
-        [LibraryImport("user32.dll", EntryPoint = "GetForegroundWindow")]
-        public static partial IntPtr GetForegroundWindow();
+        [DllImport("user32.dll", EntryPoint = "GetForegroundWindow", PreserveSig = true)]
+        public static extern IntPtr GetForegroundWindow();
 
         [DllImport("user32.dll", EntryPoint = "FlashWindowEx", PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-#pragma warning disable SYSLIB1054 // Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time
         public static extern bool FlashWindowEx([In] ref FlashWInfo info);
-#pragma warning restore SYSLIB1054 // Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time
 
         // https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-flashwinfo
         [StructLayout(LayoutKind.Sequential)]

@@ -1,4 +1,7 @@
-﻿using TwitchDownloaderCore;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderWPF.Utils;
 
@@ -47,7 +50,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
                 return;
             }
 
-            ChatDownloader downloader = new(DownloadOptions, progress);
+            ChatDownloader downloader = new ChatDownloader(DownloadOptions, progress);
             ChangeStatus(TwitchTaskStatus.Running);
             try
             {

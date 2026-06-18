@@ -1,3 +1,5 @@
+using System;
+
 namespace TwitchDownloaderWPF.Models
 {
     [Flags]

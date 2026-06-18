@@ -1,8 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloaderCore.Tools;
@@ -12,7 +16,7 @@ namespace TwitchDownloaderWPF
 {
     public partial class WindowOldVideoCacheManager : Window
     {
-        public ObservableCollection<GridItem> GridItems { get; } = [];
+        public ObservableCollection<GridItem> GridItems { get; } = new();
         private long _totalSize;
 
         public WindowOldVideoCacheManager(IEnumerable<DirectoryInfo> directories)

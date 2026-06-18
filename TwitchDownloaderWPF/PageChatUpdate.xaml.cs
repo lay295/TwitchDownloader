@@ -1,7 +1,11 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -44,7 +48,7 @@ namespace TwitchDownloaderWPF
 
         private async void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new()
+            OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Filter = "JSON Files | *.json;*.json.gz"
             };
@@ -320,7 +324,7 @@ namespace TwitchDownloaderWPF
 
         public ChatUpdateOptions GetOptions(string outputFile)
         {
-            ChatUpdateOptions options = new()
+            ChatUpdateOptions options = new ChatUpdateOptions()
             {
                 EmbedMissing = checkEmbedMissing.IsChecked.GetValueOrDefault(),
                 ReplaceEmbeds = checkReplaceEmbeds.IsChecked.GetValueOrDefault(),
@@ -349,13 +353,13 @@ namespace TwitchDownloaderWPF
             if (checkStart.IsChecked == true)
             {
                 options.TrimBeginning = true;
-                TimeSpan start = new((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
+                TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
                 options.TrimBeginningTime = (int)Math.Round(start.TotalSeconds);
             }
             if (checkEnd.IsChecked == true)
             {
                 options.TrimEnding = true;
-                TimeSpan end = new((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
+                TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
                 options.TrimEndingTime = (int)Math.Round(end.TotalSeconds);
             }
 
@@ -411,7 +415,7 @@ namespace TwitchDownloaderWPF
 
         private void checkEmbedMissing_Checked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.ChatEmbedMissing = true;
                 Settings.Default.ChatReplaceEmbeds = false;
@@ -425,7 +429,7 @@ namespace TwitchDownloaderWPF
 
         private void checkEmbedMissing_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.ChatEmbedMissing = false;
                 Settings.Default.Save();
@@ -437,7 +441,7 @@ namespace TwitchDownloaderWPF
 
         private void checkReplaceEmbeds_Checked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.ChatEmbedMissing = false;
                 Settings.Default.ChatReplaceEmbeds = true;
@@ -451,7 +455,7 @@ namespace TwitchDownloaderWPF
 
         private void checkReplaceEmbeds_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.ChatReplaceEmbeds = false;
                 Settings.Default.Save();
@@ -463,7 +467,7 @@ namespace TwitchDownloaderWPF
 
         private void checkBttvEmbed_Checked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.BTTVEmotes = true;
                 Settings.Default.Save();
@@ -472,7 +476,7 @@ namespace TwitchDownloaderWPF
 
         private void checkBttvEmbed_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.BTTVEmotes = false;
                 Settings.Default.Save();
@@ -481,7 +485,7 @@ namespace TwitchDownloaderWPF
 
         private void checkFfzEmbed_Checked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.FFZEmotes = true;
                 Settings.Default.Save();
@@ -490,7 +494,7 @@ namespace TwitchDownloaderWPF
 
         private void checkFfzEmbed_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.FFZEmotes = false;
                 Settings.Default.Save();
@@ -499,7 +503,7 @@ namespace TwitchDownloaderWPF
 
         private void checkStvEmbed_Checked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.STVEmotes = true;
                 Settings.Default.Save();
@@ -508,7 +512,7 @@ namespace TwitchDownloaderWPF
 
         private void checkStvEmbed_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 Settings.Default.STVEmotes = false;
                 Settings.Default.Save();
@@ -640,7 +644,7 @@ namespace TwitchDownloaderWPF
 
         private void radioJson_Checked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 timeText.Visibility = Visibility.Collapsed;
                 timeOptions.Visibility = Visibility.Collapsed;
@@ -657,7 +661,7 @@ namespace TwitchDownloaderWPF
 
         private void radioHTML_Checked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 timeText.Visibility = Visibility.Collapsed;
                 timeOptions.Visibility = Visibility.Collapsed;
@@ -674,7 +678,7 @@ namespace TwitchDownloaderWPF
 
         private void radioText_Checked(object sender, RoutedEventArgs e)
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 timeText.Visibility = Visibility.Visible;
                 timeOptions.Visibility = Visibility.Visible;

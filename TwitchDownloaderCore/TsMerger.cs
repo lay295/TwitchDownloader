@@ -1,13 +1,23 @@
-﻿using TwitchDownloaderCore.Interfaces;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore
 {
-    public sealed class TsMerger(TsMergeOptions tsMergeOptions, ITaskProgress progress)
+    public sealed class TsMerger
     {
-        private readonly TsMergeOptions mergeOptions = tsMergeOptions;
-        private readonly ITaskProgress _progress = progress;
+        private readonly TsMergeOptions mergeOptions;
+        private readonly ITaskProgress _progress;
+
+        public TsMerger(TsMergeOptions tsMergeOptions, ITaskProgress progress)
+        {
+            mergeOptions = tsMergeOptions;
+            _progress = progress;
+        }
 
         public async Task MergeAsync(CancellationToken cancellationToken)
         {
@@ -44,7 +54,7 @@ namespace TwitchDownloaderCore
             await using (var fs = File.Open(mergeOptions.InputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 using var sr = new StreamReader(fs);
-                while (await sr.ReadLineAsync(cancellationToken) is { } line)
+                while (await sr.ReadLineAsync() is { } line)
                 {
                     if (string.IsNullOrWhiteSpace(line)) continue;
 
@@ -67,7 +77,7 @@ namespace TwitchDownloaderCore
             await CombineVideoParts(fileList, outputFileInfo, outputFs, cancellationToken);
         }
 
-        private async Task VerifyVideoParts(List<string> fileList, CancellationToken cancellationToken)
+        private async Task VerifyVideoParts(IReadOnlyCollection<string> fileList, CancellationToken cancellationToken)
         {
             var failedParts = new List<string>();
             var partCount = fileList.Count;
@@ -121,7 +131,7 @@ namespace TwitchDownloaderCore
             return true;
         }
 
-        private async Task CombineVideoParts(List<string> fileList, FileInfo outputFileInfo, FileStream outputStream, CancellationToken cancellationToken)
+        private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, FileInfo outputFileInfo, FileStream outputStream, CancellationToken cancellationToken)
         {
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(outputFileInfo.FullName);
 

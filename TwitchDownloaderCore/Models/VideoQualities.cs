@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
@@ -95,10 +98,9 @@ namespace TwitchDownloaderCore.Models
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    public static partial class VideoQualities
+    public static class VideoQualities
     {
-        [GeneratedRegex(@"(?:^|\s)(?:(?<Width>\d{3,4})x)?(?<Height>\d{3,4})p?(?<Framerate>\d{1,3})?(?:$|\s)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "fr-FR")]
-        internal static partial Regex UserQualityStringRegex { get; }
+        internal static readonly Regex UserQualityStringRegex = new(@"(?:^|\s)(?:(?<Width>\d{3,4})x)?(?<Height>\d{3,4})p?(?<Framerate>\d{1,3})?(?:$|\s)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static IVideoQualities<M3U8.Stream> FromM3U8(M3U8 m3u8)
         {
@@ -196,7 +198,7 @@ namespace TwitchDownloaderCore.Models
         {
             if (source is not { Count: > 0 })
             {
-                return [];
+                return new List<IVideoQuality<T>>();
             }
 
             // Check for duplicate quality names

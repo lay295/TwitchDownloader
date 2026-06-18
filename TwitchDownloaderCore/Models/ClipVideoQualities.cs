@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Models.Interfaces;
 using ClipQuality = TwitchDownloaderCore.TwitchObjects.Gql.ShareClipRenderStatusVideoQuality;
@@ -73,7 +76,7 @@ namespace TwitchDownloaderCore.Models
 
         public override IVideoQuality<ClipQuality> BestQuality()
         {
-            if (Qualities is null || Qualities.Count == 0)
+            if (Qualities is null)
             {
                 return null;
             }
@@ -86,12 +89,12 @@ namespace TwitchDownloaderCore.Models
 
             bestQuality ??= Qualities.MaxBy(x => x.Resolution.Height);
 
-            return bestQuality ?? Qualities[0];
+            return bestQuality ?? Qualities.FirstOrDefault();
         }
 
         private IVideoQuality<ClipQuality> BestPortraitQuality()
         {
-            if (Qualities is null || Qualities.Count == 0)
+            if (Qualities is null)
             {
                 return null;
             }
@@ -102,12 +105,12 @@ namespace TwitchDownloaderCore.Models
 
             bestQuality ??= Qualities.MaxBy(x => x.Resolution.Height);
 
-            return bestQuality ?? Qualities[0];
+            return bestQuality ?? Qualities.FirstOrDefault();
         }
 
         public override IVideoQuality<ClipQuality> WorstQuality()
         {
-            if (Qualities is null || Qualities.Count == 0)
+            if (Qualities is null)
             {
                 return null;
             }
@@ -118,12 +121,12 @@ namespace TwitchDownloaderCore.Models
 
             worstQuality ??= Qualities.MinBy(x => x.Resolution.Height);
 
-            return worstQuality ?? Qualities[^1];
+            return worstQuality ?? Qualities.LastOrDefault();
         }
 
         private IVideoQuality<ClipQuality> WorstPortraitQuality()
         {
-            if (Qualities is null || Qualities.Count == 0)
+            if (Qualities is null)
             {
                 return null;
             }
@@ -134,7 +137,7 @@ namespace TwitchDownloaderCore.Models
 
             worstQuality ??= Qualities.MinBy(x => x.Resolution.Height);
 
-            return worstQuality ?? Qualities[^1];
+            return worstQuality ?? Qualities.LastOrDefault();
         }
     }
 }

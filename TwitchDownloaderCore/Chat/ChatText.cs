@@ -1,4 +1,7 @@
-﻿using TwitchDownloaderCore.Models;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 

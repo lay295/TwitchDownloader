@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using TwitchDownloaderCore;
@@ -51,7 +52,7 @@ namespace TwitchDownloaderWPF
             {
                 Invalid = true;
             }
-            Close();
+            this.Close();
         }
 
         private void numStart_TextChanged(object sender, TextChangedEventArgs e)

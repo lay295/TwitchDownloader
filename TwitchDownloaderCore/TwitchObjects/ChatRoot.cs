@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 
 namespace TwitchDownloaderCore.TwitchObjects
@@ -207,7 +209,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public double length { get; set; } = -1;
         public int viewCount { get; set; }
         public string game { get; set; }
-        public List<VideoChapter> chapters { get; set; } = [];
+        public List<VideoChapter> chapters { get; set; } = new();
 
 #region DeprecatedProperties
         [Obsolete("Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21.")]
@@ -260,18 +262,18 @@ namespace TwitchDownloaderCore.TwitchObjects
 
     public class EmbeddedData
     {
-        public List<EmbedEmoteData> thirdParty { get; set; } = [];
-        public List<EmbedEmoteData> firstParty { get; set; } = [];
-        public List<EmbedChatBadge> twitchBadges { get; set; } = [];
-        public List<EmbedCheerEmote> twitchBits { get; set; } = [];
+        public List<EmbedEmoteData> thirdParty { get; set; } = new();
+        public List<EmbedEmoteData> firstParty { get; set; } = new();
+        public List<EmbedChatBadge> twitchBadges { get; set; } = new();
+        public List<EmbedCheerEmote> twitchBits { get; set; } = new();
     }
 
     public class LegacyEmbeddedData
     {
-        public List<EmbedEmoteData> thirdParty { get; set; } = [];
-        public List<EmbedEmoteData> firstParty { get; set; } = [];
-        public List<LegacyEmbedChatBadge> twitchBadges { get; set; } = [];
-        public List<EmbedCheerEmote> twitchBits { get; set; } = [];
+        public List<EmbedEmoteData> thirdParty { get; set; } = new();
+        public List<EmbedEmoteData> firstParty { get; set; } = new();
+        public List<LegacyEmbedChatBadge> twitchBadges { get; set; } = new();
+        public List<EmbedCheerEmote> twitchBits { get; set; } = new();
     }
 
     public class ChatRoot

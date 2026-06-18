@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Properties;
@@ -20,11 +24,11 @@ namespace TwitchDownloaderWPF
         private async void btnQueue_Click(object sender, RoutedEventArgs e)
         {
             btnQueue.IsEnabled = false;
-            List<string> idList = [];
-            List<string> invalidList = [];
-            List<string> errorList = [];
-            List<TaskData> dataList = [];
-            Dictionary<string, string> idDict = [];
+            List<string> idList = new List<string>();
+            List<string> invalidList = new List<string>();
+            List<string> errorList = new List<string>();
+            List<TaskData> dataList = new List<TaskData>();
+            Dictionary<string, string> idDict = new Dictionary<string, string>();
 
             var urls = textList.Text.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             foreach (var url in urls)
@@ -49,9 +53,9 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            Dictionary<int, string> taskDict = [];
-            List<Task<GqlVideoResponse>> taskVideoList = [];
-            List<Task<GqlClipResponse>> taskClipList = [];
+            Dictionary<int, string> taskDict = new Dictionary<int, string>();
+            List<Task<GqlVideoResponse>> taskVideoList = new List<Task<GqlVideoResponse>>();
+            List<Task<GqlClipResponse>> taskClipList = new List<Task<GqlClipResponse>>();
 
             foreach (var id in idList)
             {
@@ -162,7 +166,7 @@ namespace TwitchDownloaderWPF
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             if (queue.ShowDialog().GetValueOrDefault())
-                Close();
+                this.Close();
 
             btnQueue.IsEnabled = true;
         }

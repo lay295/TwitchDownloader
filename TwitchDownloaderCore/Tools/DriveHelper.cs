@@ -1,4 +1,7 @@
-﻿using TwitchDownloaderCore.Interfaces;
+﻿using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderCore.Tools
 {

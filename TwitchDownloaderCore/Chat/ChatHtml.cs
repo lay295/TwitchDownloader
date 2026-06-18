@@ -1,4 +1,10 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Tools;
@@ -14,12 +20,12 @@ namespace TwitchDownloaderCore.Chat
         /// </summary>
         public static async Task SerializeAsync(Stream outputStream, string filePath, ChatRoot chatRoot, ITaskLogger logger, bool embedData = true, CancellationToken cancellationToken = default)
         {
-            Dictionary<string, EmbedEmoteData> thirdEmoteData = [];
+            Dictionary<string, EmbedEmoteData> thirdEmoteData = new();
             await BuildThirdPartyDictionary(chatRoot, embedData, thirdEmoteData, logger, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            Dictionary<string, EmbedChatBadge> chatBadgeData = [];
+            Dictionary<string, EmbedChatBadge> chatBadgeData = new();
             await BuildChatBadgesDictionary(chatRoot, embedData, chatBadgeData, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -49,7 +55,7 @@ namespace TwitchDownloaderCore.Chat
                             }
                             foreach (var badge in chatRoot.embeddedData.twitchBadges)
                             {
-                                foreach (var (version, badgeData) in badge.versions)
+                                foreach(var (version, badgeData) in badge.versions)
                                 {
                                     await sw.WriteLineAsync(".badge-" + badge.name + "-" + version + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(badgeData.bytes) + "\"); }");
                                 }
@@ -93,10 +99,8 @@ namespace TwitchDownloaderCore.Chat
                 }
                 else
                 {
-                    EmbedEmoteData embedEmoteData = new()
-                    {
-                        url = item.ImageUrl.Replace("[scale]", "1")
-                    };
+                    EmbedEmoteData embedEmoteData = new();
+                    embedEmoteData.url = item.ImageUrl.Replace("[scale]", "1");
                     thirdEmoteData[item.Code] = embedEmoteData;
                 }
             }
@@ -116,7 +120,7 @@ namespace TwitchDownloaderCore.Chat
             }
         }
 
-        private static string GetChatBadgesHtml(bool embedData, Dictionary<string, EmbedChatBadge> chatBadgeData, Comment comment)
+        private static string GetChatBadgesHtml(bool embedData, IReadOnlyDictionary<string, EmbedChatBadge> chatBadgeData, Comment comment)
         {
             if (comment.message.user_badges is null || comment.message.user_badges.Count == 0)
                 return "";
@@ -145,7 +149,7 @@ namespace TwitchDownloaderCore.Chat
             return string.Join(' ', badgesHtml);
         }
 
-        private static string GetMessageHtml(bool embedEmotes, Dictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
+        private static string GetMessageHtml(bool embedEmotes, IReadOnlyDictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
         {
             var message = new StringBuilder(comment.message.body.Length);
 
