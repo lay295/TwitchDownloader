@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace TwitchDownloaderCore.TwitchObjects
+﻿namespace TwitchDownloaderCore.TwitchObjects
 {
     public class EmoteResponse
     {

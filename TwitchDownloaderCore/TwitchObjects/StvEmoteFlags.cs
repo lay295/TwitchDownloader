@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TwitchDownloaderCore.TwitchObjects
+﻿namespace TwitchDownloaderCore.TwitchObjects
 {
     // https://github.com/SevenTV/Common/blob/4139fcc3eb8d79003573b26b552ef112ec85b8df/structures/v3/type.emote.go#L49
     [Flags]

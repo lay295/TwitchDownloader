@@ -1,5 +1,3 @@
-using System;
-
 namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
     public class PortraitCropCoordinates

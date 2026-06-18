@@ -1,5 +1,4 @@
-﻿using System.IO;
-using TwitchDownloaderCLI.Models;
+﻿using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore.Interfaces;

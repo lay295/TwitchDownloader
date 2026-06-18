@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;

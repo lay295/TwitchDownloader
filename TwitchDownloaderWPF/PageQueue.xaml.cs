@@ -1,13 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading;
-using System.Windows;
-using System.Windows.Controls;
-using TwitchDownloaderWPF.TwitchTasks;
-using TwitchDownloaderWPF.Properties;
 using System.Diagnostics;
 using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.TwitchTasks;
 
 namespace TwitchDownloaderWPF
 {

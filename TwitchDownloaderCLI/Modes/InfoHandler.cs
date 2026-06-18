@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Spectre.Console;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Web;
-using Spectre.Console;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;

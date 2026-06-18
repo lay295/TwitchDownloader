@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
-using System.Threading;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 using TwitchDownloaderCore;

@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using TwitchDownloaderCore.Models;
+﻿using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.Options
 {
