@@ -18,8 +18,11 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public static class TwitchHelper
+    public static partial class TwitchHelper
     {
+        [GeneratedRegex(@"\d+_\d+$", RegexOptions.RightToLeft)]
+        private static partial Regex VideoFolderRegex { get; }
+
         private static readonly HttpClient httpClient = new()
         {
             Timeout = TimeSpan.FromSeconds(60)
@@ -1079,7 +1082,7 @@ namespace TwitchDownloaderCore
 
                     if (fileInfo is null)
                     {
-                        // I would prefer to not throw here, but the alternative is refactoring the task queue :/
+                    // I would prefer to not throw here, but the alternative is refactoring the task queue :/
                         throw new FileNotFoundException("No destination file was provided, aborting.");
                     }
 
@@ -1176,14 +1179,13 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            var videoFolderRegex = new Regex(@"\d+_\d+$", RegexOptions.RightToLeft);
             var allCacheDirectories = Directory.GetDirectories(cacheFolder);
 
-            var oldVideoCaches = (from directory in allCacheDirectories
-                    where videoFolderRegex.IsMatch(directory)
-                    let directoryInfo = new DirectoryInfo(directory)
-                    where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7
-                    select directoryInfo)
+            var oldVideoCaches = 
+                allCacheDirectories
+                .Where(directory => VideoFolderRegex.IsMatch(directory))
+                .Select(directory => new DirectoryInfo(directory))
+                .Where(directoryInfo => DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7)
                 .ToArray();
 
             if (oldVideoCaches.Length == 0)

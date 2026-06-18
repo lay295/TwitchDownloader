@@ -95,9 +95,10 @@ namespace TwitchDownloaderCore.Models
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    public static class VideoQualities
+    public static partial class VideoQualities
     {
-        internal static readonly Regex UserQualityStringRegex = new(@"(?:^|\s)(?:(?<Width>\d{3,4})x)?(?<Height>\d{3,4})p?(?<Framerate>\d{1,3})?(?:$|\s)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        [GeneratedRegex(@"(?:^|\s)(?:(?<Width>\d{3,4})x)?(?<Height>\d{3,4})p?(?<Framerate>\d{1,3})?(?:$|\s)", RegexOptions.IgnoreCase)]
+        internal static partial Regex UserQualityStringRegex { get; }
 
         public static IVideoQualities<M3U8.Stream> FromM3U8(M3U8 m3u8)
         {

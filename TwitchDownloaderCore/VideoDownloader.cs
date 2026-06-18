@@ -12,8 +12,14 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public sealed class VideoDownloader
+    public sealed partial class VideoDownloader
     {
+        [GeneratedRegex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)")]
+        private static partial Regex EncodingTimeRegex { get; }
+
+        [GeneratedRegex(@"-muted-\w+(?=\.m3u8$)")]
+        private static partial Regex MutedHighlightRegex { get; }
+
         private readonly VideoDownloadOptions downloadOptions;
         private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
         private readonly ITaskProgress _progress;
@@ -183,7 +189,7 @@ namespace TwitchDownloaderCore
 
             var uri = new Uri(baseUrl, map.Uri);
             _progress.LogVerbose($"Downloading header file from '{uri}' to '{destinationFile}'");
-
+            
             await DownloadTools.DownloadFileAsync(_httpClient, uri, destinationFile, null, downloadOptions.ThrottleKib, _progress);
 
             return destinationFile;
@@ -519,7 +525,6 @@ namespace TwitchDownloaderCore
                 process.StartInfo.ArgumentList.Add(arg);
             }
 
-            var encodingTimeRegex = new Regex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)", RegexOptions.Compiled);
             var logQueue = new ConcurrentQueue<string>();
 
             process.ErrorDataReceived += (sender, e) =>
@@ -529,7 +534,7 @@ namespace TwitchDownloaderCore
 
                 logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
-                HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength);
+                HandleFfmpegOutput(e.Data, videoLength);
             };
 
             _progress.LogVerbose($"Running \"{downloadOptions.FfmpegPath}\" in \"{process.StartInfo.WorkingDirectory}\" with args: {CombineArguments(process.StartInfo.ArgumentList)}");
@@ -562,9 +567,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void HandleFfmpegOutput(string output, Regex encodingTimeRegex, TimeSpan videoLength)
+        private void HandleFfmpegOutput(string output, TimeSpan videoLength)
         {
-            var encodingTimeMatch = encodingTimeRegex.Match(output);
+            var encodingTimeMatch = EncodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
                 return;
 
@@ -590,7 +595,7 @@ namespace TwitchDownloaderCore
             catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
             {
                 // Hacky workaround for old highlights that were muted
-                var newUrl = Regex.Replace(playlistUrl, @"-muted-\w+(?=\.m3u8$)", "");
+                var newUrl = MutedHighlightRegex.Replace(playlistUrl, "");
                 if (playlistUrl == newUrl)
                     throw;
 
