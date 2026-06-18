@@ -84,7 +84,7 @@ namespace TwitchDownloaderCore.Models
                 .Where(x => !x.Item.IsSource() && !x.Item.IsAudioOnly())
                 .MinBy(x => x.Item.StreamInfo.Resolution.Width * x.Item.StreamInfo.Resolution.Height * x.Item.StreamInfo.Framerate);
 
-            return worstQuality ?? Qualities.FirstOrDefault();
+            return worstQuality ?? Qualities.LastOrDefault();
         }
     }
 }
