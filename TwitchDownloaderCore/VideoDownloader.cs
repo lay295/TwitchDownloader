@@ -241,7 +241,7 @@ namespace TwitchDownloaderCore
         private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
-            var totalPartsToDownload = downloadState.PartQueue.Count;
+            var totalPartsToDownload = downloadState.PartCount;
             var previousMissingCount = 0;
             var restartedThreads = 0;
             var maxRestartedThreads = limitThreadRestarts ? (int)Math.Ceiling(totalPartsToDownload * 0.95) : int.MaxValue;
