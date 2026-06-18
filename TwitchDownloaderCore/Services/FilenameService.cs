@@ -161,6 +161,7 @@ namespace TwitchDownloaderCore.Services
 
             if (char.IsDigit(qualityString[0])
                 || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase)
+                || qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase)
                 || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
             {
                 return ".mp4";
