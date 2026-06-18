@@ -190,7 +190,7 @@ namespace TwitchDownloaderCore
             var uri = new Uri(baseUrl, map.Uri);
             _progress.LogVerbose($"Downloading header file from '{uri}' to '{destinationFile}'");
             
-            await DownloadTools.DownloadFileAsync(_httpClient, uri, destinationFile, null, downloadOptions.ThrottleKib, _progress);
+            await DownloadTools.DownloadFileAsync(_httpClient, uri, destinationFile, null, downloadOptions.ThrottleKib, _progress, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken));
 
             return destinationFile;
         }

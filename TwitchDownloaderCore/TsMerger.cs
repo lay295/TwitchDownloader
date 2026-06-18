@@ -50,7 +50,7 @@ namespace TwitchDownloaderCore
             await using (var fs = File.Open(mergeOptions.InputFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 using var sr = new StreamReader(fs);
-                while (await sr.ReadLineAsync() is { } line)
+                while (await sr.ReadLineAsync(cancellationToken) is { } line)
                 {
                     if (string.IsNullOrWhiteSpace(line)) continue;
 
