@@ -185,7 +185,7 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(downloadTask);
                     }
@@ -233,7 +233,7 @@ namespace TwitchDownloaderWPF
                             }
                         };
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(chatTask);
                         }
@@ -261,7 +261,7 @@ namespace TwitchDownloaderWPF
                             };
                             renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
 
-                            lock (PageQueue.taskLock)
+                            lock (PageQueue.TaskLock)
                             {
                                 PageQueue.taskList.Add(renderTask);
                             }
@@ -319,7 +319,7 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(downloadTask);
                     }
@@ -358,7 +358,7 @@ namespace TwitchDownloaderWPF
                             }
                         };
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(chatTask);
                         }
@@ -386,7 +386,7 @@ namespace TwitchDownloaderWPF
                             };
                             renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
 
-                            lock (PageQueue.taskLock)
+                            lock (PageQueue.TaskLock)
                             {
                                 PageQueue.taskList.Add(renderTask);
                             }
@@ -437,7 +437,7 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(chatTask);
                     }
@@ -460,7 +460,7 @@ namespace TwitchDownloaderWPF
                         };
                         renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(renderTask);
                         }
@@ -510,7 +510,7 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(chatTask);
                     }
@@ -562,7 +562,7 @@ namespace TwitchDownloaderWPF
                             renderTask.Info.Thumbnail = image;
                         }
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(renderTask);
                         }
@@ -636,7 +636,7 @@ namespace TwitchDownloaderWPF
                             }
                         };
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(downloadTask);
                         }
@@ -668,7 +668,7 @@ namespace TwitchDownloaderWPF
                             }
                         };
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(downloadTask);
                         }
@@ -714,7 +714,7 @@ namespace TwitchDownloaderWPF
                         }
                     };
 
-                    lock (PageQueue.taskLock)
+                    lock (PageQueue.TaskLock)
                     {
                         PageQueue.taskList.Add(downloadTask);
                     }
@@ -743,7 +743,7 @@ namespace TwitchDownloaderWPF
                         };
                         renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
 
-                        lock (PageQueue.taskLock)
+                        lock (PageQueue.TaskLock)
                         {
                             PageQueue.taskList.Add(renderTask);
                         }
