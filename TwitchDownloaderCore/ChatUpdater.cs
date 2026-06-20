@@ -161,6 +161,7 @@ namespace TwitchDownloaderCore
                 chatRoot.video.game = videoInfo.game?.displayName;
 
                 var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo)).data.video.moments.edges;
+                chatRoot.video.chapters.Clear();
                 foreach (var responseChapter in chaptersInfo)
                 {
                     chatRoot.video.chapters.Add(new VideoChapter
@@ -208,6 +209,7 @@ namespace TwitchDownloaderCore
                 if (chatRoot.video.chapters is not { Count: > 0 })
                 {
                     var clipChapter = TwitchHelper.GenerateClipChapter(clipRenderStatus);
+                    chatRoot.video.chapters.Clear();
                     chatRoot.video.chapters.Add(new VideoChapter
                     {
                         id = clipChapter.node.id,
