@@ -40,7 +40,7 @@ namespace TwitchDownloaderCore.Services
                 .Replace("{clipper}", ReplaceInvalidFilenameChars(clipper))
                 .Replace("{clipper_id}", ReplaceInvalidFilenameChars(clipperId))
                 .Replace("{date}", date.ToString("M-d-yy"))
-                .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
+                .Replace("{random_string}", Path.GetRandomFileName().Remove(8, 1)) // Remove the period
                 .Replace("{trim_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
                 .Replace("{trim_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimEnd))
                 .Replace("{trim_length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimLength))
@@ -147,7 +147,6 @@ namespace TwitchDownloaderCore.Services
             return newName.ReplaceAny(FilenameInvalidChars, '_');
         }
 
-        [return: MaybeNull]
         public static string GuessVodFileExtension([AllowNull] string qualityString)
         {
             if (string.IsNullOrWhiteSpace(qualityString))
@@ -160,14 +159,7 @@ namespace TwitchDownloaderCore.Services
                 return ".m4a";
             }
 
-            if (char.IsDigit(qualityString[0])
-                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase)
-                || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
-            {
-                return ".mp4";
-            }
-
-            return null;
+            return ".mp4";
         }
 
         public static FileInfo GetNonCollidingName(FileInfo fileInfo)
