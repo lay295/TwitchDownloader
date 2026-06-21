@@ -40,7 +40,7 @@ namespace TwitchDownloaderCore.Services
                 .Replace("{clipper}", ReplaceInvalidFilenameChars(clipper))
                 .Replace("{clipper_id}", ReplaceInvalidFilenameChars(clipperId))
                 .Replace("{date}", date.ToString("M-d-yy"))
-                .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
+                .Replace("{random_string}", Path.GetRandomFileName().Remove(8, 1)) // Remove the period
                 .Replace("{trim_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
                 .Replace("{trim_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimEnd))
                 .Replace("{trim_length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimLength))
