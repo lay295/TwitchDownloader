@@ -76,7 +76,7 @@ namespace TwitchDownloaderWPF
             Main.Content = pageVodDownload;
 
             // Replace old crop parameters with new trim parameters
-            Settings.Default.TemplateVod  = OldCropParametersRegex.Replace(Settings.Default.TemplateVod , "{trim_");
+            Settings.Default.TemplateVod = OldCropParametersRegex.Replace(Settings.Default.TemplateVod, "{trim_");
             Settings.Default.TemplateClip = OldCropParametersRegex.Replace(Settings.Default.TemplateClip, "{trim_");
             Settings.Default.TemplateChat = OldCropParametersRegex.Replace(Settings.Default.TemplateChat, "{trim_");
             Settings.Default.Save();
