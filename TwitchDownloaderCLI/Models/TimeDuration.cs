@@ -86,7 +86,7 @@ namespace TwitchDownloaderCLI.Models
                 return new TimeSpan(days, hours, minutes, seconds, milliseconds);
             }
 
-            return TimeSpan.Parse(str, null); // Parse formats not covered by the regex
+            return TimeSpan.Parse(str); // Parse formats not covered by the regex
         }
 
         [GeneratedRegex(@"\dms$", RegexOptions.RightToLeft)]
