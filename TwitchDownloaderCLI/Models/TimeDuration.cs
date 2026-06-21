@@ -45,7 +45,7 @@ namespace TwitchDownloaderCLI.Models
             }
 
             var multiplier = GetMultiplier(str, out var span);
-            if (decimal.TryParse(span, NumberStyles.Number, CultureInfo.InvariantCulture, out var result))
+            if (decimal.TryParse(span, NumberStyles.Number, null, out var result))
             {
                 var ticks = (long)(result * multiplier);
                 return new TimeDuration(ticks);
@@ -86,7 +86,7 @@ namespace TwitchDownloaderCLI.Models
                 return new TimeSpan(days, hours, minutes, seconds, milliseconds);
             }
 
-            return TimeSpan.Parse(str, CultureInfo.InvariantCulture); // Parse formats not covered by the regex
+            return TimeSpan.Parse(str, null); // Parse formats not covered by the regex
         }
 
         [GeneratedRegex(@"\dms$", RegexOptions.RightToLeft)]

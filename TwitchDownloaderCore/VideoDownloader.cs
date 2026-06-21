@@ -14,12 +14,6 @@ namespace TwitchDownloaderCore
 {
     public sealed partial class VideoDownloader
     {
-        [GeneratedRegex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)")]
-        private static partial Regex EncodingTimeRegex { get; }
-
-        [GeneratedRegex(@"-muted-\w+(?=\.m3u8$)")]
-        private static partial Regex MutedHighlightRegex { get; }
-
         private readonly VideoDownloadOptions downloadOptions;
         private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
         private readonly ITaskProgress _progress;
@@ -189,7 +183,7 @@ namespace TwitchDownloaderCore
 
             var uri = new Uri(baseUrl, map.Uri);
             _progress.LogVerbose($"Downloading header file from '{uri}' to '{destinationFile}'");
-            
+
             await DownloadTools.DownloadFileAsync(_httpClient, uri, destinationFile, null, downloadOptions.ThrottleKib, _progress, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken));
 
             return destinationFile;
@@ -567,6 +561,9 @@ namespace TwitchDownloaderCore
             }
         }
 
+        [GeneratedRegex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)")]
+        private static partial Regex EncodingTimeRegex { get; }
+
         private void HandleFfmpegOutput(string output, TimeSpan videoLength)
         {
             var encodingTimeMatch = EncodingTimeRegex.Match(output);
@@ -584,6 +581,9 @@ namespace TwitchDownloaderCore
 
             _progress.ReportProgress(Math.Clamp(percent, 0, 100));
         }
+
+        [GeneratedRegex(@"-muted-\w+(?=\.m3u8$)")]
+        private static partial Regex MutedHighlightRegex { get; }
 
         private async Task<(M3U8 playlist, DateTimeOffset airDate)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {

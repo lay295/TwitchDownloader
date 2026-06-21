@@ -1191,7 +1191,7 @@ namespace TwitchDownloaderCore
             bool bitsPrinted = false;
             if (bitsCount > 0 && fragmentString.Any(char.IsDigit) && fragmentString.Any(char.IsLetter))
             {
-                int bitsIndex = fragmentString.AsSpan().IndexOfAny(DigitChars);
+                var bitsIndex = fragmentString.AsSpan().IndexOfAny(DigitChars);
                 if (int.TryParse(fragmentString.AsSpan(bitsIndex), out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString.AsSpan(0, bitsIndex), out var currentCheerEmote))
                 {
                     KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
@@ -1976,7 +1976,7 @@ namespace TwitchDownloaderCore
             return chatRoot;
         }
 
-        #region ImplementIDisposable
+#region ImplementIDisposable
 
         public void Dispose()
         {
@@ -2039,6 +2039,6 @@ namespace TwitchDownloaderCore
             }
         }
 
-        #endregion
+#endregion
     }
 }

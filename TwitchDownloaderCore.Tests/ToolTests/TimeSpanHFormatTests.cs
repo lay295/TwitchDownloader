@@ -48,7 +48,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             const string FORMAT_STRING = @"F2";
             const string EXPECTED = @"3.14";
 
-            var resultCustom = TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, FLOAT, CultureInfo.InvariantCulture);
+            var resultCustom = TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, FLOAT);
 
             Assert.Equal(EXPECTED, resultCustom);
         }

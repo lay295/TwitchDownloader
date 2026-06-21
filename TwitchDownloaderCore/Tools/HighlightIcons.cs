@@ -53,10 +53,10 @@ namespace TwitchDownloaderCore.Tools
         private static partial Regex SubConversionMessageRegex { get; }
 
         [GeneratedRegex("""^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d""")]
-        private static partial Regex GiftAnonymousRegex {get;}
+        private static partial Regex GiftAnonymousRegex { get; }
 
         [GeneratedRegex("""^((?:\w+ )?watched \d+ consecutive streams this month and sparked a watch streak! )(.+)$""")]
-        private static partial Regex WatchStreakRegex {get;}
+        private static partial Regex WatchStreakRegex { get; }
 
         [GeneratedRegex("""^We added \d+ Gift Subs (?:AND \d+ Bonus Gift Subs )?to """)]
         private static partial Regex SubtemberRegex { get; }
@@ -376,7 +376,8 @@ namespace TwitchDownloaderCore.Tools
             customMessageComment.message.fragments.RemoveAt(0);
             return (streakMessageComment, customMessageComment);
         }
-        #region ImplementIDisposable
+
+#region ImplementIDisposable
 
         public void Dispose()
         {
@@ -413,6 +414,6 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-        #endregion
+#endregion
     }
 }

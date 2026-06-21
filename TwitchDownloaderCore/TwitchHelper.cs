@@ -20,9 +20,6 @@ namespace TwitchDownloaderCore
 {
     public static partial class TwitchHelper
     {
-        [GeneratedRegex(@"\d+_\d+$", RegexOptions.RightToLeft)]
-        private static partial Regex VideoFolderRegex { get; }
-
         private static readonly HttpClient httpClient = new()
         {
             Timeout = TimeSpan.FromSeconds(60)
@@ -1082,7 +1079,7 @@ namespace TwitchDownloaderCore
 
                     if (fileInfo is null)
                     {
-                    // I would prefer to not throw here, but the alternative is refactoring the task queue :/
+                        // I would prefer to not throw here, but the alternative is refactoring the task queue :/
                         throw new FileNotFoundException("No destination file was provided, aborting.");
                     }
 
@@ -1163,6 +1160,9 @@ namespace TwitchDownloaderCore
             return fileSystemInfo;
         }
 
+        [GeneratedRegex(@"\d+_\d+$", RegexOptions.RightToLeft)]
+        private static partial Regex VideoFolderRegex { get; }
+
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
@@ -1181,8 +1181,7 @@ namespace TwitchDownloaderCore
 
             var allCacheDirectories = Directory.GetDirectories(cacheFolder);
 
-            var oldVideoCaches = 
-                allCacheDirectories
+            var oldVideoCaches = allCacheDirectories
                 .Where(directory => VideoFolderRegex.IsMatch(directory))
                 .Select(directory => new DirectoryInfo(directory))
                 .Where(directoryInfo => DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7)

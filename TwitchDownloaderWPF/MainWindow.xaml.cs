@@ -28,9 +28,6 @@ namespace TwitchDownloaderWPF
         public static PageChatRender pageChatRender = new PageChatRender();
         public static PageQueue pageQueue = new PageQueue();
 
-        [GeneratedRegex("{crop_(?=(?:start|end)(?:_|}))")]
-        private static partial Regex OldCropParametersRegex { get; }
-
         public MainWindow()
         {
             InitializeComponent();
@@ -70,6 +67,9 @@ namespace TwitchDownloaderWPF
         {
             App.RequestAppThemeChange();
         }
+
+        [GeneratedRegex("{crop_(?=(?:start|end)(?:_|}))")]
+        private static partial Regex OldCropParametersRegex { get; }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
