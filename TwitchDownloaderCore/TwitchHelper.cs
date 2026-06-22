@@ -1324,7 +1324,8 @@ namespace TwitchDownloaderCore
             response.EnsureSuccessStatusCode();
 
             var chapterResponse = await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
-            chapterResponse.data.video.moments ??= new VideoMomentConnection { edges = new List<VideoMomentEdge>() };
+            chapterResponse.data.video ??= new ChapterVideo { id = videoId.ToString() };
+            chapterResponse.data.video.moments ??= new VideoMomentConnection { edges = [] };
 
             // For some reason durations can be negative sometimes
             foreach (var edge in chapterResponse.data.video.moments.edges)
@@ -1344,9 +1345,32 @@ namespace TwitchDownloaderCore
             return chapterResponse;
         }
 
-        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(long videoId, VideoInfo videoInfo)
+        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(long videoId, VideoInfo videoInfo, ITaskLogger logger)
         {
-            var chapterResponse = await GetVideoChapters(videoId);
+            GqlVideoChapterResponse chapterResponse;
+            try
+            {
+                chapterResponse = await GetVideoChapters(videoId);
+            }
+            catch (NullReferenceException ex)
+            {
+                logger.LogError($"Null object reference while fetching chapters: {ex.StackTrace}");
+
+                chapterResponse = new GqlVideoChapterResponse
+                {
+                    data = new ChapterData
+                    {
+                        video = new ChapterVideo
+                        {
+                            id = videoId.ToString(),
+                            moments = new VideoMomentConnection
+                            {
+                                edges = []
+                            }
+                        }
+                    }
+                };
+            }
 
             // Video has only 1 chapter, generate a bogus video chapter with the information we have available.
             if (chapterResponse.data.video.moments.edges.Count == 0)
