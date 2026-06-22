@@ -154,7 +154,7 @@ namespace TwitchDownloaderCore
                 chatRoot.video.viewCount = videoInfo.viewCount;
                 chatRoot.video.game = videoInfo.game?.displayName;
 
-                var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo)).data.video.moments.edges;
+                var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo, _progress)).data.video.moments.edges;
                 foreach (var responseChapter in chaptersInfo)
                 {
                     chatRoot.video.chapters.Add(new VideoChapter

@@ -1345,15 +1345,17 @@ namespace TwitchDownloaderCore
             return chapterResponse;
         }
 
-        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(long videoId, VideoInfo videoInfo)
+        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(long videoId, VideoInfo videoInfo, ITaskLogger logger)
         {
             GqlVideoChapterResponse chapterResponse;
             try
             {
                 chapterResponse = await GetVideoChapters(videoId);
             }
-            catch (NullReferenceException)
+            catch (NullReferenceException ex)
             {
+                logger.LogError($"Null object reference while fetching chapters: {ex.StackTrace}");
+
                 chapterResponse = new GqlVideoChapterResponse
                 {
                     data = new ChapterData

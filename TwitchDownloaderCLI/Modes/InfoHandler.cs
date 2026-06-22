@@ -88,7 +88,7 @@ namespace TwitchDownloaderCLI.Modes
                 throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
             }
 
-            var chapters = await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo.data.video);
+            var chapters = await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo.data.video, progress);
 
             return (videoInfo, chapters, playlistString);
         }
