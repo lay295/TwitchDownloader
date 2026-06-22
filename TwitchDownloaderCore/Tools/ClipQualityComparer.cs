@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TwitchDownloaderCore.Tools
+﻿namespace TwitchDownloaderCore.Tools
 {
     public class ClipQualityComparer : IComparer<TwitchObjects.Gql.ClipVideoQuality>
     {

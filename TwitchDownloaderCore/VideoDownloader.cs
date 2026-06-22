@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
@@ -19,7 +12,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public sealed class VideoDownloader
+    public sealed partial class VideoDownloader
     {
         private readonly VideoDownloadOptions downloadOptions;
         private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
@@ -191,7 +184,7 @@ namespace TwitchDownloaderCore
             var uri = new Uri(baseUrl, map.Uri);
             _progress.LogVerbose($"Downloading header file from '{uri}' to '{destinationFile}'");
 
-            await DownloadTools.DownloadFileAsync(_httpClient, uri, destinationFile, null, downloadOptions.ThrottleKib, _progress);
+            await DownloadTools.DownloadFileAsync(_httpClient, uri, destinationFile, null, downloadOptions.ThrottleKib, _progress, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken));
 
             return destinationFile;
         }
@@ -242,10 +235,12 @@ namespace TwitchDownloaderCore
         private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
-            var totalPartsToDownload = downloadState.PartQueue.Count;
+            var totalPartsToDownload = downloadState.PartCount;
             var previousMissingCount = 0;
             var restartedThreads = 0;
-            var maxRestartedThreads = limitThreadRestarts ? (int)Math.Ceiling(totalPartsToDownload * 0.95) : int.MaxValue;
+            var maxRestartedThreads = limitThreadRestarts
+                ? Math.Max(downloadThreads.Length, (int)Math.Ceiling(totalPartsToDownload * 0.95))
+                : int.MaxValue;
             var downloadExceptions = new Dictionary<int, Exception>();
             do
             {
@@ -526,7 +521,6 @@ namespace TwitchDownloaderCore
                 process.StartInfo.ArgumentList.Add(arg);
             }
 
-            var encodingTimeRegex = new Regex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)", RegexOptions.Compiled);
             var logQueue = new ConcurrentQueue<string>();
 
             process.ErrorDataReceived += (sender, e) =>
@@ -536,7 +530,7 @@ namespace TwitchDownloaderCore
 
                 logQueue.Enqueue(e.Data); // We cannot use -report ffmpeg arg because it redirects stderr
 
-                HandleFfmpegOutput(e.Data, encodingTimeRegex, videoLength);
+                HandleFfmpegOutput(e.Data, videoLength);
             };
 
             _progress.LogVerbose($"Running \"{downloadOptions.FfmpegPath}\" in \"{process.StartInfo.WorkingDirectory}\" with args: {CombineArguments(process.StartInfo.ArgumentList)}");
@@ -569,9 +563,12 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void HandleFfmpegOutput(string output, Regex encodingTimeRegex, TimeSpan videoLength)
+        [GeneratedRegex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)")]
+        private static partial Regex EncodingTimeRegex { get; }
+
+        private void HandleFfmpegOutput(string output, TimeSpan videoLength)
         {
-            var encodingTimeMatch = encodingTimeRegex.Match(output);
+            var encodingTimeMatch = EncodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
                 return;
 
@@ -587,6 +584,9 @@ namespace TwitchDownloaderCore
             _progress.ReportProgress(Math.Clamp(percent, 0, 100));
         }
 
+        [GeneratedRegex(@"-muted-\w+(?=\.m3u8$)")]
+        private static partial Regex MutedHighlightRegex { get; }
+
         private async Task<(M3U8 playlist, DateTimeOffset airDate)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
             string playlistString;
@@ -597,7 +597,7 @@ namespace TwitchDownloaderCore
             catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
             {
                 // Hacky workaround for old highlights that were muted
-                var newUrl = Regex.Replace(playlistUrl, @"-muted-\w+(?=\.m3u8$)", "");
+                var newUrl = MutedHighlightRegex.Replace(playlistUrl, "");
                 if (playlistUrl == newUrl)
                     throw;
 

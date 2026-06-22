@@ -1,14 +1,12 @@
-﻿using System;
+﻿using HandyControl.Data;
+using Microsoft.Win32;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using HandyControl.Data;
-using Microsoft.Win32;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderWPF.Extensions;
 using TwitchDownloaderWPF.Models;

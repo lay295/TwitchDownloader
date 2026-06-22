@@ -1,3 +1,4 @@
+using System.Globalization;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Tests.ToolTests

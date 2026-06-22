@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;

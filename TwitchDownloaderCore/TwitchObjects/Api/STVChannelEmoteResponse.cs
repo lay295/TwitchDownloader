@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace TwitchDownloaderCore.TwitchObjects.Api
+﻿namespace TwitchDownloaderCore.TwitchObjects.Api
 {
     public class STVConnection
     {

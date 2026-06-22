@@ -1,7 +1,6 @@
-using System;
+using SkiaSharp;
 using System.Buffers;
 using System.Text;
-using SkiaSharp;
 using Buffer = HarfBuzzSharp.Buffer;
 
 namespace TwitchDownloaderCore.Extensions

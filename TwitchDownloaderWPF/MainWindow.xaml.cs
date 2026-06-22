@@ -1,11 +1,9 @@
 ﻿using AutoUpdaterDotNET;
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -70,14 +68,17 @@ namespace TwitchDownloaderWPF
             App.RequestAppThemeChange();
         }
 
+        [GeneratedRegex("{crop_(?=(?:start|end)(?:_|}))")]
+        private static partial Regex OldCropParametersRegex { get; }
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Main.Content = pageVodDownload;
 
             // Replace old crop parameters with new trim parameters
-            Settings.Default.TemplateVod = Regex.Replace(Settings.Default.TemplateVod, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
-            Settings.Default.TemplateClip = Regex.Replace(Settings.Default.TemplateClip, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
-            Settings.Default.TemplateChat = Regex.Replace(Settings.Default.TemplateChat, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
+            Settings.Default.TemplateVod = OldCropParametersRegex.Replace(Settings.Default.TemplateVod, "{trim_");
+            Settings.Default.TemplateClip = OldCropParametersRegex.Replace(Settings.Default.TemplateClip, "{trim_");
+            Settings.Default.TemplateChat = OldCropParametersRegex.Replace(Settings.Default.TemplateChat, "{trim_");
             Settings.Default.Save();
 
             // Flash the window taskbar icon if it is not in the foreground. This is to mitigate a problem where

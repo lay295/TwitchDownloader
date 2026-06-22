@@ -9,6 +9,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>default</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,13 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading;
-using System.Windows;
-using System.Windows.Controls;
-using TwitchDownloaderWPF.TwitchTasks;
-using TwitchDownloaderWPF.Properties;
 using System.Diagnostics;
 using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.TwitchTasks;
 
 namespace TwitchDownloaderWPF
 {
@@ -16,7 +15,7 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class PageQueue : Page
     {
-        public static readonly Lock taskLock = new();
+        public static readonly Lock TaskLock = new();
         public static ObservableCollection<TwitchTask> taskList { get; } = new();
         private static readonly BackgroundWorker taskManager = new BackgroundWorker();
 
@@ -47,7 +46,7 @@ namespace TwitchDownloaderWPF
                 int currentChat = 0;
                 int currentRender = 0;
 
-                lock (taskLock)
+                lock (TaskLock)
                 {
                     foreach (var task in taskList)
                     {
@@ -292,7 +291,7 @@ namespace TwitchDownloaderWPF
 
             task.Cancel();
 
-            lock (taskLock)
+            lock (TaskLock)
             {
                 if (!taskList.Remove(task))
                 {
@@ -359,7 +358,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            lock (taskLock)
+            lock (TaskLock)
             {
                 var index = taskList.IndexOf(task);
                 if (index < 1)
@@ -376,7 +375,7 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
-            lock (taskLock)
+            lock (TaskLock)
             {
                 var index = taskList.IndexOf(task);
                 if (index == -1 || index == taskList.Count - 1)

@@ -1,6 +1,4 @@
 ﻿using SkiaSharp;
-using System;
-using System.IO;
 using TwitchDownloaderCore.Chat;
 
 namespace TwitchDownloaderCore.Options

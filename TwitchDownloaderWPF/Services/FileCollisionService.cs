@@ -1,8 +1,7 @@
-using System;
+using Ookii.Dialogs.Wpf;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
-using Ookii.Dialogs.Wpf;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;

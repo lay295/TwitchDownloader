@@ -1,20 +1,13 @@
 ﻿using SkiaSharp;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
@@ -25,7 +18,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public static class TwitchHelper
+    public static partial class TwitchHelper
     {
         private static readonly HttpClient httpClient = new()
         {
@@ -1167,6 +1160,9 @@ namespace TwitchDownloaderCore
             return fileSystemInfo;
         }
 
+        [GeneratedRegex(@"\d+_\d+$", RegexOptions.RightToLeft)]
+        private static partial Regex VideoFolderRegex { get; }
+
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
@@ -1183,14 +1179,12 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            var videoFolderRegex = new Regex(@"\d+_\d+$", RegexOptions.RightToLeft);
             var allCacheDirectories = Directory.GetDirectories(cacheFolder);
 
-            var oldVideoCaches = (from directory in allCacheDirectories
-                    where videoFolderRegex.IsMatch(directory)
-                    let directoryInfo = new DirectoryInfo(directory)
-                    where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7
-                    select directoryInfo)
+            var oldVideoCaches = allCacheDirectories
+                .Where(directory => VideoFolderRegex.IsMatch(directory))
+                .Select(directory => new DirectoryInfo(directory))
+                .Where(directoryInfo => DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7)
                 .ToArray();
 
             if (oldVideoCaches.Length == 0)

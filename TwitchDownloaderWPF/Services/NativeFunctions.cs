@@ -1,17 +1,16 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 namespace TwitchDownloaderWPF.Services
 {
     [SupportedOSPlatform("windows")]
-    public static unsafe class NativeFunctions
+    public static unsafe partial class NativeFunctions
     {
-        [DllImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute", PreserveSig = true)]
-        public static extern int SetWindowAttribute(IntPtr handle, int attribute, void* attributeValue, uint attributeSize);
+        [LibraryImport("dwmapi.dll", EntryPoint = "DwmSetWindowAttribute")]
+        public static partial int SetWindowAttribute(IntPtr handle, int attribute, void* attributeValue, uint attributeSize);
 
-        [DllImport("user32.dll", EntryPoint = "GetForegroundWindow", PreserveSig = true)]
-        public static extern IntPtr GetForegroundWindow();
+        [LibraryImport("user32.dll", EntryPoint = "GetForegroundWindow")]
+        public static partial IntPtr GetForegroundWindow();
 
         [DllImport("user32.dll", EntryPoint = "FlashWindowEx", PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.Bool)]

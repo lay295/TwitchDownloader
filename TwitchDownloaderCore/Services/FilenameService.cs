@@ -1,8 +1,6 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
@@ -111,6 +109,7 @@ namespace TwitchDownloaderCore.Services
             return returnString;
         }
 
+        private static readonly SearchValues<char> CommonInvalidChars = SearchValues.Create("""*":<>?|/\""");
         private static readonly SearchValues<char> FilenameInvalidChars = SearchValues.Create(Path.GetInvalidFileNameChars());
 
         [GeneratedRegex("""(?<=\d):(?=\d\d)""")]
@@ -126,7 +125,7 @@ namespace TwitchDownloaderCore.Services
 
             var newName = TimestampRegex.Replace(filename, "_");
 
-            if (newName.AsSpan().IndexOfAny("""*":<>?|/\""") != -1)
+            if (newName.AsSpan().IndexOfAny(CommonInvalidChars) != -1)
             {
                 newName = string.Create(filename.Length, filename, static (span, str) =>
                 {

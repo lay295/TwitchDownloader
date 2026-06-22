@@ -1,5 +1,3 @@
-using System;
-
 namespace TwitchDownloaderCore.Tools
 {
     public static class VideoSizeEstimator
