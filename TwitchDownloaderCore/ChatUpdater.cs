@@ -161,22 +161,29 @@ namespace TwitchDownloaderCore
                 chatRoot.video.game = videoInfo.game?.displayName;
 
                 var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo)).data.video.moments.edges;
-                chatRoot.video.chapters.Clear();
-                foreach (var responseChapter in chaptersInfo)
+
+                // Test if chat was downloaded before the end of stream, append new chapters if so
+                var lastChapter = chatRoot.video.chapters.LastOrDefault();
+                if (lastChapter is null ||
+                    (chatRoot.video.chapters.Count <= chaptersInfo.Count && lastChapter.startMilliseconds + lastChapter.lengthMilliseconds < videoInfo.lengthSeconds * 1000))
                 {
-                    chatRoot.video.chapters.Add(new VideoChapter
+                    chatRoot.video.chapters.Remove(lastChapter);
+                    foreach (var responseChapter in chaptersInfo.Skip(chatRoot.video.chapters.Count))
                     {
-                        id = responseChapter.node.id,
-                        startMilliseconds = responseChapter.node.positionMilliseconds,
-                        lengthMilliseconds = responseChapter.node.durationMilliseconds,
-                        _type = responseChapter.node._type,
-                        description = responseChapter.node.description,
-                        subDescription = responseChapter.node.subDescription,
-                        thumbnailUrl = responseChapter.node.thumbnailURL,
-                        gameId = responseChapter.node.details.game?.id,
-                        gameDisplayName = responseChapter.node.details.game?.displayName,
-                        gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL
-                    });
+                        chatRoot.video.chapters.Add(new VideoChapter
+                        {
+                            id = responseChapter.node.id,
+                            startMilliseconds = responseChapter.node.positionMilliseconds,
+                            lengthMilliseconds = responseChapter.node.durationMilliseconds,
+                            _type = responseChapter.node._type,
+                            description = responseChapter.node.description,
+                            subDescription = responseChapter.node.subDescription,
+                            thumbnailUrl = responseChapter.node.thumbnailURL,
+                            gameId = responseChapter.node.details.game?.id,
+                            gameDisplayName = responseChapter.node.details.game?.displayName,
+                            gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL
+                        });
+                    }
                 }
             }
             else
