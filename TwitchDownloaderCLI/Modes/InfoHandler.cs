@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Spectre.Console;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Web;
-using Spectre.Console;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
@@ -92,7 +88,7 @@ namespace TwitchDownloaderCLI.Modes
                 throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
             }
 
-            var chapters = await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo.data.video);
+            var chapters = await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo.data.video, progress);
 
             return (videoInfo, chapters, playlistString);
         }

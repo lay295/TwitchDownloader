@@ -1,8 +1,6 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
@@ -40,7 +38,7 @@ namespace TwitchDownloaderCore.Services
                 .Replace("{clipper}", ReplaceInvalidFilenameChars(clipper))
                 .Replace("{clipper_id}", ReplaceInvalidFilenameChars(clipperId))
                 .Replace("{date}", date.ToString("M-d-yy"))
-                .Replace("{random_string}", Path.GetRandomFileName().Remove(8)) // Remove the period
+                .Replace("{random_string}", Path.GetRandomFileName().Remove(8, 1)) // Remove the period
                 .Replace("{trim_start}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimStart))
                 .Replace("{trim_end}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimEnd))
                 .Replace("{trim_length}", TimeSpanHFormat.ReusableInstance.Format(@"HH\-mm\-ss", trimLength))
@@ -111,6 +109,7 @@ namespace TwitchDownloaderCore.Services
             return returnString;
         }
 
+        private static readonly SearchValues<char> CommonInvalidChars = SearchValues.Create("""*":<>?|/\""");
         private static readonly SearchValues<char> FilenameInvalidChars = SearchValues.Create(Path.GetInvalidFileNameChars());
 
         [GeneratedRegex("""(?<=\d):(?=\d\d)""")]
@@ -126,7 +125,7 @@ namespace TwitchDownloaderCore.Services
 
             var newName = TimestampRegex.Replace(filename, "_");
 
-            if (newName.AsSpan().IndexOfAny("""*":<>?|/\""") != -1)
+            if (newName.AsSpan().IndexOfAny(CommonInvalidChars) != -1)
             {
                 newName = string.Create(filename.Length, filename, static (span, str) =>
                 {
@@ -147,7 +146,6 @@ namespace TwitchDownloaderCore.Services
             return newName.ReplaceAny(FilenameInvalidChars, '_');
         }
 
-        [return: MaybeNull]
         public static string GuessVodFileExtension([AllowNull] string qualityString)
         {
             if (string.IsNullOrWhiteSpace(qualityString))
@@ -160,14 +158,7 @@ namespace TwitchDownloaderCore.Services
                 return ".m4a";
             }
 
-            if (char.IsDigit(qualityString[0])
-                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase)
-                || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
-            {
-                return ".mp4";
-            }
-
-            return null;
+            return ".mp4";
         }
 
         public static FileInfo GetNonCollidingName(FileInfo fileInfo)

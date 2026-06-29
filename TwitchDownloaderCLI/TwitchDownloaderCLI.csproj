@@ -9,10 +9,12 @@
     <Platforms>AnyCPU;x64</Platforms>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>default</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
     <PackageReference Include="Spectre.Console" Version="0.54.0" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="6.0.2" />
   </ItemGroup>

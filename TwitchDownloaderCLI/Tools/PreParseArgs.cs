@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using TwitchDownloaderCLI.Models;
+﻿using TwitchDownloaderCLI.Models;
 
 namespace TwitchDownloaderCLI.Tools
 {

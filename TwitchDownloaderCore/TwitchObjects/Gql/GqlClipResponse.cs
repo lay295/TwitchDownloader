@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TwitchDownloaderCore.TwitchObjects.Gql
+﻿namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
     public class ClipBroadcaster
     {

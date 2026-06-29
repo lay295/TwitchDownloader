@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TwitchDownloaderCore.TwitchObjects
+﻿namespace TwitchDownloaderCore.TwitchObjects
 {
     public class ChatRootInfo
     {

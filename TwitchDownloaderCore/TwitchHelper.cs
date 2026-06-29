@@ -1,20 +1,13 @@
 ﻿using SkiaSharp;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
@@ -25,7 +18,7 @@ using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore
 {
-    public static class TwitchHelper
+    public static partial class TwitchHelper
     {
         private static readonly HttpClient httpClient = new()
         {
@@ -1167,6 +1160,9 @@ namespace TwitchDownloaderCore
             return fileSystemInfo;
         }
 
+        [GeneratedRegex(@"\d+_\d+$", RegexOptions.RightToLeft)]
+        private static partial Regex VideoFolderRegex { get; }
+
         /// <summary>
         /// Cleans up any unmanaged cache files from previous runs that were interrupted before cleaning up
         /// </summary>
@@ -1183,14 +1179,12 @@ namespace TwitchDownloaderCore
                 return;
             }
 
-            var videoFolderRegex = new Regex(@"\d+_\d+$", RegexOptions.RightToLeft);
             var allCacheDirectories = Directory.GetDirectories(cacheFolder);
 
-            var oldVideoCaches = (from directory in allCacheDirectories
-                    where videoFolderRegex.IsMatch(directory)
-                    let directoryInfo = new DirectoryInfo(directory)
-                    where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7
-                    select directoryInfo)
+            var oldVideoCaches = allCacheDirectories
+                .Where(directory => VideoFolderRegex.IsMatch(directory))
+                .Select(directory => new DirectoryInfo(directory))
+                .Where(directoryInfo => DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7)
                 .ToArray();
 
             if (oldVideoCaches.Length == 0)
@@ -1330,7 +1324,8 @@ namespace TwitchDownloaderCore
             response.EnsureSuccessStatusCode();
 
             var chapterResponse = await response.Content.ReadFromJsonAsync<GqlVideoChapterResponse>();
-            chapterResponse.data.video.moments ??= new VideoMomentConnection { edges = new List<VideoMomentEdge>() };
+            chapterResponse.data.video ??= new ChapterVideo { id = videoId.ToString() };
+            chapterResponse.data.video.moments ??= new VideoMomentConnection { edges = [] };
 
             // For some reason durations can be negative sometimes
             foreach (var edge in chapterResponse.data.video.moments.edges)
@@ -1350,9 +1345,32 @@ namespace TwitchDownloaderCore
             return chapterResponse;
         }
 
-        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(long videoId, VideoInfo videoInfo)
+        public static async Task<GqlVideoChapterResponse> GetOrGenerateVideoChapters(long videoId, VideoInfo videoInfo, ITaskLogger logger)
         {
-            var chapterResponse = await GetVideoChapters(videoId);
+            GqlVideoChapterResponse chapterResponse;
+            try
+            {
+                chapterResponse = await GetVideoChapters(videoId);
+            }
+            catch (NullReferenceException ex)
+            {
+                logger.LogError($"Null object reference while fetching chapters: {ex.StackTrace}");
+
+                chapterResponse = new GqlVideoChapterResponse
+                {
+                    data = new ChapterData
+                    {
+                        video = new ChapterVideo
+                        {
+                            id = videoId.ToString(),
+                            moments = new VideoMomentConnection
+                            {
+                                edges = []
+                            }
+                        }
+                    }
+                };
+            }
 
             // Video has only 1 chapter, generate a bogus video chapter with the information we have available.
             if (chapterResponse.data.video.moments.edges.Count == 0)

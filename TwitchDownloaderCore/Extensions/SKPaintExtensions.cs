@@ -1,7 +1,6 @@
-using System;
-using System.Reflection;
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
+using System.Reflection;
 
 namespace TwitchDownloaderCore.Extensions
 {

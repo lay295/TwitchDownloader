@@ -1,3 +1,4 @@
+using System.Globalization;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Tests.ToolTests
@@ -45,11 +46,11 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             const float FLOAT = 3.14159f;
             const string FORMAT_STRING = @"F2";
-            const string EXPECTED = @"3.14";
+            var expected = FLOAT.ToString(FORMAT_STRING);
 
             var resultCustom = TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, FLOAT);
 
-            Assert.Equal(EXPECTED, resultCustom);
+            Assert.Equal(expected, resultCustom);
         }
 
         [Fact]

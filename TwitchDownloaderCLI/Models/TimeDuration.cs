@@ -1,6 +1,6 @@
-using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 
 namespace TwitchDownloaderCLI.Models
 {
@@ -10,9 +10,7 @@ namespace TwitchDownloaderCLI.Models
 
         private readonly TimeSpan _timeSpan;
 
-        /// <summary>
-        /// Constructor used by CommandLineParser
-        /// </summary>
+        [UsedImplicitly(Reason = "Used by CommandLineParser")]
         public TimeDuration(string str)
         {
             this = Parse(str);
@@ -30,38 +28,38 @@ namespace TwitchDownloaderCLI.Models
 
         public override string ToString() => _timeSpan.ToString();
 
-        public static TimeDuration Parse(string str)
+        public static TimeDuration Parse(string str, CultureInfo cultureInfo = null)
         {
             if (string.IsNullOrWhiteSpace(str))
             {
-                throw new FormatException();
+                throw new FormatException($"'{str}' is not a valid time duration.");
             }
 
             str = str.Trim();
 
             if (str.Contains(':'))
             {
-                var timeSpan = ParseTimeSpan(str);
+                var timeSpan = ParseTimeSpan(str, cultureInfo);
                 return new TimeDuration(timeSpan);
             }
 
             var multiplier = GetMultiplier(str, out var span);
-            if (decimal.TryParse(span, NumberStyles.Number, null, out var result))
+            if (decimal.TryParse(span, NumberStyles.Number, cultureInfo, out var result))
             {
                 var ticks = (long)(result * multiplier);
                 return new TimeDuration(ticks);
             }
 
-            throw new FormatException();
+            throw new FormatException($"'{str}' is not a valid time duration.");
         }
 
-        [GeneratedRegex("""^(\d{1,}):(\d{1,2})(?:\.(\d{1,3})\d*)?$""")]
+        [GeneratedRegex("""^(\d{1,}):(\d{1,2})(?:[.,](\d{1,3})\d*)?$""")]
         private static partial Regex TimespanShortTimeRegex { get; }
 
-        [GeneratedRegex("""^(?:(\d{1,})[.:])?(\d{2,}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,3})\d*)?$""")]
+        [GeneratedRegex("""^(?:(\d{1,})[.:])?(\d{2,}):(\d{1,2}):(\d{1,2})(?:[.,](\d{1,3})\d*)?$""")]
         private static partial Regex TimespanLongTimeRegex { get; }
 
-        private static TimeSpan ParseTimeSpan(string str)
+        private static TimeSpan ParseTimeSpan(string str, CultureInfo cultureInfo)
         {
             // TimeSpan.Parse interprets '10:30' as 10 hours, 30 minutes when we want it to mean 10 minutes, 30 seconds
             var match = TimespanShortTimeRegex.Match(str);
@@ -87,7 +85,7 @@ namespace TwitchDownloaderCLI.Models
                 return new TimeSpan(days, hours, minutes, seconds, milliseconds);
             }
 
-            return TimeSpan.Parse(str); // Parse formats not covered by the regex
+            return TimeSpan.Parse(str, cultureInfo); // Parse formats not covered by the regex
         }
 
         [GeneratedRegex(@"\dms$", RegexOptions.RightToLeft)]
@@ -134,7 +132,7 @@ namespace TwitchDownloaderCLI.Models
                 return TimeSpan.TicksPerHour;
             }
 
-            throw new FormatException();
+            throw new FormatException($"'{input}' is not a valid time duration.");
         }
 
         public static implicit operator TimeSpan(TimeDuration timeDuration) => timeDuration._timeSpan;

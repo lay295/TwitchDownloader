@@ -1,6 +1,5 @@
-using System;
-using System.Numerics;
 using SkiaSharp;
+using System.Numerics;
 
 namespace TwitchDownloaderCore.Extensions
 {

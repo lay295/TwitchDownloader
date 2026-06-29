@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Extensions;
@@ -427,6 +424,9 @@ namespace TwitchDownloaderCore.Models
                     }
                 }
 
+                [GeneratedRegex(@"p\d+$", RegexOptions.RightToLeft)]
+                private static partial Regex FramerateRegex { get; }
+
                 public static ExtStreamInfo Parse(ReadOnlySpan<char> text)
                 {
                     var streamInfo = new ExtStreamInfo();
@@ -478,7 +478,7 @@ namespace TwitchDownloaderCore.Models
                     } while (true);
 
                     // Sometimes Twitch's M3U8 response lacks a Framerate value, among other things. We can just guess the framerate using the Video value.
-                    if (streamInfo.Framerate == 0 && Regex.IsMatch(streamInfo.Video, @"p\d+$", RegexOptions.RightToLeft))
+                    if (streamInfo.Framerate == 0 && FramerateRegex.IsMatch(streamInfo.Video))
                     {
                         var index = streamInfo.Video.LastIndexOf('p');
                         streamInfo.Framerate = int.Parse(streamInfo.Video.AsSpan(index + 1));

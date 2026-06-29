@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Tools;

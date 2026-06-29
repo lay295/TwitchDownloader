@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.IO.Compression;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;
@@ -160,7 +154,7 @@ namespace TwitchDownloaderCore
                 chatRoot.video.viewCount = videoInfo.viewCount;
                 chatRoot.video.game = videoInfo.game?.displayName;
 
-                var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo)).data.video.moments.edges;
+                var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo, _progress)).data.video.moments.edges;
 
                 // Test if chat was downloaded before the end of stream, append new chapters if so
                 var lastChapter = chatRoot.video.chapters.LastOrDefault();

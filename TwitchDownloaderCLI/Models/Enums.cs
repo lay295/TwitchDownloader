@@ -1,5 +1,3 @@
-using System;
-
 namespace TwitchDownloaderCLI.Models
 {
     [Flags]

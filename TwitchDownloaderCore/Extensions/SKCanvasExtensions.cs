@@ -1,4 +1,3 @@
-using System;
 using SkiaSharp;
 
 namespace TwitchDownloaderCore.Extensions
