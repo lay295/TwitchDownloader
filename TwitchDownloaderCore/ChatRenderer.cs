@@ -2,7 +2,6 @@
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
 using System.Buffers;
-using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -56,7 +55,20 @@ namespace TwitchDownloaderCore
 
         private static readonly SearchValues<char> DigitChars = SearchValues.Create("0123456789");
 
-        private static readonly IReadOnlyDictionary<int, string> AllEmojiSequences = Emoji.All.ToFrozenDictionary(e => e.SortOrder, e => e.Sequence.AsString);
+        private static readonly IReadOnlyDictionary<int, string> AllEmojiSequences = Emoji.All.ToFrozenDictionary(e => e.SortOrder, e => e.Sequence.AsString.Replace("️", ""));
+
+        // Index emojis by the first code point of their (FE0F-stripped) sequence so a text element can be
+        // matched against just the candidates that share its leading code point instead of all of Emoji.All.
+        private static readonly FrozenDictionary<string, SingleEmoji[]> EmojiByLeadCodePoint =
+            Emoji.All
+                .GroupBy(static e =>
+                {
+                    var seq = AllEmojiSequences[e.SortOrder];
+                    if (seq.Length == 0) return null;
+                    return char.IsHighSurrogate(seq[0]) && seq.Length > 1 ? seq[..2] : seq[..1];
+                })
+                .Where(static g => g.Key is not null)
+                .ToFrozenDictionary(g => g.Key, g => g.ToArray());
 
         private readonly ITaskProgress _progress;
         private readonly ChatRenderOptions renderOptions;
@@ -930,7 +942,7 @@ namespace TwitchDownloaderCore
             {
                 DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, emote, highlightWords);
             }
-            else if (!skipEmoji && EmojiRegex.IsMatch(fragmentPart))
+            else if (!skipEmoji && (EmojiRegex.IsMatch(fragmentPart) || ContainsSupplementaryEmoji(fragmentPart)))
             {
                 DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
             }
@@ -1013,39 +1025,45 @@ namespace TwitchDownloaderCore
 
             var enumerator = StringInfo.GetTextElementEnumerator(fragmentString);
             StringBuilder nonEmojiBuffer = new();
+            var emojiBag = new List<SingleEmoji>();
             while (enumerator.MoveNext())
             {
-                if (enumerator.GetTextElement().Length == 1 && char.IsAscii(enumerator.GetTextElement()[0]))
+                var textElement = enumerator.GetTextElement();
+                // Strip variation selector-16 (U+FE0F) so sequences with or without it still match.
+                var normalizedElement = textElement.Replace("️", "");
+
+                if (normalizedElement.Length == 0)
+                    continue;
+
+                if (normalizedElement.Length == 1 && char.IsAscii(normalizedElement[0]))
                 {
-                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    nonEmojiBuffer.Append(textElement);
                     continue;
                 }
 
-                var emojiBag = new ConcurrentBag<SingleEmoji>();
-                Emoji.All.AsParallel()
-                    .Where(emoji => enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder]))
-                    .ForAll(emoji =>
-                    {
-                        if (emoji.Group != "Flags")
-                        {
-                            emojiBag.Add(emoji);
-                            return;
-                        }
+                var leadKey = char.IsHighSurrogate(normalizedElement[0]) && normalizedElement.Length > 1
+                    ? normalizedElement[..2]
+                    : normalizedElement[..1];
 
-                        if (enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
-                        {
-                            emojiBag.Add(emoji);
-                        }
-                    });
-
-                if (emojiBag.IsEmpty)
+                if (!EmojiByLeadCodePoint.TryGetValue(leadKey, out var candidates))
                 {
-                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    // Unicode.net may not know this emoji (e.g. it is newer than the library's data), but the
+                    // image can still be present in the pack. Try a direct cache lookup by codepoint.
+                    if (TryDrawDirectEmoji(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, normalizedElement, nonEmojiBuffer, highlightWords))
+                        continue;
+                    nonEmojiBuffer.Append(textElement);
                     continue;
+                }
+
+                emojiBag.Clear();
+                foreach (var emoji in candidates)
+                {
+                    if (normalizedElement.StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
+                        emojiBag.Add(emoji);
                 }
 
                 // Make sure the found emojis actually exist in our cache
-                var emojiMatches = emojiBag.ToList();
+                var emojiMatches = emojiBag;
                 int emojiMatchesCount = emojiMatches.Count;
                 for (int j = 0; j < emojiMatchesCount; j++)
                 {
@@ -1059,7 +1077,9 @@ namespace TwitchDownloaderCore
 
                 if (emojiMatchesCount == 0)
                 {
-                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    if (TryDrawDirectEmoji(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, normalizedElement, nonEmojiBuffer, highlightWords))
+                        continue;
+                    nonEmojiBuffer.Append(textElement);
                     continue;
                 }
 
@@ -1071,37 +1091,106 @@ namespace TwitchDownloaderCore
 
                 SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
                 SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
-                SKImageInfo emojiImageInfo = emojiImage.Info;
-
-                if (drawPos.X + emojiImageInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
-                {
-                    AddImageSection(sectionImages, ref drawPos, defaultPos);
-                }
-
-                Point emotePoint = new Point
-                {
-                    X = drawPos.X + (int)Math.Ceiling(renderOptions.EmoteSpacing / 2d), // emotePoint.X halfway through emote padding
-                    Y = (int)((renderOptions.SectionHeight - emojiImageInfo.Height) / 2.0)
-                };
-
-                using (SKCanvas canvas = new SKCanvas(sectionImages.Last().bitmap))
-                {
-                    if (highlightWords)
-                    {
-                        using var paint = new SKPaint { Color = Purple };
-                        canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImageInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
-                    }
-
-                    canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
-                }
-
-                drawPos.X += emojiImageInfo.Width + renderOptions.EmoteSpacing;
+                DrawEmojiBitmap(sectionImages, ref drawPos, defaultPos, emojiImage, highlightWords);
             }
             if (nonEmojiBuffer.Length > 0)
             {
                 DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
                 nonEmojiBuffer.Clear();
             }
+        }
+
+        // Looks the emoji image up directly by codepoint (bypassing Emoji.All) and draws it if present, so
+        // emoji newer than the Unicode.net data still render when their image exists in the pack. Returns
+        // false if no cached image matches, leaving the caller to buffer the text.
+        private bool TryDrawDirectEmoji(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList,
+            ref Point drawPos, Point defaultPos, int bitsCount, string normalizedElement, StringBuilder nonEmojiBuffer, bool highlightWords)
+        {
+            var directKey = ComputeEmojiCacheKey(normalizedElement);
+            if (directKey is null || !emojiCache.TryGetValue(directKey, out var directBitmap))
+                return false;
+
+            if (nonEmojiBuffer.Length > 0)
+            {
+                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
+                nonEmojiBuffer.Clear();
+            }
+
+            DrawEmojiBitmap(sectionImages, ref drawPos, defaultPos, directBitmap, highlightWords);
+            return true;
+        }
+
+        private void DrawEmojiBitmap(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, SKBitmap emojiImage, bool highlightWords)
+        {
+            SKImageInfo emojiImageInfo = emojiImage.Info;
+
+            if (drawPos.X + emojiImageInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
+            {
+                AddImageSection(sectionImages, ref drawPos, defaultPos);
+            }
+
+            Point emotePoint = new Point
+            {
+                X = drawPos.X + (int)Math.Ceiling(renderOptions.EmoteSpacing / 2d), // emotePoint.X halfway through emote padding
+                Y = (int)((renderOptions.SectionHeight - emojiImageInfo.Height) / 2.0)
+            };
+
+            using (SKCanvas canvas = new SKCanvas(sectionImages.Last().bitmap))
+            {
+                if (highlightWords)
+                {
+                    using var paint = new SKPaint { Color = Purple };
+                    canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImageInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
+                }
+
+                canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
+            }
+
+            drawPos.X += emojiImageInfo.Width + renderOptions.EmoteSpacing;
+        }
+
+        // Converts a normalized text element (U+FE0F already stripped) into the emoji image-cache key used by
+        // GetEmojis: uppercase hex codepoints separated by spaces, e.g. "1FAE1" or "1F3F3 1F308". Returns null
+        // when the input is empty or contains only U+FE0F.
+        private static string ComputeEmojiCacheKey(string normalizedElement)
+        {
+            if (string.IsNullOrEmpty(normalizedElement))
+                return null;
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < normalizedElement.Length;)
+            {
+                int cp;
+                if (i + 1 < normalizedElement.Length && char.IsSurrogatePair(normalizedElement[i], normalizedElement[i + 1]))
+                {
+                    cp = char.ConvertToUtf32(normalizedElement[i], normalizedElement[i + 1]);
+                    i += 2;
+                }
+                else
+                {
+                    cp = normalizedElement[i];
+                    i++;
+                }
+
+                if (cp == 0xFE0F) continue;
+                if (sb.Length > 0) sb.Append(' ');
+                sb.Append(cp.ToString("X"));
+            }
+            return sb.Length > 0 ? sb.ToString() : null;
+        }
+
+        // Returns true if the text contains an emoji codepoint above U+1F9FF, i.e. beyond the range EmojiRegex
+        // covers, so newer emoji still enter DrawEmojiMessage even before the regex is updated.
+        private static bool ContainsSupplementaryEmoji(string text)
+        {
+            for (int i = 0; i < text.Length - 1; i++)
+            {
+                char hi = text[i];
+                if (hi < '\uD83C' || hi > '\uD83F') continue;
+                if (!char.IsLowSurrogate(text[i + 1])) continue;
+                if (char.ConvertToUtf32(hi, text[i + 1]) > 0x1F9FF) return true;
+            }
+            return false;
         }
 
         private void DrawNonFontMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, string fragmentString, bool highlightWords)
