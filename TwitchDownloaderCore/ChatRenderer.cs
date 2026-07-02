@@ -437,12 +437,23 @@ namespace TwitchDownloaderCore
             // If we are generating a mask then we need to produce a copy
             if (!renderOptions.GenerateMask)
             {
+                // comment.Emotes holds both static (FrameCount == 1) and animated (FrameCount > 1) emotes,
+                // so we must check FrameCount rather than Count. Otherwise the full-frame copy below runs on
+                // every update frame even when only static emotes are present.
                 bool hasAnimatedEmotes = false;
                 foreach (var comment in comments)
                 {
-                    if (comment.Emotes.Count > 0)
+                    foreach (var (_, emote) in comment.Emotes)
                     {
-                        hasAnimatedEmotes = true;
+                        if (emote.FrameCount > 1)
+                        {
+                            hasAnimatedEmotes = true;
+                            break;
+                        }
+                    }
+
+                    if (hasAnimatedEmotes)
+                    {
                         break;
                     }
                 }
