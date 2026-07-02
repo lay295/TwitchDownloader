@@ -146,6 +146,18 @@
     <Setting Name="IgnoreUsersList" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="HighlightUsersList" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="HighlightUsersColorR" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">255</Value>
+    </Setting>
+    <Setting Name="HighlightUsersColorG" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">215</Value>
+    </Setting>
+    <Setting Name="HighlightUsersColorB" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
     <Setting Name="ChatBadgeMask" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>

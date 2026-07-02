@@ -92,6 +92,7 @@ namespace TwitchDownloaderWPF
             SKColor backgroundColor = new(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
             SKColor altBackgroundColor = new(colorAlternateBackground.SelectedColor.Value.R, colorAlternateBackground.SelectedColor.Value.G, colorAlternateBackground.SelectedColor.Value.B, colorAlternateBackground.SelectedColor.Value.A);
             SKColor messageColor = new(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
+            SKColor highlightUsersColor = new(colorHighlightUsers.SelectedColor.Value.R, colorHighlightUsers.SelectedColor.Value.G, colorHighlightUsers.SelectedColor.Value.B);
             ChatRenderOptions options = new()
             {
                 OutputFile = filename,
@@ -119,6 +120,8 @@ namespace TwitchDownloaderWPF
                 AccentIndentScale = double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture),
                 AccentStrokeScale = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture),
                 VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture),
+                HighlightUsersArray = textHighlightUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                HighlightUsersColor = highlightUsersColor,
                 IgnoreUsersArray = textIgnoreUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 BannedWordsArray = textBannedWordsList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 Timestamp = checkTimestamp.IsChecked.GetValueOrDefault(),
@@ -189,6 +192,8 @@ namespace TwitchDownloaderWPF
                 textAccentIndentScale.Text = Settings.Default.AccentIndentScale.ToString("0.0#");
                 textOutlineScale.Text = Settings.Default.OutlineScale.ToString("0.0#");
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
+                textHighlightUsersList.Text = Settings.Default.HighlightUsersList;
+                colorHighlightUsers.SelectedColor = System.Windows.Media.Color.FromRgb(Settings.Default.HighlightUsersColorR, Settings.Default.HighlightUsersColorG, Settings.Default.HighlightUsersColorB);
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
                 checkRenderAvatars.IsChecked = Settings.Default.RenderUserAvatars;
@@ -305,6 +310,11 @@ namespace TwitchDownloaderWPF
             }
             Settings.Default.IgnoreUsersList = string.Join(",", textIgnoreUsersList.Text
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            Settings.Default.HighlightUsersList = string.Join(",", textHighlightUsersList.Text
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            Settings.Default.HighlightUsersColorR = colorHighlightUsers.SelectedColor.GetValueOrDefault().R;
+            Settings.Default.HighlightUsersColorG = colorHighlightUsers.SelectedColor.GetValueOrDefault().G;
+            Settings.Default.HighlightUsersColorB = colorHighlightUsers.SelectedColor.GetValueOrDefault().B;
             Settings.Default.BannedWordsList = string.Join(",", textBannedWordsList.Text
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             if (RadioEmojiNotoColor.IsChecked == true)

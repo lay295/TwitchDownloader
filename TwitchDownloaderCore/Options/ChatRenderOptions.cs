@@ -49,6 +49,11 @@ namespace TwitchDownloaderCore.Options
         public string TempFolder { get; set; }
         public bool SubMessages { get; set; }
         public bool ChatBadges { get; set; }
+        /// <summary>
+        /// Usernames (login or display name, case-insensitive) whose names should be drawn with <see cref="HighlightUsersColor"/>.
+        /// </summary>
+        public string[] HighlightUsersArray { get; set; } = Array.Empty<string>();
+        public SKColor HighlightUsersColor { get; set; }
         public string[] IgnoreUsersArray { get; set; } = Array.Empty<string>();
         public string[] BannedWordsArray { get; set; } = Array.Empty<string>();
         public double EmoteScale { get; set; } = 1.0;

@@ -1459,11 +1459,17 @@ namespace TwitchDownloaderCore
 
         private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null, int commentIndex = 0)
         {
-            var userColor = colorOverride ?? (comment.message.user_color is not null
-                ? SKColor.Parse(comment.message.user_color)
-                : DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
+            var isHighlighted = renderOptions.HighlightUsersArray.Length > 0
+                                && (renderOptions.HighlightUsersArray.Contains(comment.commenter.name, StringComparer.OrdinalIgnoreCase)
+                                    || renderOptions.HighlightUsersArray.Contains(comment.commenter.display_name, StringComparer.OrdinalIgnoreCase));
 
-            if (colorOverride is null && renderOptions.AdjustUsernameVisibility)
+            var userColor = isHighlighted
+                ? renderOptions.HighlightUsersColor
+                : colorOverride ?? (comment.message.user_color is not null
+                    ? SKColor.Parse(comment.message.user_color)
+                    : DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
+
+            if (!isHighlighted && colorOverride is null && renderOptions.AdjustUsernameVisibility)
             {
                 var useAlternateBackground = renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1;
                 var backgroundColor = useAlternateBackground ? renderOptions.AlternateBackgroundColor : renderOptions.BackgroundColor;

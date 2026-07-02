@@ -597,7 +597,55 @@ namespace TwitchDownloaderWPF.Properties {
                 this["IgnoreUsersList"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string HighlightUsersList {
+            get {
+                return ((string)(this["HighlightUsersList"]));
+            }
+            set {
+                this["HighlightUsersList"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("255")]
+        public byte HighlightUsersColorR {
+            get {
+                return ((byte)(this["HighlightUsersColorR"]));
+            }
+            set {
+                this["HighlightUsersColorR"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("215")]
+        public byte HighlightUsersColorG {
+            get {
+                return ((byte)(this["HighlightUsersColorG"]));
+            }
+            set {
+                this["HighlightUsersColorG"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public byte HighlightUsersColorB {
+            get {
+                return ((byte)(this["HighlightUsersColorB"]));
+            }
+            set {
+                this["HighlightUsersColorB"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]

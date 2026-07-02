@@ -1346,7 +1346,25 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("IgnoreUsersListTooltip", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Highlight Users List  ähnelt.
+        /// </summary>
+        public static string HighlightUsersList {
+            get {
+                return ResourceManager.GetString("HighlightUsersList", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die List of usernames whose names will be drawn in the chosen highlight color. ähnelt.
+        /// </summary>
+        public static string HighlightUsersListTooltip {
+            get {
+                return ResourceManager.GetString("HighlightUsersListTooltip", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Increase Username Readability: ähnelt.
         /// </summary>
