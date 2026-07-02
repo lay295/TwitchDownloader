@@ -428,7 +428,25 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("ChatFontSize", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Username Size: ähnelt.
+        /// </summary>
+        public static string ChatUsernameFontSize {
+            get {
+                return ResourceManager.GetString("ChatUsernameFontSize", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Username font size as a multiple of the message font size. ähnelt.
+        /// </summary>
+        public static string ChatUsernameFontSizeTooltip {
+            get {
+                return ResourceManager.GetString("ChatUsernameFontSizeTooltip", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Height: ähnelt.
         /// </summary>
