@@ -77,7 +77,115 @@ namespace TwitchDownloaderWPF
 
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
-            await GetVideoInfo();
+            if (checkRecoverHidden.IsChecked == true)
+                await GetHiddenVodInfo();
+            else
+                await GetVideoInfo();
+        }
+
+        // Captured stream metadata for hidden-VOD recovery. Populated by GetHiddenVodInfo while the
+        // channel is live, since this data is unavailable once the stream ends.
+        private string recoverChannelLogin;
+        private string recoverStreamId;
+        private DateTimeOffset recoverStreamStartTime;
+
+        private void checkRecoverHidden_Changed(object sender, RoutedEventArgs e)
+        {
+            var recover = checkRecoverHidden.IsChecked == true;
+            textRecoverWarning.Visibility = recover ? Visibility.Visible : Visibility.Collapsed;
+            labelUrl.Text = recover ? "Channel:" : Translations.Strings.VodLinkId;
+
+            SetEnabled(false);
+            recoverChannelLogin = null;
+            recoverStreamId = null;
+        }
+
+        private async Task GetHiddenVodInfo()
+        {
+            var channel = textUrl.Text.Trim();
+            if (string.IsNullOrWhiteSpace(channel))
+            {
+                MessageBox.Show(Application.Current.MainWindow!, "Enter a channel name to recover a hidden VOD from.", Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Accept a full URL or a bare login.
+            channel = channel.TrimEnd('/');
+            var lastSlash = channel.LastIndexOf('/');
+            if (lastSlash >= 0)
+                channel = channel[(lastSlash + 1)..];
+            channel = channel.ToLowerInvariant();
+
+            try
+            {
+                var metadata = await TwitchHelper.GetStreamMetadata(channel);
+                var user = metadata?.data?.user;
+                if (user is null)
+                {
+                    throw new InvalidOperationException($"No Twitch channel found for '{channel}'.");
+                }
+                if (user.stream is null)
+                {
+                    throw new InvalidOperationException(
+                        $"'{channel}' is not currently live. Hidden VOD recovery needs the stream id and start time, " +
+                        "which Twitch only exposes while the channel is live.");
+                }
+
+                recoverChannelLogin = user.login ?? channel;
+                recoverStreamId = user.stream.id;
+                recoverStreamStartTime = user.stream.createdAt;
+
+                textStreamer.Text = user.displayName ?? user.login ?? channel;
+                streamerId = user.id;
+                textTitle.Text = $"Hidden broadcast (stream {recoverStreamId})";
+                var startLocal = Settings.Default.UTCVideoTime ? recoverStreamStartTime.UtcDateTime : recoverStreamStartTime.LocalDateTime;
+                textCreatedAt.Text = startLocal.ToString(CultureInfo.CurrentCulture);
+                currentVideoTime = startLocal;
+                currentVideoId = 0;
+
+                _ = ThumbnailService.TryGetThumb(ThumbnailService.THUMBNAIL_MISSING_URL, out var image);
+                imgThumbnail.Source = image;
+
+                comboQuality.Items.Clear();
+                var (_, qualities) = await TwitchHelper.RecoverHiddenVodQualities(recoverChannelLogin, recoverStreamId, recoverStreamStartTime);
+                if (qualities.Count == 0)
+                {
+                    // Couldn't probe the CDN (shouldn't happen while live) - offer source and let the
+                    // downloader fall back if it turns out to be unavailable.
+                    comboQuality.Items.Add(new ComboBoxItem { Content = "Source", Tag = "chunked" });
+                    AppendLog("Could not probe available qualities; defaulting to Source.");
+                }
+                else
+                {
+                    foreach (var q in qualities)
+                        comboQuality.Items.Add(new ComboBoxItem { Content = TwitchHelper.DescribeVodRendition(q), Tag = q });
+                    AppendLog($"Available qualities: {string.Join(", ", qualities.Select(TwitchHelper.DescribeVodRendition))}.");
+                }
+                comboQuality.SelectedIndex = 0;
+
+                // Length is unknown ahead of time for a live/hidden broadcast.
+                vodLength = TimeSpan.Zero;
+                labelLength.Text = "Unknown (live)";
+                numStartHour.Maximum = 48;
+                numEndHour.Maximum = 48;
+                numStartHour.Value = numStartMinute.Value = numStartSecond.Value = 0;
+                numEndHour.Value = numEndMinute.Value = numEndSecond.Value = 0;
+                viewCount = 0;
+                game = Translations.Strings.UnknownGame;
+
+                AppendLog($"Captured live metadata for '{recoverChannelLogin}' (stream {recoverStreamId}, started {recoverStreamStartTime:u}).");
+                SetEnabled(true);
+            }
+            catch (Exception ex)
+            {
+                btnGetInfo.IsEnabled = true;
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                MessageBox.Show(Application.Current.MainWindow!, ex.Message, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private async Task GetVideoInfo()
@@ -227,11 +335,24 @@ namespace TwitchDownloaderWPF
             else if (RadioTrimExact.IsChecked == true)
                 options.TrimMode = VideoTrimMode.Exact;
 
+            if (checkRecoverHidden.IsChecked == true)
+            {
+                options.RecoverHiddenVod = true;
+                options.ChannelLogin = recoverChannelLogin;
+                options.StreamId = recoverStreamId;
+                options.StreamStartTime = recoverStreamStartTime;
+            }
+
             return options;
         }
 
         private void UpdateVideoSizeEstimates()
         {
+            // Hidden-VOD recovery uses a plain string quality tag ("chunked") and an unknown length,
+            // so there is nothing to estimate.
+            if (checkRecoverHidden.IsChecked == true)
+                return;
+
             int selectedIndex = comboQuality.SelectedIndex;
 
             var trimStart = checkStart.IsChecked == true
