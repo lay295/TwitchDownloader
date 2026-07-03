@@ -284,7 +284,52 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("Browse", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Preview ähnelt.
+        /// </summary>
+        public static string Preview {
+            get {
+                return ResourceManager.GetString("Preview", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Preview at: ähnelt.
+        /// </summary>
+        public static string PreviewAt {
+            get {
+                return ResourceManager.GetString("PreviewAt", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Click Preview to render a frame ähnelt.
+        /// </summary>
+        public static string PreviewHint {
+            get {
+                return ResourceManager.GetString("PreviewHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Rendering... ähnelt.
+        /// </summary>
+        public static string PreviewRendering {
+            get {
+                return ResourceManager.GetString("PreviewRendering", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid position. Use H:MM:SS. ähnelt.
+        /// </summary>
+        public static string PreviewInvalidPosition {
+            get {
+                return ResourceManager.GetString("PreviewInvalidPosition", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die BTTV Emotes: ähnelt.
         /// </summary>

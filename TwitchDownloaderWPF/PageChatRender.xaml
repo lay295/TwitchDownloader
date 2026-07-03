@@ -260,6 +260,18 @@
                 </RichTextBox.Resources>
             </RichTextBox>
             <Button x:Name="BtnClearLog" MinWidth="50" IsEnabled="False" Content="{lex:Loc ClearLog}" Click="BtnClearLog_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <WrapPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <TextBlock Text="{lex:Loc PreviewAt}" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource AppText}"/>
+                <TextBox x:Name="textPreviewPos" Text="0:00:00" Width="70" Margin="0,0,4,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <Button x:Name="btnPreviewRender" Content="{lex:Loc Preview}" MinWidth="60" Click="BtnPreviewRender_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            </WrapPanel>
+            <ProgressBar x:Name="progressPreview" Height="4" Margin="0,4,0,0" Visibility="Collapsed" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource ProgressBarForeground}"/>
+            <Border BorderBrush="{DynamicResource AppElementBorder}" BorderThickness="1" Margin="0,4,0,0" MinHeight="80" Background="{DynamicResource AppElementBackground}">
+                <Grid>
+                    <TextBlock x:Name="textPreviewStatus" Text="{lex:Loc PreviewHint}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" Opacity="0.6"/>
+                    <Image x:Name="imgPreview" Stretch="Uniform" Visibility="Collapsed"/>
+                </Grid>
+            </Border>
         </StackPanel>
 
         <!--STATUS BAR-->

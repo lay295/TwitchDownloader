@@ -35,6 +35,8 @@ namespace TwitchDownloaderWPF
         public SKFontManager fontManager = SKFontManager.CreateDefault();
         public string[] FileNames = [];
         private CancellationTokenSource _cancellationTokenSource;
+        private readonly List<string> _previewTempFiles = new();
+        private CancellationTokenSource _previewCts;
 
         public PageChatRender()
         {
@@ -504,6 +506,111 @@ namespace TwitchDownloaderWPF
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             SaveSettings();
+            _previewCts?.Cancel();
+            CleanUpPreviewTempFiles();
+        }
+
+        private void CleanUpPreviewTempFiles()
+        {
+            foreach (var file in _previewTempFiles)
+            {
+                try { if (File.Exists(file)) File.Delete(file); } catch { /* best effort */ }
+            }
+            _previewTempFiles.Clear();
+        }
+
+        private async void BtnPreviewRender_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileNames.Length == 0 || string.IsNullOrWhiteSpace(FileNames[0]) || !ValidateInputs())
+            {
+                textPreviewStatus.Text = Translations.Strings.PreviewHint;
+                return;
+            }
+
+            if (!TimeSpan.TryParse(textPreviewPos.Text, out var pos))
+            {
+                textPreviewStatus.Text = Translations.Strings.PreviewInvalidPosition;
+                textPreviewStatus.Visibility = Visibility.Visible;
+                imgPreview.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            _previewCts?.Cancel();
+            _previewCts = new CancellationTokenSource();
+            var token = _previewCts.Token;
+
+            var tempFile = Path.Combine(Path.GetTempPath(), $"tdw_preview_{Guid.NewGuid():N}.mp4");
+            var tempPng = Path.Combine(Path.GetTempPath(), $"tdw_preview_{Guid.NewGuid():N}.png");
+            _previewTempFiles.Add(tempFile);
+            _previewTempFiles.Add(tempPng);
+
+            // Render a short window around the requested position at 1 fps and grab a single frame.
+            var options = GetOptions(tempFile);
+            options.InputFile = FileNames[0];
+            options.StartOverride = (int)pos.TotalSeconds;
+            options.EndOverride = (int)pos.TotalSeconds + 2;
+            options.GenerateMask = false;
+            options.Framerate = 1;
+
+            progressPreview.Visibility = Visibility.Visible;
+            progressPreview.IsIndeterminate = true;
+            btnPreviewRender.IsEnabled = false;
+            imgPreview.Visibility = Visibility.Collapsed;
+            textPreviewStatus.Text = Translations.Strings.PreviewRendering;
+            textPreviewStatus.Visibility = Visibility.Visible;
+
+            try
+            {
+                var progress = new WpfTaskProgress(
+                    pct => Dispatcher.BeginInvoke(() => { progressPreview.IsIndeterminate = false; progressPreview.Value = pct; }),
+                    _ => { });
+
+                var renderer = new ChatRenderer(options, progress);
+                await renderer.ParseJsonAsync(token);
+                await renderer.RenderVideoAsync(token);
+                token.ThrowIfCancellationRequested();
+
+                var psi = new ProcessStartInfo("ffmpeg", $"-y -i \"{tempFile}\" -vframes 1 \"{tempPng}\"")
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using (var ffmpegProcess = Process.Start(psi))
+                {
+                    if (ffmpegProcess != null)
+                        await ffmpegProcess.WaitForExitAsync(token);
+                }
+
+                if (File.Exists(tempPng) && new FileInfo(tempPng).Length > 0)
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.UriSource = new Uri(tempPng);
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+                    imgPreview.Source = bitmap;
+                    imgPreview.Visibility = Visibility.Visible;
+                    textPreviewStatus.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    textPreviewStatus.Text = Translations.Strings.PreviewHint;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                textPreviewStatus.Text = Translations.Strings.PreviewHint;
+            }
+            catch (Exception ex)
+            {
+                textPreviewStatus.Text = ex.Message;
+            }
+            finally
+            {
+                progressPreview.Visibility = Visibility.Collapsed;
+                btnPreviewRender.IsEnabled = true;
+            }
         }
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)

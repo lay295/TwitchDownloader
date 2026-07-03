@@ -149,6 +149,21 @@
   <data name="Browse" xml:space="preserve">
     <value>Browse</value>
   </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="PreviewAt" xml:space="preserve">
+    <value>Preview at:</value>
+  </data>
+  <data name="PreviewHint" xml:space="preserve">
+    <value>Click Preview to render a frame</value>
+  </data>
+  <data name="PreviewRendering" xml:space="preserve">
+    <value>Rendering...</value>
+  </data>
+  <data name="PreviewInvalidPosition" xml:space="preserve">
+    <value>Invalid position. Use H:MM:SS.</value>
+  </data>
   <data name="BttvEmotes" xml:space="preserve">
     <value>BTTV Emotes:</value>
   </data>
