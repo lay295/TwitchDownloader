@@ -284,7 +284,16 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("Browse", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Split by Chapters ähnelt.
+        /// </summary>
+        public static string SplitByChapters {
+            get {
+                return ResourceManager.GetString("SplitByChapters", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die BTTV Emotes: ähnelt.
         /// </summary>
