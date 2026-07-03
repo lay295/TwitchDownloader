@@ -2093,7 +2093,16 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("SubMessages", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die ← Sync from VOD ähnelt.
+        /// </summary>
+        public static string SyncFromVod {
+            get {
+                return ResourceManager.GetString("SyncFromVod", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Cancel ähnelt.
         /// </summary>

@@ -459,6 +459,9 @@
   <data name="SubMessages" xml:space="preserve">
     <value>Sub Messages:</value>
   </data>
+  <data name="SyncFromVod" xml:space="preserve">
+    <value>← Sync from VOD</value>
+  </data>
   <data name="TaskCancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
