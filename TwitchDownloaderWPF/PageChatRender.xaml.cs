@@ -19,6 +19,7 @@ using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderWPF.Extensions;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.Utils;
 using WpfAnimatedGif;
 using MessageBox = System.Windows.MessageBox;
@@ -35,6 +36,7 @@ namespace TwitchDownloaderWPF
         public SKFontManager fontManager = SKFontManager.CreateDefault();
         public string[] FileNames = [];
         private CancellationTokenSource _cancellationTokenSource;
+        private bool _applyingPreset = false;
 
         public PageChatRender()
         {
@@ -527,8 +529,224 @@ namespace TwitchDownloaderWPF
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             LoadSettings();
+            LoadRenderPresets();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
             statusImage.Visibility = Settings.Default.ReduceMotion ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void LoadRenderPresets()
+        {
+            _applyingPreset = true;
+            try
+            {
+                var presets = ChatRenderPresetService.Load();
+                comboRenderPresets.ItemsSource = presets;
+                comboRenderPresets.SelectedIndex = -1;
+                var lastName = Settings.Default.LastRenderPresetName;
+                if (!string.IsNullOrEmpty(lastName))
+                {
+                    var idx = presets.FindIndex(p => p.Name == lastName);
+                    if (idx >= 0) comboRenderPresets.SelectedIndex = idx;
+                }
+            }
+            finally
+            {
+                _applyingPreset = false;
+            }
+        }
+
+        private void ComboRenderPresets_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_applyingPreset || !IsInitialized)
+                return;
+            if (comboRenderPresets.SelectedItem is ChatRenderPreset preset)
+            {
+                ApplyRenderPreset(preset);
+                Settings.Default.LastRenderPresetName = preset.Name;
+                Settings.Default.Save();
+            }
+        }
+
+        private void ApplyRenderPreset(ChatRenderPreset preset)
+        {
+            _applyingPreset = true;
+            try
+            {
+                if (preset.Width > 0) textWidth.Text = preset.Width.ToString();
+                if (preset.Height > 0) textHeight.Text = preset.Height.ToString();
+                if (!string.IsNullOrEmpty(preset.Font)) comboFont.SelectedItem = preset.Font;
+                if (preset.FontSize > 0) numFontSize.Value = preset.FontSize;
+                colorBackground.SelectedColor = System.Windows.Media.Color.FromArgb(
+                    (byte)preset.BackgroundColorA, (byte)preset.BackgroundColorR,
+                    (byte)preset.BackgroundColorG, (byte)preset.BackgroundColorB);
+                colorAlternateBackground.SelectedColor = System.Windows.Media.Color.FromArgb(
+                    (byte)preset.AltBackgroundColorA, (byte)preset.AltBackgroundColorR,
+                    (byte)preset.AltBackgroundColorG, (byte)preset.AltBackgroundColorB);
+                colorFont.SelectedColor = System.Windows.Media.Color.FromRgb(
+                    (byte)preset.MessageColorR, (byte)preset.MessageColorG, (byte)preset.MessageColorB);
+                checkOutline.IsChecked = preset.Outline;
+                checkTimestamp.IsChecked = preset.Timestamp;
+                checkBTTV.IsChecked = preset.Bttv;
+                checkFFZ.IsChecked = preset.Ffz;
+                checkSTV.IsChecked = preset.Stv;
+                checkSub.IsChecked = preset.SubMessages;
+                checkBadge.IsChecked = preset.Badges;
+                checkRenderAvatars.IsChecked = preset.RenderAvatars;
+                checkOffline.IsChecked = preset.Offline;
+                checkDispersion.IsChecked = preset.Dispersion;
+                checkAlternateMessageBackgrounds.IsChecked = preset.AlternateBackgrounds;
+                checkAdjustUsernameVisibility.IsChecked = preset.AdjustUsernameVisibility;
+                textUpdateTime.Text = preset.UpdateRate.ToString("0.0#", CultureInfo.CurrentCulture);
+                textFramerate.Text = preset.Framerate.ToString();
+                checkMask.IsChecked = preset.GenerateMask;
+                CheckRenderSharpening.IsChecked = preset.ChatRenderSharpening;
+                textEmoteScale.Text = preset.EmoteScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textBadgeScale.Text = preset.BadgeScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textEmojiScale.Text = preset.EmojiScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textAvatarScale.Text = preset.AvatarScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textVerticalScale.Text = preset.VerticalScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textSidePaddingScale.Text = preset.SidePaddingScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textSectionHeightScale.Text = preset.SectionHeightScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textWordSpaceScale.Text = preset.WordSpaceScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textEmoteSpaceScale.Text = preset.EmoteSpaceScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textAccentStrokeScale.Text = preset.AccentStrokeScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textAccentIndentScale.Text = preset.AccentIndentScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textOutlineScale.Text = preset.OutlineScale.ToString("0.0#", CultureInfo.CurrentCulture);
+                textIgnoreUsersList.Text = preset.IgnoreUsers ?? "";
+                textBannedWordsList.Text = preset.BannedWords ?? "";
+                RadioEmojiNotoColor.IsChecked = preset.EmojiVendor == (int)EmojiVendor.GoogleNotoColor;
+                RadioEmojiTwemoji.IsChecked = preset.EmojiVendor == (int)EmojiVendor.TwitterTwemoji;
+                RadioEmojiNone.IsChecked = preset.EmojiVendor == (int)EmojiVendor.None;
+                comboBadges.SelectedItems.Clear();
+                var badgeMask = (ChatBadgeType)preset.ChatBadgeMask;
+                foreach (CheckComboBoxItem item in comboBadges.Items)
+                {
+                    if (badgeMask.HasFlag((Enum)item.Tag))
+                        comboBadges.SelectedItems.Add(item);
+                }
+                if (!string.IsNullOrEmpty(preset.VideoContainer))
+                {
+                    foreach (VideoContainer container in comboFormat.Items)
+                    {
+                        if (container.Name == preset.VideoContainer)
+                        {
+                            comboFormat.SelectedItem = container;
+                            comboCodec.Items.Clear();
+                            foreach (Codec codec in container.SupportedCodecs)
+                            {
+                                comboCodec.Items.Add(codec);
+                                if (codec.Name == preset.VideoCodec)
+                                    comboCodec.SelectedItem = codec;
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (!string.IsNullOrEmpty(preset.FfmpegInput)) textFfmpegInput.Text = preset.FfmpegInput;
+                if (!string.IsNullOrEmpty(preset.FfmpegOutput)) textFfmpegOutput.Text = preset.FfmpegOutput;
+            }
+            finally
+            {
+                _applyingPreset = false;
+            }
+        }
+
+        private ChatRenderPreset GetCurrentRenderPreset()
+        {
+            int badgeMask = 0;
+            foreach (var item in comboBadges.SelectedItems)
+                badgeMask += (int)((CheckComboBoxItem)item).Tag;
+            int emojiVendor = RadioEmojiTwemoji.IsChecked == true
+                ? (int)EmojiVendor.TwitterTwemoji
+                : RadioEmojiNone.IsChecked == true
+                    ? (int)EmojiVendor.None
+                    : (int)EmojiVendor.GoogleNotoColor;
+            return new ChatRenderPreset
+            {
+                Width = int.TryParse(textWidth.Text, out var w) ? w : 0,
+                Height = int.TryParse(textHeight.Text, out var h) ? h : 0,
+                Font = comboFont.SelectedItem?.ToString(),
+                FontSize = numFontSize.Value,
+                BackgroundColorA = colorBackground.SelectedColor?.A ?? 255,
+                BackgroundColorR = colorBackground.SelectedColor?.R ?? 17,
+                BackgroundColorG = colorBackground.SelectedColor?.G ?? 17,
+                BackgroundColorB = colorBackground.SelectedColor?.B ?? 17,
+                AltBackgroundColorA = colorAlternateBackground.SelectedColor?.A ?? 255,
+                AltBackgroundColorR = colorAlternateBackground.SelectedColor?.R ?? 25,
+                AltBackgroundColorG = colorAlternateBackground.SelectedColor?.G ?? 25,
+                AltBackgroundColorB = colorAlternateBackground.SelectedColor?.B ?? 25,
+                MessageColorR = colorFont.SelectedColor?.R ?? 255,
+                MessageColorG = colorFont.SelectedColor?.G ?? 255,
+                MessageColorB = colorFont.SelectedColor?.B ?? 255,
+                Outline = checkOutline.IsChecked.GetValueOrDefault(),
+                Timestamp = checkTimestamp.IsChecked.GetValueOrDefault(),
+                Bttv = checkBTTV.IsChecked.GetValueOrDefault(),
+                Ffz = checkFFZ.IsChecked.GetValueOrDefault(),
+                Stv = checkSTV.IsChecked.GetValueOrDefault(),
+                SubMessages = checkSub.IsChecked.GetValueOrDefault(),
+                Badges = checkBadge.IsChecked.GetValueOrDefault(),
+                RenderAvatars = checkRenderAvatars.IsChecked.GetValueOrDefault(),
+                Offline = checkOffline.IsChecked.GetValueOrDefault(),
+                Dispersion = checkDispersion.IsChecked.GetValueOrDefault(),
+                AlternateBackgrounds = checkAlternateMessageBackgrounds.IsChecked.GetValueOrDefault(),
+                AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault(),
+                UpdateRate = double.TryParse(textUpdateTime.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ur) ? ur : 0.5,
+                Framerate = int.TryParse(textFramerate.Text, out var fr) ? fr : 30,
+                GenerateMask = checkMask.IsChecked.GetValueOrDefault(),
+                ChatRenderSharpening = CheckRenderSharpening.IsChecked.GetValueOrDefault(),
+                EmoteScale = double.TryParse(textEmoteScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var es) ? es : 1.0,
+                BadgeScale = double.TryParse(textBadgeScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var bs) ? bs : 1.0,
+                EmojiScale = double.TryParse(textEmojiScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ejs) ? ejs : 1.0,
+                AvatarScale = double.TryParse(textAvatarScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var avs) ? avs : 1.0,
+                VerticalScale = double.TryParse(textVerticalScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var vs) ? vs : 1.0,
+                SidePaddingScale = double.TryParse(textSidePaddingScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var sps) ? sps : 1.0,
+                SectionHeightScale = double.TryParse(textSectionHeightScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var shs) ? shs : 1.0,
+                WordSpaceScale = double.TryParse(textWordSpaceScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var wss) ? wss : 1.0,
+                EmoteSpaceScale = double.TryParse(textEmoteSpaceScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ess) ? ess : 1.0,
+                AccentStrokeScale = double.TryParse(textAccentStrokeScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ass) ? ass : 1.0,
+                AccentIndentScale = double.TryParse(textAccentIndentScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var ais) ? ais : 1.0,
+                OutlineScale = double.TryParse(textOutlineScale.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out var os) ? os : 1.0,
+                IgnoreUsers = textIgnoreUsersList.Text,
+                BannedWords = textBannedWordsList.Text,
+                EmojiVendor = emojiVendor,
+                ChatBadgeMask = badgeMask,
+                FfmpegInput = textFfmpegInput.Text,
+                FfmpegOutput = textFfmpegOutput.Text,
+                VideoContainer = (comboFormat.SelectedItem as VideoContainer)?.Name,
+                VideoCodec = (comboCodec.SelectedItem as Codec)?.Name,
+            };
+        }
+
+        private void BtnSaveRenderPreset_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new WindowInputText("Save Preset", "Enter a name for this preset:", (comboRenderPresets.SelectedItem as ChatRenderPreset)?.Name ?? "")
+            {
+                Owner = Application.Current.MainWindow
+            };
+            if (dialog.ShowDialog() != true || string.IsNullOrWhiteSpace(dialog.InputValue))
+                return;
+            var preset = GetCurrentRenderPreset();
+            preset.Name = dialog.InputValue;
+            ChatRenderPresetService.AddOrUpdate(preset);
+            LoadRenderPresets();
+            var presets = ChatRenderPresetService.Load();
+            var savedIndex = presets.FindIndex(p => p.Name == preset.Name);
+            if (savedIndex >= 0)
+            {
+                _applyingPreset = true;
+                comboRenderPresets.SelectedIndex = savedIndex;
+                _applyingPreset = false;
+            }
+        }
+
+        private void BtnDeleteRenderPreset_Click(object sender, RoutedEventArgs e)
+        {
+            if (comboRenderPresets.SelectedItem is not ChatRenderPreset preset)
+                return;
+            ChatRenderPresetService.Delete(preset.Name);
+            Settings.Default.LastRenderPresetName = "";
+            Settings.Default.Save();
+            LoadRenderPresets();
         }
 
         private void btnResetFfmpeg_Click(object sender, RoutedEventArgs e)
