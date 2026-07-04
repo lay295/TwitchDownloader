@@ -284,7 +284,55 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("Browse", resourceCulture);
             }
         }
-        
+
+        public static string LiveMonitor {
+            get {
+                return ResourceManager.GetString("LiveMonitor", resourceCulture);
+            }
+        }
+
+        public static string LiveMonitorChannel {
+            get {
+                return ResourceManager.GetString("LiveMonitorChannel", resourceCulture);
+            }
+        }
+
+        public static string LiveMonitorAdd {
+            get {
+                return ResourceManager.GetString("LiveMonitorAdd", resourceCulture);
+            }
+        }
+
+        public static string LiveMonitorRemove {
+            get {
+                return ResourceManager.GetString("LiveMonitorRemove", resourceCulture);
+            }
+        }
+
+        public static string LiveMonitorStart {
+            get {
+                return ResourceManager.GetString("LiveMonitorStart", resourceCulture);
+            }
+        }
+
+        public static string LiveMonitorStop {
+            get {
+                return ResourceManager.GetString("LiveMonitorStop", resourceCulture);
+            }
+        }
+
+        public static string LiveMonitorChannelColumn {
+            get {
+                return ResourceManager.GetString("LiveMonitorChannelColumn", resourceCulture);
+            }
+        }
+
+        public static string LiveMonitorStatusColumn {
+            get {
+                return ResourceManager.GetString("LiveMonitorStatusColumn", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die BTTV Emotes: ähnelt.
         /// </summary>
