@@ -248,7 +248,7 @@ namespace TwitchDownloaderCore
             if (renderOptions.BannedWordsArray.Length > 0)
             {
                 var bannedWords = string.Join('|', renderOptions.BannedWordsArray.Select(Regex.Escape));
-                bannedWordsRegex = new Regex(@$"(?<=^|[\s\d\p{{P}}\p{{S}}]){bannedWords}(?=$|[\s\d\p{{P}}\p{{S}}])",
+                bannedWordsRegex = new Regex(@$"(?<=\b|[\d\p{{Pc}}]){bannedWords}(?=\b|[\d\p{{Pc}}])",
                     RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             }
 
