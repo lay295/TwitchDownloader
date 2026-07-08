@@ -34,17 +34,14 @@ namespace TwitchDownloaderCore.Chat
 
             ChatRoot returnChatRoot = new();
 
-            JsonDocument jsonDocument;
             JsonDocumentOptions deserializationOptions = new()
             {
                 CommentHandling = JsonCommentHandling.Skip,
                 AllowTrailingCommas = true
             };
 
-            await using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                jsonDocument = await GetJsonDocumentAsync(fs, filePath, deserializationOptions, cancellationToken);
-            }
+            await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            using var jsonDocument = await GetJsonDocumentAsync(fs, filePath, deserializationOptions, cancellationToken);
 
             if (jsonDocument.RootElement.TryGetProperty("FileInfo", out JsonElement fileInfoElement))
             {

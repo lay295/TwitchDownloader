@@ -1,15 +1,16 @@
-using SkiaSharp;
-using System.Reflection;
 using System.Runtime.CompilerServices;
+using SkiaSharp;
 
 namespace TwitchDownloaderCore.Tests.ToolTests
 {
     // ReSharper disable once InconsistentNaming
     public class ColorVisibilityTests
     {
-        // AdjustColorVisibility should be extracted and made public at some point, but for now just use reflection
-        private static readonly MethodInfo AdjustVisibilityMethodInfo = typeof(ChatRenderer).GetMethod("AdjustColorVisibility", BindingFlags.NonPublic | BindingFlags.Static)!;
-        private static readonly Func<SKColor, SKColor, SKColor> AdjustVisibilityDelegate = (Func<SKColor, SKColor, SKColor>)Delegate.CreateDelegate(typeof(Func<SKColor, SKColor, SKColor>), AdjustVisibilityMethodInfo);
+        // AdjustColorVisibility should be extracted and made public at some point, but for now just use an accessor
+        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "AdjustColorVisibility")]
+        private static extern SKColor AdjustColorVisibilityAccessor(ChatRenderer? @null, SKColor foreground, SKColor background);
+
+        private static SKColor AdjustColorVisibility(SKColor foreground, SKColor background) => AdjustColorVisibilityAccessor(null, foreground, background);
 
         [Fact]
         public void RenderTestPattern()
@@ -62,7 +63,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
                 for (var y = 0; y < SAT_LEN; y++)
                 {
                     var color = SKColor.FromHsv(x, y, 100);
-                    if (adjust) color = AdjustVisibilityDelegate(color, background);
+                    if (adjust) color = AdjustColorVisibility(color, background);
 
                     paint.Color = color;
                     canvas.DrawPoint(TILE_X_OFFSET + startX + x, TILE_Y_OFFSET + startY + y, paint);
@@ -73,7 +74,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
                 for (var y = 0; y < SAT_LEN; y++)
                 {
                     var color = SKColor.FromHsv(0, 0, 100 - y);
-                    if (adjust) color = AdjustVisibilityDelegate(color, background);
+                    if (adjust) color = AdjustColorVisibility(color, background);
 
                     paint.Color = color;
                     canvas.DrawPoint(x, TILE_Y_OFFSET + startY + y, paint);
