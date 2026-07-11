@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Globalization;
+
 namespace TwitchDownloaderCore.Extensions
 {
     public static class ReadOnlySpanExtensions
@@ -277,6 +280,25 @@ namespace TwitchDownloaderCore.Extensions
                 idxB = idxA;
                 currentIndex++;
             }
+        }
+
+        public static int LengthInTextElements(this ReadOnlySpan<char> str)
+        {
+            var length = 0;
+
+            var slice = str;
+            while (!slice.IsEmpty)
+            {
+                var elementLength = char.IsAscii(slice[0])
+                    ? 1
+                    : StringInfo.GetNextTextElementLength(slice);
+
+                slice = slice[elementLength..];
+                length++;
+            }
+
+            Debug.Assert(length == new StringInfo(str.ToString()).LengthInTextElements);
+            return length;
         }
     }
 }

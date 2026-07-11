@@ -7,6 +7,7 @@ using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -18,6 +19,8 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
+using Buffer = HarfBuzzSharp.Buffer;
+using Range = System.Range;
 
 namespace TwitchDownloaderCore
 {
@@ -1053,28 +1056,41 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
+        private static readonly SearchValues<char> WhiteSpaceChars = SearchValues.Create("\t\n\v\f\r \u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000");
+
         private void DrawMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
         {
             int bitsCount = comment.message.bits_spent;
             foreach (var fragment in comment.message.fragments)
             {
-                if (fragment.emoticon == null)
-                {
-                    // Either text or third party emote
-                    var fragmentParts = SwapRightToLeft(fragment.text.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-                    foreach (var fragmentString in fragmentParts)
-                    {
-                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentString, highlightWords);
-                    }
-                }
-                else
+                if (fragment.emoticon != null)
                 {
                     DrawFirstPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, fragment, highlightWords);
+                    continue;
+                }
+
+                // Either text or third party emote
+                var fragmentSpan = fragment.text.AsSpan();
+                var spaceCount = fragmentSpan.CountAny(WhiteSpaceChars);
+
+                var fragmentParts = ArrayPool<Range>.Shared.Rent(spaceCount + 1);
+                try
+                {
+                    var written = SwapRightToLeft(fragmentSpan.SplitAny(WhiteSpaceChars), fragmentParts);
+                    foreach (var range in fragmentParts.Take(written))
+                    {
+                        var fragmentPart = fragmentSpan[range];
+                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
+                    }
+                }
+                finally
+                {
+                    ArrayPool<Range>.Shared.Return(fragmentParts);
                 }
             }
         }
 
-        private void DrawFragmentPart(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
+        private void DrawFragmentPart(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
         {
             if (!skipThird && TryGetTwitchEmote(emoteThirdList, fragmentPart, out var emote))
             {
@@ -1084,7 +1100,7 @@ namespace TwitchDownloaderCore
             {
                 DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
             }
-            else if (!skipNonFont && (!messageFont.ContainsGlyphs(fragmentPart) || new StringInfo(fragmentPart).LengthInTextElements < fragmentPart.Length))
+            else if (!skipNonFont && (!messageFont.ContainsGlyphs(fragmentPart) || fragmentPart.LengthInTextElements() < fragmentPart.Length))
             {
                 DrawNonFontMessage(sectionImages, ref drawPos, defaultPos, fragmentPart, highlightWords);
             }
@@ -1153,44 +1169,58 @@ namespace TwitchDownloaderCore
             emotePositionList.Add((emotePoint, twitchEmote));
         }
 
-        private void DrawEmojiMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
+        private void DrawEmojiMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragment, bool highlightWords)
         {
             if (renderOptions.EmojiVendor == EmojiVendor.None)
             {
-                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentString, highlightWords, true, true);
+                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragment, highlightWords, true, true);
                 return;
             }
 
-            var enumerator = StringInfo.GetTextElementEnumerator(fragmentString);
-            StringBuilder nonEmojiBuffer = new();
-            while (enumerator.MoveNext())
+            var fragmentSlice = fragment;
+            var nonEmojiStart = 0;
+            var nonEmojiLen = 0;
+            var elementLength = 1;
+            while (elementLength > 0)
             {
-                if (enumerator.GetTextElement().Length == 1 && char.IsAscii(enumerator.GetTextElement()[0]))
+                elementLength = StringInfo.GetNextTextElementLength(fragmentSlice);
+                if (elementLength == 1 && char.IsAscii(fragmentSlice[0]))
                 {
-                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    nonEmojiLen += elementLength;
+                    fragmentSlice = fragmentSlice[elementLength..];
                     continue;
                 }
 
                 var emojiBag = new ConcurrentBag<SingleEmoji>();
-                Emoji.All.AsParallel()
-                    .Where(emoji => enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder]))
-                    .ForAll(emoji =>
-                    {
-                        if (emoji.Group != "Flags")
+                var textElement = ArrayPool<char>.Shared.Rent(elementLength);
+                fragmentSlice[..elementLength].CopyTo(textElement);
+                fragmentSlice = fragmentSlice[elementLength..];
+                try
+                {
+                    Emoji.All.AsParallel()
+                        .Where(emoji => textElement.StartsWith(AllEmojiSequences[emoji.SortOrder]))
+                        .ForAll(emoji =>
                         {
-                            emojiBag.Add(emoji);
-                            return;
-                        }
+                            if (emoji.Group != "Flags")
+                            {
+                                emojiBag.Add(emoji);
+                                return;
+                            }
 
-                        if (enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
-                        {
-                            emojiBag.Add(emoji);
-                        }
-                    });
+                            if (textElement.StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
+                            {
+                                emojiBag.Add(emoji);
+                            }
+                        });
+                }
+                finally
+                {
+                    ArrayPool<char>.Shared.Return(textElement);
+                }
 
                 if (emojiBag.IsEmpty)
                 {
-                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    nonEmojiLen += elementLength;
                     continue;
                 }
 
@@ -1209,14 +1239,15 @@ namespace TwitchDownloaderCore
 
                 if (emojiMatchesCount == 0)
                 {
-                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    nonEmojiLen += elementLength;
                     continue;
                 }
 
-                if (nonEmojiBuffer.Length > 0)
+                if (nonEmojiLen > 0)
                 {
-                    DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
-                    nonEmojiBuffer.Clear();
+                    DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragment.Slice(nonEmojiStart, nonEmojiLen), highlightWords, true, true);
+                    nonEmojiStart += nonEmojiLen;
+                    nonEmojiLen = 0;
                 }
 
                 SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
@@ -1243,25 +1274,26 @@ namespace TwitchDownloaderCore
                     }
 
                     canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
+                    nonEmojiStart += elementLength;
                 }
 
                 drawPos.X += emojiImageInfo.Width + renderOptions.EmoteSpacing;
             }
-            if (nonEmojiBuffer.Length > 0)
+
+            if (nonEmojiLen > 0)
             {
-                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
-                nonEmojiBuffer.Clear();
+                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragment.Slice(nonEmojiStart, nonEmojiLen), highlightWords, true, true);
             }
         }
 
-        private void DrawNonFontMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, string fragmentString, bool highlightWords)
+        private void DrawNonFontMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, ReadOnlySpan<char> fragment, bool highlightWords)
         {
-            var fragmentSpan = fragmentString.AsSpan().Trim('\uFE0F');
+            fragment = fragment.Trim('\uFE0F');
 
-            if (BlockArtRegex.IsMatch(fragmentSpan))
+            if (BlockArtRegex.IsMatch(fragment))
             {
                 // Very rough estimation of width of block art
-                int textWidth = (int)(fragmentSpan.Length * renderOptions.BlockArtCharWidth);
+                var textWidth = (int)(fragment.Length * renderOptions.BlockArtCharWidth);
                 if (renderOptions.BlockArtPreWrap && drawPos.X + textWidth > renderOptions.BlockArtPreWrapWidth)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
@@ -1272,9 +1304,9 @@ namespace TwitchDownloaderCore
             // The fragment has either surrogate pairs or characters not in the messageFont
             var inFontBuffer = new StringBuilder();
             var nonFontBuffer = new StringBuilder();
-            for (int j = 0; j < fragmentSpan.Length; j++)
+            for (var j = 0; j < fragment.Length; j++)
             {
-                if (char.IsHighSurrogate(fragmentSpan[j]) && j + 1 < fragmentSpan.Length && char.IsLowSurrogate(fragmentSpan[j + 1]))
+                if (char.IsHighSurrogate(fragment[j]) && j + 1 < fragment.Length && char.IsLowSurrogate(fragment[j + 1]))
                 {
                     if (inFontBuffer.Length > 0)
                     {
@@ -1288,17 +1320,18 @@ namespace TwitchDownloaderCore
                         DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                         nonFontBuffer.Clear();
                     }
-                    int utf32Char = char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]);
+
+                    var utf32Char = char.ConvertToUtf32(fragment[j], fragment[j + 1]);
                     //Don't attempt to draw U+E0000
                     if (utf32Char != 0xE0000)
                     {
                         using SKPaint highSurrogateFallbackFont = GetFallbackFont(utf32Char).Clone();
                         highSurrogateFallbackFont.Color = renderOptions.MessageColor;
-                        DrawText(fragmentSpan.Slice(j, 2).ToString(), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
+                        DrawText(fragment.Slice(j, 2), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                     }
                     j++;
                 }
-                else if (!messageFont.ContainsGlyphs(fragmentSpan.Slice(j, 1)) || new StringInfo(fragmentSpan[j].ToString()).LengthInTextElements == 0)
+                else if (!messageFont.ContainsGlyphs(fragment.Slice(j, 1)) || fragment.Slice(j, 1).LengthInTextElements() == 0)
                 {
                     if (inFontBuffer.Length > 0)
                     {
@@ -1306,7 +1339,7 @@ namespace TwitchDownloaderCore
                         inFontBuffer.Clear();
                     }
 
-                    nonFontBuffer.Append(fragmentSpan[j]);
+                    nonFontBuffer.Append(fragment[j]);
                 }
                 else
                 {
@@ -1318,9 +1351,10 @@ namespace TwitchDownloaderCore
                         nonFontBuffer.Clear();
                     }
 
-                    inFontBuffer.Append(fragmentSpan[j]);
+                    inFontBuffer.Append(fragment[j]);
                 }
             }
+
             // Only one or the other should occur
             if (nonFontBuffer.Length > 0)
             {
@@ -1336,13 +1370,13 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawRegularMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
+        private void DrawRegularMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentString, bool highlightWords)
         {
-            bool bitsPrinted = false;
-            if (bitsCount > 0 && fragmentString.Any(char.IsDigit) && fragmentString.Any(char.IsLetter))
+            var bitsPrinted = false;
+            var bitsIndex = fragmentString.IndexOfAny(DigitChars);
+            if (bitsCount > 0 && bitsIndex > 0)
             {
-                var bitsIndex = fragmentString.AsSpan().IndexOfAny(DigitChars);
-                if (int.TryParse(fragmentString.AsSpan(bitsIndex), out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString.AsSpan(0, bitsIndex), out var currentCheerEmote))
+                if (int.TryParse(fragmentString[bitsIndex..], out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString[..bitsIndex], out var currentCheerEmote))
                 {
                     KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
                     TwitchEmote cheerEmote = tierList.Value;
@@ -1460,7 +1494,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawText(string drawText, SKPaint textFont, bool padding, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool highlightWords, bool noWrap = false)
+        private static readonly SearchValues<char> DrawTextDelimiters = SearchValues.Create("?-");
+
+        private void DrawText(ReadOnlySpan<char> drawText, SKPaint textFont, bool padding, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool highlightWords, bool noWrap = false)
         {
             bool isRtl = IsRightToLeft(drawText);
             float textWidth = MeasureText(drawText, textFont, isRtl);
@@ -1468,7 +1504,7 @@ namespace TwitchDownloaderCore
 
             while (!noWrap && textWidth > effectiveChatWidth)
             {
-                string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, "?-").ToString();
+                var newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, DrawTextDelimiters);
                 var overrideWrap = false;
 
                 if (newDrawText.Length == 0)
@@ -1507,7 +1543,7 @@ namespace TwitchDownloaderCore
 
                 if (RtlRegex.IsMatch(drawText))
                 {
-                    sectionImageCanvas.DrawShapedText(drawText, drawPos.X, drawPos.Y, textFont);
+                    sectionImageCanvas.DrawShapedText(drawText.ToString(), drawPos.X, drawPos.Y, textFont);
                 }
                 else
                 {
@@ -1522,7 +1558,7 @@ namespace TwitchDownloaderCore
         /// Produces a <see langword="string"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/> OR substringed to the last index of any character in <paramref name="delimiters"/>.
         /// </summary>
         /// <returns>A shortened in visual width or delimited <see langword="string"/>, whichever comes first.</returns>
-        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, ReadOnlySpan<char> delimiters)
+        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, SearchValues<char> delimiters)
         {
             // If we are dealing with non-RTL and don't have any delimiters then SKPaint.BreakText is over 9x faster
             if (!isRtl && text.IndexOfAny(delimiters) == -1)
@@ -1601,7 +1637,7 @@ namespace TwitchDownloaderCore
 
         private static float MeasureRtlText(ReadOnlySpan<char> rtlText, SKPaint textFont, SKShaper shaper)
         {
-            using var buffer = new HarfBuzzSharp.Buffer();
+            using var buffer = new Buffer();
             buffer.Add(rtlText, textFont.TextEncoding);
             SKShaper.Result measure = shaper.Shape(buffer, textFont);
             return measure.Width;
@@ -2083,45 +2119,67 @@ namespace TwitchDownloaderCore
             return input > 127;
         }
 
-        private static List<string> SwapRightToLeft(string[] words)
+        /// <summary>Sorts the word order of a given <paramref name="enumerator"/> by RTL rules.</summary>
+        /// <param name="enumerator">A span enumerator.</param>
+        /// <param name="destination">The RTL-swapped output from enumerating the <paramref name="enumerator"/>.</param>
+        /// <returns>The number of words written.</returns>
+        /// <exception cref="IndexOutOfRangeException"><paramref name="destination"/> was too small.</exception>
+        private static int SwapRightToLeft(MemoryExtensions.SpanSplitEnumerator<char> enumerator, Span<Range> destination)
         {
-            List<string> finalWords = new List<string>(words.Length);
-            Stack<string> rtlStack = new Stack<string>();
-            foreach (var word in words)
+            var source = enumerator.Source;
+            var rtlStack = ArrayPool<Range>.Shared.Rent(destination.Length);
+            var rtlStackPos = 0;
+            var destPos = 0;
+
+            try
             {
-                if (IsRightToLeft(word))
+                foreach (var range in enumerator)
                 {
-                    rtlStack.Push(word);
-                }
-                else
-                {
-                    while (rtlStack.Count > 0)
+                    if (range.Start.Value == range.End.Value) continue;
+
+                    if (IsRightToLeft(source[range]))
                     {
-                        finalWords.Add(rtlStack.Pop());
+                        rtlStack[rtlStackPos] = range;
+                        rtlStackPos++;
                     }
-                    finalWords.Add(word);
+                    else
+                    {
+                        EmptyRtlStack(rtlStack, ref rtlStackPos, destination, ref destPos);
+
+                        destination[destPos] = range;
+                        destPos++;
+                    }
+                }
+
+                EmptyRtlStack(rtlStack, ref rtlStackPos, destination, ref destPos);
+
+                return destPos;
+            }
+            finally
+            {
+                ArrayPool<Range>.Shared.Return(rtlStack);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static void EmptyRtlStack(Span<Range> rtlStack, ref int rtlStackPos, Span<Range> destination, ref int destPos)
+            {
+                while (rtlStackPos > 0)
+                {
+                    destination[destPos] = rtlStack[rtlStackPos - 1];
+                    rtlStackPos--;
+                    destPos++;
                 }
             }
-            while (rtlStack.Count > 0)
-            {
-                finalWords.Add(rtlStack.Pop());
-            }
-            return finalWords;
         }
 
         private static bool IsRightToLeft(ReadOnlySpan<char> message)
         {
             if (message.Length > 0)
             {
-                if (message[0] >= '\u0591' && message[0] <= '\u07FF')
-                    return true;
-                else
-                    return false;
+                return message[0] >= '\u0591' && message[0] <= '\u07FF';
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         public async Task<ChatRoot> ParseJsonAsync(CancellationToken cancellationToken = new())
