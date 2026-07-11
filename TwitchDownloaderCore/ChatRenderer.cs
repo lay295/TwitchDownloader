@@ -323,14 +323,14 @@ namespace TwitchDownloaderCore
                     (frame, isCopyFrame) = GetFrameFromTick(currentTick, sectionDefaultYPos, latestUpdate);
 
                     if (!renderOptions.SkipDriveWaiting)
-                        DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
+                        DriveHelper.WaitForDrive(outputDrive, _progress);
 
                     ffmpegStream.Write(frame.Bytes);
 
                     if (maskProcess != null)
                     {
                         if (!renderOptions.SkipDriveWaiting)
-                            DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
+                            DriveHelper.WaitForDrive(outputDrive, _progress);
 
                         SetFrameMask(frame);
                         maskStream.Write(frame.Bytes);
