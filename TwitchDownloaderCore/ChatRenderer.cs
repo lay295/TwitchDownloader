@@ -750,7 +750,7 @@ namespace TwitchDownloaderCore
                 DrawNonAccentedMessage(comment, sectionImages, emoteSectionList, false, commentIndex, ref drawPos, ref defaultPos);
             }
 
-            SKBitmap finalBitmap = CombineImages(sectionImages, highlightType, commentIndex);
+            SKBitmap finalBitmap = CombineImages(sectionImages, highlightType, commentIndex, IsHighlightedUser(comment));
             newSection.Image = finalBitmap;
             newSection.Emotes = emoteSectionList;
             newSection.CommentIndex = commentIndex;
@@ -758,12 +758,27 @@ namespace TwitchDownloaderCore
             return newSection;
         }
 
-        private SKBitmap CombineImages(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, HighlightType highlightType, int commentIndex)
+        private bool IsHighlightedUser(Comment comment)
+        {
+            return renderOptions.HighlightUsersArray.Length > 0
+                   && (renderOptions.HighlightUsersArray.Contains(comment.commenter.name, StringComparer.OrdinalIgnoreCase)
+                       || renderOptions.HighlightUsersArray.Contains(comment.commenter.display_name, StringComparer.OrdinalIgnoreCase));
+        }
+
+        private SKBitmap CombineImages(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, HighlightType highlightType, int commentIndex, bool isUserHighlighted)
         {
             SKBitmap finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.info.Height));
             var finalBitmapInfo = finalBitmap.Info;
             using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
             {
+                if (isUserHighlighted)
+                {
+                    // Tint the whole message background so a highlighted user stands out regardless of their name colour.
+                    var c = renderOptions.HighlightUsersColor;
+                    using var highlightPaint = new SKPaint { Color = new SKColor(c.Red, c.Green, c.Blue, 0x4D) };
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, highlightPaint);
+                }
+
                 if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight or HighlightType.WatchStreak or HighlightType.Combo)
                 {
                     var accentColor = highlightType is HighlightType.PayingForward
@@ -1580,15 +1595,9 @@ namespace TwitchDownloaderCore
 
         private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null, int commentIndex = 0)
         {
-            var isHighlighted = renderOptions.HighlightUsersArray.Length > 0
-                                && (renderOptions.HighlightUsersArray.Contains(comment.commenter.name, StringComparer.OrdinalIgnoreCase)
-                                    || renderOptions.HighlightUsersArray.Contains(comment.commenter.display_name, StringComparer.OrdinalIgnoreCase));
-
-            var userColor = isHighlighted
-                ? renderOptions.HighlightUsersColor
-                : colorOverride ?? (comment.message.user_color is not null
-                    ? SKColor.Parse(comment.message.user_color)
-                    : DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
+            var userColor = colorOverride ?? (comment.message.user_color is not null
+                ? SKColor.Parse(comment.message.user_color)
+                : DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
 
             if (colorOverride is null && renderOptions.AdjustUsernameVisibility)
             {
