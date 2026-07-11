@@ -2107,6 +2107,7 @@ namespace TwitchDownloaderCore
                 {
                     noFallbackFontFound = true;
                     _progress.LogWarning("No valid typefaces were found for some messages.");
+                    _progress.LogVerbose($"Could not find typeface for codepoint: {input}");
                 }
             }
 
