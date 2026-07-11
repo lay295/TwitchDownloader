@@ -318,6 +318,13 @@
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
     <value>使用者名稱列表 - 用半形逗號分隔，逗號周圍的空格忽略不計，不區分大小寫。</value>
   </data>
+  <data name="HighlightUsersList" xml:space="preserve">
+    <value>Highlight Users List </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="HighlightUsersListTooltip" xml:space="preserve">
+    <value>List of usernames whose names will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+  </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
     <value>剪輯連結 / ID 無效</value>
   </data>

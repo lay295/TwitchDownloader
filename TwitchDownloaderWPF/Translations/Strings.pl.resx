@@ -318,6 +318,13 @@
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
     <value>Lista użytkowników - oddzielonych przecinkiem, spacje dookoła przecinków są ignorowane, nie wrażliwe na wielkość znaków.</value>
   </data>
+  <data name="HighlightUsersList" xml:space="preserve">
+    <value>Highlight Users List </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="HighlightUsersListTooltip" xml:space="preserve">
+    <value>List of usernames whose names will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+  </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
     <value>Nieprawidłowy Link/ID Klipów</value>
   </data>

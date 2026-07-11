@@ -1347,6 +1347,24 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Highlight Users List .
+        /// </summary>
+        public static string HighlightUsersList {
+            get {
+                return ResourceManager.GetString("HighlightUsersList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List of usernames whose names will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive..
+        /// </summary>
+        public static string HighlightUsersListTooltip {
+            get {
+                return ResourceManager.GetString("HighlightUsersListTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ignore Users List .
         /// </summary>
         public static string IgnoreUsersList {
@@ -1363,25 +1381,7 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("IgnoreUsersListTooltip", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Highlight Users List  ähnelt.
-        /// </summary>
-        public static string HighlightUsersList {
-            get {
-                return ResourceManager.GetString("HighlightUsersList", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die List of usernames whose names will be drawn in the chosen highlight color. ähnelt.
-        /// </summary>
-        public static string HighlightUsersListTooltip {
-            get {
-                return ResourceManager.GetString("HighlightUsersListTooltip", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Increase Username Readability:.
         /// </summary>

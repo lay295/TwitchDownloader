@@ -318,6 +318,13 @@
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
     <value>Список ников — разделённых запятой, пробелы вокруг запятых игнорируются, НЕ чувствительно к регистру.</value>
   </data>
+  <data name="HighlightUsersList" xml:space="preserve">
+    <value>Highlight Users List </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="HighlightUsersListTooltip" xml:space="preserve">
+    <value>List of usernames whose names will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+  </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
     <value>Неправильная ссылка/ID клипа</value>
   </data>
