@@ -22,10 +22,6 @@ namespace TwitchDownloaderCore.Options
         public double OutlineSize { get; set; }
         public string Font { get; set; }
         public double FontSize { get; set; } = 24.0;
-        /// <summary>Multiplier applied to <see cref="FontSize"/> to determine the username font size. 1.0 = same as message text.</summary>
-        public double UsernameFontScale { get; set; } = 1.0;
-        /// <summary>The username font size in points, after applying <see cref="UsernameFontScale"/>.</summary>
-        public double EffectiveUsernameFontSize => FontSize * (UsernameFontScale > 0 ? UsernameFontScale : 1.0);
         public SKFontStyle MessageFontStyle { get; set; }
         public SKFontStyle UsernameFontStyle { get; set; }
         public double ReferenceScale => FontSize / 24;
@@ -59,6 +55,8 @@ namespace TwitchDownloaderCore.Options
         public double BadgeScale { get; set; } = 1.0;
         public double EmojiScale { get; set; } = 1.0;
         public double AvatarScale { get; set; } = 1.0;
+        public double UsernameFontScale { get; set; } = 1.0;
+        public double EffectiveUsernameFontSize => FontSize * (UsernameFontScale > 0 ? UsernameFontScale : 1.0);
         public double VerticalSpacingScale { get; set; } = 1.0;
         public double SidePaddingScale { get; set; } = 1.0;
         public double SectionHeightScale { get; set; } = 1.0;

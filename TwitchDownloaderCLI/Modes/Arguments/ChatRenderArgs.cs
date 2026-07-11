@@ -138,6 +138,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("scale-avatar", Default = 1.0, HelpText = "Number to scale avatar images.")]
         public double ScaleAvatar { get; set; }
 
+        [Option("scale-username", Default = 1.0, HelpText = "Number to scale username font relative to the message font size.")]
+        public double ScaleUsername { get; set; }
+
         [Option("scale-vertical", Default = 1.0, HelpText = "Number to scale vertical padding.")]
         public double ScaleVertical { get; set; }
 
