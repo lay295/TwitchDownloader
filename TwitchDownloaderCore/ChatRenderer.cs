@@ -835,9 +835,24 @@ namespace TwitchDownloaderCore
 
         private static string GetKeyName(IEnumerable<Codepoint> codepoints)
         {
-            var codepointList = from codepoint in codepoints where codepoint.Value != 0xFE0F select codepoint.Value.ToString("X");
+            if (!codepoints.TryGetNonEnumeratedCount(out var count))
+            {
+                var codepointQuery = codepoints
+                    .Where(codepoint => codepoint.Value != 0xFE0F)
+                    .Select(codepoint => codepoint.Value.ToString("X"));
+                return string.Join(' ', codepointQuery);
+            }
 
-            return string.Join(' ', codepointList);
+            var sb = new StringBuilder(count * 5); // '1234 '
+            foreach (var codepoint in codepoints)
+            {
+                if (codepoint.Value == 0xFE0F) continue;
+
+                sb.Append($"{codepoint.Value:X} ");
+            }
+
+            sb.TrimEnd(" ");
+            return sb.ToString();
         }
 
         private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, int commentIndex, ref Point drawPos, ref Point defaultPos)
