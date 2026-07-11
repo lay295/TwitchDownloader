@@ -179,6 +179,12 @@
   <data name="ChatFontSize" xml:space="preserve">
     <value>Taille de la police:</value>
   </data>
+  <data name="ChatUsernameFontSize" xml:space="preserve">
+    <value>Username Size:</value>
+  </data>
+  <data name="ChatUsernameFontSizeTooltip" xml:space="preserve">
+    <value>Username font size as a multiple of the message font size. 1.0 = same size as the message text.</value>
+  </data>
   <data name="ChatHeight" xml:space="preserve">
     <value>Hauter:</value>
   </data>
