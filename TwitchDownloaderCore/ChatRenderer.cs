@@ -1590,7 +1590,7 @@ namespace TwitchDownloaderCore
                     ? SKColor.Parse(comment.message.user_color)
                     : DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
 
-            if (!isHighlighted && colorOverride is null && renderOptions.AdjustUsernameVisibility)
+            if (colorOverride is null && renderOptions.AdjustUsernameVisibility)
             {
                 var useAlternateBackground = renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1;
                 var backgroundColor = useAlternateBackground ? renderOptions.AlternateBackgroundColor : renderOptions.BackgroundColor;
