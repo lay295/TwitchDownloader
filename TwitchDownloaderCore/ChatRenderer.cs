@@ -80,7 +80,7 @@ namespace TwitchDownloaderCore
         private SKBitmap _animComposedFrame;
         private SKCanvas _animCanvas;
         private int _animComposedForCommentIndex = int.MinValue;
-        private readonly List<int> _animLastFrameIndices = new();
+        private readonly List<int> _animLastFrameIndices = [];
 
         public ChatRenderer(ChatRenderOptions chatRenderOptions, ITaskProgress progress)
         {
@@ -435,21 +435,20 @@ namespace TwitchDownloaderCore
         private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
         {
             currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos);
-            var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentFrame.CommentIndex, currentTick);
+            var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame, currentTick);
             return (frame, isCopyFrame);
         }
 
-        private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(SKBitmap updateFrame, List<CommentSection> comments, int commentIndex, int currentTick)
+        private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(UpdateFrame currentFrame, int currentTick)
         {
-            long currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
+            var updateFrame = currentFrame.Image;
+            var comments = currentFrame.Comments;
+            var commentIndex = currentFrame.CommentIndex;
+            var currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
 
-            // Mask generation reads the alpha of a freshly copied frame every tick, so it is left on the
-            // original uncached copy path below.
+            // Mask generation modifies the returned frame, so it is left on the original uncached copy path.
             if (!renderOptions.GenerateMask)
             {
-                // comment.Emotes holds both static (FrameCount == 1) and animated (FrameCount > 1) emotes,
-                // so we must check FrameCount rather than Count. Otherwise the full-frame copy below runs on
-                // every update frame even when only static emotes are present.
                 bool hasAnimatedEmotes = false;
                 foreach (var comment in comments)
                 {
@@ -462,11 +461,9 @@ namespace TwitchDownloaderCore
                         }
                     }
 
-                    if (hasAnimatedEmotes)
-                    {
-                        break;
-                    }
+                    if (hasAnimatedEmotes) break;
                 }
+
                 if (!hasAnimatedEmotes)
                 {
                     // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
@@ -510,8 +507,7 @@ namespace TwitchDownloaderCore
 
         /// <summary>
         /// Composites the current animated-emote frames onto a copy of <paramref name="updateFrame"/> held in
-        /// the persistent <see cref="_animComposedFrame"/> buffer. The bitmap and canvas are allocated on the
-        /// first call and reused afterwards, so the hot path is allocation-free.
+        /// the persistent <see cref="_animComposedFrame"/> buffer.
         /// </summary>
         private void ComposeAnimatedFrame(SKBitmap updateFrame, List<CommentSection> comments, long currentTickMs)
         {
@@ -521,21 +517,21 @@ namespace TwitchDownloaderCore
                 _animCanvas = new SKCanvas(_animComposedFrame);
             }
 
-            // Copy the background pixels straight into the buffer the canvas is bound to. CopyTo(bitmap) swaps
-            // the pixel reference, which would leave _animCanvas pointing at the old buffer, so a raw memcpy
-            // into the existing buffer is used instead.
+            // Copy the background pixels straight into the buffer the canvas is bound to. CopyTo(bitmap) always
+            // allocates a new buffer, even if the old buffer is the same since, so a raw memcpy into the existing
+            // buffer is used instead.
             unsafe
             {
-                int byteCount = _animComposedFrame.Info.BytesSize;
+                var byteCount = _animComposedFrame.Info.BytesSize;
                 Buffer.MemoryCopy((void*)updateFrame.GetPixels(), (void*)_animComposedFrame.GetPixels(), byteCount, byteCount);
             }
 
-            int frameHeight = renderOptions.ChatHeight;
-            for (int c = comments.Count - 1; c >= 0; c--)
+            var frameHeight = renderOptions.ChatHeight;
+            for (var c = comments.Count - 1; c >= 0; c--)
             {
                 var comment = comments[c];
                 frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
-                foreach ((Point drawPoint, TwitchEmote emote) in comment.Emotes)
+                foreach (var (drawPoint, emote) in comment.Emotes)
                 {
                     if (emote.FrameCount > 1)
                     {
@@ -547,21 +543,22 @@ namespace TwitchDownloaderCore
 
         private static int ComputeAnimFrameIndex(TwitchEmote emote, long currentTickMs)
         {
-            long imageFrame = currentTickMs % (emote.TotalDuration * 10);
-            for (int i = 0; i < emote.EmoteFrameDurations.Count; i++)
+            var imageFrame = currentTickMs % (emote.TotalDuration * 10);
+            for (var i = 0; i < emote.EmoteFrameDurations.Count; i++)
             {
-                if (imageFrame - emote.EmoteFrameDurations[i] * 10 <= 0)
-                    return i;
                 imageFrame -= emote.EmoteFrameDurations[i] * 10;
+
+                if (imageFrame <= 0) return i;
             }
+
             return emote.EmoteFrameDurations.Count - 1;
         }
 
-        /// <summary>Returns true when every animated emote is on the same frame index as when the cache was built.</summary>
+        /// <summary>Returns <see langword="true"/> when every animated emote is on the same frame index as when the cache was built.</summary>
         private bool AnimCacheIsValid(List<CommentSection> comments, long currentTickMs)
         {
-            int i = 0;
-            for (int c = comments.Count - 1; c >= 0; c--)
+            var i = 0;
+            for (var c = comments.Count - 1; c >= 0; c--)
             {
                 foreach (var (_, emote) in comments[c].Emotes)
                 {
@@ -573,18 +570,18 @@ namespace TwitchDownloaderCore
                     }
                 }
             }
+
             return i == _animLastFrameIndices.Count;
         }
 
         private void RecordAnimFrameIndices(List<CommentSection> comments, long currentTickMs)
         {
             _animLastFrameIndices.Clear();
-            for (int c = comments.Count - 1; c >= 0; c--)
+            for (var c = comments.Count - 1; c >= 0; c--)
             {
                 foreach (var (_, emote) in comments[c].Emotes)
                 {
-                    if (emote.FrameCount > 1)
-                        _animLastFrameIndices.Add(ComputeAnimFrameIndex(emote, currentTickMs));
+                    if (emote.FrameCount > 1) _animLastFrameIndices.Add(ComputeAnimFrameIndex(emote, currentTickMs));
                 }
             }
         }
