@@ -1330,7 +1330,7 @@ namespace TwitchDownloaderCore
                     }
                     if (nonFontBuffer.Length > 0)
                     {
-                        using SKPaint nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0]).Clone();
+                        var nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0]);
                         nonFontFallbackFont.Color = renderOptions.MessageColor;
                         DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                         nonFontBuffer.Clear();
@@ -1340,7 +1340,7 @@ namespace TwitchDownloaderCore
                     //Don't attempt to draw U+E0000
                     if (utf32Char != 0xE0000)
                     {
-                        using SKPaint highSurrogateFallbackFont = GetFallbackFont(utf32Char).Clone();
+                        var highSurrogateFallbackFont = GetFallbackFont(utf32Char);
                         highSurrogateFallbackFont.Color = renderOptions.MessageColor;
                         DrawText(fragment.Slice(j, 2), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                     }
@@ -1360,7 +1360,7 @@ namespace TwitchDownloaderCore
                 {
                     if (nonFontBuffer.Length > 0)
                     {
-                        using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0]).Clone();
+                        var fallbackFont = GetFallbackFont(nonFontBuffer[0]);
                         fallbackFont.Color = renderOptions.MessageColor;
                         DrawText(nonFontBuffer.ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                         nonFontBuffer.Clear();
@@ -1373,7 +1373,7 @@ namespace TwitchDownloaderCore
             // Only one or the other should occur
             if (nonFontBuffer.Length > 0)
             {
-                using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0]).Clone();
+                var fallbackFont = GetFallbackFont(nonFontBuffer[0]);
                 fallbackFont.Color = renderOptions.MessageColor;
                 DrawText(nonFontBuffer.ToString(), fallbackFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
                 nonFontBuffer.Clear();
@@ -1670,9 +1670,9 @@ namespace TwitchDownloaderCore
                 userColor = AdjustUsernameVisibility(userColor, backgroundColor);
             }
 
-            using SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
-                ? GetFallbackFont(comment.commenter.display_name.First(IsNotAscii)).Clone()
-                : nameFont.Clone();
+            var userPaint = comment.commenter.display_name.Any(IsNotAscii)
+                ? GetFallbackFont(comment.commenter.display_name.First(IsNotAscii))
+                : nameFont;
 
             userPaint.Color = userColor;
             var userName = appendColon
