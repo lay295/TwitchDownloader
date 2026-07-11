@@ -11,6 +11,9 @@
     <Setting Name="FontSize" Type="System.Single" Scope="User">
       <Value Profile="(Default)">24</Value>
     </Setting>
+    <Setting Name="UsernameFontScale" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
     <Setting Name="Outline" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

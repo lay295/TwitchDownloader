@@ -60,6 +60,8 @@ namespace TwitchDownloaderCore.Options
         public double BadgeScale { get; set; } = 1.0;
         public double EmojiScale { get; set; } = 1.0;
         public double AvatarScale { get; set; } = 1.0;
+        public double UsernameFontScale { get; set; } = 1.0;
+        public double EffectiveUsernameFontSize => FontSize * (UsernameFontScale > 0 ? UsernameFontScale : 1.0);
         public double VerticalSpacingScale { get; set; } = 1.0;
         public double SidePaddingScale { get; set; } = 1.0;
         public double SectionHeightScale { get; set; } = 1.0;

@@ -74,6 +74,14 @@ namespace TwitchDownloaderCore
         private SKPaint nameFont;
         private SKPaint outlinePaint;
         private readonly HighlightIcons highlightIcons;
+        private int _usernameCenteredY;
+
+        // Persistent buffer for the composited animated-emote frame, reused across ticks so that an
+        // unchanged frame does not need to be copied and recomposited. See DrawAnimatedEmotes.
+        private SKBitmap _animComposedFrame;
+        private SKCanvas _animCanvas;
+        private int _animComposedForCommentIndex = int.MinValue;
+        private readonly List<int> _animLastFrameIndices = [];
 
         public ChatRenderer(ChatRenderOptions chatRenderOptions, ITaskProgress progress)
         {
@@ -83,7 +91,7 @@ namespace TwitchDownloaderCore
             renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
             _progress = progress;
             outlinePaint = new SKPaint { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-            nameFont = new SKPaint { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
+            nameFont = new SKPaint { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.EffectiveUsernameFontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             messageFont = new SKPaint { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
             highlightIcons = new HighlightIcons(renderOptions, _cacheDir, Purple, outlinePaint);
         }
@@ -143,6 +151,13 @@ namespace TwitchDownloaderCore
                 (int)messageFont.MeasureText("0:00:00"),
                 (int)messageFont.MeasureText("00:00:00")
             };
+
+            // Cache the username vertical centering offset. The username font may be sized differently from
+            // the message font (UsernameFontScale), so it needs to be centered using its own metrics rather
+            // than the message-derived sectionDefaultYPos. This is constant for the whole render.
+            SKRect usernameBounds = new SKRect();
+            nameFont.MeasureText("ABC123", ref usernameBounds);
+            _usernameCenteredY = (int)(((renderOptions.SectionHeight - usernameBounds.Height) / 2.0) + usernameBounds.Height);
 
             // Rough estimation of the width of a single block art character
             renderOptions.BlockArtCharWidth = GetFallbackFont('█').MeasureText("█");
@@ -428,34 +443,65 @@ namespace TwitchDownloaderCore
         private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
         {
             currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos);
-            var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame.Image, currentFrame.Comments, currentTick);
+            var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame, currentTick);
             return (frame, isCopyFrame);
         }
 
-        private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(SKBitmap updateFrame, List<CommentSection> comments, int currentTick)
+        private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(UpdateFrame currentFrame, int currentTick)
         {
-            // If we are generating a mask then we need to produce a copy
+            var updateFrame = currentFrame.Image;
+            var comments = currentFrame.Comments;
+            var commentIndex = currentFrame.CommentIndex;
+            var currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
+
+            // Mask generation modifies the returned frame, so it is left on the original uncached copy path.
             if (!renderOptions.GenerateMask)
             {
                 bool hasAnimatedEmotes = false;
                 foreach (var comment in comments)
                 {
-                    if (comment.Emotes.Count > 0)
+                    foreach (var (_, emote) in comment.Emotes)
                     {
-                        hasAnimatedEmotes = true;
-                        break;
+                        if (emote.FrameCount > 1)
+                        {
+                            hasAnimatedEmotes = true;
+                            break;
+                        }
                     }
+
+                    if (hasAnimatedEmotes) break;
                 }
+
                 if (!hasAnimatedEmotes)
                 {
                     // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
+                    InvalidateAnimCache();
                     return (updateFrame, false);
                 }
+
+                // Reuse the previously composited frame when the visible comments and every animated emote's
+                // frame index are unchanged since the last tick. At high frame rates the animation advances
+                // more slowly than the video, so most ticks hit this path and skip the copy + compositing.
+                if (_animComposedFrame != null && commentIndex == _animComposedForCommentIndex && AnimCacheIsValid(comments, currentTickMs))
+                {
+                    return (_animComposedFrame, false);
+                }
+
+                ComposeAnimatedFrame(updateFrame, comments, currentTickMs);
+                _animComposedForCommentIndex = commentIndex;
+                RecordAnimFrameIndices(comments, currentTickMs);
+                return (_animComposedFrame, false); // owned by the cache; the caller must not dispose it
             }
 
-            SKBitmap newFrame = updateFrame.Copy();
+            // SKBitmap.Copy() allocates excessively, so a raw memcpy into the new bitmap is used instead.
+            var newFrame = new SKBitmap(updateFrame.Info);
+            unsafe
+            {
+                var byteCount = updateFrame.Info.BytesSize;
+                Buffer.MemoryCopy((void*)updateFrame.GetPixels(), (void*)newFrame.GetPixels(), byteCount, byteCount);
+            }
+
             int frameHeight = renderOptions.ChatHeight;
-            long currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
             {
                 for (int c = comments.Count - 1; c >= 0; c--)
@@ -466,24 +512,99 @@ namespace TwitchDownloaderCore
                     {
                         if (emote.FrameCount > 1)
                         {
-                            int frameIndex = emote.EmoteFrameDurations.Count - 1;
-                            long imageFrame = currentTickMs % (emote.TotalDuration * 10);
-                            for (int i = 0; i < emote.EmoteFrameDurations.Count; i++)
-                            {
-                                if (imageFrame - emote.EmoteFrameDurations[i] * 10 <= 0)
-                                {
-                                    frameIndex = i;
-                                    break;
-                                }
-                                imageFrame -= emote.EmoteFrameDurations[i] * 10;
-                            }
-
-                            frameCanvas.DrawBitmap(emote.EmoteFrames[frameIndex], drawPoint.X, drawPoint.Y + frameHeight);
+                            frameCanvas.DrawBitmap(emote.EmoteFrames[ComputeAnimFrameIndex(emote, currentTickMs)], drawPoint.X, drawPoint.Y + frameHeight);
                         }
                     }
                 }
             }
             return (newFrame, true);
+        }
+
+        /// <summary>
+        /// Composites the current animated-emote frames onto a copy of <paramref name="updateFrame"/> held in
+        /// the persistent <see cref="_animComposedFrame"/> buffer.
+        /// </summary>
+        private void ComposeAnimatedFrame(SKBitmap updateFrame, List<CommentSection> comments, long currentTickMs)
+        {
+            if (_animComposedFrame == null)
+            {
+                _animComposedFrame = new SKBitmap(updateFrame.Info);
+                _animCanvas = new SKCanvas(_animComposedFrame);
+            }
+
+            // Copy the background pixels straight into the buffer the canvas is bound to. CopyTo(bitmap) always
+            // allocates a new buffer, even if the old buffer is the same since, so a raw memcpy into the existing
+            // buffer is used instead.
+            unsafe
+            {
+                var byteCount = _animComposedFrame.Info.BytesSize;
+                Buffer.MemoryCopy((void*)updateFrame.GetPixels(), (void*)_animComposedFrame.GetPixels(), byteCount, byteCount);
+            }
+
+            var frameHeight = renderOptions.ChatHeight;
+            for (var c = comments.Count - 1; c >= 0; c--)
+            {
+                var comment = comments[c];
+                frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
+                foreach (var (drawPoint, emote) in comment.Emotes)
+                {
+                    if (emote.FrameCount > 1)
+                    {
+                        _animCanvas.DrawBitmap(emote.EmoteFrames[ComputeAnimFrameIndex(emote, currentTickMs)], drawPoint.X, drawPoint.Y + frameHeight);
+                    }
+                }
+            }
+        }
+
+        private static int ComputeAnimFrameIndex(TwitchEmote emote, long currentTickMs)
+        {
+            var imageFrame = currentTickMs % (emote.TotalDuration * 10);
+            for (var i = 0; i < emote.EmoteFrameDurations.Count; i++)
+            {
+                imageFrame -= emote.EmoteFrameDurations[i] * 10;
+
+                if (imageFrame <= 0) return i;
+            }
+
+            return emote.EmoteFrameDurations.Count - 1;
+        }
+
+        /// <summary>Returns <see langword="true"/> when every animated emote is on the same frame index as when the cache was built.</summary>
+        private bool AnimCacheIsValid(List<CommentSection> comments, long currentTickMs)
+        {
+            var i = 0;
+            for (var c = comments.Count - 1; c >= 0; c--)
+            {
+                foreach (var (_, emote) in comments[c].Emotes)
+                {
+                    if (emote.FrameCount > 1)
+                    {
+                        if (i >= _animLastFrameIndices.Count) return false;
+                        if (ComputeAnimFrameIndex(emote, currentTickMs) != _animLastFrameIndices[i]) return false;
+                        i++;
+                    }
+                }
+            }
+
+            return i == _animLastFrameIndices.Count;
+        }
+
+        private void RecordAnimFrameIndices(List<CommentSection> comments, long currentTickMs)
+        {
+            _animLastFrameIndices.Clear();
+            for (var c = comments.Count - 1; c >= 0; c--)
+            {
+                foreach (var (_, emote) in comments[c].Emotes)
+                {
+                    if (emote.FrameCount > 1) _animLastFrameIndices.Add(ComputeAnimFrameIndex(emote, currentTickMs));
+                }
+            }
+        }
+
+        private void InvalidateAnimCache()
+        {
+            _animComposedForCommentIndex = int.MinValue;
+            _animLastFrameIndices.Clear();
         }
 
         private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
@@ -1485,7 +1606,12 @@ namespace TwitchDownloaderCore
                 ? comment.commenter.display_name + ":"
                 : comment.commenter.display_name;
 
+            // Center the username using its own font metrics so a scaled username font stays vertically
+            // centered within the section, then restore drawPos.Y for the message text that follows.
+            int savedY = drawPos.Y;
+            drawPos.Y = _usernameCenteredY;
             DrawText(userName, userPaint, true, sectionImages, ref drawPos, defaultPos, false);
+            drawPos.Y = savedY;
         }
 
         private SKColor AdjustUsernameVisibility(SKColor userColor, SKColor backgroundColor)
@@ -2019,6 +2145,8 @@ namespace TwitchDownloaderCore
                     messageFont?.Dispose();
                     outlinePaint?.Dispose();
                     highlightIcons?.Dispose();
+                    _animCanvas?.Dispose();
+                    _animComposedFrame?.Dispose();
 
                     badgeList.Clear();
                     emoteList.Clear();

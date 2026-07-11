@@ -120,6 +120,7 @@ namespace TwitchDownloaderWPF
                 AccentIndentScale = double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture),
                 AccentStrokeScale = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture),
                 VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture),
+                UsernameFontScale = double.Parse(textUsernameScale.Text, CultureInfo.CurrentCulture),
                 HighlightUsersArray = textHighlightUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 HighlightUsersColor = highlightUsersColor,
                 IgnoreUsersArray = textIgnoreUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
@@ -184,6 +185,7 @@ namespace TwitchDownloaderWPF
                 textBadgeScale.Text = Settings.Default.BadgeScale.ToString("0.0#");
                 textAvatarScale.Text = Settings.Default.AvatarScale.ToString("0.0#");
                 textVerticalScale.Text = Settings.Default.VerticalSpacingScale.ToString("0.0#");
+                textUsernameScale.Text = Settings.Default.UsernameFontScale.ToString("0.0#");
                 textSidePaddingScale.Text = Settings.Default.LeftSpacingScale.ToString("0.0#");
                 textSectionHeightScale.Text = Settings.Default.SectionHeightScale.ToString("0.0#");
                 textWordSpaceScale.Text = Settings.Default.WordSpacingScale.ToString("0.0#");
@@ -342,6 +344,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.AvatarScale = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.UsernameFontScale = double.Parse(textUsernameScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.LeftSpacingScale = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.WordSpacingScale = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
@@ -381,6 +384,7 @@ namespace TwitchDownloaderWPF
                 _ = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textUsernameScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);

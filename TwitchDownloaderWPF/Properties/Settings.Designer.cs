@@ -57,7 +57,19 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FontSize"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double UsernameFontScale {
+            get {
+                return ((double)(this["UsernameFontScale"]));
+            }
+            set {
+                this["UsernameFontScale"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
