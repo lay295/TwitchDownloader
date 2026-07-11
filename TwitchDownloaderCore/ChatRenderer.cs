@@ -485,7 +485,14 @@ namespace TwitchDownloaderCore
                 return (_animComposedFrame, false); // owned by the cache; the caller must not dispose it
             }
 
-            SKBitmap newFrame = updateFrame.Copy();
+            // SKBitmap.Copy() allocates excessively, so a raw memcpy into the new bitmap is used instead.
+            var newFrame = new SKBitmap(updateFrame.Info);
+            unsafe
+            {
+                var byteCount = updateFrame.Info.BytesSize;
+                Buffer.MemoryCopy((void*)updateFrame.GetPixels(), (void*)newFrame.GetPixels(), byteCount, byteCount);
+            }
+
             int frameHeight = renderOptions.ChatHeight;
             using (SKCanvas frameCanvas = new SKCanvas(newFrame))
             {
