@@ -74,6 +74,7 @@ namespace TwitchDownloaderCore
         private SKPaint nameFont;
         private SKPaint outlinePaint;
         private readonly HighlightIcons highlightIcons;
+        private int _usernameCenteredY;
 
         // Persistent buffer for the composited animated-emote frame, reused across ticks so that an
         // unchanged frame does not need to be copied and recomposited. See DrawAnimatedEmotes.
@@ -90,7 +91,7 @@ namespace TwitchDownloaderCore
             renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
             _progress = progress;
             outlinePaint = new SKPaint { Style = SKPaintStyle.Stroke, StrokeWidth = (float)(renderOptions.OutlineSize * renderOptions.ReferenceScale), StrokeJoin = SKStrokeJoin.Round, Color = SKColors.Black, IsAntialias = true, IsAutohinted = true, LcdRenderText = true, SubpixelText = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
-            nameFont = new SKPaint { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
+            nameFont = new SKPaint { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.EffectiveUsernameFontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High };
             messageFont = new SKPaint { LcdRenderText = true, SubpixelText = true, TextSize = (float)renderOptions.FontSize, IsAntialias = true, IsAutohinted = true, HintingLevel = SKPaintHinting.Full, FilterQuality = SKFilterQuality.High, Color = renderOptions.MessageColor };
             highlightIcons = new HighlightIcons(renderOptions, _cacheDir, Purple, outlinePaint);
         }
@@ -150,6 +151,13 @@ namespace TwitchDownloaderCore
                 (int)messageFont.MeasureText("0:00:00"),
                 (int)messageFont.MeasureText("00:00:00")
             };
+
+            // Cache the username vertical centering offset. The username font may be sized differently from
+            // the message font (UsernameFontScale), so it needs to be centered using its own metrics rather
+            // than the message-derived sectionDefaultYPos. This is constant for the whole render.
+            SKRect usernameBounds = new SKRect();
+            nameFont.MeasureText("ABC123", ref usernameBounds);
+            _usernameCenteredY = (int)(((renderOptions.SectionHeight - usernameBounds.Height) / 2.0) + usernameBounds.Height);
 
             // Rough estimation of the width of a single block art character
             renderOptions.BlockArtCharWidth = GetFallbackFont('█').MeasureText("█");
@@ -1592,7 +1600,12 @@ namespace TwitchDownloaderCore
                 ? comment.commenter.display_name + ":"
                 : comment.commenter.display_name;
 
+            // Center the username using its own font metrics so a scaled username font stays vertically
+            // centered within the section, then restore drawPos.Y for the message text that follows.
+            int savedY = drawPos.Y;
+            drawPos.Y = _usernameCenteredY;
             DrawText(userName, userPaint, true, sectionImages, ref drawPos, defaultPos, false);
+            drawPos.Y = savedY;
         }
 
         private SKColor AdjustUsernameVisibility(SKColor userColor, SKColor backgroundColor)
