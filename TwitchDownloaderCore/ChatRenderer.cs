@@ -306,6 +306,7 @@ namespace TwitchDownloaderCore
             messageFont.MeasureText("ABC123", ref sampleTextBounds);
             int sectionDefaultYPos = (int)(((renderOptions.SectionHeight - sampleTextBounds.Height) / 2.0) + sampleTextBounds.Height);
 
+            byte[] maskBytes = null;
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -315,32 +316,23 @@ namespace TwitchDownloaderCore
                     latestUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, latestUpdate);
                 }
 
-                SKBitmap frame = null;
-                bool isCopyFrame = false;
-                try
+                var frame = GetFrameFromTick(currentTick, sectionDefaultYPos, latestUpdate);
+
+                if (!renderOptions.SkipDriveWaiting)
+                    DriveHelper.WaitForDrive(outputDrive, _progress);
+
+                var frameSpan = frame.GetPixelSpan();
+                ffmpegStream.Write(frameSpan);
+
+                if (maskProcess != null)
                 {
-                    (frame, isCopyFrame) = GetFrameFromTick(currentTick, sectionDefaultYPos, latestUpdate);
+                    maskBytes ??= GC.AllocateUninitializedArray<byte>(frame.Info.BytesSize);
+                    frameSpan.CopyTo(maskBytes);
 
                     if (!renderOptions.SkipDriveWaiting)
                         DriveHelper.WaitForDrive(outputDrive, _progress);
 
-                    ffmpegStream.Write(frame.Bytes);
-
-                    if (maskProcess != null)
-                    {
-                        if (!renderOptions.SkipDriveWaiting)
-                            DriveHelper.WaitForDrive(outputDrive, _progress);
-
-                        SetFrameMask(frame);
-                        maskStream.Write(frame.Bytes);
-                    }
-                }
-                finally
-                {
-                    if (isCopyFrame)
-                    {
-                        frame?.Dispose();
-                    }
+                    maskStream.Write(SetFrameMask(maskBytes));
                 }
 
                 if (currentTick % 3 == 0)
@@ -367,27 +359,22 @@ namespace TwitchDownloaderCore
             maskProcess?.WaitForExit(100_000);
         }
 
-        private static void SetFrameMask(SKBitmap frame)
+        private static unsafe byte[] SetFrameMask(byte[] frame)
         {
-            IntPtr pixelsAddr = frame.GetPixels();
-            SKImageInfo frameInfo = frame.Info;
-            int height = frameInfo.Height;
-            int width = frameInfo.Width;
-            unsafe
+            fixed (byte* pFrame = frame)
             {
-                byte* ptr = (byte*)pixelsAddr.ToPointer();
-                for (int row = 0; row < height; row++)
+                var ptr = pFrame;
+                for (var i = 0; i < frame.Length; i++)
                 {
-                    for (int col = 0; col < width; col++)
-                    {
-                        byte alpha = *(ptr + 3); // alpha of the unmasked pixel
-                        *ptr++ = alpha;
-                        *ptr++ = alpha;
-                        *ptr++ = alpha;
-                        *ptr++ = 0xFF;
-                    }
+                    var alpha = *(ptr + 3); // alpha of the unmasked pixel
+                    *ptr++ = alpha;
+                    *ptr++ = alpha;
+                    *ptr++ = alpha;
+                    *ptr++ = 0xFF;
                 }
             }
+
+            return frame;
         }
 
         private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo)
@@ -442,14 +429,13 @@ namespace TwitchDownloaderCore
             return process;
         }
 
-        private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
+        private SKBitmap GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
         {
             currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos);
-            var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame, currentTick);
-            return (frame, isCopyFrame);
+            return DrawAnimatedEmotes(currentFrame, currentTick);
         }
 
-        private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(UpdateFrame currentFrame, int currentTick)
+        private SKBitmap DrawAnimatedEmotes(UpdateFrame currentFrame, int currentTick)
         {
             var updateFrame = currentFrame.Image;
             var comments = currentFrame.Comments;
@@ -457,69 +443,40 @@ namespace TwitchDownloaderCore
             var currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
 
             // Mask generation modifies the returned frame, so it is left on the original uncached copy path.
-            if (!renderOptions.GenerateMask)
+            var hasAnimatedEmotes = false;
+            foreach (var comment in comments)
             {
-                bool hasAnimatedEmotes = false;
-                foreach (var comment in comments)
+                foreach (var (_, emote) in comment.Emotes)
                 {
-                    foreach (var (_, emote) in comment.Emotes)
+                    if (emote.FrameCount > 1)
                     {
-                        if (emote.FrameCount > 1)
-                        {
-                            hasAnimatedEmotes = true;
-                            break;
-                        }
-                    }
-
-                    if (hasAnimatedEmotes) break;
-                }
-
-                if (!hasAnimatedEmotes)
-                {
-                    // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
-                    InvalidateAnimCache();
-                    return (updateFrame, false);
-                }
-
-                // Reuse the previously composited frame when the visible comments and every animated emote's
-                // frame index are unchanged since the last tick. At high frame rates the animation advances
-                // more slowly than the video, so most ticks hit this path and skip the copy + compositing.
-                if (_animComposedFrame != null && commentIndex == _animComposedForCommentIndex && AnimCacheIsValid(comments, currentTickMs))
-                {
-                    return (_animComposedFrame, false);
-                }
-
-                ComposeAnimatedFrame(updateFrame, comments, currentTickMs);
-                _animComposedForCommentIndex = commentIndex;
-                RecordAnimFrameIndices(comments, currentTickMs);
-                return (_animComposedFrame, false); // owned by the cache; the caller must not dispose it
-            }
-
-            // SKBitmap.Copy() allocates excessively, so a raw memcpy into the new bitmap is used instead.
-            var newFrame = new SKBitmap(updateFrame.Info);
-            unsafe
-            {
-                var byteCount = updateFrame.Info.BytesSize;
-                Buffer.MemoryCopy((void*)updateFrame.GetPixels(), (void*)newFrame.GetPixels(), byteCount, byteCount);
-            }
-
-            int frameHeight = renderOptions.ChatHeight;
-            using (SKCanvas frameCanvas = new SKCanvas(newFrame))
-            {
-                for (int c = comments.Count - 1; c >= 0; c--)
-                {
-                    var comment = comments[c];
-                    frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
-                    foreach ((Point drawPoint, TwitchEmote emote) in comment.Emotes)
-                    {
-                        if (emote.FrameCount > 1)
-                        {
-                            frameCanvas.DrawBitmap(emote.EmoteFrames[ComputeAnimFrameIndex(emote, currentTickMs)], drawPoint.X, drawPoint.Y + frameHeight);
-                        }
+                        hasAnimatedEmotes = true;
+                        break;
                     }
                 }
+
+                if (hasAnimatedEmotes) break;
             }
-            return (newFrame, true);
+
+            if (!hasAnimatedEmotes)
+            {
+                // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
+                InvalidateAnimCache();
+                return updateFrame;
+            }
+
+            // Reuse the previously composited frame when the visible comments and every animated emote's
+            // frame index are unchanged since the last tick. At high frame rates the animation advances
+            // more slowly than the video, so most ticks hit this path and skip the copy + compositing.
+            if (_animComposedFrame != null && commentIndex == _animComposedForCommentIndex && AnimCacheIsValid(comments, currentTickMs))
+            {
+                return _animComposedFrame;
+            }
+
+            ComposeAnimatedFrame(updateFrame, comments, currentTickMs);
+            _animComposedForCommentIndex = commentIndex;
+            RecordAnimFrameIndices(comments, currentTickMs);
+            return _animComposedFrame; // owned by the cache; the caller must not dispose it
         }
 
         /// <summary>
