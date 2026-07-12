@@ -130,6 +130,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData(
             "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too LUL\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too \",\"emoticon\":null},{\"text\":\"LUL\",\"emoticon\":{\"emoticon_id\":\"425618\"}}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[{\"_id\":\"425618\",\"begin\":84,\"end\":88}]}",
             HighlightType.WatchStreak)]
+        [InlineData(
+            "{\"body\":\"viewer8 watched 30 consecutive streams and sparked a watch streak! 30 DAYS\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 30 consecutive streams and sparked a watch streak! 30 DAYS\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",
+            HighlightType.WatchStreak)]
         // Charity donation
         [InlineData(
             "{\"body\":\"viewer8: Donated USD 20 to support Guide Dog Foundation for the Blind, Inc. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8: Donated USD 20 to support Guide Dog Foundation for the Blind, Inc. \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",
