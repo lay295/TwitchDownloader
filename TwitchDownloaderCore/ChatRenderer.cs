@@ -83,6 +83,7 @@ namespace TwitchDownloaderCore
         // unchanged frame does not need to be copied and recomposited. See DrawAnimatedEmotes.
         private SKBitmap _animComposedFrame;
         private SKCanvas _animCanvas;
+        private int _animByteSize;
         private int _animComposedForCommentIndex = int.MinValue;
         private readonly List<int> _animLastFrameIndices = [];
 
@@ -487,23 +488,24 @@ namespace TwitchDownloaderCore
             if (_animComposedFrame == null)
             {
                 _animComposedFrame = new SKBitmap(updateFrame.Info);
+                _animByteSize = updateFrame.Info.BytesSize;
                 _animCanvas = new SKCanvas(_animComposedFrame);
             }
 
             // Copy the background pixels straight into the buffer the canvas is bound to. CopyTo(bitmap) always
-            // allocates a new buffer, even if the old buffer is the same since, so a raw memcpy into the existing
+            // allocates a new buffer, even if the old buffer is the same size, so a raw memcpy into the existing
             // buffer is used instead.
             unsafe
             {
-                var byteCount = _animComposedFrame.Info.BytesSize;
-                Buffer.MemoryCopy((void*)updateFrame.GetPixels(), (void*)_animComposedFrame.GetPixels(), byteCount, byteCount);
+                Buffer.MemoryCopy((void*)updateFrame.GetPixels(), (void*)_animComposedFrame.GetPixels(), _animByteSize, _animByteSize);
             }
 
             var frameHeight = renderOptions.ChatHeight;
+            var verticalPadding = renderOptions.VerticalPadding;
             for (var c = comments.Count - 1; c >= 0; c--)
             {
                 var comment = comments[c];
-                frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
+                frameHeight -= comment.Image.Info.Height + verticalPadding;
                 foreach (var (drawPoint, emote) in comment.Emotes)
                 {
                     if (emote.FrameCount > 1)
@@ -517,9 +519,10 @@ namespace TwitchDownloaderCore
         private static int ComputeAnimFrameIndex(TwitchEmote emote, long currentTickMs)
         {
             var imageFrame = currentTickMs % (emote.TotalDuration * 10);
-            for (var i = 0; i < emote.EmoteFrameDurations.Count; i++)
+            var durations = emote.EmoteFrameDurations;
+            for (var i = 0; i < durations.Count; i++)
             {
-                imageFrame -= emote.EmoteFrameDurations[i] * 10;
+                imageFrame -= durations[i] * 10;
 
                 if (imageFrame <= 0) return i;
             }
@@ -568,7 +571,7 @@ namespace TwitchDownloaderCore
         private int GetNewestCommentIndex(int lastIndex, double currentTimeSeconds)
         {
             var commentSpan = CollectionsMarshal.AsSpan(chatRoot.comments);
-            for (var i = Math.Max(0, lastIndex); i < commentSpan.Length; i++)
+            for (var i = lastIndex + 1; i < commentSpan.Length; i++)
             {
                 if (commentSpan[i].content_offset_seconds > currentTimeSeconds)
                 {
@@ -634,7 +637,7 @@ namespace TwitchDownloaderCore
                 while (commentListIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
                 {
                     var comment = commentList[commentListIndex];
-                    var commentHeight = comment.Image.Height;
+                    var commentHeight = comment.Image.Info.Height;
                     frameHeight -= commentHeight + renderOptions.VerticalPadding;
 
                     var backgroundColor = GetMessageBackground(comment.CommentIndex, out var backgroundPaint);
@@ -643,7 +646,7 @@ namespace TwitchDownloaderCore
                         frameCanvas.DrawRect(0, frameHeight - renderOptions.VerticalPadding / 2f, frameWidth, commentHeight + renderOptions.VerticalPadding, backgroundPaint);
                     }
 
-                    frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
+                    frameCanvas.DrawBitmap(comment.Image.Bitmap, 0, frameHeight);
 
                     foreach (var (drawPoint, emote) in comment.Emotes)
                     {
@@ -660,7 +663,7 @@ namespace TwitchDownloaderCore
                 int removeCount = commentList.Count - commentsDrawn;
                 for (int i = 0; i < removeCount; i++)
                 {
-                    commentList[i].Image.Dispose();
+                    ReturnSectionImage(commentList[i].Image);
                 }
                 commentList.RemoveRange(0, removeCount);
             }
@@ -758,54 +761,54 @@ namespace TwitchDownloaderCore
                 DrawNonAccentedMessage(comment, sectionImages, emoteSectionList, false, commentIndex, ref drawPos, ref defaultPos);
             }
 
-            SKBitmap finalBitmap = CombineImages(sectionImages, highlightType, commentIndex);
-            newSection.Image = finalBitmap;
+            var finalImage = CombineImages(sectionImages, highlightType, commentIndex);
+            newSection.Image = finalImage;
             newSection.Emotes = emoteSectionList;
             newSection.CommentIndex = commentIndex;
 
             return newSection;
         }
 
-        private SKBitmap CombineImages(List<SectionImage> sectionImages, HighlightType highlightType, int commentIndex)
+        private SectionImage CombineImages(List<SectionImage> sectionImages, HighlightType highlightType, int commentIndex)
         {
-            var finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.Info.Height));
-            var finalBitmapInfo = finalBitmap.Info;
-            using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
+            var finalImage = RentSectionImage(renderOptions.ChatWidth, sectionImages.Sum(x => x.Info.Height));
+            var finalBitmapInfo = finalImage.Info;
+            var finalCanvas = finalImage.Canvas;
+
+            if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight or HighlightType.WatchStreak or HighlightType.Combo)
             {
-                if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight or HighlightType.WatchStreak or HighlightType.Combo)
-                {
-                    var accentColor = highlightType is HighlightType.PayingForward
-                        ? new SKColor(0xFF26262C) // AARRGGBB
-                        : new SKColor(0xFF80808C); // AARRGGBB
+                var accentColor = highlightType is HighlightType.PayingForward
+                    ? new SKColor(0xFF26262C) // AARRGGBB
+                    : new SKColor(0xFF80808C); // AARRGGBB
 
-                    var paint = GetCachedPaint(accentColor);
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
-                }
-                else if (highlightType is not HighlightType.None)
+                var paint = GetCachedPaint(accentColor);
+                finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
+            }
+            else if (highlightType is not HighlightType.None)
+            {
+                const int OPAQUE_THRESHOLD = 245;
+                var messageBackground = GetMessageBackground(commentIndex, out _);
+                if (messageBackground.Alpha < OPAQUE_THRESHOLD)
                 {
-                    const int OPAQUE_THRESHOLD = 245;
-                    var messageBackground = GetMessageBackground(commentIndex, out _);
-                    if (messageBackground.Alpha < OPAQUE_THRESHOLD)
-                    {
-                        // Draw the highlight background only if the message background is opaque enough
-                        var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
-                        var backgroundPaint = GetCachedPaint(backgroundColor);
-                        finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
-                    }
-
-                    var accentPaint = GetCachedPaint(Purple);
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, accentPaint);
+                    // Draw the highlight background only if the message background is opaque enough
+                    var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
+                    var backgroundPaint = GetCachedPaint(backgroundColor);
+                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
                 }
 
-                for (int i = 0; i < sectionImages.Count; i++)
-                {
-                    finalCanvas.DrawBitmap(sectionImages[i].Bitmap, 0, i * renderOptions.SectionHeight);
-                    sectionImages[i].Dispose();
-                }
+                var accentPaint = GetCachedPaint(Purple);
+                finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, accentPaint);
+            }
+
+            for (var i = 0; i < sectionImages.Count; i++)
+            {
+                finalCanvas.DrawBitmap(sectionImages[i].Bitmap, 0, i * renderOptions.SectionHeight);
+                ReturnSectionImage(sectionImages[i]);
             }
             sectionImages.Clear();
-            finalBitmap.SetImmutable();
-            return finalBitmap;
+
+            finalImage.Flush();
+            return finalImage;
         }
 
         private static string GetKeyName(IEnumerable<Codepoint> codepoints)
@@ -849,7 +852,7 @@ namespace TwitchDownloaderCore
 
             foreach (var sectionImage in sectionImages)
             {
-                sectionImage.SetImmutable();
+                sectionImage.Flush();
             }
         }
 
@@ -901,7 +904,7 @@ namespace TwitchDownloaderCore
 
             foreach (var sectionImage in sectionImages)
             {
-                sectionImage.SetImmutable();
+                sectionImage.Flush();
             }
         }
 
@@ -1888,7 +1891,43 @@ namespace TwitchDownloaderCore
         {
             drawPos.X = defaultPos.X;
             drawPos.Y = defaultPos.Y;
-            sectionImages.Add(new SectionImage(renderOptions.ChatWidth, renderOptions.SectionHeight));
+
+            sectionImages.Add(RentSectionImage(renderOptions.ChatWidth, renderOptions.SectionHeight));
+        }
+
+        private SectionImage RentSectionImage(int width, int height)
+        {
+            ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(sectionImageCache, (width, height), out var exists);
+            if (!exists)
+            {
+                bucket = [];
+            }
+
+            if (bucket.Count == 0)
+            {
+                return new SectionImage(width, height);
+            }
+
+            var image = bucket[^1];
+            bucket.RemoveAt(bucket.Count - 1);
+            image.Canvas.Clear();
+            return image;
+        }
+
+        private void ReturnSectionImage(SectionImage sectionImage)
+        {
+            var width = sectionImage.Info.Width;
+            var height = sectionImage.Info.Height;
+
+            ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(sectionImageCache, (width, height), out var exists);
+            if (!exists)
+            {
+                // Don't create a new bucket for an image that wasn't rented from the cache
+                sectionImage.Dispose();
+                return;
+            }
+
+            bucket.Add(sectionImage);
         }
 
         /// <summary>
@@ -2220,6 +2259,9 @@ namespace TwitchDownloaderCore
                         paint?.Dispose();
                     foreach (var (_, paint) in paintCache)
                         paint?.Dispose();
+                    foreach (var (_, bucket) in sectionImageCache)
+                        foreach (var image in bucket)
+                            image.Dispose();
                     fontManager?.Dispose();
                     nameFont?.Dispose();
                     messageFont?.Dispose();
