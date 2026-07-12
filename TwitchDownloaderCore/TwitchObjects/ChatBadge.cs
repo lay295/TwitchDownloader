@@ -33,14 +33,16 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public bool Disposed { get; private set; } = false;
         public string Name;
-        public readonly Dictionary<string, SKBitmap> Versions;
+        private readonly Dictionary<string, SKBitmap> _versionBitmaps;
+        private Dictionary<string, SKImage> _versions;
+        public Dictionary<string, SKImage> Versions => _versions ??= _versionBitmaps.ToDictionary(x => x.Key, x => SKImage.FromBitmap(x.Value));
         public readonly Dictionary<string, ChatBadgeData> VersionsData;
         public readonly ChatBadgeType Type;
 
         public ChatBadge(string name, Dictionary<string, ChatBadgeData> versions)
         {
             Name = name;
-            Versions = new Dictionary<string, SKBitmap>();
+            _versionBitmaps = new Dictionary<string, SKBitmap>();
             VersionsData = versions;
 
             foreach (var (versionName, versionData) in versions)
@@ -63,7 +65,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 }
 
                 badgeImage.SetImmutable();
-                Versions.Add(versionName, badgeImage);
+                _versionBitmaps.Add(versionName, badgeImage);
             }
 
             Type = name switch
@@ -82,7 +84,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         /// <inheritdoc cref="TwitchEmote.SnapResize(int,int,int)"/>
         public void SnapResize(int height, int upSnapThreshold, int downSnapThreshold)
         {
-            foreach (var (versionName, bitmap) in Versions)
+            foreach (var (versionName, bitmap) in _versionBitmaps)
             {
                 var bitmapInfo = bitmap.Info;
 
@@ -93,8 +95,14 @@ namespace TwitchDownloaderCore.TwitchObjects
                 bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
                 bitmap.Dispose();
                 newBitmap.SetImmutable();
-                Versions[versionName] = newBitmap;
+                _versionBitmaps[versionName] = newBitmap;
             }
+
+            foreach (var (_, image) in _versions ?? [])
+            {
+                image?.Dispose();
+            }
+            _versions = null;
         }
 
         public void Scale(double newScale) => SnapScale(newScale, 0, 0);
@@ -106,7 +114,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 return;
             }
 
-            foreach (var (versionName, bitmap) in Versions)
+            foreach (var (versionName, bitmap) in _versionBitmaps)
             {
                 var bitmapInfo = bitmap.Info;
                 var height = TwitchHelper.SnapResizeHeight((int)(bitmapInfo.Height * newScale), upSnapThreshold, downSnapThreshold, bitmapInfo.Height);
@@ -116,11 +124,15 @@ namespace TwitchDownloaderCore.TwitchObjects
                 bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
                 bitmap.Dispose();
                 newBitmap.SetImmutable();
-                Versions[versionName] = newBitmap;
+                _versionBitmaps[versionName] = newBitmap;
             }
-        }
 
-#region ImplementIDisposable
+            foreach (var (_, image) in _versions ?? [])
+            {
+                image?.Dispose();
+            }
+            _versions = null;
+        }
 
         public void Dispose()
         {
@@ -138,7 +150,12 @@ namespace TwitchDownloaderCore.TwitchObjects
 
                 if (isDisposing)
                 {
-                    foreach (var (_, bitmap) in Versions)
+                    foreach (var (_, image) in _versions ?? [])
+                    {
+                        image?.Dispose();
+                    }
+                    
+                    foreach (var (_, bitmap) in _versionBitmaps)
                     {
                         bitmap?.Dispose();
                     }
@@ -154,7 +171,5 @@ namespace TwitchDownloaderCore.TwitchObjects
                 Disposed = true;
             }
         }
-
-#endregion
     }
 }

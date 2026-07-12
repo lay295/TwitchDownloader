@@ -67,10 +67,11 @@ namespace TwitchDownloaderCore
         private List<TwitchEmote> emoteList = new List<TwitchEmote>();
         private List<TwitchEmote> emoteThirdList = new List<TwitchEmote>();
         private List<CheerEmote> cheermotesList = new List<CheerEmote>();
-        private Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
-        private Dictionary<string, SKBitmap> avatarCache = new Dictionary<string, SKBitmap>();
-        private Dictionary<int, SKPaint> fallbackFontCache = new Dictionary<int, SKPaint>();
-        private Dictionary<SKColor, SKPaint> paintCache = new Dictionary<SKColor, SKPaint>();
+        private Dictionary<string, SKImage> emojiCache = [];
+        private Dictionary<string, SKImage> avatarCache = [];
+        private Dictionary<int, SKPaint> fallbackFontCache = [];
+        private Dictionary<SKColor, SKPaint> paintCache = [];
+        private Dictionary<(int, int), List<SectionImage>> sectionImageCache = [];
         private bool noFallbackFontFound = false;
         private readonly SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont;
@@ -1244,7 +1245,7 @@ namespace TwitchDownloaderCore
                 }
 
                 SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
-                SKBitmap emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
+                var emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
                 SKImageInfo emojiImageInfo = emojiImage.Info;
 
                 if (drawPos.X + emojiImageInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
@@ -1265,7 +1266,7 @@ namespace TwitchDownloaderCore
                     canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImageInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                 }
 
-                canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
+                canvas.DrawImage(emojiImage, emotePoint.X, emotePoint.Y);
                 nonEmojiStart += elementLength;
 
                 drawPos.X += emojiImageInfo.Width + renderOptions.EmoteSpacing;
@@ -1775,14 +1776,14 @@ namespace TwitchDownloaderCore
             var canvas = sectionImages[^1].Canvas;
 
             var avatarY = (float)((renderOptions.SectionHeight - avatarImage.Height) / 2.0);
-            canvas.DrawBitmap(avatarImage, drawPos.X, avatarY);
+            canvas.DrawImage(avatarImage, drawPos.X, avatarY);
             drawPos.X += avatarImage.Width + renderOptions.WordSpacing;
         }
 
         private void DrawBadges(Comment comment, List<SectionImage> sectionImages, ref Point drawPos)
         {
             var canvas = sectionImages[^1].Canvas;
-            List<(SKBitmap, ChatBadgeType)> badgeImages = ParseCommentBadges(comment);
+            var badgeImages = ParseCommentBadges(comment);
             foreach (var (badgeImage, badgeType) in badgeImages)
             {
                 //Don't render filtered out badges
@@ -1790,14 +1791,14 @@ namespace TwitchDownloaderCore
                     continue;
 
                 float badgeY = (float)((renderOptions.SectionHeight - badgeImage.Height) / 2.0);
-                canvas.DrawBitmap(badgeImage, drawPos.X, badgeY);
+                canvas.DrawImage(badgeImage, drawPos.X, badgeY);
                 drawPos.X += badgeImage.Width + renderOptions.WordSpacing / 2;
             }
         }
 
-        private List<(SKBitmap badgeImage, ChatBadgeType badgeType)> ParseCommentBadges(Comment comment)
+        private List<(SKImage, ChatBadgeType)> ParseCommentBadges(Comment comment)
         {
-            List<(SKBitmap, ChatBadgeType)> returnList = new List<(SKBitmap, ChatBadgeType)>();
+            var returnList = new List<(SKImage, ChatBadgeType)>();
 
             if (comment.message.user_badges == null)
                 return returnList;
@@ -1941,7 +1942,7 @@ namespace TwitchDownloaderCore
             var emoteThirdTask = GetScaledThirdEmotes(cancellationToken);
             var cheerTask = GetScaledBits(cancellationToken);
             var emojiTask = GetScaledEmojis(cancellationToken);
-            var avatarTask = renderOptions.RenderUserAvatars ? GetScaledAvatars(cancellationToken) : Task.FromResult(new Dictionary<string, SKBitmap>());
+            var avatarTask = renderOptions.RenderUserAvatars ? GetScaledAvatars(cancellationToken) : Task.FromResult(new Dictionary<string, SKImage>());
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask, avatarTask);
 
@@ -2036,32 +2037,28 @@ namespace TwitchDownloaderCore
             return cheerTask;
         }
 
-        private async Task<Dictionary<string, SKBitmap>> GetScaledEmojis(CancellationToken cancellationToken)
+        private async Task<Dictionary<string, SKImage>> GetScaledEmojis(CancellationToken cancellationToken)
         {
             var emojis = await TwitchHelper.GetEmojis(_cacheDir, renderOptions.EmojiVendor, _progress, cancellationToken);
 
             var newHeight = (int)Math.Round(36 * renderOptions.ReferenceScale * renderOptions.EmojiScale);
 
-            // We can't just enumerate the dictionary because of the version checks
-            string[] emojiKeys = emojis.Keys.ToArray();
-            foreach (var emojiKey in emojiKeys)
+            return emojis.Keys.ToDictionary(x => x, x =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                SKBitmap bitmap = emojis[emojiKey];
+                using var bitmap = emojis[x];
                 SKImageInfo oldEmojiInfo = bitmap.Info;
                 SKImageInfo imageInfo = new SKImageInfo((int)(newHeight / (double)oldEmojiInfo.Height * oldEmojiInfo.Width), newHeight);
-                SKBitmap newBitmap = new SKBitmap(imageInfo);
+                using var newBitmap = new SKBitmap(imageInfo);
                 bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
-                bitmap.Dispose();
-                newBitmap.SetImmutable();
-                emojis[emojiKey] = newBitmap;
-            }
 
-            return emojis;
+                newBitmap.SetImmutable();
+                return SKImage.FromBitmap(newBitmap);
+            });
         }
 
-        private async Task<Dictionary<string, SKBitmap>> GetScaledAvatars(CancellationToken cancellationToken)
+        private async Task<Dictionary<string, SKImage>> GetScaledAvatars(CancellationToken cancellationToken)
         {
             var avatars = await TwitchHelper.GetAvatars(chatRoot.comments, DefaultAvatarUrls, _cacheDir, _progress, renderOptions.Offline, cancellationToken);
 
@@ -2071,17 +2068,15 @@ namespace TwitchDownloaderCore
             var radius = newHeight / 2;
             maskPath.AddCircle(radius, radius, radius);
 
-            var avatarKeys = avatars.Keys.ToArray();
-            foreach (var avatar in avatarKeys)
+            return avatars.Keys.ToDictionary(x => x, x =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var oldBitmap = avatars[avatar];
+                using var oldBitmap = avatars[x];
                 var oldImageInfo = oldBitmap.Info;
                 var imageInfo = new SKImageInfo((int)(newHeight / (double)oldImageInfo.Height * oldImageInfo.Width), newHeight);
-                var newBitmap = new SKBitmap(imageInfo);
+                using var newBitmap = new SKBitmap(imageInfo);
                 oldBitmap.ScalePixels(newBitmap, SKFilterQuality.High);
-                oldBitmap.Dispose();
 
                 // Clip avatar to circle
                 using (var canvas = new SKCanvas(newBitmap))
@@ -2091,10 +2086,8 @@ namespace TwitchDownloaderCore
                 }
 
                 newBitmap.SetImmutable();
-                avatars[avatar] = newBitmap;
-            }
-
-            return avatars;
+                return SKImage.FromBitmap(newBitmap);
+            });
         }
 
         private (int startTick, int totalTicks) GetVideoTicks()
