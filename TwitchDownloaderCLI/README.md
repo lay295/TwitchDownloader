@@ -200,6 +200,9 @@ File the program will output to.
 **--alt-background-color**
 (Default: `#191919`) The alternate message background color in the string format of `#RRGGBB` or `#AARRGGBB` in hexadecimal. Requires `--alternate-backgrounds`.
 
+**--highlight-user-color**
+(Default: `#C8FF0059`) The highlighted user message background color in the string format of `#RRGGBB` or `#AARRGGBB` in hexadecimal. Requires `--highlight-users`.
+
 **--message-color**
 (Default: `#ffffff`) The message text color in the string format of `#RRGGBB` or `#AARRGGBB` in hexadecimal.
 
@@ -278,6 +281,9 @@ File the program will output to.
 **--ban-words**
 (Default: ` `) List of words or phrases to ignore when rendering, separated by commas. Not case-sensitive.
 
+**--highlight-users**
+(Default: ` `) List of users whose message backgrounds will be drawn in the chosen highlight color, separated by commas. Not case-sensitive.
+
 **--badge-filter**
 (Default: `0`) Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, to filter out Moderator and Broadcaster badges only enter the value of 6.
 
@@ -321,6 +327,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 
 **--scale-avatar**
 (Default: `1.0`) Number to scale avatar images.
+
+**--scale-username**
+(Default: `1.0`) Number to scale username font relative to the message font size.
 
 **--scale-vertical**
 (Default: `1.0`) Number to scale vertical padding.
