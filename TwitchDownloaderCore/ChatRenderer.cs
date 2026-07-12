@@ -7,6 +7,7 @@ using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -18,6 +19,7 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
+using Range = System.Range;
 
 namespace TwitchDownloaderCore
 {
@@ -26,8 +28,8 @@ namespace TwitchDownloaderCore
         public bool Disposed { get; private set; } = false;
         public ChatRoot chatRoot { get; private set; } = new ChatRoot();
 
-        private static readonly SKColor Purple = SKColor.Parse("#7B2CF2");
-        private static readonly SKColor[] DefaultUsernameColors = [SKColor.Parse("#FF0000"), SKColor.Parse("#0000FF"), SKColor.Parse("#00FF00"), SKColor.Parse("#B22222"), SKColor.Parse("#FF7F50"), SKColor.Parse("#9ACD32"), SKColor.Parse("#FF4500"), SKColor.Parse("#2E8B57"), SKColor.Parse("#DAA520"), SKColor.Parse("#D2691E"), SKColor.Parse("#5F9EA0"), SKColor.Parse("#1E90FF"), SKColor.Parse("#FF69B4"), SKColor.Parse("#8A2BE2"), SKColor.Parse("#00FF7F")];
+        private static readonly SKColor Purple = new(0xFF7B2CF2); // AARRGGBB
+        private static readonly SKColor[] DefaultUsernameColors = [new(0xFFFF0000), new(0xFF0000FF), new(0xFF00FF00), new(0xFFB22222), new(0xFFFF7F50), new(0xFF9ACD32), new(0xFFFF4500), new(0xFF2E8B57), new(0xFFDAA520), new(0xFFD2691E), new(0xFF5F9EA0), new(0xFF1E90FF), new(0xFFFF69B4), new(0xFF8A2BE2), new(0xFF00FF7F)];
 
         private static readonly string[] DefaultAvatarUrls =
         [
@@ -68,6 +70,7 @@ namespace TwitchDownloaderCore
         private Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
         private Dictionary<string, SKBitmap> avatarCache = new Dictionary<string, SKBitmap>();
         private Dictionary<int, SKPaint> fallbackFontCache = new Dictionary<int, SKPaint>();
+        private Dictionary<SKColor, SKPaint> paintCache = new Dictionary<SKColor, SKPaint>();
         private bool noFallbackFontFound = false;
         private readonly SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont;
@@ -248,7 +251,7 @@ namespace TwitchDownloaderCore
             if (renderOptions.BannedWordsArray.Length > 0)
             {
                 var bannedWords = string.Join('|', renderOptions.BannedWordsArray.Select(Regex.Escape));
-                bannedWordsRegex = new Regex(@$"(?<=^|[\s\d\p{{P}}\p{{S}}]){bannedWords}(?=$|[\s\d\p{{P}}\p{{S}}])",
+                bannedWordsRegex = new Regex(@$"(?<=\b|[\d\p{{Pc}}]){bannedWords}(?=\b|[\d\p{{Pc}}])",
                     RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             }
 
@@ -289,11 +292,8 @@ namespace TwitchDownloaderCore
 
         private void RenderVideoSection(int startTick, int endTick, FfmpegProcess ffmpegProcess, FfmpegProcess maskProcess = null, CancellationToken cancellationToken = new())
         {
-            UpdateFrame latestUpdate = null;
-            BinaryWriter ffmpegStream = new BinaryWriter(ffmpegProcess.StandardInput.BaseStream);
-            BinaryWriter maskStream = null;
-            if (maskProcess != null)
-                maskStream = new BinaryWriter(maskProcess.StandardInput.BaseStream);
+            var ffmpegStream = ffmpegProcess.StandardInput.BaseStream;
+            var maskStream = maskProcess?.StandardInput.BaseStream;
 
             DriveInfo outputDrive = DriveHelper.GetOutputDrive(ffmpegProcess.SavePath);
 
@@ -304,6 +304,8 @@ namespace TwitchDownloaderCore
             messageFont.MeasureText("ABC123", ref sampleTextBounds);
             int sectionDefaultYPos = (int)(((renderOptions.SectionHeight - sampleTextBounds.Height) / 2.0) + sampleTextBounds.Height);
 
+            byte[] maskBytes = null;
+            UpdateFrame latestUpdate = null;
             for (int currentTick = startTick; currentTick < endTick; currentTick++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -313,32 +315,23 @@ namespace TwitchDownloaderCore
                     latestUpdate = GenerateUpdateFrame(currentTick, sectionDefaultYPos, latestUpdate);
                 }
 
-                SKBitmap frame = null;
-                bool isCopyFrame = false;
-                try
+                var frame = GetFrameFromTick(currentTick, sectionDefaultYPos, latestUpdate);
+
+                if (!renderOptions.SkipDriveWaiting)
+                    DriveHelper.WaitForDrive(outputDrive, _progress);
+
+                var frameSpan = frame.GetPixelSpan();
+                ffmpegStream.Write(frameSpan);
+
+                if (maskProcess != null)
                 {
-                    (frame, isCopyFrame) = GetFrameFromTick(currentTick, sectionDefaultYPos, latestUpdate);
+                    maskBytes ??= GC.AllocateUninitializedArray<byte>(frame.Info.BytesSize);
+                    frameSpan.CopyTo(maskBytes);
 
                     if (!renderOptions.SkipDriveWaiting)
-                        DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
+                        DriveHelper.WaitForDrive(outputDrive, _progress);
 
-                    ffmpegStream.Write(frame.Bytes);
-
-                    if (maskProcess != null)
-                    {
-                        if (!renderOptions.SkipDriveWaiting)
-                            DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken).Wait(cancellationToken);
-
-                        SetFrameMask(frame);
-                        maskStream.Write(frame.Bytes);
-                    }
-                }
-                finally
-                {
-                    if (isCopyFrame)
-                    {
-                        frame?.Dispose();
-                    }
+                    maskStream.Write(SetFrameMask(maskBytes));
                 }
 
                 if (currentTick % 3 == 0)
@@ -357,6 +350,7 @@ namespace TwitchDownloaderCore
             _progress.LogInfo($"FINISHED. RENDER TIME: {stopwatch.Elapsed.TotalSeconds:F1}s SPEED: {(endTick - startTick) / (double)renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds:F2}x");
 
             latestUpdate?.Image.Dispose();
+            latestUpdate?.Comments.ForEach(x => x.Image.Dispose());
 
             ffmpegStream.Dispose();
             maskStream?.Dispose();
@@ -365,27 +359,23 @@ namespace TwitchDownloaderCore
             maskProcess?.WaitForExit(100_000);
         }
 
-        private static void SetFrameMask(SKBitmap frame)
+        private static unsafe byte[] SetFrameMask(byte[] frame)
         {
-            IntPtr pixelsAddr = frame.GetPixels();
-            SKImageInfo frameInfo = frame.Info;
-            int height = frameInfo.Height;
-            int width = frameInfo.Width;
-            unsafe
+            fixed (byte* pFrame = frame)
             {
-                byte* ptr = (byte*)pixelsAddr.ToPointer();
-                for (int row = 0; row < height; row++)
+                var ptr = pFrame;
+                var end = pFrame + frame.Length;
+                while (ptr < end)
                 {
-                    for (int col = 0; col < width; col++)
-                    {
-                        byte alpha = *(ptr + 3); // alpha of the unmasked pixel
-                        *ptr++ = alpha;
-                        *ptr++ = alpha;
-                        *ptr++ = alpha;
-                        *ptr++ = 0xFF;
-                    }
+                    var alpha = *(ptr + 3); // alpha of the unmasked pixel
+                    *ptr++ = alpha;
+                    *ptr++ = alpha;
+                    *ptr++ = alpha;
+                    *ptr++ = 0xFF;
                 }
             }
+
+            return frame;
         }
 
         private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo)
@@ -440,84 +430,52 @@ namespace TwitchDownloaderCore
             return process;
         }
 
-        private (SKBitmap frame, bool isCopyFrame) GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
+        private SKBitmap GetFrameFromTick(int currentTick, int sectionDefaultYPos, UpdateFrame currentFrame = null)
         {
             currentFrame ??= GenerateUpdateFrame(currentTick, sectionDefaultYPos);
-            var (frame, isCopyFrame) = DrawAnimatedEmotes(currentFrame, currentTick);
-            return (frame, isCopyFrame);
+            return DrawAnimatedEmotes(currentFrame, currentTick);
         }
 
-        private (SKBitmap frame, bool isCopyFrame) DrawAnimatedEmotes(UpdateFrame currentFrame, int currentTick)
+        private SKBitmap DrawAnimatedEmotes(UpdateFrame currentFrame, int currentTick)
         {
             var updateFrame = currentFrame.Image;
             var comments = currentFrame.Comments;
             var commentIndex = currentFrame.CommentIndex;
             var currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
 
-            // Mask generation modifies the returned frame, so it is left on the original uncached copy path.
-            if (!renderOptions.GenerateMask)
+            var hasAnimatedEmotes = false;
+            foreach (var comment in comments)
             {
-                bool hasAnimatedEmotes = false;
-                foreach (var comment in comments)
+                foreach (var (_, emote) in comment.Emotes)
                 {
-                    foreach (var (_, emote) in comment.Emotes)
+                    if (emote.FrameCount > 1)
                     {
-                        if (emote.FrameCount > 1)
-                        {
-                            hasAnimatedEmotes = true;
-                            break;
-                        }
-                    }
-
-                    if (hasAnimatedEmotes) break;
-                }
-
-                if (!hasAnimatedEmotes)
-                {
-                    // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
-                    InvalidateAnimCache();
-                    return (updateFrame, false);
-                }
-
-                // Reuse the previously composited frame when the visible comments and every animated emote's
-                // frame index are unchanged since the last tick. At high frame rates the animation advances
-                // more slowly than the video, so most ticks hit this path and skip the copy + compositing.
-                if (_animComposedFrame != null && commentIndex == _animComposedForCommentIndex && AnimCacheIsValid(comments, currentTickMs))
-                {
-                    return (_animComposedFrame, false);
-                }
-
-                ComposeAnimatedFrame(updateFrame, comments, currentTickMs);
-                _animComposedForCommentIndex = commentIndex;
-                RecordAnimFrameIndices(comments, currentTickMs);
-                return (_animComposedFrame, false); // owned by the cache; the caller must not dispose it
-            }
-
-            // SKBitmap.Copy() allocates excessively, so a raw memcpy into the new bitmap is used instead.
-            var newFrame = new SKBitmap(updateFrame.Info);
-            unsafe
-            {
-                var byteCount = updateFrame.Info.BytesSize;
-                Buffer.MemoryCopy((void*)updateFrame.GetPixels(), (void*)newFrame.GetPixels(), byteCount, byteCount);
-            }
-
-            int frameHeight = renderOptions.ChatHeight;
-            using (SKCanvas frameCanvas = new SKCanvas(newFrame))
-            {
-                for (int c = comments.Count - 1; c >= 0; c--)
-                {
-                    var comment = comments[c];
-                    frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
-                    foreach ((Point drawPoint, TwitchEmote emote) in comment.Emotes)
-                    {
-                        if (emote.FrameCount > 1)
-                        {
-                            frameCanvas.DrawBitmap(emote.EmoteFrames[ComputeAnimFrameIndex(emote, currentTickMs)], drawPoint.X, drawPoint.Y + frameHeight);
-                        }
+                        hasAnimatedEmotes = true;
+                        break;
                     }
                 }
+
+                if (hasAnimatedEmotes) break;
             }
-            return (newFrame, true);
+
+            if (!hasAnimatedEmotes)
+            {
+                InvalidateAnimCache();
+                return updateFrame;
+            }
+
+            // Reuse the previously composited frame when the visible comments and every animated emote's
+            // frame index are unchanged since the last tick. At high frame rates the animation advances
+            // more slowly than the video, so most ticks hit this path and skip the copy + compositing.
+            if (_animComposedFrame != null && commentIndex == _animComposedForCommentIndex && AnimCacheIsValid(comments, currentTickMs))
+            {
+                return _animComposedFrame;
+            }
+
+            ComposeAnimatedFrame(updateFrame, comments, currentTickMs);
+            _animComposedForCommentIndex = commentIndex;
+            RecordAnimFrameIndices(comments, currentTickMs);
+            return _animComposedFrame;
         }
 
         /// <summary>
@@ -550,7 +508,7 @@ namespace TwitchDownloaderCore
                 {
                     if (emote.FrameCount > 1)
                     {
-                        _animCanvas.DrawBitmap(emote.EmoteFrames[ComputeAnimFrameIndex(emote, currentTickMs)], drawPoint.X, drawPoint.Y + frameHeight);
+                        _animCanvas.DrawImage(emote.EmoteFrames[ComputeAnimFrameIndex(emote, currentTickMs)], drawPoint.X, drawPoint.Y + frameHeight);
                     }
                 }
             }
@@ -607,24 +565,40 @@ namespace TwitchDownloaderCore
             _animLastFrameIndices.Clear();
         }
 
+        private int GetNewestCommentIndex(int lastIndex, double currentTimeSeconds)
+        {
+            var commentSpan = CollectionsMarshal.AsSpan(chatRoot.comments);
+            for (var i = Math.Max(0, lastIndex); i < commentSpan.Length; i++)
+            {
+                if (commentSpan[i].content_offset_seconds > currentTimeSeconds)
+                {
+                    return i - 1;
+                }
+            }
+
+            return commentSpan.Length - 1;
+        }
+
         private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
         {
-            SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
-            double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
-            int newestCommentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds);
-
-            if (newestCommentIndex == lastUpdate?.CommentIndex)
+            var currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
+            var newestCommentIndex = GetNewestCommentIndex(lastUpdate?.CommentIndex ?? 0, currentTimeSeconds);
+            if (lastUpdate is not null && newestCommentIndex == lastUpdate.CommentIndex)
             {
                 return lastUpdate;
             }
-            lastUpdate?.Image.Dispose();
 
-            List<CommentSection> commentList = lastUpdate?.Comments ?? [];
+            lastUpdate ??= new UpdateFrame
+            {
+                Image = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight)
+            };
+
+            var commentList = lastUpdate.Comments ?? [];
 
             int oldCommentIndex = -1;
             if (commentList.Count > 0)
             {
-                oldCommentIndex = commentList.Last().CommentIndex;
+                oldCommentIndex = commentList[^1].CommentIndex;
             }
             else if (newestCommentIndex > 100)
             {
@@ -649,22 +623,24 @@ namespace TwitchDownloaderCore
                 while (newestCommentIndex >= currentIndex);
             }
 
-            using (SKCanvas frameCanvas = new SKCanvas(newFrame))
+            using (var frameCanvas = new SKCanvas(lastUpdate.Image))
             {
                 int commentsDrawn = 0;
                 int commentListIndex = commentList.Count - 1;
                 int frameHeight = renderOptions.ChatHeight;
+                var frameWidth = lastUpdate.Image.Width;
                 frameCanvas.Clear(renderOptions.BackgroundColor);
 
                 while (commentListIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
                 {
                     var comment = commentList[commentListIndex];
-                    frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
+                    var commentHeight = comment.Image.Height;
+                    frameHeight -= commentHeight + renderOptions.VerticalPadding;
 
                     var backgroundColor = GetMessageBackground(comment.CommentIndex, out var backgroundPaint);
                     if (backgroundColor != renderOptions.BackgroundColor)
                     {
-                        frameCanvas.DrawRect(0, frameHeight - renderOptions.VerticalPadding / 2f, newFrame.Width, comment.Image.Height + renderOptions.VerticalPadding, backgroundPaint);
+                        frameCanvas.DrawRect(0, frameHeight - renderOptions.VerticalPadding / 2f, frameWidth, commentHeight + renderOptions.VerticalPadding, backgroundPaint);
                     }
 
                     frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
@@ -674,7 +650,7 @@ namespace TwitchDownloaderCore
                         //Only draw static emotes
                         if (emote.FrameCount == 1)
                         {
-                            frameCanvas.DrawBitmap(emote.EmoteFrames[0], drawPoint.X, drawPoint.Y + frameHeight);
+                            frameCanvas.DrawImage(emote.EmoteFrames[0], drawPoint.X, drawPoint.Y + frameHeight);
                         }
                     }
                     commentsDrawn++;
@@ -689,7 +665,9 @@ namespace TwitchDownloaderCore
                 commentList.RemoveRange(0, removeCount);
             }
 
-            return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
+            lastUpdate.Comments = commentList;
+            lastUpdate.CommentIndex = newestCommentIndex;
+            return lastUpdate;
         }
 
         private SKColor GetMessageBackground(int commentIndex, [AllowNull] out SKPaint paint)
@@ -707,7 +685,7 @@ namespace TwitchDownloaderCore
                     return paint.Color;
                 }
 
-                paint = renderOptions.HighlightUserPaint;
+                paint = GetCachedPaint(renderOptions.HighlightUserColor);
                 return renderOptions.HighlightUserColor;
             }
 
@@ -726,7 +704,7 @@ namespace TwitchDownloaderCore
             CommentSection newSection = new CommentSection();
             List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
             Comment comment = chatRoot.comments[commentIndex];
-            List<(SKImageInfo info, SKBitmap bitmap)> sectionImages = new List<(SKImageInfo info, SKBitmap bitmap)>();
+            List<SectionImage> sectionImages = [];
             Point drawPos = new Point();
             Point defaultPos = new Point();
             var highlightType = HighlightType.Unknown;
@@ -788,9 +766,9 @@ namespace TwitchDownloaderCore
             return newSection;
         }
 
-        private SKBitmap CombineImages(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, HighlightType highlightType, int commentIndex)
+        private SKBitmap CombineImages(List<SectionImage> sectionImages, HighlightType highlightType, int commentIndex)
         {
-            SKBitmap finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.info.Height));
+            var finalBitmap = new SKBitmap(renderOptions.ChatWidth, sectionImages.Sum(x => x.Info.Height));
             var finalBitmapInfo = finalBitmap.Info;
             using (SKCanvas finalCanvas = new SKCanvas(finalBitmap))
             {
@@ -800,7 +778,7 @@ namespace TwitchDownloaderCore
                         ? new SKColor(0xFF26262C) // AARRGGBB
                         : new SKColor(0xFF80808C); // AARRGGBB
 
-                    using var paint = new SKPaint { Color = accentColor };
+                    var paint = GetCachedPaint(accentColor);
                     finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
                 }
                 else if (highlightType is not HighlightType.None)
@@ -811,18 +789,18 @@ namespace TwitchDownloaderCore
                     {
                         // Draw the highlight background only if the message background is opaque enough
                         var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
-                        using var backgroundPaint = new SKPaint { Color = backgroundColor };
+                        var backgroundPaint = GetCachedPaint(backgroundColor);
                         finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
                     }
 
-                    using var accentPaint = new SKPaint { Color = Purple };
+                    var accentPaint = GetCachedPaint(Purple);
                     finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, accentPaint);
                 }
 
                 for (int i = 0; i < sectionImages.Count; i++)
                 {
-                    finalCanvas.DrawBitmap(sectionImages[i].bitmap, 0, i * renderOptions.SectionHeight);
-                    sectionImages[i].bitmap.Dispose();
+                    finalCanvas.DrawBitmap(sectionImages[i].Bitmap, 0, i * renderOptions.SectionHeight);
+                    sectionImages[i].Dispose();
                 }
             }
             sectionImages.Clear();
@@ -832,12 +810,27 @@ namespace TwitchDownloaderCore
 
         private static string GetKeyName(IEnumerable<Codepoint> codepoints)
         {
-            var codepointList = from codepoint in codepoints where codepoint.Value != 0xFE0F select codepoint.Value.ToString("X");
+            if (!codepoints.TryGetNonEnumeratedCount(out var count))
+            {
+                var codepointQuery = codepoints
+                    .Where(codepoint => codepoint.Value != 0xFE0F)
+                    .Select(codepoint => codepoint.Value.ToString("X"));
+                return string.Join(' ', codepointQuery);
+            }
 
-            return string.Join(' ', codepointList);
+            var sb = new StringBuilder(count * 5); // '1234 '
+            foreach (var codepoint in codepoints)
+            {
+                if (codepoint.Value == 0xFE0F) continue;
+
+                sb.Append($"{codepoint.Value:X} ");
+            }
+
+            sb.TrimEnd(" ");
+            return sb.ToString();
         }
 
-        private void DrawNonAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, int commentIndex, ref Point drawPos, ref Point defaultPos)
+        private void DrawNonAccentedMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, int commentIndex, ref Point drawPos, ref Point defaultPos)
         {
             if (renderOptions.Timestamp)
             {
@@ -854,13 +847,13 @@ namespace TwitchDownloaderCore
             DrawUsername(comment, sectionImages, ref drawPos, defaultPos, commentIndex: commentIndex);
             DrawMessage(comment, sectionImages, emotePositionList, highlightWords, ref drawPos, defaultPos);
 
-            foreach (var (_, bitmap) in sectionImages)
+            foreach (var sectionImage in sectionImages)
             {
-                bitmap.SetImmutable();
+                sectionImage.SetImmutable();
             }
         }
 
-        private void DrawAccentedMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, int commentIndex, ref Point drawPos, Point defaultPos)
+        private void DrawAccentedMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, int commentIndex, ref Point drawPos, Point defaultPos)
         {
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
@@ -906,15 +899,15 @@ namespace TwitchDownloaderCore
                     break;
             }
 
-            foreach (var (_, bitmap) in sectionImages)
+            foreach (var sectionImage in sectionImages)
             {
-                bitmap.SetImmutable();
+                sectionImage.SetImmutable();
             }
         }
 
-        private void DrawSubscribeMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawSubscribeMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
-            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+            var canvas = sectionImages[^1].Canvas;
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
 
             Point customMessagePos = drawPos;
@@ -951,9 +944,9 @@ namespace TwitchDownloaderCore
             DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, commentIndex, ref drawPos, ref defaultPos);
         }
 
-        private void DrawBitsBadgeTierMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawBitsBadgeTierMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
-            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+            var canvas = sectionImages[^1].Canvas;
 
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
             drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
@@ -986,9 +979,9 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private void DrawWatchStreakMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawWatchStreakMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
-            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+            var canvas = sectionImages[^1].Canvas;
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
 
             Point customMessagePos = drawPos;
@@ -1025,9 +1018,9 @@ namespace TwitchDownloaderCore
             DrawNonAccentedMessage(customMessage, sectionImages, emotePositionList, false, commentIndex, ref drawPos, ref defaultPos);
         }
 
-        private void DrawCharityDonationMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawCharityDonationMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
-            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+            var canvas = sectionImages[^1].Canvas;
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
 
             drawPos.X += highlightIcon.Width + renderOptions.WordSpacing;
@@ -1043,9 +1036,9 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private void DrawGiftMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawGiftMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
-            using SKCanvas canvas = new(sectionImages.Last().bitmap);
+            var canvas = sectionImages[^1].Canvas;
 
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
             drawPos.X += highlightIcon.Width + renderOptions.AccentIndentWidth - renderOptions.AccentStrokeWidth;
@@ -1053,28 +1046,41 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private void DrawMessage(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
+        private static readonly SearchValues<char> WhiteSpaceChars = SearchValues.Create("\t\n\v\f\r \u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000");
+
+        private void DrawMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
         {
             int bitsCount = comment.message.bits_spent;
             foreach (var fragment in comment.message.fragments)
             {
-                if (fragment.emoticon == null)
-                {
-                    // Either text or third party emote
-                    var fragmentParts = SwapRightToLeft(fragment.text.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-                    foreach (var fragmentString in fragmentParts)
-                    {
-                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentString, highlightWords);
-                    }
-                }
-                else
+                if (fragment.emoticon != null)
                 {
                     DrawFirstPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, fragment, highlightWords);
+                    continue;
+                }
+
+                // Either text or third party emote
+                var fragmentSpan = fragment.text.AsSpan();
+                var spaceCount = fragmentSpan.CountAny(WhiteSpaceChars);
+
+                var fragmentParts = ArrayPool<Range>.Shared.Rent(spaceCount + 1);
+                try
+                {
+                    var written = SwapRightToLeft(fragmentSpan.SplitAny(WhiteSpaceChars), fragmentParts);
+                    foreach (var range in fragmentParts.Take(written))
+                    {
+                        var fragmentPart = fragmentSpan[range];
+                        DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
+                    }
+                }
+                finally
+                {
+                    ArrayPool<Range>.Shared.Return(fragmentParts);
                 }
             }
         }
 
-        private void DrawFragmentPart(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
+        private void DrawFragmentPart(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
         {
             if (!skipThird && TryGetTwitchEmote(emoteThirdList, fragmentPart, out var emote))
             {
@@ -1084,7 +1090,7 @@ namespace TwitchDownloaderCore
             {
                 DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
             }
-            else if (!skipNonFont && (!messageFont.ContainsGlyphs(fragmentPart) || new StringInfo(fragmentPart).LengthInTextElements < fragmentPart.Length))
+            else if (!skipNonFont && (!messageFont.ContainsGlyphs(fragmentPart) || fragmentPart.LengthInTextElements() < fragmentPart.Length))
             {
                 DrawNonFontMessage(sectionImages, ref drawPos, defaultPos, fragmentPart, highlightWords);
             }
@@ -1124,7 +1130,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawThirdPartyEmote(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, TwitchEmote twitchEmote, bool highlightWords)
+        private void DrawThirdPartyEmote(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, TwitchEmote twitchEmote, bool highlightWords)
         {
             SKImageInfo emoteInfo = twitchEmote.Info;
             Point emotePoint = new Point();
@@ -1137,8 +1143,8 @@ namespace TwitchDownloaderCore
 
                 if (highlightWords)
                 {
-                    using var canvas = new SKCanvas(sectionImages.Last().bitmap);
-                    using var paint = new SKPaint { Color = Purple };
+                    var canvas = sectionImages[^1].Canvas;
+                    var paint = GetCachedPaint(Purple);
                     canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                 }
 
@@ -1149,48 +1155,62 @@ namespace TwitchDownloaderCore
             {
                 emotePoint.X = drawPos.X - renderOptions.EmoteSpacing - emoteInfo.Width;
             }
-            emotePoint.Y = (int)(sectionImages.Sum(x => x.info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0));
+            emotePoint.Y = (int)(sectionImages.Sum(x => x.Info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0));
             emotePositionList.Add((emotePoint, twitchEmote));
         }
 
-        private void DrawEmojiMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
+        private void DrawEmojiMessage(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragment, bool highlightWords)
         {
             if (renderOptions.EmojiVendor == EmojiVendor.None)
             {
-                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentString, highlightWords, true, true);
+                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragment, highlightWords, true, true);
                 return;
             }
 
-            var enumerator = StringInfo.GetTextElementEnumerator(fragmentString);
-            StringBuilder nonEmojiBuffer = new();
-            while (enumerator.MoveNext())
+            var fragmentSlice = fragment;
+            var nonEmojiStart = 0;
+            var nonEmojiLen = 0;
+            var elementLength = 1;
+            while (elementLength > 0)
             {
-                if (enumerator.GetTextElement().Length == 1 && char.IsAscii(enumerator.GetTextElement()[0]))
+                elementLength = StringInfo.GetNextTextElementLength(fragmentSlice);
+                if (elementLength == 1 && char.IsAscii(fragmentSlice[0]))
                 {
-                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    nonEmojiLen += elementLength;
+                    fragmentSlice = fragmentSlice[elementLength..];
                     continue;
                 }
 
                 var emojiBag = new ConcurrentBag<SingleEmoji>();
-                Emoji.All.AsParallel()
-                    .Where(emoji => enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder]))
-                    .ForAll(emoji =>
-                    {
-                        if (emoji.Group != "Flags")
+                var textElement = ArrayPool<char>.Shared.Rent(elementLength);
+                fragmentSlice[..elementLength].CopyTo(textElement);
+                fragmentSlice = fragmentSlice[elementLength..];
+                try
+                {
+                    Emoji.All.AsParallel()
+                        .Where(emoji => textElement.StartsWith(AllEmojiSequences[emoji.SortOrder]))
+                        .ForAll(emoji =>
                         {
-                            emojiBag.Add(emoji);
-                            return;
-                        }
+                            if (emoji.Group != "Flags")
+                            {
+                                emojiBag.Add(emoji);
+                                return;
+                            }
 
-                        if (enumerator.GetTextElement().StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
-                        {
-                            emojiBag.Add(emoji);
-                        }
-                    });
+                            if (textElement.StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
+                            {
+                                emojiBag.Add(emoji);
+                            }
+                        });
+                }
+                finally
+                {
+                    ArrayPool<char>.Shared.Return(textElement);
+                }
 
                 if (emojiBag.IsEmpty)
                 {
-                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    nonEmojiLen += elementLength;
                     continue;
                 }
 
@@ -1209,14 +1229,15 @@ namespace TwitchDownloaderCore
 
                 if (emojiMatchesCount == 0)
                 {
-                    nonEmojiBuffer.Append(enumerator.GetTextElement());
+                    nonEmojiLen += elementLength;
                     continue;
                 }
 
-                if (nonEmojiBuffer.Length > 0)
+                if (nonEmojiLen > 0)
                 {
-                    DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
-                    nonEmojiBuffer.Clear();
+                    DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragment.Slice(nonEmojiStart, nonEmojiLen), highlightWords, true, true);
+                    nonEmojiStart += nonEmojiLen;
+                    nonEmojiLen = 0;
                 }
 
                 SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
@@ -1234,34 +1255,33 @@ namespace TwitchDownloaderCore
                     Y = (int)((renderOptions.SectionHeight - emojiImageInfo.Height) / 2.0)
                 };
 
-                using (SKCanvas canvas = new SKCanvas(sectionImages.Last().bitmap))
+                var canvas = sectionImages[^1].Canvas;
+                if (highlightWords)
                 {
-                    if (highlightWords)
-                    {
-                        using var paint = new SKPaint { Color = Purple };
-                        canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImageInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
-                    }
-
-                    canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
+                    var paint = GetCachedPaint(Purple);
+                    canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImageInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                 }
+
+                canvas.DrawBitmap(emojiImage, emotePoint.X, emotePoint.Y);
+                nonEmojiStart += elementLength;
 
                 drawPos.X += emojiImageInfo.Width + renderOptions.EmoteSpacing;
             }
-            if (nonEmojiBuffer.Length > 0)
+
+            if (nonEmojiLen > 0)
             {
-                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, nonEmojiBuffer.ToString(), highlightWords, true, true);
-                nonEmojiBuffer.Clear();
+                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragment.Slice(nonEmojiStart, nonEmojiLen), highlightWords, true, true);
             }
         }
 
-        private void DrawNonFontMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, string fragmentString, bool highlightWords)
+        private void DrawNonFontMessage(List<SectionImage> sectionImages, ref Point drawPos, Point defaultPos, ReadOnlySpan<char> fragment, bool highlightWords)
         {
-            var fragmentSpan = fragmentString.AsSpan().Trim('\uFE0F');
+            fragment = fragment.Trim('\uFE0F');
 
-            if (BlockArtRegex.IsMatch(fragmentSpan))
+            if (BlockArtRegex.IsMatch(fragment))
             {
                 // Very rough estimation of width of block art
-                int textWidth = (int)(fragmentSpan.Length * renderOptions.BlockArtCharWidth);
+                var textWidth = (int)(fragment.Length * renderOptions.BlockArtCharWidth);
                 if (renderOptions.BlockArtPreWrap && drawPos.X + textWidth > renderOptions.BlockArtPreWrapWidth)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
@@ -1272,9 +1292,9 @@ namespace TwitchDownloaderCore
             // The fragment has either surrogate pairs or characters not in the messageFont
             var inFontBuffer = new StringBuilder();
             var nonFontBuffer = new StringBuilder();
-            for (int j = 0; j < fragmentSpan.Length; j++)
+            for (var j = 0; j < fragment.Length; j++)
             {
-                if (char.IsHighSurrogate(fragmentSpan[j]) && j + 1 < fragmentSpan.Length && char.IsLowSurrogate(fragmentSpan[j + 1]))
+                if (char.IsHighSurrogate(fragment[j]) && j + 1 < fragment.Length && char.IsLowSurrogate(fragment[j + 1]))
                 {
                     if (inFontBuffer.Length > 0)
                     {
@@ -1283,22 +1303,23 @@ namespace TwitchDownloaderCore
                     }
                     if (nonFontBuffer.Length > 0)
                     {
-                        using SKPaint nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0]).Clone();
+                        var nonFontFallbackFont = GetFallbackFont(nonFontBuffer[0]);
                         nonFontFallbackFont.Color = renderOptions.MessageColor;
                         DrawText(nonFontBuffer.ToString(), nonFontFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                         nonFontBuffer.Clear();
                     }
-                    int utf32Char = char.ConvertToUtf32(fragmentSpan[j], fragmentSpan[j + 1]);
+
+                    var utf32Char = char.ConvertToUtf32(fragment[j], fragment[j + 1]);
                     //Don't attempt to draw U+E0000
                     if (utf32Char != 0xE0000)
                     {
-                        using SKPaint highSurrogateFallbackFont = GetFallbackFont(utf32Char).Clone();
+                        var highSurrogateFallbackFont = GetFallbackFont(utf32Char);
                         highSurrogateFallbackFont.Color = renderOptions.MessageColor;
-                        DrawText(fragmentSpan.Slice(j, 2).ToString(), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
+                        DrawText(fragment.Slice(j, 2), highSurrogateFallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                     }
                     j++;
                 }
-                else if (!messageFont.ContainsGlyphs(fragmentSpan.Slice(j, 1)) || new StringInfo(fragmentSpan[j].ToString()).LengthInTextElements == 0)
+                else if (!messageFont.ContainsGlyphs(fragment.Slice(j, 1)) || fragment.Slice(j, 1).LengthInTextElements() == 0)
                 {
                     if (inFontBuffer.Length > 0)
                     {
@@ -1306,25 +1327,26 @@ namespace TwitchDownloaderCore
                         inFontBuffer.Clear();
                     }
 
-                    nonFontBuffer.Append(fragmentSpan[j]);
+                    nonFontBuffer.Append(fragment[j]);
                 }
                 else
                 {
                     if (nonFontBuffer.Length > 0)
                     {
-                        using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0]).Clone();
+                        var fallbackFont = GetFallbackFont(nonFontBuffer[0]);
                         fallbackFont.Color = renderOptions.MessageColor;
                         DrawText(nonFontBuffer.ToString(), fallbackFont, false, sectionImages, ref drawPos, defaultPos, highlightWords);
                         nonFontBuffer.Clear();
                     }
 
-                    inFontBuffer.Append(fragmentSpan[j]);
+                    inFontBuffer.Append(fragment[j]);
                 }
             }
+
             // Only one or the other should occur
             if (nonFontBuffer.Length > 0)
             {
-                using SKPaint fallbackFont = GetFallbackFont(nonFontBuffer[0]).Clone();
+                var fallbackFont = GetFallbackFont(nonFontBuffer[0]);
                 fallbackFont.Color = renderOptions.MessageColor;
                 DrawText(nonFontBuffer.ToString(), fallbackFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
                 nonFontBuffer.Clear();
@@ -1336,13 +1358,13 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawRegularMessage(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, string fragmentString, bool highlightWords)
+        private void DrawRegularMessage(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentString, bool highlightWords)
         {
-            bool bitsPrinted = false;
-            if (bitsCount > 0 && fragmentString.Any(char.IsDigit) && fragmentString.Any(char.IsLetter))
+            var bitsPrinted = false;
+            var bitsIndex = fragmentString.IndexOfAny(DigitChars);
+            if (bitsCount > 0 && bitsIndex > 0)
             {
-                var bitsIndex = fragmentString.AsSpan().IndexOfAny(DigitChars);
-                if (int.TryParse(fragmentString.AsSpan(bitsIndex), out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString.AsSpan(0, bitsIndex), out var currentCheerEmote))
+                if (int.TryParse(fragmentString[bitsIndex..], out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString[..bitsIndex], out var currentCheerEmote))
                 {
                     KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
                     TwitchEmote cheerEmote = tierList.Value;
@@ -1355,7 +1377,7 @@ namespace TwitchDownloaderCore
                     Point emotePoint = new Point
                     {
                         X = drawPos.X,
-                        Y = (int)(sectionImages.Sum(x => x.info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - cheerEmoteInfo.Height) / 2.0))
+                        Y = (int)(sectionImages.Sum(x => x.Info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - cheerEmoteInfo.Height) / 2.0))
                     };
                     emotePositionList.Add((emotePoint, cheerEmote));
                     drawPos.X += cheerEmoteInfo.Width + renderOptions.EmoteSpacing;
@@ -1398,7 +1420,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawFirstPartyEmote(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, Fragment fragment, bool highlightWords)
+        private void DrawFirstPartyEmote(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, Fragment fragment, bool highlightWords)
         {
             // First party emote
             if (TryGetTwitchEmote(emoteList, fragment.emoticon.emoticon_id, out var emote))
@@ -1411,13 +1433,14 @@ namespace TwitchDownloaderCore
                 Point emotePoint = new Point
                 {
                     X = drawPos.X,
-                    Y = (int)(sectionImages.Sum(x => x.info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0))
+                    Y = (int)(sectionImages.Sum(x => x.Info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0))
                 };
 
                 if (highlightWords)
                 {
-                    using var canvas = new SKCanvas(sectionImages.Last().bitmap);
-                    canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, new SKPaint() { Color = Purple });
+                    var canvas = sectionImages[^1].Canvas;
+                    var paint = GetCachedPaint(Purple);
+                    canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                 }
 
                 emotePositionList.Add((emotePoint, emote));
@@ -1460,7 +1483,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawText(string drawText, SKPaint textFont, bool padding, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool highlightWords, bool noWrap = false)
+        private static readonly SearchValues<char> DrawTextDelimiters = SearchValues.Create("?-");
+
+        private void DrawText(ReadOnlySpan<char> drawText, SKPaint textFont, bool padding, List<SectionImage> sectionImages, ref Point drawPos, Point defaultPos, bool highlightWords, bool noWrap = false)
         {
             bool isRtl = IsRightToLeft(drawText);
             float textWidth = MeasureText(drawText, textFont, isRtl);
@@ -1468,7 +1493,7 @@ namespace TwitchDownloaderCore
 
             while (!noWrap && textWidth > effectiveChatWidth)
             {
-                string newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, "?-").ToString();
+                var newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, DrawTextDelimiters);
                 var overrideWrap = false;
 
                 if (newDrawText.Length == 0)
@@ -1488,31 +1513,29 @@ namespace TwitchDownloaderCore
                 AddImageSection(sectionImages, ref drawPos, defaultPos);
             }
 
-            using (SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last().bitmap))
+            var canvas = sectionImages[^1].Canvas;
+            if (highlightWords)
             {
-                if (highlightWords)
-                {
-                    using var paint = new SKPaint { Color = Purple};
-                    sectionImageCanvas.DrawRect(drawPos.X, 0, textWidth + (padding ? renderOptions.WordSpacing : 0), renderOptions.SectionHeight, paint);
-                }
+                var paint = GetCachedPaint(Purple);
+                canvas.DrawRect(drawPos.X, 0, textWidth + (padding ? renderOptions.WordSpacing : 0), renderOptions.SectionHeight, paint);
+            }
 
-                if (renderOptions.Outline)
-                {
-                    using var outlinePath = isRtl
-                        ? textFont.GetShapedTextPath(drawText, drawPos.X, drawPos.Y)
-                        : textFont.GetTextPath(drawText, drawPos.X, drawPos.Y);
+            if (renderOptions.Outline)
+            {
+                using var outlinePath = isRtl
+                    ? textFont.GetShapedTextPath(drawText, drawPos.X, drawPos.Y)
+                    : textFont.GetTextPath(drawText, drawPos.X, drawPos.Y);
 
-                    sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
-                }
+                canvas.DrawPath(outlinePath, outlinePaint);
+            }
 
-                if (RtlRegex.IsMatch(drawText))
-                {
-                    sectionImageCanvas.DrawShapedText(drawText, drawPos.X, drawPos.Y, textFont);
-                }
-                else
-                {
-                    sectionImageCanvas.DrawText(drawText, drawPos.X, drawPos.Y, textFont);
-                }
+            if (RtlRegex.IsMatch(drawText))
+            {
+                canvas.DrawShapedText(drawText.ToString(), drawPos.X, drawPos.Y, textFont);
+            }
+            else
+            {
+                canvas.DrawText(drawText, drawPos.X, drawPos.Y, textFont);
             }
 
             drawPos.X += (int)Math.Floor(textWidth + (padding ? renderOptions.WordSpacing : 0));
@@ -1522,7 +1545,7 @@ namespace TwitchDownloaderCore
         /// Produces a <see langword="string"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/> OR substringed to the last index of any character in <paramref name="delimiters"/>.
         /// </summary>
         /// <returns>A shortened in visual width or delimited <see langword="string"/>, whichever comes first.</returns>
-        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, ReadOnlySpan<char> delimiters)
+        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, SearchValues<char> delimiters)
         {
             // If we are dealing with non-RTL and don't have any delimiters then SKPaint.BreakText is over 9x faster
             if (!isRtl && text.IndexOfAny(delimiters) == -1)
@@ -1607,7 +1630,7 @@ namespace TwitchDownloaderCore
             return measure.Width;
         }
 
-        private void DrawUsername(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null, int commentIndex = 0)
+        private void DrawUsername(Comment comment, List<SectionImage> sectionImages, ref Point drawPos, Point defaultPos, bool appendColon = true, SKColor? colorOverride = null, int commentIndex = 0)
         {
             var userColor = colorOverride ?? (comment.message.user_color is not null
                 ? SKColor.Parse(comment.message.user_color)
@@ -1619,9 +1642,9 @@ namespace TwitchDownloaderCore
                 userColor = AdjustUsernameVisibility(userColor, backgroundColor);
             }
 
-            using SKPaint userPaint = comment.commenter.display_name.Any(IsNotAscii)
-                ? GetFallbackFont(comment.commenter.display_name.First(IsNotAscii)).Clone()
-                : nameFont.Clone();
+            var userPaint = comment.commenter.display_name.Any(IsNotAscii)
+                ? GetFallbackFont(comment.commenter.display_name.First(IsNotAscii))
+                : nameFont;
 
             userPaint.Color = userColor;
             var userName = appendColon
@@ -1733,7 +1756,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawAvatar(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos)
+        private void DrawAvatar(Comment comment, List<SectionImage> sectionImages, ref Point drawPos)
         {
             var avatarUrl = comment.commenter.logo;
 
@@ -1746,16 +1769,16 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            using var sectionImageCanvas = new SKCanvas(sectionImages.Last().bitmap);
+            var canvas = sectionImages[^1].Canvas;
 
             var avatarY = (float)((renderOptions.SectionHeight - avatarImage.Height) / 2.0);
-            sectionImageCanvas.DrawBitmap(avatarImage, drawPos.X, avatarY);
+            canvas.DrawBitmap(avatarImage, drawPos.X, avatarY);
             drawPos.X += avatarImage.Width + renderOptions.WordSpacing;
         }
 
-        private void DrawBadges(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos)
+        private void DrawBadges(Comment comment, List<SectionImage> sectionImages, ref Point drawPos)
         {
-            using SKCanvas sectionImageCanvas = new SKCanvas(sectionImages.Last().bitmap);
+            var canvas = sectionImages[^1].Canvas;
             List<(SKBitmap, ChatBadgeType)> badgeImages = ParseCommentBadges(comment);
             foreach (var (badgeImage, badgeType) in badgeImages)
             {
@@ -1764,7 +1787,7 @@ namespace TwitchDownloaderCore
                     continue;
 
                 float badgeY = (float)((renderOptions.SectionHeight - badgeImage.Height) / 2.0);
-                sectionImageCanvas.DrawBitmap(badgeImage, drawPos.X, badgeY);
+                canvas.DrawBitmap(badgeImage, drawPos.X, badgeY);
                 drawPos.X += badgeImage.Width + renderOptions.WordSpacing / 2;
             }
         }
@@ -1823,9 +1846,9 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawTimestamp(Comment comment, List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, ref Point defaultPos)
+        private void DrawTimestamp(Comment comment, List<SectionImage> sectionImages, ref Point drawPos, ref Point defaultPos)
         {
-            using var sectionImageCanvas = new SKCanvas(sectionImages.Last().bitmap);
+            var canvas = sectionImages[^1].Canvas;
             var timestamp = new TimeSpan(0, 0, (int)comment.content_offset_seconds);
 
             const int MAX_TIMESTAMP_LENGTH = 8; // 48:00:00
@@ -1844,10 +1867,10 @@ namespace TwitchDownloaderCore
             if (renderOptions.Outline)
             {
                 using var outlinePath = messageFont.GetTextPath(formattedTimestamp, drawPos.X, drawPos.Y);
-                sectionImageCanvas.DrawPath(outlinePath, outlinePaint);
+                canvas.DrawPath(outlinePath, outlinePaint);
             }
 
-            sectionImageCanvas.DrawText(formattedTimestamp, drawPos.X, drawPos.Y, messageFont);
+            canvas.DrawText(formattedTimestamp, drawPos.X, drawPos.Y, messageFont);
 
             // We use pre-defined widths so all timestamps have the same defaultPos regardless of individual character width
             var textWidth = timestamp.Ticks switch
@@ -1861,13 +1884,11 @@ namespace TwitchDownloaderCore
             defaultPos.X = drawPos.X;
         }
 
-        private void AddImageSection(List<(SKImageInfo info, SKBitmap bitmap)> sectionImages, ref Point drawPos, Point defaultPos)
+        private void AddImageSection(List<SectionImage> sectionImages, ref Point drawPos, Point defaultPos)
         {
             drawPos.X = defaultPos.X;
             drawPos.Y = defaultPos.Y;
-            SKBitmap newBitmap = new SKBitmap(renderOptions.ChatWidth, renderOptions.SectionHeight);
-            SKImageInfo newInfo = newBitmap.Info;
-            sectionImages.Add((newInfo, newBitmap));
+            sectionImages.Add(new SectionImage(renderOptions.ChatWidth, renderOptions.SectionHeight));
         }
 
         /// <summary>
@@ -2055,6 +2076,18 @@ namespace TwitchDownloaderCore
             }
         }
 
+        private SKPaint GetCachedPaint(SKColor color)
+        {
+            ref var paint = ref CollectionsMarshal.GetValueRefOrAddDefault(paintCache, color, out var alreadyExists);
+            if (alreadyExists)
+            {
+                return paint;
+            }
+
+            paint = new SKPaint { Color = color };
+            return paint;
+        }
+
         private SKPaint GetFallbackFont(int input)
         {
             ref var fallbackPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(fallbackFontCache, input, out bool alreadyExists);
@@ -2071,6 +2104,7 @@ namespace TwitchDownloaderCore
                 {
                     noFallbackFontFound = true;
                     _progress.LogWarning("No valid typefaces were found for some messages.");
+                    _progress.LogVerbose($"Could not find typeface for codepoint: {input}");
                 }
             }
 
@@ -2083,45 +2117,67 @@ namespace TwitchDownloaderCore
             return input > 127;
         }
 
-        private static List<string> SwapRightToLeft(string[] words)
+        /// <summary>Sorts the word order of a given <paramref name="enumerator"/> by RTL rules.</summary>
+        /// <param name="enumerator">A span enumerator.</param>
+        /// <param name="destination">The RTL-swapped output from enumerating the <paramref name="enumerator"/>.</param>
+        /// <returns>The number of words written.</returns>
+        /// <exception cref="IndexOutOfRangeException"><paramref name="destination"/> was too small.</exception>
+        private static int SwapRightToLeft(MemoryExtensions.SpanSplitEnumerator<char> enumerator, Span<Range> destination)
         {
-            List<string> finalWords = new List<string>(words.Length);
-            Stack<string> rtlStack = new Stack<string>();
-            foreach (var word in words)
+            var source = enumerator.Source;
+            var rtlStack = ArrayPool<Range>.Shared.Rent(destination.Length);
+            var rtlStackPos = 0;
+            var destPos = 0;
+
+            try
             {
-                if (IsRightToLeft(word))
+                foreach (var range in enumerator)
                 {
-                    rtlStack.Push(word);
-                }
-                else
-                {
-                    while (rtlStack.Count > 0)
+                    if (range.Start.Value == range.End.Value) continue;
+
+                    if (IsRightToLeft(source[range]))
                     {
-                        finalWords.Add(rtlStack.Pop());
+                        rtlStack[rtlStackPos] = range;
+                        rtlStackPos++;
                     }
-                    finalWords.Add(word);
+                    else
+                    {
+                        EmptyRtlStack(rtlStack, ref rtlStackPos, destination, ref destPos);
+
+                        destination[destPos] = range;
+                        destPos++;
+                    }
+                }
+
+                EmptyRtlStack(rtlStack, ref rtlStackPos, destination, ref destPos);
+
+                return destPos;
+            }
+            finally
+            {
+                ArrayPool<Range>.Shared.Return(rtlStack);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static void EmptyRtlStack(Span<Range> rtlStack, ref int rtlStackPos, Span<Range> destination, ref int destPos)
+            {
+                while (rtlStackPos > 0)
+                {
+                    destination[destPos] = rtlStack[rtlStackPos - 1];
+                    rtlStackPos--;
+                    destPos++;
                 }
             }
-            while (rtlStack.Count > 0)
-            {
-                finalWords.Add(rtlStack.Pop());
-            }
-            return finalWords;
         }
 
         private static bool IsRightToLeft(ReadOnlySpan<char> message)
         {
             if (message.Length > 0)
             {
-                if (message[0] >= '\u0591' && message[0] <= '\u07FF')
-                    return true;
-                else
-                    return false;
+                return message[0] >= '\u0591' && message[0] <= '\u07FF';
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         public async Task<ChatRoot> ParseJsonAsync(CancellationToken cancellationToken = new())
@@ -2162,6 +2218,8 @@ namespace TwitchDownloaderCore
                         bitmap?.Dispose();
                     foreach (var (_, paint) in fallbackFontCache)
                         paint?.Dispose();
+                    foreach (var (_, paint) in paintCache)
+                        paint?.Dispose();
                     fontManager?.Dispose();
                     nameFont?.Dispose();
                     messageFont?.Dispose();
@@ -2177,6 +2235,7 @@ namespace TwitchDownloaderCore
                     emojiCache.Clear();
                     avatarCache.Clear();
                     fallbackFontCache.Clear();
+                    paintCache.Clear();
 
                     // Set the root references to null to explicitly tell the garbage collector that the resources have been disposed
                     chatRoot = null;
@@ -2187,6 +2246,7 @@ namespace TwitchDownloaderCore
                     emojiCache = null;
                     avatarCache = null;
                     fallbackFontCache = null;
+                    paintCache = null;
                 }
             }
             finally

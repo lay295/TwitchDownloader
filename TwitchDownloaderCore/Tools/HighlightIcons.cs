@@ -237,7 +237,7 @@ namespace TwitchDownloaderCore.Tools
 
             var newSize = (int)FinalIconSize;
             var imageInfo = new SKImageInfo(newSize, newSize);
-            var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            using var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
             tempBitmap.Dispose();
 
             resizedBitmap.SetImmutable();

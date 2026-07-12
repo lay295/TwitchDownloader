@@ -1,4 +1,5 @@
-﻿using TwitchDownloaderCore.Interfaces;
+﻿using System.Diagnostics;
+using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderCore.Tools
 {
@@ -26,15 +27,26 @@ namespace TwitchDownloaderCore.Tools
             return outputDrive;
         }
 
-        public static async Task WaitForDrive(DriveInfo drive, ITaskLogger logger, CancellationToken cancellationToken)
+        /// <summary>
+        /// Blocks the thread until the <paramref name="drive"/> is ready.
+        /// Mostly only needed by slow USB drives or hard drives getting pegged at 100% by other processes.
+        /// </summary>
+        public static void WaitForDrive(DriveInfo drive, ITaskLogger logger)
         {
-            var driveNotReadyCount = 0;
+            var waitStart = Stopwatch.GetTimestamp();
+            var logMillis = 250d;
             while (!drive.IsReady)
             {
-                logger.LogInfo($"Waiting for output drive ({(driveNotReadyCount + 1) / 2f:F1}s)");
-                await Task.Delay(500, cancellationToken);
+                var millis = Stopwatch.GetElapsedTime(waitStart).TotalMilliseconds;
+                if (millis >= logMillis)
+                {
+                    logger.LogInfo($"Waiting for output drive ({millis:F0}ms)");
+                    logMillis += 250;
+                }
 
-                if (++driveNotReadyCount >= 20)
+                Thread.Sleep(10);
+
+                if (millis >= 10_000)
                 {
                     throw new DriveNotFoundException("The output drive disconnected for 10 or more consecutive seconds.");
                 }
