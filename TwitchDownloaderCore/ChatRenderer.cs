@@ -364,7 +364,8 @@ namespace TwitchDownloaderCore
             fixed (byte* pFrame = frame)
             {
                 var ptr = pFrame;
-                for (var i = 0; i < frame.Length; i++)
+                var end = pFrame + frame.Length;
+                while (ptr < end)
                 {
                     var alpha = *(ptr + 3); // alpha of the unmasked pixel
                     *ptr++ = alpha;
