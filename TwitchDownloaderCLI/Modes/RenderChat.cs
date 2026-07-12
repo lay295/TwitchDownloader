@@ -5,6 +5,7 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCLI.Modes
 {
@@ -46,7 +47,7 @@ namespace TwitchDownloaderCLI.Modes
                 OutlineSize = inputOptions.OutlineSize,
                 Font = inputOptions.Font,
                 FontSize = inputOptions.FontSize,
-                ChatBadgeMask = inputOptions.BadgeFilterMask,
+                ChatBadgeMask = (ChatBadgeType)inputOptions.BadgeFilterMask,
                 MessageFontStyle = inputOptions.MessageFontStyle.ToLower() switch
                 {
                     "normal" => SKFontStyle.Normal,

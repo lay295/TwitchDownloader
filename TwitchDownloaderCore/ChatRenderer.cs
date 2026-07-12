@@ -1366,7 +1366,7 @@ namespace TwitchDownloaderCore
             {
                 if (int.TryParse(fragmentString[bitsIndex..], out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString[..bitsIndex], out var currentCheerEmote))
                 {
-                    KeyValuePair<int, TwitchEmote> tierList = currentCheerEmote.getTier(bitsAmount);
+                    var tierList = currentCheerEmote.GetTier(bitsAmount);
                     TwitchEmote cheerEmote = tierList.Value;
                     SKImageInfo cheerEmoteInfo = cheerEmote.Info;
                     if (drawPos.X + cheerEmoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
@@ -1783,7 +1783,7 @@ namespace TwitchDownloaderCore
             foreach (var (badgeImage, badgeType) in badgeImages)
             {
                 //Don't render filtered out badges
-                if (((ChatBadgeType)renderOptions.ChatBadgeMask).HasFlag(badgeType))
+                if ((renderOptions.ChatBadgeMask & badgeType) != 0)
                     continue;
 
                 float badgeY = (float)((renderOptions.SectionHeight - badgeImage.Height) / 2.0);
