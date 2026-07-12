@@ -18,10 +18,11 @@ namespace TwitchDownloaderCore.TwitchObjects
         public byte[] ImageData { get; set; }
         public EmoteProvider EmoteProvider { get; set; }
         private List<SKBitmap> EmoteBitmaps { get; } = [];
+        private SKImage[] _emoteFrames;
         public SKImage[] EmoteFrames
         {
-            get { return field ??= EmoteBitmaps.Select(SKImage.FromBitmap).ToArray(); }
-            private set;
+            get { return _emoteFrames ??= EmoteBitmaps.Select(SKImage.FromBitmap).ToArray(); }
+            private set => _emoteFrames = value;
         }
 
         public List<int> EmoteFrameDurations { get; private set; } = [];
@@ -133,8 +134,11 @@ namespace TwitchDownloaderCore.TwitchObjects
                 EmoteBitmaps[i] = newBitmap;
             }
 
-            Array.ForEach(EmoteFrames, x => x.Dispose());
-            EmoteFrames = null;
+            foreach (var image in _emoteFrames ?? [])
+            {
+                image?.Dispose();
+            }
+            _emoteFrames = null;
         }
 
         public void Scale(double newScale) => SnapScale(newScale, 0, 0);
@@ -159,8 +163,11 @@ namespace TwitchDownloaderCore.TwitchObjects
                 EmoteBitmaps[i] = newBitmap;
             }
 
-            Array.ForEach(EmoteFrames, x => x.Dispose());
-            EmoteFrames = null;
+            foreach (var image in _emoteFrames ?? [])
+            {
+                image?.Dispose();
+            }
+            _emoteFrames = null;
         }
 
         public void Dispose()
@@ -179,14 +186,14 @@ namespace TwitchDownloaderCore.TwitchObjects
 
                 if (isDisposing)
                 {
+                    foreach (var image in _emoteFrames ?? [])
+                    {
+                        image?.Dispose();
+                    }
+
                     foreach (var bitmap in EmoteBitmaps)
                     {
                         bitmap?.Dispose();
-                    }
-
-                    foreach (var image in EmoteFrames)
-                    {
-                        image?.Dispose();
                     }
 
                     Codec?.Dispose();
