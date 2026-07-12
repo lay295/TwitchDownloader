@@ -661,9 +661,10 @@ namespace TwitchDownloaderCore
                     var comment = commentList[commentListIndex];
                     frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
 
-                    if (renderOptions.AlternateMessageBackgrounds && comment.CommentIndex % 2 == 1)
+                    var backgroundColor = GetMessageBackground(comment.CommentIndex, out var backgroundPaint);
+                    if (backgroundColor != renderOptions.BackgroundColor)
                     {
-                        frameCanvas.DrawRect(0, frameHeight - renderOptions.VerticalPadding / 2f, newFrame.Width, comment.Image.Height + renderOptions.VerticalPadding, renderOptions.AlternateBackgroundPaint);
+                        frameCanvas.DrawRect(0, frameHeight - renderOptions.VerticalPadding / 2f, newFrame.Width, comment.Image.Height + renderOptions.VerticalPadding, backgroundPaint);
                     }
 
                     frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
@@ -689,6 +690,35 @@ namespace TwitchDownloaderCore
             }
 
             return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
+        }
+
+        private SKColor GetMessageBackground(int commentIndex, [AllowNull] out SKPaint paint)
+        {
+            var commenter = chatRoot.comments[commentIndex].commenter;
+            var isHighlighted = renderOptions.HighlightUsersArray.Length > 0
+                                && (renderOptions.HighlightUsersArray.Contains(commenter.name, StringComparer.OrdinalIgnoreCase)
+                                    || renderOptions.HighlightUsersArray.Contains(commenter.display_name, StringComparer.OrdinalIgnoreCase));
+
+            if (isHighlighted)
+            {
+                if (renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1)
+                {
+                    paint = renderOptions.AlternateBackgroundHighlightUserPaint;
+                    return paint.Color;
+                }
+
+                paint = renderOptions.HighlightUserPaint;
+                return renderOptions.HighlightUserColor;
+            }
+
+            if (renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1)
+            {
+                paint = renderOptions.AlternateBackgroundPaint;
+                return renderOptions.AlternateBackgroundColor;
+            }
+
+            paint = null;
+            return renderOptions.BackgroundColor;
         }
 
         private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos)
@@ -776,9 +806,8 @@ namespace TwitchDownloaderCore
                 else if (highlightType is not HighlightType.None)
                 {
                     const int OPAQUE_THRESHOLD = 245;
-                    var useAlternateBackground = renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1;
-                    if (!((!useAlternateBackground && renderOptions.BackgroundColor.Alpha < OPAQUE_THRESHOLD) ||
-                          (useAlternateBackground && renderOptions.AlternateBackgroundColor.Alpha < OPAQUE_THRESHOLD)))
+                    var messageBackground = GetMessageBackground(commentIndex, out _);
+                    if (messageBackground.Alpha < OPAQUE_THRESHOLD)
                     {
                         // Draw the highlight background only if the message background is opaque enough
                         var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
@@ -1586,8 +1615,7 @@ namespace TwitchDownloaderCore
 
             if (colorOverride is null && renderOptions.AdjustUsernameVisibility)
             {
-                var useAlternateBackground = renderOptions.AlternateMessageBackgrounds && commentIndex % 2 == 1;
-                var backgroundColor = useAlternateBackground ? renderOptions.AlternateBackgroundColor : renderOptions.BackgroundColor;
+                var backgroundColor = GetMessageBackground(commentIndex, out _);
                 userColor = AdjustUsernameVisibility(userColor, backgroundColor);
             }
 

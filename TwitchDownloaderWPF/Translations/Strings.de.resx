@@ -261,6 +261,13 @@ Das solltest du nur tun, wenn das Programm nicht korrekt funktioniert</value>
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
   <value>Liste von Benutzernamen – durch Kommata getrennt, Leerzeichen um Kommata werden ignoriert, Groß-/Kleinschreibung wird nicht beachtet.</value>
   </data>
+  <data name="HighlightUsersList" xml:space="preserve">
+    <value>Highlight Users List </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="HighlightUsersListTooltip" xml:space="preserve">
+    <value>List of usernames whose message backgrounds will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+  </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
   <value>Ungültiger Clip-Link/-ID</value>
   </data>

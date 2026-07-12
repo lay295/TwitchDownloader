@@ -18,6 +18,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("alt-background-color", Default = "#191919", HelpText = "The alternate message background color in the string format of '#RRGGBB' or '#AARRGGBB' in hexadecimal. Requires --alternate-backgrounds")]
         public string AlternateBackgroundColor { get; set; }
 
+        [Option("highlight-user-color", Default = "#C8FF0059", HelpText = "The highlighted user message background color in the string format of '#RRGGBB' or '#AARRGGBB' in hexadecimal. Requires --highlight-users")]
+        public string HighlightUserColor { get; set; }
+
         [Option("message-color", Default = "#ffffff", HelpText = "The message text color in the string format of '#RRGGBB' or '#AARRGGBB' in hexadecimal.")]
         public string MessageColor { get; set; }
 
@@ -95,6 +98,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
 
         [Option("ban-words", Default = "", HelpText = "List of words or phrases to ignore when rendering, separated by commas. Not case-sensitive.")]
         public string BannedWordsString { get; set; }
+
+        [Option("highlight-users", Default = "", HelpText = "List of users whose message backgrounds will be drawn in the chosen highlight color, separated by commas. Not case-sensitive.")]
+        public string HighlightUsersString { get; set; }
 
         [Option("badge-filter", Default = 0, HelpText = "Bitmask of types of Chat Badges to filter out. Add the numbers of the types of badges you want to filter. For example, 6 = no broadcaster or moderator badges.\r\nKey: Other = 1, Broadcaster = 2, Moderator = 4, VIP = 8, Subscriber = 16, Predictions = 32, NoAudio/NoVideo = 64, PrimeGaming = 128")]
         public int BadgeFilterMask { get; set; }

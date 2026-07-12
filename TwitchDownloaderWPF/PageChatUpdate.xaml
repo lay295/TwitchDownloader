@@ -15,7 +15,7 @@
       lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
       lex:ResxLocalizationProvider.DefaultDictionary="Strings"
       mc:Ignorable="d"
-      d:DesignHeight="400" d:DesignWidth="800"
+      d:DesignHeight="440" d:DesignWidth="850"
       Title="PageChatUpdate" Initialized="Page_Initialized" Loaded="Page_Loaded">
     <Page.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">

@@ -32,6 +32,7 @@ namespace TwitchDownloaderCLI.Modes
                 OutputFile = inputOptions.OutputFile,
                 BackgroundColor = SKColor.Parse(inputOptions.BackgroundColor),
                 AlternateBackgroundColor = SKColor.Parse(inputOptions.AlternateBackgroundColor),
+                HighlightUserColor = SKColor.Parse(inputOptions.HighlightUserColor),
                 MessageColor = SKColor.Parse(inputOptions.MessageColor),
                 ChatHeight = inputOptions.ChatHeight,
                 ChatWidth = inputOptions.ChatWidth,
@@ -127,6 +128,12 @@ namespace TwitchDownloaderCLI.Modes
             if (inputOptions.BannedWordsString != "")
             {
                 renderOptions.BannedWordsArray = inputOptions.BannedWordsString.Split(',',
+                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            }
+
+            if (inputOptions.HighlightUsersString != "")
+            {
+                renderOptions.HighlightUsersArray = inputOptions.HighlightUsersString.Split(',',
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             }
 
