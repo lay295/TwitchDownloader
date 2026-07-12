@@ -17,17 +17,23 @@ namespace TwitchDownloaderCore.TwitchObjects
         public SKCodec Codec { get; }
         public byte[] ImageData { get; set; }
         public EmoteProvider EmoteProvider { get; set; }
-        public List<SKBitmap> EmoteFrames { get; } = new List<SKBitmap>();
-        public List<int> EmoteFrameDurations { get; private set; } = new List<int>();
+        private List<SKBitmap> EmoteBitmaps { get; } = [];
+        public SKImage[] EmoteFrames
+        {
+            get { return field ??= EmoteBitmaps.Select(SKImage.FromBitmap).ToArray(); }
+            private set;
+        }
+
+        public List<int> EmoteFrameDurations { get; private set; } = [];
         public int TotalDuration { get; set; }
         public string Name { get; }
         public string Id { get; }
         public int ImageScale { get; }
         public bool IsZeroWidth { get; set; }
         public int FrameCount { get; }
-        public int Height => EmoteFrames[0].Height;
-        public int Width => EmoteFrames[0].Width;
-        public SKImageInfo Info => EmoteFrames[0].Info;
+        public int Height => Info.Height;
+        public int Width => Info.Width;
+        public SKImageInfo Info => EmoteBitmaps[0].Info;
 
         public TwitchEmote(byte[] imageData, [AllowNull] SKCodec codec, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName, bool isZeroWidth = false)
         {
@@ -103,7 +109,7 @@ namespace TwitchDownloaderCore.TwitchObjects
                 SKCodecOptions codecOptions = new SKCodecOptions(i);
                 Codec.GetPixels(imageInfo, pointer, codecOptions);
                 newBitmap.SetImmutable();
-                EmoteFrames.Add(newBitmap);
+                EmoteBitmaps.Add(newBitmap);
             }
         }
 
@@ -121,11 +127,14 @@ namespace TwitchDownloaderCore.TwitchObjects
             for (var i = 0; i < FrameCount; i++)
             {
                 var newBitmap = new SKBitmap(imageInfo);
-                EmoteFrames[i].ScalePixels(newBitmap, SKFilterQuality.High);
-                EmoteFrames[i].Dispose();
+                EmoteBitmaps[i].ScalePixels(newBitmap, SKFilterQuality.High);
+                EmoteBitmaps[i].Dispose();
                 newBitmap.SetImmutable();
-                EmoteFrames[i] = newBitmap;
+                EmoteBitmaps[i] = newBitmap;
             }
+
+            Array.ForEach(EmoteFrames, x => x.Dispose());
+            EmoteFrames = null;
         }
 
         public void Scale(double newScale) => SnapScale(newScale, 0, 0);
@@ -144,14 +153,15 @@ namespace TwitchDownloaderCore.TwitchObjects
             for (var i = 0; i < FrameCount; i++)
             {
                 var newBitmap = new SKBitmap(imageInfo);
-                EmoteFrames[i].ScalePixels(newBitmap, SKFilterQuality.High);
-                EmoteFrames[i].Dispose();
+                EmoteBitmaps[i].ScalePixels(newBitmap, SKFilterQuality.High);
+                EmoteBitmaps[i].Dispose();
                 newBitmap.SetImmutable();
-                EmoteFrames[i] = newBitmap;
+                EmoteBitmaps[i] = newBitmap;
             }
-        }
 
-#region ImplementIDisposable
+            Array.ForEach(EmoteFrames, x => x.Dispose());
+            EmoteFrames = null;
+        }
 
         public void Dispose()
         {
@@ -169,9 +179,14 @@ namespace TwitchDownloaderCore.TwitchObjects
 
                 if (isDisposing)
                 {
-                    foreach (var bitmap in EmoteFrames)
+                    foreach (var bitmap in EmoteBitmaps)
                     {
                         bitmap?.Dispose();
+                    }
+
+                    foreach (var image in EmoteFrames)
+                    {
+                        image?.Dispose();
                     }
 
                     Codec?.Dispose();
@@ -182,7 +197,5 @@ namespace TwitchDownloaderCore.TwitchObjects
                 Disposed = true;
             }
         }
-
-#endregion
     }
 }

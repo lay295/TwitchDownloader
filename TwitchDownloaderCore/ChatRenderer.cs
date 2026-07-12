@@ -508,7 +508,7 @@ namespace TwitchDownloaderCore
                 {
                     if (emote.FrameCount > 1)
                     {
-                        _animCanvas.DrawBitmap(emote.EmoteFrames[ComputeAnimFrameIndex(emote, currentTickMs)], drawPoint.X, drawPoint.Y + frameHeight);
+                        _animCanvas.DrawImage(emote.EmoteFrames[ComputeAnimFrameIndex(emote, currentTickMs)], drawPoint.X, drawPoint.Y + frameHeight);
                     }
                 }
             }
@@ -636,7 +636,7 @@ namespace TwitchDownloaderCore
                         //Only draw static emotes
                         if (emote.FrameCount == 1)
                         {
-                            frameCanvas.DrawBitmap(emote.EmoteFrames[0], drawPoint.X, drawPoint.Y + frameHeight);
+                            frameCanvas.DrawImage(emote.EmoteFrames[0], drawPoint.X, drawPoint.Y + frameHeight);
                         }
                     }
                     commentsDrawn++;
