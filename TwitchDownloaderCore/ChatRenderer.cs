@@ -569,22 +569,24 @@ namespace TwitchDownloaderCore
 
         private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
         {
-            SKBitmap newFrame = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight);
-            double currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
-            int newestCommentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds);
-
-            if (newestCommentIndex == lastUpdate?.CommentIndex)
+            var currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
+            var newestCommentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds); // TODO: This predicate allocates a lot
+            if (lastUpdate is not null && newestCommentIndex == lastUpdate.CommentIndex)
             {
                 return lastUpdate;
             }
-            lastUpdate?.Image.Dispose();
 
-            List<CommentSection> commentList = lastUpdate?.Comments ?? [];
+            lastUpdate ??= new UpdateFrame
+            {
+                Image = new SKBitmap(renderOptions.ChatWidth, renderOptions.ChatHeight)
+            };
+
+            var commentList = lastUpdate.Comments ?? [];
 
             int oldCommentIndex = -1;
             if (commentList.Count > 0)
             {
-                oldCommentIndex = commentList.Last().CommentIndex;
+                oldCommentIndex = commentList[^1].CommentIndex;
             }
             else if (newestCommentIndex > 100)
             {
@@ -609,22 +611,24 @@ namespace TwitchDownloaderCore
                 while (newestCommentIndex >= currentIndex);
             }
 
-            using (SKCanvas frameCanvas = new SKCanvas(newFrame))
+            using (var frameCanvas = new SKCanvas(lastUpdate.Image))
             {
                 int commentsDrawn = 0;
                 int commentListIndex = commentList.Count - 1;
                 int frameHeight = renderOptions.ChatHeight;
+                var frameWidth = lastUpdate.Image.Width;
                 frameCanvas.Clear(renderOptions.BackgroundColor);
 
                 while (commentListIndex >= 0 && frameHeight > -renderOptions.VerticalPadding)
                 {
                     var comment = commentList[commentListIndex];
-                    frameHeight -= comment.Image.Height + renderOptions.VerticalPadding;
+                    var commentHeight = comment.Image.Height;
+                    frameHeight -= commentHeight + renderOptions.VerticalPadding;
 
                     var backgroundColor = GetMessageBackground(comment.CommentIndex, out var backgroundPaint);
                     if (backgroundColor != renderOptions.BackgroundColor)
                     {
-                        frameCanvas.DrawRect(0, frameHeight - renderOptions.VerticalPadding / 2f, newFrame.Width, comment.Image.Height + renderOptions.VerticalPadding, backgroundPaint);
+                        frameCanvas.DrawRect(0, frameHeight - renderOptions.VerticalPadding / 2f, frameWidth, commentHeight + renderOptions.VerticalPadding, backgroundPaint);
                     }
 
                     frameCanvas.DrawBitmap(comment.Image, 0, frameHeight);
@@ -649,7 +653,9 @@ namespace TwitchDownloaderCore
                 commentList.RemoveRange(0, removeCount);
             }
 
-            return new UpdateFrame() { Image = newFrame, Comments = commentList, CommentIndex = newestCommentIndex };
+            lastUpdate.Comments = commentList;
+            lastUpdate.CommentIndex = newestCommentIndex;
+            return lastUpdate;
         }
 
         private SKColor GetMessageBackground(int commentIndex, [AllowNull] out SKPaint paint)
