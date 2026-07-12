@@ -442,7 +442,6 @@ namespace TwitchDownloaderCore
             var commentIndex = currentFrame.CommentIndex;
             var currentTickMs = (long)(currentTick / (double)renderOptions.Framerate * 1000);
 
-            // Mask generation modifies the returned frame, so it is left on the original uncached copy path.
             var hasAnimatedEmotes = false;
             foreach (var comment in comments)
             {
@@ -460,7 +459,6 @@ namespace TwitchDownloaderCore
 
             if (!hasAnimatedEmotes)
             {
-                // If there are no animated emotes to draw then return the original bitmap. Copying is pretty expensive.
                 InvalidateAnimCache();
                 return updateFrame;
             }
@@ -476,7 +474,7 @@ namespace TwitchDownloaderCore
             ComposeAnimatedFrame(updateFrame, comments, currentTickMs);
             _animComposedForCommentIndex = commentIndex;
             RecordAnimFrameIndices(comments, currentTickMs);
-            return _animComposedFrame; // owned by the cache; the caller must not dispose it
+            return _animComposedFrame;
         }
 
         /// <summary>
