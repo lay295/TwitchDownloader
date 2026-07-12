@@ -13,7 +13,6 @@ namespace TwitchDownloaderCore.Options
         public SKPaint AlternateBackgroundPaint => field ??= new SKPaint { Color = AlternateBackgroundColor, BlendMode = SKBlendMode.Src };
         public bool AlternateMessageBackgrounds { get; set; }
         public SKColor HighlightUserColor { get; set; }
-        public SKPaint HighlightUserPaint => field ??= new SKPaint { Color = HighlightUserColor };
         public SKPaint AlternateBackgroundHighlightUserPaint => field ??= new SKPaint { Color = HighlightUserColor.CompositeOver(HighlightUserColor), BlendMode = SKBlendMode.Src };
         public SKColor MessageColor { get; set; }
         public int ChatHeight { get; set; }

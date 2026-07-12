@@ -70,6 +70,7 @@ namespace TwitchDownloaderCore
         private Dictionary<string, SKBitmap> emojiCache = new Dictionary<string, SKBitmap>();
         private Dictionary<string, SKBitmap> avatarCache = new Dictionary<string, SKBitmap>();
         private Dictionary<int, SKPaint> fallbackFontCache = new Dictionary<int, SKPaint>();
+        private Dictionary<SKColor, SKPaint> paintCache = new Dictionary<SKColor, SKPaint>();
         private bool noFallbackFontFound = false;
         private readonly SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont;
@@ -671,7 +672,7 @@ namespace TwitchDownloaderCore
                     return paint.Color;
                 }
 
-                paint = renderOptions.HighlightUserPaint;
+                paint = GetCachedPaint(renderOptions.HighlightUserColor);
                 return renderOptions.HighlightUserColor;
             }
 
@@ -764,7 +765,7 @@ namespace TwitchDownloaderCore
                         ? new SKColor(0xFF26262C) // AARRGGBB
                         : new SKColor(0xFF80808C); // AARRGGBB
 
-                    using var paint = new SKPaint { Color = accentColor };
+                    var paint = GetCachedPaint(accentColor);
                     finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
                 }
                 else if (highlightType is not HighlightType.None)
@@ -775,11 +776,11 @@ namespace TwitchDownloaderCore
                     {
                         // Draw the highlight background only if the message background is opaque enough
                         var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
-                        using var backgroundPaint = new SKPaint { Color = backgroundColor };
+                        var backgroundPaint = GetCachedPaint(backgroundColor);
                         finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
                     }
 
-                    using var accentPaint = new SKPaint { Color = Purple };
+                    var accentPaint = GetCachedPaint(Purple);
                     finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, accentPaint);
                 }
 
@@ -1130,7 +1131,7 @@ namespace TwitchDownloaderCore
                 if (highlightWords)
                 {
                     var canvas = sectionImages[^1].Canvas;
-                    using var paint = new SKPaint { Color = Purple };
+                    var paint = GetCachedPaint(Purple);
                     canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                 }
 
@@ -1244,7 +1245,7 @@ namespace TwitchDownloaderCore
                 var canvas = sectionImages[^1].Canvas;
                 if (highlightWords)
                 {
-                    using var paint = new SKPaint { Color = Purple };
+                    var paint = GetCachedPaint(Purple);
                     canvas.DrawRect((int)(emotePoint.X - renderOptions.EmoteSpacing / 2d), 0, emojiImageInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                 }
 
@@ -1425,7 +1426,8 @@ namespace TwitchDownloaderCore
                 if (highlightWords)
                 {
                     var canvas = sectionImages[^1].Canvas;
-                    canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, new SKPaint() { Color = Purple });
+                    var paint = GetCachedPaint(Purple);
+                    canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                 }
 
                 emotePositionList.Add((emotePoint, emote));
@@ -1501,7 +1503,7 @@ namespace TwitchDownloaderCore
             var canvas = sectionImages[^1].Canvas;
             if (highlightWords)
             {
-                using var paint = new SKPaint { Color = Purple };
+                var paint = GetCachedPaint(Purple);
                 canvas.DrawRect(drawPos.X, 0, textWidth + (padding ? renderOptions.WordSpacing : 0), renderOptions.SectionHeight, paint);
             }
 
@@ -2061,6 +2063,18 @@ namespace TwitchDownloaderCore
             }
         }
 
+        private SKPaint GetCachedPaint(SKColor color)
+        {
+            ref var paint = ref CollectionsMarshal.GetValueRefOrAddDefault(paintCache, color, out var alreadyExists);
+            if (alreadyExists)
+            {
+                return paint;
+            }
+
+            paint = new SKPaint { Color = color };
+            return paint;
+        }
+
         private SKPaint GetFallbackFont(int input)
         {
             ref var fallbackPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(fallbackFontCache, input, out bool alreadyExists);
@@ -2191,6 +2205,8 @@ namespace TwitchDownloaderCore
                         bitmap?.Dispose();
                     foreach (var (_, paint) in fallbackFontCache)
                         paint?.Dispose();
+                    foreach (var (_, paint) in paintCache)
+                        paint?.Dispose();
                     fontManager?.Dispose();
                     nameFont?.Dispose();
                     messageFont?.Dispose();
@@ -2206,6 +2222,7 @@ namespace TwitchDownloaderCore
                     emojiCache.Clear();
                     avatarCache.Clear();
                     fallbackFontCache.Clear();
+                    paintCache.Clear();
 
                     // Set the root references to null to explicitly tell the garbage collector that the resources have been disposed
                     chatRoot = null;
@@ -2216,6 +2233,7 @@ namespace TwitchDownloaderCore
                     emojiCache = null;
                     avatarCache = null;
                     fallbackFontCache = null;
+                    paintCache = null;
                 }
             }
             finally
