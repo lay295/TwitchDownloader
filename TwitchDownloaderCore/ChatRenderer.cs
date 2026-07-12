@@ -351,6 +351,7 @@ namespace TwitchDownloaderCore
             _progress.LogInfo($"FINISHED. RENDER TIME: {stopwatch.Elapsed.TotalSeconds:F1}s SPEED: {(endTick - startTick) / (double)renderOptions.Framerate / stopwatch.Elapsed.TotalSeconds:F2}x");
 
             latestUpdate?.Image.Dispose();
+            latestUpdate?.Comments.ForEach(x => x.Image.Dispose());
 
             ffmpegStream.Dispose();
             maskStream?.Dispose();
