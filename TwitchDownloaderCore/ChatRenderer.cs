@@ -566,10 +566,24 @@ namespace TwitchDownloaderCore
             _animLastFrameIndices.Clear();
         }
 
+        private int GetNewestCommentIndex(int lastIndex, double currentTimeSeconds)
+        {
+            var commentSpan = CollectionsMarshal.AsSpan(chatRoot.comments);
+            for (var i = Math.Max(0, lastIndex); i < commentSpan.Length; i++)
+            {
+                if (commentSpan[i].content_offset_seconds > currentTimeSeconds)
+                {
+                    return i - 1;
+                }
+            }
+
+            return commentSpan.Length - 1;
+        }
+
         private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
         {
             var currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
-            var newestCommentIndex = chatRoot.comments.FindLastIndex(x => x.content_offset_seconds <= currentTimeSeconds); // TODO: This predicate allocates a lot
+            var newestCommentIndex = GetNewestCommentIndex(lastUpdate?.CommentIndex ?? 0, currentTimeSeconds);
             if (lastUpdate is not null && newestCommentIndex == lastUpdate.CommentIndex)
             {
                 return lastUpdate;
