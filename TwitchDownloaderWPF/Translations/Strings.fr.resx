@@ -323,7 +323,7 @@
     <comment>Leave a trailing space</comment>
   </data>
   <data name="HighlightUsersListTooltip" xml:space="preserve">
-    <value>List of usernames whose names will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+    <value>List of usernames whose message backgrounds will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
   </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
     <value>Lien/ID Clip Invalide</value>

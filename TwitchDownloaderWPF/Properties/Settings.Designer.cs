@@ -57,7 +57,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["FontSize"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
@@ -69,7 +69,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["UsernameFontScale"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -228,7 +228,7 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
         public byte AlternateBackgroundColorR {
             get {
                 return ((byte)(this["AlternateBackgroundColorR"]));
@@ -240,7 +240,7 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
         public byte AlternateBackgroundColorG {
             get {
                 return ((byte)(this["AlternateBackgroundColorG"]));
@@ -252,7 +252,7 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
         public byte AlternateBackgroundColorB {
             get {
                 return ((byte)(this["AlternateBackgroundColorB"]));
@@ -609,7 +609,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["IgnoreUsersList"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
@@ -621,7 +621,19 @@ namespace TwitchDownloaderWPF.Properties {
                 this["HighlightUsersList"] = value;
             }
         }
-
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public byte HighlightUsersColorA {
+            get {
+                return ((byte)(this["HighlightUsersColorA"]));
+            }
+            set {
+                this["HighlightUsersColorA"] = value;
+            }
+        }
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
@@ -633,10 +645,10 @@ namespace TwitchDownloaderWPF.Properties {
                 this["HighlightUsersColorR"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("215")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public byte HighlightUsersColorG {
             get {
                 return ((byte)(this["HighlightUsersColorG"]));
@@ -645,10 +657,10 @@ namespace TwitchDownloaderWPF.Properties {
                 this["HighlightUsersColorG"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
         public byte HighlightUsersColorB {
             get {
                 return ((byte)(this["HighlightUsersColorB"]));
@@ -657,7 +669,7 @@ namespace TwitchDownloaderWPF.Properties {
                 this["HighlightUsersColorB"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]

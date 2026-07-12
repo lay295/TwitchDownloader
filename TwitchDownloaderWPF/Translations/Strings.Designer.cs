@@ -1356,7 +1356,7 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to List of usernames whose names will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive..
+        ///   Looks up a localized string similar to List of usernames whose message backgrounds will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive..
         /// </summary>
         public static string HighlightUsersListTooltip {
             get {

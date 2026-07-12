@@ -49,6 +49,35 @@ namespace TwitchDownloaderCore.Extensions
                     : Math.Pow((v + 0.055) / 1.055, 2.4);
             }
         }
+
+        public static SKColor CompositeOver(this SKColor foreground, SKColor background)
+        {
+            var fa = foreground.Alpha / 255f;
+            var ba = background.Alpha / 255f;
+
+            var outA = fa + ba * (1f - fa);
+            if (outA <= 0f)
+                return new SKColor(0, 0, 0, 0);
+
+            var fr = foreground.Red / 255f;
+            var fg = foreground.Green / 255f;
+            var fb = foreground.Blue / 255f;
+
+            var br = background.Red / 255f;
+            var bg = background.Green / 255f;
+            var bb = background.Blue / 255f;
+
+            var outR = (fr * fa + br * ba * (1f - fa)) / outA;
+            var outG = (fg * fa + bg * ba * (1f - fa)) / outA;
+            var outB = (fb * fa + bb * ba * (1f - fa)) / outA;
+
+            var a = (byte)Math.Round(outA * 255f);
+            var r = (byte)Math.Round(outR * 255f);
+            var g = (byte)Math.Round(outG * 255f);
+            var b = (byte)Math.Round(outB * 255f);
+
+            return new SKColor(r, g, b, a);
+        }
     }
 }
 
