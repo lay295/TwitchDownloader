@@ -19,7 +19,6 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
-using Buffer = HarfBuzzSharp.Buffer;
 using Range = System.Range;
 
 namespace TwitchDownloaderCore
@@ -1652,7 +1651,7 @@ namespace TwitchDownloaderCore
 
         private static float MeasureRtlText(ReadOnlySpan<char> rtlText, SKPaint textFont, SKShaper shaper)
         {
-            using var buffer = new Buffer();
+            using var buffer = new HarfBuzzSharp.Buffer();
             buffer.Add(rtlText, textFont.TextEncoding);
             SKShaper.Result measure = shaper.Shape(buffer, textFont);
             return measure.Width;
