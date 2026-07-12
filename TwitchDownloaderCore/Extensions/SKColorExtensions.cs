@@ -50,14 +50,16 @@ namespace TwitchDownloaderCore.Extensions
             }
         }
 
+        /// <summary>
+        /// Composites the <paramref name="foreground"/> color over the <paramref name="background"/> color using straight alpha blending.
+        /// </summary>
         public static SKColor CompositeOver(this SKColor foreground, SKColor background)
         {
             var fa = foreground.Alpha / 255f;
             var ba = background.Alpha / 255f;
 
             var outA = fa + ba * (1f - fa);
-            if (outA <= 0f)
-                return new SKColor(0, 0, 0, 0);
+            if (outA <= 0f) return new SKColor(0, 0, 0, 0);
 
             var fr = foreground.Red / 255f;
             var fg = foreground.Green / 255f;
