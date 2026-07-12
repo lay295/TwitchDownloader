@@ -15,10 +15,9 @@ namespace TwitchDownloaderCore.TwitchObjects
             Canvas = new SKCanvas(Bitmap);
         }
 
-        public void SetImmutable()
+        public void Flush()
         {
             Canvas.Flush();
-            Bitmap.SetImmutable();
         }
 
         public void Dispose()

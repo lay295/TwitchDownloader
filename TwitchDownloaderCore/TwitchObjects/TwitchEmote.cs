@@ -19,12 +19,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public EmoteProvider EmoteProvider { get; set; }
         private List<SKBitmap> EmoteBitmaps { get; } = [];
         private SKImage[] _emoteFrames;
-        public SKImage[] EmoteFrames
-        {
-            get { return _emoteFrames ??= EmoteBitmaps.Select(SKImage.FromBitmap).ToArray(); }
-            private set => _emoteFrames = value;
-        }
-
+        public SKImage[] EmoteFrames => _emoteFrames ??= EmoteBitmaps.Select(SKImage.FromBitmap).ToArray();
         public List<int> EmoteFrameDurations { get; private set; } = [];
         public int TotalDuration { get; set; }
         public string Name { get; }

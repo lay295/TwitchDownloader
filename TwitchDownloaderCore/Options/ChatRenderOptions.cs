@@ -1,6 +1,7 @@
 ﻿using SkiaSharp;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Options
 {
@@ -67,7 +68,7 @@ namespace TwitchDownloaderCore.Options
         public double EmoteSpacingScale { get; set; } = 1.0;
         public double AccentStrokeScale { get; set; } = 1.0;
         public double AccentIndentScale { get; set; } = 1.0;
-        public int ChatBadgeMask { get; set; } = 0;
+        public ChatBadgeType ChatBadgeMask { get; set; } = 0;
         public int StartOverride { get; set; } = -1;
         public int EndOverride { get; set; } = -1;
         public int SidePadding => (int)(6 * ReferenceScale * SidePaddingScale);
