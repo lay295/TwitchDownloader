@@ -263,7 +263,11 @@
             <WrapPanel Orientation="Horizontal" Margin="0,8,0,0">
                 <TextBlock Text="{lex:Loc PreviewAt}" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource AppText}"/>
                 <TextBox x:Name="textPreviewPos" Text="0:00:00" Width="70" Margin="0,0,4,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                <Button x:Name="btnPreviewRender" Content="{lex:Loc Preview}" MinWidth="60" Click="BtnPreviewRender_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <RadioButton x:Name="radioPreviewImage" Content="{lex:Loc PreviewImage}" IsChecked="True" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource AppText}" Checked="RadioPreviewMode_Changed"/>
+                <RadioButton x:Name="radioPreviewVideo" Content="{lex:Loc PreviewVideo}" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource AppText}" Checked="RadioPreviewMode_Changed"/>
+                <TextBox x:Name="textPreviewDuration" Text="30" Width="34" Visibility="Collapsed" ToolTip="{lex:Loc PreviewDuration}" Margin="0,0,4,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                <Button x:Name="btnPreviewRender" Content="{lex:Loc Preview}" MinWidth="60" Margin="0,0,4,0" Click="BtnPreviewRender_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <Button x:Name="btnPreviewFullscreen" Content="&#x26F6;" Width="26" ToolTip="{lex:Loc PreviewFullscreen}" Click="BtnPreviewFullscreen_Click" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}"/>
             </WrapPanel>
             <ProgressBar x:Name="progressPreview" Height="4" Margin="0,4,0,0" Visibility="Collapsed" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource ProgressBarForeground}"/>
             <Border BorderBrush="{DynamicResource AppElementBorder}" BorderThickness="1" Margin="0,4,0,0" MinHeight="80" Background="{DynamicResource AppElementBackground}">
@@ -272,6 +276,16 @@
                     <Image x:Name="imgPreview" Stretch="Uniform" Visibility="Collapsed"/>
                 </Grid>
             </Border>
+            <Grid x:Name="panelPreviewPlayback" Visibility="Collapsed" Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="btnPreviewPlayPause" Grid.Column="0" Content="{lex:Loc PreviewPause}" MinWidth="50" Margin="0,0,6,0" Click="BtnPreviewPlayPause_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                <TextBlock x:Name="textPreviewTime" Grid.Column="1" Text="0:00 / 0:00" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource AppText}"/>
+                <Slider x:Name="sliderPreview" Grid.Column="2" Minimum="0" Maximum="1" VerticalAlignment="Center" ValueChanged="SliderPreview_ValueChanged"/>
+            </Grid>
         </StackPanel>
 
         <!--STATUS BAR-->

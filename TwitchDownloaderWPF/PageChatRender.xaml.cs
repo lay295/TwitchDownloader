@@ -12,6 +12,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Options;
@@ -37,11 +38,20 @@ namespace TwitchDownloaderWPF
         private CancellationTokenSource _cancellationTokenSource;
         private readonly List<string> _previewTempFiles = new();
         private CancellationTokenSource _previewCts;
+        private DispatcherTimer _previewTimer;
+        private List<BitmapImage> _previewFrames = new();
+        private int _previewFrameIndex;
+        private double _previewDuration;
+        private bool _previewPlaying;
+        private bool _previewSuppressSlider;
+        private const int PreviewFrameRate = 4;
 
         public PageChatRender()
         {
             InitializeComponent();
             App.CultureServiceSingleton.CultureChanged += OnCultureChanged;
+            _previewTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000.0 / PreviewFrameRate) };
+            _previewTimer.Tick += PreviewTimer_Tick;
         }
 
         private void OnCultureChanged(object sender, CultureInfo e)
@@ -506,6 +516,7 @@ namespace TwitchDownloaderWPF
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             SaveSettings();
+            _previewTimer?.Stop();
             _previewCts?.Cancel();
             CleanUpPreviewTempFiles();
         }
@@ -535,27 +546,41 @@ namespace TwitchDownloaderWPF
                 return;
             }
 
+            var videoMode = radioPreviewVideo.IsChecked == true;
+            var windowSeconds = 2;
+            if (videoMode && (!int.TryParse(textPreviewDuration.Text, out windowSeconds) || windowSeconds < 1))
+            {
+                textPreviewStatus.Text = Translations.Strings.PreviewInvalidPosition;
+                textPreviewStatus.Visibility = Visibility.Visible;
+                return;
+            }
+
+            _previewTimer.Stop();
+            _previewPlaying = false;
+            _previewFrames = new();
+            _previewFrameIndex = 0;
             _previewCts?.Cancel();
             _previewCts = new CancellationTokenSource();
             var token = _previewCts.Token;
 
             var tempFile = Path.Combine(Path.GetTempPath(), $"tdw_preview_{Guid.NewGuid():N}.mp4");
-            var tempPng = Path.Combine(Path.GetTempPath(), $"tdw_preview_{Guid.NewGuid():N}.png");
             _previewTempFiles.Add(tempFile);
-            _previewTempFiles.Add(tempPng);
 
-            // Render a short window around the requested position at 1 fps and grab a single frame.
+            // Render a short window around the requested position. Image mode grabs a single frame at
+            // 1 fps; video mode keeps the configured framerate and samples it back at PreviewFrameRate.
             var options = GetOptions(tempFile);
             options.InputFile = FileNames[0];
             options.StartOverride = (int)pos.TotalSeconds;
-            options.EndOverride = (int)pos.TotalSeconds + 2;
+            options.EndOverride = (int)pos.TotalSeconds + windowSeconds;
             options.GenerateMask = false;
-            options.Framerate = 1;
+            if (!videoMode)
+                options.Framerate = 1;
 
             progressPreview.Visibility = Visibility.Visible;
             progressPreview.IsIndeterminate = true;
             btnPreviewRender.IsEnabled = false;
             imgPreview.Visibility = Visibility.Collapsed;
+            panelPreviewPlayback.Visibility = Visibility.Collapsed;
             textPreviewStatus.Text = Translations.Strings.PreviewRendering;
             textPreviewStatus.Visibility = Visibility.Visible;
 
@@ -570,33 +595,10 @@ namespace TwitchDownloaderWPF
                 await renderer.RenderVideoAsync(token);
                 token.ThrowIfCancellationRequested();
 
-                var psi = new ProcessStartInfo("ffmpeg", $"-y -i \"{tempFile}\" -vframes 1 \"{tempPng}\"")
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                using (var ffmpegProcess = Process.Start(psi))
-                {
-                    if (ffmpegProcess != null)
-                        await ffmpegProcess.WaitForExitAsync(token);
-                }
-
-                if (File.Exists(tempPng) && new FileInfo(tempPng).Length > 0)
-                {
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.UriSource = new Uri(tempPng);
-                    bitmap.EndInit();
-                    bitmap.Freeze();
-                    imgPreview.Source = bitmap;
-                    imgPreview.Visibility = Visibility.Visible;
-                    textPreviewStatus.Visibility = Visibility.Collapsed;
-                }
+                if (videoMode)
+                    await LoadVideoPreview(tempFile, windowSeconds, token);
                 else
-                {
-                    textPreviewStatus.Text = Translations.Strings.PreviewHint;
-                }
+                    await LoadImagePreview(tempFile, token);
             }
             catch (OperationCanceledException)
             {
@@ -611,6 +613,177 @@ namespace TwitchDownloaderWPF
                 progressPreview.Visibility = Visibility.Collapsed;
                 btnPreviewRender.IsEnabled = true;
             }
+        }
+
+        private async Task LoadImagePreview(string videoFile, CancellationToken token)
+        {
+            var tempPng = Path.Combine(Path.GetTempPath(), $"tdw_preview_{Guid.NewGuid():N}.png");
+            _previewTempFiles.Add(tempPng);
+
+            await RunFfmpeg($"-y -i \"{videoFile}\" -vframes 1 \"{tempPng}\"", token);
+
+            if (File.Exists(tempPng) && new FileInfo(tempPng).Length > 0)
+            {
+                imgPreview.Source = LoadFrozenBitmap(tempPng);
+                imgPreview.Visibility = Visibility.Visible;
+                textPreviewStatus.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                textPreviewStatus.Text = Translations.Strings.PreviewHint;
+            }
+        }
+
+        private async Task LoadVideoPreview(string videoFile, int durationSeconds, CancellationToken token)
+        {
+            var frameDir = Path.Combine(Path.GetTempPath(), $"tdw_prevframes_{Guid.NewGuid():N}");
+            Directory.CreateDirectory(frameDir);
+            _previewTempFiles.Add(frameDir);
+
+            // Sample the rendered clip into individual frames so playback does not depend on a media codec.
+            await RunFfmpeg($"-y -i \"{videoFile}\" -vf fps={PreviewFrameRate} \"{Path.Combine(frameDir, "frame%05d.png")}\"", token);
+
+            var files = Directory.GetFiles(frameDir, "frame*.png");
+            Array.Sort(files, StringComparer.Ordinal);
+            var frames = new List<BitmapImage>(files.Length);
+            foreach (var file in files)
+            {
+                try { frames.Add(LoadFrozenBitmap(file)); }
+                catch { /* skip unreadable frame */ }
+            }
+
+            if (frames.Count == 0)
+            {
+                textPreviewStatus.Text = Translations.Strings.PreviewHint;
+                return;
+            }
+
+            _previewFrames = frames;
+            _previewFrameIndex = 0;
+            _previewDuration = durationSeconds;
+            sliderPreview.Maximum = Math.Max(frames.Count - 1, 1);
+            imgPreview.Visibility = Visibility.Visible;
+            panelPreviewPlayback.Visibility = Visibility.Visible;
+            textPreviewStatus.Visibility = Visibility.Collapsed;
+            ShowFrame(0);
+            StartPlayback();
+        }
+
+        private static async Task RunFfmpeg(string arguments, CancellationToken token)
+        {
+            var psi = new ProcessStartInfo("ffmpeg", arguments)
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using var process = Process.Start(psi);
+            if (process != null)
+                await process.WaitForExitAsync(token);
+        }
+
+        private static BitmapImage LoadFrozenBitmap(string path)
+        {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.UriSource = new Uri(path);
+            bitmap.EndInit();
+            bitmap.Freeze();
+            return bitmap;
+        }
+
+        private void RadioPreviewMode_Changed(object sender, RoutedEventArgs e)
+        {
+            if (textPreviewDuration == null)
+                return;
+
+            var videoMode = radioPreviewVideo.IsChecked == true;
+            textPreviewDuration.Visibility = videoMode ? Visibility.Visible : Visibility.Collapsed;
+            if (!videoMode)
+            {
+                _previewTimer?.Stop();
+                _previewPlaying = false;
+                panelPreviewPlayback.Visibility = Visibility.Collapsed;
+            }
+            else if (_previewFrames.Count > 0)
+            {
+                panelPreviewPlayback.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void BtnPreviewPlayPause_Click(object sender, RoutedEventArgs e)
+        {
+            if (_previewFrames.Count == 0)
+                return;
+
+            if (_previewPlaying)
+                StopPlayback();
+            else
+                StartPlayback();
+        }
+
+        private void StartPlayback()
+        {
+            _previewPlaying = true;
+            btnPreviewPlayPause.Content = Translations.Strings.PreviewPause;
+            _previewTimer.Start();
+        }
+
+        private void StopPlayback()
+        {
+            _previewPlaying = false;
+            btnPreviewPlayPause.Content = Translations.Strings.PreviewPlay;
+            _previewTimer.Stop();
+        }
+
+        private void PreviewTimer_Tick(object sender, EventArgs e)
+        {
+            if (_previewFrames.Count == 0)
+                return;
+
+            _previewFrameIndex = (_previewFrameIndex + 1) % _previewFrames.Count;
+            ShowFrame(_previewFrameIndex);
+        }
+
+        private void SliderPreview_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_previewSuppressSlider || _previewFrames.Count == 0)
+                return;
+
+            ShowFrame(Math.Clamp((int)e.NewValue, 0, _previewFrames.Count - 1));
+        }
+
+        private void ShowFrame(int index)
+        {
+            _previewFrameIndex = index;
+            imgPreview.Source = _previewFrames[index];
+
+            _previewSuppressSlider = true;
+            sliderPreview.Value = index;
+            _previewSuppressSlider = false;
+
+            var current = TimeSpan.FromSeconds((double)index / PreviewFrameRate);
+            var total = TimeSpan.FromSeconds(_previewDuration);
+            textPreviewTime.Text = $"{FormatPreviewTime(current)} / {FormatPreviewTime(total)}";
+        }
+
+        private static string FormatPreviewTime(TimeSpan t) =>
+            t.TotalHours >= 1 ? $"{(int)t.TotalHours}:{t.Minutes:D2}:{t.Seconds:D2}" : $"{t.Minutes}:{t.Seconds:D2}";
+
+        private void BtnPreviewFullscreen_Click(object sender, RoutedEventArgs e)
+        {
+            if (imgPreview.Source == null)
+                return;
+
+            var window = new System.Windows.Window
+            {
+                Title = Translations.Strings.Preview,
+                WindowState = WindowState.Maximized,
+                Background = System.Windows.Media.Brushes.Black,
+                Content = new Image { Source = imgPreview.Source, Stretch = System.Windows.Media.Stretch.Uniform }
+            };
+            window.KeyDown += (_, ke) => { if (ke.Key == Key.Escape || ke.Key == Key.F11) window.Close(); };
+            window.Show();
         }
 
         private void btnDonate_Click(object sender, RoutedEventArgs e)

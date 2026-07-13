@@ -331,6 +331,60 @@ namespace TwitchDownloaderWPF.Translations {
         }
 
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Image ähnelt.
+        /// </summary>
+        public static string PreviewImage {
+            get {
+                return ResourceManager.GetString("PreviewImage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Video ähnelt.
+        /// </summary>
+        public static string PreviewVideo {
+            get {
+                return ResourceManager.GetString("PreviewVideo", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Clip length in seconds (video mode) ähnelt.
+        /// </summary>
+        public static string PreviewDuration {
+            get {
+                return ResourceManager.GetString("PreviewDuration", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die View full size ähnelt.
+        /// </summary>
+        public static string PreviewFullscreen {
+            get {
+                return ResourceManager.GetString("PreviewFullscreen", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Play ähnelt.
+        /// </summary>
+        public static string PreviewPlay {
+            get {
+                return ResourceManager.GetString("PreviewPlay", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Pause ähnelt.
+        /// </summary>
+        public static string PreviewPause {
+            get {
+                return ResourceManager.GetString("PreviewPause", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die BTTV Emotes: ähnelt.
         /// </summary>
         public static string BttvEmotes {

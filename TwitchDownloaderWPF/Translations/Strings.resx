@@ -164,6 +164,24 @@
   <data name="PreviewInvalidPosition" xml:space="preserve">
     <value>Invalid position. Use H:MM:SS.</value>
   </data>
+  <data name="PreviewImage" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="PreviewVideo" xml:space="preserve">
+    <value>Video</value>
+  </data>
+  <data name="PreviewDuration" xml:space="preserve">
+    <value>Clip length in seconds (video mode)</value>
+  </data>
+  <data name="PreviewFullscreen" xml:space="preserve">
+    <value>View full size</value>
+  </data>
+  <data name="PreviewPlay" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="PreviewPause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
   <data name="BttvEmotes" xml:space="preserve">
     <value>BTTV Emotes:</value>
   </data>
