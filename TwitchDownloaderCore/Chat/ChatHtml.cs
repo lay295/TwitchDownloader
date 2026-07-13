@@ -12,10 +12,10 @@ namespace TwitchDownloaderCore.Chat
         /// <summary>
         /// Serializes a chat Html file.
         /// </summary>
-        public static async Task SerializeAsync(Stream outputStream, string filePath, ChatRoot chatRoot, ITaskLogger logger, bool embedData = true, CancellationToken cancellationToken = default)
+        public static async Task SerializeAsync(Stream outputStream, string filePath, ChatRoot chatRoot, string cacheDir, ITaskLogger logger, bool embedData = true, CancellationToken cancellationToken = default)
         {
             Dictionary<string, EmbedEmoteData> thirdEmoteData = new();
-            await BuildThirdPartyDictionary(chatRoot, embedData, thirdEmoteData, logger, cancellationToken);
+            await BuildThirdPartyDictionary(chatRoot, embedData, thirdEmoteData, cacheDir, logger, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -72,9 +72,9 @@ namespace TwitchDownloaderCore.Chat
             }
         }
 
-        private static async Task BuildThirdPartyDictionary(ChatRoot chatRoot, bool embedData, Dictionary<string, EmbedEmoteData> thirdEmoteData, ITaskLogger logger, CancellationToken cancellationToken)
+        private static async Task BuildThirdPartyDictionary(ChatRoot chatRoot, bool embedData, Dictionary<string, EmbedEmoteData> thirdEmoteData, string cacheDir, ITaskLogger logger, CancellationToken cancellationToken)
         {
-            EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmotesMetadata(chatRoot.streamer.id, true, true, true, true, logger, cancellationToken);
+            EmoteResponse emotes = await TwitchHelper.GetThirdPartyEmotesMetadata(chatRoot.streamer.id, true, true, true, true, cacheDir, false, logger, cancellationToken);
             List<EmoteResponseItem> itemList = [];
             itemList.AddRange(emotes.BTTV);
             itemList.AddRange(emotes.FFZ);

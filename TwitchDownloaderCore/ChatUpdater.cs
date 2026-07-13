@@ -100,7 +100,7 @@ namespace TwitchDownloaderCore
                         await ChatJson.SerializeAsync(outputStream, chatRoot, cancellationToken);
                         break;
                     case ChatFormat.Html:
-                        await ChatHtml.SerializeAsync(outputStream, outputFileInfo.FullName, chatRoot, _progress, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
+                        await ChatHtml.SerializeAsync(outputStream, outputFileInfo.FullName, chatRoot, _cacheDir, _progress, chatRoot.embeddedData != null && (chatRoot.embeddedData.firstParty?.Count > 0 || chatRoot.embeddedData.twitchBadges?.Count > 0), cancellationToken);
                         break; // If there is embedded data, it's almost guaranteed to be first party emotes or badges.
                     case ChatFormat.Text:
                         await ChatText.SerializeAsync(outputStream, chatRoot, _updateOptions.TextTimestampFormat);
