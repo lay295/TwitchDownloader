@@ -506,19 +506,6 @@ namespace TwitchDownloaderCore
                 {
                     emoteDataResponse.STV = await RefreshOrLoadProviderMetadata(streamerId, emoteDataResponse.STV, stvFolder, "7TV", logger, cancellationToken);
                     await FetchEmoteImages(comments, emoteDataResponse.STV, emotes, stvFolder, "7TV", logger, cancellationToken);
-
-                    // When metadata failed (STV is null), FetchEmoteImages returned early without touching
-                    // the cache. Report whether previously cached images exist so the user knows what to expect.
-                    if (emoteDataResponse.STV is null)
-                    {
-                        // Both the API and the metadata cache failed. Report image cache status for context.
-                        stvFolder.Refresh();
-                        var cachedCount = stvFolder.Exists ? stvFolder.GetFiles("*_2.*").Length : 0;
-                        if (cachedCount > 0)
-                            logger.LogWarning($"7TV API and metadata cache were both unavailable. {cachedCount} cached 7TV emote image(s) exist but cannot be matched - new 7TV emotes will not appear, embedded ones may still be present.");
-                        else
-                            logger.LogInfo("7TV API and metadata cache were both unavailable and no cached 7TV emotes were found - only embedded 7TV emotes will appear.");
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -528,12 +515,9 @@ namespace TwitchDownloaderCore
 
             return emotes.Values.ToList();
 
-            static async Task FetchEmoteImages([AllowNull] IEnumerable<Comment> comments, [AllowNull] IEnumerable<EmoteResponseItem> emoteResponse, Dictionary<string, TwitchEmote> emotes,
+            static async Task FetchEmoteImages([AllowNull] IEnumerable<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, Dictionary<string, TwitchEmote> emotes,
                 DirectoryInfo cacheFolder, string providerName, ITaskLogger logger, CancellationToken cancellationToken)
             {
-                if (emoteResponse is null)
-                    return;
-
                 if (!cacheFolder.Exists)
                     cacheFolder = CreateDirectory(cacheFolder.FullName);
 
@@ -596,12 +580,12 @@ namespace TwitchDownloaderCore
 
             // Persist fresh metadata to disk so future sessions can fall back to it when the API is unavailable.
             // If the API call already failed (null), try loading the cached list.
-            static async Task<List<EmoteResponseItem>> RefreshOrLoadProviderMetadata(int streamerId, List<EmoteResponseItem> freshData, DirectoryInfo cacheFolder, string providerName,
+            static async Task<List<EmoteResponseItem>> RefreshOrLoadProviderMetadata(int streamerId, List<EmoteResponseItem> emoteResponse, DirectoryInfo cacheFolder, string providerName,
                 ITaskLogger logger, CancellationToken ct)
             {
                 var cacheFile = new FileInfo(Path.Combine(cacheFolder.FullName, $"emotes_{streamerId}.json.gz"));
 
-                if (freshData is not null)
+                if (emoteResponse is { Count: > 0 })
                 {
                     // Persist fresh metadata so future sessions can fall back to it.
                     try
@@ -611,23 +595,23 @@ namespace TwitchDownloaderCore
 
                         await using var fs = cacheFile.OpenWrite();
                         await using var gs = new GZipStream(fs, CompressionLevel.SmallestSize);
-                        await JsonSerializer.SerializeAsync(gs, freshData, JsonSerializerOptions, ct);
+                        await JsonSerializer.SerializeAsync(gs, emoteResponse, JsonSerializerOptions, ct);
                     }
                     catch { /* best-effort - never block rendering on a metadata write failure */ }
 
-                    return freshData;
+                    return emoteResponse;
                 }
 
                 // API failed - try falling back to a previously cached emote list.
                 try
                 {
                     if (!cacheFile.Exists)
-                        return null;
+                        return emoteResponse;
 
                     var timeSinceLastWrite = DateTime.UtcNow - cacheFile.LastWriteTimeUtc;
                     var maxAge = TimeSpan.FromHours(48);
                     if (timeSinceLastWrite > maxAge)
-                        return null;
+                        return emoteResponse;
 
                     await using var fs = cacheFile.OpenRead();
                     await using var gs = new GZipStream(fs, CompressionMode.Decompress);
@@ -645,7 +629,7 @@ namespace TwitchDownloaderCore
                     logger.LogError($"Failed to load cached {providerName} emote metadata: {ex.Message}");
                 }
 
-                return null;
+                return emoteResponse;
             }
 
             static void LogProviderException(Exception ex, string providerName, ITaskLogger logger)
