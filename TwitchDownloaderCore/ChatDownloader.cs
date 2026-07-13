@@ -335,7 +335,7 @@ namespace TwitchDownloaderCore
                         await ChatJson.SerializeAsync(outputStream, chatRoot, cancellationToken);
                         break;
                     case ChatFormat.Html:
-                        await ChatHtml.SerializeAsync(outputStream, outputFileInfo.FullName, chatRoot, _progress, downloadOptions.EmbedData, cancellationToken);
+                        await ChatHtml.SerializeAsync(outputStream, outputFileInfo.FullName, chatRoot, _cacheDir, _progress, downloadOptions.EmbedData, cancellationToken);
                         break;
                     case ChatFormat.Text:
                         await ChatText.SerializeAsync(outputStream, chatRoot, downloadOptions.TimeFormat);

@@ -215,7 +215,7 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlClipSearchResponse>();
         }
 
-        public static async Task<EmoteResponse> GetThirdPartyEmotesMetadata(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, ITaskLogger logger, CancellationToken cancellationToken = default)
+        public static async Task<EmoteResponse> GetThirdPartyEmotesMetadata(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, string cacheFolder, ITaskLogger logger, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -231,6 +231,9 @@ namespace TwitchDownloaderCore
                 {
                     LogProviderException(ex, "BetterTTV", logger);
                 }
+
+                var bttvDir = new DirectoryInfo(Path.Combine(cacheFolder, "bttv"));
+                await RefreshOrLoadProviderMetadata(emoteResponse.BTTV, bttvDir, "BetterTTV", streamerId, logger, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -245,6 +248,9 @@ namespace TwitchDownloaderCore
                 {
                     LogProviderException(ex, "FFZ", logger);
                 }
+
+                var ffzDir = new DirectoryInfo(Path.Combine(cacheFolder, "ffz"));
+                await RefreshOrLoadProviderMetadata(emoteResponse.FFZ, ffzDir, "FFZ", streamerId, logger, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -259,6 +265,9 @@ namespace TwitchDownloaderCore
                 {
                     LogProviderException(ex, "7TV", logger);
                 }
+
+                var stvDir = new DirectoryInfo(Path.Combine(cacheFolder, "stv"));
+                await RefreshOrLoadProviderMetadata(emoteResponse.FFZ, stvDir, "7TV", streamerId, logger, cancellationToken);
             }
 
             return emoteResponse;
@@ -427,6 +436,57 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
+        /// <summary>
+        /// Persists fresh metadata to disk so future sessions can fall back to it when the API is temporarily unavailable.
+        /// </summary>
+        private static async Task RefreshOrLoadProviderMetadata(List<EmoteResponseItem> emotes, DirectoryInfo cacheFolder, string providerName, int streamerId, ITaskLogger logger, CancellationToken ct)
+        {
+            var cacheFile = new FileInfo(Path.Combine(cacheFolder.FullName, $"emotes_{streamerId}.json.gz"));
+
+            if (emotes is { Count: > 0 })
+            {
+                // Persist fresh metadata so future sessions can fall back to it.
+                try
+                {
+                    if (!cacheFolder.Exists)
+                        CreateDirectory(cacheFolder.FullName);
+
+                    await using var fs = cacheFile.OpenWrite();
+                    await using var gs = new GZipStream(fs, CompressionLevel.SmallestSize);
+                    await JsonSerializer.SerializeAsync(gs, emotes, JsonSerializerOptions, ct);
+                }
+                catch { /* best-effort - never block rendering on a metadata write failure */ }
+
+                return;
+            }
+
+            // API failed - try falling back to a previously cached emote list.
+            try
+            {
+                if (!cacheFile.Exists)
+                    return;
+
+                var timeSinceLastWrite = DateTime.UtcNow - cacheFile.LastWriteTimeUtc;
+                var maxAge = TimeSpan.FromHours(48);
+                if (timeSinceLastWrite > maxAge)
+                    return;
+
+                await using var fs = cacheFile.OpenRead();
+                await using var gs = new GZipStream(fs, CompressionMode.Decompress);
+                var cached = await JsonSerializer.DeserializeAsync<EmoteResponseItem[]>(gs, JsonSerializerOptions, ct);
+                if (cached is { Length: > 0 })
+                {
+                    var ageHours = timeSinceLastWrite.TotalHours;
+                    logger.LogInfo($"{providerName} API unavailable. Using cached emote list from {ageHours:F1}h ago ({cached.Length} emotes).");
+                    emotes.AddRange(cached);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Failed to load cached {providerName} emote metadata: {ex.Message}");
+            }
+        }
+
         public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = default)
         {
             // No 3rd party emotes are wanted
@@ -468,17 +528,16 @@ namespace TwitchDownloaderCore
                 return emotes.Values.ToList();
             }
 
+            EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, cacheFolder, logger, cancellationToken);
+
             DirectoryInfo bttvFolder = new DirectoryInfo(Path.Combine(cacheFolder, "bttv"));
             DirectoryInfo ffzFolder = new DirectoryInfo(Path.Combine(cacheFolder, "ffz"));
             DirectoryInfo stvFolder = new DirectoryInfo(Path.Combine(cacheFolder, "stv"));
-
-            EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, logger, cancellationToken);
 
             if (bttv)
             {
                 try
                 {
-                    emoteDataResponse.BTTV = await RefreshOrLoadProviderMetadata(streamerId, emoteDataResponse.BTTV, bttvFolder, "BetterTTV", logger, cancellationToken);
                     await FetchEmoteImages(comments, emoteDataResponse.BTTV, emotes, bttvFolder, "BetterTTV", logger, cancellationToken);
                 }
                 catch (Exception ex)
@@ -491,7 +550,6 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    emoteDataResponse.FFZ = await RefreshOrLoadProviderMetadata(streamerId, emoteDataResponse.FFZ, ffzFolder, "FFZ", logger, cancellationToken);
                     await FetchEmoteImages(comments, emoteDataResponse.FFZ, emotes, ffzFolder, "FFZ", logger, cancellationToken);
                 }
                 catch (Exception ex)
@@ -504,7 +562,6 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    emoteDataResponse.STV = await RefreshOrLoadProviderMetadata(streamerId, emoteDataResponse.STV, stvFolder, "7TV", logger, cancellationToken);
                     await FetchEmoteImages(comments, emoteDataResponse.STV, emotes, stvFolder, "7TV", logger, cancellationToken);
                 }
                 catch (Exception ex)
@@ -535,7 +592,7 @@ namespace TwitchDownloaderCore
                         select emote;
                 }
 
-                int fromCache = 0, fromDownload = 0, fromEmbed = emotes.Count;
+                int fromCache = 0, fromDownload = 0;
                 foreach (var emote in emoteResponseQuery)
                 {
                     var emoteUrl = emote.ImageUrl.Replace("[scale]", "2");
@@ -574,62 +631,8 @@ namespace TwitchDownloaderCore
 
                 if (emotes.Count > 0)
                 {
-                    logger.LogInfo($"Loaded {emotes.Count} {providerName} emote(s) - {fromEmbed} embedded, {fromCache} cached, {fromDownload} newly downloaded.");
+                    logger.LogInfo($"Loaded {emotes.Count} {providerName} emotes from cache/download - {fromCache} cached, {fromDownload} newly downloaded.");
                 }
-            }
-
-            // Persist fresh metadata to disk so future sessions can fall back to it when the API is unavailable.
-            // If the API call already failed (null), try loading the cached list.
-            static async Task<List<EmoteResponseItem>> RefreshOrLoadProviderMetadata(int streamerId, List<EmoteResponseItem> emoteResponse, DirectoryInfo cacheFolder, string providerName,
-                ITaskLogger logger, CancellationToken ct)
-            {
-                var cacheFile = new FileInfo(Path.Combine(cacheFolder.FullName, $"emotes_{streamerId}.json.gz"));
-
-                if (emoteResponse is { Count: > 0 })
-                {
-                    // Persist fresh metadata so future sessions can fall back to it.
-                    try
-                    {
-                        if (!cacheFolder.Exists)
-                            CreateDirectory(cacheFolder.FullName);
-
-                        await using var fs = cacheFile.OpenWrite();
-                        await using var gs = new GZipStream(fs, CompressionLevel.SmallestSize);
-                        await JsonSerializer.SerializeAsync(gs, emoteResponse, JsonSerializerOptions, ct);
-                    }
-                    catch { /* best-effort - never block rendering on a metadata write failure */ }
-
-                    return emoteResponse;
-                }
-
-                // API failed - try falling back to a previously cached emote list.
-                try
-                {
-                    if (!cacheFile.Exists)
-                        return emoteResponse;
-
-                    var timeSinceLastWrite = DateTime.UtcNow - cacheFile.LastWriteTimeUtc;
-                    var maxAge = TimeSpan.FromHours(48);
-                    if (timeSinceLastWrite > maxAge)
-                        return emoteResponse;
-
-                    await using var fs = cacheFile.OpenRead();
-                    await using var gs = new GZipStream(fs, CompressionMode.Decompress);
-                    var cached = await JsonSerializer.DeserializeAsync<List<EmoteResponseItem>>(gs, JsonSerializerOptions, ct);
-                    if (cached is { Count: > 0 })
-                    {
-                        var ageHours = timeSinceLastWrite.TotalHours;
-                        logger.LogInfo($"{providerName} API unavailable. Using cached emote list from {ageHours:F1}h ago ({cached.Count} emotes).");
-
-                        return cached;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError($"Failed to load cached {providerName} emote metadata: {ex.Message}");
-                }
-
-                return emoteResponse;
             }
 
             static void LogProviderException(Exception ex, string providerName, ITaskLogger logger)
