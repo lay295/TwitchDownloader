@@ -636,9 +636,10 @@ namespace TwitchDownloaderCore
                     }
                 }
 
-                if (emotes.Count > 0)
+                var total = fromCache + fromDownload;
+                if (total > 0)
                 {
-                    logger.LogInfo($"Loaded {emotes.Count} {providerName} emotes from cache/download - {fromCache} cached, {fromDownload} newly downloaded.");
+                    logger.LogInfo($"Loaded {total} {providerName} emotes from cache/download - {fromCache} cached, {fromDownload} newly downloaded.");
                 }
             }
 
