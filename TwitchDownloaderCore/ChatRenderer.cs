@@ -7,8 +7,11 @@ using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Chat;
@@ -183,7 +186,7 @@ namespace TwitchDownloaderCore
                 maskFileInfo.Delete();
 
             FfmpegProcess ffmpegProcess = GetFfmpegProcess(outputFileInfo);
-            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(maskFileInfo) : null;
+            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(maskFileInfo, true) : null;
             _progress.SetTemplateStatus(@"Rendering Video {0}% ({1:h\hm\ms\s} Elapsed | {2:h\hm\ms\s} Remaining)", 0, TimeSpan.Zero, TimeSpan.Zero);
 
             try
@@ -327,13 +330,13 @@ namespace TwitchDownloaderCore
 
                 if (maskProcess != null)
                 {
-                    maskBytes ??= GC.AllocateUninitializedArray<byte>(frame.Info.BytesSize);
-                    frameSpan.CopyTo(maskBytes);
+                    maskBytes ??= GC.AllocateUninitializedArray<byte>(frameSpan.Length / 4);
+                    SetFrameMask(frameSpan, maskBytes);
 
                     if (!renderOptions.SkipDriveWaiting)
                         DriveHelper.WaitForDrive(outputDrive, _progress);
 
-                    maskStream.Write(SetFrameMask(maskBytes));
+                    maskStream.Write(maskBytes);
                 }
 
                 if (currentTick % 3 == 0)
@@ -361,28 +364,99 @@ namespace TwitchDownloaderCore
             maskProcess?.WaitForExit(100_000);
         }
 
-        private static unsafe byte[] SetFrameMask(byte[] frame)
+        private static unsafe void SetFrameMask(ReadOnlySpan<byte> frame, Span<byte> maskBytes)
         {
+            Debug.Assert(frame.Length == maskBytes.Length * 4); // 32bpp -> 8bpp
+
             fixed (byte* pFrame = frame)
+            fixed (byte* pMask = maskBytes)
             {
-                var ptr = pFrame;
-                var end = pFrame + frame.Length;
-                while (ptr < end)
+                if (Avx2.IsSupported)
                 {
-                    var alpha = *(ptr + 3); // alpha of the unmasked pixel
-                    *ptr++ = alpha;
-                    *ptr++ = alpha;
-                    *ptr++ = alpha;
-                    *ptr++ = 0xFF;
+                    // 3,7,11,15 in low lane and 19,23,27,31 in high lane.
+                    // In AVX2 shuffle, each 128-bit lane is shuffled independently.
+                    var shuffleMask = Vector256.Create(
+                        3, 7, 11, 15, 0x80, 0x80, 0x80, 0x80,
+                        0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+                        3, 7, 11, 15, 0x80, 0x80, 0x80, 0x80,
+                        0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80
+                    );
+
+                    var produced = 0;
+                    var outCount = maskBytes.Length;
+                    while (produced + 8 <= outCount)
+                    {
+                        // 32 input bytes -> 8 output bytes
+                        var vec = Avx.LoadVector256(pFrame + produced * 4);
+                        var shuffle = Avx2.Shuffle(vec, shuffleMask);
+
+                        var lo = shuffle.GetLower().AsUInt32().ToScalar();
+                        var hi = shuffle.GetUpper().AsUInt32().ToScalar();
+                        *(ulong*)(pMask + produced) = lo | ((ulong)hi << 32);
+
+                        produced += 8;
+                    }
+
+                    // Finish copy
+                    for (; produced < outCount; produced++)
+                    {
+                        pMask[produced] = pFrame[produced * 4 + 3];
+                    }
+
+                    return;
+                }
+
+                if (Ssse3.IsSupported)
+                {
+                    // Take every 4th byte
+                    var shuffleMask = Vector128.Create(
+                        3, 7, 11, 15,
+                        0x80, 0x80, 0x80, 0x80,
+                        0x80, 0x80, 0x80, 0x80,
+                        0x80, 0x80, 0x80, 0x80
+                    );
+
+                    var produced = 0;
+                    var outCount = maskBytes.Length;
+                    while (produced + 4 <= outCount)
+                    {
+                        // 16 input bytes -> 4 output bytes
+                        var vec = Sse2.LoadVector128(pFrame + produced * 4);
+                        var shuffle = Ssse3.Shuffle(vec, shuffleMask);
+
+                        *(uint*)(pMask + produced) = shuffle.AsUInt32().ToScalar();
+
+                        produced += 4;
+                    }
+
+                    // Finish copy
+                    for (; produced < outCount; produced++)
+                    {
+                        pMask[produced] = pFrame[produced * 4 + 3];
+                    }
+
+                    return;
+                }
+
+                // Scalar fallback for when SIMD is unavailable
+                var pF = pFrame + 3;
+                var pM = pMask;
+                var end = pFrame + frame.Length;
+
+                while (pF < end)
+                {
+                    *pM++ = *pF;
+                    pF += 4;
                 }
             }
-
-            return frame;
         }
 
-        private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo)
+        private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo, bool isMask = false)
         {
             string savePath = fileInfo.FullName;
+            var pixFmt = isMask
+                ? "gray"
+                : SKImageInfo.PlatformColorType == SKColorType.Bgra8888 ? "bgra" : "rgba";
 
             string inputArgs = new StringBuilder(renderOptions.InputArgs)
                 .Replace("{fps}", renderOptions.Framerate.ToString())
@@ -390,7 +464,7 @@ namespace TwitchDownloaderCore
                 .Replace("{width}", renderOptions.ChatWidth.ToString())
                 .Replace("{save_path}", savePath)
                 .Replace("{max_int}", int.MaxValue.ToString())
-                .Replace("{pix_fmt}", SKImageInfo.PlatformColorType == SKColorType.Bgra8888 ? "bgra" : "rgba")
+                .Replace("{pix_fmt}", pixFmt)
                 .ToString();
             string outputArgs = new StringBuilder(renderOptions.OutputArgs)
                 .Replace("{fps}", renderOptions.Framerate.ToString())
