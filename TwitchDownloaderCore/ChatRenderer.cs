@@ -183,7 +183,7 @@ namespace TwitchDownloaderCore
                 maskFileInfo.Delete();
 
             FfmpegProcess ffmpegProcess = GetFfmpegProcess(outputFileInfo);
-            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(maskFileInfo) : null;
+            FfmpegProcess maskProcess = renderOptions.GenerateMask ? GetFfmpegProcess(maskFileInfo, true) : null;
             _progress.SetTemplateStatus(@"Rendering Video {0}% ({1:h\hm\ms\s} Elapsed | {2:h\hm\ms\s} Remaining)", 0, TimeSpan.Zero, TimeSpan.Zero);
 
             try
@@ -327,13 +327,13 @@ namespace TwitchDownloaderCore
 
                 if (maskProcess != null)
                 {
-                    maskBytes ??= GC.AllocateUninitializedArray<byte>(frame.Info.BytesSize);
-                    frameSpan.CopyTo(maskBytes);
+                    maskBytes ??= GC.AllocateUninitializedArray<byte>(frameSpan.Length / 4);
+                    SetFrameMask(frameSpan, maskBytes);
 
                     if (!renderOptions.SkipDriveWaiting)
                         DriveHelper.WaitForDrive(outputDrive, _progress);
 
-                    maskStream.Write(SetFrameMask(maskBytes));
+                    maskStream.Write(maskBytes);
                 }
 
                 if (currentTick % 3 == 0)
@@ -361,28 +361,29 @@ namespace TwitchDownloaderCore
             maskProcess?.WaitForExit(100_000);
         }
 
-        private static unsafe byte[] SetFrameMask(byte[] frame)
+        private static unsafe void SetFrameMask(ReadOnlySpan<byte> frame, Span<byte> maskBytes)
         {
             fixed (byte* pFrame = frame)
+            fixed (byte* pMask = maskBytes)
             {
-                var ptr = pFrame;
+                var pF = pFrame + 4 - 1;
+                var pM = pMask;
                 var end = pFrame + frame.Length;
-                while (ptr < end)
+
+                while (pF < end)
                 {
-                    var alpha = *(ptr + 3); // alpha of the unmasked pixel
-                    *ptr++ = alpha;
-                    *ptr++ = alpha;
-                    *ptr++ = alpha;
-                    *ptr++ = 0xFF;
+                    *pM++ = *pF;
+                    pF += 4;
                 }
             }
-
-            return frame;
         }
 
-        private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo)
+        private FfmpegProcess GetFfmpegProcess(FileInfo fileInfo, bool isMask = false)
         {
             string savePath = fileInfo.FullName;
+            var pixFmt = isMask
+                ? "gray"
+                : SKImageInfo.PlatformColorType == SKColorType.Bgra8888 ? "bgra" : "rgba";
 
             string inputArgs = new StringBuilder(renderOptions.InputArgs)
                 .Replace("{fps}", renderOptions.Framerate.ToString())
@@ -390,7 +391,7 @@ namespace TwitchDownloaderCore
                 .Replace("{width}", renderOptions.ChatWidth.ToString())
                 .Replace("{save_path}", savePath)
                 .Replace("{max_int}", int.MaxValue.ToString())
-                .Replace("{pix_fmt}", SKImageInfo.PlatformColorType == SKColorType.Bgra8888 ? "bgra" : "rgba")
+                .Replace("{pix_fmt}", pixFmt)
                 .ToString();
             string outputArgs = new StringBuilder(renderOptions.OutputArgs)
                 .Replace("{fps}", renderOptions.Framerate.ToString())

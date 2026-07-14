@@ -226,6 +226,9 @@
                         <Run MouseDown="FfmpegParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
                             {save_path}
                         </Run>
+                        <Run MouseDown="FfmpegParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
+                            {pix_fmt}
+                        </Run>
                     </TextBlock>
                     <TextBlock>
                 <Hyperlink NavigateUri="https://ffmpeg.org/ffmpeg.html" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AppHyperlink}">
