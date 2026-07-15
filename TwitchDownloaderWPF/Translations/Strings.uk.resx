@@ -179,6 +179,12 @@
   <data name="ChatFontSize" xml:space="preserve">
     <value>Розмір шрифту:</value>
   </data>
+  <data name="ChatUsernameFontSize" xml:space="preserve">
+    <value>Username Size:</value>
+  </data>
+  <data name="ChatUsernameFontSizeTooltip" xml:space="preserve">
+    <value>Username font size as a multiple of the message font size. 1.0 = same size as the message text.</value>
+  </data>
   <data name="ChatHeight" xml:space="preserve">
     <value>Висота:</value>
   </data>
@@ -311,6 +317,13 @@
   </data>
   <data name="IgnoreUsersListTooltip" xml:space="preserve">
     <value>Список імен користувачів - через кому, пробіли навколо ком ігноруються, НЕ враховує регістр.</value>
+  </data>
+  <data name="HighlightUsersList" xml:space="preserve">
+    <value>Highlight Users List </value>
+    <comment>Leave a trailing space</comment>
+  </data>
+  <data name="HighlightUsersListTooltip" xml:space="preserve">
+    <value>List of usernames whose message backgrounds will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
   </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
     <value>Не правильне посилання/ID кліпу:</value>

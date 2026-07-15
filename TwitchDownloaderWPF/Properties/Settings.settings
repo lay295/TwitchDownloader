@@ -11,6 +11,9 @@
     <Setting Name="FontSize" Type="System.Single" Scope="User">
       <Value Profile="(Default)">24</Value>
     </Setting>
+    <Setting Name="UsernameFontScale" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
     <Setting Name="Outline" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
@@ -51,13 +54,13 @@
       <Value Profile="(Default)">255</Value>
     </Setting>
     <Setting Name="AlternateBackgroundColorR" Type="System.Byte" Scope="User">
-      <Value Profile="(Default)">19</Value>
+      <Value Profile="(Default)">25</Value>
     </Setting>
     <Setting Name="AlternateBackgroundColorG" Type="System.Byte" Scope="User">
-      <Value Profile="(Default)">19</Value>
+      <Value Profile="(Default)">25</Value>
     </Setting>
     <Setting Name="AlternateBackgroundColorB" Type="System.Byte" Scope="User">
-      <Value Profile="(Default)">19</Value>
+      <Value Profile="(Default)">25</Value>
     </Setting>
     <Setting Name="FontColorR" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">255</Value>
@@ -145,6 +148,21 @@
     </Setting>
     <Setting Name="IgnoreUsersList" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="HighlightUsersList" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="HighlightUsersColorA" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">200</Value>
+    </Setting>
+    <Setting Name="HighlightUsersColorR" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">255</Value>
+    </Setting>
+    <Setting Name="HighlightUsersColorG" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="HighlightUsersColorB" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="ChatBadgeMask" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>

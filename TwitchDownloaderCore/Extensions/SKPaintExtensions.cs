@@ -1,20 +1,21 @@
+using System.Runtime.CompilerServices;
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
-using System.Reflection;
+using Buffer = HarfBuzzSharp.Buffer;
 
 namespace TwitchDownloaderCore.Extensions
 {
     // ReSharper disable once InconsistentNaming
     public static class SKPaintExtensions
     {
-        private static readonly MethodInfo GetFontMethodInfo = typeof(SKPaint).GetMethod("GetFont", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly Func<SKPaint, SKFont> GetFontDelegate = (Func<SKPaint, SKFont>)Delegate.CreateDelegate(typeof(Func<SKPaint, SKFont>), GetFontMethodInfo);
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "GetFont")]
+        private static extern SKFont GetFontAccessor(this SKPaint paint);
 
         /// <returns>A reference to the <see cref="SKFont"/> held internally by the <paramref name="paint"/>.</returns>
         /// <remarks>The returned <see cref="SKFont"/> should NOT be disposed of.</remarks>
         public static SKFont AsFont(this SKPaint paint)
         {
-            return GetFontDelegate.Invoke(paint);
+            return paint.GetFontAccessor();
         }
 
         // Heavily modified from SkiaSharp.HarfBuzz.CanvasExtensions.DrawShapedText
@@ -26,7 +27,7 @@ namespace TwitchDownloaderCore.Extensions
                 return returnPath;
 
             using var shaper = new SKShaper(paint.Typeface);
-            using var buffer = new HarfBuzzSharp.Buffer();
+            using var buffer = new Buffer();
             buffer.Add(text, paint.TextEncoding);
             var result = shaper.Shape(buffer, x, y, paint);
 

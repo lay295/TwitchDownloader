@@ -92,6 +92,7 @@ namespace TwitchDownloaderWPF
             SKColor backgroundColor = new(colorBackground.SelectedColor.Value.R, colorBackground.SelectedColor.Value.G, colorBackground.SelectedColor.Value.B, colorBackground.SelectedColor.Value.A);
             SKColor altBackgroundColor = new(colorAlternateBackground.SelectedColor.Value.R, colorAlternateBackground.SelectedColor.Value.G, colorAlternateBackground.SelectedColor.Value.B, colorAlternateBackground.SelectedColor.Value.A);
             SKColor messageColor = new(colorFont.SelectedColor.Value.R, colorFont.SelectedColor.Value.G, colorFont.SelectedColor.Value.B);
+            SKColor highlightUsersColor = new(colorHighlightUsers.SelectedColor.Value.R, colorHighlightUsers.SelectedColor.Value.G, colorHighlightUsers.SelectedColor.Value.B, colorHighlightUsers.SelectedColor.Value.A);
             ChatRenderOptions options = new()
             {
                 OutputFile = filename,
@@ -119,6 +120,9 @@ namespace TwitchDownloaderWPF
                 AccentIndentScale = double.Parse(textAccentIndentScale.Text, CultureInfo.CurrentCulture),
                 AccentStrokeScale = double.Parse(textAccentStrokeScale.Text, CultureInfo.CurrentCulture),
                 VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture),
+                UsernameFontScale = double.Parse(textUsernameScale.Text, CultureInfo.CurrentCulture),
+                HighlightUserColor = highlightUsersColor,
+                HighlightUsersArray = textHighlightUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 IgnoreUsersArray = textIgnoreUsersList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 BannedWordsArray = textBannedWordsList.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 Timestamp = checkTimestamp.IsChecked.GetValueOrDefault(),
@@ -181,6 +185,7 @@ namespace TwitchDownloaderWPF
                 textBadgeScale.Text = Settings.Default.BadgeScale.ToString("0.0#");
                 textAvatarScale.Text = Settings.Default.AvatarScale.ToString("0.0#");
                 textVerticalScale.Text = Settings.Default.VerticalSpacingScale.ToString("0.0#");
+                textUsernameScale.Text = Settings.Default.UsernameFontScale.ToString("0.0#");
                 textSidePaddingScale.Text = Settings.Default.LeftSpacingScale.ToString("0.0#");
                 textSectionHeightScale.Text = Settings.Default.SectionHeightScale.ToString("0.0#");
                 textWordSpaceScale.Text = Settings.Default.WordSpacingScale.ToString("0.0#");
@@ -189,6 +194,8 @@ namespace TwitchDownloaderWPF
                 textAccentIndentScale.Text = Settings.Default.AccentIndentScale.ToString("0.0#");
                 textOutlineScale.Text = Settings.Default.OutlineScale.ToString("0.0#");
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
+                textHighlightUsersList.Text = Settings.Default.HighlightUsersList;
+                colorHighlightUsers.SelectedColor = System.Windows.Media.Color.FromArgb(Settings.Default.HighlightUsersColorA, Settings.Default.HighlightUsersColorR, Settings.Default.HighlightUsersColorG, Settings.Default.HighlightUsersColorB);
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
                 checkRenderAvatars.IsChecked = Settings.Default.RenderUserAvatars;
@@ -305,6 +312,12 @@ namespace TwitchDownloaderWPF
             }
             Settings.Default.IgnoreUsersList = string.Join(",", textIgnoreUsersList.Text
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            Settings.Default.HighlightUsersList = string.Join(",", textHighlightUsersList.Text
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+            Settings.Default.HighlightUsersColorR = colorHighlightUsers.SelectedColor.GetValueOrDefault().R;
+            Settings.Default.HighlightUsersColorG = colorHighlightUsers.SelectedColor.GetValueOrDefault().G;
+            Settings.Default.HighlightUsersColorB = colorHighlightUsers.SelectedColor.GetValueOrDefault().B;
+            Settings.Default.HighlightUsersColorA = colorHighlightUsers.SelectedColor.GetValueOrDefault().A;
             Settings.Default.BannedWordsList = string.Join(",", textBannedWordsList.Text
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             if (RadioEmojiNotoColor.IsChecked == true)
@@ -332,6 +345,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.AvatarScale = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.UsernameFontScale = double.Parse(textUsernameScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.LeftSpacingScale = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.WordSpacingScale = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
@@ -371,6 +385,7 @@ namespace TwitchDownloaderWPF
                 _ = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textUsernameScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture);
@@ -470,16 +485,16 @@ namespace TwitchDownloaderWPF
             }
             comboFont.SelectedItem = "Inter Embedded";
 
-            Codec h264Codec = new Codec() { Name = "H264", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx264 -preset:v veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h264NvencCodec = new Codec() { Name = "H264 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_nvenc -preset:v p4 -cq 20 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h264AmfCodec = new Codec() { Name = "H264 AMD", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_amf -preset:v p4 -cq 20 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h265Codec = new Codec() { Name = "H265", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libx265 -preset:v veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h265NvencCodec = new Codec() { Name = "H265 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v hevc_nvenc -preset:v p4 -cq 21 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec h265AmfCodec = new Codec() { Name = "H265 AMD", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v hevc_amf -preset:v p4 -cq 21 -pix_fmt yuv420p \"{save_path}\"" };
-            Codec vp8Codec = new Codec() { Name = "VP8", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx -crf 18 -b:v 2M -pix_fmt yuva420p -auto-alt-ref 0 \"{save_path}\"" };
-            Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 18 -b:v 2M -deadline realtime -quality realtime -speed 3 -pix_fmt yuva420p \"{save_path}\"" };
-            Codec rleCodec = new Codec() { Name = "RLE", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v qtrle -pix_fmt argb \"{save_path}\"" };
-            Codec proresCodec = new Codec() { Name = "ProRes", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt bgra -video_size {width}x{height} -i -", OutputArgs = "-c:v prores_ks -qscale:v 62 -pix_fmt argb \"{save_path}\"" };
+            Codec h264Codec = new Codec() { Name = "H264", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v libx264 -preset:v veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h264NvencCodec = new Codec() { Name = "H264 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_nvenc -preset:v p4 -cq 20 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h264AmfCodec = new Codec() { Name = "H264 AMD", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v h264_amf -preset:v p4 -cq 20 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h265Codec = new Codec() { Name = "H265", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v libx265 -preset:v veryfast -crf 18 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h265NvencCodec = new Codec() { Name = "H265 NVIDIA", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v hevc_nvenc -preset:v p4 -cq 21 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec h265AmfCodec = new Codec() { Name = "H265 AMD", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v hevc_amf -preset:v p4 -cq 21 -pix_fmt yuv420p \"{save_path}\"" };
+            Codec vp8Codec = new Codec() { Name = "VP8", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx -crf 18 -b:v 2M -pix_fmt yuva420p -auto-alt-ref 0 \"{save_path}\"" };
+            Codec vp9Codec = new Codec() { Name = "VP9", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v libvpx-vp9 -crf 18 -b:v 2M -deadline realtime -quality realtime -speed 3 -pix_fmt yuva420p \"{save_path}\"" };
+            Codec rleCodec = new Codec() { Name = "RLE", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v qtrle -pix_fmt argb \"{save_path}\"" };
+            Codec proresCodec = new Codec() { Name = "ProRes", InputArgs = "-framerate {fps} -f rawvideo -analyzeduration {max_int} -probesize {max_int} -pix_fmt {pix_fmt} -video_size {width}x{height} -i -", OutputArgs = "-c:v prores_ks -qscale:v 62 -pix_fmt argb \"{save_path}\"" };
             VideoContainer mp4Container = new VideoContainer() { Name = "MP4", SupportedCodecs = [h264Codec, h265Codec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec] };
             VideoContainer movContainer = new VideoContainer() { Name = "MOV", SupportedCodecs = [h264Codec, h265Codec, rleCodec, proresCodec, h264NvencCodec, h265NvencCodec, h264AmfCodec, h265AmfCodec] };
             VideoContainer webmContainer = new VideoContainer() { Name = "WEBM", SupportedCodecs = [vp8Codec, vp9Codec] };

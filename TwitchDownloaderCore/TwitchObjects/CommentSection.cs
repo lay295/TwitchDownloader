@@ -1,10 +1,8 @@
-﻿using SkiaSharp;
-
-namespace TwitchDownloaderCore.TwitchObjects
+﻿namespace TwitchDownloaderCore.TwitchObjects
 {
     public class CommentSection
     {
-        public SKBitmap Image { get; set; }
+        public SectionImage Image { get; set; }
         public List<(Point drawPoint, TwitchEmote emote)> Emotes { get; set; }
         public int CommentIndex { get; set; }
     }

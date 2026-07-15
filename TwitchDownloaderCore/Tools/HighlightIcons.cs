@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore.Tools
         [GeneratedRegex("""^An anonymous user (?:gifted a|is gifting \d{1,4}) Tier \d""")]
         private static partial Regex GiftAnonymousRegex { get; }
 
-        [GeneratedRegex("""^((?:\w+ )?watched \d+ consecutive streams this month and sparked a watch streak! )(.+)$""")]
+        [GeneratedRegex("""^((?:\w+ )?watched \d+ consecutive streams (?:this month )?and sparked a watch streak! )(.+)$""")]
         private static partial Regex WatchStreakRegex { get; }
 
         [GeneratedRegex("""^We added \d+ Gift Subs (?:AND \d+ Bonus Gift Subs )?to """)]
@@ -130,7 +130,7 @@ namespace TwitchDownloaderCore.Tools
                 if (bodyWithoutName.StartsWith(" is paying forward the Gift they got from"))
                     return HighlightType.PayingForward;
 
-                if (bodyWithoutName.Contains(" consecutive streams this month and sparked a watch streak! ", StringComparison.Ordinal))
+                if (bodyWithoutName.Contains(" consecutive streams ", StringComparison.Ordinal) && bodyWithoutName.Contains(" and sparked a watch streak! ", StringComparison.Ordinal))
                     return HighlightType.WatchStreak;
 
                 if (bodyWithoutName.StartsWith(": Donated ") && bodyWithoutName[10..].Contains(" to support ", StringComparison.Ordinal))
@@ -237,7 +237,7 @@ namespace TwitchDownloaderCore.Tools
 
             var newSize = (int)FinalIconSize;
             var imageInfo = new SKImageInfo(newSize, newSize);
-            var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
+            using var resizedBitmap = tempBitmap.Resize(imageInfo, SKFilterQuality.High);
             tempBitmap.Dispose();
 
             resizedBitmap.SetImmutable();

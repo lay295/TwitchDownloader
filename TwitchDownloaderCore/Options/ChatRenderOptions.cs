@@ -1,5 +1,7 @@
 ﻿using SkiaSharp;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Options
 {
@@ -9,9 +11,10 @@ namespace TwitchDownloaderCore.Options
         public string OutputFile { get; set; }
         public SKColor BackgroundColor { get; set; }
         public SKColor AlternateBackgroundColor { get; set; }
-        private SKPaint _alternateBackgroundPaint;
-        public SKPaint AlternateBackgroundPaint => _alternateBackgroundPaint ??= new SKPaint { Color = AlternateBackgroundColor, BlendMode = SKBlendMode.Src };
+        public SKPaint AlternateBackgroundPaint => field ??= new SKPaint { Color = AlternateBackgroundColor, BlendMode = SKBlendMode.Src };
         public bool AlternateMessageBackgrounds { get; set; }
+        public SKColor HighlightUserColor { get; set; }
+        public SKPaint AlternateBackgroundHighlightUserPaint => field ??= new SKPaint { Color = HighlightUserColor.CompositeOver(HighlightUserColor), BlendMode = SKBlendMode.Src };
         public SKColor MessageColor { get; set; }
         public int ChatHeight { get; set; }
         public int ChatWidth { get; set; }
@@ -49,12 +52,15 @@ namespace TwitchDownloaderCore.Options
         public string TempFolder { get; set; }
         public bool SubMessages { get; set; }
         public bool ChatBadges { get; set; }
-        public string[] IgnoreUsersArray { get; set; } = Array.Empty<string>();
-        public string[] BannedWordsArray { get; set; } = Array.Empty<string>();
+        public string[] HighlightUsersArray { get; set; } = [];
+        public string[] IgnoreUsersArray { get; set; } = [];
+        public string[] BannedWordsArray { get; set; } = [];
         public double EmoteScale { get; set; } = 1.0;
         public double BadgeScale { get; set; } = 1.0;
         public double EmojiScale { get; set; } = 1.0;
         public double AvatarScale { get; set; } = 1.0;
+        public double UsernameFontScale { get; set; } = 1.0;
+        public double EffectiveUsernameFontSize => FontSize * (UsernameFontScale > 0 ? UsernameFontScale : 1.0);
         public double VerticalSpacingScale { get; set; } = 1.0;
         public double SidePaddingScale { get; set; } = 1.0;
         public double SectionHeightScale { get; set; } = 1.0;
@@ -62,7 +68,7 @@ namespace TwitchDownloaderCore.Options
         public double EmoteSpacingScale { get; set; } = 1.0;
         public double AccentStrokeScale { get; set; } = 1.0;
         public double AccentIndentScale { get; set; } = 1.0;
-        public int ChatBadgeMask { get; set; } = 0;
+        public ChatBadgeType ChatBadgeMask { get; set; } = 0;
         public int StartOverride { get; set; } = -1;
         public int EndOverride { get; set; } = -1;
         public int SidePadding => (int)(6 * ReferenceScale * SidePaddingScale);

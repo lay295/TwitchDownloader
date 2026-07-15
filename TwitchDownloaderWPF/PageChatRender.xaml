@@ -14,7 +14,7 @@
       lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
       lex:ResxLocalizationProvider.DefaultDictionary="Strings"
       mc:Ignorable="d"
-      d:DesignHeight="400" d:DesignWidth="800"
+      d:DesignHeight="440" d:DesignWidth="850"
       Title="PageChatRender" Initialized="Page_Initialized" Unloaded="Page_Unloaded" Loaded="Page_Loaded"
       >
     <Page.Resources>
@@ -115,6 +115,16 @@
                             <TextBox x:Name="textIgnoreUsersList" Margin="0,4,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc BannedWordsList}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc BannedWordsListTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
                             <TextBox x:Name="textBannedWordsList" Margin="0,4,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                            <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource AppText}"><Run Text="{lex:Loc HighlightUsersList}"/><Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><Run Text="{lex:Loc HighlightUsersListTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" x:Name="textHighlightUsersList" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                                <xctk:ColorPicker Grid.Column="1" x:Name="colorHighlightUsers" SelectedColor="#C8FF0059" Width="50" Height="22" Margin="5,0,0,0" HorizontalAlignment="Left" Background="White" BorderBrush="{DynamicResource AppElementInnerBorder}" DropDownBackground="{DynamicResource AppElementInnerBackground}" Foreground="{DynamicResource AppText}" HeaderBackground="{DynamicResource AppElementInnerBackground}" HeaderForeground="{DynamicResource AppText}" TabBackground="{DynamicResource AppElementBorder}" TabForeground="{DynamicResource AppText}"/>
+                            </Grid>
                             <WrapPanel Orientation="Horizontal" Margin="0,10,0,0">
                                 <TextBlock Text="{lex:Loc EmojiVendor}" Margin="0,0,0,0" Foreground="{DynamicResource AppText}"/>
                                 <RadioButton x:Name="RadioEmojiNotoColor" IsChecked="True" Content="{lex:Loc EmojiVendorNotoColor}" Margin="3,0,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
@@ -135,6 +145,7 @@
                             <TextBlock Text="{lex:Loc EmojiScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc AvatarScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc OutlineScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
+                            <TextBlock Text="{lex:Loc ChatUsernameFontSize}" ToolTip="{lex:Loc ChatUsernameFontSizeTooltip}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                             <TextBlock Text="{lex:Loc VerticalSpacingScale}" HorizontalAlignment="Right" Margin="0,14,0,0" Foreground="{DynamicResource AppText}"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="0,10,5,5">
@@ -143,6 +154,7 @@
                             <TextBox x:Name="textEmojiScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textAvatarScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textOutlineScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                            <TextBox x:Name="textUsernameScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" ToolTip="{lex:Loc ChatUsernameFontSizeTooltip}" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                             <TextBox x:Name="textVerticalScale" Text="1.0" Width="50" HorizontalAlignment="Left" Margin="0,2,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="5,10,5,5">
@@ -213,6 +225,9 @@
                         </Run>
                         <Run MouseDown="FfmpegParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
                             {save_path}
+                        </Run>
+                        <Run MouseDown="FfmpegParameter_MouseDown" Cursor="Hand" FontWeight="Bold">
+                            {pix_fmt}
                         </Run>
                     </TextBlock>
                     <TextBlock>

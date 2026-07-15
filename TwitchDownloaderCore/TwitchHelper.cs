@@ -7,6 +7,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
@@ -23,6 +26,13 @@ namespace TwitchDownloaderCore
         private static readonly HttpClient httpClient = new()
         {
             Timeout = TimeSpan.FromSeconds(60)
+        };
+
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            AllowTrailingCommas = true
         };
 
         private static readonly string[] BttvZeroWidth = ["SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat"];
@@ -205,7 +215,8 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlClipSearchResponse>();
         }
 
-        public static async Task<EmoteResponse> GetThirdPartyEmotesMetadata(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, ITaskLogger logger, CancellationToken cancellationToken = default)
+        public static async Task<EmoteResponse> GetThirdPartyEmotesMetadata(int streamerId, bool getBttv, bool getFfz, bool getStv, bool allowUnlistedEmotes, string cacheFolder, bool offline, ITaskLogger logger,
+            CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -215,12 +226,18 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    emoteResponse.BTTV = await GetBttvEmotesMetadata(streamerId, cancellationToken);
+                    if (!offline)
+                    {
+                        emoteResponse.BTTV = await GetBttvEmotesMetadata(streamerId, cancellationToken);
+                    }
                 }
                 catch (Exception ex)
                 {
                     LogProviderException(ex, "BetterTTV", logger);
                 }
+
+                var bttvDir = new DirectoryInfo(Path.Combine(cacheFolder, "bttv"));
+                await RefreshOrLoadProviderMetadata(emoteResponse.BTTV, bttvDir, "BetterTTV", streamerId, offline, logger, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -229,12 +246,18 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    emoteResponse.FFZ = await GetFfzEmotesMetadata(streamerId, cancellationToken);
+                    if (!offline)
+                    {
+                        emoteResponse.FFZ = await GetFfzEmotesMetadata(streamerId, cancellationToken);
+                    }
                 }
                 catch (Exception ex)
                 {
                     LogProviderException(ex, "FFZ", logger);
                 }
+
+                var ffzDir = new DirectoryInfo(Path.Combine(cacheFolder, "ffz"));
+                await RefreshOrLoadProviderMetadata(emoteResponse.FFZ, ffzDir, "FFZ", streamerId, offline, logger, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -243,12 +266,18 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    emoteResponse.STV = await GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, logger, cancellationToken);
+                    if (!offline)
+                    {
+                        emoteResponse.STV = await GetStvEmotesMetadata(streamerId, allowUnlistedEmotes, logger, cancellationToken);
+                    }
                 }
                 catch (Exception ex)
                 {
                     LogProviderException(ex, "7TV", logger);
                 }
+
+                var stvDir = new DirectoryInfo(Path.Combine(cacheFolder, "stv"));
+                await RefreshOrLoadProviderMetadata(emoteResponse.FFZ, stvDir, "7TV", streamerId, offline, logger, cancellationToken);
             }
 
             return emoteResponse;
@@ -417,6 +446,60 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
+        /// <summary>
+        /// Persists fresh metadata to disk so future sessions can fall back to it when the API is temporarily unavailable.
+        /// </summary>
+        private static async Task RefreshOrLoadProviderMetadata(List<EmoteResponseItem> emotes, DirectoryInfo cacheFolder, string providerName, int streamerId, bool offline, ITaskLogger logger, CancellationToken ct)
+        {
+            var cacheFile = new FileInfo(Path.Combine(cacheFolder.FullName, $"emotes_{streamerId}.json.gz"));
+
+            if (emotes is { Count: > 0 })
+            {
+                // Persist fresh metadata so future sessions can fall back to it.
+                try
+                {
+                    if (!cacheFolder.Exists)
+                        CreateDirectory(cacheFolder.FullName);
+
+                    await using var fs = cacheFile.OpenWrite();
+                    await using var gs = new GZipStream(fs, CompressionLevel.SmallestSize);
+                    await JsonSerializer.SerializeAsync(gs, emotes, JsonSerializerOptions, ct);
+                }
+                catch { /* best-effort - never block rendering on a metadata write failure */ }
+
+                return;
+            }
+
+            // API failed - try falling back to a previously cached emote list.
+            try
+            {
+                if (!cacheFile.Exists)
+                    return;
+
+                var timeSinceLastWrite = DateTime.UtcNow - cacheFile.LastWriteTimeUtc;
+                var maxAge = TimeSpan.FromHours(48);
+                if (timeSinceLastWrite > maxAge)
+                    return;
+
+                await using var fs = cacheFile.OpenRead();
+                await using var gs = new GZipStream(fs, CompressionMode.Decompress);
+                var cached = await JsonSerializer.DeserializeAsync<EmoteResponseItem[]>(gs, JsonSerializerOptions, ct);
+                if (cached is { Length: > 0 })
+                {
+                    var ageHours = timeSinceLastWrite.TotalHours;
+                    if (offline)
+                        logger.LogInfo($"Using cached {providerName} emote list from {ageHours:F1}h ago ({cached.Length} emotes).");
+                    else
+                        logger.LogInfo($"{providerName} API unavailable. Using cached emote list from {ageHours:F1}h ago ({cached.Length} emotes).");
+                    emotes.AddRange(cached);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Failed to load cached {providerName} emote metadata: {ex.Message}");
+            }
+        }
+
         public static async Task<List<TwitchEmote>> GetThirdPartyEmotes(List<Comment> comments, int streamerId, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool bttv = true, bool ffz = true, bool stv = true, bool allowUnlistedEmotes = true, bool offline = false, CancellationToken cancellationToken = default)
         {
             // No 3rd party emotes are wanted
@@ -452,23 +535,17 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            // Directly return if we are in offline, no need for a network request
-            if (offline)
-            {
-                return emotes.Values.ToList();
-            }
+            EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, cacheFolder, offline, logger, cancellationToken);
 
             DirectoryInfo bttvFolder = new DirectoryInfo(Path.Combine(cacheFolder, "bttv"));
             DirectoryInfo ffzFolder = new DirectoryInfo(Path.Combine(cacheFolder, "ffz"));
             DirectoryInfo stvFolder = new DirectoryInfo(Path.Combine(cacheFolder, "stv"));
 
-            EmoteResponse emoteDataResponse = await GetThirdPartyEmotesMetadata(streamerId, bttv, ffz, stv, allowUnlistedEmotes, logger, cancellationToken);
-
             if (bttv)
             {
                 try
                 {
-                    await FetchEmoteImages(comments, emoteDataResponse.BTTV, emotes, bttvFolder, logger, cancellationToken);
+                    await FetchEmoteImages(comments, emoteDataResponse.BTTV, emotes, bttvFolder, "BetterTTV", offline, logger, cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -480,7 +557,7 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    await FetchEmoteImages(comments, emoteDataResponse.FFZ, emotes, ffzFolder, logger, cancellationToken);
+                    await FetchEmoteImages(comments, emoteDataResponse.FFZ, emotes, ffzFolder, "FFZ", offline, logger, cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -492,7 +569,7 @@ namespace TwitchDownloaderCore
             {
                 try
                 {
-                    await FetchEmoteImages(comments, emoteDataResponse.STV, emotes, stvFolder, logger, cancellationToken);
+                    await FetchEmoteImages(comments, emoteDataResponse.STV, emotes, stvFolder, "7TV", offline, logger, cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -503,7 +580,7 @@ namespace TwitchDownloaderCore
             return emotes.Values.ToList();
 
             static async Task FetchEmoteImages([AllowNull] IEnumerable<Comment> comments, IEnumerable<EmoteResponseItem> emoteResponse, Dictionary<string, TwitchEmote> emotes,
-                DirectoryInfo cacheFolder, ITaskLogger logger, CancellationToken cancellationToken)
+                DirectoryInfo cacheFolder, string providerName, bool offline, ITaskLogger logger, CancellationToken cancellationToken)
             {
                 if (!cacheFolder.Exists)
                     cacheFolder = CreateDirectory(cacheFolder.FullName);
@@ -522,13 +599,16 @@ namespace TwitchDownloaderCore
                         select emote;
                 }
 
+                int fromCache = 0, fromDownload = 0;
                 foreach (var emote in emoteResponseQuery)
                 {
                     var emoteUrl = emote.ImageUrl.Replace("[scale]", "2");
+                    var expectedCachePath = Path.Combine(cacheFolder.FullName, $"{emote.Id}_2.{emote.ImageType}");
+                    var wasInCache = File.Exists(expectedCachePath);
 
                     try
                     {
-                        var (bytes, codec) = await GetImage(cacheFolder, emoteUrl, emote.Id, 2, emote.ImageType, false, logger, cancellationToken);
+                        var (bytes, codec) = await GetImage(cacheFolder, emoteUrl, emote.Id, 2, emote.ImageType, offline, logger, cancellationToken);
                         if (bytes is null)
                         {
                             continue;
@@ -541,11 +621,25 @@ namespace TwitchDownloaderCore
                             // Should never occur, but just in case
                             newEmote.Dispose();
                         }
+                        else if (wasInCache)
+                        {
+                            fromCache++;
+                        }
+                        else
+                        {
+                            fromDownload++;
+                        }
                     }
                     catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                     {
                         logger.LogWarning($"Got {(int)ex.StatusCode}: {ex.StatusCode} when fetching {emote.Code} ({emoteUrl}).");
                     }
+                }
+
+                var total = fromCache + fromDownload;
+                if (total > 0)
+                {
+                    logger.LogInfo($"Loaded {total} {providerName} emotes from cache/download - {fromCache} cached, {fromDownload} newly downloaded.");
                 }
             }
 

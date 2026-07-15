@@ -60,6 +60,18 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double UsernameFontScale {
+            get {
+                return ((double)(this["UsernameFontScale"]));
+            }
+            set {
+                this["UsernameFontScale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Outline {
             get {
@@ -216,7 +228,7 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
         public byte AlternateBackgroundColorR {
             get {
                 return ((byte)(this["AlternateBackgroundColorR"]));
@@ -228,7 +240,7 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
         public byte AlternateBackgroundColorG {
             get {
                 return ((byte)(this["AlternateBackgroundColorG"]));
@@ -240,7 +252,7 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
         public byte AlternateBackgroundColorB {
             get {
                 return ((byte)(this["AlternateBackgroundColorB"]));
@@ -595,6 +607,66 @@ namespace TwitchDownloaderWPF.Properties {
             }
             set {
                 this["IgnoreUsersList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string HighlightUsersList {
+            get {
+                return ((string)(this["HighlightUsersList"]));
+            }
+            set {
+                this["HighlightUsersList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public byte HighlightUsersColorA {
+            get {
+                return ((byte)(this["HighlightUsersColorA"]));
+            }
+            set {
+                this["HighlightUsersColorA"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("255")]
+        public byte HighlightUsersColorR {
+            get {
+                return ((byte)(this["HighlightUsersColorR"]));
+            }
+            set {
+                this["HighlightUsersColorR"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public byte HighlightUsersColorG {
+            get {
+                return ((byte)(this["HighlightUsersColorG"]));
+            }
+            set {
+                this["HighlightUsersColorG"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public byte HighlightUsersColorB {
+            get {
+                return ((byte)(this["HighlightUsersColorB"]));
+            }
+            set {
+                this["HighlightUsersColorB"] = value;
             }
         }
         

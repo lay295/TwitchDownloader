@@ -129,15 +129,11 @@ namespace TwitchDownloaderCore
 
         private async Task CombineVideoParts(IReadOnlyCollection<string> fileList, FileInfo outputFileInfo, FileStream outputStream, CancellationToken cancellationToken)
         {
-            DriveInfo outputDrive = DriveHelper.GetOutputDrive(outputFileInfo.FullName);
-
             int partCount = fileList.Count;
             int doneCount = 0;
 
             foreach (var partFile in fileList)
             {
-                await DriveHelper.WaitForDrive(outputDrive, _progress, cancellationToken);
-
                 await using (var fs = File.Open(partFile, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     await fs.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
