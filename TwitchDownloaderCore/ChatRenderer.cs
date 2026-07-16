@@ -11,6 +11,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -368,13 +369,15 @@ namespace TwitchDownloaderCore
         {
             Debug.Assert(frame.Length == maskBytes.Length * 4); // 32bpp -> 8bpp
 
+            var produced = 0;
+            var outCount = maskBytes.Length;
+
             fixed (byte* pFrame = frame)
             fixed (byte* pMask = maskBytes)
             {
                 if (Avx2.IsSupported)
                 {
-                    // 3,7,11,15 in low lane and 19,23,27,31 in high lane.
-                    // In AVX2 shuffle, each 128-bit lane is shuffled independently.
+                    // Take every 4th byte. AVX2 shuffles each 128-bit lane independently
                     var shuffleMask = Vector256.Create(
                         3, 7, 11, 15, 0x80, 0x80, 0x80, 0x80,
                         0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
@@ -382,31 +385,17 @@ namespace TwitchDownloaderCore
                         0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80
                     );
 
-                    var produced = 0;
-                    var outCount = maskBytes.Length;
-                    while (produced + 8 <= outCount)
+                    for (; produced + 8 <= outCount; produced += 8)
                     {
-                        // 32 input bytes -> 8 output bytes
                         var vec = Avx.LoadVector256(pFrame + produced * 4);
                         var shuffle = Avx2.Shuffle(vec, shuffleMask);
 
                         var lo = shuffle.GetLower().AsUInt32().ToScalar();
                         var hi = shuffle.GetUpper().AsUInt32().ToScalar();
                         *(ulong*)(pMask + produced) = lo | ((ulong)hi << 32);
-
-                        produced += 8;
                     }
-
-                    // Finish copy
-                    for (; produced < outCount; produced++)
-                    {
-                        pMask[produced] = pFrame[produced * 4 + 3];
-                    }
-
-                    return;
                 }
-
-                if (Ssse3.IsSupported)
+                else if (Ssse3.IsSupported)
                 {
                     // Take every 4th byte
                     var shuffleMask = Vector128.Create(
@@ -416,37 +405,40 @@ namespace TwitchDownloaderCore
                         0x80, 0x80, 0x80, 0x80
                     );
 
-                    var produced = 0;
-                    var outCount = maskBytes.Length;
-                    while (produced + 4 <= outCount)
+                    for (; produced + 4 <= outCount; produced += 4)
                     {
-                        // 16 input bytes -> 4 output bytes
                         var vec = Sse2.LoadVector128(pFrame + produced * 4);
                         var shuffle = Ssse3.Shuffle(vec, shuffleMask);
 
                         *(uint*)(pMask + produced) = shuffle.AsUInt32().ToScalar();
-
-                        produced += 4;
                     }
+                }
+                else if (AdvSimd.Arm64.IsSupported)
+                {
+                    // Take every 4th byte
+                    var tableIdx = Vector128.Create(
+                        3, 7, 11, 15,
+                        0xFF, 0xFF, 0xFF, 0xFF,
+                        0xFF, 0xFF, 0xFF, 0xFF,
+                        0xFF, 0xFF, 0xFF, 0xFF
+                    );
 
-                    // Finish copy
-                    for (; produced < outCount; produced++)
+                    for (; produced + 4 <= outCount; produced += 4)
                     {
-                        pMask[produced] = pFrame[produced * 4 + 3];
-                    }
+                        var vec = AdvSimd.LoadVector128(pFrame + produced * 4);
+                        var shuffle = AdvSimd.Arm64.VectorTableLookup(vec, tableIdx);
 
-                    return;
+                        *(uint*)(pMask + produced) = shuffle.AsUInt32().ToScalar();
+                    }
                 }
 
-                // Scalar fallback for when SIMD is unavailable
-                var pF = pFrame + 3;
+                // Scalar fallback for when SIMD is unavailable/finish copy if vector size % outCount != 0
+                var pF = pFrame + produced * 4 + 3;
                 var pM = pMask;
-                var end = pFrame + frame.Length;
-
-                while (pF < end)
+                var frameEnd = pFrame + frame.Length;
+                for (; pF < frameEnd; pF += 4)
                 {
                     *pM++ = *pF;
-                    pF += 4;
                 }
             }
         }
