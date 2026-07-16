@@ -18,7 +18,7 @@ namespace TwitchDownloaderCore.Tools
 		private readonly ITaskLogger _logger;
 		private readonly CancellationTokenSource _endConnection = new CancellationTokenSource();
 
-		private readonly Channel<string> _subscriptionRequestsWaitingForSending = Channel.CreateUnbounded<string>();
+		private readonly Channel<EventHubMessage> _subscriptionRequestsWaitingForSending = Channel.CreateUnbounded<EventHubMessage>();
 		private readonly ConcurrentDictionary<string, TaskCompletionSource<SubscribeResponseData>> _subscriptionResponseHandlers = new();
 
 		private readonly Channel<EventHubMessage> _notifications = Channel.CreateUnbounded<EventHubMessage>();
@@ -35,40 +35,38 @@ namespace TwitchDownloaderCore.Tools
 			_ = RunConnectionLoop();
 		}
 
-		public Task<SubscribeResponseData> Subscribe(TwitchChatEvent evt, string streamerId)
+		/// <summary>
+		/// send a subscription request and wait for the response
+		/// </summary>
+		/// <param name="evt">the name of the event</param>
+		/// <param name="streamerId">the id (not login or displayname) of the streamer</param>
+		/// <returns>the subscribe response data, can be successful or failed</returns>
+		public async Task<SubscribeResponseData> Subscribe(TwitchChatEvent evt, string streamerId)
 		{
-			// TODO: timeout or what happens when there is no open connection/the loop ended?
-			string topic;
-			switch (evt)
-			{
-				case TwitchChatEvent.VideoPlaybackById:
-					topic = $"video-playback-by-id.{streamerId}";
-					break;
-				default:
-					throw new ArgumentException($"subscription for that event not yet supported: {evt}", nameof(evt));
-			}
+			const int SUBSCRIPTION_TIMEOUT_SECS = 20;
 
-			var messageId = GenerateNanoId();
 			var subscribeId = GenerateNanoId();
+			EventHubMessage request = CreateSubscriptionMessage(evt, streamerId, subscribeId);
 
-			EventHubMessage request = new EventHubMessage
-			{
-				id = messageId,
-				type = EventHubMessageType.Subscribe,
-				timestamp = DateTime.UtcNow,
-				Data = new SubscribeData
-				{
-					id = subscribeId,
-					pubsub = new SubscriptionPubSub { topic = topic }
-				}
-			};
-
-			var message = JsonSerializer.Serialize(request, _jsonSerializerOptions);
 			var subscriptionTaskSource = new TaskCompletionSource<SubscribeResponseData>();
 			_subscriptionResponseHandlers.TryAdd(subscribeId, subscriptionTaskSource);
-			_subscriptionRequestsWaitingForSending.Writer.TryWrite(message);
 
-			return subscriptionTaskSource.Task;
+			_subscriptionRequestsWaitingForSending.Writer.TryWrite(request);
+
+			try
+			{
+				return await subscriptionTaskSource.Task.WaitAsync(TimeSpan.FromSeconds(SUBSCRIPTION_TIMEOUT_SECS));
+			}
+			catch
+			{
+				// if sending failed, this is already set to the exception, but timeout does not complete task
+				subscriptionTaskSource.TrySetCanceled();
+				throw;
+			}
+			finally
+			{
+				_subscriptionResponseHandlers.TryRemove(subscribeId, out _);
+			}
 		}
 
 		private async Task RunConnectionLoop()
@@ -175,10 +173,13 @@ namespace TwitchDownloaderCore.Tools
 					if (_subscriptionResponseHandlers.TryRemove(subscribeResponse.subscription.id, out var subscriptionTaskSource))
 					{
 						subscriptionTaskSource.SetResult(subscribeResponse);
+					} else
+					{
+						_logger.LogWarning($"received subscription response for unknown subscription request {subscribeResponse.subscription.id} ({subscribeResponse.result})");
 					}
 					break;
 				case null:
-					// keepalive whose only purpose it was to update _lastMessageReceived
+					// keepalive message, whose only purpose it is to update _lastMessageReceived
 					break;
 				case NotificationData:
 					_notifications.Writer.TryWrite(message);
@@ -226,8 +227,20 @@ namespace TwitchDownloaderCore.Tools
 				await foreach (var subrequest in _subscriptionRequestsWaitingForSending.Reader.ReadAllAsync(cancellationToken))
 				{
 					_logger.LogVerbose($"send sub request {subrequest}");
-					// can't be interrupted as the subrequest has already been removed from the channel and now needs to be processed.
-					await socket.SendTextPooledAsync(subrequest, CancellationToken.None);
+					try
+					{
+						var message = JsonSerializer.Serialize(subrequest, _jsonSerializerOptions);
+						// can't be interrupted as the subrequest has already been removed from the channel and now needs to be processed.
+						// if sending fails, then this subscription will just fail
+						await socket.SendTextPooledAsync(message, CancellationToken.None);
+					}
+					catch (Exception ex)
+					{
+						if (_subscriptionResponseHandlers.TryRemove(((SubscribeData)subrequest.Data).id, out var subscriptionTaskSource))
+						{
+							subscriptionTaskSource.SetException(ex);
+						}
+					}
 				}
 			}
 			catch (OperationCanceledException) { }
@@ -249,6 +262,31 @@ namespace TwitchDownloaderCore.Tools
 			}
 
 			return new string(result);
+		}
+
+		private EventHubMessage CreateSubscriptionMessage(TwitchChatEvent evt, string streamerId, string subscribeId)
+		{
+			string topic;
+			switch (evt)
+			{
+				case TwitchChatEvent.VideoPlaybackById:
+					topic = $"video-playback-by-id.{streamerId}";
+					break;
+				default:
+					throw new ArgumentException($"subscription for that event not yet supported: {evt}", nameof(evt));
+			}
+
+			return new EventHubMessage
+			{
+				id = GenerateNanoId(),
+				type = EventHubMessageType.Subscribe,
+				timestamp = DateTime.UtcNow,
+				Data = new SubscribeData
+				{
+					id = subscribeId,
+					pubsub = new SubscriptionPubSub { topic = topic }
+				}
+			};
 		}
 
 		public void Dispose()
