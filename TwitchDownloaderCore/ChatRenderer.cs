@@ -7,7 +7,6 @@ using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
@@ -652,7 +651,7 @@ namespace TwitchDownloaderCore
         private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
         {
             var currentTimeSeconds = currentTick / (double)renderOptions.Framerate;
-            var newestCommentIndex = GetNewestCommentIndex(lastUpdate?.CommentIndex ?? 0, currentTimeSeconds);
+            var newestCommentIndex = GetNewestCommentIndex(lastUpdate?.CommentIndex ?? -1, currentTimeSeconds);
             if (lastUpdate is not null && newestCommentIndex == lastUpdate.CommentIndex)
             {
                 return lastUpdate;
