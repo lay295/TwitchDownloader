@@ -308,7 +308,7 @@ namespace TwitchDownloaderCore.Extensions
             var slice = str;
             foreach (var current in codepoints)
             {
-                var currentLength = current.Value < ushort.MaxValue ? 1 : 2;
+                var currentLength = current.Value <= ushort.MaxValue ? 1 : 2;
 
                 if (slice.Length < currentLength)
                 {
