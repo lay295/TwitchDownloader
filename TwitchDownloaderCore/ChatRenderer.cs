@@ -1275,48 +1275,12 @@ namespace TwitchDownloaderCore
                 var written = textElement.CopyToExcept(stackSpace, EmojiExcludeChars);
                 if (!emojiLookup.TryGetValue(lookupKey[..written], out var emojiImage))
                 {
-                    var firstCodepoint = elementLength > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
-                        ? char.ConvertToUtf32(textElement[0], textElement[1])
-                        : textElement[0];
-
-                    if (AllEmojiSequences.TryGetValue(firstCodepoint, out var matches))
-                    {
-                        emojiMatches.Clear();
-                        foreach (var emoji in matches)
-                        {
-                            if (textElement.StartsWith(emoji.Sequence.Codepoints))
-                            {
-                                emojiMatches.Add(emoji);
-                            }
-                        }
-                    }
-
-                    var emojiMatchesCount = emojiMatches.Count;
-                    if (emojiMatchesCount == 0)
+                    // Slow path: Search for the emoji with Unicode.Net data
+                    if (!LookupEmojiSlow(textElement, emojiMatches, emojiLookup, ref emojiImage))
                     {
                         nonEmojiLen += elementLength;
                         continue;
                     }
-
-                    // Make sure the found emojis actually exist in our cache
-                    for (var j = 0; j < emojiMatchesCount; j++)
-                    {
-                        if (!emojiLookup.ContainsKey(GetEmojiKey(emojiMatches[j].Sequence.Codepoints)))
-                        {
-                            emojiMatches.RemoveAt(j);
-                            emojiMatchesCount--;
-                            j--;
-                        }
-                    }
-
-                    if (emojiMatchesCount == 0)
-                    {
-                        nonEmojiLen += elementLength;
-                        continue;
-                    }
-
-                    var selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
-                    emojiImage = emojiLookup[GetEmojiKey(selectedEmoji.Sequence.Codepoints)];
                 }
 
                 if (nonEmojiLen > 0)
@@ -1355,6 +1319,52 @@ namespace TwitchDownloaderCore
             {
                 DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragment.Slice(nonEmojiStart, nonEmojiLen), highlightWords, true, true);
             }
+        }
+
+        private static bool LookupEmojiSlow(ReadOnlySpan<char> textElement, List<SingleEmoji> emojiMatches, Dictionary<string, SKImage>.AlternateLookup<ReadOnlySpan<char>> emojiLookup, ref SKImage emojiImage)
+        {
+            var elementLength = textElement.Length;
+            var firstCodepoint = elementLength > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
+                ? char.ConvertToUtf32(textElement[0], textElement[1])
+                : textElement[0];
+
+            emojiMatches.Clear();
+            if (AllEmojiSequences.TryGetValue(firstCodepoint, out var matches))
+            {
+                foreach (var emoji in matches)
+                {
+                    if (textElement.StartsWith(emoji.Sequence.Codepoints))
+                    {
+                        emojiMatches.Add(emoji);
+                    }
+                }
+            }
+
+            var emojiMatchesCount = emojiMatches.Count;
+            if (emojiMatchesCount == 0)
+            {
+                return false;
+            }
+
+            // Make sure the found emojis actually exist in our cache
+            for (var j = 0; j < emojiMatchesCount; j++)
+            {
+                if (!emojiLookup.ContainsKey(GetEmojiKey(emojiMatches[j].Sequence.Codepoints)))
+                {
+                    emojiMatches.RemoveAt(j);
+                    emojiMatchesCount--;
+                    j--;
+                }
+            }
+
+            if (emojiMatchesCount == 0)
+            {
+                return false;
+            }
+
+            var selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
+            emojiImage = emojiLookup[GetEmojiKey(selectedEmoji.Sequence.Codepoints)];
+            return true;
         }
 
         private void DrawNonFontMessage(List<SectionImage> sectionImages, ref Point drawPos, Point defaultPos, ReadOnlySpan<char> fragment, bool highlightWords)
