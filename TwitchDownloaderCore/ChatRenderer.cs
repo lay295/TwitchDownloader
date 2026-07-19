@@ -1237,6 +1237,7 @@ namespace TwitchDownloaderCore
 
             var emojiMatches = new List<SingleEmoji>();
             var emojiLookup = emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            Span<char> stackSpace = stackalloc char[16];
 
             var fragmentSlice = fragment;
             var nonEmojiStart = 0;
@@ -1259,7 +1260,9 @@ namespace TwitchDownloaderCore
                 var textElement = fragmentSlice[..elementLength];
                 fragmentSlice = fragmentSlice[elementLength..];
 
-                if (!emojiLookup.TryGetValue(textElement.TrimEnd('\uFE0F'), out var emojiImage))
+                var lookupKey = elementLength <= stackSpace.Length ? stackSpace : new char[elementLength];
+                var written = textElement.CopyToExcept(stackSpace, '\uFE0F');
+                if (!emojiLookup.TryGetValue(lookupKey[..written], out var emojiImage))
                 {
                     var firstCodepoint = elementLength > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
                         ? char.ConvertToUtf32(textElement[0], textElement[1])

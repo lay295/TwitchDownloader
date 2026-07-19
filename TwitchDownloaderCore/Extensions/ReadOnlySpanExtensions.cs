@@ -330,32 +330,37 @@ namespace TwitchDownloaderCore.Extensions
             return true;
         }
 
-        public static bool CopyToNotInRange(this ReadOnlySpan<char> str, IEnumerable<Codepoint> codepoints)
+        public static int CopyToExcept(this ReadOnlySpan<char> str, Span<char> destination, params ReadOnlySpan<char> excludeChars)
         {
-            var slice = str;
-            foreach (var current in codepoints)
+            var firstIndex = str.IndexOfAny(excludeChars);
+            if (firstIndex == -1)
             {
-                var currentLength = current.Value < ushort.MaxValue ? 1 : 2;
-
-                if (slice.Length < currentLength)
-                {
-                    return false;
-                }
-
-                var codepointSpan = slice[..currentLength];
-                slice = slice[currentLength..];
-
-                var codepoint = currentLength > 1 && char.IsHighSurrogate(codepointSpan[0]) && char.IsLowSurrogate(codepointSpan[1])
-                    ? char.ConvertToUtf32(codepointSpan[0], codepointSpan[1])
-                    : codepointSpan[0];
-
-                if (codepoint != current)
-                {
-                    return false;
-                }
+                // No exclude chars, fallback to normal copy
+                str.CopyTo(destination);
+                return str.Length;
             }
 
-            return true;
+            // Ensure destination is large enough
+            if (destination.Length < str.Length)
+            {
+                throw new ArgumentException("Destination is too short.", nameof(destination));
+            }
+
+            // Regular copy until first invalid char, then loop copy
+            str[..firstIndex].CopyTo(destination);
+            var skipped = 0;
+            for (var i = firstIndex; i < str.Length; i++)
+            {
+                if (excludeChars.Contains(str[i]))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                destination[i - skipped] = str[i];
+            }
+
+            return str.Length - skipped;
         }
     }
 }
