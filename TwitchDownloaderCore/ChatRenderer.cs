@@ -1154,7 +1154,7 @@ namespace TwitchDownloaderCore
             {
                 DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, emote, highlightWords);
             }
-            else if (!skipEmoji && renderOptions.EmojiVendor != EmojiVendor.None && EmojiRegex.IsMatch(fragmentPart))
+            else if (!skipEmoji && renderOptions.EmojiVendor != EmojiVendor.None && (EmojiRegex.IsMatch(fragmentPart) || ContainsSupplementaryEmoji(fragmentPart)))
             {
                 DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
             }
@@ -1194,6 +1194,21 @@ namespace TwitchDownloaderCore
                 }
 
                 twitchEmote = null;
+                return false;
+            }
+
+            // Returns true if the text contains an emoji codepoint above U+1F9FF, i.e. beyond the range EmojiRegex
+            // covers, so newer emoji still enter DrawEmojiMessage even before the regex is updated.
+            static bool ContainsSupplementaryEmoji(ReadOnlySpan<char> text)
+            {
+                for (var i = 0; i < text.Length - 1; i++)
+                {
+                    var hi = text[i];
+                    if (hi is < '\uD83C' or > '\uD83F') continue;
+                    if (!char.IsLowSurrogate(text[i + 1])) continue;
+                    if (char.ConvertToUtf32(hi, text[i + 1]) > 0x1F9FF) return true;
+                }
+
                 return false;
             }
         }
