@@ -1227,6 +1227,8 @@ namespace TwitchDownloaderCore
             emotePositionList.Add((emotePoint, twitchEmote));
         }
 
+        private static readonly SearchValues<char> EmojiExcludeChars = SearchValues.Create('\uFE0F');
+
         private void DrawEmojiMessage(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragment, bool highlightWords)
         {
             if (renderOptions.EmojiVendor == EmojiVendor.None)
@@ -1261,7 +1263,7 @@ namespace TwitchDownloaderCore
                 fragmentSlice = fragmentSlice[elementLength..];
 
                 var lookupKey = elementLength <= stackSpace.Length ? stackSpace : new char[elementLength];
-                var written = textElement.CopyToExcept(stackSpace, '\uFE0F');
+                var written = textElement.CopyToExcept(stackSpace, EmojiExcludeChars);
                 if (!emojiLookup.TryGetValue(lookupKey[..written], out var emojiImage))
                 {
                     var firstCodepoint = elementLength > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])

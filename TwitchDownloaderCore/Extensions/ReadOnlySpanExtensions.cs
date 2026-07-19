@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Diagnostics;
 using System.Globalization;
 using NeoSmart.Unicode;
@@ -330,7 +331,7 @@ namespace TwitchDownloaderCore.Extensions
             return true;
         }
 
-        public static int CopyToExcept(this ReadOnlySpan<char> str, Span<char> destination, params ReadOnlySpan<char> excludeChars)
+        public static int CopyToExcept<T>(this ReadOnlySpan<T> str, Span<T> destination, SearchValues<T> excludeChars) where T : IEquatable<T>
         {
             var firstIndex = str.IndexOfAny(excludeChars);
             if (firstIndex == -1)
