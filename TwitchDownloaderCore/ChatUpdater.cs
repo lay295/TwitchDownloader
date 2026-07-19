@@ -158,8 +158,9 @@ namespace TwitchDownloaderCore
 
                 // Test if chat was downloaded before the end of stream, append new chapters if so
                 var lastChapter = chatRoot.video.chapters.LastOrDefault();
-                if (lastChapter is null ||
-                    (chatRoot.video.chapters.Count <= chaptersInfo.Count && lastChapter.startMilliseconds + lastChapter.lengthMilliseconds < videoInfo.lengthSeconds * 1000))
+                if (lastChapter is null
+                    || chatRoot.video.chapters.Count < chaptersInfo.Count
+                    || (chatRoot.video.chapters.Count == chaptersInfo.Count && lastChapter.startMilliseconds + lastChapter.lengthMilliseconds < videoInfo.lengthSeconds * 1000))
                 {
                     chatRoot.video.chapters.Remove(lastChapter);
                     foreach (var responseChapter in chaptersInfo.Skip(chatRoot.video.chapters.Count))
