@@ -879,22 +879,22 @@ namespace TwitchDownloaderCore
             return finalImage;
         }
 
-        private static string GetKeyName(IEnumerable<Codepoint> codepoints)
+        private static string GetEmojiKey(IEnumerable<Codepoint> codepoints)
         {
             if (!codepoints.TryGetNonEnumeratedCount(out var count))
             {
                 count = 2;
             }
 
-            var sb = new StringBuilder(count * 5); // '1234 '
+            var sb = new StringBuilder(count);
             foreach (var codepoint in codepoints)
             {
-                if (codepoint.Value == 0xFE0F) continue;
+                if (codepoint == 0xFE0F) continue;
 
-                sb.Append($"{codepoint.Value:X} ");
+                var rune = new Rune(codepoint.Value);
+                sb.Append($"{rune}");
             }
 
-            sb.TrimEnd(" ");
             return sb.ToString();
         }
 
@@ -1114,7 +1114,7 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private static readonly SearchValues<char> WhiteSpaceChars = SearchValues.Create("\t\n\v\f\r \u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000");
+        private static readonly SearchValues<char> WhiteSpaceChars = SearchValues.Create("\t\n\v\f\r\u0020\u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000");
 
         private void DrawMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
         {
@@ -1236,6 +1236,7 @@ namespace TwitchDownloaderCore
             }
 
             var emojiMatches = new List<SingleEmoji>();
+            var emojiLookup = emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
 
             var fragmentSlice = fragment;
             var nonEmojiStart = 0;
@@ -1258,44 +1259,50 @@ namespace TwitchDownloaderCore
                 var textElement = fragmentSlice[..elementLength];
                 fragmentSlice = fragmentSlice[elementLength..];
 
-                var firstCodepoint = elementLength > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
-                    ? char.ConvertToUtf32(textElement[0], textElement[1])
-                    : textElement[0];
-
-                if (AllEmojiSequences.TryGetValue(firstCodepoint, out var matches))
+                if (!emojiLookup.TryGetValue(textElement.TrimEnd('\uFE0F'), out var emojiImage))
                 {
-                    emojiMatches.Clear();
-                    foreach (var emoji in matches)
+                    var firstCodepoint = elementLength > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
+                        ? char.ConvertToUtf32(textElement[0], textElement[1])
+                        : textElement[0];
+
+                    if (AllEmojiSequences.TryGetValue(firstCodepoint, out var matches))
                     {
-                        if (textElement.StartsWith(emoji.Sequence.Codepoints))
+                        emojiMatches.Clear();
+                        foreach (var emoji in matches)
                         {
-                            emojiMatches.Add(emoji);
+                            if (textElement.StartsWith(emoji.Sequence.Codepoints))
+                            {
+                                emojiMatches.Add(emoji);
+                            }
                         }
                     }
-                }
 
-                if (emojiMatches.Count == 0)
-                {
-                    nonEmojiLen += elementLength;
-                    continue;
-                }
-
-                // Make sure the found emojis actually exist in our cache
-                var emojiMatchesCount = emojiMatches.Count;
-                for (var j = 0; j < emojiMatchesCount; j++)
-                {
-                    if (!emojiCache.ContainsKey(GetKeyName(emojiMatches[j].Sequence.Codepoints)))
+                    if (emojiMatches.Count == 0)
                     {
-                        emojiMatches.RemoveAt(j);
-                        emojiMatchesCount--;
-                        j--;
+                        nonEmojiLen += elementLength;
+                        continue;
                     }
-                }
 
-                if (emojiMatchesCount == 0)
-                {
-                    nonEmojiLen += elementLength;
-                    continue;
+                    // Make sure the found emojis actually exist in our cache
+                    var emojiMatchesCount = emojiMatches.Count;
+                    for (var j = 0; j < emojiMatchesCount; j++)
+                    {
+                        if (!emojiLookup.ContainsKey(GetEmojiKey(emojiMatches[j].Sequence.Codepoints)))
+                        {
+                            emojiMatches.RemoveAt(j);
+                            emojiMatchesCount--;
+                            j--;
+                        }
+                    }
+
+                    if (emojiMatchesCount == 0)
+                    {
+                        nonEmojiLen += elementLength;
+                        continue;
+                    }
+
+                    var selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
+                    emojiImage = emojiLookup[GetEmojiKey(selectedEmoji.Sequence.Codepoints)];
                 }
 
                 if (nonEmojiLen > 0)
@@ -1305,10 +1312,7 @@ namespace TwitchDownloaderCore
                     nonEmojiLen = 0;
                 }
 
-                SingleEmoji selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
-                var emojiImage = emojiCache[GetKeyName(selectedEmoji.Sequence.Codepoints)];
                 SKImageInfo emojiImageInfo = emojiImage.Info;
-
                 if (drawPos.X + emojiImageInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
                 {
                     AddImageSection(sectionImages, ref drawPos, defaultPos);
@@ -2104,7 +2108,18 @@ namespace TwitchDownloaderCore
 
             var newHeight = (int)Math.Round(36 * renderOptions.ReferenceScale * renderOptions.EmojiScale);
 
-            return emojis.Keys.ToDictionary(x => x, x =>
+            return emojis.Keys.ToDictionary(x =>
+            {
+                var span = x.AsSpan();
+                var sb = new StringBuilder(span.Length / 5); // '1234 '
+                foreach (var range in span.SplitAny())
+                {
+                    var rune = new Rune(uint.Parse(span[range], NumberStyles.HexNumber));
+                    sb.Append($"{rune}");
+                }
+
+                return sb.ToString();
+            }, x =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
