@@ -2,7 +2,6 @@
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
 using System.Buffers;
-using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -61,7 +60,10 @@ namespace TwitchDownloaderCore
 
         private static readonly SearchValues<char> DigitChars = SearchValues.Create("0123456789");
 
-        private static readonly IReadOnlyDictionary<int, string> AllEmojiSequences = Emoji.All.ToFrozenDictionary(e => e.SortOrder, e => e.Sequence.AsString);
+        private static readonly FrozenDictionary<int, SingleEmoji[]> AllEmojiSequences =
+            Emoji.All
+                .GroupBy(x => (int)x.Sequence.Codepoints.First().Value)
+                .ToFrozenDictionary(x => x.Key, x => x.ToArray());
 
         private readonly ITaskProgress _progress;
         private readonly ChatRenderOptions renderOptions;
@@ -881,10 +883,7 @@ namespace TwitchDownloaderCore
         {
             if (!codepoints.TryGetNonEnumeratedCount(out var count))
             {
-                var codepointQuery = codepoints
-                    .Where(codepoint => codepoint.Value != 0xFE0F)
-                    .Select(codepoint => codepoint.Value.ToString("X"));
-                return string.Join(' ', codepointQuery);
+                count = 2;
             }
 
             var sb = new StringBuilder(count * 5); // '1234 '
@@ -1236,13 +1235,19 @@ namespace TwitchDownloaderCore
                 return;
             }
 
+            var emojiMatches = new List<SingleEmoji>();
+
             var fragmentSlice = fragment;
             var nonEmojiStart = 0;
             var nonEmojiLen = 0;
-            var elementLength = 1;
-            while (elementLength > 0)
+            while (true)
             {
-                elementLength = StringInfo.GetNextTextElementLength(fragmentSlice);
+                var elementLength = StringInfo.GetNextTextElementLength(fragmentSlice);
+                if (elementLength == 0)
+                {
+                    break;
+                }
+
                 if (elementLength == 1 && char.IsAscii(fragmentSlice[0]))
                 {
                     nonEmojiLen += elementLength;
@@ -1250,43 +1255,34 @@ namespace TwitchDownloaderCore
                     continue;
                 }
 
-                var emojiBag = new ConcurrentBag<SingleEmoji>();
-                var textElement = ArrayPool<char>.Shared.Rent(elementLength);
-                fragmentSlice[..elementLength].CopyTo(textElement);
+                var textElement = fragmentSlice[..elementLength];
                 fragmentSlice = fragmentSlice[elementLength..];
-                try
+
+                var firstCodepoint = elementLength > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
+                    ? char.ConvertToUtf32(textElement[0], textElement[1])
+                    : textElement[0];
+
+                if (AllEmojiSequences.TryGetValue(firstCodepoint, out var matches))
                 {
-                    Emoji.All.AsParallel()
-                        .Where(emoji => textElement.StartsWith(AllEmojiSequences[emoji.SortOrder]))
-                        .ForAll(emoji =>
+                    emojiMatches.Clear();
+                    foreach (var emoji in matches)
+                    {
+                        if (textElement.StartsWith(emoji.Sequence.Codepoints))
                         {
-                            if (emoji.Group != "Flags")
-                            {
-                                emojiBag.Add(emoji);
-                                return;
-                            }
-
-                            if (textElement.StartsWith(AllEmojiSequences[emoji.SortOrder], StringComparison.Ordinal))
-                            {
-                                emojiBag.Add(emoji);
-                            }
-                        });
-                }
-                finally
-                {
-                    ArrayPool<char>.Shared.Return(textElement);
+                            emojiMatches.Add(emoji);
+                        }
+                    }
                 }
 
-                if (emojiBag.IsEmpty)
+                if (emojiMatches.Count == 0)
                 {
                     nonEmojiLen += elementLength;
                     continue;
                 }
 
                 // Make sure the found emojis actually exist in our cache
-                var emojiMatches = emojiBag.ToList();
-                int emojiMatchesCount = emojiMatches.Count;
-                for (int j = 0; j < emojiMatchesCount; j++)
+                var emojiMatchesCount = emojiMatches.Count;
+                for (var j = 0; j < emojiMatchesCount; j++)
                 {
                     if (!emojiCache.ContainsKey(GetKeyName(emojiMatches[j].Sequence.Codepoints)))
                     {
