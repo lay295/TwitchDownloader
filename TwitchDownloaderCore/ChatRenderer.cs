@@ -435,7 +435,7 @@ namespace TwitchDownloaderCore
 
                 // Scalar fallback for when SIMD is unavailable/finish copy if vector size % outCount != 0
                 var pF = pFrame + produced * 4 + 3;
-                var pM = pMask;
+                var pM = pMask + produced;
                 var frameEnd = pFrame + frame.Length;
                 for (; pF < frameEnd; pF += 4)
                 {
