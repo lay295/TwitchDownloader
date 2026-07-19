@@ -1154,7 +1154,7 @@ namespace TwitchDownloaderCore
             {
                 DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, emote, highlightWords);
             }
-            else if (!skipEmoji && EmojiRegex.IsMatch(fragmentPart))
+            else if (!skipEmoji && renderOptions.EmojiVendor != EmojiVendor.None && EmojiRegex.IsMatch(fragmentPart))
             {
                 DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
             }
@@ -1231,12 +1231,6 @@ namespace TwitchDownloaderCore
 
         private void DrawEmojiMessage(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragment, bool highlightWords)
         {
-            if (renderOptions.EmojiVendor == EmojiVendor.None)
-            {
-                DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragment, highlightWords, true, true);
-                return;
-            }
-
             var emojiMatches = new List<SingleEmoji>();
             var emojiLookup = emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
             Span<char> stackSpace = stackalloc char[16];
