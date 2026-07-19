@@ -1276,7 +1276,8 @@ namespace TwitchDownloaderCore
                 if (!emojiLookup.TryGetValue(lookupKey[..written], out var emojiImage))
                 {
                     // Slow path: Search for the emoji with Unicode.Net data
-                    if (!LookupEmojiSlow(textElement, emojiMatches, emojiLookup, ref emojiImage))
+                    emojiImage = LookupEmojiSlow(textElement, emojiMatches, emojiLookup);
+                    if (emojiImage is null)
                     {
                         nonEmojiLen += elementLength;
                         continue;
@@ -1321,10 +1322,10 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static bool LookupEmojiSlow(ReadOnlySpan<char> textElement, List<SingleEmoji> emojiMatches, Dictionary<string, SKImage>.AlternateLookup<ReadOnlySpan<char>> emojiLookup, ref SKImage emojiImage)
+        [return: MaybeNull]
+        private static SKImage LookupEmojiSlow(ReadOnlySpan<char> textElement, List<SingleEmoji> emojiMatches, Dictionary<string, SKImage>.AlternateLookup<ReadOnlySpan<char>> emojiLookup)
         {
-            var elementLength = textElement.Length;
-            var firstCodepoint = elementLength > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
+            var firstCodepoint = textElement.Length > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
                 ? char.ConvertToUtf32(textElement[0], textElement[1])
                 : textElement[0];
 
@@ -1343,7 +1344,7 @@ namespace TwitchDownloaderCore
             var emojiMatchesCount = emojiMatches.Count;
             if (emojiMatchesCount == 0)
             {
-                return false;
+                return null;
             }
 
             // Make sure the found emojis actually exist in our cache
@@ -1359,12 +1360,11 @@ namespace TwitchDownloaderCore
 
             if (emojiMatchesCount == 0)
             {
-                return false;
+                return null;
             }
 
             var selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
-            emojiImage = emojiLookup[GetEmojiKey(selectedEmoji.Sequence.Codepoints)];
-            return true;
+            return emojiLookup[GetEmojiKey(selectedEmoji.Sequence.Codepoints)];
         }
 
         private void DrawNonFontMessage(List<SectionImage> sectionImages, ref Point drawPos, Point defaultPos, ReadOnlySpan<char> fragment, bool highlightWords)
