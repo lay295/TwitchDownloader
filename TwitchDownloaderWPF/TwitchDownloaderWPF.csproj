@@ -51,7 +51,7 @@
     <PackageReference Include="FontAwesome5" Version="2.1.11" />
     <PackageReference Include="HandyControl" Version="3.5.1" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
-    <PackageReference Include="System.Management" Version="10.0.9" />
+    <PackageReference Include="System.Management" Version="10.0.10" />
     <PackageReference Include="WpfExtensions.Xaml" Version="1.2.0" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.10.0" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="6.0.2" />
