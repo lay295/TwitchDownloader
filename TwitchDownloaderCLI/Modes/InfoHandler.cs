@@ -135,7 +135,7 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("FPS").RightAligned())
                 .AddColumn(new TableColumn("Codecs").RightAligned());
 
-            var hasBitrate = qualities.Any(x => x.Item.StreamInfo.Bandwidth != 0);
+            var hasBitrate = qualities.Any(x => x.BitRate != 0);
             if (hasBitrate)
             {
                 streamTable
@@ -155,8 +155,8 @@ namespace TwitchDownloaderCLI.Modes
                 if (hasBitrate)
                 {
                     var videoLength = TimeSpan.FromSeconds(infoVideo.lengthSeconds);
-                    var bitrate = streamInfo.Bandwidth.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
-                    var fileSize = streamInfo.Bandwidth.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
+                    var bitrate = quality.BitRate.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
+                    var fileSize = quality.BitRate.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
                     streamTable.AddRow(name, resolution, fps, codecs, bitrate, fileSize);
                 }
                 else
@@ -265,6 +265,7 @@ namespace TwitchDownloaderCLI.Modes
         {
             const string DEFAULT_STRING = "-";
             var infoClip = clipRenderStatus.data.clip;
+            var qualities = VideoQualities.FromClip(infoClip);
 
             var infoTableTitle = new TableTitle("Clip Info");
             var infoTable = new Table()
@@ -296,14 +297,31 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("Resolution"))
                 .AddColumn(new TableColumn("FPS").RightAligned());
 
-            var clipQualities = VideoQualities.FromClip(clipRenderStatus.data.clip);
-            foreach (var quality in clipQualities.Qualities)
+            var hasBitrate = qualities.Any(x => x.BitRate != 0);
+            if (hasBitrate)
+            {
+                qualityTable
+                    .AddColumn(new TableColumn("Bitrate").RightAligned())
+                    .AddColumn(new TableColumn("File size").RightAligned());
+            }
+
+            foreach (var quality in qualities.Qualities)
             {
                 var name = quality.Name;
                 var resolution = quality.Resolution.HasWidth ? quality.Resolution.ToString() : quality.Resolution.Height.ToString();
                 var fps = quality.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
 
-                qualityTable.AddRow(name, resolution, fps);
+                if (hasBitrate)
+                {
+                    var videoLength = TimeSpan.FromSeconds(infoClip.durationSeconds);
+                    var bitrate = quality.BitRate.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
+                    var fileSize = quality.BitRate.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
+                    qualityTable.AddRow(name, resolution, fps, bitrate, fileSize);
+                }
+                else
+                {
+                    qualityTable.AddRow(name, resolution, fps);
+                }
             }
 
             AnsiConsole.Write(qualityTable);
@@ -329,7 +347,7 @@ namespace TwitchDownloaderCLI.Modes
                 .Select(x =>
                     new M3U8.Stream(
                         new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, x.Item.quality, x.Name, true, true),
-                        new M3U8.Stream.ExtStreamInfo(default, default, default, x.Resolution, x.Item.quality, x.Framerate),
+                        new M3U8.Stream.ExtStreamInfo(0, x.BitRate, x.Item.codecs?.Split(','), x.Resolution, x.Item.quality, x.Framerate),
                         $"{x.Item.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}"
                     ))
                 .ToArray();
