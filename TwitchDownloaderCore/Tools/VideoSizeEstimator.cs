@@ -26,6 +26,9 @@ namespace TwitchDownloaderCore.Tools
         }
 
         /// <returns>An estimate of the final video download size in bytes.</returns>
+        public static long EstimateVideoSize(int bandwidth, TimeSpan length) => EstimateVideoSize(bandwidth, TimeSpan.Zero, length);
+
+        /// <returns>An estimate of the final video download size in bytes.</returns>
         public static long EstimateVideoSize(int bandwidth, TimeSpan startTime, TimeSpan endTime)
         {
             if (bandwidth < 1)

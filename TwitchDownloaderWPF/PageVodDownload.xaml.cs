@@ -244,7 +244,7 @@ namespace TwitchDownloaderWPF
             foreach (var item in comboQuality.Items.Cast<ComboBoxItem>())
             {
                 var quality = (IVideoQuality<M3U8.Stream>)item.Tag;
-                var bandwidth = quality.Item.StreamInfo.Bandwidth;
+                var bandwidth = quality.BitRate;
 
                 var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth, trimStart, trimEnd);
                 if (sizeInBytes == 0)

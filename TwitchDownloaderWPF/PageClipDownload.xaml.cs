@@ -7,9 +7,11 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Models;
+using TwitchDownloaderCore.Models.Interfaces;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -83,10 +85,14 @@ namespace TwitchDownloaderWPF
                 var clipQualities = VideoQualities.FromClip(clip);
                 foreach (var quality in clipQualities.Qualities)
                 {
-                    comboQuality.Items.Add(quality);
+                    var item = new ComboBoxItem { Content = quality.Name, Tag = quality };
+                    comboQuality.Items.Add(item);
                 }
 
                 comboQuality.SelectedIndex = 0;
+
+                UpdateVideoSizeEstimates();
+
                 SetEnabled(true);
             }
             catch (Exception ex)
@@ -164,6 +170,30 @@ namespace TwitchDownloaderWPF
             comboQuality.IsEnabled = enabled;
             SplitBtnDownload.IsEnabled = enabled;
             CheckMetadata.IsEnabled = enabled;
+        }
+
+        private void UpdateVideoSizeEstimates()
+        {
+            var selectedIndex = comboQuality.SelectedIndex;
+
+            foreach (var item in comboQuality.Items.Cast<ComboBoxItem>())
+            {
+                var quality = (IVideoQuality<ShareClipRenderStatusVideoQuality>)item.Tag;
+                var bandwidth = quality.BitRate;
+
+                var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(bandwidth, clipLength);
+                if (sizeInBytes == 0)
+                {
+                    item.Content = quality.Name;
+                }
+                else
+                {
+                    var newVideoSize = VideoSizeEstimator.StringifyByteCount(sizeInBytes);
+                    item.Content = $"{quality.Name} - {newVideoSize}";
+                }
+            }
+
+            comboQuality.SelectedIndex = selectedIndex;
         }
 
         public void SetImage(string imageUri, bool isGif)
@@ -268,7 +298,7 @@ namespace TwitchDownloaderWPF
             {
                 Filename = fileName,
                 Id = clipId,
-                Quality = comboQuality.Text,
+                Quality = ((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString(),
                 ThrottleKib = Settings.Default.DownloadThrottleEnabled
                     ? Settings.Default.MaximumBandwidthKib
                     : -1,
