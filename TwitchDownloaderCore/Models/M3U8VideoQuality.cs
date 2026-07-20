@@ -17,6 +17,8 @@ namespace TwitchDownloaderCore.Models
 
         public string Path { get; }
 
+        public int BitRate { get; }
+
         internal M3U8VideoQuality(M3U8.Stream item, string name)
         {
             Item = item;
@@ -25,6 +27,7 @@ namespace TwitchDownloaderCore.Models
             Framerate = item.StreamInfo.Framerate;
             IsSource = item.IsSource();
             Path = item.Path;
+            BitRate = item.StreamInfo.Bandwidth;
         }
 
         public override string ToString() => Name;

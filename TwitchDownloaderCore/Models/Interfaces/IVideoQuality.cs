@@ -14,6 +14,8 @@ namespace TwitchDownloaderCore.Models.Interfaces
 
         string Path { get; }
 
+        int BitRate { get; }
+
         string ToString() => Name;
     }
 }

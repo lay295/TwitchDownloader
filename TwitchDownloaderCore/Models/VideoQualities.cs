@@ -177,6 +177,11 @@ namespace TwitchDownloaderCore.Models
 
             static Resolution BuildClipResolution(ClipQuality clipQuality, decimal aspectRatio)
             {
+                if (clipQuality.width > 0 && clipQuality.height > 0)
+                {
+                    return new Resolution((uint)clipQuality.width, (uint)clipQuality.height);
+                }
+
                 if (!uint.TryParse(clipQuality.quality, out var height))
                 {
                     return default;
