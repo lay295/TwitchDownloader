@@ -91,7 +91,12 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
 
     public class ShareClipRenderStatusVideoQuality
     {
+        public int bitrate { get; set; }
+        public string codecs { get; set; }
+        public int width { get; set; }
+        public int height { get; set; }
         public decimal frameRate { get; set; }
+        public string videoCodec { get; set; }
         public string quality { get; set; }
         public string sourceURL { get; set; }
     }
