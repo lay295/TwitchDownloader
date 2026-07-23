@@ -1,14 +1,8 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;
 

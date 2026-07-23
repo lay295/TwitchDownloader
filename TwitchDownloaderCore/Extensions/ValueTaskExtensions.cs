@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace TwitchDownloaderCore.Extensions
 {
     public static class ValueTaskExtensions
