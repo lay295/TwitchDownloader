@@ -21,25 +21,25 @@ namespace TwitchDownloaderCore.Tools
 		{
 			private readonly TwitchEventHub _hub;
 			internal readonly Channel<EventHubMessage> _channel;
-			private readonly TwitchChatEvent[] _events;
+			private readonly string[] _topics;
 			public ChannelReader<EventHubMessage> Messages { get => _channel.Reader; }
 
-			internal SubscriptionGroup(TwitchEventHub hub, Channel<EventHubMessage> channel, TwitchChatEvent[] events)
+			internal SubscriptionGroup(TwitchEventHub hub, Channel<EventHubMessage> channel, string[] topics)
 			{
 				_hub = hub;
 				_channel = channel;
-				_events = events;
+				_topics = topics;
 			}
 
 			public void Dispose()
 			{
 				_channel.Writer.TryComplete();
-				foreach (var evt in _events)
+				foreach (var topic in _topics)
 				{
 					try
 					{
 						// we do not await unsubscriptions, they are fire and forget to keep the unsubscribe/dispose simple
-						_ = _hub.Unsubscribe(evt);
+						_ = _hub.Unsubscribe(topic);
 					}
 					catch { }
 				}
@@ -59,8 +59,8 @@ namespace TwitchDownloaderCore.Tools
 		// stores currently queued unsubscriptions so that their success/failure can be signaled
 		private readonly ConcurrentDictionary<string, TaskCompletionSource<SubscriptionChangeResponseData>> _unsubscriptionResponseHandlers = new();
 
-		// allows mapping a TwitchChatEvent to a subId if such a subscription is already ongoing
-		private readonly ConcurrentDictionary<TwitchChatEvent, string> _subscriptionIds = new();
+		// allows mapping a topic to a subId if such a subscription is already ongoing
+		private readonly ConcurrentDictionary<string, string> _subscriptionIds = new();
 		// all currently ongoing listeners for each subscription
 		private readonly ConcurrentDictionary<string, List<SubscriptionGroup>> _notificationChannels = new();
 
@@ -79,17 +79,19 @@ namespace TwitchDownloaderCore.Tools
 		{
 			var subChannel = Channel.CreateUnbounded<EventHubMessage>();
 
-			var subGroup = new SubscriptionGroup(this, subChannel, events);
+			var topics = events.Select(evt => GetTopic(evt, streamerId));
 
-			var subTasks = events.Select(async evt =>
+			var subGroup = new SubscriptionGroup(this, subChannel, topics.ToArray());
+
+			var subTasks = topics.Select(async topic =>
 			{
 				// ensure that there is a subscription ongoing
-				if (!_subscriptionIds.ContainsKey(evt))
+				if (!_subscriptionIds.ContainsKey(topic))
 				{
-					await Subscribe(evt, streamerId);
+					await Subscribe(topic);
 				}
 
-				_subscriptionIds.TryGetValue(evt, out var subId);
+				_subscriptionIds.TryGetValue(topic, out var subId);
 
 				var listenerList = _notificationChannels.GetOrAdd(subId, new List<SubscriptionGroup>());
 
@@ -114,14 +116,13 @@ namespace TwitchDownloaderCore.Tools
 		/// send a subscription request and wait for the response, throws if not sucessful<br/>
 		/// handles adding the id to _subscriptionIds in case of success
 		/// </summary>
-		/// <param name="evt">the name of the event</param>
-		/// <param name="streamerId">the id (not login or displayname) of the streamer</param>
-		private async Task Subscribe(TwitchChatEvent evt, string streamerId)
+		/// <param name="topic">the combined string of the event name and streamer used for identifying what to subscribe to</param>
+		private async Task Subscribe(string topic)
 		{
 			const int SUBSCRIPTION_TIMEOUT_SECS = 20;
 
 			var subscribeId = GenerateNanoId();
-			EventHubMessage request = CreateSubscriptionMessage(evt, streamerId, subscribeId);
+			EventHubMessage request = CreateSubscriptionMessage(topic, subscribeId);
 
 			var subscriptionTaskSource = new TaskCompletionSource<SubscriptionChangeResponseData>();
 			_subscriptionResponseHandlers.TryAdd(subscribeId, subscriptionTaskSource);
@@ -137,7 +138,7 @@ namespace TwitchDownloaderCore.Tools
 					throw new HttpRequestException("the subscription was rejected");
 				}
 
-				_subscriptionIds.TryAdd(evt, subResponse.subscription.id);
+				_subscriptionIds.TryAdd(topic, subResponse.subscription.id);
 			}
 			catch
 			{
@@ -156,13 +157,13 @@ namespace TwitchDownloaderCore.Tools
 		/// handles removing the id from _subscriptionIds in case of success
 		/// </summary>
 		/// <param name="evt">the name of the event</param>
-		private async Task Unsubscribe(TwitchChatEvent evt)
+		private async Task Unsubscribe(string topic)
 		{
 			const int TIMEOUT_SECS = 20;
 
-			if (!_subscriptionIds.TryGetValue(evt, out var subId))
+			if (!_subscriptionIds.TryGetValue(topic, out var subId))
 			{
-				throw new ArgumentException($"no known subscription for {evt}", "evt");
+				throw new ArgumentException($"no known subscription for {topic}", "evt");
 			}
 
 			EventHubMessage request = CreateUnsubscriptionMessage(subId);
@@ -181,7 +182,7 @@ namespace TwitchDownloaderCore.Tools
 					throw new HttpRequestException("the unsubscription has failed");
 				}
 
-				_subscriptionIds.TryRemove(evt, out _);
+				_subscriptionIds.TryRemove(topic, out _);
 			}
 			catch
 			{
@@ -429,14 +430,17 @@ namespace TwitchDownloaderCore.Tools
 			return new string(result);
 		}
 
-		private EventHubMessage CreateSubscriptionMessage(TwitchChatEvent evt, string streamerId, string subscribeId)
+		private string GetTopic(TwitchChatEvent evt, string streamerId)
 		{
-			string topic = evt switch
+			return evt switch
 			{
 				TwitchChatEvent.VideoPlaybackById => $"video-playback-by-id.{streamerId}",
 				_ => throw new NotImplementedException(),
 			};
+		}
 
+		private EventHubMessage CreateSubscriptionMessage(string subId, string subscribeId)
+		{
 			return new EventHubMessage
 			{
 				id = GenerateNanoId(),
@@ -445,7 +449,7 @@ namespace TwitchDownloaderCore.Tools
 				Data = new SubscribeData
 				{
 					id = subscribeId,
-					pubsub = new SubscriptionPubSub { topic = topic }
+					pubsub = new SubscriptionPubSub { topic = subId }
 				}
 			};
 		}
