@@ -20,6 +20,8 @@ namespace TwitchDownloaderCore.Models
 					"welcome" => EventHubMessageType.Welcome,
 					"subscribe" => EventHubMessageType.Subscribe,
 					"subscribeResponse" => EventHubMessageType.SubscribeResponse,
+					"unsubscribe" => EventHubMessageType.Unsubscribe,
+					"unsubscribeResponse" => EventHubMessageType.UnsubscribeResponse,
 					"keepalive" => EventHubMessageType.KeepAlive,
 					"notification" => EventHubMessageType.Notification,
 					_ => EventHubMessageType.Unknown
@@ -31,21 +33,32 @@ namespace TwitchDownloaderCore.Models
 			{
 				EventHubMessageType.Welcome => root.GetProperty("welcome").Deserialize<WelcomeData>(options),
 				EventHubMessageType.Subscribe => root.GetProperty("subscribe").Deserialize<SubscribeData>(options),
-				EventHubMessageType.SubscribeResponse => new SubscribeResponseData
+				EventHubMessageType.SubscribeResponse => new SubscriptionChangeResponseData
 				{
 					result = root.GetProperty("subscribeResponse").GetProperty("result").GetString() switch
-                    {
-                        "ok" => EventHubSubscriptionResult.Ok,
-                        "error" => EventHubSubscriptionResult.Error,
-                        string str => throw new JsonException($"unknown subscription response result {str}")
-                    },
+					{
+						"ok" => EventHubSubscriptionResult.Ok,
+						"error" => EventHubSubscriptionResult.Error,
+						string str => throw new JsonException($"unknown subscription response result {str}")
+					},
 					subscription = root.GetProperty("subscribeResponse").GetProperty("subscription").Deserialize<SubscriptionId>(options)
-                },
+				},
+				EventHubMessageType.Unsubscribe => root.GetProperty("unsubscribe").Deserialize<UnsubscribeData>(options),
+				EventHubMessageType.UnsubscribeResponse => new SubscriptionChangeResponseData
+				{
+					result = root.GetProperty("unsubscribeResponse").GetProperty("result").GetString() switch
+					{
+						"ok" => EventHubSubscriptionResult.Ok,
+						"error" => EventHubSubscriptionResult.Error,
+						string str => throw new JsonException($"unknown subscription response result {str}")
+					},
+					subscription = root.GetProperty("unsubscribeResponse").GetProperty("subscription").Deserialize<SubscriptionId>(options)
+				},
 				EventHubMessageType.Notification => root.GetProperty("notification").Deserialize<NotificationData>(options),
 				_ => null
 			};
 
-			if (message.type == EventHubMessageType.SubscribeResponse)
+			if (message.type is EventHubMessageType.SubscribeResponse or EventHubMessageType.UnsubscribeResponse)
 			{
 				message.parentId = root.GetProperty("parentId").GetString();
 			}
@@ -63,6 +76,8 @@ namespace TwitchDownloaderCore.Models
 				EventHubMessageType.Welcome => "welcome",
 				EventHubMessageType.Subscribe => "subscribe",
 				EventHubMessageType.SubscribeResponse => "subscribeResponse",
+				EventHubMessageType.Unsubscribe => "unsubscribe",
+				EventHubMessageType.UnsubscribeResponse => "unsubscribeResponse",
 				EventHubMessageType.Notification => "notification",
 				EventHubMessageType.KeepAlive => "keepalive",
 				_ => throw new JsonException($"can't serialize unknown event type {value.type}")
@@ -79,9 +94,13 @@ namespace TwitchDownloaderCore.Models
 					writer.WritePropertyName("subscribe");
 					JsonSerializer.Serialize(writer, subscribe, options);
 					break;
-				case SubscribeResponseData subscribeResponse:
-					writer.WritePropertyName("subscribeResponse");
-					JsonSerializer.Serialize(writer, subscribeResponse, options);
+				case UnsubscribeData unsubscribe:
+					writer.WritePropertyName("unsubscribe");
+					JsonSerializer.Serialize(writer, unsubscribe, options);
+					break;
+				case SubscriptionChangeResponseData subscriptionChangeResponse:
+					writer.WritePropertyName(value.type == EventHubMessageType.SubscribeResponse ? "subscribeResponse" : "unsubscribeResponse");
+					JsonSerializer.Serialize(writer, subscriptionChangeResponse, options);
 					break;
 				case NotificationData notification:
 					writer.WritePropertyName("notification");

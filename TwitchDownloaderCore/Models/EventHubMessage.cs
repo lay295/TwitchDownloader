@@ -8,6 +8,8 @@ namespace TwitchDownloaderCore.Models
 		Unknown,
 		Subscribe,
 		SubscribeResponse,
+		Unsubscribe,
+		UnsubscribeResponse,
 		Welcome,
 		KeepAlive,
 		Notification
@@ -43,11 +45,15 @@ namespace TwitchDownloaderCore.Models
 		public string topic { get; set; }
 	}
 
-	public sealed class SubscribeResponseData : EventHubMessageData
+	public sealed class UnsubscribeData : EventHubMessageData
+	{
+		public string id { get; set; }
+	}
+
+	public sealed class SubscriptionChangeResponseData : EventHubMessageData
 	{
 		public EventHubSubscriptionResult result { get; set; }
 		public SubscriptionId subscription { get; set; }
-
 	}
 
 	public sealed class SubscriptionId
