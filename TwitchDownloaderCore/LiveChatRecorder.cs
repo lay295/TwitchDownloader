@@ -54,8 +54,6 @@ namespace TwitchDownloaderCore
             var outputFileInfo = TwitchHelper.ClaimFile(_recorderOptions.OutputFile, _recorderOptions.FileCollisionCallback, _progress);
             _recorderOptions.OutputFile = outputFileInfo.FullName;
 
-            var debugFileInfo = TwitchHelper.ClaimFile(_recorderOptions.OutputFile + ".debug.txt", _recorderOptions.FileCollisionCallback, _progress);
-
             try
             {
                 var chatRoot = await ProcessMessages();
@@ -70,7 +68,6 @@ namespace TwitchDownloaderCore
                 await Task.Delay(100);
 
                 TwitchHelper.CleanUpClaimedFile(outputFileInfo, null, _progress);
-                TwitchHelper.CleanUpClaimedFile(debugFileInfo, null, _progress);
 
                 throw;
             }
@@ -122,15 +119,27 @@ namespace TwitchDownloaderCore
             return chatRoot;
         }
 
+        private async Task WaitForStreamStart(TwitchEventHub eventHub)
+        {
+            using var sub = await eventHub.SubscribeTo(_recorderOptions.Channel, [TwitchEventHub.TwitchChatEvent.VideoPlaybackById]);
+
+            await foreach (var msg in sub.Messages.ReadAllAsync())
+            {
+                if (((NotificationData)msg.Data).pubsub.Contains("stream-up"))
+                {
+                    break;
+                }
+            }
+        }
+
         private async Task TestEventHub()
         {
             using var eventHub = new TwitchEventHub(_progress);
-
-            await eventHub.Subscribe(TwitchEventHub.TwitchChatEvent.VideoPlaybackById, "112295341");
-
             try
             {
-                await foreach (var message in eventHub.Notifications.ReadAllAsync(new CancellationTokenSource(_recorderOptions.Duration).Token))
+                using var sub = await eventHub.SubscribeTo(_recorderOptions.Channel, [TwitchEventHub.TwitchChatEvent.VideoPlaybackById]);
+
+                await foreach (var message in sub.Messages.ReadAllAsync(new CancellationTokenSource(_recorderOptions.Duration).Token))
                 {
                     if (message.Data is not NotificationData)
                     {

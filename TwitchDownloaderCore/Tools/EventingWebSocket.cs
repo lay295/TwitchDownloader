@@ -59,9 +59,7 @@ namespace TwitchDownloaderCore.Tools
 
                     do
                     {
-                        _logger.LogVerbose($"{_instanceId} call ReceiveAsync");
                         result = await _socket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
-                        _logger.LogVerbose($"{_instanceId} after ReceiveAsync");
                         messageBuffer.Write(buffer, 0, result.Count);
                     }
                     while (!result.EndOfMessage);
