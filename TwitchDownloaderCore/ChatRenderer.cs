@@ -2169,7 +2169,7 @@ namespace TwitchDownloaderCore
                     var num = uint.Parse(span[range], NumberStyles.HexNumber);
                     if (num == 0xFE0F) continue;
 
-                    var rune = new Rune();
+                    var rune = new Rune(num);
                     sb.Append($"{rune}");
                 }
 
