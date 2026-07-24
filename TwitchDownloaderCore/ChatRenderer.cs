@@ -1,8 +1,6 @@
-﻿using NeoSmart.Unicode;
-using SkiaSharp;
+﻿using SkiaSharp;
 using SkiaSharp.HarfBuzz;
 using System.Buffers;
-using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -17,16 +15,17 @@ using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;
+using TwitchDownloaderCore.Models.Render;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
-using Range = System.Range;
 
 namespace TwitchDownloaderCore
 {
     public sealed partial class ChatRenderer : IDisposable
     {
+        private const char ZERO_WIDTH_JOINER = '\u200D';
         public bool Disposed { get; private set; } = false;
         public ChatRoot chatRoot { get; private set; } = new ChatRoot();
 
@@ -55,28 +54,20 @@ namespace TwitchDownloaderCore
         [GeneratedRegex("[\u2500-\u257F\u2580-\u259F\u2800-\u28FF]")]
         private static partial Regex BlockArtRegex { get; }
 
-        [GeneratedRegex(@"(?:[#*0-9]\uFE0F?\u20E3|[\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23ED-\u23EF\u23F1\u23F2\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB\u25FC\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692\u2694-\u2697\u2699\u269B\u269C\u26A0\u26A7\u26AA\u26B0\u26B1\u26BD\u26BE\u26C4\u26C8\u26CF\u26D1\u26E9\u26F0-\u26F5\u26F7\u26F8\u26FA\u2702\u2708\u2709\u270F\u2712\u2714\u2716\u271D\u2721\u2733\u2734\u2744\u2747\u2757\u2763\u27A1\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B55\u3030\u303D\u3297\u3299]\uFE0F?|[\u261D\u270C\u270D](?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?|[\u270A\u270B](?:\uD83C[\uDFFB-\uDFFF])?|[\u23E9-\u23EC\u23F0\u23F3\u25FD\u2693\u26A1\u26AB\u26C5\u26CE\u26D4\u26EA\u26FD\u2705\u2728\u274C\u274E\u2753-\u2755\u2795-\u2797\u27B0\u27BF\u2B50]|\u26D3\uFE0F?(?:\u200D\uD83D\uDCA5)?|\u26F9(?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?(?:\u200D[\u2640\u2642]\uFE0F?)?|\u2764\uFE0F?(?:\u200D(?:\uD83D\uDD25|\uD83E\uDE79))?|\uD83C(?:[\uDC04\uDD70\uDD71\uDD7E\uDD7F\uDE02\uDE37\uDF21\uDF24-\uDF2C\uDF36\uDF7D\uDF96\uDF97\uDF99-\uDF9B\uDF9E\uDF9F\uDFCD\uDFCE\uDFD4-\uDFDF\uDFF5\uDFF7]\uFE0F?|[\uDF85\uDFC2\uDFC7](?:\uD83C[\uDFFB-\uDFFF])?|[\uDFC4\uDFCA](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDFCB\uDFCC](?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDCCF\uDD8E\uDD91-\uDD9A\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF43\uDF45-\uDF4A\uDF4C-\uDF7C\uDF7E-\uDF84\uDF86-\uDF93\uDFA0-\uDFC1\uDFC5\uDFC6\uDFC8\uDFC9\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF8-\uDFFF]|\uDDE6\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF]|\uDDE7\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF]|\uDDE8\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF7\uDDFA-\uDDFF]|\uDDE9\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF]|\uDDEA\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA]|\uDDEB\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7]|\uDDEC\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE]|\uDDED\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA]|\uDDEE\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9]|\uDDEF\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5]|\uDDF0\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF]|\uDDF1\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE]|\uDDF2\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF]|\uDDF3\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF]|\uDDF4\uD83C\uDDF2|\uDDF5\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE]|\uDDF6\uD83C\uDDE6|\uDDF7\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC]|\uDDF8\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF]|\uDDF9\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF]|\uDDFA\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF]|\uDDFB\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA]|\uDDFC\uD83C[\uDDEB\uDDF8]|\uDDFD\uD83C\uDDF0|\uDDFE\uD83C[\uDDEA\uDDF9]|\uDDFF\uD83C[\uDDE6\uDDF2\uDDFC]|\uDF44(?:\u200D\uD83D\uDFEB)?|\uDF4B(?:\u200D\uD83D\uDFE9)?|\uDFC3(?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D(?:[\u2640\u2642]\uFE0F?(?:\u200D\u27A1\uFE0F?)?|\u27A1\uFE0F?))?|\uDFF3\uFE0F?(?:\u200D(?:\u26A7\uFE0F?|\uD83C\uDF08))?|\uDFF4(?:\u200D\u2620\uFE0F?|\uDB40\uDC67\uDB40\uDC62\uDB40(?:\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDC73\uDB40\uDC63\uDB40\uDC74|\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F)?)|\uD83D(?:[\uDC3F\uDCFD\uDD49\uDD4A\uDD6F\uDD70\uDD73\uDD76-\uDD79\uDD87\uDD8A-\uDD8D\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA\uDECB\uDECD-\uDECF\uDEE0-\uDEE5\uDEE9\uDEF0\uDEF3]\uFE0F?|[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDC8F\uDC91\uDCAA\uDD7A\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC](?:\uD83C[\uDFFB-\uDFFF])?|[\uDC6E-\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4\uDEB5](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD74\uDD90](?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?|[\uDC00-\uDC07\uDC09-\uDC14\uDC16-\uDC25\uDC27-\uDC3A\uDC3C-\uDC3E\uDC40\uDC44\uDC45\uDC51-\uDC65\uDC6A\uDC79-\uDC7B\uDC7D-\uDC80\uDC84\uDC88-\uDC8E\uDC90\uDC92-\uDCA9\uDCAB-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDDA4\uDDFB-\uDE2D\uDE2F-\uDE34\uDE37-\uDE41\uDE43\uDE44\uDE48-\uDE4A\uDE80-\uDEA2\uDEA4-\uDEB3\uDEB7-\uDEBF\uDEC1-\uDEC5\uDED0-\uDED2\uDED5-\uDED8\uDEDC-\uDEDF\uDEEB\uDEEC\uDEF4-\uDEFC\uDFE0-\uDFEB\uDFF0]|\uDC08(?:\u200D\u2B1B)?|\uDC15(?:\u200D\uD83E\uDDBA)?|\uDC26(?:\u200D(?:\u2B1B|\uD83D\uDD25))?|\uDC3B(?:\u200D\u2744\uFE0F?)?|\uDC41\uFE0F?(?:\u200D\uD83D\uDDE8\uFE0F?)?|\uDC68(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDC68\uDC69]\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC68\uD83C[\uDFFC-\uDFFF])|\uD83E(?:[\uDD1D\uDEEF]\u200D\uD83D\uDC68\uD83C[\uDFFC-\uDFFF]|[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFD-\uDFFF])|\uD83E(?:[\uDD1D\uDEEF]\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFD-\uDFFF]|[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])|\uD83E(?:[\uDD1D\uDEEF]\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF]|[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFD\uDFFF])|\uD83E(?:[\uDD1D\uDEEF]\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFD\uDFFF]|[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFE])|\uD83E(?:[\uDD1D\uDEEF]\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFE]|[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3])))?))?|\uDC69(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?[\uDC68\uDC69]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?|\uDC69\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?))|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC69\uD83C[\uDFFC-\uDFFF])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFC-\uDFFF]|\uDEEF\u200D\uD83D\uDC69\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC69\uD83C[\uDFFB\uDFFD-\uDFFF])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFD-\uDFFF]|\uDEEF\u200D\uD83D\uDC69\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC69\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF]|\uDEEF\u200D\uD83D\uDC69\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC69\uD83C[\uDFFB-\uDFFD\uDFFF])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFD\uDFFF]|\uDEEF\u200D\uD83D\uDC69\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83D\uDC69\uD83C[\uDFFB-\uDFFE])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFE]|\uDEEF\u200D\uD83D\uDC69\uD83C[\uDFFB-\uDFFE])))?))?|\uDD75(?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDE2E(?:\u200D\uD83D\uDCA8)?|\uDE35(?:\u200D\uD83D\uDCAB)?|\uDE36(?:\u200D\uD83C\uDF2B\uFE0F?)?|\uDE42(?:\u200D[\u2194\u2195]\uFE0F?)?|\uDEB6(?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D(?:[\u2640\u2642]\uFE0F?(?:\u200D\u27A1\uFE0F?)?|\u27A1\uFE0F?))?)|\uD83E(?:[\uDD0C\uDD0F\uDD18-\uDD1F\uDD30-\uDD34\uDD36\uDD77\uDDB5\uDDB6\uDDBB\uDDD2\uDDD3\uDDD5\uDEC3-\uDEC5\uDEF0\uDEF2-\uDEF8](?:\uD83C[\uDFFB-\uDFFF])?|[\uDD26\uDD35\uDD37-\uDD39\uDD3C-\uDD3E\uDDB8\uDDB9\uDDCD\uDDCF\uDDD4\uDDD6-\uDDDD](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDDDE\uDDDF](?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD0D\uDD0E\uDD10-\uDD17\uDD20-\uDD25\uDD27-\uDD2F\uDD3A\uDD3F-\uDD45\uDD47-\uDD76\uDD78-\uDDB4\uDDB7\uDDBA\uDDBC-\uDDCC\uDDD0\uDDE0-\uDDFF\uDE70-\uDE7C\uDE80-\uDE8A\uDE8E-\uDEC2\uDEC6\uDEC8\uDECD-\uDEDC\uDEDF-\uDEEA\uDEEF]|\uDDCE(?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D(?:[\u2640\u2642]\uFE0F?(?:\u200D\u27A1\uFE0F?)?|\u27A1\uFE0F?))?|\uDDD1(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3\uDE70]|\uDD1D\u200D\uD83E\uDDD1|\uDDD1\u200D\uD83E\uDDD2(?:\u200D\uD83E\uDDD2)?|\uDDD2(?:\u200D\uD83E\uDDD2)?))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFC-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83E\uDDD1\uD83C[\uDFFC-\uDFFF])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3\uDE70]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF]|\uDEEF\u200D\uD83E\uDDD1\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFD-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83E\uDDD1\uD83C[\uDFFB\uDFFD-\uDFFF])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3\uDE70]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF]|\uDEEF\u200D\uD83E\uDDD1\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83E\uDDD1\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3\uDE70]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF]|\uDEEF\u200D\uD83E\uDDD1\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFD\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFD\uDFFF])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3\uDE70]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF]|\uDEEF\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFE]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC30\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFE])|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3\uDE70]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF]|\uDEEF\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFE])))?))?|\uDEF1(?:\uD83C(?:\uDFFB(?:\u200D\uD83E\uDEF2\uD83C[\uDFFC-\uDFFF])?|\uDFFC(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFD-\uDFFF])?|\uDFFD(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])?|\uDFFE(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFD\uDFFF])?|\uDFFF(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFE])?))?))")]
-        private static partial Regex EmojiRegex { get; }
-
-        private static FrozenDictionary<int, SingleEmoji[]> AllEmojiSequences => field ??=
-            Emoji.All
-                .GroupBy(x => (int)x.Sequence.Codepoints.First().Value)
-                .ToFrozenDictionary(x => x.Key, x => x.ToArray());
-
         private static readonly SearchValues<char> DigitChars = SearchValues.Create("0123456789");
 
         private readonly ITaskProgress _progress;
         private readonly ChatRenderOptions renderOptions;
         private readonly string _cacheDir;
-        private List<ChatBadge> badgeList = new List<ChatBadge>();
-        private List<TwitchEmote> emoteList = new List<TwitchEmote>();
-        private List<TwitchEmote> emoteThirdList = new List<TwitchEmote>();
-        private List<CheerEmote> cheermotesList = new List<CheerEmote>();
-        private Dictionary<string, SKImage> emojiCache = [];
-        private Dictionary<string, SKImage> avatarCache = [];
-        private Dictionary<int, SKPaint> fallbackFontCache = [];
-        private Dictionary<SKColor, SKPaint> paintCache = [];
-        private Dictionary<(int, int), List<SectionImage>> sectionImageCache = [];
+        private DisposableDictionary<string, ChatBadge> _badgeCache = [];
+        private DisposableDictionary<string, TwitchEmote> _emoteCache = [];
+        private DisposableDictionary<string, TwitchEmote> _emoteThirdCache = [];
+        private DisposableDictionary<string, CheerEmote> _cheermoteCache = [];
+        private DisposableDictionary<string, SKImage> _emojiCache = [];
+        private DisposableDictionary<string, SKImage> _avatarCache = [];
+        private DisposableDictionary<int, SKPaint> _fallbackFontCache = [];
+        private DisposableDictionary<SKColor, SKPaint> _paintCache = [];
+        private readonly SectionImageCache _sectionImageCache = new();
         private bool noFallbackFontFound = false;
         private readonly SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont;
@@ -84,6 +75,11 @@ namespace TwitchDownloaderCore
         private SKPaint outlinePaint;
         private readonly HighlightIcons highlightIcons;
         private int _usernameCenteredY;
+
+        private Dictionary<int, string[]> AllEmojiSequences => field ??=
+            _emojiCache.Keys
+                .GroupBy(x => Rune.GetRuneAt(x, 0).Value)
+                .ToDictionary(x => x.Key, x => x.ToArray());
 
         // Persistent buffer for the composited animated-emote frame, reused across ticks so that an
         // unchanged frame does not need to be copied and recomposited. See DrawAnimatedEmotes.
@@ -731,7 +727,7 @@ namespace TwitchDownloaderCore
                 int removeCount = commentList.Count - commentsDrawn;
                 for (int i = 0; i < removeCount; i++)
                 {
-                    ReturnSectionImage(commentList[i].Image);
+                    _sectionImageCache.Return(commentList[i].Image);
                 }
                 commentList.RemoveRange(0, removeCount);
             }
@@ -773,7 +769,7 @@ namespace TwitchDownloaderCore
         private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos)
         {
             CommentSection newSection = new CommentSection();
-            List<(Point, TwitchEmote)> emoteSectionList = new List<(Point, TwitchEmote)>();
+            List<EmotePosition> emoteSectionList = new List<EmotePosition>();
             Comment comment = chatRoot.comments[commentIndex];
             List<SectionImage> sectionImages = [];
             Point drawPos = new Point();
@@ -839,7 +835,7 @@ namespace TwitchDownloaderCore
 
         private SectionImage CombineImages(List<SectionImage> sectionImages, HighlightType highlightType, int commentIndex)
         {
-            var finalImage = RentSectionImage(renderOptions.ChatWidth, sectionImages.Sum(x => x.Info.Height));
+            var finalImage = _sectionImageCache.Rent(renderOptions.ChatWidth, sectionImages.Sum(x => x.Info.Height));
             var finalBitmapInfo = finalImage.Info;
             var finalCanvas = finalImage.Canvas;
 
@@ -871,7 +867,7 @@ namespace TwitchDownloaderCore
             for (var i = 0; i < sectionImages.Count; i++)
             {
                 finalCanvas.DrawBitmap(sectionImages[i].Bitmap, 0, i * renderOptions.SectionHeight);
-                ReturnSectionImage(sectionImages[i]);
+                _sectionImageCache.Return(sectionImages[i]);
             }
             sectionImages.Clear();
 
@@ -879,26 +875,7 @@ namespace TwitchDownloaderCore
             return finalImage;
         }
 
-        private static string GetEmojiKey(IEnumerable<Codepoint> codepoints)
-        {
-            if (!codepoints.TryGetNonEnumeratedCount(out var count))
-            {
-                count = 2;
-            }
-
-            var sb = new StringBuilder(count);
-            foreach (var codepoint in codepoints)
-            {
-                if (codepoint == 0xFE0F) continue;
-
-                var rune = new Rune(codepoint.Value);
-                sb.Append($"{rune}");
-            }
-
-            return sb.ToString();
-        }
-
-        private void DrawNonAccentedMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, int commentIndex, ref Point drawPos, ref Point defaultPos)
+        private void DrawNonAccentedMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, bool highlightWords, int commentIndex, ref Point drawPos, ref Point defaultPos)
         {
             if (renderOptions.Timestamp)
             {
@@ -921,7 +898,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawAccentedMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, HighlightType highlightType, int commentIndex, ref Point drawPos, Point defaultPos)
+        private void DrawAccentedMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, HighlightType highlightType, int commentIndex, ref Point drawPos, Point defaultPos)
         {
             drawPos.X += renderOptions.AccentIndentWidth;
             defaultPos.X = drawPos.X;
@@ -973,7 +950,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawSubscribeMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawSubscribeMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             var canvas = sectionImages[^1].Canvas;
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
@@ -1012,7 +989,7 @@ namespace TwitchDownloaderCore
             DrawNonAccentedMessage(customResubMessage, sectionImages, emotePositionList, false, commentIndex, ref drawPos, ref defaultPos);
         }
 
-        private void DrawBitsBadgeTierMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawBitsBadgeTierMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             var canvas = sectionImages[^1].Canvas;
 
@@ -1047,7 +1024,7 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private void DrawWatchStreakMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawWatchStreakMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             var canvas = sectionImages[^1].Canvas;
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
@@ -1086,7 +1063,7 @@ namespace TwitchDownloaderCore
             DrawNonAccentedMessage(customMessage, sectionImages, emotePositionList, false, commentIndex, ref drawPos, ref defaultPos);
         }
 
-        private void DrawCharityDonationMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawCharityDonationMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             var canvas = sectionImages[^1].Canvas;
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
@@ -1104,7 +1081,7 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private void DrawGiftMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawGiftMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             var canvas = sectionImages[^1].Canvas;
 
@@ -1116,7 +1093,7 @@ namespace TwitchDownloaderCore
 
         private static readonly SearchValues<char> WhiteSpaceChars = SearchValues.Create("\t\n\v\f\r\u0020\u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000");
 
-        private void DrawMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
+        private void DrawMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
         {
             int bitsCount = comment.message.bits_spent;
             foreach (var fragment in comment.message.fragments)
@@ -1148,15 +1125,20 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawFragmentPart(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
+        private void DrawFragmentPart(List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
         {
-            if (!skipThird && TryGetTwitchEmote(emoteThirdList, fragmentPart, out var emote))
+            var thirdLookup = _emoteThirdCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            if (!skipThird && thirdLookup.TryGetValue(fragmentPart, out var emote))
             {
                 DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, emote, highlightWords);
             }
-            else if (!skipEmoji && renderOptions.EmojiVendor != EmojiVendor.None && (EmojiRegex.IsMatch(fragmentPart) || ContainsSupplementaryEmoji(fragmentPart)))
+            else if (bitsCount > 0 && TryDrawBits(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart))
             {
-                DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
+                // no-op
+            }
+            else if (!skipEmoji && renderOptions.EmojiVendor != EmojiVendor.None && ContainsEmoji(fragmentPart, out var firstEmoji))
+            {
+                DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords, firstEmoji);
             }
             else if (!skipNonFont && (!messageFont.ContainsGlyphs(fragmentPart) || fragmentPart.LengthInTextElements() < fragmentPart.Length))
             {
@@ -1164,56 +1146,11 @@ namespace TwitchDownloaderCore
             }
             else
             {
-                DrawRegularMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
-            }
-
-            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, [NotNullWhen(true)] out TwitchEmote twitchEmote)
-            {
-                var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
-                var lo = 0;
-                var hi = emoteListSpan.Length - 1;
-                while (lo <= hi)
-                {
-                    var i = lo + ((hi - lo) >> 1);
-                    var order = emoteListSpan[i].Name.AsSpan().CompareTo(emoteName, StringComparison.Ordinal);
-
-                    if (order == 0)
-                    {
-                        twitchEmote = emoteListSpan[i];
-                        return true;
-                    }
-
-                    if (order < 0)
-                    {
-                        lo = i + 1;
-                    }
-                    else
-                    {
-                        hi = i - 1;
-                    }
-                }
-
-                twitchEmote = null;
-                return false;
-            }
-
-            // Returns true if the text contains an emoji codepoint above U+1F9FF, i.e. beyond the range EmojiRegex
-            // covers, so newer emoji still enter DrawEmojiMessage even before the regex is updated.
-            static bool ContainsSupplementaryEmoji(ReadOnlySpan<char> text)
-            {
-                for (var i = 0; i < text.Length - 1; i++)
-                {
-                    var hi = text[i];
-                    if (hi is < '\uD83C' or > '\uD83F') continue;
-                    if (!char.IsLowSurrogate(text[i + 1])) continue;
-                    if (char.ConvertToUtf32(hi, text[i + 1]) > 0x1F9FF) return true;
-                }
-
-                return false;
+                DrawText(fragmentPart, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
             }
         }
 
-        private void DrawThirdPartyEmote(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, TwitchEmote twitchEmote, bool highlightWords)
+        private void DrawThirdPartyEmote(List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, TwitchEmote twitchEmote, bool highlightWords)
         {
             SKImageInfo emoteInfo = twitchEmote.Info;
             Point emotePoint = new Point();
@@ -1239,20 +1176,68 @@ namespace TwitchDownloaderCore
                 emotePoint.X = drawPos.X - renderOptions.EmoteSpacing - emoteInfo.Width;
             }
             emotePoint.Y = (int)(sectionImages.Sum(x => x.Info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteInfo.Height) / 2.0));
-            emotePositionList.Add((emotePoint, twitchEmote));
+            emotePositionList.Add(new EmotePosition(emotePoint, twitchEmote));
         }
 
         private static readonly SearchValues<char> EmojiExcludeChars = SearchValues.Create('\uFE0F');
 
-        private void DrawEmojiMessage(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragment, bool highlightWords)
+        private bool ContainsEmoji(ReadOnlySpan<char> text, out int firstEmoji)
         {
-            var emojiMatches = new List<SingleEmoji>();
-            var emojiLookup = emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            var emojiLookup = _emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            Span<char> stackSpace = stackalloc char[16];
+
+            var fragmentSlice = text;
+            var index = 0;
+            while (true)
+            {
+                var elementLength = StringInfo.GetNextTextElementLength(fragmentSlice);
+                if (elementLength == 0)
+                {
+                    firstEmoji = -1;
+                    return false;
+                }
+
+                if (elementLength == 1 && char.IsAscii(fragmentSlice[0]))
+                {
+                    fragmentSlice = fragmentSlice[elementLength..];
+                    index += elementLength;
+                    continue;
+                }
+
+                var textElement = fragmentSlice[..elementLength];
+                foreach (var range in textElement.Split(ZERO_WIDTH_JOINER)) // Will return textElement once when no ZWJ
+                {
+                    var subEmoji = textElement[range];
+
+                    var lookupKey = subEmoji.Length <= stackSpace.Length ? stackSpace : new char[subEmoji.Length];
+                    var written = subEmoji.CopyToExcept(stackSpace, EmojiExcludeChars);
+                    if (emojiLookup.ContainsKey(lookupKey[..written]))
+                    {
+                        firstEmoji = index;
+                        return true;
+                    }
+                }
+
+                fragmentSlice = fragmentSlice[elementLength..];
+                index += elementLength;
+            }
+        }
+
+        private void DrawEmojiMessage(List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragment, bool highlightWords, int firstEmoji = -1)
+        {
+            var emojiMatches = new List<string>();
+            var emojiLookup = _emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
             Span<char> stackSpace = stackalloc char[16];
 
             var fragmentSlice = fragment;
             var nonEmojiStart = 0;
             var nonEmojiLen = 0;
+            if (firstEmoji > 0)
+            {
+                nonEmojiLen = firstEmoji;
+                fragmentSlice = fragmentSlice[firstEmoji..];
+            }
+
             while (true)
             {
                 var elementLength = StringInfo.GetNextTextElementLength(fragmentSlice);
@@ -1275,8 +1260,8 @@ namespace TwitchDownloaderCore
                 var written = textElement.CopyToExcept(stackSpace, EmojiExcludeChars);
                 if (!emojiLookup.TryGetValue(lookupKey[..written], out var emojiImage))
                 {
-                    // Slow path: Search for the emoji with Unicode.Net data
-                    emojiImage = LookupEmojiSlow(textElement, emojiMatches, emojiLookup);
+                    emojiImage = SplitZwjEmoji(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, highlightWords, textElement, emojiLookup);
+                    emojiImage ??= LookupEmojiSlow(textElement, emojiMatches);
                     if (emojiImage is null)
                     {
                         nonEmojiLen += elementLength;
@@ -1323,7 +1308,36 @@ namespace TwitchDownloaderCore
         }
 
         [return: MaybeNull]
-        private static SKImage LookupEmojiSlow(ReadOnlySpan<char> textElement, List<SingleEmoji> emojiMatches, Dictionary<string, SKImage>.AlternateLookup<ReadOnlySpan<char>> emojiLookup)
+        private SKImage SplitZwjEmoji(List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, bool highlightWords, ReadOnlySpan<char> textElement,
+            Dictionary<string, SKImage>.AlternateLookup<ReadOnlySpan<char>> emojiLookup)
+        {
+            Span<char> stackSpace = stackalloc char[16];
+
+            if (!textElement.Contains(ZERO_WIDTH_JOINER))
+            {
+                return null;
+            }
+
+            ReadOnlySpan<char> subEmoji = default;
+            foreach (var range in textElement.Split(ZERO_WIDTH_JOINER))
+            {
+                if (!subEmoji.IsEmpty)
+                {
+                    DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, subEmoji, highlightWords);
+                }
+
+                subEmoji = textElement[range];
+            }
+
+            var lookupKey = subEmoji.Length <= stackSpace.Length ? stackSpace : new char[subEmoji.Length];
+            var written = subEmoji.CopyToExcept(lookupKey, EmojiExcludeChars);
+            return emojiLookup.TryGetValue(lookupKey[..written], out var emojiImage)
+                ? emojiImage
+                : null;
+        }
+
+        [return: MaybeNull]
+        private SKImage LookupEmojiSlow(ReadOnlySpan<char> textElement, List<string> emojiMatches)
         {
             var firstCodepoint = textElement.Length > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
                 ? char.ConvertToUtf32(textElement[0], textElement[1])
@@ -1334,7 +1348,7 @@ namespace TwitchDownloaderCore
             {
                 foreach (var emoji in matches)
                 {
-                    if (textElement.StartsWith(emoji.Sequence.Codepoints))
+                    if (textElement.StartsWith(emoji))
                     {
                         emojiMatches.Add(emoji);
                     }
@@ -1347,24 +1361,8 @@ namespace TwitchDownloaderCore
                 return null;
             }
 
-            // Make sure the found emojis actually exist in our cache
-            for (var j = 0; j < emojiMatchesCount; j++)
-            {
-                if (!emojiLookup.ContainsKey(GetEmojiKey(emojiMatches[j].Sequence.Codepoints)))
-                {
-                    emojiMatches.RemoveAt(j);
-                    emojiMatchesCount--;
-                    j--;
-                }
-            }
-
-            if (emojiMatchesCount == 0)
-            {
-                return null;
-            }
-
-            var selectedEmoji = emojiMatches.MaxBy(x => x.SortOrder);
-            return emojiLookup[GetEmojiKey(selectedEmoji.Sequence.Codepoints)];
+            var selectedEmoji = emojiMatches.MaxBy(x => x.Length);
+            return _emojiCache[selectedEmoji];
         }
 
         private void DrawNonFontMessage(List<SectionImage> sectionImages, ref Point drawPos, Point defaultPos, ReadOnlySpan<char> fragment, bool highlightWords)
@@ -1451,72 +1449,44 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawRegularMessage(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentString, bool highlightWords)
+        private bool TryDrawBits(List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentString)
         {
-            var bitsPrinted = false;
-            var bitsIndex = fragmentString.IndexOfAny(DigitChars);
-            if (bitsCount > 0 && bitsIndex > 0)
+            if (bitsCount < 1)
             {
-                if (int.TryParse(fragmentString[bitsIndex..], out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString[..bitsIndex], out var currentCheerEmote))
-                {
-                    var tierList = currentCheerEmote.GetTier(bitsAmount);
-                    TwitchEmote cheerEmote = tierList.Value;
-                    SKImageInfo cheerEmoteInfo = cheerEmote.Info;
-                    if (drawPos.X + cheerEmoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
-                    {
-                        AddImageSection(sectionImages, ref drawPos, defaultPos);
-                    }
-
-                    Point emotePoint = new Point
-                    {
-                        X = drawPos.X,
-                        Y = (int)(sectionImages.Sum(x => x.Info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - cheerEmoteInfo.Height) / 2.0))
-                    };
-                    emotePositionList.Add((emotePoint, cheerEmote));
-                    drawPos.X += cheerEmoteInfo.Width + renderOptions.EmoteSpacing;
-                    bitsPrinted = true;
-                }
-            }
-            if (!bitsPrinted)
-            {
-                DrawText(fragmentString, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
-            }
-
-            static bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, [NotNullWhen(true)] out CheerEmote cheerEmote)
-            {
-                var emoteListSpan = CollectionsMarshal.AsSpan(cheerEmoteList);
-                var lo = 0;
-                var hi = emoteListSpan.Length - 1;
-                while (lo <= hi)
-                {
-                    var i = lo + ((hi - lo) >> 1);
-                    var order = emoteListSpan[i].prefix.AsSpan().CompareTo(prefix, StringComparison.Ordinal);
-
-                    if (order == 0)
-                    {
-                        cheerEmote = emoteListSpan[i];
-                        return true;
-                    }
-
-                    if (order < 0)
-                    {
-                        lo = i + 1;
-                    }
-                    else
-                    {
-                        hi = i - 1;
-                    }
-                }
-
-                cheerEmote = null;
+                Debug.Fail($"Check {nameof(bitsCount)} before calling TryDrawBits to avoid setting up the method call.");
                 return false;
             }
+
+            var bitsIndex = fragmentString.IndexOfAny(DigitChars);
+            var cheermoteLookup = _cheermoteCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            if (bitsIndex > 0 && int.TryParse(fragmentString[bitsIndex..], out var bitsAmount) && cheermoteLookup.TryGetValue(fragmentString[..bitsIndex], out var currentCheerEmote))
+            {
+                var tieredEmote = currentCheerEmote.GetTier(bitsAmount).Value;
+                var emoteImageInfo = tieredEmote.Info;
+                if (drawPos.X + emoteImageInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
+                {
+                    AddImageSection(sectionImages, ref drawPos, defaultPos);
+                }
+
+                var emotePoint = new Point
+                {
+                    X = drawPos.X,
+                    Y = (int)(sectionImages.Sum(x => x.Info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteImageInfo.Height) / 2.0))
+                };
+                emotePositionList.Add(new EmotePosition(emotePoint, tieredEmote));
+                drawPos.X += emoteImageInfo.Width + renderOptions.EmoteSpacing;
+
+                return true;
+            }
+
+            return false;
         }
 
-        private void DrawFirstPartyEmote(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, Fragment fragment, bool highlightWords)
+        private void DrawFirstPartyEmote(List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, Fragment fragment, bool highlightWords)
         {
             // First party emote
-            if (TryGetTwitchEmote(emoteList, fragment.emoticon.emoticon_id, out var emote))
+            var emoteLookup = _emoteCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            if (emoteLookup.TryGetValue(fragment.emoticon.emoticon_id, out var emote))
             {
                 SKImageInfo emoteInfo = emote.Info;
                 if (drawPos.X + emoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
@@ -1536,43 +1506,13 @@ namespace TwitchDownloaderCore
                     canvas.DrawRect(drawPos.X, 0, emoteInfo.Width + renderOptions.EmoteSpacing, renderOptions.SectionHeight, paint);
                 }
 
-                emotePositionList.Add((emotePoint, emote));
+                emotePositionList.Add(new EmotePosition(emotePoint, emote));
                 drawPos.X += emoteInfo.Width + renderOptions.EmoteSpacing;
             }
             else
             {
                 // Probably an old emote that was removed
                 DrawText(fragment.text, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
-            }
-
-            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteId, [NotNullWhen(true)] out TwitchEmote twitchEmote)
-            {
-                var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
-                var lo = 0;
-                var hi = emoteListSpan.Length - 1;
-                while (lo <= hi)
-                {
-                    var i = lo + ((hi - lo) >> 1);
-                    var order = emoteListSpan[i].Id.AsSpan().CompareTo(emoteId, StringComparison.Ordinal);
-
-                    if (order == 0)
-                    {
-                        twitchEmote = emoteListSpan[i];
-                        return true;
-                    }
-
-                    if (order < 0)
-                    {
-                        lo = i + 1;
-                    }
-                    else
-                    {
-                        hi = i - 1;
-                    }
-                }
-
-                twitchEmote = null;
-                return false;
             }
         }
 
@@ -1593,7 +1533,7 @@ namespace TwitchDownloaderCore
                 {
                     // When chat width is small enough and font size is big enough, 1 character can be wider than effectiveChatWidth.
                     overrideWrap = true;
-                    newDrawText = drawText[..1];
+                    newDrawText = drawText[..StringInfo.GetNextTextElementLength(drawText)];
                 }
 
                 DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos, highlightWords, overrideWrap);
@@ -1853,10 +1793,10 @@ namespace TwitchDownloaderCore
         {
             var avatarUrl = comment.commenter.logo;
 
-            if (string.IsNullOrWhiteSpace(avatarUrl) || !avatarCache.TryGetValue(avatarUrl, out var avatarImage))
+            if (string.IsNullOrWhiteSpace(avatarUrl) || !_avatarCache.TryGetValue(avatarUrl, out var avatarImage))
             {
                 avatarUrl = DefaultAvatarUrls[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultAvatarUrls.Length];
-                if (!avatarCache.TryGetValue(avatarUrl, out avatarImage))
+                if (!_avatarCache.TryGetValue(avatarUrl, out avatarImage))
                 {
                     return;
                 }
@@ -1897,7 +1837,7 @@ namespace TwitchDownloaderCore
                 var id = badge._id;
                 var version = badge.version;
 
-                if (!TryGetBadge(badgeList, id, out var cachedBadge))
+                if (!_badgeCache.TryGetValue(id, out var cachedBadge))
                     continue;
 
                 if (!cachedBadge.Versions.TryGetValue(version, out var badgeBitmap))
@@ -1907,36 +1847,6 @@ namespace TwitchDownloaderCore
             }
 
             return returnList;
-
-            static bool TryGetBadge(List<ChatBadge> badgeList, ReadOnlySpan<char> badgeName, [NotNullWhen(true)] out ChatBadge badge)
-            {
-                var badgeSpan = CollectionsMarshal.AsSpan(badgeList);
-                var lo = 0;
-                var hi = badgeSpan.Length - 1;
-                while (lo <= hi)
-                {
-                    var i = lo + ((hi - lo) >> 1);
-                    var order = badgeSpan[i].Name.AsSpan().CompareTo(badgeName, StringComparison.Ordinal);
-
-                    if (order == 0)
-                    {
-                        badge = badgeSpan[i];
-                        return true;
-                    }
-
-                    if (order < 0)
-                    {
-                        lo = i + 1;
-                    }
-                    else
-                    {
-                        hi = i - 1;
-                    }
-                }
-
-                badge = null;
-                return false;
-            }
         }
 
         private void DrawTimestamp(Comment comment, List<SectionImage> sectionImages, ref Point drawPos, ref Point defaultPos)
@@ -1982,42 +1892,7 @@ namespace TwitchDownloaderCore
             drawPos.X = defaultPos.X;
             drawPos.Y = defaultPos.Y;
 
-            sectionImages.Add(RentSectionImage(renderOptions.ChatWidth, renderOptions.SectionHeight));
-        }
-
-        private SectionImage RentSectionImage(int width, int height)
-        {
-            ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(sectionImageCache, (width, height), out var exists);
-            if (!exists)
-            {
-                bucket = [];
-            }
-
-            if (bucket.Count == 0)
-            {
-                return new SectionImage(width, height);
-            }
-
-            var image = bucket[^1];
-            bucket.RemoveAt(bucket.Count - 1);
-            image.Canvas.Clear();
-            return image;
-        }
-
-        private void ReturnSectionImage(SectionImage sectionImage)
-        {
-            var width = sectionImage.Info.Width;
-            var height = sectionImage.Info.Height;
-
-            ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(sectionImageCache, (width, height), out var exists);
-            if (!exists)
-            {
-                // Don't create a new bucket for an image that wasn't rented from the cache
-                sectionImage.Dispose();
-                return;
-            }
-
-            bucket.Add(sectionImage);
+            sectionImages.Add(_sectionImageCache.Rent(renderOptions.ChatWidth, renderOptions.SectionHeight));
         }
 
         /// <summary>
@@ -2041,17 +1916,12 @@ namespace TwitchDownloaderCore
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            badgeList = badgeTask.Result;
-            emoteList = emoteTask.Result;
-            emoteThirdList = emoteThirdTask.Result;
-            cheermotesList = cheerTask.Result;
-            emojiCache = emojiTask.Result;
-            avatarCache = avatarTask.Result;
-
-            badgeList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
-            emoteList.Sort((a, b) => string.Compare(a.Id, b.Id, StringComparison.Ordinal));
-            emoteThirdList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
-            cheermotesList.Sort((a, b) => string.Compare(a.prefix, b.prefix, StringComparison.Ordinal));
+            _badgeCache.AddRange(badgeTask.Result, x => x.Name, x => x);
+            _emoteCache.AddRange(emoteTask.Result, x => x.Name, x => x);
+            _emoteThirdCache.AddRange(emoteThirdTask.Result, x => x.Name, x => x);
+            _cheermoteCache.AddRange(cheerTask.Result, x => x.prefix, x => x);
+            _emojiCache.AddRange(emojiTask.Result);
+            _avatarCache.AddRange(avatarTask.Result);
         }
 
         private async Task<List<ChatBadge>> GetScaledBadges(CancellationToken cancellationToken)
@@ -2138,8 +2008,10 @@ namespace TwitchDownloaderCore
                 var sb = new StringBuilder(span.Length / 5); // '1234 '
                 foreach (var range in span.SplitAny())
                 {
-                    var rune = new Rune(uint.Parse(span[range], NumberStyles.HexNumber));
-                    sb.Append($"{rune}");
+                    var num = uint.Parse(span[range], NumberStyles.HexNumber);
+                    if (num == 0xFE0F) continue;
+
+                    sb.Append($"{new Rune(num)}");
                 }
 
                 return sb.ToString();
@@ -2210,7 +2082,7 @@ namespace TwitchDownloaderCore
 
         private SKPaint GetCachedPaint(SKColor color)
         {
-            ref var paint = ref CollectionsMarshal.GetValueRefOrAddDefault(paintCache, color, out var alreadyExists);
+            ref var paint = ref CollectionsMarshal.GetValueRefOrAddDefault(_paintCache, color, out var alreadyExists);
             if (alreadyExists)
             {
                 return paint;
@@ -2222,7 +2094,7 @@ namespace TwitchDownloaderCore
 
         private SKPaint GetFallbackFont(int input)
         {
-            ref var fallbackPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(fallbackFontCache, input, out bool alreadyExists);
+            ref var fallbackPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(_fallbackFontCache, input, out bool alreadyExists);
             if (alreadyExists)
             {
                 return fallbackPaint;
@@ -2318,8 +2190,6 @@ namespace TwitchDownloaderCore
             return chatRoot;
         }
 
-#region ImplementIDisposable
-
         public void Dispose()
         {
             Dispose(true);
@@ -2336,25 +2206,15 @@ namespace TwitchDownloaderCore
 
                 if (isDisposing)
                 {
-                    foreach (var badge in badgeList)
-                        badge?.Dispose();
-                    foreach (var emote in emoteList)
-                        emote?.Dispose();
-                    foreach (var emote in emoteThirdList)
-                        emote?.Dispose();
-                    foreach (var cheerEmote in cheermotesList)
-                        cheerEmote?.Dispose();
-                    foreach (var (_, bitmap) in emojiCache)
-                        bitmap?.Dispose();
-                    foreach (var (_, bitmap) in avatarCache)
-                        bitmap?.Dispose();
-                    foreach (var (_, paint) in fallbackFontCache)
-                        paint?.Dispose();
-                    foreach (var (_, paint) in paintCache)
-                        paint?.Dispose();
-                    foreach (var (_, bucket) in sectionImageCache)
-                        foreach (var image in bucket)
-                            image.Dispose();
+                    _badgeCache.Dispose();
+                    _emoteCache.Dispose();
+                    _emoteThirdCache.Dispose();
+                    _cheermoteCache.Dispose();
+                    _emojiCache.Dispose();
+                    _avatarCache.Dispose();
+                    _fallbackFontCache.Dispose();
+                    _paintCache.Dispose();
+                    _sectionImageCache?.Dispose();
                     fontManager?.Dispose();
                     nameFont?.Dispose();
                     messageFont?.Dispose();
@@ -2363,25 +2223,25 @@ namespace TwitchDownloaderCore
                     _animCanvas?.Dispose();
                     _animComposedFrame?.Dispose();
 
-                    badgeList.Clear();
-                    emoteList.Clear();
-                    emoteThirdList.Clear();
-                    cheermotesList.Clear();
-                    emojiCache.Clear();
-                    avatarCache.Clear();
-                    fallbackFontCache.Clear();
-                    paintCache.Clear();
+                    _badgeCache.Clear();
+                    _emoteCache.Clear();
+                    _emoteThirdCache.Clear();
+                    _cheermoteCache.Clear();
+                    _emojiCache.Clear();
+                    _avatarCache.Clear();
+                    _fallbackFontCache.Clear();
+                    _paintCache.Clear();
 
-                    // Set the root references to null to explicitly tell the garbage collector that the resources have been disposed
+                    // Let the GC collect the caches immediately
                     chatRoot = null;
-                    badgeList = null;
-                    emoteList = null;
-                    emoteThirdList = null;
-                    cheermotesList = null;
-                    emojiCache = null;
-                    avatarCache = null;
-                    fallbackFontCache = null;
-                    paintCache = null;
+                    _badgeCache = null;
+                    _emoteCache = null;
+                    _emoteThirdCache = null;
+                    _cheermoteCache = null;
+                    _emojiCache = null;
+                    _avatarCache = null;
+                    _fallbackFontCache = null;
+                    _paintCache = null;
                 }
             }
             finally
@@ -2389,7 +2249,5 @@ namespace TwitchDownloaderCore
                 Disposed = true;
             }
         }
-
-#endregion
     }
 }

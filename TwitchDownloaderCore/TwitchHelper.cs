@@ -927,7 +927,9 @@ namespace TwitchDownloaderCore
                         {
                             try
                             {
-                                await emoji.ExtractToFileAsync(filePath, cancellationToken);
+                                // ReSharper disable once MethodHasAsyncOverloadWithCancellation
+                                // ExtractToFileAsync is extremely slow
+                                emoji.ExtractToFile(filePath);
                             }
                             catch { /* Being written by a parallel process? */ }
                         }
