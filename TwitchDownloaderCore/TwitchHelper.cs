@@ -1342,6 +1342,20 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlUserInfoResponse>();
         }
 
+        public static async Task<GqlStreamResponse> GetLiveStreamInfo(string channel)
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"query\":\"query{channel(name:\"" + channel + "\"){id,stream{id}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<GqlStreamResponse>();
+        }
+
         public static async Task<TwitchEmote> GetFirstPartyEmote(string id, DirectoryInfo cacheDir, bool offline, ITaskLogger logger, CancellationToken cancellationToken)
         {
             var (bytes, codec) = await GetImage(cacheDir, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, 2, "png", offline, logger, cancellationToken);
