@@ -1,7 +1,6 @@
 ﻿using SkiaSharp;
 using SkiaSharp.HarfBuzz;
 using System.Buffers;
-using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -1132,6 +1131,10 @@ namespace TwitchDownloaderCore
             {
                 DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, emote, highlightWords);
             }
+            else if (bitsCount > 0 && TryDrawBits(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart))
+            {
+                // no-op
+            }
             else if (!skipEmoji && renderOptions.EmojiVendor != EmojiVendor.None && ContainsEmoji(fragmentPart, out var firstEmoji))
             {
                 DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords, firstEmoji);
@@ -1142,7 +1145,7 @@ namespace TwitchDownloaderCore
             }
             else
             {
-                DrawRegularMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragmentPart, highlightWords);
+                DrawText(fragmentPart, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
             }
 
             static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, [NotNullWhen(true)] out TwitchEmote twitchEmote)
@@ -1440,36 +1443,36 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void DrawRegularMessage(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentString, bool highlightWords)
+        private bool TryDrawBits(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentString)
         {
-            var bitsPrinted = false;
-            var bitsIndex = fragmentString.IndexOfAny(DigitChars);
-            if (bitsCount > 0 && bitsIndex > 0)
+            if (bitsCount < 1)
             {
-                if (int.TryParse(fragmentString[bitsIndex..], out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString[..bitsIndex], out var currentCheerEmote))
-                {
-                    var tierList = currentCheerEmote.GetTier(bitsAmount);
-                    TwitchEmote cheerEmote = tierList.Value;
-                    SKImageInfo cheerEmoteInfo = cheerEmote.Info;
-                    if (drawPos.X + cheerEmoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
-                    {
-                        AddImageSection(sectionImages, ref drawPos, defaultPos);
-                    }
+                Debug.Fail($"Check {nameof(bitsCount)} before calling TryDrawBits to avoid setting up the method call.");
+                return false;
+            }
 
-                    Point emotePoint = new Point
-                    {
-                        X = drawPos.X,
-                        Y = (int)(sectionImages.Sum(x => x.Info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - cheerEmoteInfo.Height) / 2.0))
-                    };
-                    emotePositionList.Add((emotePoint, cheerEmote));
-                    drawPos.X += cheerEmoteInfo.Width + renderOptions.EmoteSpacing;
-                    bitsPrinted = true;
-                }
-            }
-            if (!bitsPrinted)
+            var bitsIndex = fragmentString.IndexOfAny(DigitChars);
+            if (bitsIndex > 0 && int.TryParse(fragmentString[bitsIndex..], out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString[..bitsIndex], out var currentCheerEmote))
             {
-                DrawText(fragmentString, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
+                var tieredEmote = currentCheerEmote.GetTier(bitsAmount).Value;
+                var emoteImageInfo = tieredEmote.Info;
+                if (drawPos.X + emoteImageInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
+                {
+                    AddImageSection(sectionImages, ref drawPos, defaultPos);
+                }
+
+                var emotePoint = new Point
+                {
+                    X = drawPos.X,
+                    Y = (int)(sectionImages.Sum(x => x.Info.Height) - renderOptions.SectionHeight + ((renderOptions.SectionHeight - emoteImageInfo.Height) / 2.0))
+                };
+                emotePositionList.Add((emotePoint, tieredEmote));
+                drawPos.X += emoteImageInfo.Width + renderOptions.EmoteSpacing;
+
+                return true;
             }
+
+            return false;
 
             static bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, [NotNullWhen(true)] out CheerEmote cheerEmote)
             {
