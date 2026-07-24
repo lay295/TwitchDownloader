@@ -27,7 +27,7 @@ jobs:
       run: |
         expr "${{ steps.create_release.outputs.upload_url }}" > upload_url.txt
     - name: Upload URL
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: upload_url.txt
         path: upload_url.txt
@@ -39,18 +39,16 @@ jobs:
      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
  
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v7
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.0.x
     - name: Build Windows GUI
       run: dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows -p:DebugType=Embedded
     
     - name: Download FFmpeg To Workspace
-      # You may pin to the exact commit or the version.
-      # uses: carlosperate/download-file-action@e85e0aa6262f13571d17a4a39687b26981c583dc
-      uses: carlosperate/download-file-action@v2.0.1
+      uses: carlosperate/download-file-action@v2.0.3
       with:
         # URL of the file to download
         file-url: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
@@ -61,19 +59,19 @@ jobs:
       run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderWPF/bin/Release/net10.0-windows/publish/win-x64/ffmpeg.exe
       
     - name: Zip Windows GUI Release Asset
-      uses: vimtor/action-zip@v1.2
+      uses: vimtor/action-zip@v1.3
       with:
         files: "TwitchDownloaderWPF/bin/Release/net10.0-windows/publish/win-x64"
         dest: TwitchDownloaderGUI-${{ github.event.inputs.release_tag }}-Windows-x64.zip
     
     - name: Download URL
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: upload_url.txt
         
     - name: Read URL
       id: url
-      uses: juliangruber/read-file-action@v1.1.7
+      uses: juliangruber/read-file-action@v1.1.8
       with:
         path: upload_url.txt
         
@@ -92,9 +90,9 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [create-release, build-gui]
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v7
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.0.x
     - name: Build Windows CLI
@@ -109,43 +107,43 @@ jobs:
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=LinuxArm64 -p:DebugType=Embedded
         
     - name: Zip Windows CLI
-      uses: vimtor/action-zip@v1.2
+      uses: vimtor/action-zip@v1.3
       with:
         files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/Windows"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-Windows-x64.zip
         
     - name: Zip Linux CLI
-      uses: vimtor/action-zip@v1.2
+      uses: vimtor/action-zip@v1.3
       with:
         files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/Linux"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-Linux-x64.zip
         
     - name: Zip LinuxAlpine CLI
-      uses: vimtor/action-zip@v1.2
+      uses: vimtor/action-zip@v1.3
       with:
         files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/LinuxAlpine"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxAlpine-x64.zip
     
     - name: Zip LinuxArm CLI
-      uses: vimtor/action-zip@v1.2
+      uses: vimtor/action-zip@v1.3
       with:
         files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/LinuxArm"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm.zip
         
     - name: Zip LinuxArm64 CLI
-      uses: vimtor/action-zip@v1.2
+      uses: vimtor/action-zip@v1.3
       with:
         files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/LinuxArm64"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-LinuxArm64.zip
     
     - name: Download URL
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: upload_url.txt
         
     - name: Read URL
       id: url
-      uses: juliangruber/read-file-action@v1.1.7
+      uses: juliangruber/read-file-action@v1.1.8
       with:
         path: upload_url.txt
     
@@ -203,9 +201,9 @@ jobs:
     runs-on: macos-latest
     needs: [create-release, build-cli]
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v7
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.0.x
     - name: Build MacOS CLI
@@ -214,25 +212,25 @@ jobs:
       run: dotnet publish TwitchDownloaderCLI -p:PublishProfile=MacOSArm64 -p:DebugType=Embedded
       
     - name: Zip MacOS CLI
-      uses: vimtor/action-zip@v1.2
+      uses: vimtor/action-zip@v1.3
       with:
         files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/MacOS"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOS-x64.zip
 
     - name: Zip MacOSArm64 CLI
-      uses: vimtor/action-zip@v1.2
+      uses: vimtor/action-zip@v1.3
       with:
         files: "TwitchDownloaderCLI/bin/Release/net10.0/publish/MacOSArm64"
         dest: TwitchDownloaderCLI-${{ github.event.inputs.release_tag }}-MacOSArm64.zip
     
     - name: Download URL
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: upload_url.txt
         
     - name: Read URL
       id: url
-      uses: juliangruber/read-file-action@v1.1.7
+      uses: juliangruber/read-file-action@v1.1.8
       with:
         path: upload_url.txt
     
