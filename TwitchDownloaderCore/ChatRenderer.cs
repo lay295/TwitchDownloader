@@ -78,9 +78,7 @@ namespace TwitchDownloaderCore
 
         private Dictionary<int, string[]> AllEmojiSequences => field ??=
             _emojiCache.Keys
-                .GroupBy(x => x.Length > 1 && char.IsHighSurrogate(x[0]) && char.IsLowSurrogate(x[1])
-                    ? char.ConvertToUtf32(x[0], x[1])
-                    : x[0])
+                .GroupBy(x => Rune.GetRuneAt(x, 0).Value)
                 .ToDictionary(x => x.Key, x => x.ToArray());
 
         // Persistent buffer for the composited animated-emote frame, reused across ticks so that an
@@ -1263,7 +1261,7 @@ namespace TwitchDownloaderCore
                 if (!emojiLookup.TryGetValue(lookupKey[..written], out var emojiImage))
                 {
                     emojiImage = SplitZwjEmoji(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, highlightWords, textElement, emojiLookup);
-                    emojiImage ??= LookupEmojiSlow(textElement, emojiMatches, emojiLookup, AllEmojiSequences);
+                    emojiImage ??= LookupEmojiSlow(textElement, emojiMatches);
                     if (emojiImage is null)
                     {
                         nonEmojiLen += elementLength;
@@ -1339,14 +1337,14 @@ namespace TwitchDownloaderCore
         }
 
         [return: MaybeNull]
-        private static SKImage LookupEmojiSlow(ReadOnlySpan<char> textElement, List<string> emojiMatches, Dictionary<string, SKImage>.AlternateLookup<ReadOnlySpan<char>> emojiLookup, Dictionary<int, string[]> allEmojiSequences)
+        private SKImage LookupEmojiSlow(ReadOnlySpan<char> textElement, List<string> emojiMatches)
         {
             var firstCodepoint = textElement.Length > 1 && char.IsHighSurrogate(textElement[0]) && char.IsLowSurrogate(textElement[1])
                 ? char.ConvertToUtf32(textElement[0], textElement[1])
                 : textElement[0];
 
             emojiMatches.Clear();
-            if (allEmojiSequences.TryGetValue(firstCodepoint, out var matches))
+            if (AllEmojiSequences.TryGetValue(firstCodepoint, out var matches))
             {
                 foreach (var emoji in matches)
                 {
@@ -1364,7 +1362,7 @@ namespace TwitchDownloaderCore
             }
 
             var selectedEmoji = emojiMatches.MaxBy(x => x.Length);
-            return emojiLookup[selectedEmoji];
+            return _emojiCache[selectedEmoji];
         }
 
         private void DrawNonFontMessage(List<SectionImage> sectionImages, ref Point drawPos, Point defaultPos, ReadOnlySpan<char> fragment, bool highlightWords)
