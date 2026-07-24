@@ -245,6 +245,10 @@
             <TextBlock Margin="3,8,3,3" Text="{lex:Loc JsonFile}" Foreground="{DynamicResource AppText}"/>
             <TextBox x:Name="textJson" Margin="3" MinWidth="200" MaxWidth="400" TextChanged="TextJson_TextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
             <Button x:Name="btnBrowse" Margin="3" MinWidth="50" Content="{lex:Loc Browse}" Click="btnBrowse_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <TextBlock Margin="16,8,3,3" Text="{lex:Loc RenderPreset}" Foreground="{DynamicResource AppText}"/>
+            <ComboBox x:Name="comboRenderPresets" Width="150" Margin="3,4,3,3" DisplayMemberPath="Name" SelectionChanged="ComboRenderPresets_SelectionChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+            <Button x:Name="btnSaveRenderPreset" Margin="3,4,3,3" MinWidth="50" Content="{lex:Loc Save}" Click="BtnSaveRenderPreset_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <Button x:Name="btnDeleteRenderPreset" Margin="0,4,3,3" MinWidth="50" Content="{lex:Loc Delete}" Click="BtnDeleteRenderPreset_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
         </WrapPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
             <hc:SplitButton x:Name="SplitBtnRender" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc Render}" Click="SplitBtnRender_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
