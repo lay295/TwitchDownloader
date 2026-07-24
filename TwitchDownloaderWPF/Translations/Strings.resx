@@ -149,6 +149,30 @@
   <data name="Browse" xml:space="preserve">
     <value>Browse</value>
   </data>
+  <data name="LiveMonitor" xml:space="preserve">
+    <value>Live Monitor</value>
+  </data>
+  <data name="LiveMonitorChannel" xml:space="preserve">
+    <value>Channel:</value>
+  </data>
+  <data name="LiveMonitorAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="LiveMonitorRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="LiveMonitorStart" xml:space="preserve">
+    <value>Start Monitoring</value>
+  </data>
+  <data name="LiveMonitorStop" xml:space="preserve">
+    <value>Stop Monitoring</value>
+  </data>
+  <data name="LiveMonitorChannelColumn" xml:space="preserve">
+    <value>Channel</value>
+  </data>
+  <data name="LiveMonitorStatusColumn" xml:space="preserve">
+    <value>Status</value>
+  </data>
   <data name="BttvEmotes" xml:space="preserve">
     <value>BTTV Emotes:</value>
   </data>
