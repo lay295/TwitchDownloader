@@ -914,7 +914,9 @@ namespace TwitchDownloaderCore
                     await using var archive = await ZipFile.OpenReadAsync(emojiZipPath, cancellationToken);
                     var emojiAssetsPath = emojiVendor.AssetPath();
                     var emojis = archive.Entries
-                        .Where(x => !string.IsNullOrWhiteSpace(x.Name) && Path.GetDirectoryName(x.FullName) == emojiAssetsPath);
+                        .Where(x => !string.IsNullOrWhiteSpace(x.Name)
+                                    && Path.GetDirectoryName(x.FullName) is { } dir
+                                    && dir.EndsWith(emojiAssetsPath));
 
                     foreach (var emoji in emojis)
                     {

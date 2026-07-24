@@ -258,7 +258,7 @@ Chat Renders are encoded and Video Downloads are finalized with [FFmpeg](https:/
 
 Chat Renders may use [Noto Color Emoji](https://github.com/googlefonts/noto-emoji) © Google and contributors.
 
-Chat Renders may use [Twemoji](https://github.com/twitter/twemoji) © Twitter and contributors.
+Chat Renders may use [Twemoji](https://github.com/jdecked/twemoji) © Twitter and contributors.
 
 Bundled FFmpeg binaries are fetched from [gyan.dev](https://www.gyan.dev/ffmpeg/) © Gyan Doshi.
 
