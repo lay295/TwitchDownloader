@@ -1,5 +1,4 @@
 ﻿using SkiaSharp;
-using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Models.Render
 {
