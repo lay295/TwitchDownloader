@@ -15,6 +15,7 @@ using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
 using TwitchDownloaderCore.Models;
+using TwitchDownloaderCore.Models.Render;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
@@ -58,15 +59,15 @@ namespace TwitchDownloaderCore
         private readonly ITaskProgress _progress;
         private readonly ChatRenderOptions renderOptions;
         private readonly string _cacheDir;
-        private List<ChatBadge> badgeList = new List<ChatBadge>();
-        private List<TwitchEmote> emoteList = new List<TwitchEmote>();
-        private List<TwitchEmote> emoteThirdList = new List<TwitchEmote>();
-        private List<CheerEmote> cheermotesList = new List<CheerEmote>();
-        private Dictionary<string, SKImage> emojiCache = [];
-        private Dictionary<string, SKImage> avatarCache = [];
-        private Dictionary<int, SKPaint> fallbackFontCache = [];
-        private Dictionary<SKColor, SKPaint> paintCache = [];
-        private Dictionary<(int, int), List<SectionImage>> sectionImageCache = [];
+        private DisposableDictionary<string, ChatBadge> _badgeCache = [];
+        private DisposableDictionary<string, TwitchEmote> _emoteCache = [];
+        private DisposableDictionary<string, TwitchEmote> _emoteThirdCache = [];
+        private DisposableDictionary<string, CheerEmote> _cheermoteCache = [];
+        private DisposableDictionary<string, SKImage> _emojiCache = [];
+        private DisposableDictionary<string, SKImage> _avatarCache = [];
+        private DisposableDictionary<int, SKPaint> _fallbackFontCache = [];
+        private DisposableDictionary<SKColor, SKPaint> _paintCache = [];
+        private readonly SectionImageCache _sectionImageCache = new();
         private bool noFallbackFontFound = false;
         private readonly SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont;
@@ -76,7 +77,7 @@ namespace TwitchDownloaderCore
         private int _usernameCenteredY;
 
         private Dictionary<int, string[]> AllEmojiSequences => field ??=
-            emojiCache.Keys
+            _emojiCache.Keys
                 .GroupBy(x => x.Length > 1 && char.IsHighSurrogate(x[0]) && char.IsLowSurrogate(x[1])
                     ? char.ConvertToUtf32(x[0], x[1])
                     : x[0])
@@ -728,7 +729,7 @@ namespace TwitchDownloaderCore
                 int removeCount = commentList.Count - commentsDrawn;
                 for (int i = 0; i < removeCount; i++)
                 {
-                    ReturnSectionImage(commentList[i].Image);
+                    _sectionImageCache.Return(commentList[i].Image);
                 }
                 commentList.RemoveRange(0, removeCount);
             }
@@ -836,7 +837,7 @@ namespace TwitchDownloaderCore
 
         private SectionImage CombineImages(List<SectionImage> sectionImages, HighlightType highlightType, int commentIndex)
         {
-            var finalImage = RentSectionImage(renderOptions.ChatWidth, sectionImages.Sum(x => x.Info.Height));
+            var finalImage = _sectionImageCache.Rent(renderOptions.ChatWidth, sectionImages.Sum(x => x.Info.Height));
             var finalBitmapInfo = finalImage.Info;
             var finalCanvas = finalImage.Canvas;
 
@@ -868,7 +869,7 @@ namespace TwitchDownloaderCore
             for (var i = 0; i < sectionImages.Count; i++)
             {
                 finalCanvas.DrawBitmap(sectionImages[i].Bitmap, 0, i * renderOptions.SectionHeight);
-                ReturnSectionImage(sectionImages[i]);
+                _sectionImageCache.Return(sectionImages[i]);
             }
             sectionImages.Clear();
 
@@ -1025,7 +1026,7 @@ namespace TwitchDownloaderCore
             DrawMessage(comment, sectionImages, emotePositionList, false, ref drawPos, defaultPos);
         }
 
-        private void DrawWatchStreakMessage(Comment comment, List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
+        private void DrawWatchStreakMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, int commentIndex, ref Point drawPos, Point defaultPos, SKImage highlightIcon, Point iconPoint)
         {
             var canvas = sectionImages[^1].Canvas;
             canvas.DrawImage(highlightIcon, iconPoint.X, iconPoint.Y);
@@ -1128,7 +1129,8 @@ namespace TwitchDownloaderCore
 
         private void DrawFragmentPart(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
         {
-            if (!skipThird && TryGetTwitchEmote(emoteThirdList, fragmentPart, out var emote))
+            var thirdLookup = _emoteThirdCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            if (!skipThird && thirdLookup.TryGetValue(fragmentPart, out var emote))
             {
                 DrawThirdPartyEmote(sectionImages, emotePositionList, ref drawPos, defaultPos, emote, highlightWords);
             }
@@ -1148,22 +1150,7 @@ namespace TwitchDownloaderCore
             {
                 DrawText(fragmentPart, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
             }
-
-            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteName, [NotNullWhen(true)] out TwitchEmote twitchEmote)
-            {
-                var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
-                var lo = 0;
-                var hi = emoteListSpan.Length - 1;
-                while (lo <= hi)
-                {
-                    var i = lo + ((hi - lo) >> 1);
-                    var order = emoteListSpan[i].Name.AsSpan().CompareTo(emoteName, StringComparison.Ordinal);
-
-                    if (order == 0)
-                    {
-                        twitchEmote = emoteListSpan[i];
-                        return true;
-                    }
+        }
 
                     if (order < 0)
                     {
@@ -1213,7 +1200,7 @@ namespace TwitchDownloaderCore
 
         private bool ContainsEmoji(ReadOnlySpan<char> text, out int firstEmoji)
         {
-            var emojiLookup = emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            var emojiLookup = _emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
             Span<char> stackSpace = stackalloc char[16];
 
             var fragmentSlice = text;
@@ -1256,7 +1243,7 @@ namespace TwitchDownloaderCore
         private void DrawEmojiMessage(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragment, bool highlightWords, int firstEmoji = -1)
         {
             var emojiMatches = new List<string>();
-            var emojiLookup = emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            var emojiLookup = _emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
             Span<char> stackSpace = stackalloc char[16];
 
             var fragmentSlice = fragment;
@@ -1488,7 +1475,8 @@ namespace TwitchDownloaderCore
             }
 
             var bitsIndex = fragmentString.IndexOfAny(DigitChars);
-            if (bitsIndex > 0 && int.TryParse(fragmentString[bitsIndex..], out var bitsAmount) && TryGetCheerEmote(cheermotesList, fragmentString[..bitsIndex], out var currentCheerEmote))
+            var cheermoteLookup = _cheermoteCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            if (bitsIndex > 0 && int.TryParse(fragmentString[bitsIndex..], out var bitsAmount) && cheermoteLookup.TryGetValue(fragmentString[..bitsIndex], out var currentCheerEmote))
             {
                 var tieredEmote = currentCheerEmote.GetTier(bitsAmount).Value;
                 var emoteImageInfo = tieredEmote.Info;
@@ -1509,42 +1497,13 @@ namespace TwitchDownloaderCore
             }
 
             return false;
-
-            static bool TryGetCheerEmote(List<CheerEmote> cheerEmoteList, ReadOnlySpan<char> prefix, [NotNullWhen(true)] out CheerEmote cheerEmote)
-            {
-                var emoteListSpan = CollectionsMarshal.AsSpan(cheerEmoteList);
-                var lo = 0;
-                var hi = emoteListSpan.Length - 1;
-                while (lo <= hi)
-                {
-                    var i = lo + ((hi - lo) >> 1);
-                    var order = emoteListSpan[i].prefix.AsSpan().CompareTo(prefix, StringComparison.Ordinal);
-
-                    if (order == 0)
-                    {
-                        cheerEmote = emoteListSpan[i];
-                        return true;
-                    }
-
-                    if (order < 0)
-                    {
-                        lo = i + 1;
-                    }
-                    else
-                    {
-                        hi = i - 1;
-                    }
-                }
-
-                cheerEmote = null;
-                return false;
-            }
         }
 
         private void DrawFirstPartyEmote(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, Fragment fragment, bool highlightWords)
         {
             // First party emote
-            if (TryGetTwitchEmote(emoteList, fragment.emoticon.emoticon_id, out var emote))
+            var emoteLookup = _emoteCache.GetAlternateLookup<ReadOnlySpan<char>>();
+            if (emoteLookup.TryGetValue(fragment.emoticon.emoticon_id, out var emote))
             {
                 SKImageInfo emoteInfo = emote.Info;
                 if (drawPos.X + emoteInfo.Width > renderOptions.ChatWidth - renderOptions.SidePadding * 2)
@@ -1571,36 +1530,6 @@ namespace TwitchDownloaderCore
             {
                 // Probably an old emote that was removed
                 DrawText(fragment.text, messageFont, true, sectionImages, ref drawPos, defaultPos, highlightWords);
-            }
-
-            static bool TryGetTwitchEmote(List<TwitchEmote> twitchEmoteList, ReadOnlySpan<char> emoteId, [NotNullWhen(true)] out TwitchEmote twitchEmote)
-            {
-                var emoteListSpan = CollectionsMarshal.AsSpan(twitchEmoteList);
-                var lo = 0;
-                var hi = emoteListSpan.Length - 1;
-                while (lo <= hi)
-                {
-                    var i = lo + ((hi - lo) >> 1);
-                    var order = emoteListSpan[i].Id.AsSpan().CompareTo(emoteId, StringComparison.Ordinal);
-
-                    if (order == 0)
-                    {
-                        twitchEmote = emoteListSpan[i];
-                        return true;
-                    }
-
-                    if (order < 0)
-                    {
-                        lo = i + 1;
-                    }
-                    else
-                    {
-                        hi = i - 1;
-                    }
-                }
-
-                twitchEmote = null;
-                return false;
             }
         }
 
@@ -1881,10 +1810,10 @@ namespace TwitchDownloaderCore
         {
             var avatarUrl = comment.commenter.logo;
 
-            if (string.IsNullOrWhiteSpace(avatarUrl) || !avatarCache.TryGetValue(avatarUrl, out var avatarImage))
+            if (string.IsNullOrWhiteSpace(avatarUrl) || !_avatarCache.TryGetValue(avatarUrl, out var avatarImage))
             {
                 avatarUrl = DefaultAvatarUrls[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultAvatarUrls.Length];
-                if (!avatarCache.TryGetValue(avatarUrl, out avatarImage))
+                if (!_avatarCache.TryGetValue(avatarUrl, out avatarImage))
                 {
                     return;
                 }
@@ -1925,7 +1854,7 @@ namespace TwitchDownloaderCore
                 var id = badge._id;
                 var version = badge.version;
 
-                if (!TryGetBadge(badgeList, id, out var cachedBadge))
+                if (!_badgeCache.TryGetValue(id, out var cachedBadge))
                     continue;
 
                 if (!cachedBadge.Versions.TryGetValue(version, out var badgeBitmap))
@@ -1935,36 +1864,6 @@ namespace TwitchDownloaderCore
             }
 
             return returnList;
-
-            static bool TryGetBadge(List<ChatBadge> badgeList, ReadOnlySpan<char> badgeName, [NotNullWhen(true)] out ChatBadge badge)
-            {
-                var badgeSpan = CollectionsMarshal.AsSpan(badgeList);
-                var lo = 0;
-                var hi = badgeSpan.Length - 1;
-                while (lo <= hi)
-                {
-                    var i = lo + ((hi - lo) >> 1);
-                    var order = badgeSpan[i].Name.AsSpan().CompareTo(badgeName, StringComparison.Ordinal);
-
-                    if (order == 0)
-                    {
-                        badge = badgeSpan[i];
-                        return true;
-                    }
-
-                    if (order < 0)
-                    {
-                        lo = i + 1;
-                    }
-                    else
-                    {
-                        hi = i - 1;
-                    }
-                }
-
-                badge = null;
-                return false;
-            }
         }
 
         private void DrawTimestamp(Comment comment, List<SectionImage> sectionImages, ref Point drawPos, ref Point defaultPos)
@@ -2010,42 +1909,7 @@ namespace TwitchDownloaderCore
             drawPos.X = defaultPos.X;
             drawPos.Y = defaultPos.Y;
 
-            sectionImages.Add(RentSectionImage(renderOptions.ChatWidth, renderOptions.SectionHeight));
-        }
-
-        private SectionImage RentSectionImage(int width, int height)
-        {
-            ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(sectionImageCache, (width, height), out var exists);
-            if (!exists)
-            {
-                bucket = [];
-            }
-
-            if (bucket.Count == 0)
-            {
-                return new SectionImage(width, height);
-            }
-
-            var image = bucket[^1];
-            bucket.RemoveAt(bucket.Count - 1);
-            image.Canvas.Clear();
-            return image;
-        }
-
-        private void ReturnSectionImage(SectionImage sectionImage)
-        {
-            var width = sectionImage.Info.Width;
-            var height = sectionImage.Info.Height;
-
-            ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(sectionImageCache, (width, height), out var exists);
-            if (!exists)
-            {
-                // Don't create a new bucket for an image that wasn't rented from the cache
-                sectionImage.Dispose();
-                return;
-            }
-
-            bucket.Add(sectionImage);
+            sectionImages.Add(_sectionImageCache.Rent(renderOptions.ChatWidth, renderOptions.SectionHeight));
         }
 
         /// <summary>
@@ -2069,17 +1933,12 @@ namespace TwitchDownloaderCore
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            badgeList = badgeTask.Result;
-            emoteList = emoteTask.Result;
-            emoteThirdList = emoteThirdTask.Result;
-            cheermotesList = cheerTask.Result;
-            emojiCache = emojiTask.Result;
-            avatarCache = avatarTask.Result;
-
-            badgeList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
-            emoteList.Sort((a, b) => string.Compare(a.Id, b.Id, StringComparison.Ordinal));
-            emoteThirdList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
-            cheermotesList.Sort((a, b) => string.Compare(a.prefix, b.prefix, StringComparison.Ordinal));
+            _badgeCache.AddRange(badgeTask.Result, x => x.Name, x => x);
+            _emoteCache.AddRange(emoteTask.Result, x => x.Name, x => x);
+            _emoteThirdCache.AddRange(emoteThirdTask.Result, x => x.Name, x => x);
+            _cheermoteCache.AddRange(cheerTask.Result, x => x.prefix, x => x);
+            _emojiCache.AddRange(emojiTask.Result);
+            _avatarCache.AddRange(avatarTask.Result);
         }
 
         private async Task<List<ChatBadge>> GetScaledBadges(CancellationToken cancellationToken)
@@ -2169,8 +2028,7 @@ namespace TwitchDownloaderCore
                     var num = uint.Parse(span[range], NumberStyles.HexNumber);
                     if (num == 0xFE0F) continue;
 
-                    var rune = new Rune(num);
-                    sb.Append($"{rune}");
+                    sb.Append($"{new Rune(num)}");
                 }
 
                 return sb.ToString();
@@ -2241,7 +2099,7 @@ namespace TwitchDownloaderCore
 
         private SKPaint GetCachedPaint(SKColor color)
         {
-            ref var paint = ref CollectionsMarshal.GetValueRefOrAddDefault(paintCache, color, out var alreadyExists);
+            ref var paint = ref CollectionsMarshal.GetValueRefOrAddDefault(_paintCache, color, out var alreadyExists);
             if (alreadyExists)
             {
                 return paint;
@@ -2253,7 +2111,7 @@ namespace TwitchDownloaderCore
 
         private SKPaint GetFallbackFont(int input)
         {
-            ref var fallbackPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(fallbackFontCache, input, out bool alreadyExists);
+            ref var fallbackPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(_fallbackFontCache, input, out bool alreadyExists);
             if (alreadyExists)
             {
                 return fallbackPaint;
@@ -2349,8 +2207,6 @@ namespace TwitchDownloaderCore
             return chatRoot;
         }
 
-#region ImplementIDisposable
-
         public void Dispose()
         {
             Dispose(true);
@@ -2367,25 +2223,15 @@ namespace TwitchDownloaderCore
 
                 if (isDisposing)
                 {
-                    foreach (var badge in badgeList)
-                        badge?.Dispose();
-                    foreach (var emote in emoteList)
-                        emote?.Dispose();
-                    foreach (var emote in emoteThirdList)
-                        emote?.Dispose();
-                    foreach (var cheerEmote in cheermotesList)
-                        cheerEmote?.Dispose();
-                    foreach (var (_, bitmap) in emojiCache)
-                        bitmap?.Dispose();
-                    foreach (var (_, bitmap) in avatarCache)
-                        bitmap?.Dispose();
-                    foreach (var (_, paint) in fallbackFontCache)
-                        paint?.Dispose();
-                    foreach (var (_, paint) in paintCache)
-                        paint?.Dispose();
-                    foreach (var (_, bucket) in sectionImageCache)
-                        foreach (var image in bucket)
-                            image.Dispose();
+                    _badgeCache.Dispose();
+                    _emoteCache.Dispose();
+                    _emoteThirdCache.Dispose();
+                    _cheermoteCache.Dispose();
+                    _emojiCache.Dispose();
+                    _avatarCache.Dispose();
+                    _fallbackFontCache.Dispose();
+                    _paintCache.Dispose();
+                    _sectionImageCache?.Dispose();
                     fontManager?.Dispose();
                     nameFont?.Dispose();
                     messageFont?.Dispose();
@@ -2394,25 +2240,25 @@ namespace TwitchDownloaderCore
                     _animCanvas?.Dispose();
                     _animComposedFrame?.Dispose();
 
-                    badgeList.Clear();
-                    emoteList.Clear();
-                    emoteThirdList.Clear();
-                    cheermotesList.Clear();
-                    emojiCache.Clear();
-                    avatarCache.Clear();
-                    fallbackFontCache.Clear();
-                    paintCache.Clear();
+                    _badgeCache.Clear();
+                    _emoteCache.Clear();
+                    _emoteThirdCache.Clear();
+                    _cheermoteCache.Clear();
+                    _emojiCache.Clear();
+                    _avatarCache.Clear();
+                    _fallbackFontCache.Clear();
+                    _paintCache.Clear();
 
-                    // Set the root references to null to explicitly tell the garbage collector that the resources have been disposed
+                    // Let the GC collect the caches immediately
                     chatRoot = null;
-                    badgeList = null;
-                    emoteList = null;
-                    emoteThirdList = null;
-                    cheermotesList = null;
-                    emojiCache = null;
-                    avatarCache = null;
-                    fallbackFontCache = null;
-                    paintCache = null;
+                    _badgeCache = null;
+                    _emoteCache = null;
+                    _emoteThirdCache = null;
+                    _cheermoteCache = null;
+                    _emojiCache = null;
+                    _avatarCache = null;
+                    _fallbackFontCache = null;
+                    _paintCache = null;
                 }
             }
             finally
@@ -2420,7 +2266,5 @@ namespace TwitchDownloaderCore
                 Disposed = true;
             }
         }
-
-#endregion
     }
 }
