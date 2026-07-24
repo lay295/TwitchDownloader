@@ -27,8 +27,8 @@ namespace TwitchDownloaderCore.Chat
         {
             return vendor switch
             {
-                EmojiVendor.TwitterTwemoji => new MemoryStream(Resources.twemoji_14_0_0),
-                EmojiVendor.GoogleNotoColor => new MemoryStream(Resources.noto_emoji_2_038),
+                EmojiVendor.TwitterTwemoji => new MemoryStream(Resources.twemoji),
+                EmojiVendor.GoogleNotoColor => new MemoryStream(Resources.noto_emoji),
                 _ => throw new NotSupportedException(NOT_SUPPORTED_MESSAGE)
             };
         }
@@ -47,8 +47,8 @@ namespace TwitchDownloaderCore.Chat
         {
             return vendor switch
             {
-                EmojiVendor.TwitterTwemoji => Path.Combine("twemoji-14.0.0", "assets", "72x72"),
-                EmojiVendor.GoogleNotoColor => Path.Combine("noto-emoji-2.038", "png", "72"),
+                EmojiVendor.TwitterTwemoji => Path.Combine("assets", "72x72"),
+                EmojiVendor.GoogleNotoColor => Path.Combine("png", "72"),
                 _ => throw new NotSupportedException(NOT_SUPPORTED_MESSAGE)
             };
         }
