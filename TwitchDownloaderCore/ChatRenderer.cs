@@ -1582,7 +1582,7 @@ namespace TwitchDownloaderCore
                 {
                     // When chat width is small enough and font size is big enough, 1 character can be wider than effectiveChatWidth.
                     overrideWrap = true;
-                    newDrawText = drawText[..1];
+                    newDrawText = drawText[..StringInfo.GetNextTextElementLength(drawText)];
                 }
 
                 DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos, highlightWords, overrideWrap);
