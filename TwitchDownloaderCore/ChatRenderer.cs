@@ -24,6 +24,7 @@ namespace TwitchDownloaderCore
 {
     public sealed partial class ChatRenderer : IDisposable
     {
+        private const char ZERO_WIDTH_JOINER = '\u200D';
         public bool Disposed { get; private set; } = false;
         public ChatRoot chatRoot { get; private set; } = new ChatRoot();
 
@@ -1234,12 +1235,17 @@ namespace TwitchDownloaderCore
                 }
 
                 var textElement = fragmentSlice[..elementLength];
-                var lookupKey = elementLength <= stackSpace.Length ? stackSpace : new char[elementLength];
-                var written = textElement.CopyToExcept(stackSpace, EmojiExcludeChars);
-                if (emojiLookup.ContainsKey(lookupKey[..written]))
+                foreach (var range in textElement.Split(ZERO_WIDTH_JOINER)) // Will return textElement once when no ZWJ
                 {
-                    firstEmoji = index;
-                    return true;
+                    var subEmoji = textElement[range];
+
+                    var lookupKey = subEmoji.Length <= stackSpace.Length ? stackSpace : new char[subEmoji.Length];
+                    var written = subEmoji.CopyToExcept(stackSpace, EmojiExcludeChars);
+                    if (emojiLookup.ContainsKey(lookupKey[..written]))
+                    {
+                        firstEmoji = index;
+                        return true;
+                    }
                 }
 
                 fragmentSlice = fragmentSlice[elementLength..];
@@ -1284,7 +1290,8 @@ namespace TwitchDownloaderCore
                 var written = textElement.CopyToExcept(stackSpace, EmojiExcludeChars);
                 if (!emojiLookup.TryGetValue(lookupKey[..written], out var emojiImage))
                 {
-                    emojiImage = LookupEmojiSlow(textElement, emojiMatches, emojiLookup, AllEmojiSequences);
+                    emojiImage = SplitZwjEmoji(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, highlightWords, textElement, emojiLookup);
+                    emojiImage ??= LookupEmojiSlow(textElement, emojiMatches, emojiLookup, AllEmojiSequences);
                     if (emojiImage is null)
                     {
                         nonEmojiLen += elementLength;
@@ -1328,6 +1335,35 @@ namespace TwitchDownloaderCore
             {
                 DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, fragment.Slice(nonEmojiStart, nonEmojiLen), highlightWords, true, true);
             }
+        }
+
+        [return: MaybeNull]
+        private SKImage SplitZwjEmoji(List<SectionImage> sectionImages, List<(Point, TwitchEmote)> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, bool highlightWords, ReadOnlySpan<char> textElement,
+            Dictionary<string, SKImage>.AlternateLookup<ReadOnlySpan<char>> emojiLookup)
+        {
+            Span<char> stackSpace = stackalloc char[16];
+
+            if (!textElement.Contains(ZERO_WIDTH_JOINER))
+            {
+                return null;
+            }
+
+            ReadOnlySpan<char> subEmoji = default;
+            foreach (var range in textElement.Split(ZERO_WIDTH_JOINER))
+            {
+                if (!subEmoji.IsEmpty)
+                {
+                    DrawEmojiMessage(sectionImages, emotePositionList, ref drawPos, defaultPos, bitsCount, subEmoji, highlightWords);
+                }
+
+                subEmoji = textElement[range];
+            }
+
+            var lookupKey = subEmoji.Length <= stackSpace.Length ? stackSpace : new char[subEmoji.Length];
+            var written = subEmoji.CopyToExcept(lookupKey, EmojiExcludeChars);
+            return emojiLookup.TryGetValue(lookupKey[..written], out var emojiImage)
+                ? emojiImage
+                : null;
         }
 
         [return: MaybeNull]
