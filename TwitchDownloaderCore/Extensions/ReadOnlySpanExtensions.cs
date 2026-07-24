@@ -1,7 +1,6 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Globalization;
-using NeoSmart.Unicode;
 
 namespace TwitchDownloaderCore.Extensions
 {
@@ -301,34 +300,6 @@ namespace TwitchDownloaderCore.Extensions
 
             Debug.Assert(length == new StringInfo(str.ToString()).LengthInTextElements);
             return length;
-        }
-
-        public static bool StartsWith(this ReadOnlySpan<char> str, IEnumerable<Codepoint> codepoints)
-        {
-            var slice = str;
-            foreach (var current in codepoints)
-            {
-                var currentLength = current.Value <= ushort.MaxValue ? 1 : 2;
-
-                if (slice.Length < currentLength)
-                {
-                    return false;
-                }
-
-                var codepointSpan = slice[..currentLength];
-                slice = slice[currentLength..];
-
-                var codepoint = currentLength > 1 && char.IsHighSurrogate(codepointSpan[0]) && char.IsLowSurrogate(codepointSpan[1])
-                    ? char.ConvertToUtf32(codepointSpan[0], codepointSpan[1])
-                    : codepointSpan[0];
-
-                if (codepoint != current)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         public static int CopyToExcept<T>(this ReadOnlySpan<T> str, Span<T> destination, SearchValues<T> excludeChars) where T : IEquatable<T>

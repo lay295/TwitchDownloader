@@ -1,6 +1,6 @@
 using SkiaSharp;
 
-namespace TwitchDownloaderCore.TwitchObjects
+namespace TwitchDownloaderCore.Models.Render
 {
     public readonly record struct SectionImage : IDisposable
     {

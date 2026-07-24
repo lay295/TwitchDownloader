@@ -34,7 +34,6 @@
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.9" />
     <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="2.88.9" />
     <PackageReference Include="System.Text.Json" Version="10.0.10" />
-    <PackageReference Include="Unicode.net" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

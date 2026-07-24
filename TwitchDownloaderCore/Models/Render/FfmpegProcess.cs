@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace TwitchDownloaderCore.Models
+namespace TwitchDownloaderCore.Models.Render
 {
     public sealed class FfmpegProcess : Process
     {
