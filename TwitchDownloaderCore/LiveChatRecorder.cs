@@ -43,8 +43,10 @@ namespace TwitchDownloaderCore
                 throw new ArgumentException("Invalid channel name.");
             }
 
-            var testEventHubTask = TestEventHub();
-
+            if (_recorderOptions.Duration is not null && _recorderOptions.NextStream)
+            {
+                throw new ArgumentException("Can't set both a duration and next-stream");
+            }
             var outputFileInfo = TwitchHelper.ClaimFile(_recorderOptions.OutputFile, _recorderOptions.FileCollisionCallback, _progress);
             _recorderOptions.OutputFile = outputFileInfo.FullName;
 

@@ -24,8 +24,8 @@ namespace TwitchDownloaderCLI.Modes
             {
                 Channel = inputOptions.Channel,
                 OutputFile = inputOptions.OutputFile,
-                NextStream = !!inputOptions.NextStream,
-                Duration = (TimeSpan)inputOptions.Duration,
+                NextStream = inputOptions.NextStream,
+                Duration = inputOptions.Duration,
                 FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
 
