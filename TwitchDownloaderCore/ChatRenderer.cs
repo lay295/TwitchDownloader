@@ -635,15 +635,26 @@ namespace TwitchDownloaderCore
         private int GetNewestCommentIndex(int lastIndex, double currentTimeSeconds)
         {
             var commentSpan = CollectionsMarshal.AsSpan(chatRoot.comments);
-            for (var i = lastIndex + 1; i < commentSpan.Length; i++)
+
+            // Offset dispersal plus update-rate flooring can leave offsets locally out of order by up
+            // to 1.2 seconds, so stopping at the first comment past the current time can miss comments
+            // that have already appeared. Scan to the first comment more than two seconds ahead, then
+            // search backwards for the newest comment at or before the current time.
+            var scanEnd = lastIndex;
+            while (scanEnd + 1 < commentSpan.Length && commentSpan[scanEnd + 1].content_offset_seconds <= currentTimeSeconds + 2.0)
             {
-                if (commentSpan[i].content_offset_seconds > currentTimeSeconds)
+                scanEnd++;
+            }
+
+            for (var i = scanEnd; i > lastIndex; i--)
+            {
+                if (commentSpan[i].content_offset_seconds <= currentTimeSeconds)
                 {
-                    return i - 1;
+                    return i;
                 }
             }
 
-            return commentSpan.Length - 1;
+            return lastIndex;
         }
 
         private UpdateFrame GenerateUpdateFrame(int currentTick, int sectionDefaultYPos, UpdateFrame lastUpdate = null)
