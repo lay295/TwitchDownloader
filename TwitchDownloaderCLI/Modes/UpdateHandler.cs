@@ -254,6 +254,8 @@ namespace TwitchDownloaderCLI.Modes
 
                 foreach (var entry in archive.Entries)
                 {
+                    // ReSharper disable once MethodHasAsyncOverload
+                    // ExtractToFileAsync is extremely slow
                     entry.ExtractToFile(Path.Combine(destinationDir, entry.FullName), true);
                     extracted++;
 
