@@ -2138,7 +2138,10 @@ namespace TwitchDownloaderCore
                 var sb = new StringBuilder(span.Length / 5); // '1234 '
                 foreach (var range in span.SplitAny())
                 {
-                    var rune = new Rune(uint.Parse(span[range], NumberStyles.HexNumber));
+                    var num = uint.Parse(span[range], NumberStyles.HexNumber);
+                    if (num == 0xFE0F) continue;
+
+                    var rune = new Rune();
                     sb.Append($"{rune}");
                 }
 
