@@ -530,6 +530,103 @@ namespace TwitchDownloaderWPF
             }
         }
 
+        private async void MenuItemSplitByChapters_Click(object sender, RoutedEventArgs e)
+        {
+            if (!SplitBtnDownload.IsDropDownOpen)
+                return;
+
+            if (currentVideoId == 0)
+            {
+                MessageBox.Show(Application.Current.MainWindow!, "Please load a VOD first.", "No VOD Loaded", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                btnGetInfo.IsEnabled = false;
+                SplitBtnDownload.IsEnabled = false;
+
+                var videoInfo = new TwitchDownloaderCore.TwitchObjects.Gql.VideoInfo
+                {
+                    lengthSeconds = (int)vodLength.TotalSeconds,
+                    game = new TwitchDownloaderCore.TwitchObjects.Gql.Game { displayName = game }
+                };
+
+                var progress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
+                var chapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(currentVideoId, videoInfo, progress);
+                var chapters = chapterResponse.data.video.moments.edges;
+
+                if (chapters.Count <= 1)
+                {
+                    MessageBox.Show(Application.Current.MainWindow!, "This VOD has only one chapter, so there is nothing to split.", "Single Chapter", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var msg = $"Enqueue {chapters.Count} separate downloads (one per chapter)?";
+                if (MessageBox.Show(Application.Current.MainWindow!, msg, "Split by Chapters", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                    return;
+
+                string folder = Settings.Default.QueueFolder;
+                string quality = ((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString();
+                string ext = FilenameService.GuessVodFileExtension(quality);
+                var trimMode = RadioTrimSafe.IsChecked == true ? VideoTrimMode.Safe : VideoTrimMode.Exact;
+
+                for (int i = 0; i < chapters.Count; i++)
+                {
+                    var chapter = chapters[i].node;
+                    var startSec = chapter.positionMilliseconds / 1000;
+                    var endSec = startSec + chapter.durationMilliseconds / 1000;
+                    var chapterStart = TimeSpan.FromSeconds(startSec);
+                    var chapterEnd = TimeSpan.FromSeconds(Math.Min(endSec, (int)vodLength.TotalSeconds));
+                    var gameName = chapter.details?.game?.displayName ?? chapter.description ?? game;
+
+                    var options = new VideoDownloadOptions
+                    {
+                        DownloadThreads = (int)numDownloadThreads.Value,
+                        ThrottleKib = Settings.Default.DownloadThrottleEnabled ? Settings.Default.MaximumBandwidthKib : -1,
+                        Filename = Path.Combine(folder,
+                            FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(),
+                                currentVideoTime, textStreamer.Text, streamerId,
+                                chapterStart, chapterEnd, vodLength, viewCount, gameName) + $"_ch{i + 1:D2}" + ext),
+                        Oauth = TextOauth.Text,
+                        Quality = quality,
+                        Id = currentVideoId,
+                        TrimBeginning = true,
+                        TrimBeginningTime = chapterStart,
+                        TrimEnding = true,
+                        TrimEndingTime = chapterEnd,
+                        FfmpegPath = "ffmpeg",
+                        TempFolder = Settings.Default.TempPath,
+                        TrimMode = trimMode
+                    };
+
+                    var task = new TwitchTasks.VodDownloadTask
+                    {
+                        DownloadOptions = options,
+                        Info =
+                        {
+                            Title = $"{textTitle.Text} - {gameName} (Ch. {i + 1})",
+                            Thumbnail = imgThumbnail.Source
+                        }
+                    };
+                    PageQueue.taskList.Add(task);
+                }
+
+                if (Application.Current.MainWindow is MainWindow mw)
+                    mw.Main.Content = MainWindow.pageQueue;
+            }
+            catch (Exception ex)
+            {
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                MessageBox.Show(Application.Current.MainWindow!, "Failed to fetch chapters: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                btnGetInfo.IsEnabled = true;
+                SplitBtnDownload.IsEnabled = true;
+            }
+        }
+
         private void numEndHour_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
         {
             UpdateVideoSizeEstimates();
