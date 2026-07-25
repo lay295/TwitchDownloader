@@ -1917,7 +1917,7 @@ namespace TwitchDownloaderCore
             GC.WaitForPendingFinalizers();
 
             _badgeCache.AddRange(badgeTask.Result, x => x.Name, x => x);
-            _emoteCache.AddRange(emoteTask.Result, x => x.Name, x => x);
+            _emoteCache.AddRange(emoteTask.Result, x => x.Id, x => x);
             _emoteThirdCache.AddRange(emoteThirdTask.Result, x => x.Name, x => x);
             _cheermoteCache.AddRange(cheerTask.Result, x => x.prefix, x => x);
             _emojiCache.AddRange(emojiTask.Result);
