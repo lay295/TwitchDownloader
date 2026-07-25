@@ -17,7 +17,6 @@ namespace TwitchDownloaderCore.Models
 
             var streams = new List<Stream>();
 
-            Stream.ExtMediaInfo currentExtMediaInfo = null;
             Stream.ExtStreamInfo currentExtStreamInfo = null;
 
             Metadata.Builder metadataBuilder = new();
@@ -29,20 +28,20 @@ namespace TwitchDownloaderCore.Models
             {
                 if (string.IsNullOrWhiteSpace(line))
                 {
-                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
+                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
                     continue;
                 }
 
                 if (line[0] != '#')
                 {
                     var path = Path.Combine(basePath, line);
-                    streams.Add(new Stream(currentExtMediaInfo, currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
-                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
+                    streams.Add(new Stream(currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
+                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
 
                     continue;
                 }
 
-                if (!ParseM3U8Key(line, metadataBuilder, ref currentExtMediaInfo, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
+                if (!ParseM3U8Key(line, metadataBuilder, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
                 {
                     break;
                 }
@@ -60,7 +59,6 @@ namespace TwitchDownloaderCore.Models
 
             var streams = new List<Stream>();
 
-            Stream.ExtMediaInfo currentExtMediaInfo = null;
             Stream.ExtStreamInfo currentExtStreamInfo = null;
 
             Metadata.Builder metadataBuilder = new();
@@ -90,15 +88,15 @@ namespace TwitchDownloaderCore.Models
 
                 if (workingSlice.IsWhiteSpace())
                 {
-                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
+                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
                     continue;
                 }
 
                 if (workingSlice[0] != '#')
                 {
                     var path = Path.Combine(basePath, workingSlice.ToString());
-                    streams.Add(new Stream(currentExtMediaInfo, currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
-                    ClearStreamMetadata(out currentExtMediaInfo, out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
+                    streams.Add(new Stream(currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
+                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
 
                     if (lineEnd == -1)
                         break;
@@ -106,7 +104,7 @@ namespace TwitchDownloaderCore.Models
                     continue;
                 }
 
-                if (!ParseM3U8Key(workingSlice, metadataBuilder, ref currentExtMediaInfo, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
+                if (!ParseM3U8Key(workingSlice, metadataBuilder, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
                 {
                     break;
                 }
@@ -120,17 +118,16 @@ namespace TwitchDownloaderCore.Models
             return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
         }
 
-        private static void ClearStreamMetadata(out Stream.ExtMediaInfo currentExtMediaInfo, out Stream.ExtStreamInfo currentExtStreamInfo, out DateTimeOffset currentExtProgramDateTime,
+        private static void ClearStreamMetadata(out Stream.ExtStreamInfo currentExtStreamInfo, out DateTimeOffset currentExtProgramDateTime,
             out ByteRange currentByteRange, out Stream.ExtPartInfo currentExtPartInfo)
         {
-            currentExtMediaInfo = null;
             currentExtStreamInfo = null;
             currentExtProgramDateTime = default;
             currentByteRange = default;
             currentExtPartInfo = null;
         }
 
-        private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtMediaInfo extMediaInfo, ref Stream.ExtStreamInfo extStreamInfo,
+        private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtStreamInfo extStreamInfo,
             ref DateTimeOffset extProgramDateTime, ref ByteRange byteRange, ref Stream.ExtPartInfo extPartInfo)
         {
             const string END_LIST_KEY = "#EXT-X-ENDLIST";

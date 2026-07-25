@@ -104,10 +104,9 @@ namespace TwitchDownloaderCore.Extensions
 
             var unavailableStreams = unavailableMedia.Select(x =>
             {
-                var mediaInfo = new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, x.StableVariantId, x.IvsName, true, true);
                 var streamInfo = new M3U8.Stream.ExtStreamInfo(0, x.Bandwidth, x.Codecs.Split(','), M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(x.Resolution), x.StableVariantId, x.FrameRate);
                 var path = string.Format(pathFormat, x.StableVariantId);
-                return new M3U8.Stream(mediaInfo, streamInfo, path);
+                return new M3U8.Stream(streamInfo, path);
             });
 
             var allStreams = unavailableStreams

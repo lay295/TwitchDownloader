@@ -152,11 +152,11 @@ namespace TwitchDownloaderCore.Models
             }
         }
 
-        public partial record Stream(Stream.ExtMediaInfo MediaInfo, Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
+        public partial record Stream(Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
         {
-            public Stream(ExtMediaInfo mediaInfo, ExtStreamInfo streamInfo, string path) : this(mediaInfo, streamInfo, null, default, default, path) { }
+            public Stream(ExtStreamInfo streamInfo, string path) : this(streamInfo, null, default, default, path) { }
 
-            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, null, partInfo, programDateTime, byteRange, path) { }
+            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, partInfo, programDateTime, byteRange, path) { }
 
             public bool IsPlaylist { get; } = Path.AsSpan().EndsWith(".m3u8") || Path.AsSpan().EndsWith(".m3u");
 
@@ -166,9 +166,6 @@ namespace TwitchDownloaderCore.Models
             public override string ToString()
             {
                 var sb = new StringBuilder();
-
-                if (MediaInfo != null)
-                    sb.AppendLine(MediaInfo.ToString());
 
                 if (StreamInfo != null)
                     sb.AppendLine(StreamInfo.ToString());
