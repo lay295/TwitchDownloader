@@ -12,7 +12,6 @@ namespace TwitchDownloaderCore
     public class LiveChatRecorder
     {
         private readonly LiveChatRecorderOptions _recorderOptions;
-        private readonly CancellationTokenSource _cancellationSource;
         private readonly ITaskProgress _progress;
 
         private readonly string _cacheDir;
@@ -27,12 +26,11 @@ namespace TwitchDownloaderCore
             _cacheDir = CacheDirectoryService.GetCacheDirectory("");
             _emoteCache = new DirectoryInfo(Path.Combine(_cacheDir, "emotes"));
             _badgeCacheDir = new DirectoryInfo(Path.Combine(_cacheDir, "badges"));
-
-            _cancellationSource = new CancellationTokenSource(_recorderOptions.NextStream ? new TimeSpan(0, 1, 0) : _recorderOptions.Duration);
         }
 
         public async Task RecordAsync(CancellationToken cancellationToken)
         {
+
             if (string.IsNullOrWhiteSpace(_recorderOptions.Channel))
             {
                 throw new NullReferenceException("Channel name cannot be null or empty.");
@@ -47,17 +45,40 @@ namespace TwitchDownloaderCore
             {
                 throw new ArgumentException("Can't set both a duration and next-stream");
             }
+
+            await RecordAsyncImpl(cancellationToken);
+        }
+
+        private async Task RecordAsyncImpl(CancellationToken cancellationToken)
+        {
             var outputFileInfo = TwitchHelper.ClaimFile(_recorderOptions.OutputFile, _recorderOptions.FileCollisionCallback, _progress);
             _recorderOptions.OutputFile = outputFileInfo.FullName;
 
             try
             {
-                var chatRoot = await ProcessMessages();
+                var streamerId = (await TwitchHelper.GetUserIds([_recorderOptions.Channel])).data.users[0].id;
 
-                var outputStream = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
-                await ChatJson.SerializeAsync(outputStream, chatRoot, cancellationToken);
+                using var eventHub = new TwitchEventHub(_progress);
 
-                await testEventHubTask;
+                if (_recorderOptions.NextStream)
+                {
+                    var streamInfo = await TwitchHelper.GetLiveStreamInfo(_recorderOptions.Channel);
+
+                    if (streamInfo.data.stream is null)
+                    {
+                        await WaitFor(StreamStateChange.START, eventHub, streamerId);
+                    }
+                }
+
+                // TODO: distinguish between task ending regularly signal and cancellation
+                // also this obv does not yet wait for stream end and uses 1min instead
+                var _cancellationSource = new CancellationTokenSource(_recorderOptions.Duration ?? new TimeSpan(0, 1, 0));
+                var chatRoot = await ProcessMessages(CancellationTokenSource.CreateLinkedTokenSource(_cancellationSource.Token, cancellationToken).Token);
+
+                using (var outputStream = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read))
+                {
+                    await ChatJson.SerializeAsync(outputStream, chatRoot, cancellationToken);
+                }
             }
             catch
             {
@@ -69,7 +90,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<ChatRoot> ProcessMessages()
+        private async Task<ChatRoot> ProcessMessages(CancellationToken cancellationToken)
         {
             ConcurrentQueue<Comment> Comments = new();
 
@@ -85,7 +106,7 @@ namespace TwitchDownloaderCore
                 embeddedData = new EmbeddedData()
             };
 
-            await foreach (var message in TwitchIrcClient.MessagesFor(_recorderOptions.Channel, _cancellationSource.Token, _progress).ReadAllAsync())
+            await foreach (var message in TwitchIrcClient.MessagesFor(_recorderOptions.Channel, cancellationToken, _progress).ReadAllAsync())
             {
                 try
                 {
@@ -115,39 +136,20 @@ namespace TwitchDownloaderCore
             return chatRoot;
         }
 
-        private async Task WaitForStreamStart(TwitchEventHub eventHub)
+        private enum StreamStateChange { START, END }
+        private async Task WaitFor(StreamStateChange target, TwitchEventHub eventHub, string streamerId)
         {
-            using var sub = await eventHub.SubscribeTo(_recorderOptions.Channel, [TwitchEventHub.TwitchChatEvent.VideoPlaybackById]);
+            using var sub = await eventHub.SubscribeTo(streamerId, [TwitchEventHub.TwitchChatEvent.VideoPlaybackById]);
+
+            var eventTarget = target switch { StreamStateChange.START => "stream-up", StreamStateChange.END => "stream-down", _ => throw new ArgumentException("invalid StreamStateChange", "target") };
 
             await foreach (var msg in sub.Messages.ReadAllAsync())
             {
-                if (((NotificationData)msg.Data).pubsub.Contains("stream-up"))
+                if (((NotificationData)msg.Data).pubsub.Contains(eventTarget))
                 {
                     break;
                 }
             }
-        }
-
-        private async Task TestEventHub()
-        {
-            using var eventHub = new TwitchEventHub(_progress);
-            try
-            {
-                using var sub = await eventHub.SubscribeTo(_recorderOptions.Channel, [TwitchEventHub.TwitchChatEvent.VideoPlaybackById]);
-
-                await foreach (var message in sub.Messages.ReadAllAsync(new CancellationTokenSource(_recorderOptions.Duration).Token))
-                {
-                    if (message.Data is not NotificationData)
-                    {
-                        _progress.LogInfo($"unexpected message type: {message.Data.GetType()}");
-                        continue;
-                    }
-                    _progress.LogInfo($"Message: {((NotificationData)message.Data).pubsub}");
-                }
-            }
-            catch { }
-            _progress.LogInfo("end of readallasync");
-            return;
         }
     }
 }

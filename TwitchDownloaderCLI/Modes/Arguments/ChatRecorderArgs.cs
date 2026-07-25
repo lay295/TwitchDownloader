@@ -13,9 +13,9 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         public string OutputFile { get; set; }
 
         [Option("duration", Required = true, SetName = "recordForDuration", HelpText = "How long to record. Can be milliseconds (#ms), seconds (#s), minutes (#m), hours (#h), or time (##:##:##).")]
-        public TimeDuration? Duration { get; set; }
+        public TimeDuration Duration { get; set; }
 
-        [Option("next-stream", Default = false, Required = true, SetName = "recordWholeStream", HelpText = "Record the whole of the next (or remaining ongoing) stream.")]
+        [Option("next-stream", Required = true, SetName = "recordWholeStream", HelpText = "Record the whole of the next (or remaining ongoing) stream.")]
         public bool NextStream { get; set; }
 
         // Interface args
