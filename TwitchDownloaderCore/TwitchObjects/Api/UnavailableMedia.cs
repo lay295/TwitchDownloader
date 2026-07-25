@@ -4,8 +4,11 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
 {
     public class UnavailableMedia
     {
-        [JsonPropertyName("NAME")]
-        public string Name { get; set; }
+        [JsonPropertyName("STABLE-VARIANT-ID")]
+        public string StableVariantId { get; set; }
+
+        [JsonPropertyName("IVS_NAME")]
+        public string IvsName { get; set; }
 
         [JsonPropertyName("BANDWIDTH")]
         public int Bandwidth { get; set; }
@@ -22,10 +25,10 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
         [JsonPropertyName("AUTHORIZATION_REASONS")]
         public string[] AuthorizationReasons { get; set; }
 
-        [JsonPropertyName("GROUP-ID")]
-        public string GroupId { get; set; }
-
         [JsonPropertyName("FRAME-RATE")]
         public decimal FrameRate { get; set; }
+
+        [JsonPropertyName("IVS-VARIANT-SOURCE")]
+        public decimal VariantSource { get; set; }
     }
 }
