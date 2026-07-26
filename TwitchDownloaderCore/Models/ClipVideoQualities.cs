@@ -13,9 +13,9 @@ namespace TwitchDownloaderCore.Models
 
         public override IVideoQuality<ClipQuality> GetQuality(string qualityString)
         {
-            if (TryGetQuality(qualityString, out var quality1))
+            if (TryGetQuality(qualityString, out var foundQuality))
             {
-                return quality1;
+                return foundQuality;
             }
 
             foreach (var quality in Qualities)

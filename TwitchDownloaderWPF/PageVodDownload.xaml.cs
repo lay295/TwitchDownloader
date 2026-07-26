@@ -118,7 +118,6 @@ namespace TwitchDownloaderWPF
                 }
 
                 var videoPlaylist = M3U8.Parse(playlistString);
-                videoPlaylist.SortStreamsByQuality();
                 var qualities = VideoQualities.FromM3U8(videoPlaylist);
 
                 //Add video qualities to combo quality
