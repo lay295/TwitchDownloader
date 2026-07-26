@@ -42,12 +42,6 @@ namespace TwitchDownloaderCore.Models
                 return true;
             }
 
-            if (qualityString.Contains("portrait", StringComparison.OrdinalIgnoreCase))
-            {
-                quality = BestPortraitQuality();
-                return true;
-            }
-
             if (qualityString.Contains("best", StringComparison.OrdinalIgnoreCase)
                 || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase))
             {
