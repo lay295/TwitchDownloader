@@ -145,11 +145,12 @@ namespace TwitchDownloaderCore.Models
             {
                 var aspectRatio = asset.aspectRatio;
                 var isPortrait = IsPortrait(asset);
+                var orientation = isPortrait ? VideoOrientation.Portrait : VideoOrientation.Landscape;
 
                 var assetQualities = BuildQualityList(
                     asset.videoQualities,
                     quality => isPortrait ? $"{quality.quality}p{quality.frameRate:F0}-{PORTRAIT_SUFFIX}" : $"{quality.quality}p{quality.frameRate:F0}",
-                    (quality, name) => new ClipVideoQuality(quality, name, BuildClipResolution(quality, aspectRatio), ReferenceEquals(quality, sourceQuality))
+                    (quality, name) => new ClipVideoQuality(quality, name, BuildClipResolution(quality, aspectRatio), ReferenceEquals(quality, sourceQuality), orientation)
                 );
 
                 qualities.AddRange(assetQualities);
@@ -165,14 +166,16 @@ namespace TwitchDownloaderCore.Models
 
             return new ClipVideoQualities(sortedQualities);
 
-            static bool IsLandscape(ShareClipRenderStatusAssets asset)
+            static bool IsLandscape(ShareClipRenderStatusAsset asset)
             {
-                return asset.type == "SOURCE" || asset.portraitMetadata is null || asset.aspectRatio > 1;
+                return asset.portraitMetadata is null || asset.aspectRatio > 1 ||
+                       asset.thumbnailURL.Contains("/landscape/", StringComparison.OrdinalIgnoreCase);
             }
 
-            static bool IsPortrait(ShareClipRenderStatusAssets asset)
+            static bool IsPortrait(ShareClipRenderStatusAsset asset)
             {
-                return asset.type == "RECOMPOSED" || asset.portraitMetadata is not null || asset.aspectRatio is < 1 and not 0;
+                return asset.portraitMetadata is not null || asset.aspectRatio is < 1 and > 0 ||
+                       asset.thumbnailURL.Contains("/portrait/", StringComparison.OrdinalIgnoreCase);
             }
 
             static Resolution BuildClipResolution(ClipQuality clipQuality, decimal aspectRatio)

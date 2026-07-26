@@ -19,13 +19,16 @@ namespace TwitchDownloaderCore.Models
 
         public int BitRate { get; }
 
-        internal ClipVideoQuality(ClipQuality item, string name, Resolution resolution, bool isSource)
+        public VideoOrientation Orientation { get; }
+
+        internal ClipVideoQuality(ClipQuality item, string name, Resolution resolution, bool isSource, VideoOrientation orientation)
         {
             Item = item;
             Name = name;
             Resolution = resolution;
             Framerate = item.frameRate;
             IsSource = isSource;
+            Orientation = orientation;
             Path = item.sourceURL;
             BitRate = item.bitrate;
         }

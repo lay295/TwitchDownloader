@@ -19,6 +19,8 @@ namespace TwitchDownloaderCore.Models
 
         public int BitRate { get; }
 
+        public VideoOrientation Orientation { get; }
+
         internal M3U8VideoQuality(M3U8.Stream item, string name)
         {
             Item = item;
@@ -28,6 +30,7 @@ namespace TwitchDownloaderCore.Models
             IsSource = item.IsSource();
             Path = item.Path;
             BitRate = item.StreamInfo.Bandwidth;
+            Orientation = item.Orientation();
         }
 
         public override string ToString() => Name;

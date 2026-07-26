@@ -75,11 +75,15 @@ namespace TwitchDownloaderCore.Extensions
         }
 
         public static bool IsSource(this M3U8.Stream stream)
-            => stream.MediaInfo.Name.Contains("source", StringComparison.OrdinalIgnoreCase) ||
-               stream.MediaInfo.GroupId.Equals("chunked", StringComparison.OrdinalIgnoreCase);
+            => stream.Path.Contains("/chunked/", StringComparison.OrdinalIgnoreCase) ||
+                stream.StreamInfo.IvsVariantSource.Contains("source", StringComparison.OrdinalIgnoreCase);
 
         public static bool IsAudioOnly(this M3U8.Stream stream)
-            => stream.MediaInfo.Name.Contains("audio", StringComparison.OrdinalIgnoreCase);
+            => stream.StreamInfo.StableVariantId.Contains("audio", StringComparison.OrdinalIgnoreCase) ||
+               stream.StreamInfo.IvsName.Contains("audio", StringComparison.OrdinalIgnoreCase);
+
+        public static VideoOrientation Orientation(this M3U8.Stream stream)
+            => stream.StreamInfo.StableVariantId.Contains("-portrait", StringComparison.OrdinalIgnoreCase) ? VideoOrientation.Portrait : VideoOrientation.Landscape;
 
         public static M3U8 WithUnavailableMedia(this M3U8 m3u8)
         {

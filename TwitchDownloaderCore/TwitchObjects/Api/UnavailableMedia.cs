@@ -29,6 +29,6 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
         public decimal FrameRate { get; set; }
 
         [JsonPropertyName("IVS-VARIANT-SOURCE")]
-        public decimal VariantSource { get; set; }
+        public string VariantSource { get; set; }
     }
 }

@@ -27,4 +27,10 @@
         Safe,
         Exact
     }
+
+    public enum VideoOrientation
+    {
+        Landscape,
+        Portrait
+    }
 }
