@@ -62,7 +62,7 @@ namespace TwitchDownloaderCore.Models
             private Dictionary<string, string> _sessionData;
             public IReadOnlyDictionary<string, string> SessionData
             {
-                get => _sessionData ??= new Dictionary<string, string>();
+                get => _sessionData ??= [];
                 init => _sessionData = new Dictionary<string, string>(value);
             }
 
@@ -108,14 +108,14 @@ namespace TwitchDownloaderCore.Models
                 if (Map is not null)
                     sb.AppendKeyValue(MAP_KEY, Map.ToString(), itemSeparator);
 
-                foreach (var (id, value) in _sessionData)
+                foreach (var (id, value) in SessionData)
                 {
                     sb.Append(SESSION_DATA_KEY);
                     sb.AppendKeyQuoteValue("DATA-ID=\"", id, ",");
                     sb.AppendKeyQuoteValue("VALUE=\"", value, itemSeparator);
                 }
 
-                foreach (var (key, value) in _unparsedValues)
+                foreach (var (key, value) in UnparsedValues)
                 {
                     sb.AppendKeyValue(key, value, itemSeparator);
                 }
