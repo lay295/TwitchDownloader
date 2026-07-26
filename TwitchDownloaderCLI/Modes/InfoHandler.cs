@@ -334,11 +334,11 @@ namespace TwitchDownloaderCLI.Modes
 
             var metadata = new M3U8.Metadata
             {
-                Version = default,
+                Version = null,
                 MediaSequence = 0,
                 StreamTargetDuration = (uint)clip.durationSeconds,
                 TwitchElapsedSeconds = 0,
-                TwitchLiveSequence = default,
+                TwitchLiveSequence = null,
                 TwitchTotalSeconds = clip.durationSeconds,
                 Type = M3U8.Metadata.PlaylistType.Event,
             };
@@ -346,8 +346,7 @@ namespace TwitchDownloaderCLI.Modes
             var streams = clipQualities.Qualities
                 .Select(x =>
                     new M3U8.Stream(
-                        new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, x.Item.quality, x.Name, true, true),
-                        new M3U8.Stream.ExtStreamInfo(0, x.BitRate, x.Item.codecs?.Split(','), x.Resolution, x.Item.quality, x.Framerate),
+                        new M3U8.Stream.ExtStreamInfo(0, x.BitRate, x.Item.codecs?.Split(','), x.Resolution, x.Framerate, x.Item.quality, x.Item.quality, "source"),
                         $"{x.Item.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}"
                     ))
                 .ToArray();
