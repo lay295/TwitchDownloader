@@ -131,11 +131,7 @@ namespace TwitchDownloaderCore.Models
             ref DateTimeOffset extProgramDateTime, ref ByteRange byteRange, ref Stream.ExtPartInfo extPartInfo)
         {
             const string END_LIST_KEY = "#EXT-X-ENDLIST";
-            if (text.StartsWith(Stream.ExtMediaInfo.MEDIA_INFO_KEY))
-            {
-                extMediaInfo = Stream.ExtMediaInfo.Parse(text);
-            }
-            else if (text.StartsWith(Stream.ExtStreamInfo.STREAM_INFO_KEY))
+            if (text.StartsWith(Stream.ExtStreamInfo.STREAM_INFO_KEY))
             {
                 extStreamInfo = Stream.ExtStreamInfo.Parse(text);
             }
@@ -421,7 +417,7 @@ namespace TwitchDownloaderCore.Models
                     }
                 }
 
-                [GeneratedRegex(@"p\d+$", RegexOptions.RightToLeft)]
+                [GeneratedRegex(@"p\d+(?:-\w+)?$", RegexOptions.RightToLeft)]
                 private static partial Regex FramerateRegex { get; }
 
                 public static ExtStreamInfo Parse(ReadOnlySpan<char> text)
@@ -435,8 +431,10 @@ namespace TwitchDownloaderCore.Models
                     const string KEY_BANDWIDTH = "BANDWIDTH=";
                     const string KEY_CODECS = "CODECS=\"";
                     const string KEY_RESOLUTION = "RESOLUTION=";
-                    const string KEY_VIDEO = "VIDEO=\"";
                     const string KEY_FRAMERATE = "FRAME-RATE=";
+                    const string KEY_STABLE_VARIANT_ID = "STABLE-VARIANT-ID=\"";
+                    const string KEY_IVS_NAME = "IVS-NAME=\"";
+                    const string KEY_IVS_VARIANT_SOURCE = "IVS-VARIANT-SOURCE=\"";
                     do
                     {
                         text = text.TrimStart();
@@ -458,13 +456,21 @@ namespace TwitchDownloaderCore.Models
                         {
                             streamInfo.Resolution = ParsingHelpers.ParseResolution(text, KEY_RESOLUTION);
                         }
-                        else if (text.StartsWith(KEY_VIDEO))
-                        {
-                            streamInfo.Video = ParsingHelpers.ParseStringValue(text, KEY_VIDEO);
-                        }
                         else if (text.StartsWith(KEY_FRAMERATE))
                         {
                             streamInfo.Framerate = ParsingHelpers.ParseDecimalValue(text, KEY_FRAMERATE, false);
+                        }
+                        else if (text.StartsWith(KEY_STABLE_VARIANT_ID))
+                        {
+                            streamInfo.StableVariantId = ParsingHelpers.ParseStringValue(text, KEY_STABLE_VARIANT_ID);
+                        }
+                        else if (text.StartsWith(KEY_IVS_NAME))
+                        {
+                            streamInfo.IvsName = ParsingHelpers.ParseStringValue(text, KEY_IVS_NAME);
+                        }
+                        else if (text.StartsWith(KEY_IVS_VARIANT_SOURCE))
+                        {
+                            streamInfo.IvsVariantSource = ParsingHelpers.ParseStringValue(text, KEY_IVS_VARIANT_SOURCE);
                         }
 
                         var nextIndex = text.UnEscapedIndexOf(',');
@@ -474,11 +480,15 @@ namespace TwitchDownloaderCore.Models
                         text = text[(nextIndex + 1)..];
                     } while (true);
 
-                    // Sometimes Twitch's M3U8 response lacks a Framerate value, among other things. We can just guess the framerate using the Video value.
-                    if (streamInfo.Framerate == 0 && FramerateRegex.IsMatch(streamInfo.Video))
+                    // Sometimes Twitch's M3U8 response lacks a Framerate value, among other things. We can just guess the framerate using the StableVariantId value.
+                    var variantId = streamInfo.StableVariantId;
+                    if (streamInfo.Framerate == 0 && variantId is not null && FramerateRegex.IsMatch(variantId))
                     {
-                        var index = streamInfo.Video.LastIndexOf('p');
-                        streamInfo.Framerate = int.Parse(streamInfo.Video.AsSpan(index + 1));
+                        var pIndex = variantId.LastIndexOf('p') + 1;
+                        var hyphenIndex = variantId.AsSpan(pIndex).IndexOf('-');
+                        if (hyphenIndex == -1) hyphenIndex = variantId.Length - pIndex;
+
+                        streamInfo.Framerate = int.Parse(variantId.AsSpan(pIndex, hyphenIndex));
                     }
 
                     return streamInfo;

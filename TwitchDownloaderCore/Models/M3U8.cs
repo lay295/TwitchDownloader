@@ -259,32 +259,36 @@ namespace TwitchDownloaderCore.Models
 
                 private ExtStreamInfo() { }
 
-                public ExtStreamInfo(int programId, int bandwidth, string[] codecs, StreamResolution resolution, string video, decimal framerate)
+                public ExtStreamInfo(int programId, int bandwidth, string[] codecs, StreamResolution resolution, decimal framerate, string stableVariantId, string ivsName, string ivsVariantSource)
                 {
                     ProgramId = programId;
                     Bandwidth = bandwidth;
                     Codecs = codecs ?? [];
                     Resolution = resolution;
-                    Video = video;
                     Framerate = framerate;
+                    StableVariantId = stableVariantId;
+                    IvsName = ivsName;
+                    IvsVariantSource = ivsVariantSource;
                 }
 
                 public int ProgramId { get; internal set; }
                 public int Bandwidth { get; internal set; }
                 public IReadOnlyList<string> Codecs { get; internal set; } = [];
                 public StreamResolution Resolution { get; internal set; }
-                public string Video { get; internal set; }
                 public decimal Framerate { get; internal set; }
+                public string StableVariantId { get; internal set; }
+                public string IvsName { get; internal set; }
+                public string IvsVariantSource { get; internal set; }
 
                 public override string ToString()
                 {
                     var sb = new StringBuilder(STREAM_INFO_KEY);
                     ReadOnlySpan<char> keyValueSeparator = [','];
 
-                    if (ProgramId != default)
+                    if (ProgramId != 0)
                         sb.AppendKeyValue("PROGRAM-ID=", ProgramId, keyValueSeparator);
 
-                    if (Bandwidth != default)
+                    if (Bandwidth != 0)
                         sb.AppendKeyValue("BANDWIDTH=", Bandwidth, keyValueSeparator);
 
                     if (Codecs is { Count: > 0 })
@@ -293,11 +297,17 @@ namespace TwitchDownloaderCore.Models
                     if (Resolution != default)
                         sb.AppendKeyValue("RESOLUTION=", Resolution, keyValueSeparator);
 
-                    if (!string.IsNullOrWhiteSpace(Video))
-                        sb.AppendKeyQuoteValue("VIDEO=", Video, keyValueSeparator);
-
-                    if (Framerate != default)
+                    if (Framerate != 0)
                         sb.AppendKeyValue("FRAME-RATE=", Framerate, default);
+
+                    if (!string.IsNullOrWhiteSpace(StableVariantId))
+                        sb.AppendKeyQuoteValue("STABLE-VARIANT-ID=", StableVariantId, keyValueSeparator);
+
+                    if (!string.IsNullOrWhiteSpace(IvsName))
+                        sb.AppendKeyQuoteValue("IVS-NAME=", IvsName, keyValueSeparator);
+
+                    if (!string.IsNullOrWhiteSpace(IvsVariantSource))
+                        sb.AppendKeyQuoteValue("IVS-VARIANT-SOURCE=", IvsVariantSource, keyValueSeparator);
 
                     return sb.TrimEnd(keyValueSeparator).ToString();
                 }
