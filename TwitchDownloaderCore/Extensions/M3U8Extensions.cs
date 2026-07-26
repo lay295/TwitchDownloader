@@ -31,30 +31,23 @@ namespace TwitchDownloaderCore.Extensions
         /// </returns>
         public static string GetResolutionFramerateString(this M3U8.Stream stream, bool appendSource = true)
         {
-            var mediaInfo = stream.MediaInfo;
-            if (stream.IsAudioOnly() || ResolutionFramerateRegex.IsMatch(mediaInfo.Name))
-            {
-                return mediaInfo.Name;
-            }
-
             var streamInfo = stream.StreamInfo;
-            if (ResolutionFramerateRegex.IsMatch(streamInfo.Video))
+            if (stream.IsAudioOnly())
             {
-                var hyphenIndex = streamInfo.Video.IndexOf('-');
-                return hyphenIndex > 0 ? streamInfo.Video[..hyphenIndex] : streamInfo.Video;
+                return streamInfo.IvsName;
             }
 
-            if (ResolutionFramerateRegex.IsMatch(mediaInfo.GroupId))
+            if (ResolutionFramerateRegex.IsMatch(streamInfo.StableVariantId))
             {
-                var hyphenIndex = mediaInfo.GroupId.IndexOf('-');
-                return hyphenIndex > 0 ? mediaInfo.GroupId[..hyphenIndex] : mediaInfo.GroupId;
+                return streamInfo.StableVariantId;
             }
 
             if (streamInfo.Resolution == default)
             {
-                return stream.IsSource()
-                    ? "Source"
-                    : "";
+                var urlId = stream.Path.GetNthOccurrence('/', ^2).ToString();
+                return appendSource && stream.IsSource()
+                    ? $"{urlId} (Source)"
+                    : urlId;
             }
 
             var frameHeight = streamInfo.Resolution.Height;
@@ -108,7 +101,7 @@ namespace TwitchDownloaderCore.Extensions
 
             var unavailableStreams = unavailableMedia.Select(x =>
             {
-                var streamInfo = new M3U8.Stream.ExtStreamInfo(0, x.Bandwidth, x.Codecs.Split(','), M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(x.Resolution), x.StableVariantId, x.FrameRate);
+                var streamInfo = new M3U8.Stream.ExtStreamInfo(0, x.Bandwidth, x.Codecs.Split(','), M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(x.Resolution), x.FrameRate, x.StableVariantId, x.IvsName, x.VariantSource);
                 var path = string.Format(pathFormat, x.StableVariantId);
                 return new M3U8.Stream(streamInfo, path);
             });

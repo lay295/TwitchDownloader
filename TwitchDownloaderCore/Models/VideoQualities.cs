@@ -111,7 +111,7 @@ namespace TwitchDownloaderCore.Models
             // Build quality list
             var qualities = BuildQualityList(
                 m3u8.Streams,
-                stream => stream.GetResolutionFramerateString(false),
+                stream => stream.GetResolutionFramerateString(false).Replace("portrait", "Portrait", StringComparison.OrdinalIgnoreCase),
                 (stream, name) => new M3U8VideoQuality(stream, name)
             );
 
