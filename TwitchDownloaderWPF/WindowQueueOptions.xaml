@@ -38,6 +38,7 @@
                 <TextBlock x:Name="TextPreferredQuality" Text="{lex:Loc PreferredQuality}" HorizontalAlignment="Right" Margin="5,5,0,0" Foreground="{DynamicResource AppTextDisabled}" />
                 <ComboBox SelectedIndex="0" x:Name="ComboPreferredQuality" IsEnabled="False" Margin="5,0,0,0" MinWidth="90" SelectionChanged="ComboPreferredQuality_OnSelectionChanged" Background="{DynamicResource AppElementBackground}" Foreground="{DynamicResource AppText}" BorderBrush="{DynamicResource AppElementBorder}">
                     <ComboBoxItem Content="Source" />
+                    <ComboBoxItem Content="Source Portrait" />
                     <ComboBoxItem Content="1440p" />
                     <ComboBoxItem Content="1080p" />
                     <ComboBoxItem Content="720p" />
@@ -46,6 +47,7 @@
                     <ComboBoxItem Content="160p" />
                     <ComboBoxItem Content="144p" />
                     <ComboBoxItem Content="Worst" />
+                    <ComboBoxItem Content="Worst Portrait" />
                 </ComboBox>
             </StackPanel>
             <CheckBox x:Name="checkDelay" Content="{lex:Loc DelayDownload}" HorizontalAlignment="Left" Margin="25,0,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" IsEnabled="False" />
