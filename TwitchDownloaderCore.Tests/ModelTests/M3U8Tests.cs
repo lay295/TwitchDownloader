@@ -306,6 +306,24 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         }
 
         [Theory]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO", M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "1080p60", false, false)]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"720p60\",NAME=\"720p60\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true)]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"480p30\",NAME=\"480p\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true)]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"audio_only\",NAME=\"Audio Only\",AUTOSELECT=NO,DEFAULT=NO", M3U8.Stream.ExtMediaInfo.MediaType.Video, "audio_only", "Audio Only", false, false)]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"360p30\",NAME=\"360p\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true)]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"160p30\",NAME=\"160p\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "160p30", "160p", true, true)]
+        public void CorrectlyParsesTwitchM3U8MediaInfo(string mediaInfoString, M3U8.Stream.ExtMediaInfo.MediaType type, string groupId, string name, bool autoSelect, bool @default)
+        {
+            var mediaInfo = M3U8.Stream.ExtMediaInfo.Parse(mediaInfoString);
+
+            Assert.Equal(type, mediaInfo.Type);
+            Assert.Equal(groupId, mediaInfo.GroupId);
+            Assert.Equal(name, mediaInfo.Name);
+            Assert.Equal(autoSelect, mediaInfo.AutoSelect);
+            Assert.Equal(@default, mediaInfo.Default);
+        }
+
+        [Theory]
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,FRAME-RATE=59.995,STABLE-VARIANT-ID=\"1080p60\",IVS-NAME=\"1080p60\",IVS-VARIANT-SOURCE=\"source\"",
             5898203, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080, 59.995, "1080p60", "1080p60", "source")]
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,FRAME-RATE=59.995,STABLE-VARIANT-ID=\"720p60\",IVS-NAME=\"720p60\",IVS-VARIANT-SOURCE=\"transcode\"",
@@ -500,6 +518,23 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equivalent(streams[4], m3u8.Streams[4], true);
         }
         */
+
+        [Theory]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"1080p60\",NAME=\"1080p60\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "1080p60", "1080p60", true, true)]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"720p60\",NAME=\"720p60\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true)]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"480p30\",NAME=\"480p\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true)]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"360p30\",NAME=\"360p\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true)]
+        [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"160p30\",NAME=\"160p\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "160p30", "160p", true, true)]
+        public void CorrectlyParsesKickM3U8MediaInfo(string mediaInfoString, M3U8.Stream.ExtMediaInfo.MediaType type, string groupId, string name, bool autoSelect, bool @default)
+        {
+            var mediaInfo = M3U8.Stream.ExtMediaInfo.Parse(mediaInfoString);
+
+            Assert.Equal(type, mediaInfo.Type);
+            Assert.Equal(groupId, mediaInfo.GroupId);
+            Assert.Equal(name, mediaInfo.Name);
+            Assert.Equal(autoSelect, mediaInfo.AutoSelect);
+            Assert.Equal(@default, mediaInfo.Default);
+        }
 
         [Theory]
         [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080)]
