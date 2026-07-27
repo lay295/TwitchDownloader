@@ -106,7 +106,6 @@ namespace TwitchDownloaderCLI.Modes
         private static void HandleVodTable(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)
         {
             var m3u8 = M3U8.Parse(playlistString);
-            m3u8.SortStreamsByQuality();
             var qualities = VideoQualities.FromM3U8(m3u8);
 
             const string DEFAULT_STRING = "-";
