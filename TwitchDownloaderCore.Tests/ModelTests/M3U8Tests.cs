@@ -502,19 +502,18 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         */
 
         [Theory]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080, "1080p60")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=3330599,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\"", 3330599, new[] { "avc1.4D401F", "mp4a.40.2" }, 1280, 720, "720p60")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1335600,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\"", 1335600, new[] { "avc1.4D401F", "mp4a.40.2" }, 852, 480, "480p30")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=630000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\"", 630000, new[] { "avc1.4D401F", "mp4a.40.2" }, 640, 360, "360p30")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=230000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\"", 230000, new[] { "avc1.4D401F", "mp4a.40.2" }, 284, 160, "160p30")]
-        public void CorrectlyParsesKickM3U8StreamInfo(string streamInfoString, int bandwidth, string[] codecs, uint videoWidth, uint videoHeight, string video)
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080)]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=3330599,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\"", 3330599, new[] { "avc1.4D401F", "mp4a.40.2" }, 1280, 720)]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1335600,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\"", 1335600, new[] { "avc1.4D401F", "mp4a.40.2" }, 852, 480)]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=630000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\"", 630000, new[] { "avc1.4D401F", "mp4a.40.2" }, 640, 360)]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=230000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\"", 230000, new[] { "avc1.4D401F", "mp4a.40.2" }, 284, 160)]
+        public void CorrectlyParsesKickM3U8StreamInfo(string streamInfoString, int bandwidth, string[] codecs, uint videoWidth, uint videoHeight)
         {
             var streamInfo = M3U8.Stream.ExtStreamInfo.Parse(streamInfoString);
 
             Assert.Equal(bandwidth, streamInfo.Bandwidth);
             Assert.Equal(codecs, streamInfo.Codecs);
             Assert.Equal((videoWidth, videoHeight), streamInfo.Resolution);
-            // Assert.Equal(video, streamInfo.Video);
         }
 
         [Theory]
