@@ -526,7 +526,7 @@ namespace TwitchDownloaderWPF
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, downloadId, currentVideoTime, textStreamer.Text, streamerId,
                     CheckTrimStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     CheckTrimEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    vodLength, viewCount, game, clipper, clipperId)
+                    vodLength, viewCount, game, clipper, clipperId, removeEmojis: Settings.Default.RemoveEmojisFromFilenames)
             };
 
             if (radioJson.IsChecked == true)

@@ -65,6 +65,7 @@ namespace TwitchDownloaderWPF
             CheckThrottleEnabled.IsChecked = Settings.Default.DownloadThrottleEnabled;
             RadioTimeFormatUtc.IsChecked = Settings.Default.UTCVideoTime;
             CheckReduceMotion.IsChecked = Settings.Default.ReduceMotion;
+            CheckRemoveEmojis.IsChecked = Settings.Default.RemoveEmojisFromFilenames;
 
             if (Directory.Exists("Themes"))
             {
@@ -291,6 +292,14 @@ namespace TwitchDownloaderWPF
                 return;
 
             Settings.Default.VerboseErrors = CheckVerboseErrors.IsChecked.GetValueOrDefault();
+        }
+
+        private void CheckRemoveEmojis_OnCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized)
+                return;
+
+            Settings.Default.RemoveEmojisFromFilenames = CheckRemoveEmojis.IsChecked.GetValueOrDefault();
         }
 
         private void TextVodTemplate_OnTextChanged(object sender, TextChangedEventArgs e)

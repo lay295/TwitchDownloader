@@ -210,7 +210,7 @@ namespace TwitchDownloaderWPF
                 Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text, streamerId,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    vodLength, viewCount, game) + FilenameService.GuessVodFileExtension(((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString())),
+                    vodLength, viewCount, game, removeEmojis: Settings.Default.RemoveEmojisFromFilenames) + FilenameService.GuessVodFileExtension(((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString())),
                 Oauth = TextOauth.Text,
                 Quality = ((ComboBoxItem)comboQuality.SelectedItem).Tag.ToString(),
                 Id = currentVideoId,
@@ -433,7 +433,7 @@ namespace TwitchDownloaderWPF
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text, streamerId,
                     checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
                     checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
-                    vodLength, viewCount, game) + FilenameService.GuessVodFileExtension(comboQuality.Text)
+                    vodLength, viewCount, game, removeEmojis: Settings.Default.RemoveEmojisFromFilenames) + FilenameService.GuessVodFileExtension(comboQuality.Text)
             };
             if (saveFileDialog.ShowDialog() == false)
             {
