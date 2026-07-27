@@ -30,6 +30,7 @@
 
     public enum VideoOrientation
     {
+        None,
         Landscape,
         Portrait
     }

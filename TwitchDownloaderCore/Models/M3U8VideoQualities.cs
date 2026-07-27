@@ -77,9 +77,18 @@ namespace TwitchDownloaderCore.Models
                 return null;
             }
 
-            var source = Qualities
+            IVideoQuality<M3U8.Stream> source = null;
+
+            if (Qualities.Where(x => x.Orientation is VideoOrientation.Landscape).All(x => x.Framerate > 0))
+            {
+                source = Qualities
+                    .Where(x => x.Orientation is VideoOrientation.Landscape)
+                    .MaxBy(x => x.Resolution.Pixels * x.Framerate);
+            }
+
+            source ??= Qualities
                 .Where(x => x.Orientation is VideoOrientation.Landscape)
-                .MaxBy(x => x.Resolution.Width * x.Resolution.Height * x.Framerate);
+                .MaxBy(x => x.Resolution.Pixels);
 
             source ??= Qualities
                 .Where(x => x.Orientation is VideoOrientation.Landscape)
@@ -114,13 +123,20 @@ namespace TwitchDownloaderCore.Models
                 return null;
             }
 
-            var worstQuality = Qualities
-                .Where(x => !x.Item.IsAudioOnly())
-                .Where(x => x.Orientation is VideoOrientation.Landscape)
-                .MinBy(x => x.Resolution.Width * x.Resolution.Height * x.Framerate);
+            IVideoQuality<M3U8.Stream> worstQuality = null;
+
+            if (Qualities.Where(x => x.Orientation is VideoOrientation.Landscape).All(x => x.Framerate > 0))
+            {
+                worstQuality = Qualities
+                    .Where(x => x.Orientation is VideoOrientation.Landscape)
+                    .MinBy(x => x.Resolution.Pixels * x.Framerate);
+            }
 
             worstQuality ??= Qualities
-                .Where(x => !x.Item.IsAudioOnly())
+                .Where(x => x.Orientation is VideoOrientation.Landscape)
+                .MinBy(x => x.Resolution.Pixels);
+
+            worstQuality ??= Qualities
                 .Where(x => x.Orientation is VideoOrientation.Landscape)
                 .MinBy(x => x.BitRate);
 

@@ -76,7 +76,14 @@ namespace TwitchDownloaderCore.Extensions
                stream.StreamInfo.IvsName.Contains("audio", StringComparison.OrdinalIgnoreCase);
 
         public static VideoOrientation Orientation(this M3U8.Stream stream)
-            => stream.StreamInfo.StableVariantId.Contains("-portrait", StringComparison.OrdinalIgnoreCase) ? VideoOrientation.Portrait : VideoOrientation.Landscape;
+        {
+            if (stream.IsAudioOnly())
+                return VideoOrientation.None;
+
+            return stream.StreamInfo.StableVariantId.Contains("-portrait", StringComparison.OrdinalIgnoreCase)
+                ? VideoOrientation.Portrait
+                : VideoOrientation.Landscape;
+        }
 
         public static M3U8 WithUnavailableMedia(this M3U8 m3u8)
         {
