@@ -266,9 +266,9 @@ namespace TwitchDownloaderCore.Models
                     Codecs = codecs ?? [];
                     Resolution = resolution;
                     Framerate = framerate;
-                    StableVariantId = stableVariantId;
-                    IvsName = ivsName;
-                    IvsVariantSource = ivsVariantSource;
+                    StableVariantId = stableVariantId ?? "";
+                    IvsName = ivsName ?? "";
+                    IvsVariantSource = ivsVariantSource ?? "";
                 }
 
                 public int ProgramId { get; internal set; }
@@ -276,9 +276,9 @@ namespace TwitchDownloaderCore.Models
                 public IReadOnlyList<string> Codecs { get; internal set; } = [];
                 public StreamResolution Resolution { get; internal set; }
                 public decimal Framerate { get; internal set; }
-                public string StableVariantId { get; internal set; }
-                public string IvsName { get; internal set; }
-                public string IvsVariantSource { get; internal set; }
+                public string StableVariantId { get; internal set; } = "";
+                public string IvsName { get; internal set; } = "";
+                public string IvsVariantSource { get; internal set; } = "";
 
                 public override string ToString()
                 {

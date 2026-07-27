@@ -25,6 +25,9 @@ namespace TwitchDownloaderCore.Extensions
         [GeneratedRegex("""\d{3,4}p\d{2,3}""")]
         private static partial Regex ResolutionFramerateRegex { get; }
 
+        [GeneratedRegex("""[\dp]-portrait/""")]
+        private static partial Regex PortraitPathRegex { get; }
+
         /// <returns>
         /// A <see cref="string"/> representing the <paramref name="stream"/>'s <see cref="M3U8.Stream.ExtStreamInfo.Resolution"/>
         /// and <see cref="M3U8.Stream.ExtStreamInfo.Framerate"/> in the format of "{resolution}p{framerate}" or <see langword="null"/>
@@ -42,12 +45,15 @@ namespace TwitchDownloaderCore.Extensions
                 return streamInfo.StableVariantId;
             }
 
-            if (streamInfo.Resolution == default)
+            if (streamInfo.Resolution == default || streamInfo.Framerate == 0)
             {
-                var urlId = stream.Path.GetNthOccurrence('/', ^2).ToString();
-                return appendSource && stream.IsSource()
-                    ? $"{urlId} (Source)"
-                    : urlId;
+                var urlId = stream.Path.GetNthOccurrence('/', ^2);
+                if (ResolutionFramerateRegex.IsMatch(urlId))
+                {
+                    return appendSource && stream.IsSource()
+                        ? $"{urlId} (Source)"
+                        : urlId.ToString();
+                }
             }
 
             var frameHeight = streamInfo.Resolution.Height;
@@ -72,7 +78,8 @@ namespace TwitchDownloaderCore.Extensions
                 stream.StreamInfo.IvsVariantSource.Contains("source", StringComparison.OrdinalIgnoreCase);
 
         public static bool IsAudioOnly(this M3U8.Stream stream)
-            => stream.StreamInfo.StableVariantId.Contains("audio", StringComparison.OrdinalIgnoreCase) ||
+            => stream.Path.Contains("/audio_only/", StringComparison.OrdinalIgnoreCase) ||
+               stream.StreamInfo.StableVariantId.Contains("audio", StringComparison.OrdinalIgnoreCase) ||
                stream.StreamInfo.IvsName.Contains("audio", StringComparison.OrdinalIgnoreCase);
 
         public static VideoOrientation Orientation(this M3U8.Stream stream)
@@ -80,9 +87,12 @@ namespace TwitchDownloaderCore.Extensions
             if (stream.IsAudioOnly())
                 return VideoOrientation.None;
 
-            return stream.StreamInfo.StableVariantId.Contains("-portrait", StringComparison.OrdinalIgnoreCase)
-                ? VideoOrientation.Portrait
-                : VideoOrientation.Landscape;
+            if (PortraitPathRegex.IsMatch(stream.Path) || stream.StreamInfo.StableVariantId.Contains("-portrait", StringComparison.OrdinalIgnoreCase))
+                return VideoOrientation.Portrait;
+
+            return stream.StreamInfo.StableVariantId.Length > 0
+                ? VideoOrientation.Landscape
+                : VideoOrientation.None;
         }
 
         public static M3U8 WithUnavailableMedia(this M3U8 m3u8)

@@ -486,7 +486,10 @@ namespace TwitchDownloaderCore.Models
                         var hyphenIndex = variantId.AsSpan(pIndex).IndexOf('-');
                         if (hyphenIndex == -1) hyphenIndex = variantId.Length - pIndex;
 
-                        streamInfo.Framerate = int.Parse(variantId.AsSpan(pIndex, hyphenIndex));
+                        if (int.TryParse(variantId.AsSpan(pIndex, hyphenIndex), out var framerate))
+                        {
+                            streamInfo.Framerate = framerate;
+                        }
                     }
 
                     return streamInfo;
