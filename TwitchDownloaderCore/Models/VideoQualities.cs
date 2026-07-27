@@ -111,11 +111,23 @@ namespace TwitchDownloaderCore.Models
             // Build quality list
             var qualities = BuildQualityList(
                 m3u8.Streams,
-                stream => stream.GetResolutionFramerateString(false).Replace("portrait", "Portrait", StringComparison.OrdinalIgnoreCase),
+                BuildM3U8Name,
                 (stream, name) => new M3U8VideoQuality(stream, name)
             );
 
             return new M3U8VideoQualities(qualities);
+        }
+
+        private static string BuildM3U8Name(M3U8.Stream stream)
+        {
+            var name = stream.GetResolutionFramerateString(false).Replace("portrait", "Portrait", StringComparison.OrdinalIgnoreCase);
+
+            if (stream.Orientation() is VideoOrientation.Portrait && !name.Contains("portrait", StringComparison.OrdinalIgnoreCase))
+            {
+                name = $"{name}-Portrait";
+            }
+
+            return name;
         }
 
         public static IVideoQualities<ClipQuality> FromClip(ShareClipRenderStatusClip clip)
