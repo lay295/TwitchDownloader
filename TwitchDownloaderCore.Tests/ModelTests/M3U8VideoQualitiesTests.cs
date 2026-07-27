@@ -163,6 +163,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/1080p60/index-dvr.m3u8", "1080p60")]
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=1920x1080,FRAME-RATE=60.000,IVS-VARIANT-SOURCE=\"source\"",
             "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/1080p60/index-dvr.m3u8", "1080p60")]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=1920x1080,IVS-VARIANT-SOURCE=\"source\"",
+            "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/chunked/index-dvr.m3u8", "1080p")]
         // Portrait
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=1920x1080,FRAME-RATE=60.000,STABLE-VARIANT-ID=\"1080p60-portrait\",IVS-NAME=\"1080p60-portrait\",IVS-VARIANT-SOURCE=\"source\"",
             "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/1080p60-portrait/index-dvr.m3u8", "1080p60-Portrait")]
