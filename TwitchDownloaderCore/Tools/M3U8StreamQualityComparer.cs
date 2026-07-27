@@ -22,7 +22,13 @@ namespace TwitchDownloaderCore.Tools
             var xOrientation = x.Orientation();
             var yOrientation = y.Orientation();
 
-            if (xOrientation != yOrientation) return xOrientation is VideoOrientation.Landscape ? -1 : 1;
+            if (xOrientation != yOrientation)
+            {
+                if (x.IsAudioOnly()) return 1;
+                if (y.IsAudioOnly()) return -1;
+
+                return xOrientation is VideoOrientation.Landscape ? -1 : 1;
+            }
 
             var xResolution = x.StreamInfo.Resolution;
             var yResolution = y.StreamInfo.Resolution;
