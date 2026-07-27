@@ -28,7 +28,6 @@ namespace TwitchDownloaderCore.Models
             {
                 if (string.IsNullOrWhiteSpace(line))
                 {
-                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
                     continue;
                 }
 
@@ -88,7 +87,6 @@ namespace TwitchDownloaderCore.Models
 
                 if (workingSlice.IsWhiteSpace())
                 {
-                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
                     continue;
                 }
 
