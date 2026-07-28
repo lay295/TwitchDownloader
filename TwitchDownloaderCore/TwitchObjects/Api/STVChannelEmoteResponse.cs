@@ -8,8 +8,7 @@
         public string display_name { get; set; }
         public long linked_at { get; set; }
         public int emote_capacity { get; set; }
-        public object emote_set_id { get; set; }
-        public STVEmoteSet emote_set { get; set; }
+        public string emote_set_id { get; set; }
     }
 
     public class STVEditor
@@ -41,8 +40,7 @@
         public string display_name { get; set; }
         public long linked_at { get; set; }
         public int emote_capacity { get; set; }
-        public object emote_set_id { get; set; }
-        public STVEmoteSet emote_set { get; set; }
+        public string emote_set_id { get; set; }
         public STVUser user { get; set; }
     }
 

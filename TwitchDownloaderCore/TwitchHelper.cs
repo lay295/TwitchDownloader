@@ -374,15 +374,20 @@ namespace TwitchDownloaderCore
             // Channel might not be registered on 7tv
             try
             {
-                var streamerEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://7tv.io/v3/users/twitch/{streamerId}", UriKind.Absolute));
+                var streamerInfoRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://7tv.io/v3/users/twitch/{streamerId}", UriKind.Absolute));
+                using var streamerInfoResponse = await httpClient.SendAsync(streamerInfoRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                streamerInfoResponse.EnsureSuccessStatusCode();
+
+                var streamerInfoObject = await streamerInfoResponse.Content.ReadFromJsonAsync<STVChannelEmoteResponse>(cancellationToken: cancellationToken);
+                var streamerEmoteRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://7tv.io/v3/emote-sets/{streamerInfoObject.emote_set_id}", UriKind.Absolute));
                 using var streamerEmoteResponse = await httpClient.SendAsync(streamerEmoteRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 streamerEmoteResponse.EnsureSuccessStatusCode();
 
-                var streamerEmoteObject = await streamerEmoteResponse.Content.ReadFromJsonAsync<STVChannelEmoteResponse>(cancellationToken: cancellationToken);
+                var streamerEmoteObject = await streamerEmoteResponse.Content.ReadFromJsonAsync<STVEmoteSet>(cancellationToken: cancellationToken);
                 // Channel might not have emotes setup
-                if (streamerEmoteObject.emote_set?.emotes != null)
+                if (streamerEmoteObject?.emotes != null)
                 {
-                    stvEmotes.AddRange(streamerEmoteObject.emote_set.emotes);
+                    stvEmotes.AddRange(streamerEmoteObject.emotes);
                 }
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
