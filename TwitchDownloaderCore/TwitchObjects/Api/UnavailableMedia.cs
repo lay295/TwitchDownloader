@@ -30,5 +30,8 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
 
         [JsonPropertyName("IVS-VARIANT-SOURCE")]
         public string VariantSource { get; set; }
+
+        [JsonPropertyName("IVS-GROUPS")]
+        public string[] IvsGroups { get; set; }
     }
 }

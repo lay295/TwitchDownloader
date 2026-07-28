@@ -432,6 +432,7 @@ namespace TwitchDownloaderCore.Models
                     const string KEY_FRAMERATE = "FRAME-RATE=";
                     const string KEY_STABLE_VARIANT_ID = "STABLE-VARIANT-ID=\"";
                     const string KEY_IVS_NAME = "IVS-NAME=\"";
+                    const string KEY_IVS_GROUPS = "IVS-GROUPS=\"";
                     const string KEY_IVS_VARIANT_SOURCE = "IVS-VARIANT-SOURCE=\"";
                     do
                     {
@@ -465,6 +466,11 @@ namespace TwitchDownloaderCore.Models
                         else if (text.StartsWith(KEY_IVS_NAME))
                         {
                             streamInfo.IvsName = ParsingHelpers.ParseStringValue(text, KEY_IVS_NAME);
+                        }
+                        else if (text.StartsWith(KEY_IVS_GROUPS))
+                        {
+                            var groupsString = ParsingHelpers.ParseStringValue(text, KEY_IVS_GROUPS);
+                            streamInfo.IvsGroups = groupsString.Split(',');
                         }
                         else if (text.StartsWith(KEY_IVS_VARIANT_SOURCE))
                         {

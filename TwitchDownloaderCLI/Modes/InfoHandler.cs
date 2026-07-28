@@ -344,10 +344,19 @@ namespace TwitchDownloaderCLI.Modes
 
             var streams = clipQualities.Qualities
                 .Select(x =>
-                    new M3U8.Stream(
-                        new M3U8.Stream.ExtStreamInfo(0, x.BitRate, x.Item.codecs?.Split(','), x.Resolution, x.Framerate, x.Item.quality, x.Item.quality, "source"),
+                {
+                    string[] ivsGroups = x.Orientation switch
+                    {
+                        VideoOrientation.Landscape => ["landscape"],
+                        VideoOrientation.Portrait => ["portrait"],
+                        _ => []
+                    };
+
+                    return new M3U8.Stream(
+                        new M3U8.Stream.ExtStreamInfo(0, x.BitRate, x.Item.codecs?.Split(','), x.Resolution, x.Framerate, x.Item.quality, x.Item.quality, ivsGroups, "source"),
                         $"{x.Item.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}"
-                    ))
+                    );
+                })
                 .ToArray();
 
             var m3u8 = new M3U8(metadata, streams);

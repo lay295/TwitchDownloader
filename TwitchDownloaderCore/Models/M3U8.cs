@@ -259,7 +259,7 @@ namespace TwitchDownloaderCore.Models
 
                 private ExtStreamInfo() { }
 
-                public ExtStreamInfo(int programId, int bandwidth, string[] codecs, StreamResolution resolution, decimal framerate, string stableVariantId, string ivsName, string ivsVariantSource)
+                public ExtStreamInfo(int programId, int bandwidth, string[] codecs, StreamResolution resolution, decimal framerate, string stableVariantId, string ivsName, string[] ivsGroups, string ivsVariantSource)
                 {
                     ProgramId = programId;
                     Bandwidth = bandwidth;
@@ -268,6 +268,7 @@ namespace TwitchDownloaderCore.Models
                     Framerate = framerate;
                     StableVariantId = stableVariantId ?? "";
                     IvsName = ivsName ?? "";
+                    IvsGroups = ivsGroups ?? [];
                     IvsVariantSource = ivsVariantSource ?? "";
                 }
 
@@ -278,6 +279,7 @@ namespace TwitchDownloaderCore.Models
                 public decimal Framerate { get; internal set; }
                 public string StableVariantId { get; internal set; } = "";
                 public string IvsName { get; internal set; } = "";
+                public IReadOnlyList<string> IvsGroups { get; internal set; } = [];
                 public string IvsVariantSource { get; internal set; } = "";
 
                 public override string ToString()
@@ -305,6 +307,9 @@ namespace TwitchDownloaderCore.Models
 
                     if (!string.IsNullOrWhiteSpace(IvsName))
                         sb.AppendKeyQuoteValue("IVS-NAME=", IvsName, keyValueSeparator);
+
+                    if (IvsGroups is { Count: > 0 })
+                        sb.AppendKeyQuoteValue("IVS-GROUPS=", string.Join(',', IvsGroups), keyValueSeparator);
 
                     if (!string.IsNullOrWhiteSpace(IvsVariantSource))
                         sb.AppendKeyQuoteValue("IVS-VARIANT-SOURCE=", IvsVariantSource, keyValueSeparator);
