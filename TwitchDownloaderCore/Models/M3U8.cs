@@ -62,7 +62,7 @@ namespace TwitchDownloaderCore.Models
             private Dictionary<string, string> _sessionData;
             public IReadOnlyDictionary<string, string> SessionData
             {
-                get => _sessionData ??= new Dictionary<string, string>();
+                get => _sessionData ??= [];
                 init => _sessionData = new Dictionary<string, string>(value);
             }
 
@@ -108,14 +108,14 @@ namespace TwitchDownloaderCore.Models
                 if (Map is not null)
                     sb.AppendKeyValue(MAP_KEY, Map.ToString(), itemSeparator);
 
-                foreach (var (id, value) in _sessionData)
+                foreach (var (id, value) in SessionData)
                 {
                     sb.Append(SESSION_DATA_KEY);
                     sb.AppendKeyQuoteValue("DATA-ID=\"", id, ",");
                     sb.AppendKeyQuoteValue("VALUE=\"", value, itemSeparator);
                 }
 
-                foreach (var (key, value) in _unparsedValues)
+                foreach (var (key, value) in UnparsedValues)
                 {
                     sb.AppendKeyValue(key, value, itemSeparator);
                 }
@@ -152,11 +152,11 @@ namespace TwitchDownloaderCore.Models
             }
         }
 
-        public partial record Stream(Stream.ExtMediaInfo MediaInfo, Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
+        public partial record Stream(Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
         {
-            public Stream(ExtMediaInfo mediaInfo, ExtStreamInfo streamInfo, string path) : this(mediaInfo, streamInfo, null, default, default, path) { }
+            public Stream(ExtStreamInfo streamInfo, string path) : this(streamInfo, null, default, default, path) { }
 
-            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, null, partInfo, programDateTime, byteRange, path) { }
+            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, partInfo, programDateTime, byteRange, path) { }
 
             public bool IsPlaylist { get; } = Path.AsSpan().EndsWith(".m3u8") || Path.AsSpan().EndsWith(".m3u");
 
@@ -166,9 +166,6 @@ namespace TwitchDownloaderCore.Models
             public override string ToString()
             {
                 var sb = new StringBuilder();
-
-                if (MediaInfo != null)
-                    sb.AppendLine(MediaInfo.ToString());
 
                 if (StreamInfo != null)
                     sb.AppendLine(StreamInfo.ToString());
@@ -262,32 +259,38 @@ namespace TwitchDownloaderCore.Models
 
                 private ExtStreamInfo() { }
 
-                public ExtStreamInfo(int programId, int bandwidth, string[] codecs, StreamResolution resolution, string video, decimal framerate)
+                public ExtStreamInfo(int programId, int bandwidth, string[] codecs, StreamResolution resolution, decimal framerate, string stableVariantId, string ivsName, string[] ivsGroups, string ivsVariantSource)
                 {
                     ProgramId = programId;
                     Bandwidth = bandwidth;
                     Codecs = codecs ?? [];
                     Resolution = resolution;
-                    Video = video;
                     Framerate = framerate;
+                    StableVariantId = stableVariantId ?? "";
+                    IvsName = ivsName ?? "";
+                    IvsGroups = ivsGroups ?? [];
+                    IvsVariantSource = ivsVariantSource ?? "";
                 }
 
                 public int ProgramId { get; internal set; }
                 public int Bandwidth { get; internal set; }
                 public IReadOnlyList<string> Codecs { get; internal set; } = [];
                 public StreamResolution Resolution { get; internal set; }
-                public string Video { get; internal set; }
                 public decimal Framerate { get; internal set; }
+                public string StableVariantId { get; internal set; } = "";
+                public string IvsName { get; internal set; } = "";
+                public IReadOnlyList<string> IvsGroups { get; internal set; } = [];
+                public string IvsVariantSource { get; internal set; } = "";
 
                 public override string ToString()
                 {
                     var sb = new StringBuilder(STREAM_INFO_KEY);
                     ReadOnlySpan<char> keyValueSeparator = [','];
 
-                    if (ProgramId != default)
+                    if (ProgramId != 0)
                         sb.AppendKeyValue("PROGRAM-ID=", ProgramId, keyValueSeparator);
 
-                    if (Bandwidth != default)
+                    if (Bandwidth != 0)
                         sb.AppendKeyValue("BANDWIDTH=", Bandwidth, keyValueSeparator);
 
                     if (Codecs is { Count: > 0 })
@@ -296,11 +299,20 @@ namespace TwitchDownloaderCore.Models
                     if (Resolution != default)
                         sb.AppendKeyValue("RESOLUTION=", Resolution, keyValueSeparator);
 
-                    if (!string.IsNullOrWhiteSpace(Video))
-                        sb.AppendKeyQuoteValue("VIDEO=", Video, keyValueSeparator);
-
-                    if (Framerate != default)
+                    if (Framerate != 0)
                         sb.AppendKeyValue("FRAME-RATE=", Framerate, default);
+
+                    if (!string.IsNullOrWhiteSpace(StableVariantId))
+                        sb.AppendKeyQuoteValue("STABLE-VARIANT-ID=", StableVariantId, keyValueSeparator);
+
+                    if (!string.IsNullOrWhiteSpace(IvsName))
+                        sb.AppendKeyQuoteValue("IVS-NAME=", IvsName, keyValueSeparator);
+
+                    if (IvsGroups is { Count: > 0 })
+                        sb.AppendKeyQuoteValue("IVS-GROUPS=", string.Join(',', IvsGroups), keyValueSeparator);
+
+                    if (!string.IsNullOrWhiteSpace(IvsVariantSource))
+                        sb.AppendKeyQuoteValue("IVS-VARIANT-SOURCE=", IvsVariantSource, keyValueSeparator);
 
                     return sb.TrimEnd(keyValueSeparator).ToString();
                 }

@@ -109,7 +109,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public string profileImageURL { get; set; }
     }
 
-    public class ShareClipRenderStatusAssets
+    public class ShareClipRenderStatusAsset
     {
         public string id { get; set; }
         public decimal aspectRatio { get; set; }
@@ -132,7 +132,7 @@ namespace TwitchDownloaderCore.TwitchObjects.Gql
         public int viewCount { get; set; }
         public string language { get; set; }
         public bool isFeatured { get; set; }
-        public ShareClipRenderStatusAssets[] assets { get; set; }
+        public ShareClipRenderStatusAsset[] assets { get; set; }
         public ShareClipRenderStatusCurator curator { get; set; }
         public ShareClipRenderStatusGame game { get; set; }
         public ShareClipRenderStatusBroadcast broadcast { get; set; }

@@ -12,19 +12,19 @@ namespace TwitchDownloaderCore.Models
 
         public override IVideoQuality<M3U8.Stream> GetQuality(string qualityString)
         {
-            if (TryGetQuality(qualityString, out var quality1))
+            if (TryGetQuality(qualityString, out var foundQuality))
             {
-                return quality1;
+                return foundQuality;
             }
 
             var qualitySpan = qualityString.AsSpan().Trim();
-            foreach (var quality2 in Qualities)
+            foreach (var quality in Qualities)
             {
-                if (qualitySpan.Equals(quality2.Item.StreamInfo.Video, StringComparison.OrdinalIgnoreCase)
-                    || qualitySpan.Equals(quality2.Item.MediaInfo.Name, StringComparison.OrdinalIgnoreCase)
-                    || qualitySpan.Equals(quality2.Item.MediaInfo.GroupId, StringComparison.OrdinalIgnoreCase))
+                if (qualitySpan.Equals(quality.Item.StreamInfo.StableVariantId, StringComparison.OrdinalIgnoreCase)
+                    || qualitySpan.Equals(quality.Item.StreamInfo.IvsName, StringComparison.OrdinalIgnoreCase)
+                    || (quality.Path.Count('/') >= 1 && qualitySpan.Equals(quality.Path.GetNthOccurrence('/', ^2), StringComparison.OrdinalIgnoreCase)))
                 {
-                    return quality2;
+                    return quality;
                 }
             }
 
@@ -33,18 +33,29 @@ namespace TwitchDownloaderCore.Models
 
         protected override bool TryGetKeywordQuality(string qualityString, out IVideoQuality<M3U8.Stream> quality)
         {
-            if (string.IsNullOrWhiteSpace(qualityString)
-                || qualityString.Contains("best", StringComparison.OrdinalIgnoreCase)
-                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase)
-                || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(qualityString))
             {
                 quality = BestQuality();
                 return true;
             }
 
+            if (qualityString.Contains("best", StringComparison.OrdinalIgnoreCase)
+                || qualityString.Contains("source", StringComparison.OrdinalIgnoreCase)
+                || qualityString.Contains("chunked", StringComparison.OrdinalIgnoreCase))
+            {
+                quality = qualityString.Contains("portrait", StringComparison.OrdinalIgnoreCase)
+                    ? BestPortraitQuality()
+                    : BestQuality();
+
+                return true;
+            }
+
             if (qualityString.Contains("worst", StringComparison.OrdinalIgnoreCase))
             {
-                quality = WorstQuality();
+                quality = qualityString.Contains("portrait", StringComparison.OrdinalIgnoreCase)
+                    ? WorstPortraitQuality()
+                    : WorstQuality();
+
                 return true;
             }
 
@@ -66,11 +77,43 @@ namespace TwitchDownloaderCore.Models
                 return null;
             }
 
-            var source = Qualities.FirstOrDefault(x => x.Item.IsSource());
+            IVideoQuality<M3U8.Stream> source = null;
 
-            source ??= Qualities.MaxBy(x => x.Item.StreamInfo.Resolution.Width * x.Item.StreamInfo.Resolution.Height * x.Item.StreamInfo.Framerate);
+            if (Qualities.Where(x => x.Orientation is VideoOrientation.Landscape).All(x => x.Framerate > 0))
+            {
+                source = Qualities
+                    .Where(x => x.Orientation is VideoOrientation.Landscape)
+                    .MaxBy(x => x.Resolution.Pixels * x.Framerate);
+            }
+
+            source ??= Qualities
+                .Where(x => x.Orientation is VideoOrientation.Landscape)
+                .MaxBy(x => x.Resolution.Pixels);
+
+            source ??= Qualities
+                .Where(x => x.Orientation is VideoOrientation.Landscape)
+                .MaxBy(x => x.BitRate);
 
             return source;
+        }
+
+        private IVideoQuality<M3U8.Stream> BestPortraitQuality()
+        {
+            if (Qualities is null)
+            {
+                return null;
+            }
+
+            var bestQuality = Qualities
+                .WhereOnlyIf(x => x.Resolution.Width < x.Resolution.Height, Qualities.All(x => x.Resolution.HasWidth))
+                .Where(x => x.Orientation is VideoOrientation.Portrait)
+                .MaxBy(x => x.Resolution.Height);
+
+            bestQuality ??= Qualities
+                .Where(x => x.Orientation is VideoOrientation.Portrait)
+                .MaxBy(x => x.Resolution.Height);
+
+            return bestQuality ?? Qualities.FirstOrDefault();
         }
 
         public override IVideoQuality<M3U8.Stream> WorstQuality()
@@ -80,9 +123,41 @@ namespace TwitchDownloaderCore.Models
                 return null;
             }
 
+            IVideoQuality<M3U8.Stream> worstQuality = null;
+
+            if (Qualities.Where(x => x.Orientation is VideoOrientation.Landscape).All(x => x.Framerate > 0))
+            {
+                worstQuality = Qualities
+                    .Where(x => x.Orientation is VideoOrientation.Landscape)
+                    .MinBy(x => x.Resolution.Pixels * x.Framerate);
+            }
+
+            worstQuality ??= Qualities
+                .Where(x => x.Orientation is VideoOrientation.Landscape)
+                .MinBy(x => x.Resolution.Pixels);
+
+            worstQuality ??= Qualities
+                .Where(x => x.Orientation is VideoOrientation.Landscape)
+                .MinBy(x => x.BitRate);
+
+            return worstQuality ?? Qualities.LastOrDefault();
+        }
+
+        private IVideoQuality<M3U8.Stream> WorstPortraitQuality()
+        {
+            if (Qualities is null)
+            {
+                return null;
+            }
+
             var worstQuality = Qualities
-                .Where(x => !x.Item.IsSource() && !x.Item.IsAudioOnly())
-                .MinBy(x => x.Item.StreamInfo.Resolution.Width * x.Item.StreamInfo.Resolution.Height * x.Item.StreamInfo.Framerate);
+                .WhereOnlyIf(x => x.Resolution.Width < x.Resolution.Height, Qualities.All(x => x.Resolution.HasWidth))
+                .Where(x => x.Orientation is VideoOrientation.Portrait)
+                .MinBy(x => x.Resolution.Height);
+
+            worstQuality ??= Qualities
+                .Where(x => x.Orientation is VideoOrientation.Portrait)
+                .MinBy(x => x.Resolution.Height);
 
             return worstQuality ?? Qualities.LastOrDefault();
         }

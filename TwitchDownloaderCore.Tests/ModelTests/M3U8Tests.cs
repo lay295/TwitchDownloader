@@ -245,44 +245,32 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 "#EXTM3U" +
                 "\n#EXT-X-SESSION-DATA:DATA-ID=\"com.amazon.ivs.unavailable-media\",VALUE=\"W3siTkFNRSI6IjE0NDBwNjAiLCJCQU5EV0lEVEgiOjc3MzY1NjAsIkNPREVDUyI6ImhldjEuMS4yLkwxNTAuOTAuMC4wLjAuMC4wLG1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIyNTYweDE0NDAiLCJGSUxURVJfUkVBU09OUyI6W10sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6WyJBVVRIWl9OT1RfTE9HR0VEX0lOIl0sIkdST1VQLUlEIjoiY2h1bmtlZCIsIkZSQU1FLVJBVEUiOjYwfSx7Ik5BTUUiOiJBdWRpbyBPbmx5IiwiQkFORFdJRFRIIjoyMDQzMTAsIkNPREVDUyI6Im1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIiLCJGSUxURVJfUkVBU09OUyI6WyJGUl9BVURJT19ESVNBTExPV0VEIl0sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6W10sIkdST1VQLUlEIjoiYXVkaW9fb25seSIsIkZSQU1FLVJBVEUiOjB9XQ==\"" +
                 "\n#EXT-X-TWITCH-INFO:ORIGIN=\"s3\",B=\"false\",REGION=\"NA\",USER-IP=\"255.255.255.255\",SERVING-ID=\"123abc456def789ghi012jkl345mno67\",CLUSTER=\"cloudfront_vod\",USER-COUNTRY=\"US\",MANIFEST-CLUSTER=\"cloudfront_vod\"" +
-                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"chunked\",FRAME-RATE=59.995" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,FRAME-RATE=59.995,STABLE-VARIANT-ID=\"1080p60\",IVS-NAME=\"1080p60\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"source\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/chunked/index-dvr.m3u8" +
-                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"720p60\",NAME=\"720p60\",AUTOSELECT=YES,DEFAULT=YES" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\",FRAME-RATE=59.995" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,FRAME-RATE=59.995,STABLE-VARIANT-ID=\"720p60\",IVS-NAME=\"720p60\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/720p60/index-dvr.m3u8" +
-                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"480p30\",NAME=\"480p\",AUTOSELECT=YES,DEFAULT=YES" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=1454397,CODECS=\"avc1.4D001F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\",FRAME-RATE=29.998" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=1454397,CODECS=\"avc1.4D001F,mp4a.40.2\",RESOLUTION=852x480,FRAME-RATE=29.998,STABLE-VARIANT-ID=\"480p30\",IVS-NAME=\"480p\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/480p30/index-dvr.m3u8" +
-                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"audio_only\",NAME=\"Audio Only\",AUTOSELECT=NO,DEFAULT=NO" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",VIDEO=\"audio_only\"" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",STABLE-VARIANT-ID=\"audio_only\",IVS-NAME=\"Audio Only\",IVS-GROUPS=\"landscape,portrait\",IVS-VARIANT-SOURCE=\"source\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/audio_only/index-dvr.m3u8" +
-                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"360p30\",NAME=\"360p\",AUTOSELECT=YES,DEFAULT=YES" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\",FRAME-RATE=29.998" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,FRAME-RATE=29.998,STABLE-VARIANT-ID=\"360p30\",IVS-NAME=\"360p\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/360p30/index-dvr.m3u8" +
-                "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"160p30\",NAME=\"160p\",AUTOSELECT=YES,DEFAULT=YES" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\",FRAME-RATE=29.998" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,FRAME-RATE=29.998,STABLE-VARIANT-ID=\"160p30\",IVS-NAME=\"160p\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/160p30/index-dvr.m3u8";
 
             var streams = new M3U8.Stream[]
             {
-                new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "1080p60", false, false),
-                    new M3U8.Stream.ExtStreamInfo(0, 5898203, ["avc1.64002A", "mp4a.40.2"], (1920, 1080), "chunked", 59.995m),
+                new(new M3U8.Stream.ExtStreamInfo(0, 5898203, ["avc1.64002A", "mp4a.40.2"], (1920, 1080), 59.995m, "1080p60", "1080p60", ["landscape"], "source"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/chunked/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 3443956, ["avc1.4D0020", "mp4a.40.2"], (1280, 720), "720p60", 59.995m),
+                new(new M3U8.Stream.ExtStreamInfo(0, 3443956, ["avc1.4D0020", "mp4a.40.2"], (1280, 720), 59.995m, "720p60", "720p60", ["landscape"], "transcode"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/720p60/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "480p30", "480p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 1454397, ["avc1.4D001F", "mp4a.40.2"], (852, 480), "480p30", 29.998m),
+                new(new M3U8.Stream.ExtStreamInfo(0, 1454397, ["avc1.4D001F", "mp4a.40.2"], (852, 480), 29.998m, "480p30", "480p", ["landscape"], "transcode"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/480p30/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "audio_only", "Audio Only", false, false),
-                    new M3U8.Stream.ExtStreamInfo(0, 220328, ["mp4a.40.2"], (0, 0), "audio_only", 0m),
+                new(new M3U8.Stream.ExtStreamInfo(0, 220328, ["mp4a.40.2"], (0, 0), 0m, "audio_only", "Audio Only", ["landscape", "portrait"], "source"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/audio_only/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "360p30", "360p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 708016, ["avc1.4D001E", "mp4a.40.2"], (640, 360), "360p30", 29.998m),
+                new(new M3U8.Stream.ExtStreamInfo(0, 708016, ["avc1.4D001E", "mp4a.40.2"], (640, 360), 29.998m, "360p30", "360p", ["landscape"], "transcode"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/360p30/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, "160p30", "160p", true, true),
-                    new M3U8.Stream.ExtStreamInfo(0, 288409, ["avc1.4D000C", "mp4a.40.2"], (284, 160), "160p30", 29.998m),
+                new(new M3U8.Stream.ExtStreamInfo(0, 288409, ["avc1.4D000C", "mp4a.40.2"], (284, 160), 29.998m, "160p30", "160p", ["landscape"], "transcode"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/160p30/index-dvr.m3u8")
             };
 
@@ -309,12 +297,10 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             );
 
             Assert.Equal(streams.Length, m3u8.Streams.Length);
-            Assert.Equivalent(streams[0], m3u8.Streams[0], true);
-            Assert.Equivalent(streams[1], m3u8.Streams[1], true);
-            Assert.Equivalent(streams[2], m3u8.Streams[2], true);
-            Assert.Equivalent(streams[3], m3u8.Streams[3], true);
-            Assert.Equivalent(streams[4], m3u8.Streams[4], true);
-            Assert.Equivalent(streams[5], m3u8.Streams[5], true);
+            for (var i = 0; i < streams.Length; i++)
+            {
+                Assert.Equivalent(streams[i], m3u8.Streams[i], true);
+            }
         }
 
         [Theory]
@@ -336,21 +322,29 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         }
 
         [Theory]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"chunked\",FRAME-RATE=59.995", 5898203, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080, "chunked", 59.995)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\",FRAME-RATE=59.995", 3443956, new[] { "avc1.4D0020", "mp4a.40.2" }, 1280, 720, "720p60", 59.995)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=1454397,CODECS=\"avc1.4D001F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\",FRAME-RATE=29.998", 1454397, new[] { "avc1.4D001F", "mp4a.40.2" }, 852, 480, "480p30", 29.998)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",VIDEO=\"audio_only\"", 220328, new[] { "mp4a.40.2" }, 0, 0, "audio_only", 0)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\",FRAME-RATE=29.998", 708016, new[] { "avc1.4D001E", "mp4a.40.2" }, 640, 360, "360p30", 29.998)]
-        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\",FRAME-RATE=29.998", 288409, new[] { "avc1.4D000C", "mp4a.40.2" }, 284, 160, "160p30", 29.998)]
-        public void CorrectlyParsesTwitchM3U8StreamInfo(string streamInfoString, int bandwidth, string[] codecs, uint videoWidth, uint videoHeight, string video, decimal framerate)
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,FRAME-RATE=59.995,STABLE-VARIANT-ID=\"1080p60\",IVS-NAME=\"1080p60\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"source\"",
+            5898203, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080, 59.995, "1080p60", "1080p60", new[] { "landscape" }, "source")]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,FRAME-RATE=59.995,STABLE-VARIANT-ID=\"720p60\",IVS-NAME=\"720p60\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"",
+            3443956, new[] { "avc1.4D0020", "mp4a.40.2" }, 1280, 720, 59.995, "720p60", "720p60", new[] { "landscape" }, "transcode")]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=1454397,CODECS=\"avc1.4D001F,mp4a.40.2\",RESOLUTION=852x480,FRAME-RATE=29.998,STABLE-VARIANT-ID=\"480p30\",IVS-NAME=\"480p\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"",
+            1454397, new[] { "avc1.4D001F", "mp4a.40.2" }, 852, 480, 29.998, "480p30", "480p", new[] { "landscape" }, "transcode")]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",STABLE-VARIANT-ID=\"audio_only\",IVS-NAME=\"Audio Only\",IVS-GROUPS=\"landscape,portrait\",IVS-VARIANT-SOURCE=\"source\"",
+            220328, new[] { "mp4a.40.2" }, 0, 0, 0, "audio_only", "Audio Only", new[] { "landscape", "portrait" }, "source")]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,FRAME-RATE=29.998,STABLE-VARIANT-ID=\"360p30\",IVS-NAME=\"360p\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"",
+            708016, new[] { "avc1.4D001E", "mp4a.40.2" }, 640, 360, 29.998, "360p30", "360p", new[] { "landscape" }, "transcode")]
+        [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,FRAME-RATE=29.998,STABLE-VARIANT-ID=\"160p30\",IVS-NAME=\"160p\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"",
+            288409, new[] { "avc1.4D000C", "mp4a.40.2" }, 284, 160, 29.998, "160p30", "160p", new[] { "landscape" }, "transcode")]
+        public void CorrectlyParsesTwitchM3U8StreamInfo(string streamInfoString, int bandwidth, string[] codecs, uint videoWidth, uint videoHeight, decimal framerate, string stableVariantId, string ivsName, string[] ivsGroups, string ivsVariantSource)
         {
             var streamInfo = M3U8.Stream.ExtStreamInfo.Parse(streamInfoString);
 
             Assert.Equal(bandwidth, streamInfo.Bandwidth);
             Assert.Equal(codecs, streamInfo.Codecs);
             Assert.Equal((videoWidth, videoHeight), streamInfo.Resolution);
-            Assert.Equal(video, streamInfo.Video);
             Assert.Equal(framerate, streamInfo.Framerate);
+            Assert.Equal(stableVariantId, streamInfo.StableVariantId);
+            Assert.Equal(ivsName, streamInfo.IvsName);
+            Assert.Equal(ivsVariantSource, streamInfo.IvsVariantSource);
         }
 
         [Theory]
@@ -450,6 +444,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             }
         }
 
+        /* Kick M3U8 doesn't look like this anymore, nor does it use the new IVS API like Twitch. Ignore for now.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -514,12 +509,12 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             CultureInfo.CurrentCulture = oldCulture;
 
             Assert.Equal(streams.Length, m3u8.Streams.Length);
-            Assert.Equivalent(streams[0], m3u8.Streams[0], true);
-            Assert.Equivalent(streams[1], m3u8.Streams[1], true);
-            Assert.Equivalent(streams[2], m3u8.Streams[2], true);
-            Assert.Equivalent(streams[3], m3u8.Streams[3], true);
-            Assert.Equivalent(streams[4], m3u8.Streams[4], true);
+            for (var i = 0; i < streams.Length; i++)
+            {
+                Assert.Equivalent(streams[i], m3u8.Streams[i], true);
+            }
         }
+        */
 
         [Theory]
         [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"1080p60\",NAME=\"1080p60\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "1080p60", "1080p60", true, true)]
@@ -539,19 +534,18 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         }
 
         [Theory]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080, "1080p60")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=3330599,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\"", 3330599, new[] { "avc1.4D401F", "mp4a.40.2" }, 1280, 720, "720p60")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1335600,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\"", 1335600, new[] { "avc1.4D401F", "mp4a.40.2" }, 852, 480, "480p30")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=630000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\"", 630000, new[] { "avc1.4D401F", "mp4a.40.2" }, 640, 360, "360p30")]
-        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=230000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\"", 230000, new[] { "avc1.4D401F", "mp4a.40.2" }, 284, 160, "160p30")]
-        public void CorrectlyParsesKickM3U8StreamInfo(string streamInfoString, int bandwidth, string[] codecs, uint videoWidth, uint videoHeight, string video)
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080)]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=3330599,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\"", 3330599, new[] { "avc1.4D401F", "mp4a.40.2" }, 1280, 720)]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1335600,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\"", 1335600, new[] { "avc1.4D401F", "mp4a.40.2" }, 852, 480)]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=630000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\"", 630000, new[] { "avc1.4D401F", "mp4a.40.2" }, 640, 360)]
+        [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=230000,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\"", 230000, new[] { "avc1.4D401F", "mp4a.40.2" }, 284, 160)]
+        public void CorrectlyParsesKickM3U8StreamInfo(string streamInfoString, int bandwidth, string[] codecs, uint videoWidth, uint videoHeight)
         {
             var streamInfo = M3U8.Stream.ExtStreamInfo.Parse(streamInfoString);
 
             Assert.Equal(bandwidth, streamInfo.Bandwidth);
             Assert.Equal(codecs, streamInfo.Codecs);
             Assert.Equal((videoWidth, videoHeight), streamInfo.Resolution);
-            Assert.Equal(video, streamInfo.Video);
         }
 
         [Theory]
@@ -608,22 +602,22 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 "\n#EXT-X-SESSION-DATA:DATA-ID=\"com.amazon.ivs.unavailable-media\",VALUE=\"W3siTkFNRSI6IjE0NDBwNjAiLCJCQU5EV0lEVEgiOjc3MzY1NjAsIkNPREVDUyI6ImhldjEuMS4yLkwxNTAuOTAuMC4wLjAuMC4wLG1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIyNTYweDE0NDAiLCJGSUxURVJfUkVBU09OUyI6W10sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6WyJBVVRIWl9OT1RfTE9HR0VEX0lOIl0sIkdST1VQLUlEIjoiY2h1bmtlZCIsIkZSQU1FLVJBVEUiOjYwfSx7Ik5BTUUiOiJBdWRpbyBPbmx5IiwiQkFORFdJRFRIIjoyMDQzMTAsIkNPREVDUyI6Im1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIiLCJGSUxURVJfUkVBU09OUyI6WyJGUl9BVURJT19ESVNBTExPV0VEIl0sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6W10sIkdST1VQLUlEIjoiYXVkaW9fb25seSIsIkZSQU1FLVJBVEUiOjB9XQ==\"" +
                 "\n#EXT-X-TWITCH-INFO:ORIGIN=\"s3\",B=\"false\",REGION=\"NA\",USER-IP=\"255.255.255.255\",SERVING-ID=\"123abc456def789ghi012jkl345mno67\",CLUSTER=\"cloudfront_vod\",USER-COUNTRY=\"US\",MANIFEST-CLUSTER=\"cloudfront_vod\"" +
                 "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"chunked\",FRAME-RATE=59.995" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"chunked\",FRAME-RATE=59.995,STABLE-VARIANT-ID=\"1080p60\",IVS-NAME=\"1080p60\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"source\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/chunked/index-dvr.m3u8" +
                 "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"720p60\",NAME=\"720p60\",AUTOSELECT=YES,DEFAULT=YES" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\",FRAME-RATE=59.995" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=3443956,CODECS=\"avc1.4D0020,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\",FRAME-RATE=59.995,STABLE-VARIANT-ID=\"720p60\",IVS-NAME=\"720p60\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/720p60/index-dvr.m3u8" +
                 "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"480p30\",NAME=\"480p\",AUTOSELECT=YES,DEFAULT=YES" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=1454397,CODECS=\"avc1.4D001F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\",FRAME-RATE=29.998" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=1454397,CODECS=\"avc1.4D001F,mp4a.40.2\",RESOLUTION=852x480,VIDEO=\"480p30\",FRAME-RATE=29.998,STABLE-VARIANT-ID=\"480p30\",IVS-NAME=\"480p\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/480p30/index-dvr.m3u8" +
                 "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"audio_only\",NAME=\"Audio Only\",AUTOSELECT=NO,DEFAULT=NO" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",VIDEO=\"audio_only\"" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=220328,CODECS=\"mp4a.40.2\",VIDEO=\"audio_only\",STABLE-VARIANT-ID=\"audio_only\",IVS-NAME=\"Audio Only\",IVS-GROUPS=\"landscape,portrait\",IVS-VARIANT-SOURCE=\"source\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/audio_only/index-dvr.m3u8" +
                 "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"360p30\",NAME=\"360p\",AUTOSELECT=YES,DEFAULT=YES" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\",FRAME-RATE=29.998" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=708016,CODECS=\"avc1.4D001E,mp4a.40.2\",RESOLUTION=640x360,VIDEO=\"360p30\",FRAME-RATE=29.998,STABLE-VARIANT-ID=\"360p30\",IVS-NAME=\"360p\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/360p30/index-dvr.m3u8" +
                 "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"160p30\",NAME=\"160p\",AUTOSELECT=YES,DEFAULT=YES" +
-                "\n#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\",FRAME-RATE=29.998" +
+                "\n#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=284x160,VIDEO=\"160p30\",FRAME-RATE=29.998,STABLE-VARIANT-ID=\"160p30\",IVS-NAME=\"160p\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"transcode\"" +
                 "\nhttps://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/160p30/index-dvr.m3u8" +
                 "\n#EXT-X-VERSION:4" +
                 "\n#EXT-X-MEDIA-SEQUENCE:0" +

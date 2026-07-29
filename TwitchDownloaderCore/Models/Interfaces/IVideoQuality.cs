@@ -16,6 +16,8 @@ namespace TwitchDownloaderCore.Models.Interfaces
 
         int BitRate { get; }
 
+        VideoOrientation Orientation { get; }
+
         string ToString() => Name;
     }
 }

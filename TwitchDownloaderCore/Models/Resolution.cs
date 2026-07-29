@@ -6,6 +6,8 @@ namespace TwitchDownloaderCore.Models
 
         public bool HasWidth => Width > 0;
 
+        public uint Pixels => Width * Height;
+
         public override string ToString() => $"{Width}x{Height}";
 
         public static implicit operator Resolution((uint width, uint height) tuple) => new(tuple.width, tuple.height);

@@ -106,7 +106,6 @@ namespace TwitchDownloaderCLI.Modes
         private static void HandleVodTable(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)
         {
             var m3u8 = M3U8.Parse(playlistString);
-            m3u8.SortStreamsByQuality();
             var qualities = VideoQualities.FromM3U8(m3u8);
 
             const string DEFAULT_STRING = "-";
@@ -334,22 +333,30 @@ namespace TwitchDownloaderCLI.Modes
 
             var metadata = new M3U8.Metadata
             {
-                Version = default,
+                Version = null,
                 MediaSequence = 0,
                 StreamTargetDuration = (uint)clip.durationSeconds,
                 TwitchElapsedSeconds = 0,
-                TwitchLiveSequence = default,
+                TwitchLiveSequence = null,
                 TwitchTotalSeconds = clip.durationSeconds,
                 Type = M3U8.Metadata.PlaylistType.Event,
             };
 
             var streams = clipQualities.Qualities
                 .Select(x =>
-                    new M3U8.Stream(
-                        new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, x.Item.quality, x.Name, true, true),
-                        new M3U8.Stream.ExtStreamInfo(0, x.BitRate, x.Item.codecs?.Split(','), x.Resolution, x.Item.quality, x.Framerate),
+                {
+                    string[] ivsGroups = x.Orientation switch
+                    {
+                        VideoOrientation.Landscape => ["landscape"],
+                        VideoOrientation.Portrait => ["portrait"],
+                        _ => []
+                    };
+
+                    return new M3U8.Stream(
+                        new M3U8.Stream.ExtStreamInfo(0, x.BitRate, x.Item.codecs?.Split(','), x.Resolution, x.Framerate, x.Item.quality, x.Item.quality, ivsGroups, "source"),
                         $"{x.Item.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}"
-                    ))
+                    );
+                })
                 .ToArray();
 
             var m3u8 = new M3U8(metadata, streams);

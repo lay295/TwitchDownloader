@@ -25,36 +25,35 @@ namespace TwitchDownloaderCore.Extensions
         [GeneratedRegex("""\d{3,4}p\d{2,3}""")]
         private static partial Regex ResolutionFramerateRegex { get; }
 
+        [GeneratedRegex("""[\dp]-portrait/""")]
+        private static partial Regex PortraitPathRegex { get; }
+
         /// <returns>
         /// A <see cref="string"/> representing the <paramref name="stream"/>'s <see cref="M3U8.Stream.ExtStreamInfo.Resolution"/>
         /// and <see cref="M3U8.Stream.ExtStreamInfo.Framerate"/> in the format of "{resolution}p{framerate}" or <see langword="null"/>
         /// </returns>
         public static string GetResolutionFramerateString(this M3U8.Stream stream, bool appendSource = true)
         {
-            var mediaInfo = stream.MediaInfo;
-            if (stream.IsAudioOnly() || ResolutionFramerateRegex.IsMatch(mediaInfo.Name))
-            {
-                return mediaInfo.Name;
-            }
-
             var streamInfo = stream.StreamInfo;
-            if (ResolutionFramerateRegex.IsMatch(streamInfo.Video))
+            if (stream.IsAudioOnly())
             {
-                var hyphenIndex = streamInfo.Video.IndexOf('-');
-                return hyphenIndex > 0 ? streamInfo.Video[..hyphenIndex] : streamInfo.Video;
+                return streamInfo.IvsName;
             }
 
-            if (ResolutionFramerateRegex.IsMatch(mediaInfo.GroupId))
+            if (ResolutionFramerateRegex.IsMatch(streamInfo.StableVariantId))
             {
-                var hyphenIndex = mediaInfo.GroupId.IndexOf('-');
-                return hyphenIndex > 0 ? mediaInfo.GroupId[..hyphenIndex] : mediaInfo.GroupId;
+                return streamInfo.StableVariantId;
             }
 
-            if (streamInfo.Resolution == default)
+            if (streamInfo.Resolution == default || streamInfo.Framerate == 0)
             {
-                return stream.IsSource()
-                    ? "Source"
-                    : "";
+                var urlId = stream.Path.GetNthOccurrence('/', ^2);
+                if (ResolutionFramerateRegex.IsMatch(urlId))
+                {
+                    return appendSource && stream.IsSource()
+                        ? $"{urlId} (Source)"
+                        : urlId.ToString();
+                }
             }
 
             var frameHeight = streamInfo.Resolution.Height;
@@ -75,11 +74,31 @@ namespace TwitchDownloaderCore.Extensions
         }
 
         public static bool IsSource(this M3U8.Stream stream)
-            => stream.MediaInfo.Name.Contains("source", StringComparison.OrdinalIgnoreCase) ||
-               stream.MediaInfo.GroupId.Equals("chunked", StringComparison.OrdinalIgnoreCase);
+            => stream.Path.Contains("/chunked/", StringComparison.OrdinalIgnoreCase) ||
+                stream.StreamInfo.IvsVariantSource.Contains("source", StringComparison.OrdinalIgnoreCase);
 
         public static bool IsAudioOnly(this M3U8.Stream stream)
-            => stream.MediaInfo.Name.Contains("audio", StringComparison.OrdinalIgnoreCase);
+            => stream.Path.Contains("/audio_only/", StringComparison.OrdinalIgnoreCase) ||
+               stream.StreamInfo.StableVariantId.Contains("audio", StringComparison.OrdinalIgnoreCase) ||
+               stream.StreamInfo.IvsName.Contains("audio", StringComparison.OrdinalIgnoreCase);
+
+        public static VideoOrientation Orientation(this M3U8.Stream stream)
+        {
+            if (stream.IsAudioOnly())
+                return VideoOrientation.None;
+
+            if (stream.StreamInfo.IvsGroups.Contains("landscape", StringComparer.OrdinalIgnoreCase))
+                return VideoOrientation.Landscape;
+
+            if (stream.StreamInfo.IvsGroups.Contains("portrait", StringComparer.OrdinalIgnoreCase)
+                || PortraitPathRegex.IsMatch(stream.Path)
+                || stream.StreamInfo.StableVariantId.Contains("-portrait", StringComparison.OrdinalIgnoreCase))
+                return VideoOrientation.Portrait;
+
+            return stream.StreamInfo.StableVariantId.Length > 0
+                ? VideoOrientation.Landscape
+                : VideoOrientation.None;
+        }
 
         public static M3U8 WithUnavailableMedia(this M3U8 m3u8)
         {
@@ -104,10 +123,9 @@ namespace TwitchDownloaderCore.Extensions
 
             var unavailableStreams = unavailableMedia.Select(x =>
             {
-                var mediaInfo = new M3U8.Stream.ExtMediaInfo(M3U8.Stream.ExtMediaInfo.MediaType.Video, x.GroupId, x.Name, true, true);
-                var streamInfo = new M3U8.Stream.ExtStreamInfo(0, x.Bandwidth, x.Codecs.Split(','), M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(x.Resolution), x.GroupId, x.FrameRate);
-                var path = string.Format(pathFormat, x.GroupId);
-                return new M3U8.Stream(mediaInfo, streamInfo, path);
+                var streamInfo = new M3U8.Stream.ExtStreamInfo(0, x.Bandwidth, x.Codecs.Split(','), M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(x.Resolution), x.FrameRate, x.StableVariantId, x.IvsName, x.IvsGroups, x.VariantSource);
+                var path = string.Format(pathFormat, x.StableVariantId);
+                return new M3U8.Stream(streamInfo, path);
             });
 
             var allStreams = unavailableStreams
