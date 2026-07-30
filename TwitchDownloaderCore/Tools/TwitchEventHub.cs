@@ -30,12 +30,35 @@ namespace TwitchDownloaderCore.Tools
 				_channel.Writer.TryComplete();
 				foreach (var topic in _topics)
 				{
-					try
+					if (!_hub._subscriptionIds.TryGetValue(topic, out var subId))
 					{
-						// we do not await unsubscriptions, they are fire and forget to keep the unsubscribe/dispose simple
-						_ = _hub.Unsubscribe(topic);
+						_hub._logger.LogWarning($"tried to remove subscription for a topic that has no subscriptions: {topic}");
+						continue;
 					}
-					catch { }
+
+					if (!_hub._notificationChannels.TryGetValue(subId, out var subGroups))
+					{
+						_hub._logger.LogWarning($"tried to remove subGroup for a subscription that has no subGroups: {subId}");
+						continue;
+					}
+
+					if (!subGroups.Remove(this))
+					{
+						_hub._logger.LogWarning($"subGroup is not a known listener for the subscription: {subId}");
+						continue;
+					}
+
+					// if this is the last listener for that subscription, clean up the subscription and unsubscribe
+					if (subGroups.Count < 1)
+					{
+						_hub._notificationChannels.TryRemove(subId, out _);
+						try
+						{
+							// we do not await unsubscriptions, they are fire and forget to keep the unsubscribe/dispose simple
+							_ = _hub.Unsubscribe(topic);
+						}
+						catch { }
+					}
 				}
 			}
 		}

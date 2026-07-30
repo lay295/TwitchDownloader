@@ -62,10 +62,10 @@ namespace TwitchDownloaderCore.Tools
 
                     var message = new Message { MessageType = result.MessageType, Buffer = messageBuffer.ToArray() };
 
-                    if(message.MessageType == WebSocketMessageType.Close) { _logger.LogVerbose($"[{_instanceId}] close frame received"); }
+                    if (message.MessageType == WebSocketMessageType.Close) { _logger.LogVerbose($"[{_instanceId}] close frame received [{result.CloseStatus}, {_socket.State}]"); }
 
                     // ignore errors in the handler
-                    try { MessageReceived?.Invoke(this, message); } catch {}
+                    try { MessageReceived?.Invoke(this, message); } catch { }
                 }
             }
             catch (OperationCanceledException) { }

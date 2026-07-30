@@ -58,17 +58,22 @@ namespace TwitchDownloaderCore
             {
                 var streamerId = (await TwitchHelper.GetUserIds([_recorderOptions.Channel])).data.users[0].id;
 
-                using var eventHub = new TwitchEventHub(_progress);
 
                 if (_recorderOptions.NextStream)
                 {
+                    using var eventHub = new TwitchEventHub(_progress);
                     var streamInfo = await TwitchHelper.GetLiveStreamInfo(_recorderOptions.Channel);
 
                     if (streamInfo.data.stream is null)
                     {
-                        await WaitFor(StreamStateChange.START, eventHub, streamerId);
+                        try
+                        {
+                            await WaitFor(StreamStateChange.START, eventHub, streamerId, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, new CancellationTokenSource(new TimeSpan(0, 1, 0)).Token).Token);
+                        }
+                        catch { }
                     }
                 }
+
 
                 // TODO: distinguish between task ending regularly signal and cancellation
                 // also this obv does not yet wait for stream end and uses 1min instead
@@ -137,13 +142,13 @@ namespace TwitchDownloaderCore
         }
 
         private enum StreamStateChange { START, END }
-        private async Task WaitFor(StreamStateChange target, TwitchEventHub eventHub, string streamerId)
+        private async Task WaitFor(StreamStateChange target, TwitchEventHub eventHub, string streamerId, CancellationToken cancellationToken)
         {
             using var sub = await eventHub.SubscribeTo(streamerId, [TwitchEventHub.TwitchChatEvent.VideoPlaybackById]);
 
             var eventTarget = target switch { StreamStateChange.START => "stream-up", StreamStateChange.END => "stream-down", _ => throw new ArgumentException("invalid StreamStateChange", "target") };
 
-            await foreach (var msg in sub.Messages.ReadAllAsync())
+            await foreach (var msg in sub.Messages.ReadAllAsync(cancellationToken))
             {
                 if (((NotificationData)msg.Data).pubsub.Contains(eventTarget))
                 {
