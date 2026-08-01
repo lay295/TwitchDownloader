@@ -200,23 +200,35 @@ namespace TwitchDownloaderCore
             }
         }
 
-        /* Due to Twitch changing the API to return only whole number offsets, renders have become less readable.
-         * To get around this we can disperse comment offsets according to their creation date milliseconds to
-         * help bring back the better readability of comments coming in 1-by-1 */
+        /// <summary>
+        /// Due to Twitch changing the API to return only whole number offsets, renders have become less readable.
+        /// To get around this we can re-evaluate comment offsets according to their creation date to help restore
+        /// the better readability of comments coming in 1-by-1.
+        /// </summary>
         private static void DisperseCommentOffsets(List<Comment> comments)
         {
-            // Enumerating over a span is faster than a list
             var commentSpan = CollectionsMarshal.AsSpan(comments);
+
+            // ChatRoot.Video.CreatedAt lacks millisecond accuracy
+            var estimatedVideoCreated = DateTime.MaxValue;
+            foreach (var c in commentSpan)
+            {
+                if (c.content_offset_seconds % 1 != 0)
+                {
+                    // This is an old chat with millisecond accuracy
+                    return;
+                }
+
+                var newEstimate = c.created_at - TimeSpan.FromSeconds(c.content_offset_seconds);
+                if (newEstimate < estimatedVideoCreated)
+                {
+                    estimatedVideoCreated = newEstimate;
+                }
+            }
 
             foreach (var c in commentSpan)
             {
-                if (c.content_offset_seconds % 1 == 0 && c.created_at.Millisecond != 0)
-                {
-                    const int MILLIS_PER_HALF_SECOND = 500;
-                    const double MILLIS_PER_SECOND = 1000.0;
-                    // Finding the difference between the creation dates and offsets is inconsistent. This approximation looks better more often.
-                    c.content_offset_seconds += (c.created_at.Millisecond - MILLIS_PER_HALF_SECOND) / MILLIS_PER_SECOND;
-                }
+                c.content_offset_seconds = (c.created_at - estimatedVideoCreated).TotalSeconds;
             }
         }
 
