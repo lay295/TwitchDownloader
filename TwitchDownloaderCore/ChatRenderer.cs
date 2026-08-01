@@ -226,12 +226,13 @@ namespace TwitchDownloaderCore
                 if (newEstimate > maxVideoCreated) maxVideoCreated = newEstimate;
             }
 
-            if ((maxVideoCreated - minVideoCreated).TotalSeconds < 2)
+            const double MAX_DRIFT_SECONDS = 1.5;
+            if ((maxVideoCreated - minVideoCreated).TotalSeconds < MAX_DRIFT_SECONDS)
             {
                 foreach (var c in commentSpan)
                 {
                     var newOffset = (c.created_at - minVideoCreated).TotalSeconds;
-                    Debug.Assert(Math.Abs(newOffset - c.content_offset_seconds) < 2);
+                    Debug.Assert(Math.Abs(newOffset - c.content_offset_seconds) < MAX_DRIFT_SECONDS);
                     c.content_offset_seconds = newOffset;
                 }
             }
