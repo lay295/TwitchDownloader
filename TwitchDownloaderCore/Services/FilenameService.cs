@@ -26,7 +26,7 @@ namespace TwitchDownloaderCore.Services
         private static partial Regex LengthCustomRegex { get; }
 
         public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date, [AllowNull] string channel, [AllowNull] string channelId, TimeSpan trimStart, TimeSpan trimEnd, TimeSpan videoLength, long viewCount,
-            [AllowNull] string game, [AllowNull] string clipper = null, [AllowNull] string clipperId = null)
+            [AllowNull] string game, [AllowNull] string clipper = null, [AllowNull] string clipperId = null, bool removeEmojis = false)
         {
             var trimLength = trimEnd - trimStart;
 
@@ -73,7 +73,37 @@ namespace TwitchDownloaderCore.Services
 
             var fileName = stringBuilder.ToString();
             var additionalSubfolders = GetTemplateSubfolders(ref fileName);
+
+            if (removeEmojis)
+            {
+                fileName = RemoveEmojis(fileName);
+                for (var i = 0; i < additionalSubfolders.Length; i++)
+                {
+                    additionalSubfolders[i] = RemoveEmojis(additionalSubfolders[i]);
+                }
+            }
+
             return Path.Combine(Path.Combine(additionalSubfolders), ReplaceInvalidFilenameChars(fileName));
+        }
+
+        [GeneratedRegex(@"\s{2,}")]
+        private static partial Regex RepeatedWhitespaceRegex { get; }
+
+        private static string RemoveEmojis([AllowNull] string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+
+            var stripped = EmojiRegex.Instance.Replace(value, "");
+            if (ReferenceEquals(stripped, value) || stripped.Length == value.Length)
+            {
+                return value;
+            }
+
+            // Removing an emoji can leave behind doubled or trailing whitespace
+            return RepeatedWhitespaceRegex.Replace(stripped, " ").Trim();
         }
 
         private static void ReplaceCustomWithFormattable<TFormattable>(StringBuilder sb, Regex regex, TFormattable formattable, [AllowNull] IFormatProvider formatProvider = null) where TFormattable : IFormattable

@@ -1750,7 +1750,16 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("ReduceMotion", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Remove Emojis From File Names:.
+        /// </summary>
+        public static string RemoveEmojisFromFilenames {
+            get {
+                return ResourceManager.GetString("RemoveEmojisFromFilenames", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Render.
         /// </summary>
