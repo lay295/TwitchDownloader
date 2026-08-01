@@ -6,6 +6,8 @@ namespace TwitchDownloaderCore.Models.Render
     public sealed class SectionImageCache : IDisposable
     {
         private const int MAX_BUCKETS = 50;
+        private const int MIN_BUCKET_SIZE = 3;
+        private const int BUCKET_MAX_BYTE_SIZE = 20_000_000;
 
         private readonly Dictionary<(int, int), List<SectionImage>> _sectionImageCache = [];
 
@@ -48,7 +50,15 @@ namespace TwitchDownloaderCore.Models.Render
                 return;
             }
 
-            bucket.Add(sectionImage);
+            var bytesPerImage = sectionImage.Info.BytesSize;
+            if (bucket.Count < MIN_BUCKET_SIZE || bucket.Count * bytesPerImage < BUCKET_MAX_BYTE_SIZE)
+            {
+                bucket.Add(sectionImage);
+            }
+            else
+            {
+                sectionImage.Dispose();
+            }
         }
 
         public void Dispose()
