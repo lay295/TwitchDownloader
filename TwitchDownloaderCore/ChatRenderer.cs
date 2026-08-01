@@ -210,7 +210,8 @@ namespace TwitchDownloaderCore
             var commentSpan = CollectionsMarshal.AsSpan(comments);
 
             // ChatRoot.Video.CreatedAt lacks millisecond accuracy
-            var estimatedVideoCreated = DateTime.MaxValue;
+            var minVideoCreated = DateTime.MaxValue;
+            var maxVideoCreated = DateTime.MinValue;
             foreach (var c in commentSpan)
             {
                 if (c.content_offset_seconds % 1 != 0)
@@ -220,15 +221,68 @@ namespace TwitchDownloaderCore
                 }
 
                 var newEstimate = c.created_at - TimeSpan.FromSeconds(c.content_offset_seconds);
-                if (newEstimate < estimatedVideoCreated)
-                {
-                    estimatedVideoCreated = newEstimate;
-                }
+
+                if (newEstimate < minVideoCreated) minVideoCreated = newEstimate;
+                if (newEstimate > maxVideoCreated) maxVideoCreated = newEstimate;
             }
 
-            foreach (var c in commentSpan)
+            if ((maxVideoCreated - minVideoCreated).TotalSeconds < 2)
             {
-                c.content_offset_seconds = (c.created_at - estimatedVideoCreated).TotalSeconds;
+                foreach (var c in commentSpan)
+                {
+                    var newOffset = (c.created_at - minVideoCreated).TotalSeconds;
+                    Debug.Assert(Math.Abs(newOffset - c.content_offset_seconds) < 2);
+                    c.content_offset_seconds = newOffset;
+                }
+            }
+            else
+            {
+                // Comments.CreatedAt is inaccurate. Fall back to jitter approximation
+                JitterCommentOffsets(comments);
+            }
+        }
+
+        /// <summary>
+        /// Disperse the offsets of comments on each whole second across the second. For example:
+        ///   the input a=1.0 b=2.0 c=2.0  d=2.0 e=2.0  f=3.0
+        ///     becomes a=1.0 b=2.0 c=2.25 d=2.5 e=2.75 f=3.0
+        ///
+        /// The only drawback to this method is there will never be multiple comments drawn on the same tick
+        /// like in a real chat. The overall improved chat flow is still worth it regardless. */
+        /// </summary>
+        private static void JitterCommentOffsets(List<Comment> comments)
+        {
+            var jitterRnd = new Random(comments.Count);
+
+            for (var i = 0; i < comments.Count - 1; i++)
+            {
+                if (comments[i + 1].content_offset_seconds != comments[i].content_offset_seconds
+                    || comments[i].content_offset_seconds % 1 != 0)
+                {
+                    continue;
+                }
+
+                var startIndex = i + 1;
+                while (i < comments.Count - 1 && comments[i + 1].content_offset_seconds == comments[i].content_offset_seconds)
+                {
+                    i++;
+                }
+
+                var scaleFactor = 1.0;
+                if (i < comments.Count - 1 && comments[i + 1].content_offset_seconds - comments[i].content_offset_seconds < 1)
+                {
+                    // If there happens to be 2+ comments on a whole second in a chat with decimal comment offsets
+                    // we don't want to inadvertently rearrange the comment order
+                    scaleFactor = comments[i + 1].content_offset_seconds - comments[i].content_offset_seconds;
+                }
+
+                var commentsToUpdate = i - startIndex;
+                for (var c = 1; c <= commentsToUpdate; c++) // Start at 1 so we don't offset the first comment on the second
+                {
+                    var jitter = jitterRnd.NextDouble() * 0.98 - 0.49; // Jitter the distributed comment offset between 0.51-1.49x
+                    var distributedOffset = (c + jitter) / (commentsToUpdate + 1); // Jitter must be addition to retain comment order
+                    comments[startIndex + c].content_offset_seconds += distributedOffset * scaleFactor;
+                }
             }
         }
 
