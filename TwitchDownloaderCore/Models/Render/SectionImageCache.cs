@@ -1,13 +1,26 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace TwitchDownloaderCore.Models.Render
 {
     public sealed class SectionImageCache : IDisposable
     {
+        private const int MAX_BUCKETS = 50;
+
         private readonly Dictionary<(int, int), List<SectionImage>> _sectionImageCache = [];
 
         public SectionImage Rent(int width, int height)
         {
+            if (_sectionImageCache.Count > MAX_BUCKETS)
+            {
+                // Too many buckets, delete a random bucket to save memory
+                var bucketId = Random.Shared.Next(0, _sectionImageCache.Count);
+                var (key, val) = _sectionImageCache.Skip(bucketId).FirstOrDefault();
+
+                _sectionImageCache.Remove(key);
+                foreach (var i in val) i.Dispose();
+            }
+
             ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(_sectionImageCache, (width, height), out _);
             bucket ??= [];
 
