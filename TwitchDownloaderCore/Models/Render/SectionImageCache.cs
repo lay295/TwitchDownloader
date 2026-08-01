@@ -8,11 +8,8 @@ namespace TwitchDownloaderCore.Models.Render
 
         public SectionImage Rent(int width, int height)
         {
-            ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(_sectionImageCache, (width, height), out var exists);
-            if (!exists)
-            {
-                bucket = [];
-            }
+            ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(_sectionImageCache, (width, height), out _);
+            bucket ??= [];
 
             if (bucket.Count == 0)
             {
@@ -30,8 +27,8 @@ namespace TwitchDownloaderCore.Models.Render
             var width = sectionImage.Info.Width;
             var height = sectionImage.Info.Height;
 
-            ref var bucket = ref CollectionsMarshal.GetValueRefOrAddDefault(_sectionImageCache, (width, height), out var exists);
-            if (!exists)
+            ref var bucket = ref CollectionsMarshal.GetValueRefOrNullRef(_sectionImageCache, (width, height));
+            if (Unsafe.IsNullRef(ref bucket))
             {
                 // Don't create a new bucket for an image that wasn't rented from the cache
                 sectionImage.Dispose();
