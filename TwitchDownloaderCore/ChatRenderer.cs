@@ -747,7 +747,7 @@ namespace TwitchDownloaderCore
 
                 do
                 {
-                    CommentSection comment = GenerateCommentSection(currentIndex, sectionDefaultYPos);
+                    var comment = GenerateCommentSection(currentIndex, sectionDefaultYPos);
                     if (comment != null)
                     {
                         commentList.Add(comment);
@@ -777,7 +777,7 @@ namespace TwitchDownloaderCore
                         frameCanvas.DrawRect(0, frameHeight - renderOptions.VerticalPadding / 2f, frameWidth, commentHeight + renderOptions.VerticalPadding, backgroundPaint);
                     }
 
-                    frameCanvas.DrawBitmap(comment.Image.Bitmap, 0, frameHeight);
+                    frameCanvas.DrawImage(comment.Image, 0, frameHeight);
 
                     foreach (var (drawPoint, emote) in comment.Emotes)
                     {
@@ -794,7 +794,7 @@ namespace TwitchDownloaderCore
                 int removeCount = commentList.Count - commentsDrawn;
                 for (int i = 0; i < removeCount; i++)
                 {
-                    _sectionImageCache.Return(commentList[i].Image);
+                    commentList[i].Image.Dispose();
                 }
                 commentList.RemoveRange(0, removeCount);
             }
@@ -835,7 +835,6 @@ namespace TwitchDownloaderCore
 
         private CommentSection GenerateCommentSection(int commentIndex, int sectionDefaultYPos)
         {
-            CommentSection newSection = new CommentSection();
             List<EmotePosition> emoteSectionList = new List<EmotePosition>();
             Comment comment = chatRoot.comments[commentIndex];
             List<SectionImage> sectionImages = [];
@@ -892,19 +891,19 @@ namespace TwitchDownloaderCore
                 DrawNonAccentedMessage(comment, sectionImages, emoteSectionList, false, commentIndex, ref drawPos, ref defaultPos);
             }
 
-            var finalImage = CombineImages(sectionImages, highlightType, commentIndex);
-            newSection.Image = finalImage;
-            newSection.Emotes = emoteSectionList;
-            newSection.CommentIndex = commentIndex;
-
-            return newSection;
+            return new CommentSection
+            {
+                Image = CombineImages(sectionImages, highlightType, commentIndex),
+                Emotes = emoteSectionList,
+                CommentIndex = commentIndex,
+            };
         }
 
-        private SectionImage CombineImages(List<SectionImage> sectionImages, HighlightType highlightType, int commentIndex)
+        private SKImage CombineImages(List<SectionImage> sectionImages, HighlightType highlightType, int commentIndex)
         {
-            var finalImage = _sectionImageCache.Rent(renderOptions.ChatWidth, sectionImages.Sum(x => x.Info.Height));
-            var finalBitmapInfo = finalImage.Info;
-            var finalCanvas = finalImage.Canvas;
+            var rentedImage = _sectionImageCache.Rent(renderOptions.ChatWidth, sectionImages.Sum(x => x.Info.Height));
+            var bitmapInfo = rentedImage.Info;
+            var canvas = rentedImage.Canvas;
 
             if (highlightType is HighlightType.PayingForward or HighlightType.ChannelPointHighlight or HighlightType.WatchStreak or HighlightType.Combo)
             {
@@ -913,7 +912,7 @@ namespace TwitchDownloaderCore
                     : new SKColor(0xFF80808C); // AARRGGBB
 
                 var paint = GetCachedPaint(accentColor);
-                finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, paint);
+                canvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, bitmapInfo.Height, paint);
             }
             else if (highlightType is not HighlightType.None)
             {
@@ -924,21 +923,23 @@ namespace TwitchDownloaderCore
                     // Draw the highlight background only if the message background is opaque enough
                     var backgroundColor = new SKColor(0x1A6B6B6E); // AARRGGBB
                     var backgroundPaint = GetCachedPaint(backgroundColor);
-                    finalCanvas.DrawRect(renderOptions.SidePadding, 0, finalBitmapInfo.Width - renderOptions.SidePadding * 2, finalBitmapInfo.Height, backgroundPaint);
+                    canvas.DrawRect(renderOptions.SidePadding, 0, bitmapInfo.Width - renderOptions.SidePadding * 2, bitmapInfo.Height, backgroundPaint);
                 }
 
                 var accentPaint = GetCachedPaint(Purple);
-                finalCanvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, finalBitmapInfo.Height, accentPaint);
+                canvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, bitmapInfo.Height, accentPaint);
             }
 
             for (var i = 0; i < sectionImages.Count; i++)
             {
-                finalCanvas.DrawBitmap(sectionImages[i].Bitmap, 0, i * renderOptions.SectionHeight);
+                canvas.DrawBitmap(sectionImages[i].Bitmap, 0, i * renderOptions.SectionHeight);
                 _sectionImageCache.Return(sectionImages[i]);
             }
             sectionImages.Clear();
 
-            finalImage.Flush();
+            rentedImage.Flush();
+            var finalImage = SKImage.FromBitmap(rentedImage.Bitmap);
+            _sectionImageCache.Return(rentedImage);
             return finalImage;
         }
 
@@ -1591,7 +1592,7 @@ namespace TwitchDownloaderCore
             float textWidth = MeasureText(drawText, textFont, isRtl);
             int effectiveChatWidth = renderOptions.ChatWidth - renderOptions.SidePadding - defaultPos.X;
 
-            while (!noWrap && textWidth > effectiveChatWidth)
+            while (!noWrap && textWidth > effectiveChatWidth && !drawText.IsEmpty)
             {
                 var newDrawText = SubstringToTextWidth(drawText, textFont, effectiveChatWidth, isRtl, DrawTextDelimiters);
                 var overrideWrap = false;
@@ -1600,7 +1601,8 @@ namespace TwitchDownloaderCore
                 {
                     // When chat width is small enough and font size is big enough, 1 character can be wider than effectiveChatWidth.
                     overrideWrap = true;
-                    newDrawText = drawText[..StringInfo.GetNextTextElementLength(drawText)];
+                    var charCount = Math.Max(StringInfo.GetNextTextElementLength(drawText), 1);
+                    newDrawText = drawText[..charCount];
                 }
 
                 DrawText(newDrawText, textFont, padding, sectionImages, ref drawPos, defaultPos, highlightWords, overrideWrap);
